@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+
+    <title>Worker For Kmoni Image</title>
+</head>
+
+<body>
+    <canvas id="kmoniCanvas" width="352" height="400"></canvas>
+
+    <script>
+        var points;
+        fetch("./Resource/Knet_Points.json").then(function (res) {
+            return res.json()
+        }).then(function (json) {
+            points = json;
+        })
+
+        var canvas = document.getElementById("kmoniCanvas");
+        var context = canvas.getContext("2d");
+
+        window.electronAPI.messageSend((event, request) => {
+
+            var image = new Image();
+            image.src = request.data;
+
+            image.onload = function () {
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                context.drawImage(image, 0, 0);
+                kmoniRedraw()
+                window.electronAPI.messageReturn({
+                    action: "kmoniReturn",
+                    data: points,
+                    date: request.date
+                })
+
+            };
+
+
+        })
+        function kmoniRedraw() {
+            points.forEach(function (elm) {
+                if (!elm.IsSuspended && elm.Name && elm.Point) {
+                    var rgb = point2RGB(elm.Point.X, elm.Point.Y);
+                    if (rgb[0] + rgb[1] + rgb[2] !== 0) {
+                        var hsv = RGB2HSV(rgb[0], rgb[1], rgb[2]);
+                        var p = HSVtoP(hsv[0], hsv[1], hsv[2]);
+                        var shindo = (10 * p - 3);
+                        var pga = 10 ** (5 * p - 2);
+
+                        elm.rgb = rgb
+                        elm.shindo = shindo
+                        elm.pga = pga
+
+                        /*
+                    var pulsingIcon = L.icon.pulse({
+                      iconSize: [10, 10],
+                      fillColor: "rgb(" + rgb.join(",") + ")",
+                      animate: false,
+                    });
+                    marker = L.marker([elm.Location.latitude, elm.Location.longitude], { icon: pulsingIcon }).addTo(map).bindPopup(elm.Name);
+                  */
+                    } else {
+                        elm.rgb = null
+                        elm.shindo = null
+                        elm.pga = null
+
+                    }
+                } else {
+                    elm.rgb = null
+                    elm.shindo = null
+                    elm.pga = null
+                }
+            });
+        }
+
+        function point2RGB(x, y) {
+            // 指定座標から幅1,高さ1のImageDataオブジェクトの取得。
+            var imagedata = context.getImageData(x, y, 1, 1);
+
+            // RGBAの取得。
+            var r = imagedata.data[0];
+            var g = imagedata.data[1];
+            var b = imagedata.data[2];
+            return [r, g, b];
+        }
+        function RGB2HSV(r, g, b) {
+            var max = Math.max(r, g, b);
+            var min = Math.min(r, g, b);
+            var diff = max - min;
+
+            var v = Math.max(r, g, b),
+                d = v - Math.min(r, g, b),
+                s = v ? d / v : 0,
+                a = [r, g, b, r, g],
+                i = a.indexOf(v),
+                h = s ? (((a[i + 1] - a[i + 2]) / d + i * 2 + 6) % 6) * 60 : 0;
+            v = v / 255;
+            h = h / 260;
+            return [h, s, v];
+        }
+
+        function HSVtoP(h, s, v) {
+            var p = 0;
+
+            if (v > 0.1 && s > 0.75) {
+                if (h > 0.1476) {
+                    p = 280.31 * Math.pow(h, 6) - 916.05 * Math.pow(h, 5) + 1142.6 * Math.pow(h, 4) - 709.95 * Math.pow(h, 3) + 234.65 * Math.pow(h, 2) - 40.27 * h + 3.2217;
+                }
+
+                if (h <= 0.1476 && h > 0.001) {
+                    p = 151.4 * Math.pow(h, 4) - 49.32 * Math.pow(h, 3) + 6.753 * Math.pow(h, 2) - 2.481 * h + 0.9033;
+                }
+
+                if (h <= 0.001) {
+                    p = -0.005171 * Math.pow(v, 2) - 0.3282 * v + 1.2236;
+                }
+            }
+
+            if (p < 0) {
+                p = 0;
+            }
+            return p;
+        }
+
+    </script>
+</body>
+
+</html>

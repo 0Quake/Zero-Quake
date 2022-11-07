@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>設定 - Zero Quake</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <style>
+        body {
+            overflow: hidden;
+        }
+
+        #tab1_wrap {
+            display: flex;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .EEWMode #tab1_wrap,
+        .TsunamiMode #tab1_wrap {
+            height: 100%;
+        }
+
+        #tab1_bar {
+            min-width: 250px;
+            width: auto;
+            height: 100%;
+            writing-mode: unset;
+            text-orientation: unset;
+        }
+
+        .tabmenu {
+            display: block;
+            padding: 0.5em;
+        }
+
+        .active_tabmenu {
+            border-left: solid 2px rgb(203, 27, 27);
+            background: rgba(255, 0, 0, 0.2);
+            color: #fff;
+        }
+
+        .active_tabmenu:hover {
+            color: #fff;
+        }
+
+        #softName {
+            font-size: 25px;
+            line-height: 50px;
+            text-align: center;
+        }
+
+        #softName img {
+            height: 50px;
+            width: 50px;
+            vertical-align: middle;
+            margin: 0 10px;
+        }
+
+        .tabcontent {
+            height: 100%;
+            overflow: auto;
+            padding: 20px 20px 60px 20px;
+        }
+
+        #BtnWrap {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            height: 40px;
+            line-height: 40px;
+            background: #444;
+            border-top: solid 1px #666;
+            text-align: right;
+            font-size: 0;
+        }
+
+        #BtnWrap button {
+            height: 30px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            background: rgb(108, 30, 30);
+            color: #fff;
+            transition: 200ms;
+        }
+
+        #BtnWrap button:hover {
+            background: rgb(83, 0, 0);
+
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="tab1_wrap">
+        <div id="tab1_bar">
+            <div id="tab1_menu1" class="tabmenu active_tabmenu" data-contentid="tab1_content1">地震情報</div>
+            <div id="tab1_menu2" class="tabmenu" data-contentid="tab1_content2">
+                ライセンス
+            </div>
+        </div>
+
+        <div id="tab1_content">
+            <div id="tab1_content1" class="tabcontent active_tabcontent">
+                <label><input type="checkbox" id="setting1">項目名</label>
+            </div>
+            <div id="tab1_content2" class="tabcontent">
+
+                <h2 id="softName"><img src="./img/icon.svg">Zero Quake V<span id="softVersion">0.0.0</span></h2>
+
+                <div>
+                    <small>&copy;2022 Acialnat</small>
+                    <p>ライセンス：GNU General Public License v2.0</p>
+                    <p>このソフトウェアは無保証です。</p>
+                </div>
+
+                <div>
+                    <h3>情報の取得先</h3>
+
+                    <h4>緊急地震速報</h4>
+                    <ul>
+                        <li><a href="kmoni.bosai.go.jp">強震モニタ</a>防災科学技術研究所</li>
+                        <li><a href="lmoni.bosai.go.jp">長周期地震動モニタ</a>防災科学技術研究所</li>
+                        <li><a href="https://typhoon.yahoo.co.jp/weather/jp/earthquake/kyoshin/">Yahoo 強震モニタ</a>防災科学技術研究所／Yahoo</li>
+                        <li><a href="https://dev.narikakun.net/doc/eew">緊急地震速報 API</a>@narikakun</li>
+                        <li><a href="https://www.p2pquake.net/json_api_v2/">P2P 地震情報 API</a>@p2pquake_takuya</li>
+                    </ul>
+
+                    <h4>地震情報(震度速報／震源に関する情報／震度・震源に関する情報)</h4>
+                    <ul>
+                        <li><a href="https://www.jma.go.jp/bosai/map.html?contents=earthquake_map">気象庁</a>気象庁</li>
+                        <li><a href="https://www.nhk.or.jp/kishou-saigai/earthquake/">NHK</a>NHK</li>
+                        <li><a href="https://dev.narikakun.net/doc/earthquake">地震情報 API</a>@narikakun</li>
+                    </ul>
+
+                    <h4>その他の地震情報</h4>
+                    <ul>
+                        <li><a href="https://www.hinet.bosai.go.jp/AQUA/aqua_catalogue.php?LANG=ja">AQUAシステム</a>防災科学技術研究所</li>
+                        <li><a href="https://earthquake.usgs.gov/fdsnws/event/1/">FDSN Web Service</a>USGS</li>
+                    </ul>
+
+                    <h4>津波情報</h4>
+                    <ul>
+                        <li><a href="https://www.p2pquake.net/json_api_v2/">P2P 地震情報 API</a></li>
+                    </ul>
+
+
+                    <h3>参考資料</h3>
+                    <ul>
+                        <li>
+                            <a href="https://qiita.com/NoneType1/items/a4d2cf932e20b56ca444">多項式補間を使用して強震モニタ画像から数値データを決定する</a>@NoneType1
+                        </li>
+                        <li>
+                            <a href="https://qiita.com/ingen084/items/7e91f8da2996972ac586">強震モニタの画像から震度と地点を特定するまで</a>@ingen084
+                        </li>
+
+                    </ul>
+
+
+                </div>
+
+            </div>
+
+            <div id="BtnWrap">
+                <button id="cancel">キャンセル</button>
+                <button id="apply">OK</button>
+            </div>
+
+        </div>
+
+
+    </div>
+
+    <script src="./js/UIcommon.js"></script>
+
+    <script>
+        var setting;
+        window.electronAPI.messageSend((event, request) => {
+            if (request.action == "setting") {
+                setting = request.data.config
+                document.getElementById("softVersion").innerText = request.data.softVersion
+
+                document.getElementById("setting1").checked = setting.setting1
+            }
+        })
+
+        document.getElementById("apply").addEventListener("click", function () {
+            setting.setting1 = document.getElementById("setting1").checked;
+
+
+
+            window.electronAPI.messageReturn({
+                action: "settingReturn",
+                data: setting
+            })
+
+            window.close()
+        })
+        document.getElementById("cancel").addEventListener("click", function () {
+            window.close()
+        })
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+
+  <title>地震詳細情報 - Zero Quake</title>
+
+  <link rel="stylesheet" href="./js/leaflet/leaflet.css" />
+  <link rel="stylesheet" href="./css/map.css" />
+  <script src="./js/leaflet/leaflet.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      background: #222;
+      color: #FFF;
+    }
+
+    #mapcontainer {
+      width: 100%;
+      height: 50vh;
+      background: #202227;
+      border-bottom: solid 2px #999;
+    }
+
+    h2,
+    .h2 {
+      font-size: 22px;
+      line-height: 50px;
+      padding: 0;
+      margin: 0.1em 0.5em;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    #yahooLink,
+    #tenkijpLink,
+    #gooLink {
+      display: none;
+    }
+
+    table,
+    tr,
+    th,
+    td {
+      border: solid 1px #666;
+      border-collapse: collapse;
+    }
+
+    tr,
+    td {
+      font-size: 18px;
+      padding: 0.2em 0.5em;
+    }
+
+    td {
+      text-align: left;
+    }
+
+    #EQInfo {
+      vertical-align: top;
+      display: inline-table;
+      width: calc(50% - 10px);
+    }
+
+    #Shindo,
+    #AQUAImg {
+      display: inline-block;
+      width: calc(50% - 10px);
+    }
+
+    #AQUAImg img {
+      max-width: 40%;
+      max-height: 100%;
+    }
+
+    .ShindoItem {
+      background: #333;
+      border-top: solid 1px #666;
+      border-bottom: solid 1px #666;
+      height: 40px;
+      padding: 5px;
+      font-size: 18px;
+    }
+
+    .ShindoItem1:hover,
+    .ShindoItem2:hover,
+    .ShindoItem3:hover {
+      background: #444;
+
+    }
+
+    .ShindoItem1,
+    .ShindoItem2,
+    .ShindoItem3 {
+      cursor: pointer;
+    }
+
+    .ShindoItem4 {
+      cursor: default;
+    }
+
+
+    .ShindoItem::before {
+      content: "";
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      vertical-align: middle;
+
+    }
+
+
+    .ShindoItem1::before,
+    .ShindoItem2::before,
+    .ShindoItem3::before {
+      background-image: url(./img/expand_more.svg);
+      background-size: cover;
+    }
+
+
+    .ShindoItem1.has-open::before,
+    .ShindoItem2.has-open::before,
+    .ShindoItem3.has-open::before {
+      transform: rotateZ(180deg);
+    }
+
+    .ShindoItem span {
+      display: inline-block;
+      width: 30px;
+      height: 30px;
+      line-height: 30px;
+      text-align: center;
+      border-radius: 4px;
+      margin-right: 10px;
+    }
+
+    .close {
+      display: none;
+    }
+
+    .open {
+      display: block;
+    }
+
+    .WrapLevel1,
+    .WrapLevel2,
+    .WrapLevel3 {
+      padding-left: 15px;
+    }
+
+
+    .ShindoIcon div {
+      display: none;
+      width: 16px;
+      height: 16px;
+      border: solid 1px #000;
+      line-height: 16px;
+      text-align: center;
+      border-radius: 50%;
+
+    }
+
+    .zoomLevel_3 .ShindoIcon div,
+    .zoomLevel_4 .ShindoIcon div {
+      display: block;
+    }
+
+    #ShindoSample {
+      font-size: 0;
+      text-align: center;
+    }
+
+    #ShindoSample span {
+      font-size: 16px;
+    }
+
+    #ShindoSample div {
+      display: inline-block;
+      width: 30px;
+      height: 30px;
+      border-radius: 5px;
+      line-height: 30px;
+      text-align: center;
+      font-size: 18px;
+      margin: 3px;
+    }
+
+    #AQUAImg {
+      display: none;
+    }
+  </style>
+
+</head>
+
+<body>
+
+  <div id="mapcontainer"></div>
+  <div id="ShindoSample"><span>凡例：</span>
+    <div id="ShindoSample0">0</div>
+    <div id="ShindoSample1">1</div>
+    <div id="ShindoSample2">2</div>
+    <div id="ShindoSample3">3</div>
+    <div id="ShindoSample4">4</div>
+    <div id="ShindoSample5-">5弱</div>
+    <div id="ShindoSample5+">5強</div>
+    <div id="ShindoSample6-">6弱</div>
+    <div id="ShindoSample6+">6強</div>
+    <div id="ShindoSample7">7</div>
+  </div>
+
+  <div id="tableWrap">
+
+
+    <table id="EQInfo">
+      <caption class="h2">地震情報</caption>
+      <tr>
+        <th></th>
+        <th>情報</th>
+      </tr>
+      <tr>
+        <th>発生時刻</th>
+        <td id="data_time">不明</td>
+      </tr>
+      <tr>
+        <th>最大震度</th>
+        <td id="data_maxI">不明</td>
+      </tr>
+      <tr>
+        <th>マグニチュード</th>
+        <td id="data_M">不明</td>
+      </tr>
+      <tr>
+        <th>深さ</th>
+        <td id="data_depth">不明</td>
+      </tr>
+      <tr>
+        <th>震源</th>
+        <td id="data_center">不明</td>
+      </tr>
+    </table>
+
+
+    <div id="Shindo">
+      <h2>各地の震度</h2>
+      <button id="AllOpen">すべて展開</button>
+      <button id="AllClose">すべて折り畳み</button>
+    </div>
+    <div id="AQUAImg">
+      <img alt="AQUAシステムによる震源地図" id="AQUAImg1">
+      <img alt="AQUAシステムによる震源地図" id="AQUAImg2">
+    </div>
+
+  </div>
+
+  リンク
+  <a href="#" target="_blank" id="yahooLink">Yahoo地震情報</a>
+  <a href="#" target="_blank" id="tenkijpLink">tenki.jp地震情報</a>
+  <a href="#" target="_blank" id="gooLink">goo地震情報</a>
+
+
+
+
+  <script>
+    var data_time = document.getElementById("data_time")
+    var data_maxI = document.getElementById("data_maxI")
+    var data_M = document.getElementById("data_M")
+    var data_depth = document.getElementById("data_depth")
+    var data_center = document.getElementById("data_center")
+
+    let url = new URL(window.location.href);
+    let params = url.searchParams;
+    var eid = params.get('eid')
+    var detailURL = params.get('detailURL')
+    detailURL = decodeURIComponent(detailURL).split("[ZQ_URLSEPARATE]")
+    var markerElm;
+    var newInfoDateTime = 0;
+    var sections = [];
+    var map_drawed = false;
+    var map
+
+    var AQUAData = params.get('dataAQUA')
+
+
+    function init() {
+      map = L.map("mapcontainer", {
+        maxBounds: [
+          [90, 0],
+          [-90, 360],
+        ],
+
+        zoomAnimation: false, //←オフにするとずれて不自然
+        //preferCanvas: true,←かるくなる？
+      });
+      //L.control.scale({ imperial: false }).addTo(map);←縮尺
+      map.setView([32.99125, 138.46], 4);
+
+      var tile1 = L.tileLayer("https://www.data.jma.go.jp/svd/eqdb/data/shindo/map/{z}/{x}/{y}.png", {
+        minZoom: 0,
+        minNativeZoom: 0,
+        maxNativeZoom: 11,
+        maxZoom: 21,
+        attribution: 'Map data <a href="https://www.data.jma.go.jp/svd/eqdb/data/shindo/" target="_blank">© 気象庁</a>',
+      })
+      var tile2 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png", {
+        minZoom: 0,
+        minNativeZoom: 2,
+        maxNativeZoom: 18,
+        maxZoom: 21,
+        attribution: 'Map data <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">©国土地理院</a>',
+      }); //最初に表示させるタイルに addTo() をつける
+      var tile3 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg", {
+        minZoom: 9,
+        minNativeZoom: 9,
+        maxNativeZoom: 18,
+        maxZoom: 21,
+        attribution: 'Map data <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">©国土地理院</a>',
+      });
+      var tile4 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/blank/{z}/{x}/{y}.png", {
+        minZoom: 0,
+        minNativeZoom: 5,
+        maxNativeZoom: 14,
+        maxZoom: 21,
+        attribution: 'Map data <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">©国土地理院</a>',
+      });
+      var tile5 = L.tileLayer("http://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        minZoom: 0,
+        minNativeZoom: 0,
+        maxNativeZoom: 19,
+        maxZoom: 21,
+        attribution: 'Map data <a href="https://www.openstreetmap.org/" target="_blank">©OpenStreetMap contributors</a>',
+      });
+      var tile6 = L.tileLayer("https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}", {
+        minZoom: 0,
+        minNativeZoom: 0,
+        maxNativeZoom: 21,
+        maxZoom: 21,
+        attribution: 'Map data <a href="https://www.google.com/maps" target="_blank">©google</a>',
+      });
+      var tile7 = L.tileLayer("https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}", {
+        minZoom: 0,
+        minNativeZoom: 0,
+        maxNativeZoom: 21,
+        maxZoom: 21,
+        attribution: 'Map data <a href="https://www.google.com/maps" target="_blank">©google</a>',
+      });
+      var tile8 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png", {
+        minZoom: 0,
+        minNativeZoom: 0,
+        maxNativeZoom: 18,
+        maxZoom: 21,
+        attribution: 'Map data <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">©国土地理院</a>',
+      });
+
+      var tile9 = L.tileLayer("https://www.jma.go.jp/tile/gsi/pale2/{z}/{x}/{y}.png", {
+        minZoom: 0,
+        minNativeZoom: 2,
+        maxNativeZoom: 11,
+        maxZoom: 21,
+        attribution: 'Map data <a href="https://www.jma.go.jp/bosai/map.html#5/28.835/168.548/&elem=int&contents=earthquake_map" target="_blank">©気象庁</a>',
+      });
+
+      //
+      //
+      var overlay1 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/hillshademap/{z}/{x}/{y}.png", {
+        minZoom: 2,
+        maxZoom: 16,
+        attribution: 'Map data <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">©国土地理院</a>',
+      });
+      var overlay2 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/vbmd_colorrel/{z}/{x}/{y}.png", {
+        minZoom: 11,
+        maxZoom: 18,
+        attribution: 'Map data <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">©国土地理院</a>',
+      });
+      var overlay3 = L.tileLayer("https://disaportaldata.gsi.go.jp/raster/04_tsunami_newlegend_data/{z}/{x}/{y}.png", {
+        minZoom: 7,
+        maxZoom: 12,
+        attribution: 'Map data <a href="https://disaportal.gsi.go.jp/hazardmap/copyright/opendata.html#tsunami" target="_blank">©国土地理院</a>',
+      });
+      var overlay4 = L.tileLayer("https://disaportaldata.gsi.go.jp/raster/05_kyukeishakeikaikuiki/{z}/{x}/{y}.png", {
+        minZoom: 7,
+        maxZoom: 12,
+        attribution: 'Map data <a href="https://disaportal.gsi.go.jp/hazardmap/copyright/opendata.html#dosekiryukeikaikuiki" target="_blank">©国土地理院</a>',
+      });
+      var overlay5 = L.tileLayer("https://disaportaldata.gsi.go.jp/raster/05_jisuberikeikaikuiki/{z}/{x}/{y}.png", {
+        minZoom: 7,
+        maxZoom: 12,
+        attribution: 'Map data <a href="https://disaportal.gsi.go.jp/hazardmap/copyright/opendata.html#jisuberikeikaikuiki" target="_blank">©国土地理院</a>',
+      });
+      var overlay6 = L.tileLayer("https://www.jma.go.jp/tile/jma/transparent-cities/{z}/{x}/{y}.png", {
+        minZoom: 0,
+        minNativeZoom: 2,
+        maxNativeZoom: 11,
+        maxZoom: 21,
+        attribution: 'Map data <a href="https://www.jma.go.jp/bosai/map.html#5/28.835/168.548/&elem=int&contents=earthquake_map" target="_blank">©JMA</a>',
+      });
+
+      map.createPane("pane300").style.zIndex = 300;
+
+
+      fetch("./Resource/basemap.json")
+        .then(function (res) {
+          return res.json();
+        })
+        .then(function (json) {
+          gjmap = L.geoJSON(json, {
+            style: {
+              color: "#999",
+              fill: true,
+              fillColor: "#333",
+              fillOpacity: 1,
+              weight: 1,
+              pane: "tilePane",
+              attribution: 'Map data <a href="https://www.naturalearthdata.com/">©Natural Earth</a> / <a href="https://www.data.jma.go.jp/developer/gis.html" target="_blank">©JMA</a>',
+            },
+            onEachFeature: function onEachFeature(feature, layer) {
+              if (feature.properties && feature.properties.NAME) {
+                sections.push({ name: feature.properties.NAME, item: layer })
+                layer.bindPopup(feature.properties.NAME)
+              }
+            },
+          }).addTo(map);
+
+          L.control
+            .layers(
+              {
+                オフライン地図: gjmap,
+                気象庁: tile1,
+                気象庁2: tile9,
+                "地理院 標準地図": tile8,
+
+                "地理院 淡色地図": tile2,
+                "地理院 写真": tile3,
+                "地理院 白地図": tile4,
+                OpenStreetMap: tile5,
+                "Google Map": tile6,
+                "Google Map 写真": tile7,
+              },
+              {
+                "地理院 陰影起伏図": overlay1,
+                "地理院 火山基本図データ": overlay2,
+                "地理院 津波浸水想定 ハザードマップ": overlay3,
+                "地理院 土砂災害警戒区域（急傾斜地の崩壊） ハザードマップ": overlay4,
+                "地理院 土砂災害警戒区域（地すべり） ハザードマップ": overlay5,
+                "気象庁　境界線": overlay6,
+              }
+            )
+            .addTo(map);
+
+          mapDraw()
+        });
+
+      var currentZoom = map.getZoom();
+      if (currentZoom < 6) {
+        document.getElementById("mapcontainer").classList.add("zoomLevel_1");
+      } else if (currentZoom < 8) {
+        document.getElementById("mapcontainer").classList.add("zoomLevel_2");
+      } else if (currentZoom < 9) {
+        document.getElementById("mapcontainer").classList.add("zoomLevel_3");
+      } else {
+        document.getElementById("mapcontainer").classList.add("zoomLevel_4");
+      }
+
+
+      map.on("zoom", function () {
+        var currentZoom = map.getZoom();
+        document.getElementById("mapcontainer").classList.remove("zoomLevel_1");
+        document.getElementById("mapcontainer").classList.remove("zoomLevel_2");
+        document.getElementById("mapcontainer").classList.remove("zoomLevel_3");
+        document.getElementById("mapcontainer").classList.remove("zoomLevel_4");
+
+        if (currentZoom < 6) {
+          document.getElementById("mapcontainer").classList.add("zoomLevel_1");
+        } else if (currentZoom < 8) {
+          document.getElementById("mapcontainer").classList.add("zoomLevel_2");
+        } else if (currentZoom < 9) {
+          document.getElementById("mapcontainer").classList.add("zoomLevel_3");
+        } else {
+          document.getElementById("mapcontainer").classList.add("zoomLevel_4");
+        }
+
+      })
+    }
+
+    function mapDraw() {
+      if (eid && detailURL) {
+
+
+        var jmaURL = detailURL.find(function (elm) { return elm.indexOf('jma.go.jp') != -1 })
+        var nhkURL = detailURL.find(function (elm) { return elm.indexOf('nhk.or.jp') != -1 })
+        var narikakunURL = detailURL.find(function (elm) { return elm.indexOf('dev.narikakun.net') != -1 })
+        console.log(jmaURL, nhkURL, narikakunURL)
+        if (jmaURL) {
+          fetch(jmaURL).then(function (res) { return res.json() }).then(function (json) {
+
+            var mostNew = false;
+            if (!newInfoDateTime || newInfoDateTime < new Date(json.Head.ReportDateTime)) {
+              newInfoDateTime = new Date(json.Head.ReportDateTime)
+              mostNew = true
+            }
+
+
+            if (json.Body.Earthquake) {
+              var LatLngDepth = json.Body.Earthquake.Hypocenter.Area.Coordinate.replaceAll("+", "｜+").replaceAll("-", "｜-").replaceAll("/", "").split("｜")
+            }
+
+            if (json.Body.Earthquake && json.Body.Earthquake.OriginTime && (mostNew || data_time.innerText == "不明")) data_time.innerText = dateEncode(3, json.Body.Earthquake.OriginTime)
+            if (json.Body.Intensity.Observation.MaxInt && (mostNew || data_maxI.innerText == "不明")) data_maxI.innerText = json.Body.Intensity.Observation.MaxInt
+            if (json.Body.Earthquake && json.Body.Earthquake.Magnitude && (mostNew || data_M.innerText == "不明")) data_M.innerText = json.Body.Earthquake.Magnitude
+            if (LatLngDepth && LatLngDepth[3] && (mostNew || data_depth.innerText == "不明")) data_depth.innerText = Math.abs(Number(LatLngDepth[3]) / 1000) + "km"
+            if (json.Body.Earthquake && json.Body.Earthquake.Hypocenter.Area.Name && (mostNew || data_center.innerText == "不明")) data_center.innerText = json.Body.Earthquake.Hypocenter.Area.Name
+
+
+
+
+            if (json.Body.Intensity.Observation.Pref && !map_drawed) {
+              map_drawed = true
+              json.Body.Intensity.Observation.Pref.forEach(function (elm) {
+                var newDiv = document.createElement("div")
+                var color1 = shindoConvert2(shindoConvert3(elm.MaxInt))
+                newDiv.innerHTML = "<span style='background:" + color1[0] + ";color:" + color1[1] + ";'>" + elm.MaxInt + "</span>" + elm.Name
+                newDiv.classList.add("ShindoItem", "ShindoItem1")
+                document.getElementById("Shindo").appendChild(newDiv)
+                newDiv.addEventListener('click', function () {
+                  this.classList.toggle('has-open')
+                  this.nextElementSibling.classList.toggle('open')
+                });
+
+                var newDiv = document.createElement("div")
+                newDiv.innerHTML = "<div></div>"
+                newDiv.classList.add("WrapLevel1", "close")
+                document.getElementById("Shindo").appendChild(newDiv)
+
+                if (elm.Area) {
+                  elm.Area.forEach(function (elm2) {
+                    var wrap = document.querySelectorAll(".WrapLevel1")
+
+                    var newDiv = document.createElement("div")
+                    var color2 = shindoConvert2(shindoConvert3(elm2.MaxInt))
+                    newDiv.innerHTML = "<span style='background:" + color2[0] + ";color:" + color2[1] + ";'>" + elm2.MaxInt + "</span>" + elm2.Name
+                    newDiv.classList.add("ShindoItem", "ShindoItem2")
+                    wrap[wrap.length - 1].appendChild(newDiv)
+                    newDiv.addEventListener('click', function () {
+                      this.classList.toggle('has-open')
+                      this.nextElementSibling.classList.toggle('open')
+                    });
+
+                    var newDiv = document.createElement("div")
+                    newDiv.innerHTML = "<div></div>"
+                    newDiv.classList.add("WrapLevel2", "close")
+                    wrap[wrap.length - 1].appendChild(newDiv)
+
+                    var sectionTmp = sections.find(function (elmA) {
+                      return elmA.name == elm2.Name
+                    })
+                    if (sectionTmp) {
+                      sectionTmp.item.setStyle({
+                        fill: true,
+                        fillColor: color2[0]
+                      })
+                      sectionTmp.item.bindPopup(sectionTmp.name + "<br>震度" + elm2.MaxInt)
+                    }
+                    if (elm2.City) {
+                      elm2.City.forEach(function (elm3) {
+                        var wrap2 = document.querySelectorAll(".WrapLevel2")
+
+                        var newDiv = document.createElement("div")
+                        var color3 = shindoConvert2(shindoConvert3(elm3.MaxInt))
+                        newDiv.innerHTML = "<span style='background:" + color3[0] + ";color:" + color3[1] + ";'>" + elm3.MaxInt + "</span>" + elm3.Name
+                        newDiv.classList.add("ShindoItem", "ShindoItem3")
+                        wrap2[wrap2.length - 1].appendChild(newDiv)
+                        newDiv.addEventListener('click', function () {
+                          this.classList.toggle('has-open')
+                          this.nextElementSibling.classList.toggle('open')
+                        });
+
+                        var newDiv = document.createElement("div")
+                        newDiv.innerHTML = "<div></div>"
+                        newDiv.classList.add("WrapLevel3", "close")
+                        wrap2[wrap2.length - 1].appendChild(newDiv)
+
+                        if (elm3.IntensityStation) {
+                          elm3.IntensityStation.forEach(function (elm4) {
+                            var wrap3 = document.querySelectorAll(".WrapLevel3")
+
+                            var newDiv = document.createElement("div")
+                            var color4 = shindoConvert2(shindoConvert3(elm4.Int))
+                            newDiv.innerHTML = "<span style='background:" + color4[0] + ";color:" + color4[1] + ";'>" + elm4.Int + "</span>" + elm4.Name
+                            newDiv.classList.add("ShindoItem", "ShindoItem4")
+
+
+
+                            var divIcon = L.divIcon({
+                              html: '<div style="background:' + color4[0] + ';color:' + color4[1] + '">' + elm4.Int + '</div>',
+                              className: 'ShindoIcon',
+                              iconSize: [16, 16],
+                            });
+
+                            L.marker([elm4.latlon.lat, elm4.latlon.lon], { icon: divIcon, pane: "shadowPane" }).addTo(map).bindPopup(elm4.Name + "<br>震度" + elm4.Int);
+
+                            wrap3[wrap3.length - 1].appendChild(newDiv)
+                          })
+                        }
+
+
+                      })
+                    }
+
+                  })
+                }
+
+              })
+            }
+
+            if (LatLngDepth) {
+              if (!markerElm) {
+                epicenterIcon = L.icon({
+                  iconUrl: "./img/epicenter.svg",
+                  iconSize: [32, 32], // size of the icon
+                  iconAnchor: [16, 16], // point of the icon which will correspond to marker's location
+                  popupAnchor: [0, -20], // point from which the popup should open relative to the iconAnchor
+                });
+
+                markerElm = L.marker([Number(LatLngDepth[1]), Number(LatLngDepth[2])], {
+                  icon: epicenterIcon,
+                  pane: "markerPane"
+                }).addTo(map).bindPopup("震央：" + json.Body.Earthquake.Hypocenter.Area.Name);
+              } else {
+                markerElm.setLatLng([Number(LatLngDepth[1]), Number(LatLngDepth[2])])
+              }
+
+              map.setView([Number(LatLngDepth[1]), Number(LatLngDepth[2])], 6);
+            }
+
+          })
+        }
+
+        if (narikakunURL) {
+
+          fetch(narikakunURL).then(function (res) { return res.json() }).then(function (json) {
+            if (json.Head.EventID == eid) {
+
+              var mostNew = false;
+              if (!newInfoDateTime || newInfoDateTime < new Date(json.Head.ReportDateTime)) {
+                newInfoDateTime = new Date(json.Head.ReportDateTime)
+                mostNew = true
+              }
+
+              if (json.Body.Earthquake.OriginTime && (mostNew || data_time.innerText == "不明")) document.getElementById("data_time").innerText = dateEncode(3, json.Body.Earthquake.OriginTime)
+              if (json.Body.Intensity.Observation.MaxInt && (mostNew || data_maxI.innerText == "不明")) document.getElementById("data_maxI").innerText = json.Body.Intensity.Observation.MaxInt
+              if (json.Body.Earthquake.Magnitude && (mostNew || data_M.innerText == "不明")) document.getElementById("data_M").innerText = json.Body.Earthquake.Magnitude
+              if (json.Body.Earthquake.Hypocenter.Depth && (mostNew || data_depth.innerText == "不明")) document.getElementById("data_depth").innerText = json.Body.Earthquake.Hypocenter.Depth + "km"
+              if (json.Body.Earthquake.Hypocenter.Name && (mostNew || data_center.innerText == "不明")) document.getElementById("data_center").innerText = json.Body.Earthquake.Hypocenter.Name
+
+
+              if (json.Body.Intensity.Observation.Pref && !map_drawed) {
+                map_drawed = true
+                json.Body.Intensity.Observation.Pref.forEach(function (elm) {
+                  var newDiv = document.createElement("div")
+                  var color1 = shindoConvert2(shindoConvert3(elm.MaxInt))
+                  newDiv.innerHTML = "<span style='background:" + color1[0] + ";color:" + color1[1] + ";'>" + elm.MaxInt + "</span>" + elm.Name
+                  newDiv.classList.add("ShindoItem", "ShindoItem1")
+                  document.getElementById("Shindo").appendChild(newDiv)
+                  newDiv.addEventListener('click', function () {
+                    this.classList.toggle('has-open')
+                    this.nextElementSibling.classList.toggle('open')
+                  });
+
+                  var newDiv = document.createElement("div")
+                  newDiv.innerHTML = "<div></div>"
+                  newDiv.classList.add("WrapLevel1", "close")
+                  document.getElementById("Shindo").appendChild(newDiv)
+
+                  elm.Area.forEach(function (elm2) {
+                    var wrap = document.querySelectorAll(".WrapLevel1")
+
+                    var newDiv = document.createElement("div")
+                    var color2 = shindoConvert2(shindoConvert3(elm2.MaxInt))
+                    newDiv.innerHTML = "<span style='background:" + color2[0] + ";color:" + color2[1] + ";'>" + elm2.MaxInt + "</span>" + elm2.Name
+                    newDiv.classList.add("ShindoItem", "ShindoItem2")
+                    wrap[wrap.length - 1].appendChild(newDiv)
+                    newDiv.addEventListener('click', function () {
+                      this.classList.toggle('has-open')
+                      this.nextElementSibling.classList.toggle('open')
+                    });
+
+                    var newDiv = document.createElement("div")
+                    newDiv.innerHTML = "<div></div>"
+                    newDiv.classList.add("WrapLevel2", "close")
+                    wrap[wrap.length - 1].appendChild(newDiv)
+
+                    var sectionTmp = sections.find(function (elmA) {
+                      return elmA.name == elm2.Name
+                    }).item
+                    if (sectionTmp) {
+                      sectionTmp.setStyle({
+                        fill: true,
+                        fillColor: color2[0]
+                      })
+                    }
+
+                    elm2.City.forEach(function (elm3) {
+                      var wrap2 = document.querySelectorAll(".WrapLevel2")
+
+                      var newDiv = document.createElement("div")
+                      var color3 = shindoConvert2(shindoConvert3(elm3.MaxInt))
+                      newDiv.innerHTML = "<span style='background:" + color3[0] + ";color:" + color3[1] + ";'>" + elm3.MaxInt + "</span>" + elm3.Name
+                      newDiv.classList.add("ShindoItem", "ShindoItem3")
+                      wrap2[wrap2.length - 1].appendChild(newDiv)
+                      newDiv.addEventListener('click', function () {
+                        this.classList.toggle('has-open')
+                        this.nextElementSibling.classList.toggle('open')
+                      });
+
+                      var newDiv = document.createElement("div")
+                      newDiv.innerHTML = "<div></div>"
+                      newDiv.classList.add("WrapLevel3", "close")
+                      wrap2[wrap2.length - 1].appendChild(newDiv)
+
+                      elm3.IntensityStation.forEach(function (elm4) {
+                        var wrap3 = document.querySelectorAll(".WrapLevel3")
+
+                        var newDiv = document.createElement("div")
+                        var color4 = shindoConvert2(shindoConvert3(elm4.Int))
+                        newDiv.innerHTML = "<span style='background:" + color4[0] + ";color:" + color4[1] + ";'>" + elm4.Int + "</span>" + elm4.Name
+                        newDiv.classList.add("ShindoItem", "ShindoItem4")
+
+
+
+                        var divIcon = L.divIcon({
+                          html: '<div style="background:' + color4[0] + ';color:' + color4[1] + '">' + elm4.Int + '</div>',
+                          className: 'ShindoIcon',
+                          iconSize: [16, 16],
+
+                        });
+
+                        L.marker([elm4.latlon.lat, elm4.latlon.lon], { icon: divIcon, pane: "shadowPane" }).addTo(map).bindPopup(elm4.Name + "<br>震度" + elm4.Int);
+
+                        wrap3[wrap3.length - 1].appendChild(newDiv)
+                      })
+
+
+                    })
+
+                  })
+
+                })
+              }
+            }
+          })
+
+        }
+
+        if (nhkURL) {
+
+          fetch(nhkURL)
+            .then((response) => {
+              return response.arrayBuffer();
+            }) // (2) レスポンスデータを取得
+            .then((data) => {
+              data = new TextDecoder("shift-jis").decode(data);
+              var parser2 = new DOMParser();
+              var xml2 = parser2.parseFromString(data, "application/xml");
+              var eid = "20" + nhkURL.split("data/")[1].split("_")[0].slice(-12);
+              //console.log({ "地震ID:": eid, 情報の種別: "?", 発生時刻: new Date(xml2.querySelector("Timestamp").textContent), 震源: xml2.querySelector("Earthquake").getAttribute("Epicenter"), M: xml2.querySelector("Earthquake").getAttribute("Magnitude"), 最大震度: xml2.querySelector("Earthquake").getAttribute("Intensity"), 詳細JSONURL: urls[i] });
+
+
+
+              var mostNew = false;
+              if (!newInfoDateTime || newInfoDateTime < new Date(new Date(xml2.querySelector("Timestamp").textContent))) {
+                newInfoDateTime = new Date(new Date(xml2.querySelector("Timestamp").textContent))
+                mostNew = true
+              }
+
+              if (xml2.querySelector("Earthquake").getAttribute("Time") && (mostNew || data_time.innerText == "不明")) data_time.innerText = dateEncode(3, new Date(xml2.querySelector("Earthquake").getAttribute("Time")))
+              if (xml2.querySelector("Earthquake").getAttribute("Intensity") && (mostNew || data_maxI.innerText == "不明")) data_maxI.innerText = xml2.querySelector("Earthquake").getAttribute("Intensity")
+              if (xml2.querySelector("Earthquake").getAttribute("Magnitude") && (mostNew || data_M.innerText == "不明")) data_M.innerText = xml2.querySelector("Earthquake").getAttribute("Magnitude")
+              if (xml2.querySelector("Earthquake").getAttribute("Depth") && (mostNew || data_depth.innerText == "不明")) data_depth.innerText = xml2.querySelector("Earthquake").getAttribute("Depth")
+              if (xml2.querySelector("Earthquake").getAttribute("Epicenter") && (mostNew || data_center.innerText == "不明")) data_center.innerText = xml2.querySelector("Earthquake").getAttribute("Epicenter")
+
+              if (xml2.querySelector("Earthquake").querySelectorAll("Group") && !narikakunURL && !jmaURL) {
+                xml2.querySelector("Earthquake").querySelectorAll("Group").forEach(function (elm) {
+                  var newDiv = document.createElement("div")
+                  var color1 = shindoConvert2(shindoConvert3(elm.getAttribute("Intensity")))
+                  var shindoJP = elm.getAttribute("Intensity").replace("-", "弱").replace("+", "強")
+                  newDiv.innerHTML = "<span style='background:" + color1[0] + ";color:" + color1[1] + ";'>" + shindoJP + "</span>震度" + shindoJP + "を観測した地域"
+                  newDiv.classList.add("ShindoItem", "ShindoItem1")
+                  document.getElementById("Shindo").appendChild(newDiv)
+                  newDiv.addEventListener('click', function () {
+                    this.classList.toggle('has-open')
+                    this.nextElementSibling.classList.toggle('open')
+                  });
+
+                  var newDiv = document.createElement("div")
+                  newDiv.innerHTML = "<div></div>"
+                  newDiv.classList.add("WrapLevel1", "close")
+                  document.getElementById("Shindo").appendChild(newDiv)
+                  elm.querySelectorAll("Area").forEach(function (elm2) {
+                    var wrap = document.querySelectorAll(".WrapLevel1")
+
+                    var newDiv = document.createElement("div")
+                    newDiv.innerHTML = "<span style='background:" + color1[0] + ";color:" + color1[1] + ";'>" + shindoJP + "</span>" + elm2.getAttribute("Name")
+                    newDiv.classList.add("ShindoItem", "ShindoItem4")
+                    wrap[wrap.length - 1].appendChild(newDiv)
+                  })
+                })
+              }
+            });
+
+        }
+
+
+
+
+
+
+
+
+
+        const year = (eid.substring(0, 4)); //2022
+        const month = (eid.substring(4, 6)); //2
+        const day = (eid.substring(6, 8)); //5
+        const hour = (eid.substring(8, 10)); //21
+        const min = (eid.substring(10, 12)); //0
+        const sec = (eid.substring(12, 14)); //0
+
+
+        document.getElementById("yahooLink").setAttribute("href", "https://typhoon.yahoo.co.jp/weather/jp/earthquake/" + eid + ".html")
+        document.getElementById("yahooLink").style.display = "block"
+        document.getElementById("tenkijpLink").setAttribute("href", "https://earthquake.tenki.jp/bousai/earthquake/detail/" + year + "/" + month + "/" + day + "/" + year + "-" + month + "-" + day + "-" + hour + "-" + min + "-" + sec + ".html")
+        document.getElementById("tenkijpLink").style.display = "block"
+        document.getElementById("gooLink").setAttribute("href", "https://weather.goo.ne.jp/earthquake/id/" + eid + "/")
+        document.getElementById("gooLink").style.display = "block"
+      } else if (AQUAData) {
+        AQUAData = JSON.parse(decodeURIComponent(AQUAData))
+
+        document.getElementById("AQUAImg").style.display = "block"
+        document.getElementById("Shindo").style.display = "none"
+        document.getElementById("AQUAImg1").setAttribute("src", AQUAData.url1)
+        document.getElementById("AQUAImg2").setAttribute("src", AQUAData.url2)
+        /*
+        if (json.Body.Earthquake && json.Body.Earthquake.OriginTime && (mostNew || data_time.innerText == "不明")) data_time.innerText = dateEncode(3, json.Body.Earthquake.OriginTime)
+        if (json.Body.Intensity.Observation.MaxInt && (mostNew || data_maxI.innerText == "不明")) data_maxI.innerText = json.Body.Intensity.Observation.MaxInt
+        if (json.Body.Earthquake && json.Body.Earthquake.Magnitude && (mostNew || data_M.innerText == "不明")) data_M.innerText = json.Body.Earthquake.Magnitude
+        if (LatLngDepth && LatLngDepth[3] && (mostNew || data_depth.innerText == "不明")) data_depth.innerText = Math.abs(Number(LatLngDepth[3]) / 1000) + "km"
+        if (json.Body.Earthquake && json.Body.Earthquake.Hypocenter.Area.Name && (mostNew || data_center.innerText == "不明")) data_center.innerText = json.Body.Earthquake.Hypocenter.Area.Name
+*/
+
+        /*
+                date: new Date(td[0].textContent),
+                  center: td[1].textContent,
+                    lat: latitudeConvert(td[2].textContent),
+                      lng: latitudeConvert(td[3].textContent),
+                        depth: Number(td[4].textContent.replace("km", "")),
+                          M: Number(td[5].textContent),
+                            souko: td[6].textContent,
+                              keisha: td[7].textContent,
+                                suberikaku: td[8].textContent,
+                                  quality: Number(td[9].textContent),
+                                    pointCount: Number(td[10].textContent),
+                                      date: td[11].textContent.replace("C", "AQUA-CMT").replace("M", "AQUA-MT"),
+        */
+
+
+      }
+    }
+
+
+
+    init()
+
+
+
+
+
+    function dateEncode(type, dateTmp, inputtype) {
+      if (inputtype == 1) {
+        var str = String(dateTmp);
+        const year = Number(str.substring(0, 4)); //2022
+        const month = Number(str.substring(4, 6)); //2
+        const day = Number(str.substring(6, 8)); //5
+        const hour = Number(str.substring(8, 10)); //21
+        const min = Number(str.substring(10, 12)); //0
+        const sec = Number(str.substring(12, 14)); //0
+        dateTmp = new Date(year, month - 1, day, hour, min, sec); //monthは0オリジン
+      } else {
+        dateTmp = new Date(dateTmp);
+      }
+
+      if (type == 1) {
+        //YYYYMMDDHHMMSS
+        var YYYY = String(dateTmp.getFullYear());
+        var MM = String(dateTmp.getMonth() + 1).padStart(2, "0");
+        var DD = String(dateTmp.getDate()).padStart(2, "0");
+        var hh = String(dateTmp.getHours()).padStart(2, "0");
+        var mm = String(dateTmp.getMinutes()).padStart(2, "0");
+        var ss = String(dateTmp.getSeconds()).padStart(2, "0");
+        return YYYY + MM + DD + hh + mm + ss;
+      } else if (type == 2) {
+        //YYYYMMDD
+        var YYYY = String(dateTmp.getFullYear());
+        var MM = String(dateTmp.getMonth() + 1).padStart(2, "0");
+        var DD = String(dateTmp.getDate()).padStart(2, "0");
+        return YYYY + MM + DD;
+      } else if (type == 3) {
+        //YYYYMMDDHHMMSS
+        var YYYY = String(dateTmp.getFullYear());
+        var MM = String(dateTmp.getMonth() + 1).padStart(2, "0");
+        var DD = String(dateTmp.getDate()).padStart(2, "0");
+        var hh = String(dateTmp.getHours()).padStart(2, "0");
+        var mm = String(dateTmp.getMinutes()).padStart(2, "0");
+        var ss = String(dateTmp.getSeconds()).padStart(2, "0");
+        return YYYY + "/" + MM + "/" + DD + " " + hh + ":" + mm + ":" + ss;
+      } else {
+        var YYYY = String(dateTmp.getFullYear());
+        var MM = String(dateTmp.getMonth() + 1).padStart(2, "0");
+        var DD = String(dateTmp.getDate()).padStart(2, "0");
+        var hh = String(dateTmp.getHours()).padStart(2, "0");
+        var mm = String(dateTmp.getMinutes()).padStart(2, "0");
+        var ss = String(dateTmp.getSeconds()).padStart(2, "0");
+
+        type.replaceAll("YYYY", YYYY);
+        type.replaceAll("MM", MM);
+        type.replaceAll("DD", DD);
+        type.replaceAll("hh", hh);
+        type.replaceAll("mm", mm);
+        type.replaceAll("ss", ss);
+
+        return type;
+      }
+    }
+    function shindoConvert2(num) {
+      if (isNaN(num)) num = Number(num);
+
+      if (num < 0.5) {
+        return ["#D1D1D1", "#444"];
+      } else if (num < 1.5) {
+        return ["#54C9E3", "#222"];
+      } else if (num < 2.5) {
+        return ["#2B8DFC", "#111"];
+      } else if (num < 3.5) {
+        return ["#32BA37", "#111"];
+      } else if (num < 4.5) {
+        return ["#DBD21F", "#000"];
+      } else if (num < 5) {
+        return ["#FF8C00", "#FFF"];
+      } else if (num < 5.5) {
+        return ["#FF5714", "#FFF"];
+      } else if (num < 6) {
+        return ["#E60000", "#FFF"];
+      } else if (num < 6.5) {
+        return ["#8A0A0A", "#FFF"];
+      } else if (6.5 <= num) {
+        return ["#C400DE", "#FFF"];
+      } else {
+        return "transparent";
+      }
+    }
+    function shindoConvert3(num) {
+
+      if (num == "0") {
+        return 0;
+      } else if (num == "1" || num == "2" || num == "3" || num == "4" || num == "7") {
+        return Number(num);
+      } else if (num == "5-") {
+        return 4.5;
+      } else if (num == "5+") {
+        return 5;
+      } else if (num == "6-") {
+        return 5.5;
+      } else if (num == "6+") {
+        return 6;
+      } else {
+        return Number(num);
+      }
+    }
+
+    document.getElementById("ShindoSample0").style.background = shindoConvert2(0)[0]
+    document.getElementById("ShindoSample0").style.color = shindoConvert2(0)[1]
+    document.getElementById("ShindoSample1").style.background = shindoConvert2(1)[0]
+    document.getElementById("ShindoSample1").style.color = shindoConvert2(1)[1]
+    document.getElementById("ShindoSample2").style.background = shindoConvert2(2)[0]
+    document.getElementById("ShindoSample2").style.color = shindoConvert2(2)[1]
+    document.getElementById("ShindoSample3").style.background = shindoConvert2(3)[0]
+    document.getElementById("ShindoSample3").style.color = shindoConvert2(3)[1]
+    document.getElementById("ShindoSample4").style.background = shindoConvert2(4)[0]
+    document.getElementById("ShindoSample4").style.color = shindoConvert2(4)[1]
+    document.getElementById("ShindoSample5-").style.background = shindoConvert2(4.5)[0]
+    document.getElementById("ShindoSample5-").style.color = shindoConvert2(4.5)[1]
+    document.getElementById("ShindoSample5+").style.background = shindoConvert2(5)[0]
+    document.getElementById("ShindoSample5+").style.color = shindoConvert2(5)[1]
+    document.getElementById("ShindoSample6-").style.background = shindoConvert2(5.5)[0]
+    document.getElementById("ShindoSample6-").style.color = shindoConvert2(5.5)[1]
+    document.getElementById("ShindoSample6+").style.background = shindoConvert2(6)[0]
+    document.getElementById("ShindoSample6+").style.color = shindoConvert2(6)[1]
+    document.getElementById("ShindoSample7").style.background = shindoConvert2(7)[0]
+    document.getElementById("ShindoSample7").style.color = shindoConvert2(7)[1]
+
+    document.getElementById("AllOpen").addEventListener("click", function () {
+      document.querySelectorAll(".ShindoItem1,.ShindoItem2,.ShindoItem3").forEach(function (elm) {
+        elm.classList.add("has-open")
+      })
+      document.querySelectorAll(".WrapLevel1,.WrapLevel2,.WrapLevel3").forEach(function (elm) {
+        elm.classList.add("open")
+      })
+    })
+    document.getElementById("AllClose").addEventListener("click", function () {
+      document.querySelectorAll(".ShindoItem1,.ShindoItem2,.ShindoItem3").forEach(function (elm) {
+        elm.classList.remove("has-open")
+      })
+      document.querySelectorAll(".WrapLevel1,.WrapLevel2,.WrapLevel3").forEach(function (elm) {
+        elm.classList.remove("open")
+      })
+    })
+  </script>
+
+</body>
+
+</html>

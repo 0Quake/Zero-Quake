@@ -1,0 +1,157 @@
+#mapcontainer {
+  display: inline-block;
+  width: 100%;
+  height: 100vh;
+  font-size: 14px;
+  background: #272020;
+}
+
+.leaflet-control-layers,
+.leaflet-control-zoom,
+a.leaflet-control-zoom-in,
+a.leaflet-control-zoom-out {
+  background: #333;
+  color: #fff;
+  border: solid 1px #999 !important;
+}
+a.leaflet-control-zoom-in:hover,
+a.leaflet-control-zoom-out:hover {
+  background: #666;
+}
+#sideBar {
+  width: 500px;
+  display: inline-block;
+}
+
+#kmoniCanvas {
+  display: none;
+}
+
+img.leaflet-control {
+  max-height: 200px;
+  max-width: 200px;
+  background: #fff;
+  border-radius: 5px;
+}
+.PWaveAnm,
+.SWaveAnm {
+  transition: linear 1s;
+}
+
+.leaflet-background-pane {
+  z-index: 100;
+}
+
+.PointPopup .leaflet-popup-content-wrapper,
+.PointPopup .leaflet-popup-tip {
+  background: #222;
+  color: #fff;
+  font-size: 14px;
+}
+.PointPopup .leaflet-popup-content-wrapper {
+  border-radius: 3px;
+  padding: 0;
+}
+
+.PointPopup .leaflet-popup-content {
+  margin: 0;
+}
+.PointPopup h3 {
+  padding: 0.15em 0.4em;
+  margin: 0;
+  font-size: 16px;
+  background: #444;
+}
+.PointPopup table {
+  border-collapse: collapse;
+  margin: 10px 10px 10px 10px;
+}
+
+.kmoniPointMarker {
+  width: 25px;
+  height: 25px;
+}
+
+.marker-circle {
+  width: 10px;
+  height: 10px;
+  background: #000;
+  border-radius: 50%;
+}
+.PointPopup {
+  background: #333;
+  border-radius: 3px;
+  box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.4);
+}
+.PointPopup2 {
+  position: absolute;
+  top: 0;
+  left: 25px;
+  display: none;
+}
+
+.zoomLevel_1 .marker-circle {
+  width: 5px;
+  height: 5px;
+  margin: 10px;
+}
+.zoomLevel_2 .marker-circle {
+  width: 10px;
+  height: 10px;
+  margin: 7.5px;
+}
+.zoomLevel_3 .marker-circle {
+  width: 15px;
+  height: 15px;
+  margin: 5px;
+}
+.zoomLevel_4 .marker-circle {
+  width: 25px;
+  height: 25px;
+  margin: 0;
+}
+.popup_show .PointPopup2 {
+  display: block;
+}
+.leaflet-control-attribution.leaflet-control {
+  font-size: 12px;
+}
+.leaflet-map-pane svg {
+  z-index: unset;
+}
+.zoomLevel_1 .tsunamiElm {
+  stroke-width: 5px;
+}
+.zoomLevel_2 .tsunamiElm {
+  stroke-width: 10px;
+}
+.zoomLevel_3 .tsunamiElm {
+  stroke-width: 15px;
+}
+.zoomLevel_4 .tsunamiElm {
+  stroke-width: 20px;
+}
+#tsunamiSample {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+#tsunamiSample li {
+  padding: 0.2em 0.5em;
+}
+#tsunamiSample li span {
+  display: inline-block;
+  height: 8px;
+  width: 20px;
+  vertical-align: middle;
+  margin: 0 5px;
+}
+#tsunami_MajorWarning span {
+  background: rgb(200, 0, 255);
+}
+#tsunami_Warning span {
+  background: rgb(255, 40, 0);
+}
+#tsunami_Watch span {
+  background: rgb(250, 245, 0);
+}
