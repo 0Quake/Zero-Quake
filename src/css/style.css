@@ -400,12 +400,6 @@ td {
   text-align: right;
   transition: width linear 1s;
 }
-.Wave_progress .PWave_value {
-  background: #00f;
-}
-.Wave_progress .SWave_value {
-  background: #f00;
-}
 .infoOverlay {
   position: absolute;
   inset: 0;
@@ -448,7 +442,6 @@ td {
 .SuccessAnm {
   animation-name: SuccessAnm;
   animation-duration: 400ms;
-  animation-timing-function: linear;
   animation-delay: 0ms;
   animation-fill-mode: forwards;
 }

@@ -81,7 +81,8 @@ img.leaflet-control {
 .PointPopup {
   background: #333;
   border-radius: 3px;
-  box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.4);
+
+  border: solid 1px #888;
 }
 .PointPopup2 {
   position: absolute;
@@ -146,6 +147,13 @@ img.leaflet-control {
   vertical-align: middle;
   margin: 0 5px;
 }
+
+/*カラーテーマ*/
+:root {
+  --PwaveColor: rgb(48, 148, 255);
+  --SwaveColor: rgb(255, 62, 48);
+}
+
 #tsunami_MajorWarning span {
   background: rgb(200, 0, 255);
 }
@@ -154,4 +162,26 @@ img.leaflet-control {
 }
 #tsunami_Watch span {
   background: rgb(250, 245, 0);
+}
+
+.PWave {
+  stroke: var(--PwaveColor);
+  transform: translate3d(0, 0, 0);
+}
+.SWave {
+  stroke: var(--SwaveColor);
+  transform: translate3d(0, 0, 0);
+}
+.Wave_progress .PWave_value {
+  background: var(--PwaveColor);
+}
+.Wave_progress .SWave_value {
+  background: var(--SwaveColor);
+}
+.SWaveProgress svg {
+  transform: rotate(270deg);
+  stroke: var(--SwaveColor);
+}
+.SWaveProgress .SWprogressValue {
+  transition: 200ms;
 }

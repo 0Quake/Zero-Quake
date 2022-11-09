@@ -4,6 +4,7 @@ var now_EEW = [];
 var EEWDetectionTimeout;
 var Replay;
 var ICT_JST = 0;
+var setting;
 //ipcRenderer.on("message2", (event, request) => {
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "EEWAlertUpdate") {
@@ -26,7 +27,7 @@ window.electronAPI.messageSend((event, request) => {
   } else if (request.action == "PSWaveClear") {
     epiCenterClear(request.data);
   } else if (request.action == "setting") {
-    console.log(request.data);
+    setting = request.data;
   } else if (request.action == "Replay") {
     Replay = request.data;
   }
@@ -221,6 +222,7 @@ function epiCenterUpdate(eid, latitude, longitude) {
 
       if (EQElm.PCircleElm) EQElm.PCircleElm.setLatLng([latitude, longitude]);
       if (EQElm.SCircleElm) EQElm.SCircleElm.setLatLng([latitude, longitude]);
+      if (EQElm.SIElm) EQElm.SIElm.setLatLng([latitude, longitude]);
     }
     latitudeTmp = latitude;
     longitudeTmp = longitude;
@@ -288,15 +290,21 @@ function eqInfoUpdate() {
     })
     .then(function (json) {
       var dataTmp = [];
+      json = json.filter(function (elm) {
+        return elm.ttl == "震度速報" || elm.ttl == "震源に関する情報" || elm.ttl == "震源・震度情報" || elm.ttl == "遠地地震に関する情報";
+      });
       for (let i = 0; i < 10; i++) {
         //console.log({ "地震ID:": json[i].eid, 情報の種別: json[i].ttl, 発生時刻: new Date(json[i].at), 震源: json[i].anm, M: json[i].mag, 最大震度: json[i].maxi, 詳細JSONURL: json[i].json });
+
+        var maxi = json[i].maxi;
+        if (!maxi) maxi = shindoConvert("?", 1);
         dataTmp.push({
           eventId: json[i].eid,
           category: json[i].ttl,
           Timestamp: new Date(json[i].at),
           epiCenter: json[i].anm,
           M: json[i].mag,
-          maxI: json[i].maxi,
+          maxI: maxi,
           reportDateTime: new Date(json[i].rdt),
           DetailURL: [String("https://www.jma.go.jp/bosai/quake/data/" + json[i].json)],
         });
@@ -506,9 +514,9 @@ function eqInfoDraw(data, EQListWrap, jma, type) {
   data.forEach(function (elm) {
     var clone = EQTemplate.content.cloneNode(true);
 
-    var shindoColor = shindoConvert2(elm.maxI);
+    var shindoColor = shindoConvert(elm.maxI, 2);
     if (jma) {
-      clone.querySelector(".EQI_maxI").innerText = elm.maxI;
+      clone.querySelector(".EQI_maxI").innerText = shindoConvert(elm.maxI, 0);
       clone.querySelector(".EQI_maxI").style.background = shindoColor[0];
       clone.querySelector(".EQI_maxI").style.color = shindoColor[1];
     }
@@ -642,33 +650,121 @@ function dateEncode(type, dateTmp, inputtype) {
   }
 }
 
-function shindoConvert2(num) {
-  if (isNaN(num)) num = Number(num);
-
-  if (num < 0.5) {
-    return ["#D1D1D1", "#444"];
-  } else if (num < 1.5) {
-    return ["#54C9E3", "#222"];
-  } else if (num < 2.5) {
-    return ["#2B8DFC", "#111"];
-  } else if (num < 3.5) {
-    return ["#32BA37", "#111"];
-  } else if (num < 4.5) {
-    return ["#DBD21F", "#000"];
-  } else if (num < 5) {
-    return ["#FF8C00", "#FFF"];
-  } else if (num < 5.5) {
-    return ["#FF5714", "#FFF"];
-  } else if (num < 6) {
-    return ["#E60000", "#FFF"];
-  } else if (num < 6.5) {
-    return ["#8A0A0A", "#FFF"];
-  } else if (6.5 <= num) {
-    return ["#C400DE", "#FFF"];
+function shindoConvert(str, responseType) {
+  var ShindoTmp;
+  if (isNaN(str)) {
+    ShindoTmp = String(str);
+    ShindoTmp = ShindoTmp.replace(/[０-９]/g, function (s) {
+      return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
+    });
+    ShindoTmp = ShindoTmp.replaceAll("＋", "+").replaceAll("－", "-").replaceAll("強", "+").replaceAll("弱", "-");
+    ShindoTmp = ShindoTmp.replace(/\s+/g, "");
+    switch (str) {
+      case "-1":
+      case "不明":
+        ShindoTmp = "?";
+        break;
+      case "1":
+      case "10":
+        ShindoTmp = "1";
+        break;
+      case "2":
+      case "20":
+        ShindoTmp = "2";
+        break;
+      case "3":
+      case "30":
+        ShindoTmp = "3";
+        break;
+      case "4":
+      case "40":
+        ShindoTmp = "4";
+        break;
+      case "5-":
+      case "45":
+        ShindoTmp = "5-";
+        break;
+      case "5+":
+      case "50":
+        ShindoTmp = "5+";
+        break;
+      case "6-":
+      case "55":
+        ShindoTmp = "6-";
+        break;
+      case "6+":
+      case "60":
+        ShindoTmp = "6+";
+        break;
+      case "7":
+      case "70":
+        ShindoTmp = "7";
+        break;
+      case "99":
+        ShindoTmp = "7+";
+        break;
+    }
   } else {
-    return "transparent";
+    if (str < 0.5) {
+      ShindoTmp = "0";
+    } else if (str < 1.5) {
+      ShindoTmp = "1";
+    } else if (str < 2.5) {
+      ShindoTmp = "2";
+    } else if (str < 3.5) {
+      ShindoTmp = "3";
+    } else if (str < 4.5) {
+      ShindoTmp = "4";
+    } else if (str < 5) {
+      ShindoTmp = "5-";
+    } else if (str < 5.5) {
+      ShindoTmp = "5+";
+    } else if (str < 6) {
+      ShindoTmp = "6-";
+    } else if (str < 6.5) {
+      ShindoTmp = "6+";
+    } else if (6.5 <= str) {
+      ShindoTmp = "7";
+    } else if (7.5 <= str) {
+      ShindoTmp = "7+";
+    } else {
+      ShindoTmp = "?";
+    }
+  }
+  if (["?", "0", "1", "2", "3", "4", "5-", "5+", "6-", "6+", "7", "7+"].includes(ShindoTmp)) {
+    switch (responseType) {
+      case 1:
+        var ConvTable = { "?": "不明", 0: "0", 1: "1", 2: "2", 3: "3", 4: "4", "5-": "5弱", "5+": "5強", "6-": "6弱", "6+": "6強", 7: "7", "7+": "7以上" };
+        return ConvTable[ShindoTmp];
+        break;
+      case 2:
+        var ConvTable = {
+          "?": ["#D1D1D1", "#444"],
+          0: ["#D1D1D1", "#444"],
+          1: ["#54C9E3", "#222"],
+          2: ["#2B8DFC", "#111"],
+          3: ["#32BA37", "#111"],
+          4: ["#DBD21F", "#000"],
+          "5-": ["#FF8C00", "#FFF"],
+          "5+": ["#FF5714", "#FFF"],
+          "6-": ["#E60000", "#FFF"],
+          "6+": ["#8A0A0A", "#FFF"],
+          7: ["#C400DE", "#FFF"],
+          "7+": ["#C400DE", "#FFF"],
+        };
+        return ConvTable[ShindoTmp];
+        break;
+
+      case 0:
+      default:
+        return ShindoTmp;
+        break;
+    }
+  } else {
+    return str;
   }
 }
+
 document.getElementById("setting").addEventListener("click", function () {
   window.electronAPI.messageReturn({
     action: "settingWindowOpen",

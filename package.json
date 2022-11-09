@@ -17,7 +17,7 @@
   "license": "GNU General Public License v2.0",
   "dependencies": {
     "@types/node": "^18.11.5",
-    "config": "^3.3.8",
+    "electron-store": "^8.1.0",
     "request": "^2.88.2",
     "sound-play": "^1.1.0",
     "typescript": "^4.8.4",

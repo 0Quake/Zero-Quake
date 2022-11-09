@@ -7,6 +7,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>設定 - Zero Quake</title>
     <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="./js/leaflet/leaflet.css" />
+    <link rel="stylesheet" href="./css/map.css">
+
     <style>
         body {
             overflow: hidden;
@@ -93,6 +96,16 @@
             background: rgb(83, 0, 0);
 
         }
+
+        #mapcontainer {
+            width: 100%;
+            height: 300px;
+            background: rgb(39, 32, 32);
+        }
+
+        .ActiveSaibun {
+            fill: rgb(167, 40, 40);
+        }
     </style>
 </head>
 
@@ -109,6 +122,13 @@
         <div id="tab1_content">
             <div id="tab1_content1" class="tabcontent active_tabcontent">
                 <label><input type="checkbox" id="setting1">項目名</label>
+
+                <h3>現在地</h3>
+                <label>緯度<input id="latitude" type="number" oninput="MapReDraw()"></label>
+                <label>緯度<input id="longitude" type="number" oninput="MapReDraw()"></label>
+                <label>細分区域<select id="saibun" onchange="MapReDraw()"></select></label>
+                <div id="mapcontainer"></div>
+
             </div>
             <div id="tab1_content2" class="tabcontent">
 
@@ -178,33 +198,294 @@
     </div>
 
     <script src="./js/UIcommon.js"></script>
+    <script src="./js/leaflet/leaflet.js"></script>
 
     <script>
         var setting;
+        var sections = []
+        var markerElm;
         window.electronAPI.messageSend((event, request) => {
             if (request.action == "setting") {
                 setting = request.data.config
                 document.getElementById("softVersion").innerText = request.data.softVersion
 
+
+
+                document.getElementById("latitude").value = setting.home.latitude
+                document.getElementById("longitude").value = setting.home.longitude
+                var SaibunElm = Array.from(document.querySelectorAll("#saibun option")).find(function (elm) { return elm.innerText == setting.home.Saibun })
+                if (SaibunElm) SaibunElm.selected = true
+
+
+
                 document.getElementById("setting1").checked = setting.setting1
+                init()
             }
         })
 
         document.getElementById("apply").addEventListener("click", function () {
             setting.setting1 = document.getElementById("setting1").checked;
-
-
+            setting.home.latitude = document.getElementById("latitude").value
+            setting.home.longitude = document.getElementById("longitude").value
+            setting.home.Saibun = document.getElementById("saibun").value
 
             window.electronAPI.messageReturn({
                 action: "settingReturn",
                 data: setting
             })
-
             window.close()
         })
         document.getElementById("cancel").addEventListener("click", function () {
             window.close()
         })
+
+        function init() {
+            map = L.map("mapcontainer", {
+                maxBounds: [
+                    [90, 0],
+                    [-90, 360],
+                ],
+
+                zoomAnimation: false, //←オフにするとずれて不自然
+                //preferCanvas: true,←かるくなる？
+            });
+            //L.control.scale({ imperial: false }).addTo(map);←縮尺
+            map.setView([32.99125, 138.46], 4);
+
+            var tile1 = L.tileLayer("https://www.data.jma.go.jp/svd/eqdb/data/shindo/map/{z}/{x}/{y}.png", {
+                minZoom: 0,
+                minNativeZoom: 0,
+                maxNativeZoom: 11,
+                maxZoom: 21,
+                attribution: 'Map data <a href="https://www.data.jma.go.jp/svd/eqdb/data/shindo/" target="_blank">© 気象庁</a>',
+            })
+            var tile2 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png", {
+                minZoom: 0,
+                minNativeZoom: 2,
+                maxNativeZoom: 18,
+                maxZoom: 21,
+                attribution: 'Map data <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">©国土地理院</a>',
+            }); //最初に表示させるタイルに addTo() をつける
+            var tile3 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg", {
+                minZoom: 9,
+                minNativeZoom: 9,
+                maxNativeZoom: 18,
+                maxZoom: 21,
+                attribution: 'Map data <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">©国土地理院</a>',
+            });
+            var tile4 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/blank/{z}/{x}/{y}.png", {
+                minZoom: 0,
+                minNativeZoom: 5,
+                maxNativeZoom: 14,
+                maxZoom: 21,
+                attribution: 'Map data <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">©国土地理院</a>',
+            });
+            var tile5 = L.tileLayer("http://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                minZoom: 0,
+                minNativeZoom: 0,
+                maxNativeZoom: 19,
+                maxZoom: 21,
+                attribution: 'Map data <a href="https://www.openstreetmap.org/" target="_blank">©OpenStreetMap contributors</a>',
+            });
+            var tile6 = L.tileLayer("https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}", {
+                minZoom: 0,
+                minNativeZoom: 0,
+                maxNativeZoom: 21,
+                maxZoom: 21,
+                attribution: 'Map data <a href="https://www.google.com/maps" target="_blank">©google</a>',
+            });
+            var tile7 = L.tileLayer("https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}", {
+                minZoom: 0,
+                minNativeZoom: 0,
+                maxNativeZoom: 21,
+                maxZoom: 21,
+                attribution: 'Map data <a href="https://www.google.com/maps" target="_blank">©google</a>',
+            });
+            var tile8 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png", {
+                minZoom: 0,
+                minNativeZoom: 0,
+                maxNativeZoom: 18,
+                maxZoom: 21,
+                attribution: 'Map data <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">©国土地理院</a>',
+            });
+
+            var tile9 = L.tileLayer("https://www.jma.go.jp/tile/gsi/pale2/{z}/{x}/{y}.png", {
+                minZoom: 0,
+                minNativeZoom: 2,
+                maxNativeZoom: 11,
+                maxZoom: 21,
+                attribution: 'Map data <a href="https://www.jma.go.jp/bosai/map.html#5/28.835/168.548/&elem=int&contents=earthquake_map" target="_blank">©気象庁</a>',
+            });
+
+            //
+            //
+            var overlay1 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/hillshademap/{z}/{x}/{y}.png", {
+                minZoom: 2,
+                maxZoom: 16,
+                attribution: 'Map data <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">©国土地理院</a>',
+            });
+            var overlay2 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/vbmd_colorrel/{z}/{x}/{y}.png", {
+                minZoom: 11,
+                maxZoom: 18,
+                attribution: 'Map data <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">©国土地理院</a>',
+            });
+            var overlay3 = L.tileLayer("https://disaportaldata.gsi.go.jp/raster/04_tsunami_newlegend_data/{z}/{x}/{y}.png", {
+                minZoom: 7,
+                maxZoom: 12,
+                attribution: 'Map data <a href="https://disaportal.gsi.go.jp/hazardmap/copyright/opendata.html#tsunami" target="_blank">©国土地理院</a>',
+            });
+            var overlay4 = L.tileLayer("https://disaportaldata.gsi.go.jp/raster/05_kyukeishakeikaikuiki/{z}/{x}/{y}.png", {
+                minZoom: 7,
+                maxZoom: 12,
+                attribution: 'Map data <a href="https://disaportal.gsi.go.jp/hazardmap/copyright/opendata.html#dosekiryukeikaikuiki" target="_blank">©国土地理院</a>',
+            });
+            var overlay5 = L.tileLayer("https://disaportaldata.gsi.go.jp/raster/05_jisuberikeikaikuiki/{z}/{x}/{y}.png", {
+                minZoom: 7,
+                maxZoom: 12,
+                attribution: 'Map data <a href="https://disaportal.gsi.go.jp/hazardmap/copyright/opendata.html#jisuberikeikaikuiki" target="_blank">©国土地理院</a>',
+            });
+            var overlay6 = L.tileLayer("https://www.jma.go.jp/tile/jma/transparent-cities/{z}/{x}/{y}.png", {
+                minZoom: 0,
+                minNativeZoom: 2,
+                maxNativeZoom: 11,
+                maxZoom: 21,
+                attribution: 'Map data <a href="https://www.jma.go.jp/bosai/map.html#5/28.835/168.548/&elem=int&contents=earthquake_map" target="_blank">©JMA</a>',
+            });
+
+            map.createPane("pane300").style.zIndex = 300;
+            var homeIcon = L.icon({
+                iconUrl: 'img/homePin.svg',
+                iconSize: [30, 30],
+                iconAnchor: [15, 30],
+            });
+
+            markerElm =
+                L.marker(
+                    [setting.home.latitude, setting.home.longitude],
+                    { keyboard: false, icon: homeIcon }
+                ).addTo(map);
+
+            fetch("./Resource/basemap.json")
+                .then(function (res) {
+                    return res.json();
+                })
+                .then(function (json) {
+                    gjmap = L.geoJSON(json, {
+                        style: {
+                            color: "#999",
+                            fill: true,
+                            fillColor: "#333",
+                            fillOpacity: 1,
+                            weight: 1,
+                            pane: "tilePane",
+                            attribution: 'Map data <a href="https://www.naturalearthdata.com/">©Natural Earth</a> / <a href="https://www.data.jma.go.jp/developer/gis.html" target="_blank">©JMA</a>',
+                        },
+                        onEachFeature: function onEachFeature(feature, layer) {
+                            if (feature.properties && feature.properties.NAME) {
+                                sections.push({ name: feature.properties.NAME, item: layer })
+                                var saibunElm = document.createElement("option")
+                                saibunElm.innerText = feature.properties.NAME
+
+                                if (setting && setting.home.Saibun == feature.properties.NAME) {
+                                    saibunElm.selected = true; layer.setStyle({ fillColor: "#FFF" })
+                                }
+                                document.getElementById("saibun").appendChild(saibunElm)
+
+                                layer.on('click', function (e) {
+                                    gjmap.setStyle({
+                                        fillColor: "#333",
+                                    })
+                                    lat = e.latlng.lat;
+                                    lng = e.latlng.lng;
+                                    markerElm.setLatLng(e.latlng)
+                                    console.log(layer)
+                                    if (feature.properties.layer == "地震情報／細分区域") {
+                                        layer.setStyle({ fillColor: "#FFF" })
+                                        document.getElementById("latitude").value = lat
+                                        document.getElementById("longitude").value = lng
+                                        console.log(feature.properties.NAME)
+                                        Array.from(document.querySelectorAll("#saibun option")).find(function (elm) { return elm.innerText == feature.properties.NAME }).selected = true
+                                    }
+                                });
+
+                            }
+                        },
+                    }).addTo(map);
+
+                    L.control
+                        .layers(
+                            {
+                                オフライン地図: gjmap,
+                                気象庁: tile1,
+                                気象庁2: tile9,
+                                "地理院 標準地図": tile8,
+
+                                "地理院 淡色地図": tile2,
+                                "地理院 写真": tile3,
+                                "地理院 白地図": tile4,
+                                OpenStreetMap: tile5,
+                                "Google Map": tile6,
+                                "Google Map 写真": tile7,
+                            },
+                            {
+                                "地理院 陰影起伏図": overlay1,
+                                "地理院 火山基本図データ": overlay2,
+                                "地理院 津波浸水想定 ハザードマップ": overlay3,
+                                "地理院 土砂災害警戒区域（急傾斜地の崩壊） ハザードマップ": overlay4,
+                                "地理院 土砂災害警戒区域（地すべり） ハザードマップ": overlay5,
+                                "気象庁　境界線": overlay6,
+                            }
+                        )
+                        .addTo(map);
+                });
+
+            var currentZoom = map.getZoom();
+            if (currentZoom < 6) {
+                document.getElementById("mapcontainer").classList.add("zoomLevel_1");
+            } else if (currentZoom < 8) {
+                document.getElementById("mapcontainer").classList.add("zoomLevel_2");
+            } else if (currentZoom < 9) {
+                document.getElementById("mapcontainer").classList.add("zoomLevel_3");
+            } else {
+                document.getElementById("mapcontainer").classList.add("zoomLevel_4");
+            }
+
+
+            map.on("zoom", function () {
+                var currentZoom = map.getZoom();
+                document.getElementById("mapcontainer").classList.remove("zoomLevel_1");
+                document.getElementById("mapcontainer").classList.remove("zoomLevel_2");
+                document.getElementById("mapcontainer").classList.remove("zoomLevel_3");
+                document.getElementById("mapcontainer").classList.remove("zoomLevel_4");
+
+                if (currentZoom < 6) {
+                    document.getElementById("mapcontainer").classList.add("zoomLevel_1");
+                } else if (currentZoom < 8) {
+                    document.getElementById("mapcontainer").classList.add("zoomLevel_2");
+                } else if (currentZoom < 9) {
+                    document.getElementById("mapcontainer").classList.add("zoomLevel_3");
+                } else {
+                    document.getElementById("mapcontainer").classList.add("zoomLevel_4");
+                }
+
+            })
+            map.on('click', function (e) {
+                lat = e.latlng.lat;
+                lng = e.latlng.lng;
+                document.getElementById("latitude").value = lat
+                document.getElementById("longitude").value = lng
+            });
+        }
+        function MapReDraw() {
+            gjmap.setStyle({
+                fillColor: "#333",
+            })
+            lat = document.getElementById("latitude").value;
+            lng = document.getElementById("longitude").value;
+            markerElm.setLatLng([lat, lng])
+            sections.find(function (elm) { return elm.name == document.getElementById("saibun").value }).item.setStyle({ fillColor: "#FFF" })
+
+        }
     </script>
 </body>
 

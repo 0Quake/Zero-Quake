@@ -72,11 +72,17 @@
       width: calc(50% - 10px);
     }
 
+
     #Shindo,
     #AQUAImg {
       display: inline-block;
       width: calc(50% - 10px);
     }
+
+    #Shindo {
+      display: none;
+    }
+
 
     #AQUAImg img {
       max-width: 40%;
@@ -224,10 +230,6 @@
     <table id="EQInfo">
       <caption class="h2">地震情報</caption>
       <tr>
-        <th></th>
-        <th>情報</th>
-      </tr>
-      <tr>
         <th>発生時刻</th>
         <td id="data_time">不明</td>
       </tr>
@@ -247,8 +249,10 @@
         <th>震源</th>
         <td id="data_center">不明</td>
       </tr>
+      <tr>
+        <td id="data_comment" colspan="2"></td>
+      </tr>
     </table>
-
 
     <div id="Shindo">
       <h2>各地の震度</h2>
@@ -262,7 +266,8 @@
 
   </div>
 
-  リンク
+  <hr>
+  <h2>外部リンク</h2>
   <a href="#" target="_blank" id="yahooLink">Yahoo地震情報</a>
   <a href="#" target="_blank" id="tenkijpLink">tenki.jp地震情報</a>
   <a href="#" target="_blank" id="gooLink">goo地震情報</a>
@@ -276,6 +281,7 @@
     var data_M = document.getElementById("data_M")
     var data_depth = document.getElementById("data_depth")
     var data_center = document.getElementById("data_center")
+    var data_comment = document.getElementById("data_comment")
 
     let url = new URL(window.location.href);
     let params = url.searchParams;
@@ -503,26 +509,30 @@
           fetch(jmaURL).then(function (res) { return res.json() }).then(function (json) {
 
             var mostNew = false;
-            if (!newInfoDateTime || newInfoDateTime < new Date(json.Head.ReportDateTime)) {
+            if (!newInfoDateTime || newInfoDateTime <= new Date(json.Head.ReportDateTime)) {
               newInfoDateTime = new Date(json.Head.ReportDateTime)
               mostNew = true
             }
 
-
             if (json.Body.Earthquake) {
               var LatLngDepth = json.Body.Earthquake.Hypocenter.Area.Coordinate.replaceAll("+", "｜+").replaceAll("-", "｜-").replaceAll("/", "").split("｜")
-            }
+            } console.log(data_depth.innerText)
 
             if (json.Body.Earthquake && json.Body.Earthquake.OriginTime && (mostNew || data_time.innerText == "不明")) data_time.innerText = dateEncode(3, json.Body.Earthquake.OriginTime)
-            if (json.Body.Intensity.Observation.MaxInt && (mostNew || data_maxI.innerText == "不明")) data_maxI.innerText = json.Body.Intensity.Observation.MaxInt
+            if (json.Body.Intensity && json.Body.Intensity.Observation.MaxInt && (mostNew || data_maxI.innerText == "不明")) data_maxI.innerText = json.Body.Intensity.Observation.MaxInt
             if (json.Body.Earthquake && json.Body.Earthquake.Magnitude && (mostNew || data_M.innerText == "不明")) data_M.innerText = json.Body.Earthquake.Magnitude
-            if (LatLngDepth && LatLngDepth[3] && (mostNew || data_depth.innerText == "不明")) data_depth.innerText = Math.abs(Number(LatLngDepth[3]) / 1000) + "km"
+            if (LatLngDepth && LatLngDepth[3] && (mostNew || data_depth.innerText == "不明")) data_depth.innerText = Math.abs(Number(LatLngDepth[3]) / 1000) + "km";
             if (json.Body.Earthquake && json.Body.Earthquake.Hypocenter.Area.Name && (mostNew || data_center.innerText == "不明")) data_center.innerText = json.Body.Earthquake.Hypocenter.Area.Name
 
+            var commentText = "";
+            if (json.Body.Comments && json.Body.Comments.ForecastComment.Text && (mostNew || data_comment.innerText == "")) commentText += json.Body.Comments.ForecastComment.Text
+            if (json.Body.Comments && json.Body.Comments.FreeFormComment && (mostNew || data_comment.innerText == "")) commentText += json.Body.Comments.FreeFormComment
+            data_comment.innerText = commentText
 
 
 
-            if (json.Body.Intensity.Observation.Pref && !map_drawed) {
+            if (json.Body.Intensity && json.Body.Intensity.Observation.Pref && !map_drawed) {
+              document.getElementById("Shindo").style.display = "inline-block"
               map_drawed = true
               json.Body.Intensity.Observation.Pref.forEach(function (elm) {
                 var newDiv = document.createElement("div")
@@ -655,14 +665,16 @@
                 mostNew = true
               }
 
-              if (json.Body.Earthquake.OriginTime && (mostNew || data_time.innerText == "不明")) document.getElementById("data_time").innerText = dateEncode(3, json.Body.Earthquake.OriginTime)
-              if (json.Body.Intensity.Observation.MaxInt && (mostNew || data_maxI.innerText == "不明")) document.getElementById("data_maxI").innerText = json.Body.Intensity.Observation.MaxInt
-              if (json.Body.Earthquake.Magnitude && (mostNew || data_M.innerText == "不明")) document.getElementById("data_M").innerText = json.Body.Earthquake.Magnitude
-              if (json.Body.Earthquake.Hypocenter.Depth && (mostNew || data_depth.innerText == "不明")) document.getElementById("data_depth").innerText = json.Body.Earthquake.Hypocenter.Depth + "km"
-              if (json.Body.Earthquake.Hypocenter.Name && (mostNew || data_center.innerText == "不明")) document.getElementById("data_center").innerText = json.Body.Earthquake.Hypocenter.Name
-
+              if (json.Body.Earthquake.OriginTime && (mostNew || data_time.innerText == "不明")) data_time.innerText = dateEncode(3, json.Body.Earthquake.OriginTime)
+              if (json.Body.Intensity && json.Body.Intensity.Observation.MaxInt && (mostNew || data_maxI.innerText == "不明")) data_maxI.innerText = json.Body.Intensity.Observation.MaxInt
+              if (json.Body.Earthquake.Magnitude && (mostNew || data_M.innerText == "不明")) data_M.innerText = json.Body.Earthquake.Magnitude
+              if (json.Body.Earthquake.Hypocenter.Depth && (mostNew || data_depth.innerText == "不明")) data_depth.innerText = json.Body.Earthquake.Hypocenter.Depth + "km"
+              if (json.Body.Earthquake.Hypocenter.Name && (mostNew || data_center.innerText == "不明")) data_center.innerText = json.Body.Earthquake.Hypocenter.Name
+              if (json.Body.Comments && json.Body.Comments.Observation && (mostNew || data_comment.innerText == "")) data_comment.innerText = json.Body.Comments.Observation;
 
               if (json.Body.Intensity.Observation.Pref && !map_drawed) {
+                document.getElementById("Shindo").style.display = "inline-block"
+
                 map_drawed = true
                 json.Body.Intensity.Observation.Pref.forEach(function (elm) {
                   var newDiv = document.createElement("div")
@@ -788,6 +800,8 @@
               if (xml2.querySelector("Earthquake").getAttribute("Epicenter") && (mostNew || data_center.innerText == "不明")) data_center.innerText = xml2.querySelector("Earthquake").getAttribute("Epicenter")
 
               if (xml2.querySelector("Earthquake").querySelectorAll("Group") && !narikakunURL && !jmaURL) {
+                document.getElementById("Shindo").style.display = "inline-block"
+
                 xml2.querySelector("Earthquake").querySelectorAll("Group").forEach(function (elm) {
                   var newDiv = document.createElement("div")
                   var color1 = shindoConvert2(shindoConvert3(elm.getAttribute("Intensity")))

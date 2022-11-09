@@ -4,7 +4,18 @@ const path = require("path");
 const sound = require("sound-play");
 const Request = require("request");
 let fs;
-let config = require("config");
+//let config = require("config");
+const Store = require("electron-store");
+const store = new Store();
+var config = store.get("config", {
+  setting1: true,
+  home: {
+    name: "自宅",
+    latitude: 35.68,
+    longitude: 139.767,
+    Saibun: "東京都２３区",
+  },
+});
 
 let mainWindow;
 var settingWindow;
@@ -66,10 +77,15 @@ ipcMain.on("message", (_event, response) => {
       });
 
       settingWindow.setMenuBarVisibility(false);
+      settingWindow.webContents.openDevTools();
+
       settingWindow.loadFile("src/settings.html");
     }
   } else if (response.action == "settingReturn") {
     config = response.data;
+    store.set("config", config);
+    console.log("りたーん return!!!", store.get("config"), response.data);
+
     settingWindow.webContents.send("message2", {
       action: "setting",
       data: { config: config, softVersion: process.env.npm_package_version },
@@ -106,8 +122,10 @@ const createWindow = () => {
 
   mainWindow.webContents.on("did-finish-load", () => {
     //replay("2022/10/2 0:2:45");
-    // replay("2022/11/3 19:04:40"); 深い
-    replay("2022/04/19 08:16:10");
+    //replay("2022/11/3 19:04:40");
+
+    //replay("2022/04/19 08:16:15");
+    //replay("2022/11/09 17:40:05");
 
     /*
     EEWcontrol({
@@ -530,7 +548,6 @@ function nakn_WS() {
             report_id: data.eventId, //地震ID
             report_num: data.eventSerial, //第n報
             report_time: new Date(data.reportTime), //発表時刻
-            condition: "", //仮定震源要素か
             magunitude: Number(data.magnitude), //マグニチュード
             calcintensity: calcintensityTmp, //最大深度
             depth: Number(data.hypocenter.depth.replace("km", "")), //深さ
@@ -542,6 +559,7 @@ function nakn_WS() {
             region_code: region_codeTmp, //震央地域コード
             region_name: region_nameTmp, //震央地域
             origin_time: origin_timeTmp, //発生時刻
+            isPlum: data.isPlum, //🔴PLUM法かどうか
             source: "narikakun",
           };
 
@@ -604,7 +622,6 @@ function EEWdetect(type, json, KorL) {
           report_id: elm.reportId, //地震ID
           report_num: Number(elm.reportNum), //第n報
           report_time: new Date(json.realTimeData.dataTime), //発表時刻
-          condition: "",
           magunitude: Number(elm.magnitude), //マグニチュード
           calcintensity: shindoConvert(elm.calcintensity, 0), //最大深度
           depth: Number(elm.depth.replace("km", "")), //深さ
@@ -616,6 +633,7 @@ function EEWdetect(type, json, KorL) {
           region_code: elm.regionCode, //震央地域コード
           region_name: elm.regionName, //震央地域
           origin_time: new Date(elm.originTime), //発生時刻
+          isPlum: false,
           source: "YahooKmoni",
         };
 
@@ -669,7 +687,6 @@ function EEWdetect(type, json, KorL) {
         report_id: json.report_id, //地震ID
         report_num: Number(json.report_num), //第n報
         report_time: new Date(json.report_time), //発表時刻
-        condition: "",
         magunitude: Number(json.magunitude), //マグニチュード
         calcintensity: shindoConvert(json.calcintensity, 0), //最大深度
         depth: Number(json.depth.replace("km", "")), //深さ
@@ -681,6 +698,7 @@ function EEWdetect(type, json, KorL) {
         region_code: json.region_code, //震央地域コード
         region_name: json.region_name, //震央地域
         origin_time: origin_timeTmp, //発生時刻
+        isPlum: false,
         source: sourceTmp,
       };
 
@@ -737,7 +755,6 @@ function EEWdetect(type, json, KorL) {
     var longitudeTmp;
     var depthTmp;
     var magnitudeTmp;
-    var conditionTmp;
     var region_nameTmp;
     var origin_timeTmp;
     if (json.earthquake) {
@@ -745,7 +762,6 @@ function EEWdetect(type, json, KorL) {
       if (longitudeTmp !== 200) longitudeTmp = json.earthquake.hypocenter.longitude;
       if (depthTmp !== -1) depthTmp = json.earthquake.hypocenter.depth;
       if (magnitudeTmp !== -1) magnitudeTmp = json.earthquake.hypocenter.magnitude;
-      conditionTmp = json.earthquake.condition;
       region_nameTmp = json.earthquake.hypocenter.name;
       origin_timeTmp = new Date(json.earthquake.originTime);
     }
@@ -754,7 +770,6 @@ function EEWdetect(type, json, KorL) {
       report_id: json.issue.eventId, //地震ID
       report_num: Number(json.issue.serial), //第n報
       report_time: new Date(json.issue.time), //発表時刻
-      condition: conditionTmp, //仮定震源要素か（""もしくは"仮定震源要素"）
       magunitude: magnitudeTmp, //マグニチュード
       calcintensity: shindoConvert(maxIntTmp), //最大震度
       depth: depthTmp, //深さ
@@ -767,6 +782,7 @@ function EEWdetect(type, json, KorL) {
       region_name: region_nameTmp, //震央地域
       origin_time: origin_timeTmp, //発生時刻
       areas: null, //地域ごとの情報
+      isPlum: conditionTmp == "仮定震源要素", //🔴PLUM法かどうか
       source: "P2P_EEW",
     };
 

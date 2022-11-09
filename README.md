@@ -4,7 +4,7 @@
 
 - 緊急地震速報（予報・警報）※PLUM 法・深発地震含む
 - 津波情報（大津波警報・津波警報・津波注意報）
-- 地震情報（震度速報・震源に関する情報・震度・震源に関する情報）
+- 地震情報（震度速報・震源に関する情報・震度・震源に関する情報・遠地地震に関する情報）
 
 ## 情報源
 
@@ -36,6 +36,34 @@ Zero Quake が情報を取得している情報源
 - 緊急地震速報から得られる、地震発生時刻・深さ・震源の緯度・経度をもとに
   [JMA2001 走時表](https://www.data.jma.go.jp/eqev/data/bulletin/catalog/appendix/trtime/trt_j.html)
   を利用して計算
+
+## その他の情報源
+
+### 地図データ
+
+#### 「オフラインマップ」
+
+国内：[気象庁 予報区等 GIS データ](https://www.data.jma.go.jp/developer/gis.html)©jma  
+国外：[Natural Earth](https://www.naturalearthdata.com/downloads/110m-cultural-vectors/)©Natural Earth  
+([mapshaper](https://mapshaper.org/)で単純化)
+
+#### タイル地図
+
+「気象庁」© jma  
+「気象庁 2」© jma  
+「地理院 標準地図」© 国土地理院  
+「地理院 淡色地図」© 国土地理院  
+「地理院 写真」© 国土地理院  
+「地理院 白地図」© 国土地理院  
+「OpenStreetMap」© OpenStreetMap contributors  
+「Google Map」© Google  
+「Google Map 写真」© Google  
+「地理院 陰影起伏図」© 国土地理院  
+「地理院 火山基本図データ」© 国土地理院  
+「地理院 津波浸水想定 ハザードマップ」© 国土地理院  
+「地理院 土砂災害警戒区域（急傾斜地の崩壊） ハザードマップ」© 国土地理院  
+「地理院 土砂災害警戒区域（地すべり） ハザードマップ」© 国土地理院  
+「気象庁　境界線」© jma
 
 ## 参考資料
 

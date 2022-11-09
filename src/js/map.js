@@ -5,30 +5,6 @@ var tsunamiLayer;
 var gjmap; //オフライン地図
 var gjmapT; //津波用geojson
 window.addEventListener("load", function () {
-  fetch("./Resource/Knet_Points.json")
-    .then(function (res) {
-      return res.json();
-    })
-    .then(function (json) {
-      points = json;
-
-      init();
-
-      points.forEach(function (elm) {
-        if (!elm.IsSuspended && elm.Name && elm.Point) {
-          var kmoniPointMarker = L.divIcon({
-            html: "<div class='marker-circle' style='background:rgba(128,128,128,0.2)'></div><div class='PointPopup PointPopup2'>読み込み中</div>",
-            className: "kmoniPointMarker",
-            iconSize: 25,
-          });
-          elm.marker = L.marker([elm.Location.Latitude, elm.Location.Longitude], {
-            icon: kmoniPointMarker,
-          }).addTo(map);
-        }
-      });
-    });
-});
-window.addEventListener("load", function () {
   this.setTimeout(function () {
     document.getElementById("splash").style.display = "none";
   }, 2000);
@@ -210,8 +186,8 @@ window.electronAPI.messageSend((event, request) => {
     for (let a = 0; a < 10; a++) {
       var shindoElm = shindoList[a];
       var newElm = document.createElement("li");
-      var shindoColor = shindoConvert2(shindoElm.shindo);
-      newElm.innerHTML = "<span style='color:" + shindoColor[1] + ";background:" + shindoColor[0] + "'>" + shindoConvert(shindoElm.shindo, true) + "</span>" + shindoElm.Name;
+      var shindoColor = shindoConvert(shindoElm.shindo, 2);
+      newElm.innerHTML = "<span style='color:" + shindoColor[1] + ";background:" + shindoColor[0] + "'>" + shindoConvert(shindoElm.shindo, 0) + "</span>" + shindoElm.Name;
       document.getElementById("pointList").appendChild(newElm);
     }
 
@@ -334,8 +310,25 @@ let geojsonMarkerOptions2 = {
 var overlayTmp = [];
 var epicenterIcon;
 var tsunamiElm = [];
+var inited = false;
+var windowLoaded = false;
+window.addEventListener("load", function () {
+  windowLoaded = true;
+});
+
+window.electronAPI.messageSend((event, request) => {
+  if (request.action == "setting") {
+    init();
+  }
+  return true;
+});
 
 function init() {
+  if (inited || !setting || !windowLoaded) return;
+  inited = true;
+  console.log(11111111);
+
+  console.log(points);
   map = L.map("mapcontainer", {
     maxBounds: [
       [90, 0],
@@ -495,6 +488,27 @@ function init() {
     maxZoom: 21,
     attribution: 'Map data <a href="https://www.jma.go.jp/bosai/map.html#5/28.835/168.548/&elem=int&contents=earthquake_map" target="_blank">©JMA</a>',
   });
+
+  fetch("./Resource/Knet_Points.json")
+    .then(function (res) {
+      return res.json();
+    })
+    .then(function (json) {
+      points = json;
+
+      points.forEach(function (elm) {
+        if (!elm.IsSuspended && elm.Name && elm.Point) {
+          var kmoniPointMarker = L.divIcon({
+            html: "<div class='marker-circle' style='background:rgba(128,128,128,0.2)'></div><div class='PointPopup PointPopup2'>読み込み中</div>",
+            className: "kmoniPointMarker",
+            iconSize: 25,
+          });
+          elm.marker = L.marker([elm.Location.Latitude, elm.Location.Longitude], {
+            icon: kmoniPointMarker,
+          }).addTo(map);
+        }
+      });
+    });
 
   fetch("./Resource/basemap.json")
     .then(function (res) {
@@ -701,8 +715,15 @@ function init() {
     document.getElementById("mapcontainer").classList.remove("popup_show");
   }
 
-  var TimeTable_JMA2001;
+  var homeIcon = L.icon({
+    iconUrl: "img/homePin.svg",
+    iconSize: [30, 30],
+    iconAnchor: [15, 30],
+  });
 
+  markerElm = L.marker([setting.home.latitude, setting.home.longitude], { keyboard: false, icon: homeIcon }).addTo(map).bindPopup("自宅");
+
+  var TimeTable_JMA2001;
   fetch("./Resource/TimeTable_JMA2001.json")
     .then(function (res) {
       return res.json();
@@ -741,6 +762,7 @@ function init() {
               var Pfind = TimeTableTmp.find(function (elm2) {
                 return elm2.P == distance;
               });
+
               if (Pfind) {
                 TimeElmTmpP = [Pfind, Pfind];
               } else {
@@ -760,6 +782,13 @@ function init() {
                 return elm2.S == distance;
               });
 
+              TimeTableTmp;
+              var SWmin = Math.min.apply(
+                null,
+                TimeTableTmp.map(function (elm2) {
+                  return elm2.S;
+                })
+              );
               if (Sfind) {
                 TimeElmTmpS = [Sfind, Sfind];
               } else {
@@ -784,13 +813,26 @@ function init() {
 
               PRadius = TimeElmTmpP[0].R + ((TimeElmTmpP[1].R - TimeElmTmpP[0].R) * (distance - TimeElmTmpP[0].P)) / (TimeElmTmpP[1].P - TimeElmTmpP[0].P);
 
-              SRadius = linear([TimeElmTmpS[0].S, TimeElmTmpS[1].S], [TimeElmTmpS[0].R, TimeElmTmpS[1].R])(distance);
-
-              console.log("ほかん", PRadius, SRadius, TimeElmTmpS, TimeTableTmp);
-
-              console.log(PRadius, SRadius, TimeElmTmpS, TimeTableTmp);
+              if (SWmin > distance) {
+                var ArriveTime = TimeTableTmp.find(function (elm2) {
+                  return elm2.R == 0;
+                }).S;
+                psWaveReDraw(
+                  elm.report_id,
+                  elm.latitude,
+                  elm.longitude,
+                  PRadius * 1000,
+                  0,
+                  true, //S波未到達
+                  ArriveTime, //発生からの到達時間
+                  distance //現在の経過時間
+                );
+                console.log(ArriveTime, distance);
+              } else {
+                SRadius = linear([TimeElmTmpS[0].S, TimeElmTmpS[1].S], [TimeElmTmpS[0].R, TimeElmTmpS[1].R])(distance);
+                psWaveReDraw(elm.report_id, elm.latitude, elm.longitude, PRadius * 1000, SRadius * 1000);
+              }
             }
-            psWaveReDraw(elm.report_id, elm.latitude, elm.longitude, PRadius * 1000, SRadius * 1000);
           }
         });
 
@@ -809,8 +851,8 @@ function init() {
     });
 }
 
-function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius) {
-  if (!pRadius || !sRadius) return;
+function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArrived, SArriveTime, nowDistance) {
+  if (!pRadius || (!sRadius && !SnotArrived)) return;
   var EQElm = psWaveList.find(function (elm) {
     return elm.id == report_id;
   });
@@ -826,7 +868,7 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius) {
     //EQElm.markerElm.setLatLng([data.latitude, data.longitude]);
 
     EQElm.PCircleElm.setRadius(pRadius).setLatLng([latitude, longitude]);
-    EQElm.SCircleElm.setRadius(sRadius).setLatLng([latitude, longitude]);
+    EQElm.SCircleElm.setRadius(sRadius).setLatLng([latitude, longitude]).setStyle({ stroke: !SnotArrived });
 
     /*
     var overflow1 = map.getBounds()._northEast.lat < EQElm.PCircleElm.getBounds()._northEast.lat;
@@ -848,6 +890,7 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius) {
     var PCElm = L.circle([latitude, longitude], {
       radius: pRadius,
       color: "#3094ff",
+      stroke: true,
       fill: false,
       weight: 2,
       className: "PWave PWaveAnm",
@@ -856,6 +899,7 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius) {
     var SCElm = L.circle([latitude, longitude], {
       radius: sRadius,
       color: "#ff3e30",
+      stroke: !SnotArrived,
       fill: true,
       fillColor: "#F00",
       fillOpacity: 0.15,
@@ -868,6 +912,35 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius) {
     map.setView([latitude, longitude, 10]);
 
     psWaveList.push({ id: report_id, PCircleElm: PCElm, SCircleElm: SCElm, data: [{ latitude: latitude, longitude: longitude, pRadius: pRadius, sRadius: sRadius }] });
+    EQElm = psWaveList[psWaveList.length - 1];
+  }
+
+  if (EQElm.SIElm) {
+    if (SnotArrived) {
+      var SIcon = L.divIcon({
+        html: '<svg width="50" height="50"><circle class="SWprogressValue" cx="25" cy="25" r="23.5" fill="none" stroke-width="5px" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="' + Number(157 - 157 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect))) + '""/></path></svg>',
+        className: "SWaveProgress",
+        iconSize: 50,
+      });
+      EQElm.SIElm.setIcon(SIcon);
+    } else {
+      map.removeLayer(EQElm.SIElm);
+    }
+  } else if (SnotArrived) {
+    var SIElm;
+
+    EQElm.firstDetect = nowDistance;
+    var SIcon = L.divIcon({
+      html: '<svg width="50" height="50"><circle class="SWprogressValue" cx="25" cy="25" r="23.5" fill="none" stroke-width="5px" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="' + Number(157 - 157 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect))) + '""/></path></svg>',
+      className: "SWaveProgress",
+      iconSize: 50,
+    });
+
+    SIElm = L.marker([latitude, longitude], {
+      icon: SIcon,
+    }).addTo(map);
+
+    EQElm.SIElm = SIElm;
   }
 
   var EEWPanelElm = document.getElementById("EEW-" + report_id);
@@ -934,84 +1007,121 @@ function dateEncode(type, dateTmp, inputtype) {
   }
 }
 
-function shindoConvert(num, type) {
-  if (isNaN(num) || Number.isInteger(Number(num))) {
-    num = String(num).replace(/[Ａ-Ｚａ-ｚ０-９]/g, function (s) {
-      return String.fromCharCode(s.charCodeAt(0) - 65248);
+function shindoConvert(str, responseType) {
+  var ShindoTmp;
+  if (isNaN(str)) {
+    ShindoTmp = String(str);
+    ShindoTmp = ShindoTmp.replace(/[０-９]/g, function (s) {
+      return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
     });
-    num = num.replace("-", "弱");
-    num = num.replace("+", "強");
-
-    if (num == "0") {
-      return type ? "0" : false;
-    } else if (num == "1" || num == "2" || num == "3" || num == "4" || num == "7") {
-      return num;
-    } else if (num == "5弱") {
-      return "5-";
-    } else if (num == "5強") {
-      return "5+";
-    } else if (num == "6弱") {
-      return "6-";
-    } else if (num == "6強") {
-      return "6+";
-    } else {
-      return num;
+    ShindoTmp = ShindoTmp.replaceAll("＋", "+").replaceAll("－", "-").replaceAll("強", "+").replaceAll("弱", "-");
+    ShindoTmp = ShindoTmp.replace(/\s+/g, "");
+    switch (str) {
+      case "-1":
+      case "不明":
+        ShindoTmp = "?";
+        break;
+      case "1":
+      case "10":
+        ShindoTmp = "1";
+        break;
+      case "2":
+      case "20":
+        ShindoTmp = "2";
+        break;
+      case "3":
+      case "30":
+        ShindoTmp = "3";
+        break;
+      case "4":
+      case "40":
+        ShindoTmp = "4";
+        break;
+      case "5-":
+      case "45":
+        ShindoTmp = "5-";
+        break;
+      case "5+":
+      case "50":
+        ShindoTmp = "5+";
+        break;
+      case "6-":
+      case "55":
+        ShindoTmp = "6-";
+        break;
+      case "6+":
+      case "60":
+        ShindoTmp = "6+";
+        break;
+      case "7":
+      case "70":
+        ShindoTmp = "7";
+        break;
+      case "99":
+        ShindoTmp = "7+";
+        break;
     }
   } else {
-    if (num < -0.5) {
-      return type ? "0" : false;
-    } else if (num < 0.5) {
-      return "0";
-    } else if (num < 1.5) {
-      return "1";
-    } else if (num < 2.5) {
-      return "2";
-    } else if (num < 3.5) {
-      return "3";
-    } else if (num < 4.5) {
-      return "4";
-    } else if (num < 5) {
-      return "5-";
-    } else if (num < 5.5) {
-      return "5+";
-    } else if (num < 6) {
-      return "6-";
-    } else if (num < 6.5) {
-      return "6+";
-    } else if (6.5 <= num) {
-      return "7";
+    if (str < 0.5) {
+      ShindoTmp = "0";
+    } else if (str < 1.5) {
+      ShindoTmp = "1";
+    } else if (str < 2.5) {
+      ShindoTmp = "2";
+    } else if (str < 3.5) {
+      ShindoTmp = "3";
+    } else if (str < 4.5) {
+      ShindoTmp = "4";
+    } else if (str < 5) {
+      ShindoTmp = "5-";
+    } else if (str < 5.5) {
+      ShindoTmp = "5+";
+    } else if (str < 6) {
+      ShindoTmp = "6-";
+    } else if (str < 6.5) {
+      ShindoTmp = "6+";
+    } else if (6.5 <= str) {
+      ShindoTmp = "7";
+    } else if (7.5 <= str) {
+      ShindoTmp = "7+";
     } else {
-      return num;
+      ShindoTmp = "?";
     }
   }
-}
-function shindoConvert2(num) {
-  if (isNaN(num)) num = Number(num);
+  if (["?", "0", "1", "2", "3", "4", "5-", "5+", "6-", "6+", "7", "7+"].includes(ShindoTmp)) {
+    switch (responseType) {
+      case 1:
+        var ConvTable = { "?": "不明", 0: "0", 1: "1", 2: "2", 3: "3", 4: "4", "5-": "5弱", "5+": "5強", "6-": "6弱", "6+": "6強", 7: "7", "7+": "7以上" };
+        return ConvTable[ShindoTmp];
+        break;
+      case 2:
+        var ConvTable = {
+          "?": ["#D1D1D1", "#444"],
+          0: ["#D1D1D1", "#444"],
+          1: ["#54C9E3", "#222"],
+          2: ["#2B8DFC", "#111"],
+          3: ["#32BA37", "#111"],
+          4: ["#DBD21F", "#000"],
+          "5-": ["#FF8C00", "#FFF"],
+          "5+": ["#FF5714", "#FFF"],
+          "6-": ["#E60000", "#FFF"],
+          "6+": ["#8A0A0A", "#FFF"],
+          7: ["#C400DE", "#FFF"],
+          "7+": ["#C400DE", "#FFF"],
+        };
+        return ConvTable[ShindoTmp];
+        break;
 
-  if (num < 0.5) {
-    return ["#D1D1D1", "#444"];
-  } else if (num < 1.5) {
-    return ["#54C9E3", "#222"];
-  } else if (num < 2.5) {
-    return ["#2B8DFC", "#111"];
-  } else if (num < 3.5) {
-    return ["#32BA37", "#111"];
-  } else if (num < 4.5) {
-    return ["#DBD21F", "#000"];
-  } else if (num < 5) {
-    return ["#FF8C00", "#FFF"];
-  } else if (num < 5.5) {
-    return ["#FF5714", "#FFF"];
-  } else if (num < 6) {
-    return ["#E60000", "#FFF"];
-  } else if (num < 6.5) {
-    return ["#8A0A0A", "#FFF"];
-  } else if (6.5 <= num) {
-    return ["#C400DE", "#FFF"];
+      case 0:
+      default:
+        return ShindoTmp;
+        break;
+    }
   } else {
-    return "transparent";
+    return str;
   }
 }
+
 function removeChild(element) {
   while (element.firstChild) {
     element.removeChild(element.firstChild);

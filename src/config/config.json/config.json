@@ -1,0 +1,11 @@
+{
+	"config": {
+		"setting1": true,
+		"home": {
+			"name": "自宅",
+			"latitude": 35.68,
+			"longitude": 139.767,
+			"Saibun": "東京都２３区"
+		}
+	}
+}
