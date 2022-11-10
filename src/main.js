@@ -253,7 +253,6 @@ electron.app.on("ready", () => {
 
 var EEW_Data = []; //地震速報リスト
 var EEW_nowList = []; //現在発報中リスト
-var EEW_new; //最新の速報
 var EEW_history = []; //起動中に発生したリスト
 
 var Yoyu = 100;
@@ -536,6 +535,10 @@ function nakn_WS() {
           var region_codeTmp;
           var region_nameTmp;
           var origin_timeTmp;
+          var intensityAreas;
+          var warnZones;
+          var warnPref;
+          var warnRegions;
           if (data.intensity) calcintensityTmp = data.intensity;
           if (data.isFinal) isFinalTmp = data.isFinal;
           if (data.hypocenter && data.hypocenter.latitude) latitudeTmp = Number(data.hypocenter.latitude);
@@ -543,6 +546,11 @@ function nakn_WS() {
           if (data.hypocenter && data.hypocenter.code) region_codeTmp = Number(data.hypocenter.code);
           if (data.hypocenter && data.hypocenter.name) region_nameTmp = data.hypocenter.name;
           if (data.originTime) origin_timeTmp = new Date(data.originTime);
+          if (data.intensityAreas && Object.keys(data.intensityAreas).length !== 0) intensityAreas = data.intensityAreas;
+          if (data.warnZones && Object.keys(data.warnZones).length !== 0) warnZones = data.warnZones;
+          if (data.warnPref && Object.keys(data.warnPref).length !== 0) warnPref = data.warnPref;
+          if (data.warnRegions && Object.keys(data.warnRegions).length !== 0) warnRegions = data.warnRegions;
+
           var EEWdata = {
             alertflg: data.alertFlg ? "警報" : "予報", //種別
             report_id: data.eventId, //地震ID
@@ -560,6 +568,12 @@ function nakn_WS() {
             region_name: region_nameTmp, //震央地域
             origin_time: origin_timeTmp, //発生時刻
             isPlum: data.isPlum, //🔴PLUM法かどうか
+            intensityAreas: intensityAreas, //細分区分ごとの予想震度
+            warnZones: {
+              zone: warnZones,
+              Pref: warnPref,
+              Regions: warnRegions,
+            },
             source: "narikakun",
           };
 
@@ -634,6 +648,12 @@ function EEWdetect(type, json, KorL) {
           region_name: elm.regionName, //震央地域
           origin_time: new Date(elm.originTime), //発生時刻
           isPlum: false,
+          intensityAreas: null, //細分区分ごとの予想震度
+          warnZones: {
+            zone: null,
+            Pref: null,
+            Regions: null,
+          },
           source: "YahooKmoni",
         };
 
@@ -699,6 +719,12 @@ function EEWdetect(type, json, KorL) {
         region_name: json.region_name, //震央地域
         origin_time: origin_timeTmp, //発生時刻
         isPlum: false,
+        intensityAreas: null, //細分区分ごとの予想震度
+        warnZones: {
+          zone: null,
+          Pref: null,
+          Regions: null,
+        },
         source: sourceTmp,
       };
 
@@ -783,6 +809,20 @@ function EEWdetect(type, json, KorL) {
       origin_time: origin_timeTmp, //発生時刻
       areas: null, //地域ごとの情報
       isPlum: conditionTmp == "仮定震源要素", //🔴PLUM法かどうか
+      intensityAreas: null, //細分区分ごとの予想震度
+      warnZones: {
+        zone: null,
+        Pref: null,
+        Regions: null,
+      },
+
+      /*
+      intensityAreas: intensityAreas, //細分区分ごとの予想震度
+      warnZones: {
+        zone: warnZones,
+        Pref: warnPref,
+        Regions: warnRegions,
+      },*/
       source: "P2P_EEW",
     };
 
@@ -869,7 +909,6 @@ function EEWcontrol(data) {
   EEW_history[data.source].push({ code: data.report_id, reportnum: data.report_num });*/
 }
 function EEWAlert(data, first) {
-  EEW_new = data;
   EEW_nowList = EEW_nowList.filter(function (elm) {
     return elm.report_id !== data.report_id;
   });
