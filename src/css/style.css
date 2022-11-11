@@ -1,5 +1,17 @@
-@import url("https://fonts.googleapis.com/css2?family=BIZ+UDPGothic&family=M+PLUS+1p:wght@800&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=BIZ+UDPGothic&family=M+PLUS+1p:wght@800&display=swap");
+@font-face {
+  font-family: "BIZ UDPGothic";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(../font/BIZUDPGothic-Regular.ttf);
+}
+@font-face {
+  font-family: "M PLUS 1p";
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url(../font/MPLUS1p-ExtraBold.ttf);
+}
 * {
   font-family: "BIZ UDPGothic", sans-serif;
   box-sizing: border-box;
@@ -114,6 +126,7 @@ main {
   overflow: hidden;
   background: rgb(69, 63, 63);
   border-left: solid 1px #444;
+  width: 350px;
 }
 
 #sokuho-Panel {
@@ -326,15 +339,18 @@ td {
 }
 .EQI_detailWrap {
   padding: 5px;
+  flex: 1;
 }
 .EQI_datetime {
-  font-size: 15px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  font-family: ui-monospace;
 }
 .EQItem {
   position: relative;
   display: flex;
   align-content: center;
-  align-items: center;
+  align-items: flex-start;
   padding: 5px;
   margin: 5px;
   background: #222;
@@ -370,6 +386,13 @@ td {
 }
 .EQItemOverlay button:hover {
   background: rgb(203, 27, 27);
+}
+.EQI_epiCenter {
+  float: left;
+}
+.EQI_magnitude {
+  font-size: 20px;
+  float: right;
 }
 .tsunamiElm {
   animation: flash 2s step-end infinite;

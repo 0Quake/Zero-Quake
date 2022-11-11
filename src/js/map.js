@@ -13,161 +13,7 @@ window.addEventListener("load", function () {
 var psWaveList = [];
 
 window.electronAPI.messageSend((event, request) => {
-  //ipcRenderer.on("message2", (event, request) => {
-
-  /*
-  if (request.action == "PSWaveUpdate" && false) {
-    var data = request.data;
-    var EQElm = psWaveList.find(function (elm) {
-      return elm.id == data.report_id;
-    });
-
-    data.latitude = latitudeConvert(data.latitude);
-    data.longitude = latitudeConvert(data.longitude);
-
-    if (EQElm && EQElm.PCircleElm && EQElm.SCircleElm) {
-      if (EQElm.data.latitude !== data.latitude || EQElm.data.longitude !== data.longitude) {
-        document.querySelectorAll(".SWave,.PWave").forEach(function (elm) {
-          elm.classList.remove("SWaveAnm");
-          elm.classList.remove("PWaveAnm");
-        });
-        setTimeout(function () {
-          document.querySelectorAll(".SWave").forEach(function (elm) {
-            elm.classList.add("SWaveAnm");
-          });
-          document.querySelectorAll(".PWave").forEach(function (elm) {
-            elm.classList.add("PWaveAnm");
-          });
-        }, 100);
-      }
-      //EQElm.markerElm.setLatLng([data.latitude, data.longitude]);
-
-      EQElm.PCircleElm.setRadius(data.pRadius * 1000 + 6000).setLatLng([data.latitude, data.longitude]);
-      EQElm.SCircleElm.setRadius(data.sRadius * 1000 + 3500).setLatLng([data.latitude, data.longitude]);
-
-      var overflow1 = map.getBounds()._northEast.lat < EQElm.PCircleElm.getBounds()._northEast.lat;
-      var overflow2 = map.getBounds()._northEast.lng < EQElm.PCircleElm.getBounds()._northEast.lng;
-      var overflow3 = map.getBounds()._southWest.lat > EQElm.PCircleElm.getBounds()._southWest.lat;
-      var overflow4 = map.getBounds()._southWest.lng > EQElm.PCircleElm.getBounds()._southWest.lng;
-      if (overflow1 || overflow2 || overflow3 || overflow4) {
-        map.fitBounds(EQElm.PCircleElm.getBounds());
-      }
-
-      EQElm.data = { latitude: data.latitude, longitude: data.longitude, pRadius: data.pRadius, sRadius: data.sRadius };
-    } else {
-      /*
-      var markerElm = L.marker([data.latitude, data.longitude], {
-        icon: epicenterIcon,
-        pane: "pane700",
-      }).addTo(map);*/
-  /*
-      var PCElm = L.circle([data.latitude, data.longitude], {
-        radius: data.pRadius * 1000,
-        color: "#3094ff",
-        fill: false,
-        weight: 2,
-        className: "PWave PWaveAnm",
-        pane: "pane700",
-      }).addTo(map);
-      var SCElm = L.circle([data.latitude, data.longitude], {
-        radius: data.sRadius * 1000,
-        color: "#ff3e30",
-        fill: true,
-        fillColor: "#F00",
-        fillOpacity: 0.15,
-        weight: 2,
-        className: "SWave SWaveAnm",
-        pane: "pane700",
-      }).addTo(map);
-
-      map.fitBounds(PCElm.getBounds());
-      map.setView([data.latitude, data.longitude]);
-
-      psWaveList.push({ id: data.report_id, PCircleElm: PCElm, SCircleElm: SCElm, data: [{ latitude: data.latitude, longitude: data.longitude, pRadius: data.pRadius, sRadius: data.sRadius }] });
-    }
-    // {report_id }
-    /*
-  } else if (request.action == "EpiCenterUpdate") {
-    return;
-    var data = request.data;
-    var EQElm = psWaveList.find(function (elm) {
-      return elm.id == data.report_id;
-    });
-
-    data.latitude = latitudeConvert(data.latitude);
-    data.longitude = latitudeConvert(data.longitude);
-
-    if (EQElm && EQElm.PCircleElm && EQElm.SCircleElm) {
-      if (EQElm.data.latitude !== data.latitude || EQElm.data.longitude !== data.longitude) {
-        document.querySelectorAll(".SWave,.PWave").forEach(function (elm) {
-          elm.classList.remove("SWaveAnm");
-          elm.classList.remove("PWaveAnm");
-        });
-        setTimeout(function () {
-          document.querySelectorAll(".SWave").forEach(function (elm) {
-            elm.classList.add("SWaveAnm");
-          });
-          document.querySelectorAll(".PWave").forEach(function (elm) {
-            elm.classList.add("PWaveAnm");
-          });
-        }, 100);
-      }
-      //EQElm.markerElm.setLatLng([data.latitude, data.longitude]);
-
-      EQElm.PCircleElm.setRadius(data.pRadius).setLatLng([data.latitude, data.longitude]);
-      EQElm.SCircleElm.setRadius(data.sRadius).setLatLng([data.latitude, data.longitude]);
-
-      var overflow1 = map.getBounds()._northEast.lat < EQElm.PCircleElm.getBounds()._northEast.lat;
-      var overflow2 = map.getBounds()._northEast.lng < EQElm.PCircleElm.getBounds()._northEast.lng;
-      var overflow3 = map.getBounds()._southWest.lat > EQElm.PCircleElm.getBounds()._southWest.lat;
-      var overflow4 = map.getBounds()._southWest.lng > EQElm.PCircleElm.getBounds()._southWest.lng;
-      if (overflow1 || overflow2 || overflow3 || overflow4) {
-        map.fitBounds(EQElm.PCircleElm.getBounds());
-      }
-
-      EQElm.data.push({ latitude: data.latitude, longitude: data.longitude, pRadius: data.pRadius, sRadius: data.sRadius });
-    } else {
-      /*var markerElm = L.marker([data.latitude, data.longitude], {
-        icon: epicenterIcon,
-        pane: "pane700",
-      }).addTo(map);*/
-  /*
-      var PCElm = L.circle([data.latitude, data.longitude], {
-        radius: data.pRadius,
-        color: "#3094ff",
-        fill: false,
-        weight: 2,
-        className: "PWave PWaveAnm",
-        pane: "pane700",
-      }).addTo(map);
-      var SCElm = L.circle([data.latitude, data.longitude], {
-        radius: data.sRadius,
-        color: "#ff3e30",
-        fill: true,
-        fillColor: "#F00",
-        fillOpacity: 0.15,
-        weight: 2,
-        className: "SWave SWaveAnm",
-        pane: "pane700",
-      }).addTo(map);
-
-      map.fitBounds(PCElm.getBounds());
-      map.setView([data.latitude, data.longitude]);
-
-      psWaveList.push({ id: data.report_id, PCircleElm: PCElm, SCircleElm: SCElm, data: { latitude: data.latitude, longitude: data.longitude, pRadius: data.pRadius, sRadius: data.sRadius } });
-    }
-    // {report_id }
-    /*} else if (request.action == "PSWaveClear") {
-    var pswaveTmp = psWaveList.find(function (elm) {
-      return elm.id == request.data;
-    });
-    if (pswaveTmp) {
-      // map.removeLayer(pswaveTmp.markerElm);
-      console.log(pswaveTmp.PCircleElm);
-      console.log(pswaveTmp.SCircleElm);
-      map.removeLayer(pswaveTmp.PCircleElm);
-      map.removeLayer(pswaveTmp.SCircleElm);
-    }*/
+  console.log(request);
   if (request.action == "kmoniUpdate") {
     var i = 0;
 
@@ -205,6 +51,7 @@ window.electronAPI.messageSend((event, request) => {
           });
 
           elm.marker.setIcon(kmoniPointMarker).bindPopup(popup_content, { className: "PointPopup" });
+          elm.marker.setOpacity(1);
         }
       } else if (elm.marker) {
         elm.marker.setOpacity(0);
@@ -218,6 +65,8 @@ window.electronAPI.messageSend((event, request) => {
     document.getElementById("maxKaikyu").innerText = request.data.avrrank;
   } else if (request.action == "longWaveClear") {
     document.getElementById("LWaveWrap").style.display = "none";
+  } else if (request.action == "EEWAlertUpdate") {
+    psWaveCalc();
   } else if (request.action == "tsunamiUpdate") {
     gjmapT.setStyle({
       stroke: false,
@@ -312,6 +161,8 @@ var epicenterIcon;
 var tsunamiElm = [];
 var inited = false;
 var windowLoaded = false;
+var TimeTable_JMA2001;
+
 window.addEventListener("load", function () {
   windowLoaded = true;
 });
@@ -723,7 +574,6 @@ function init() {
 
   markerElm = L.marker([setting.home.latitude, setting.home.longitude], { keyboard: false, icon: homeIcon }).addTo(map).bindPopup("自宅");
 
-  var TimeTable_JMA2001;
   fetch("./Resource/TimeTable_JMA2001.json")
     .then(function (res) {
       return res.json();
@@ -731,124 +581,112 @@ function init() {
     .then(function (json) {
       TimeTable_JMA2001 = json;
 
-      this.setInterval(function () {
-        now_EEW.forEach(function (elm) {
-          if (elm.origin_time && elm.depth && elm.latitude && elm.longitude) {
-            var distance = Math.floor((new Date() - Replay - elm.origin_time) / 1000);
-
-            if (elm.depth <= 700 && distance <= 2000) {
-              var TimeTableTmp = TimeTable_JMA2001[elm.depth];
-              var PRadius = 0;
-              var SRadius = 0;
-              distance += 1;
-              var TimeElmTmpP;
-              var TimeElmTmpS;
-
-              /*
-            TimeTableTmp.find(function (elm2) {
-              return elm2.T == distance;
-            });
-            TimeTableTmp.find(function (elm2) {
-              return elm2.T == distance;
-            });
-
-            var TimeTableTmpP = TimeTableTmp.filter(function (elm2) {
-              return elm2.P > distance;
-            });
-            var TimeTableTmpS = TimeTableTmp.filter(function (elm2) {
-              return elm2.S > distance;
-            });*/
-
-              var Pfind = TimeTableTmp.find(function (elm2) {
-                return elm2.P == distance;
-              });
-
-              if (Pfind) {
-                TimeElmTmpP = [Pfind, Pfind];
-              } else {
-                var result = [Infinity, 0];
-                var result2 = [Infinity, 0];
-                TimeTableTmp.forEach((a) => {
-                  var b = Math.abs(a.P - distance);
-                  if (result[0] > b) {
-                    result2 = result;
-                    result = [b, a];
-                  }
-                });
-                TimeElmTmpP = [result[1], result2[1]];
-              }
-
-              var Sfind = TimeTableTmp.find(function (elm2) {
-                return elm2.S == distance;
-              });
-
-              TimeTableTmp;
-              var SWmin = Math.min.apply(
-                null,
-                TimeTableTmp.map(function (elm2) {
-                  return elm2.S;
-                })
-              );
-              if (Sfind) {
-                TimeElmTmpS = [Sfind, Sfind];
-              } else {
-                var loopI = 0;
-                var result;
-                var result2;
-                TimeTableTmp.forEach((a) => {
-                  var b = Math.abs(a.S - distance);
-                  if (result[0] >= b || loopI == 0) {
-                    if (loopI == 0) {
-                      result2 = [null, TimeTableTmp[1]];
-                    } else {
-                      result2 = result;
-                    }
-                    result = [b, a];
-                  }
-                  loopI++;
-                });
-                TimeElmTmpS = [result[1], result2[1]];
-                console.log(distance, result, result2);
-              }
-
-              PRadius = TimeElmTmpP[0].R + ((TimeElmTmpP[1].R - TimeElmTmpP[0].R) * (distance - TimeElmTmpP[0].P)) / (TimeElmTmpP[1].P - TimeElmTmpP[0].P);
-
-              if (SWmin > distance) {
-                var ArriveTime = TimeTableTmp.find(function (elm2) {
-                  return elm2.R == 0;
-                }).S;
-                psWaveReDraw(
-                  elm.report_id,
-                  elm.latitude,
-                  elm.longitude,
-                  PRadius * 1000,
-                  0,
-                  true, //S波未到達
-                  ArriveTime, //発生からの到達時間
-                  distance //現在の経過時間
-                );
-                console.log(ArriveTime, distance);
-              } else {
-                SRadius = linear([TimeElmTmpS[0].S, TimeElmTmpS[1].S], [TimeElmTmpS[0].R, TimeElmTmpS[1].R])(distance);
-                psWaveReDraw(elm.report_id, elm.latitude, elm.longitude, PRadius * 1000, SRadius * 1000);
-              }
-            }
-          }
-        });
-
-        //終わった地震の予報円削除
-        psWaveList = psWaveList.filter(function (elm) {
-          var stillEEW = now_EEW.some(function (elm2) {
-            return elm2.report_id;
-          });
-          if (!stillEEW) {
-            if (elm.PCircleElm) map.removeLayer(elm.PCircleElm);
-            if (elm.SCircleElm) map.removeLayer(elm.SCircleElm);
-          }
-          return stillEEW;
-        });
-      }, 1000);
+      psWaveCalc();
+      this.setInterval(psWaveCalc, 1000);
     });
+}
+
+function psWaveCalc() {
+  now_EEW.forEach(function (elm) {
+    if (elm.origin_time && elm.depth && elm.latitude && elm.longitude) {
+      var distance = Math.floor((new Date() - elm.origin_time) / 1000);
+
+      if (elm.depth <= 700 && distance <= 2000) {
+        var TimeTableTmp = TimeTable_JMA2001[elm.depth];
+        var PRadius = 0;
+        var SRadius = 0;
+        distance += 1;
+        var TimeElmTmpP;
+        var TimeElmTmpS;
+
+        var Pfind = TimeTableTmp.find(function (elm2) {
+          return elm2.P == distance;
+        });
+
+        if (Pfind) {
+          TimeElmTmpP = [Pfind, Pfind];
+        } else {
+          var result = [Infinity, 0];
+          var result2 = [Infinity, 0];
+          TimeTableTmp.forEach((a) => {
+            var b = Math.abs(a.P - distance);
+            if (result[0] > b) {
+              result2 = result;
+              result = [b, a];
+            }
+          });
+          TimeElmTmpP = [result[1], result2[1]];
+        }
+
+        var Sfind = TimeTableTmp.find(function (elm2) {
+          return elm2.S == distance;
+        });
+
+        TimeTableTmp;
+        var SWmin = Math.min.apply(
+          null,
+          TimeTableTmp.map(function (elm2) {
+            return elm2.S;
+          })
+        );
+        if (Sfind) {
+          TimeElmTmpS = [Sfind, Sfind];
+        } else {
+          var loopI = 0;
+          var result;
+          var result2;
+          TimeTableTmp.forEach((a) => {
+            var b = Math.abs(a.S - distance);
+            if (result[0] >= b || loopI == 0) {
+              if (loopI == 0) {
+                result2 = [null, TimeTableTmp[1]];
+              } else {
+                result2 = result;
+              }
+              result = [b, a];
+            }
+            loopI++;
+          });
+          TimeElmTmpS = [result[1], result2[1]];
+          console.log(distance, result, result2);
+        }
+
+        PRadius = TimeElmTmpP[0].R + ((TimeElmTmpP[1].R - TimeElmTmpP[0].R) * (distance - TimeElmTmpP[0].P)) / (TimeElmTmpP[1].P - TimeElmTmpP[0].P);
+
+        if (SWmin > distance) {
+          var ArriveTime = TimeTableTmp.find(function (elm2) {
+            return elm2.R == 0;
+          }).S;
+          psWaveReDraw(
+            elm.report_id,
+            elm.latitude,
+            elm.longitude,
+            PRadius * 1000,
+            0,
+            true, //S波未到達
+            ArriveTime, //発生からの到達時間
+            distance //現在の経過時間
+          );
+          console.log(ArriveTime, distance);
+        } else {
+          SRadius = linear([TimeElmTmpS[0].S, TimeElmTmpS[1].S], [TimeElmTmpS[0].R, TimeElmTmpS[1].R])(distance);
+          psWaveReDraw(elm.report_id, elm.latitude, elm.longitude, PRadius * 1000, SRadius * 1000);
+        }
+      }
+    }
+  });
+
+  //終わった地震の予報円削除
+  psWaveList = psWaveList.filter(function (elm) {
+    var stillEEW = now_EEW.some(function (elm2) {
+      return elm2.report_id;
+    });
+    if (!stillEEW) {
+      if (elm.PCircleElm) map.removeLayer(elm.PCircleElm);
+      if (elm.SCircleElm) map.removeLayer(elm.SCircleElm);
+    }
+    return stillEEW;
+  });
 }
 
 function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArrived, SArriveTime, nowDistance) {
@@ -917,12 +755,17 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
 
   if (EQElm.SIElm) {
     if (SnotArrived) {
-      var SIcon = L.divIcon({
-        html: '<svg width="50" height="50"><circle class="SWprogressValue" cx="25" cy="25" r="23.5" fill="none" stroke-width="5px" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="' + Number(157 - 157 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect))) + '""/></path></svg>',
-        className: "SWaveProgress",
-        iconSize: 50,
-      });
-      EQElm.SIElm.setIcon(SIcon);
+      var SWprogressValue = document.getElementById("SWprogressValue_" + report_id);
+      if (SWprogressValue) {
+        SWprogressValue.setAttribute("stroke-dashoffset", Number(157 - 157 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect))));
+      } else {
+        var SIcon = L.divIcon({
+          html: '<svg width="50" height="50"><circle id="SWprogressValue_' + report_id + '" class="SWprogressValue" cx="25" cy="25" r="23.5" fill="none" stroke-width="5px" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="' + Number(157 - 157 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect))) + '"/></path></svg>',
+          className: "SWaveProgress",
+          iconSize: 50,
+        });
+        EQElm.SIElm.setIcon(SIcon);
+      }
     } else {
       map.removeLayer(EQElm.SIElm);
     }
@@ -931,7 +774,7 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
 
     EQElm.firstDetect = nowDistance;
     var SIcon = L.divIcon({
-      html: '<svg width="50" height="50"><circle class="SWprogressValue" cx="25" cy="25" r="23.5" fill="none" stroke-width="5px" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="' + Number(157 - 157 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect))) + '""/></path></svg>',
+      html: '<svg width="50" height="50"><circle id="SWprogressValue_' + report_id + '" class="SWprogressValue" cx="25" cy="25" r="23.5" fill="none" stroke-width="5px" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="' + Number(157 - 157 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect))) + '"/></path></svg>',
       className: "SWaveProgress",
       iconSize: 50,
     });
@@ -950,183 +793,6 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
   }
 }
 
-function dateEncode(type, dateTmp, inputtype) {
-  if (inputtype == 1) {
-    var str = String(dateTmp);
-    const year = Number(str.substring(0, 4)); //2022
-    const month = Number(str.substring(4, 6)); //2
-    const day = Number(str.substring(6, 8)); //5
-    const hour = Number(str.substring(8, 10)); //21
-    const min = Number(str.substring(10, 12)); //0
-    const sec = Number(str.substring(12, 14)); //0
-    dateTmp = new Date(year, month - 1, day, hour, min, sec); //monthは0オリジン
-  } else {
-    dateTmp = new Date(dateTmp);
-  }
-
-  if (type == 1) {
-    //YYYYMMDDHHMMSS
-    var YYYY = String(dateTmp.getFullYear());
-    var MM = String(dateTmp.getMonth() + 1).padStart(2, "0");
-    var DD = String(dateTmp.getDate()).padStart(2, "0");
-    var hh = String(dateTmp.getHours()).padStart(2, "0");
-    var mm = String(dateTmp.getMinutes()).padStart(2, "0");
-    var ss = String(dateTmp.getSeconds()).padStart(2, "0");
-    return YYYY + MM + DD + hh + mm + ss;
-  } else if (type == 2) {
-    //YYYYMMDD
-    var YYYY = String(dateTmp.getFullYear());
-    var MM = String(dateTmp.getMonth() + 1).padStart(2, "0");
-    var DD = String(dateTmp.getDate()).padStart(2, "0");
-    return YYYY + MM + DD;
-  } else if (type == 3) {
-    //YYYYMMDDHHMMSS
-    var YYYY = String(dateTmp.getFullYear());
-    var MM = String(dateTmp.getMonth() + 1).padStart(2, "0");
-    var DD = String(dateTmp.getDate()).padStart(2, "0");
-    var hh = String(dateTmp.getHours()).padStart(2, "0");
-    var mm = String(dateTmp.getMinutes()).padStart(2, "0");
-    var ss = String(dateTmp.getSeconds()).padStart(2, "0");
-    return YYYY + "/" + MM + "/" + DD + " " + hh + ":" + mm + ":" + ss;
-  } else {
-    var YYYY = String(dateTmp.getFullYear());
-    var MM = String(dateTmp.getMonth() + 1).padStart(2, "0");
-    var DD = String(dateTmp.getDate()).padStart(2, "0");
-    var hh = String(dateTmp.getHours()).padStart(2, "0");
-    var mm = String(dateTmp.getMinutes()).padStart(2, "0");
-    var ss = String(dateTmp.getSeconds()).padStart(2, "0");
-
-    type.replaceAll("YYYY", YYYY);
-    type.replaceAll("MM", MM);
-    type.replaceAll("DD", DD);
-    type.replaceAll("hh", hh);
-    type.replaceAll("mm", mm);
-    type.replaceAll("ss", ss);
-
-    return type;
-  }
-}
-
-function shindoConvert(str, responseType) {
-  var ShindoTmp;
-  if (isNaN(str)) {
-    ShindoTmp = String(str);
-    ShindoTmp = ShindoTmp.replace(/[０-９]/g, function (s) {
-      return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
-    });
-    ShindoTmp = ShindoTmp.replaceAll("＋", "+").replaceAll("－", "-").replaceAll("強", "+").replaceAll("弱", "-");
-    ShindoTmp = ShindoTmp.replace(/\s+/g, "");
-    switch (str) {
-      case "-1":
-      case "不明":
-        ShindoTmp = "?";
-        break;
-      case "1":
-      case "10":
-        ShindoTmp = "1";
-        break;
-      case "2":
-      case "20":
-        ShindoTmp = "2";
-        break;
-      case "3":
-      case "30":
-        ShindoTmp = "3";
-        break;
-      case "4":
-      case "40":
-        ShindoTmp = "4";
-        break;
-      case "5-":
-      case "45":
-        ShindoTmp = "5-";
-        break;
-      case "5+":
-      case "50":
-        ShindoTmp = "5+";
-        break;
-      case "6-":
-      case "55":
-        ShindoTmp = "6-";
-        break;
-      case "6+":
-      case "60":
-        ShindoTmp = "6+";
-        break;
-      case "7":
-      case "70":
-        ShindoTmp = "7";
-        break;
-      case "99":
-        ShindoTmp = "7+";
-        break;
-    }
-  } else {
-    if (str < 0.5) {
-      ShindoTmp = "0";
-    } else if (str < 1.5) {
-      ShindoTmp = "1";
-    } else if (str < 2.5) {
-      ShindoTmp = "2";
-    } else if (str < 3.5) {
-      ShindoTmp = "3";
-    } else if (str < 4.5) {
-      ShindoTmp = "4";
-    } else if (str < 5) {
-      ShindoTmp = "5-";
-    } else if (str < 5.5) {
-      ShindoTmp = "5+";
-    } else if (str < 6) {
-      ShindoTmp = "6-";
-    } else if (str < 6.5) {
-      ShindoTmp = "6+";
-    } else if (6.5 <= str) {
-      ShindoTmp = "7";
-    } else if (7.5 <= str) {
-      ShindoTmp = "7+";
-    } else {
-      ShindoTmp = "?";
-    }
-  }
-  if (["?", "0", "1", "2", "3", "4", "5-", "5+", "6-", "6+", "7", "7+"].includes(ShindoTmp)) {
-    switch (responseType) {
-      case 1:
-        var ConvTable = { "?": "不明", 0: "0", 1: "1", 2: "2", 3: "3", 4: "4", "5-": "5弱", "5+": "5強", "6-": "6弱", "6+": "6強", 7: "7", "7+": "7以上" };
-        return ConvTable[ShindoTmp];
-        break;
-      case 2:
-        var ConvTable = {
-          "?": ["#D1D1D1", "#444"],
-          0: ["#D1D1D1", "#444"],
-          1: ["#54C9E3", "#222"],
-          2: ["#2B8DFC", "#111"],
-          3: ["#32BA37", "#111"],
-          4: ["#DBD21F", "#000"],
-          "5-": ["#FF8C00", "#FFF"],
-          "5+": ["#FF5714", "#FFF"],
-          "6-": ["#E60000", "#FFF"],
-          "6+": ["#8A0A0A", "#FFF"],
-          7: ["#C400DE", "#FFF"],
-          "7+": ["#C400DE", "#FFF"],
-        };
-        return ConvTable[ShindoTmp];
-        break;
-
-      case 0:
-      default:
-        return ShindoTmp;
-        break;
-    }
-  } else {
-    return str;
-  }
-}
-
-function removeChild(element) {
-  while (element.firstChild) {
-    element.removeChild(element.firstChild);
-  }
-}
 function tsunamiColorConv(str) {
   switch (str) {
     case "MajorWarning":

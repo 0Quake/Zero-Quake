@@ -15,6 +15,9 @@ var config = store.get("config", {
     longitude: 139.767,
     Saibun: "東京都２３区",
   },
+  KmoniInterval: 1000,
+  LmoniInterval: 1000,
+  YmoniInterval: 1000,
 });
 
 let mainWindow;
@@ -107,7 +110,7 @@ const createWindow = () => {
       icon: path.join(__dirname, "img/icon.ico"),
     },
   });
-  mainWindow.setMenuBarVisibility(false);
+  //mainWindow.setMenuBarVisibility(false);
   mainWindow.webContents.openDevTools();
 
   kmoniWorker = new BrowserWindow({
@@ -268,160 +271,128 @@ var errorCount = 0;
 ipcMain.on("message", (event, request) => {
   if (request.action == "monitorSelect") {
     monitorVendor = request.data;
-  } else if (request.action == "Content-script OK") {
-    content_script = true;
   }
-  //sendResponse({}); // 送り返すものがない場合は空のオブジェクトを送る
   return true;
 });
 
-var EEWDetectionTimeout;
-function start() {
-  setInterval(function () {
-    if (monitorVendor == "YE") {
-      if (net.online) {
-        var request = net.request("https://weather-kyoshin.east.edge.storage-yahoo.jp/RealTimeData/" + dateEncode(2, new Date() - yoyuY - Replay) + "/" + dateEncode(1, new Date() - yoyuY - Replay) + ".json");
-        request.on("response", (res) => {
-          var dataTmp = "";
-          if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
-            yoyuY += 100;
-            errorCount++;
-            if (errorCount > 3) {
-              kmoniServerSelect();
-            }
-          } else {
-            errorCount = 0;
-          }
-          res.on("data", (chunk) => {
-            dataTmp += chunk;
-          });
-
-          res.on("end", function () {
-            var json = jsonParse(dataTmp);
-            EEWdetect(1, json);
-          });
-        });
-        request.end();
+function kmoniRequest() {
+  if (net.online) {
+    var request = net.request("http://www.kmoni.bosai.go.jp/webservice/hypo/eew/" + dateEncode(1, new Date() - yoyuK - Replay) + ".json");
+    request.on("response", (res) => {
+      var dataTmp = "";
+      if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
+        yoyuY += 100;
+        errorCount++;
+        if (errorCount > 3) {
+          kmoniServerSelect();
+        }
+      } else {
+        errorCount = 0;
       }
-    } else if (monitorVendor == "YW") {
-      if (net.online) {
-        var request = net.request("https://weather-kyoshin.west.edge.storage-yahoo.jp/RealTimeData/" + dateEncode(2, new Date() - yoyuY - Replay) + "/" + dateEncode(1, new Date() - yoyuY - Replay) + ".json");
-        request.on("response", (res) => {
-          var dataTmp = "";
-          if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
-            yoyuY += 100;
-            errorCount++;
-            if (errorCount > 3) {
-              kmoniServerSelect();
-            }
-          } else {
-            errorCount = 0;
-          }
-          res.on("data", (chunk) => {
-            dataTmp += chunk;
-          });
-          res.on("end", function () {
-            var json = jsonParse(dataTmp);
-            EEWdetect(1, json);
-          });
-        });
-        request.end();
-      }
-    } // else if (monitorVendor == "K") {
-  }, 1000);
-  yoyuSetK(function () {
-    setInterval(function () {
-      if (net.online) {
-        var request = net.request("http://www.kmoni.bosai.go.jp/webservice/hypo/eew/" + dateEncode(1, new Date() - yoyuK - Replay) + ".json");
-        request.on("response", (res) => {
-          var dataTmp = "";
-          if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
-            yoyuY += 100;
-            errorCount++;
-            if (errorCount > 3) {
-              kmoniServerSelect();
-            }
-          } else {
-            errorCount = 0;
-          }
-          res.on("data", (chunk) => {
-            dataTmp += chunk;
-          });
-          res.on("end", function () {
-            var json = jsonParse(dataTmp);
-            EEWdetect(2, json, 1);
-          });
-        });
-        request.end();
-      }
+      res.on("data", (chunk) => {
+        dataTmp += chunk;
+      });
+      res.on("end", function () {
+        var json = jsonParse(dataTmp);
+        EEWdetect(2, json, 1);
+      });
+    });
+    request.end();
+  }
 
-      if (net.online) {
-        var ReqTime = new Date() - 2000;
-        Request({ method: "GET", url: "http://www.kmoni.bosai.go.jp/data/map_img/RealTimeImg/acmap_s/" + dateEncode(2, ReqTime /*- Replay*/) + "/" + dateEncode(1, ReqTime /*- Replay*/) + ".acmap_s.gif", encoding: null }, (error, response, body) => {
-          // エラーチェック
-          if (error !== null) {
-            console.error("error:", error);
-            return false;
-          }
-          if (kmoniWorker) {
-            kmoniWorker.webContents.send("message2", {
-              action: "KmoniImgUpdate",
-              data: "data:image/gif;base64," + body.toString("base64"),
-              date: ReqTime,
-            });
-          }
-        });
+  if (net.online) {
+    var ReqTime = new Date() - 2000;
+    Request({ method: "GET", url: "http://www.kmoni.bosai.go.jp/data/map_img/RealTimeImg/acmap_s/" + dateEncode(2, ReqTime /*- Replay*/) + "/" + dateEncode(1, ReqTime /*- Replay*/) + ".acmap_s.gif", encoding: null }, (error, response, body) => {
+      // エラーチェック
+      if (error !== null) {
+        console.error("error:", error);
+        return false;
       }
-    }, 1000);
-  });
-  yoyuSetL(function () {
-    setInterval(function () {
-      if (net.online) {
-        var request = net.request("https://www.lmoni.bosai.go.jp/monitor/webservice/hypo/eew/" + dateEncode(1, new Date() - yoyuL - Replay) + ".json");
-        request.on("response", (res) => {
-          var dataTmp = "";
-          if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
-            yoyuY += 100;
-            errorCount++;
-            if (errorCount > 3) {
-              kmoniServerSelect();
-            }
-          } else {
-            errorCount = 0;
-          }
-          res.on("data", (chunk) => {
-            dataTmp += chunk;
-          });
-          res.on("end", function () {
-            var json = jsonParse(dataTmp);
-            EEWdetect(2, json, 2);
-          });
+      if (kmoniWorker) {
+        kmoniWorker.webContents.send("message2", {
+          action: "KmoniImgUpdate",
+          data: "data:image/gif;base64," + body.toString("base64"),
+          date: ReqTime,
         });
-        request.end();
-      }
-    }, 1000);
-  });
-
-  //} else if (monitorVendor == "L") {
-
-  //
-  //
-  //
-  //
-  //WebSocket接続
-  P2P_WS();
-  nakn_WS();
-
-  setInterval(function () {
-    EEW_nowList.forEach(function (elm) {
-      if (new Date() - Replay - new Date(dateEncode(3, Number(elm.origin_time), 1)) > 300000) {
-        EEWClear(null, elm.report_id, null, true);
       }
     });
-  }, 1000);
+  }
 }
+function lmoniRequest() {
+  if (net.online) {
+    var request = net.request("https://www.lmoni.bosai.go.jp/monitor/webservice/hypo/eew/" + dateEncode(1, new Date() - yoyuL - Replay) + ".json");
+    request.on("response", (res) => {
+      var dataTmp = "";
+      if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
+        yoyuY += 100;
+        errorCount++;
+        if (errorCount > 3) {
+          kmoniServerSelect();
+        }
+      } else {
+        errorCount = 0;
+      }
+      res.on("data", (chunk) => {
+        dataTmp += chunk;
+      });
+      res.on("end", function () {
+        var json = jsonParse(dataTmp);
+        EEWdetect(2, json, 2);
+      });
+    });
+    request.end();
+  }
+}
+function ymoniRequest() {
+  if (net.online) {
+    if (monitorVendor == "YE") {
+      var request = net.request("https://weather-kyoshin.east.edge.storage-yahoo.jp/RealTimeData/" + dateEncode(2, new Date() - yoyuY - Replay) + "/" + dateEncode(1, new Date() - yoyuY - Replay) + ".json");
+      request.on("response", (res) => {
+        var dataTmp = "";
+        if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
+          yoyuY += 100;
+          errorCount++;
+          if (errorCount > 3) {
+            kmoniServerSelect();
+          }
+        } else {
+          errorCount = 0;
+        }
+        res.on("data", (chunk) => {
+          dataTmp += chunk;
+        });
 
-var tsunamiData;
+        res.on("end", function () {
+          var json = jsonParse(dataTmp);
+          EEWdetect(1, json);
+        });
+      });
+      request.end();
+    } else if (monitorVendor == "YW") {
+      var request = net.request("https://weather-kyoshin.west.edge.storage-yahoo.jp/RealTimeData/" + dateEncode(2, new Date() - yoyuY - Replay) + "/" + dateEncode(1, new Date() - yoyuY - Replay) + ".json");
+      request.on("response", (res) => {
+        var dataTmp = "";
+        if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
+          yoyuY += 100;
+          errorCount++;
+          if (errorCount > 3) {
+            kmoniServerSelect();
+          }
+        } else {
+          errorCount = 0;
+        }
+        res.on("data", (chunk) => {
+          dataTmp += chunk;
+        });
+        res.on("end", function () {
+          var json = jsonParse(dataTmp);
+          EEWdetect(1, json);
+        });
+      });
+      request.end();
+    }
+  }
+}
 function P2P_WS() {
   var WebSocketClient = require("websocket").client;
   var client = new WebSocketClient();
@@ -527,7 +498,7 @@ function nakn_WS() {
 
         console.log("WS_message");
 
-        if (new Date() - origin_timeTmp > 300000) {
+        if (true || new Date() - origin_timeTmp > 300000) {
           var calcintensityTmp;
           var isFinalTmp;
           var latitudeTmp;
@@ -555,7 +526,7 @@ function nakn_WS() {
             alertflg: data.alertFlg ? "警報" : "予報", //種別
             report_id: data.eventId, //地震ID
             report_num: data.eventSerial, //第n報
-            report_time: new Date(data.reportTime), //発表時刻
+            report_time: new Date(new Date() - 5000), //new Date(data.reportTime), //発表時刻
             magunitude: Number(data.magnitude), //マグニチュード
             calcintensity: calcintensityTmp, //最大深度
             depth: Number(data.hypocenter.depth.replace("km", "")), //深さ
@@ -566,7 +537,7 @@ function nakn_WS() {
             longitude: longitudeTmp, //経度
             region_code: region_codeTmp, //震央地域コード
             region_name: region_nameTmp, //震央地域
-            origin_time: origin_timeTmp, //発生時刻
+            origin_time: new Date(), //origin_timeTmp, //発生時刻
             isPlum: data.isPlum, //🔴PLUM法かどうか
             intensityAreas: intensityAreas, //細分区分ごとの予想震度
             warnZones: {
@@ -587,7 +558,36 @@ function nakn_WS() {
   client.connect("wss://eew.ws.nakn.jp:8080/eew");
 }
 
+function start() {
+  //↓接続処理
+  ymoniRequest();
+  kmoniRequest();
+  lmoniRequest();
+  yoyuSetK(function () {
+    setInterval(kmoniRequest, 1000);
+  });
+  yoyuSetL(function () {
+    setInterval(lmoniRequest, 1000);
+  });
+  setInterval(ymoniRequest, 1000);
+
+  P2P_WS();
+  nakn_WS();
+  //↑接続処理
+
+  //EEW解除
+  setInterval(function () {
+    EEW_nowList.forEach(function (elm) {
+      if (new Date() - Replay - new Date(dateEncode(3, Number(elm.origin_time), 1)) > 300000) {
+        EEWClear(null, elm.report_id, null, true);
+      }
+    });
+  }, 1000);
+}
+
+var tsunamiData;
 var lwaveTmp;
+
 function EEWdetect(type, json, KorL) {
   if (!json) return;
   if (type == 1) {
@@ -595,40 +595,7 @@ function EEWdetect(type, json, KorL) {
 
     kmoniTimeUpdate(request_time, "YahooKmoni");
 
-    /*
-    if (json.psWave) {
-      json.psWave.items.forEach(function (elm) {
-        var psDataTmp = {
-          report_id: Number(json.hypoInfo.items[0].reportId),
-          latitude: elm.latitude,
-          longitude: elm.longitude,
-          pRadius: elm.pRadius,
-          sRadius: elm.sRadius,
-        };
-        if (JSON.stringify(psDataTmp) !== JSON.stringify(psData)) {
-          json.psWave.items.forEach(function (elm) {
-            if (mainWindow) {
-              mainWindow.webContents.send("message2", {
-                action: "PSWaveUpdate",
-                data: psDataTmp,
-              });
-            }
-          });
-        }
-        psData = psDataTmp;
-      });
-    } else if (psData) {
-      if (mainWindow) {
-        mainWindow.webContents.send("message2", {
-          action: "PSWaveClear",
-          data: psData.report_id,
-        });
-      }
-      psData = null;
-    }*/
-
     if (json.hypoInfo) {
-      //console.log(json.hypoInfo.items);
       EEWNow = true;
       json.hypoInfo.items.forEach(function (elm) {
         var EEWdata = {
@@ -842,7 +809,6 @@ function EEWdetect(type, json, KorL) {
     EEWcontrol(EEWdata);
   }
 }
-
 function EEWcontrol(data) {
   if (new Date() - Replay - data.origin_time > 300000) return;
   if (!EEW_history[data.source]) EEW_history[data.source] = [];
@@ -949,7 +915,6 @@ function EEWAlert(data, first) {
     createWindow();
   }
 }
-
 function EEWClear(source, code, reportnum, bypass) {
   if (EEWNow || bypass) {
     if (!bypass && EEW_history[source]) {

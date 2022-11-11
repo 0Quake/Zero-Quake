@@ -1,11 +1,8 @@
-//var { ipcRenderer } = require("electron");
-
 var now_EEW = [];
 var EEWDetectionTimeout;
 var Replay;
 var ICT_JST = 0;
 var setting;
-//ipcRenderer.on("message2", (event, request) => {
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "EEWAlertUpdate") {
     EEWAlertUpdate(request.data);
@@ -33,7 +30,6 @@ window.electronAPI.messageSend((event, request) => {
   }
   return true;
 });
-//ipcRenderer.send("message", { action: "windowOpen" });
 window.addEventListener("load", function () {
   fetch("https://67495dde3b39c2991829589f0101ab7a035eecf5.nict.go.jp/cgi-bin/json")
     .then(function (res) {
@@ -585,7 +581,7 @@ function kmoniTimeUpdate(updateTime, LocalTime, type, vendor) {
 //
 //
 //
-//汎用関数
+//汎用関数 map.js共用
 
 function removeChild(element) {
   while (element.firstChild) {
@@ -630,6 +626,14 @@ function dateEncode(type, dateTmp, inputtype) {
     var mm = String(dateTmp.getMinutes()).padStart(2, "0");
     var ss = String(dateTmp.getSeconds()).padStart(2, "0");
     return YYYY + "/" + MM + "/" + DD + " " + hh + ":" + mm + ":" + ss;
+  } else if (type == 4) {
+    //YYYY/MM/DD HH:MM
+    var YYYY = String(dateTmp.getFullYear());
+    var MM = String(dateTmp.getMonth() + 1).padStart(2, "0");
+    var DD = String(dateTmp.getDate()).padStart(2, "0");
+    var hh = String(dateTmp.getHours()).padStart(2, "0");
+    var mm = String(dateTmp.getMinutes()).padStart(2, "0");
+    return YYYY + "/" + MM + "/" + DD + " " + hh + ":" + mm;
   } else {
     //free
     var YYYY = String(dateTmp.getFullYear());
