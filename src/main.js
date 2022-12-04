@@ -130,7 +130,6 @@ const createWindow = () => {
     //replay("2022/04/19 08:16:15");
     //replay("2022/11/09 17:40:05");
 
-    /*
     EEWcontrol({
       report_time: new Date() - Replay, //発表時刻
       region_code: "", //震央地域コード
@@ -149,7 +148,7 @@ const createWindow = () => {
       alertflg: "警報", //種別
       condition: "",
       source: "存在しない情報源",
-    });*/
+    });
 
     kmoniTimeTmp.forEach(function (elm) {
       mainWindow.webContents.send("message2", {
