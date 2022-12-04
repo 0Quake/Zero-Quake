@@ -184,6 +184,7 @@ h2 {
   margin: 0;
 }
 .EEW_content_wrap {
+  position: relative;
   padding: 0.8em;
 }
 
@@ -208,7 +209,19 @@ h2 {
 }
 
 .canceled {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
   display: none;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(3px);
+}
+h2.traning {
+  display: none;
+  text-align: center;
+  background: rgb(66, 118, 186);
+  color: #fff;
 }
 @keyframes flash {
   0%,
@@ -228,8 +241,7 @@ td {
   border-collapse: collapse;
   border: solid 1px #666;
 }
-#time_table {
-}
+
 #tab1_wrap {
   display: flex;
   height: calc(100% - 110px);
@@ -410,6 +422,7 @@ td {
   border-radius: 4px;
 }
 .EEWWrap:hover .Wave_progress {
+  position: relative;
   height: 30px;
   font-size: 14px;
   line-height: 30px;
@@ -434,6 +447,9 @@ td {
 }
 #UpdateTimeWrap {
   position: fixed;
+  overflow-y: auto;
+  padding: 5px;
+  border-radius: 4px 0 0 0;
   left: 0;
   bottom: 0;
   z-index: 1000;

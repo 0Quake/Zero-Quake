@@ -16,7 +16,6 @@ Zero Quake が情報を取得している情報源
   - [強震モニタ](http://www.kmoni.bosai.go.jp/)
   - [長周期地震動モニタ](lmoni.bosai.go.jp)
   - [Yahoo 強震モニタ](https://typhoon.yahoo.co.jp/weather/jp/earthquake/kyoshin/)
-- [narikakun.net 緊急地震速報 API](https://dev.narikakun.net/doc/eew)
 - [P2P 地震情報 API](https://www.p2pquake.net/json_api_v2/)
 
 ### 地震情報(震度速報／震源に関する情報／震度・震源に関する情報)

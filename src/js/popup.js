@@ -3,6 +3,8 @@ var EEWDetectionTimeout;
 var Replay;
 var ICT_JST = 0;
 var setting;
+var AreaForecastLocalE;
+var prepareing = true;
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "EEWAlertUpdate") {
     EEWAlertUpdate(request.data);
@@ -46,6 +48,17 @@ window.addEventListener("load", function () {
     .then(function (json) {
       document.getElementById("kmoni_Message").innerHTML = json.message;
     });
+  fetch("./Resource/AreaForecastLocalE.json")
+    .then(function (res) {
+      return res.json();
+    })
+    .then(function (json) {
+      AreaForecastLocalE = json;
+      prepareing = false;
+      window.electronAPI.messageReturn({
+        action: "EEWReqest",
+      });
+    });
   setInterval(function () {
     document.getElementById("NICT_JST").innerText = dateEncode(3, new Date() + NICT_JST);
     document.getElementById("PC_TIME").innerText = dateEncode(3, new Date());
@@ -72,6 +85,7 @@ var template = document.getElementById("EEWTemplate");
 var epiCenter = [];
 
 function EEWAlertUpdate(data) {
+  if (prepareing) return;
   data.forEach((elm) => {
     var same = now_EEW.find(function (elm2) {
       return elm.report_id == elm2.report_id && elm.report_num == elm2.report_num;
@@ -101,12 +115,14 @@ function EEWAlertUpdate(data) {
       isCancelTmp = String(isCancelTmp).replace("false", "");
       isCancelTmp = Boolean(isCancelTmp);
       clone.querySelector(".is_final").style.display = isFinalTmp ? "inline" : "none";
-      clone.querySelector(".canceled").style.display = isCancelTmp ? "block" : "none";
+      clone.querySelector(".canceled").style.display = isCancelTmp ? "flex" : "none";
       clone.querySelector(".region_name").innerText = elm.region_name;
       clone.querySelector(".origin_time").innerText = dateEncode(3, elm.origin_time);
       clone.querySelector(".calcintensity").innerText = elm.calcintensity;
       clone.querySelector(".magunitude").innerText = elm.magunitude;
       clone.querySelector(".depth").innerText = elm.depth;
+      clone.querySelector(".traning").style.display = elm.is_training ? "block" : "none";
+
       if (elm.distance) {
         clone.querySelector(".Wave_progress").style.display = "block";
         clone.querySelector(".distance").innerText = Math.round(elm.distance);
@@ -132,7 +148,7 @@ function EEWAlertUpdate(data) {
       isCancelTmp = Boolean(isCancelTmp);
 
       EQMenu.querySelector(".is_final").style.display = isFinalTmp ? "inline" : "none";
-      EQMenu.querySelector(".canceled").style.display = isCancelTmp ? "block" : "none";
+      EQMenu.querySelector(".canceled").style.display = isCancelTmp ? "flex" : "none";
       EQMenu.querySelector(".region_name").innerText = elm.region_name;
 
       EQMenu.querySelector(".origin_time").innerText = dateEncode(3, elm.origin_time);
@@ -143,6 +159,75 @@ function EEWAlertUpdate(data) {
       if (elm.distance) {
         EQMenu.querySelector(".Wave_progress").style.display = "block";
         EQMenu.querySelector(".distance").innerText = Math.round(elm.distance);
+      }
+    }
+
+    if (elm.intensityAreas) {
+      var intAreaTmp = [];
+      if (elm.intensityAreas["0"]) {
+        elm.intensityAreas["0"].forEach(function (elm2) {
+          intAreaTmp.push({ int: "0", areaCode: elm2 });
+        });
+      }
+      if (elm.intensityAreas["1"]) {
+        elm.intensityAreas["1"].forEach(function (elm2) {
+          intAreaTmp.push({ int: "1", areaCode: elm2 });
+        });
+      }
+      if (elm.intensityAreas["2"]) {
+        elm.intensityAreas["2"].forEach(function (elm2) {
+          intAreaTmp.push({ int: "2", areaCode: elm2 });
+        });
+      }
+      if (elm.intensityAreas["3"]) {
+        elm.intensityAreas["3"].forEach(function (elm2) {
+          intAreaTmp.push({ int: "3", areaCode: elm2 });
+        });
+      }
+      if (elm.intensityAreas["4"]) {
+        elm.intensityAreas["4"].forEach(function (elm2) {
+          intAreaTmp.push({ int: "4", areaCode: elm2 });
+        });
+      }
+      if (elm.intensityAreas["5-"]) {
+        elm.intensityAreas["5-"].forEach(function (elm2) {
+          intAreaTmp.push({ int: "5-", areaCode: elm2 });
+        });
+      }
+      if (elm.intensityAreas["5+"]) {
+        elm.intensityAreas["5+"].forEach(function (elm2) {
+          intAreaTmp.push({ int: "5+", areaCode: elm2 });
+        });
+      }
+      if (elm.intensityAreas["6-"]) {
+        elm.intensityAreas["6-"].forEach(function (elm2) {
+          intAreaTmp.push({ int: "6-", areaCode: elm2 });
+        });
+      }
+      if (elm.intensityAreas["6+"]) {
+        elm.intensityAreas["6+"].forEach(function (elm2) {
+          intAreaTmp.push({ int: "6+", areaCode: elm2 });
+        });
+      }
+      if (elm.intensityAreas["7"]) {
+        elm.intensityAreas["7"].forEach(function (elm2) {
+          intAreaTmp.push({ int: "7", areaCode: elm2 });
+        });
+      }
+      if (elm.intensityAreas["?"]) {
+        elm.intensityAreas["不明"].forEach(function (elm2) {
+          intAreaTmp.push({ int: "?", areaCode: elm2 });
+        });
+      }
+
+      if (sections.length !== 0) {
+        intAreaTmp.forEach(function (elm2) {
+          var sectTmp = sections.find(function (elm3) {
+            return elm3.name == AreaForecastLocalE[elm2.areaCode].name;
+          });
+          console.log(elm2.int, elm2.areaCode, shindoConvert(elm2.int, 2), sectTmp, AreaForecastLocalE);
+          if (sectTmp && sectTmp.item) sectTmp.item.setStyle({ fillColor: shindoConvert(elm2.int, 2)[0] });
+        });
       }
     }
 
@@ -157,10 +242,15 @@ function EEWAlertUpdate(data) {
     var stillEQ = data.find(function (elm2) {
       return elm.report_id == elm2.report_id;
     });
+    //終わった地震
     if (!stillEQ) {
-      //終わった地震
       document.getElementById("EEW-" + elm.report_id).remove();
       epiCenterClear(elm.report_id);
+    } else if (elm.is_cancel) {
+      epiCenterClear(elm.report_id);
+      setTimeout(function () {
+        document.getElementById("EEW-" + elm.report_id).remove();
+      }, 1000);
     }
 
     return stillEQ;
@@ -176,6 +266,8 @@ function EEWAlertUpdate(data) {
 var latitudeTmp = 0;
 var longitudeTmp = 0;
 function epiCenterUpdate(eid, latitude, longitude) {
+  if (prepareing) return;
+
   latitude = latitudeConvert(latitude);
   longitude = latitudeConvert(longitude);
   if (latitude !== latitudeTmp || longitude !== longitudeTmp) {
@@ -225,6 +317,8 @@ function epiCenterUpdate(eid, latitude, longitude) {
   }
 }
 function epiCenterClear(eid) {
+  if (prepareing) return;
+
   eid = Number(eid);
   if (map) {
     var epicenterElm = epiCenter.find(function (elm2) {
@@ -347,7 +441,7 @@ function eqInfoUpdate() {
       }
     });
 
-  fetch("https://dev.narikakun.net/webapi/earthquake/post_data.json")
+  fetch("https://dev.narikakun.net/webapi/earthquake/post_data.json?_=" + new Date())
     .then(function (res) {
       return res.json();
     })
@@ -553,6 +647,8 @@ document.getElementById("EQInfoSelect").addEventListener("change", function () {
 
 var updateTimeTmp = 0;
 function kmoniTimeUpdate(updateTime, LocalTime, type, vendor) {
+  if (prepareing) return;
+
   /*
   Updatetime: new Date(data.time),
   LocalTime: new Date(),

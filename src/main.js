@@ -130,6 +130,7 @@ const createWindow = () => {
     //replay("2022/04/19 08:16:15");
     //replay("2022/11/09 17:40:05");
 
+    /*
     EEWcontrol({
       report_time: new Date() - Replay, //発表時刻
       region_code: "", //震央地域コード
@@ -140,7 +141,7 @@ const createWindow = () => {
       depth: 10, //深さ
       calcintensity: 7, //最大深度
       is_final: false, //最終報
-      is_training: false, //訓練報
+      is_training: true, //訓練報
       origin_time: new Date(new Date() - Replay - 2000), //発生時刻
       magunitude: 9, //マグニチュード
       report_num: 1, //第n報
@@ -148,7 +149,31 @@ const createWindow = () => {
       alertflg: "警報", //種別
       condition: "",
       source: "存在しない情報源",
-    });
+      intensityAreas: { 4: ["301", "331", "341"] },
+    });*/
+
+    /*
+    setTimeout(function () {
+      EEWcontrol({
+        report_time: new Date() - Replay, //発表時刻
+        region_code: "", //震央地域コード
+        region_name: "存在しない地名", //震央地域
+        latitude: 35.6, //緯度
+        longitude: 140.3, //経度
+        is_cancel: true, //キャンセル
+        depth: 10, //深さ
+        calcintensity: 7, //最大深度
+        is_final: false, //最終報
+        is_training: false, //訓練報
+        origin_time: new Date(new Date() - Replay - 2000), //発生時刻
+        magunitude: 9, //マグニチュード
+        report_num: 2, //第n報
+        report_id: "20991111111111", //地震ID
+        alertflg: "警報", //種別
+        condition: "",
+        source: "存在しない情報源",
+      });
+    }, 5000);*/
 
     kmoniTimeTmp.forEach(function (elm) {
       mainWindow.webContents.send("message2", {
@@ -472,6 +497,8 @@ function P2P_WS() {
 
   client.connect("wss://api.p2pquake.net/v2/ws");
 }
+
+/*
 function nakn_WS() {
   process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
   var WebSocketClient = require("websocket").client;
@@ -497,7 +524,7 @@ function nakn_WS() {
 
         console.log("WS_message");
 
-        if (true || new Date() - origin_timeTmp > 300000) {
+        if (new Date() - origin_timeTmp > 300000) {
           var calcintensityTmp;
           var isFinalTmp;
           var latitudeTmp;
@@ -555,7 +582,7 @@ function nakn_WS() {
   });
 
   client.connect("wss://eew.ws.nakn.jp:8080/eew");
-}
+}*/
 
 function start() {
   //↓接続処理
@@ -571,7 +598,7 @@ function start() {
   setInterval(ymoniRequest, 1000);
 
   P2P_WS();
-  nakn_WS();
+  //nakn_WS();
   //↑接続処理
 
   //EEW解除

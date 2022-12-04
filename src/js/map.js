@@ -4,6 +4,7 @@ var Tsunami_MajorWarning, Tsunami_Warning, Tsunami_Watch;
 var tsunamiLayer;
 var gjmap; //オフライン地図
 var gjmapT; //津波用geojson
+var sections = [];
 window.addEventListener("load", function () {
   this.setTimeout(function () {
     document.getElementById("splash").style.display = "none";
@@ -377,7 +378,8 @@ function init() {
           attribution: 'Map data <a href="https://www.naturalearthdata.com/">©Natural Earth</a> / <a href="https://www.data.jma.go.jp/developer/gis.html" target="_blank">©JMA</a>',
         },
         onEachFeature: function onEachFeature(feature, layer) {
-          if (feature.properties && feature.properties.popupContent) {
+          if (feature.properties && feature.properties.NAME) {
+            sections.push({ name: feature.properties.NAME, item: layer });
             layer.bindPopup(feature.properties.popupContent);
           }
         },
@@ -588,7 +590,7 @@ function init() {
 
 function psWaveCalc() {
   now_EEW.forEach(function (elm) {
-    if (elm.origin_time && elm.depth && elm.latitude && elm.longitude) {
+    if (!elm.is_cancel && elm.origin_time && elm.depth && elm.latitude && elm.longitude) {
       var distance = Math.floor((new Date() - elm.origin_time) / 1000);
 
       if (elm.depth <= 700 && distance <= 2000) {
@@ -678,10 +680,10 @@ function psWaveCalc() {
 
   //終わった地震の予報円削除
   psWaveList = psWaveList.filter(function (elm) {
-    var stillEEW = now_EEW.some(function (elm2) {
+    var stillEEW = now_EEW.find(function (elm2) {
       return elm2.report_id;
     });
-    if (!stillEEW) {
+    if (!stillEEW || stillEEW.is_cancel) {
       if (elm.PCircleElm) map.removeLayer(elm.PCircleElm);
       if (elm.SCircleElm) map.removeLayer(elm.SCircleElm);
     }
