@@ -194,7 +194,10 @@ h2 {
   font-size: 16px;
   padding: 5px 0.5em;
 }
-
+.EEWWrap h2 {
+  background: rgb(39, 110, 50);
+  color: #fff;
+}
 #tsunamiTitle {
   border-bottom: solid 2px #fff;
 }

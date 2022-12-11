@@ -23,20 +23,32 @@
 
         window.electronAPI.messageSend((event, request) => {
 
-            var image = new Image();
-            image.src = request.data;
+            if (request.action == "KmoniImgUpdate") {
+                var image = new Image();
+                image.src = request.data;
 
-            image.onload = function () {
-                context.clearRect(0, 0, canvas.width, canvas.height);
-                context.drawImage(image, 0, 0);
-                kmoniRedraw()
-                window.electronAPI.messageReturn({
-                    action: "kmoniReturn",
-                    data: points,
-                    date: request.date
-                })
+                image.onload = function () {
+                    context.clearRect(0, 0, canvas.width, canvas.height);
+                    context.drawImage(image, 0, 0);
+                    kmoniRedraw()
+                    window.electronAPI.messageReturn({
+                        action: "kmoniReturn",
+                        data: points,
+                        date: request.date
+                    })
 
-            };
+                };
+            } else if (request.action == "speak") {
+                speechSynthesis.cancel()
+                // 発言を作成
+                const uttr = new SpeechSynthesisUtterance()
+                uttr.text = request.data
+                uttr.lang = "ja-JP"
+                uttr.rate = 1
+                uttr.pitch = 1
+                uttr.volume = 1
+                speechSynthesis.speak(uttr)
+            }
 
 
         })

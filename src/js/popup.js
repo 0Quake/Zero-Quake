@@ -97,7 +97,7 @@ function EEWAlertUpdate(data) {
     if (!sameEQ) {
       //新しい地震、新しい報
       var clone = template.content.cloneNode(true);
-      clone.querySelector(".alertflg").innerText = elm.alertflg;
+      if (elm.alertflg) clone.querySelector(".alertflg").innerText = "(" + elm.alertflg + ")";
 
       if (elm.alertflg == "警報") {
         clone.querySelector(".EEWWrap").classList.add("keihou");

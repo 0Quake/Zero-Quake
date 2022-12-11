@@ -3,7 +3,8 @@ const { app, BrowserWindow, ipcMain, net, Notification } = electron;
 const path = require("path");
 const sound = require("sound-play");
 const Request = require("request");
-let fs;
+let fs = require("fs");
+
 //let config = require("config");
 const Store = require("electron-store");
 const store = new Store();
@@ -19,6 +20,7 @@ var config = store.get("config", {
   LmoniInterval: 1000,
   YmoniInterval: 1000,
 });
+const userHome = process.env[process.platform == "win32" ? "USERPROFILE" : "HOME"];
 
 let mainWindow;
 var settingWindow;
@@ -175,6 +177,59 @@ const createWindow = () => {
       });
     }, 5000);*/
 
+    var intColorConv = { "0xFFFFFFFF": "0", "0xFFF2F2FF": "1", "0xFF00AAFF": "2", "0xFF0041FF": "3", "0xFFFAE696": "4", "0xFFFFE600": "5-", "0xFFFF9900": "5+", "0xFFFF2800": "6-", "0xFFA50021": "6+", "0xFFB40068": "7" };
+
+    fs.readFile(path.join(userHome, "/AppData/Roaming/StrategyCorporation/SignalNowX/SignalNowX_01.csl"), function (err, content) {
+      if (err) {
+        console.error(err);
+      }
+      var buf = new Buffer(content, "binary");
+      let logData = buf.toString();
+      let dataTmp = logData.split("MsgType=9");
+      dataTmp.forEach(function (elm) {
+        var eidTmp;
+        var reportnumTmp;
+        var origintimeTmp;
+        var reporttimeTmp;
+        var intTmp;
+        elm.split("<BOM>").forEach(function (elm2) {
+          if (elm2.indexOf("対象EQ ID") != -1) {
+            eidTmp = elm2.split(" = ")[1].substring(2, 16);
+            reportnumTmp = elm2.split(" = ")[1].substring(17, 20);
+          } else if (elm2.indexOf("地震発生時刻(a)") != -1) {
+            origintimeTmp = elm2.split(" = ")[1].substring(0, 19);
+          } else if (elm2.indexOf("現在時刻(d)") != -1) {
+            reporttimeTmp = elm2.split(" = ")[1].substring(0, 19);
+          } else if (elm2.indexOf("震度階級色") != -1) {
+            intTmp = intColorConv[elm2.split(" = ")[1].substring(0, 10)];
+          }
+        });
+
+        if (eidTmp || reportnumTmp || origintimeTmp || intTmp) {
+          EEWcontrol({
+            alertflg: null,
+            report_id: eidTmp,
+            report_num: Number(reportnumTmp),
+            report_time: new Date(reporttimeTmp),
+            condition: null,
+            magunitude: null,
+            calcintensity: intTmp,
+            depth: null,
+            is_cancel: null,
+            is_final: null,
+            is_training: null,
+            latitude: null,
+            longitude: null,
+            region_code: null,
+            region_name: null,
+            origin_time: new Date(),
+            isPlum: null,
+            source: "SignalNow X",
+          });
+        }
+      });
+    });
+
     kmoniTimeTmp.forEach(function (elm) {
       mainWindow.webContents.send("message2", {
         action: "kmoniTimeUpdate",
@@ -207,7 +262,6 @@ const createWindow = () => {
 app.whenReady().then(() => {
   createWindow();
 
-  fs = require("fs");
   points = JSON.parse(fs.readFileSync(path.join(__dirname, "Resource/Knet_Points.json"), "utf8"));
 
   (async function () {
@@ -869,6 +923,7 @@ function EEWcontrol(data) {
 
     if (!EEWJSON && saishin) {
       //console.log("       EEW!!!", data);
+      console.log("AAAAAAAAA", data.report_time, data.report_id, data.report_num);
 
       EEWAlert(data, false);
       EQJSON.data.push(data);
@@ -878,6 +933,7 @@ function EEWcontrol(data) {
     }
   } else {
     EEWAlert(data, true);
+    console.log("AAAAAAAAA", data.report_time, data.report_id, data.report_num);
 
     EEW_Data.push({
       EQ_id: data.report_id,
@@ -929,6 +985,13 @@ function EEWAlert(data, first) {
     EEWNotification.show();
     EEWNotification.on("click", function () {
       createWindow();
+    });
+  }
+
+  if (kmoniWorker) {
+    kmoniWorker.webContents.send("message2", {
+      action: "speak",
+      data: "緊急地震速報です。",
     });
   }
 
