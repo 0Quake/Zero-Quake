@@ -29,6 +29,8 @@ window.electronAPI.messageSend((event, request) => {
     setting = request.data;
   } else if (request.action == "Replay") {
     Replay = request.data;
+  } else if (request.action == "EQInfo") {
+    eqInfoDraw(request.data, request.source);
   }
   return true;
 });
@@ -340,6 +342,7 @@ function epiCenterClear(eid) {
 //
 
 var eqInfo = [];
+/*
 function eqInfoControl(dataList) {
   dataList.forEach(function (data) {
     var EQElm = eqInfo.find(function (elm) {
@@ -347,7 +350,7 @@ function eqInfoControl(dataList) {
     });
 
     if (EQElm) {
-      /*          category: json[i].ttl,    */
+      //         category: json[i].ttl,    
 
       if (data.Timestamp && (!EQElm.Timestamp || EQElm.reportDateTime < data.reportDateTime)) EQElm.Timestamp = data.Timestamp;
       if (data.epiCenter && (!EQElm.epiCenter || EQElm.reportDateTime < data.reportDateTime)) EQElm.epiCenter = data.epiCenter;
@@ -588,18 +591,20 @@ function eqInfoUpdate() {
       eqInfoDraw(dataTmp, document.getElementById("USGS_EqInfo"), false, "USGS");
       //eqInfoControl(dataTmp);
     });
-}
+}*/
 
 var template2 = document.getElementById("EQListTemplate");
 var template2_2 = document.getElementById("EQListTemplate2");
-function eqInfoDraw(data, EQListWrap, jma, type) {
+var EQListWrap;
+function eqInfoDraw(data, source, EQListWrap, jma, type) {
   var EQTemplate;
-  if (jma) {
+  if (source == "jma") {
     EQTemplate = template2;
-  } else {
+    EQListWrap = document.getElementById("JMA_EqInfo");
+  } else if (source == "usgs") {
     EQTemplate = template2_2;
+    EQListWrap = document.getElementById("USGS_EqInfo");
   }
-  //var EQListWrap = document.getElementById("JMA_EqInfo");
   removeChild(EQListWrap);
   data.forEach(function (elm) {
     var clone = EQTemplate.content.cloneNode(true);
@@ -614,24 +619,22 @@ function eqInfoDraw(data, EQListWrap, jma, type) {
     clone.querySelector(".EQI_datetime").innerText = dateEncode(3, elm.Timestamp);
     clone.querySelector(".EQI_magnitude").innerText = "M" + elm.M;
 
-    if (elm.eventId) {
+    if (source == "jma") {
       clone.querySelector(".EQDetailButton").addEventListener("click", function () {
         window.open("EQDetail.html?eid=" + elm.eventId + "&detailURL=" + encodeURIComponent(elm.DetailURL.join("[ZQ_URLSEPARATE]")), "地震情報 - Zero Quake");
       });
-    } else if (type == "USGS") {
+    } else if (source == "USGS") {
       clone.querySelector(".EQDetailButton").addEventListener("click", function () {
         window.open(elm.DetailURL, "地震情報 - Zero Quake");
-      });
-    } else if (type == "AQUA") {
-      clone.querySelector(".EQDetailButton").addEventListener("click", function () {
-        window.open("EQDetail.html?dataAQUA=" + elm.DetailURL, "地震情報 - Zero Quake");
       });
     }
     EQListWrap.appendChild(clone);
   });
 }
+/*
 setInterval(eqInfoUpdate, 10000);
 eqInfoUpdate();
+*/
 
 //
 //

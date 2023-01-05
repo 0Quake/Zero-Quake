@@ -69,6 +69,7 @@ main {
 
 ::-webkit-scrollbar {
   width: 10px;
+  height: 10px;
 }
 
 /*スクロールバーの軌道*/
@@ -77,6 +78,10 @@ main {
 }
 ::-webkit-scrollbar-track:hover {
   border-radius: 10px;
+  background: rgba(128, 128, 128, 0.1);
+}
+
+::-webkit-scrollbar-corner {
   background: rgba(128, 128, 128, 0.1);
 }
 

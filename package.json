@@ -18,6 +18,10 @@
   "dependencies": {
     "@types/node": "^18.11.5",
     "electron-store": "^8.1.0",
+    "iconv-lite": "^0.6.3",
+    "install": "^0.13.0",
+    "jsdom": "^20.0.3",
+    "npm": "^9.2.0",
     "path": "^0.12.7",
     "request": "^2.88.2",
     "sound-play": "^1.1.0",
