@@ -116,11 +116,11 @@ function EEWAlertUpdate(data) {
       isCancelTmp = Boolean(isCancelTmp);
       clone.querySelector(".is_final").style.display = isFinalTmp ? "inline" : "none";
       clone.querySelector(".canceled").style.display = isCancelTmp ? "flex" : "none";
-      clone.querySelector(".region_name").innerText = elm.region_name;
+      clone.querySelector(".region_name").innerText = elm.region_name ? elm.region_name : "?";
       clone.querySelector(".origin_time").innerText = dateEncode(3, elm.origin_time);
-      clone.querySelector(".calcintensity").innerText = elm.calcintensity;
-      clone.querySelector(".magunitude").innerText = elm.magunitude;
-      clone.querySelector(".depth").innerText = elm.depth;
+      clone.querySelector(".calcintensity").innerText = elm.calcintensity ? elm.calcintensity : "?";
+      clone.querySelector(".magunitude").innerText = elm.magunitude ? elm.magunitude : "?";
+      clone.querySelector(".depth").innerText = elm.depth ? elm.depth : "?";
       clone.querySelector(".traning").style.display = elm.is_training ? "block" : "none";
 
       if (elm.distance) {
@@ -149,12 +149,12 @@ function EEWAlertUpdate(data) {
 
       EQMenu.querySelector(".is_final").style.display = isFinalTmp ? "inline" : "none";
       EQMenu.querySelector(".canceled").style.display = isCancelTmp ? "flex" : "none";
-      EQMenu.querySelector(".region_name").innerText = elm.region_name;
+      EQMenu.querySelector(".region_name").innerText = elm.region_name ? elm.region_name : "?";
 
       EQMenu.querySelector(".origin_time").innerText = dateEncode(3, elm.origin_time);
-      EQMenu.querySelector(".calcintensity").innerText = elm.calcintensity;
-      EQMenu.querySelector(".magunitude").innerText = elm.magunitude;
-      EQMenu.querySelector(".depth").innerText = elm.depth;
+      EQMenu.querySelector(".calcintensity").innerText = elm.calcintensity ? elm.calcintensity : "?";
+      EQMenu.querySelector(".magunitude").innerText = elm.magunitude ? elm.magunitude : "?";
+      EQMenu.querySelector(".depth").innerText = elm.depth ? elm.depth : "?";
 
       if (elm.distance) {
         EQMenu.querySelector(".Wave_progress").style.display = "block";

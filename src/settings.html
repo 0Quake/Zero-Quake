@@ -114,6 +114,7 @@
     <div id="tab1_wrap">
         <div id="tab1_bar">
             <div id="tab1_menu1" class="tabmenu active_tabmenu" data-contentid="tab1_content1">地震情報</div>
+            <div id="tab1_menu3" class="tabmenu active_tabme" data-contentid="tab3_content1">通知</div>
             <div id="tab1_menu2" class="tabmenu" data-contentid="tab1_content2">
                 ライセンス
             </div>
@@ -128,6 +129,11 @@
                 <label>緯度<input id="longitude" type="number" oninput="MapReDraw()"></label>
                 <label>細分区域<select id="saibun" onchange="MapReDraw()"></select></label>
                 <div id="mapcontainer"></div>
+
+            </div>
+            <div id="tab1_content3" class="tabcontent">
+                <h3>音声合成</h3>
+                <label>緊急地震速報<input id="EEW_Voice" type="text"></label>
 
             </div>
             <div id="tab1_content2" class="tabcontent">
@@ -213,6 +219,7 @@
 
                 document.getElementById("latitude").value = setting.home.latitude
                 document.getElementById("longitude").value = setting.home.longitude
+                document.getElementById("EEW_Voice").value = setting.notice.voice.EEW
                 var SaibunElm = Array.from(document.querySelectorAll("#saibun option")).find(function (elm) { return elm.innerText == setting.home.Saibun })
                 if (SaibunElm) SaibunElm.selected = true
 
@@ -228,6 +235,7 @@
             setting.home.latitude = document.getElementById("latitude").value
             setting.home.longitude = document.getElementById("longitude").value
             setting.home.Saibun = document.getElementById("saibun").value
+            setting.notice.voice.EEW = document.getElementById("EEW_Voice").value
 
             window.electronAPI.messageReturn({
                 action: "settingReturn",

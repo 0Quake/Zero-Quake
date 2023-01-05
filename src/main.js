@@ -19,6 +19,11 @@ var config = store.get("config", {
   KmoniInterval: 1000,
   LmoniInterval: 1000,
   YmoniInterval: 1000,
+  notice: {
+    voice: {
+      EEW: "緊急地震速報です。強い揺れに警戒してください。",
+    },
+  },
 });
 const userHome = process.env[process.platform == "win32" ? "USERPROFILE" : "HOME"];
 
@@ -89,7 +94,6 @@ ipcMain.on("message", (_event, response) => {
   } else if (response.action == "settingReturn") {
     config = response.data;
     store.set("config", config);
-    console.log("りたーん return!!!", store.get("config"), response.data);
 
     settingWindow.webContents.send("message2", {
       action: "setting",
@@ -222,7 +226,7 @@ const createWindow = () => {
             longitude: null,
             region_code: null,
             region_name: null,
-            origin_time: new Date(),
+            origin_time: new Date(origintimeTmp),
             isPlum: null,
             source: "SignalNow X",
           });
