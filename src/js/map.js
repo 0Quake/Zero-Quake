@@ -15,7 +15,7 @@ window.addEventListener("load", function () {
 var psWaveList = [];
 
 window.electronAPI.messageSend((event, request) => {
-  console.log(request);
+  //console.log(request);
   if (request.action == "kmoniUpdate") {
     var i = 0;
 
@@ -43,8 +43,8 @@ window.electronAPI.messageSend((event, request) => {
     //地図上マーカー
     points.forEach(function (elm) {
       elm2 = dataTmp[i];
-
-      if (!elm.IsSuspended && elm.Name && elm.Point && elm2.rgb && elm.marker) {
+      if (!elm.marker) return;
+      if (!elm.IsSuspended && elm.Name && elm.Point && elm2.rgb) {
         var changed = true;
         if (previous_points.length !== 0) {
           var rgb0 = previous_points[i].rgb;
@@ -359,7 +359,7 @@ function init() {
       points = json;
 
       points.forEach(function (elm) {
-        if (!elm.IsSuspended && elm.Name && elm.Point) {
+        if (elm.Name && elm.Point) {
           var kmoniPointMarker = L.divIcon({
             html: "<div class='marker-circle' style='background:rgba(128,128,128,0.2)'></div><div class='PointPopup PointPopup2'>読み込み中</div>",
             className: "kmoniPointMarker",

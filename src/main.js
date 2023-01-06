@@ -259,6 +259,12 @@ const createWindow = () => {
         data: EEW_nowList,
       });
     }
+
+    mainWindow.webContents.send("message2", {
+      action: "EQInfo",
+      source: "jma",
+      data: [...eqInfo.jma].reverse(),
+    });
   });
 
   mainWindow.loadFile("src/index.html");
@@ -505,6 +511,24 @@ function P2P_WS() {
         switch (data.code) {
           case 551:
             //地震情報
+
+            /*
+            eqInfoControl(
+              [
+                {
+                  eventId: data,
+                  category: "?",
+                  Timestamp: new Date(xml2.querySelector("Earthquake").getAttribute("Time")),
+                  epiCenter: xml2.querySelector("Earthquake").getAttribute("Epicenter"),
+                  M: xml2.querySelector("Earthquake").getAttribute("Magnitude"),
+                  maxI: xml2.querySelector("Earthquake").getAttribute("Intensity"),
+                  reportDateTime: new Date(xml2.querySelector("Timestamp").textContent),
+                  DetailURL: [],
+                },
+              ],
+              "jma"
+            );*/
+
             break;
           case 552:
             //津波予報
@@ -860,14 +884,13 @@ function EEWdetect(type, json, KorL) {
       calcintensity: shindoConvert(maxIntTmp), //最大震度
       depth: depthTmp, //深さ
       is_cancel: json.canceled, //キャンセル
-      is_final: false, //最終報(P2P→不明)
+      is_final: null, //最終報(P2P→不明)
       is_training: json.test, //訓練報
       latitude: latitudeTmp, //緯度
       longitude: longitudeTmp, //経度
       region_code: "", //震央地域コード
       region_name: region_nameTmp, //震央地域
       origin_time: origin_timeTmp, //発生時刻
-      areas: null, //地域ごとの情報
       isPlum: conditionTmp == "仮定震源要素", //🔴PLUM法かどうか
       intensityAreas: null, //細分区分ごとの予想震度
       warnZones: {
@@ -875,14 +898,6 @@ function EEWdetect(type, json, KorL) {
         Pref: null,
         Regions: null,
       },
-
-      /*
-      intensityAreas: intensityAreas, //細分区分ごとの予想震度
-      warnZones: {
-        zone: warnZones,
-        Pref: warnPref,
-        Regions: warnRegions,
-      },*/
       source: "P2P_EEW",
     };
 

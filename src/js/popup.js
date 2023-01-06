@@ -609,17 +609,16 @@ function eqInfoDraw(data, source, EQListWrap, jma, type) {
   data.forEach(function (elm) {
     var clone = EQTemplate.content.cloneNode(true);
 
-    var shindoColor = shindoConvert(elm.maxI, 2);
-    if (jma) {
-      clone.querySelector(".EQI_maxI").innerText = shindoConvert(elm.maxI, 0);
-      clone.querySelector(".EQI_maxI").style.background = shindoColor[0];
-      clone.querySelector(".EQI_maxI").style.color = shindoColor[1];
-    }
     clone.querySelector(".EQI_epiCenter").innerText = elm.epiCenter;
     clone.querySelector(".EQI_datetime").innerText = dateEncode(3, elm.Timestamp);
     clone.querySelector(".EQI_magnitude").innerText = "M" + elm.M;
 
     if (source == "jma") {
+      var shindoColor = shindoConvert(elm.maxI, 2);
+      clone.querySelector(".EQI_maxI").innerText = shindoConvert(elm.maxI, 0);
+      clone.querySelector(".EQI_maxI").style.background = shindoColor[0];
+      clone.querySelector(".EQI_maxI").style.color = shindoColor[1];
+
       clone.querySelector(".EQDetailButton").addEventListener("click", function () {
         window.open("EQDetail.html?eid=" + elm.eventId + "&detailURL=" + encodeURIComponent(elm.DetailURL.join("[ZQ_URLSEPARATE]")), "地震情報 - Zero Quake");
       });
