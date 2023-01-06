@@ -496,6 +496,7 @@ function P2P_WS() {
 
   client.on("connect", function (connection) {
     console.log("WS__conect");
+    kmoniTimeUpdate(new Date(), "P2P_EEW");
 
     connection.on("error", function (error) {
       console.log("WS_error", error.toString());
@@ -708,15 +709,16 @@ var lwaveTmp;
 function EEWdetect(type, json, KorL) {
   if (!json) return;
   if (type == 1) {
+    //yahookmoni
     const request_time = new Date(json.realTimeData.dataTime); //monthは0オリジン
 
-    kmoniTimeUpdate(request_time, "YahooKmoni");
+    kmoniTimeUpdate(request_time, "YahooKmoni", monitorVendor);
 
     if (json.hypoInfo) {
       EEWNow = true;
       json.hypoInfo.items.forEach(function (elm) {
         var EEWdata = {
-          alertflg: "", //種別
+          alertflg: null, //種別
           report_id: elm.reportId, //地震ID
           report_num: Number(elm.reportNum), //第n報
           report_time: new Date(json.realTimeData.dataTime), //発表時刻
@@ -741,20 +743,6 @@ function EEWdetect(type, json, KorL) {
           source: "YahooKmoni",
         };
 
-        var past_keihou = EEW_Data.find(function (elm2) {
-          return elm2.EQ_id == EEWdata.report_id;
-        });
-        if (past_keihou) {
-          past_keihou = past_keihou.data.find(function (elm3) {
-            return elm3.alertflg == "警報";
-          });
-        }
-        if ((EEWdata.calcintensity == "00" || EEWdata.calcintensity == "01" || EEWdata.calcintensity == "02" || EEWdata.calcintensity == "03" || EEWdata.calcintensity == "04") && !past_keihou) {
-          EEWdata.alertflg = "予報";
-        } else {
-          EEWdata.alertflg = "警報";
-        }
-
         EEWcontrol(EEWdata);
       });
     } else {
@@ -767,6 +755,7 @@ function EEWdetect(type, json, KorL) {
       console.log(json.estShindo);
     }
   } else if (type == 2) {
+    //kmoni/lmoni
     const year = parseInt(json.request_time.substring(0, 4));
     const month = parseInt(json.request_time.substring(4, 6));
     const day = parseInt(json.request_time.substring(6, 8));
@@ -849,6 +838,7 @@ function EEWdetect(type, json, KorL) {
     }
     if (KorL == 2) lwaveTmp = json.avrarea;
   } else if (type == 3) {
+    //P2P
     const reception_time = new Date(json.time); //monthは0オリジン
 
     EEWNow = true;
@@ -901,6 +891,8 @@ function EEWdetect(type, json, KorL) {
       source: "P2P_EEW",
     };
 
+    kmoniTimeUpdate(new Date(json.issue.time), "P2P_EEW");
+
     var areaTmp = [];
     json.areas.forEach(function (elm) {
       areaTmp.push({
@@ -912,7 +904,7 @@ function EEWdetect(type, json, KorL) {
         arrivalTime: new Date(elm.arrivalTime), //主要動の到達予測時刻
       });
     });
-    EEWdata.areas = areaTmp;
+    EEWdata.intensityAreas = areaTmp;
 
     EEWcontrol(EEWdata);
   }
@@ -1603,12 +1595,13 @@ async function yoyuSetL(func) {
   return true;
 }
 
-function kmoniTimeUpdate(Updatetime, type) {
+function kmoniTimeUpdate(Updatetime, type, vendor) {
   if (mainWindow) {
     mainWindow.webContents.send("message2", {
       action: "kmoniTimeUpdate",
       Updatetime: Updatetime,
       LocalTime: new Date(),
+      vendor: vendor,
       type: type,
     });
   }

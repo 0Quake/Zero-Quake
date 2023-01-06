@@ -78,3 +78,4 @@ dist/win-unpacked/locales/zh-TW.pak
 dist/win-unpacked/resources/app-update.yml
 dist/win-unpacked/resources/app.asar
 dist/win-unpacked/resources/elevate.exe
+src/config/

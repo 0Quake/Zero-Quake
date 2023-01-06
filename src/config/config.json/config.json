@@ -1,11 +1,17 @@
 {
-	"config": {
-		"setting1": true,
-		"home": {
-			"name": "自宅",
-			"latitude": 35.68,
-			"longitude": 139.767,
-			"Saibun": "東京都２３区"
-		}
-	}
+  "setting1": true,
+  "home": {
+    "name": "自宅",
+    "latitude": 35.68,
+    "longitude": 139.767,
+    "Saibun": "東京都２３区"
+  },
+  "KmoniInterval": 1000,
+  "LmoniInterval": 1000,
+  "YmoniInterval": 1000,
+  "notice": {
+    "voice": {
+      "EEW": "緊急地震速報です。強い揺れに警戒してください。"
+    }
+  }
 }
