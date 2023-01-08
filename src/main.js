@@ -1123,7 +1123,7 @@ function eqInfoControl(dataList, type) {
 }
 
 function eqInfoUpdate() {
-  //気象庁XMLリクエスト～パース
+  //気象庁JSONリクエスト～パース
   var request = net.request("https://www.jma.go.jp/bosai/quake/data/list.json");
   request.on("response", (res) => {
     var dataTmp = "";
@@ -1153,6 +1153,33 @@ function eqInfoUpdate() {
         });
       }
       eqInfoControl(dataTmp2, "jma");
+    });
+  });
+  request.end();
+
+  //気象庁XMLリクエスト～パース
+  var request = net.request("https://www.data.jma.go.jp/developer/xml/feed/eqvol.xml");
+  request.on("response", (res) => {
+    var dataTmp = "";
+    res.on("data", (chunk) => {
+      dataTmp += chunk;
+    });
+    res.on("end", function () {
+      const parser = new new JSDOM().window.DOMParser();
+      const xml = parser.parseFromString(dataTmp, "text/html");
+      xml.querySelectorAll("entry").forEach(function (elm) {
+        //" || elm.ttl == "震源に関する情報" || elm.ttl == "震源・震度情報" || elm.ttl == "遠地地震に関する情報
+        var title = elm.querySelector("title").textContent;
+        var url = elm.querySelector("id").textContent;
+        if (!url) return;
+
+        if (title == "震度速報" || title == "震源に関する情報" || title == "震源・震度情報" || title == "遠地地震に関する情報") {
+          //地震情報
+          JMAEQInfoFetch(url);
+        } else if (/大津波警報|津波警報|津波注意報|津波予報/.test(title)) {
+          //津波予報
+        }
+      });
     });
   });
   request.end();
@@ -1189,16 +1216,32 @@ function eqInfoUpdate() {
 
             var eid = "20" + urls[i].split("data/")[1].split("_")[0].slice(-12);
             //console.log({ "地震ID:": eid, 情報の種別: "?", 発生時刻: new Date(xml2.querySelector("Timestamp").textContent), 震源: xml2.querySelector("Earthquake").getAttribute("Epicenter"), M: xml2.querySelector("Earthquake").getAttribute("Magnitude"), 最大震度: xml2.querySelector("Earthquake").getAttribute("Intensity"), 詳細JSONURL: urls[i] });
+
+            var Timestamp;
+            var epiCenter;
+            var magnitude;
+            var maxI;
+            if (xml2.querySelector("Earthquake")) {
+              Timestamp = new Date(xml2.querySelector("Earthquake").getAttribute("Time"));
+              epiCenter = xml2.querySelector("Earthquake").getAttribute("Epicenter");
+              magnitude = xml2.querySelector("Earthquake").getAttribute("Magnitude");
+              maxI = xml2.querySelector("Earthquake").getAttribute("Intensity");
+            }
+
+            var Timestamp;
+            if (xml2.querySelector("Timestamp")) {
+              Timestamp = new Date(xml2.querySelector("Timestamp").textContent);
+            }
             eqInfoControl(
               [
                 {
                   eventId: eid,
                   category: "?",
-                  Timestamp: new Date(xml2.querySelector("Earthquake").getAttribute("Time")),
-                  epiCenter: xml2.querySelector("Earthquake").getAttribute("Epicenter"),
-                  M: xml2.querySelector("Earthquake").getAttribute("Magnitude"),
-                  maxI: xml2.querySelector("Earthquake").getAttribute("Intensity"),
-                  reportDateTime: new Date(xml2.querySelector("Timestamp").textContent),
+                  Timestamp: Timestamp,
+                  epiCenter: epiCenter,
+                  M: magnitude,
+                  maxI: maxI,
+                  reportDateTime: Timestamp,
                   DetailURL: [urls[i]],
                 },
               ],
@@ -1392,6 +1435,33 @@ function eqInfoUpdate() {
       eqInfoControl(dataTmp2, "usgs");
 
       //eqInfoDraw(dataTmp2, document.getElementById("USGS_EqInfo"), false, "USGS");
+    });
+  });
+  request.end();
+}
+
+function JMAEQInfoFetch(url) {
+  var request = net.request(url);
+  request.on("response", (res) => {
+    var dataTmp = "";
+    res.on("data", (chunk) => {
+      dataTmp += chunk;
+    });
+    res.on("end", function () {
+      const parser = new new JSDOM().window.DOMParser();
+      const xml = parser.parseFromString(dataTmp, "text/html");
+      xml.querySelectorAll("entry").forEach(function (elm) {
+        var title = elm.querySelector("title").textContent;
+        var url = elm.querySelector("id").textContent;
+        if (!url) return;
+
+        if (title == "震度速報" || title == "震源に関する情報" || title == "震源・震度情報" || title == "遠地地震に関する情報") {
+          //地震情報
+          JMAEQInfoFetch(url);
+        } else if (/大津波警報|津波警報|津波注意報|津波予報/.test(title)) {
+          //津波予報
+        }
+      });
     });
   });
   request.end();

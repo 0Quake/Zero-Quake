@@ -596,7 +596,7 @@ function eqInfoUpdate() {
 var template2 = document.getElementById("EQListTemplate");
 var template2_2 = document.getElementById("EQListTemplate2");
 var EQListWrap;
-function eqInfoDraw(data, source, EQListWrap, jma, type) {
+function eqInfoDraw(data, source) {
   var EQTemplate;
   if (source == "jma") {
     EQTemplate = template2;
@@ -622,7 +622,7 @@ function eqInfoDraw(data, source, EQListWrap, jma, type) {
       clone.querySelector(".EQDetailButton").addEventListener("click", function () {
         window.open("EQDetail.html?eid=" + elm.eventId + "&detailURL=" + encodeURIComponent(elm.DetailURL.join("[ZQ_URLSEPARATE]")), "地震情報 - Zero Quake");
       });
-    } else if (source == "USGS") {
+    } else if (source == "usgs") {
       clone.querySelector(".EQDetailButton").addEventListener("click", function () {
         window.open(elm.DetailURL, "地震情報 - Zero Quake");
       });
