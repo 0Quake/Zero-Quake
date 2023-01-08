@@ -54,7 +54,7 @@
         })
         function kmoniRedraw() {
             points.forEach(function (elm) {
-                if (!elm.IsSuspended && elm.Name && elm.Point) {
+                if (elm.Name && elm.Point) {
                     var rgb = point2RGB(elm.Point.X, elm.Point.Y);
                     if (rgb[0] + rgb[1] + rgb[2] !== 0) {
                         var hsv = RGB2HSV(rgb[0], rgb[1], rgb[2]);
@@ -62,6 +62,7 @@
                         var shindo = (10 * p - 3);
                         var pga = 10 ** (5 * p - 2);
 
+                        elm.data = true
                         elm.rgb = rgb
                         elm.shindo = shindo
                         elm.pga = pga
@@ -75,13 +76,15 @@
                     marker = L.marker([elm.Location.latitude, elm.Location.longitude], { icon: pulsingIcon }).addTo(map).bindPopup(elm.Name);
                   */
                     } else {
+                        elm.data = false
+
                         elm.rgb = null
                         elm.shindo = null
                         elm.pga = null
 
                     }
                 } else {
-                    elm.rgb = null
+                    elm.rgb = false
                     elm.shindo = null
                     elm.pga = null
                 }

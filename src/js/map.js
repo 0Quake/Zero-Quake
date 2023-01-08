@@ -44,8 +44,9 @@ window.electronAPI.messageSend((event, request) => {
     points.forEach(function (elm) {
       elm2 = dataTmp[i];
       if (!elm.marker) return;
-      if (!elm.IsSuspended && elm.Name && elm.Point && elm2.rgb) {
+      if (elm.Name && elm.Point && elm2.data) {
         var changed = true;
+
         if (previous_points.length !== 0) {
           var rgb0 = previous_points[i].rgb;
           var rgb1 = elm2.rgb;
@@ -53,7 +54,7 @@ window.electronAPI.messageSend((event, request) => {
         }
 
         if (changed) {
-          var popup_content = "<h3>" + elm.Name + "</h3><table><tr><td>震度</td><td>" + Math.round(elm2.shindo * 10) / 10 + " </td></tr><tr><td>PGA</td><td>" + Math.round(elm2.pga * 100) / 100 + "</td></tr></table>";
+          var popup_content = "<h3>" + elm.Name + "</h3><table><tr><td>震度</td><td>" + Math.round(elm2.shindo * 10) / 10 + " </td></tr><tr><td>PGA</td><td>" + Math.round(elm2.pga * 100) / 100 + "</td></tr></table><br>";
 
           var kmoniPointMarker = L.divIcon({
             html: "<div class='marker-circle' style='background:rgb(" + elm2.rgb.join(",") + ")'></div><div class='PointPopup PointPopup2'><h3>" + elm.Name + "</h3><table><tr><td>震度</td><td>" + Math.round(elm2.shindo * 10) / 10 + " </td></tr><tr><td>PGA</td><td>" + Math.round(elm2.pga * 100) / 100 + "</td></tr></table></div>",
@@ -62,8 +63,8 @@ window.electronAPI.messageSend((event, request) => {
           });
 
           elm.marker.setIcon(kmoniPointMarker).bindPopup(popup_content, { className: "PointPopup" });
-          elm.marker.setOpacity(1);
         }
+        elm.marker.setOpacity(1);
       } else {
         elm.marker.setOpacity(0);
       }
