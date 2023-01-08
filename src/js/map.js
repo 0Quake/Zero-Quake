@@ -41,37 +41,43 @@ window.electronAPI.messageSend((event, request) => {
     }
 
     //地図上マーカー
-    points.forEach(function (elm) {
-      elm2 = dataTmp[i];
-      if (!elm.marker) return;
-      if (elm.Name && elm.Point && elm2.data) {
-        var changed = true;
+    (async function () {
+      await (function () {
+        points.forEach(function (elm) {
+          elm2 = dataTmp[i];
+          if (!elm.marker) return;
+          if (elm.Name && elm.Point && elm2.data) {
+            var changed = true;
 
-        if (previous_points.length !== 0) {
-          var rgb0 = previous_points[i].rgb;
-          var rgb1 = elm2.rgb;
-          if (rgb0) changed = JSON.stringify(rgb0) !== JSON.stringify(rgb1);
-        }
+            if (previous_points.length !== 0) {
+              var rgb0 = previous_points[i].rgb;
+              var rgb1 = elm2.rgb;
+              if (rgb0) changed = JSON.stringify(rgb0) !== JSON.stringify(rgb1);
+            }
 
-        if (changed) {
-          var popup_content = "<h3 style='border-bottom:solid 2px rgb(" + elm2.rgb.join(",") + ")'>" + elm.Name + "</h3><table><tr><td>震度</td><td>" + Math.round(elm2.shindo * 10) / 10 + " </td></tr><tr><td>PGA</td><td>" + Math.round(elm2.pga * 100) / 100 + "</td></tr></table>";
+            if (changed) {
+              var popup_content = "<h3 style='border-bottom:solid 2px rgb(" + elm2.rgb.join(",") + ")'>" + elm.Name + "</h3><table><tr><td>震度</td><td>" + Math.round(elm2.shindo * 10) / 10 + " </td></tr><tr><td>PGA</td><td>" + Math.round(elm2.pga * 100) / 100 + "</td></tr></table>";
 
-          var kmoniPointMarker = L.divIcon({
-            html: "<div class='marker-circle' style='background:rgb(" + elm2.rgb.join(",") + ")'></div><div class='PointPopup'>" + popup_content + "</div>",
-            className: "kmoniPointMarker",
-            iconSize: 25,
-          });
+              var kmoniPointMarker = L.divIcon({
+                html: "<div class='marker-circle' style='background:rgb(" + elm2.rgb.join(",") + ")'></div><div class='PointPopup'>" + popup_content + "</div>",
+                className: "kmoniPointMarker",
+                iconSize: 25,
+              });
 
-          elm.marker.setIcon(kmoniPointMarker).bindPopup(popup_content);
-        }
-        elm.marker.setOpacity(1);
-      } else {
-        elm.marker.setOpacity(0);
-      }
+              elm.marker.setIcon(kmoniPointMarker).bindPopup(popup_content);
+            }
+            elm.marker.setOpacity(1);
+          } else {
+            elm.marker.setOpacity(0);
+          }
 
-      i++;
-    });
-    previous_points = dataTmp;
+          i++;
+        });
+      })();
+      await (function () {
+        previous_points = dataTmp;
+      })();
+    })();
   } else if (request.action == "longWaveUpdate") {
     document.getElementById("LWaveWrap").style.display = "block";
     document.getElementById("region_name2").innerText = request.data.avrarea_list.join(" ");

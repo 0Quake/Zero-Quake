@@ -395,6 +395,12 @@ eqInfoUpdate();
 //
 //UI
 
+document.getElementById("TsunamiDetail").addEventListener("click", function () {
+  window.electronAPI.messageReturn({
+    action: "TsunamiWindowOpen",
+  });
+});
+
 document.getElementById("EQInfoSelect").addEventListener("change", function () {
   document.querySelectorAll(".activeEQInfo").forEach(function (elm) {
     elm.classList.remove("activeEQInfo");
@@ -438,6 +444,11 @@ function kmoniTimeUpdate(updateTime, LocalTime, type, condition, vendor) {
     this.classList.remove("SuccessAnm");
   });
 }
+document.getElementById("setting").addEventListener("click", function () {
+  window.electronAPI.messageReturn({
+    action: "settingWindowOpen",
+  });
+});
 
 //
 //
@@ -630,11 +641,6 @@ function shindoConvert(str, responseType) {
   }
 }
 
-document.getElementById("setting").addEventListener("click", function () {
-  window.electronAPI.messageReturn({
-    action: "settingWindowOpen",
-  });
-});
 function latitudeConvert(data) {
   if (!isNaN(data)) {
     return Number(data);

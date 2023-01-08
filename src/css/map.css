@@ -20,6 +20,11 @@ a.leaflet-control-zoom-out:hover {
   background: #666;
 }
 
+.leaflet-bar a.leaflet-disabled {
+  background: #444;
+  color: #666;
+}
+
 #kmoniCanvas {
   display: none;
 }
@@ -111,8 +116,8 @@ img.leaflet-control {
 }
 
 .zoomLevel_1 .marker-circle {
-  width: 5px;
-  height: 5px;
+  width: 3px;
+  height: 3px;
   margin: 10px;
 }
 .zoomLevel_2 .marker-circle {

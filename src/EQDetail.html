@@ -505,7 +505,7 @@
             if (json.Body.Earthquake && json.Body.Earthquake.OriginTime && (mostNew || data_time.innerText == "不明")) data_time.innerText = dateEncode(3, json.Body.Earthquake.OriginTime)
             if (json.Body.Intensity && json.Body.Intensity.Observation.MaxInt && (mostNew || data_maxI.innerText == "不明")) data_maxI.innerText = json.Body.Intensity.Observation.MaxInt
             if (json.Body.Earthquake && json.Body.Earthquake.Magnitude && (mostNew || data_M.innerText == "不明")) data_M.innerText = json.Body.Earthquake.Magnitude
-            if (LatLngDepth && LatLngDepth[3] && (mostNew || data_depth.innerText == "不明")) data_depth.innerText = Math.abs(Number(LatLngDepth[3]) / 1000) + "km";
+            if (LatLngDepth && !isNaN(LatLngDepth[3]) && LatLngDepth[3] && (mostNew || data_depth.innerText == "不明")) data_depth.innerText = Math.abs(Number(LatLngDepth[3]) / 1000) + "km";
             if (json.Body.Earthquake && json.Body.Earthquake.Hypocenter.Area.Name && (mostNew || data_center.innerText == "不明")) data_center.innerText = json.Body.Earthquake.Hypocenter.Area.Name
 
             var commentText = "";
@@ -652,7 +652,7 @@
               if (json.Body.Earthquake.OriginTime && (mostNew || data_time.innerText == "不明")) data_time.innerText = dateEncode(3, json.Body.Earthquake.OriginTime)
               if (json.Body.Intensity && json.Body.Intensity.Observation.MaxInt && (mostNew || data_maxI.innerText == "不明")) data_maxI.innerText = json.Body.Intensity.Observation.MaxInt
               if (json.Body.Earthquake.Magnitude && (mostNew || data_M.innerText == "不明")) data_M.innerText = json.Body.Earthquake.Magnitude
-              if (json.Body.Earthquake.Hypocenter.Depth && (mostNew || data_depth.innerText == "不明")) data_depth.innerText = json.Body.Earthquake.Hypocenter.Depth + "km"
+              if (json.Body.Earthquake.Hypocenter.Depth && !isNaN(json.Body.Earthquake.Hypocenter.Depth) && (mostNew || data_depth.innerText == "不明")) data_depth.innerText = json.Body.Earthquake.Hypocenter.Depth + "km"
               if (json.Body.Earthquake.Hypocenter.Name && (mostNew || data_center.innerText == "不明")) data_center.innerText = json.Body.Earthquake.Hypocenter.Name
               if (json.Body.Comments && json.Body.Comments.Observation && (mostNew || data_comment.innerText == "")) data_comment.innerText = json.Body.Comments.Observation;
 
@@ -780,7 +780,7 @@
               if (xml2.querySelector("Earthquake").getAttribute("Time") && (mostNew || data_time.innerText == "不明")) data_time.innerText = dateEncode(3, new Date(xml2.querySelector("Earthquake").getAttribute("Time")))
               if (xml2.querySelector("Earthquake").getAttribute("Intensity") && (mostNew || data_maxI.innerText == "不明")) data_maxI.innerText = xml2.querySelector("Earthquake").getAttribute("Intensity")
               if (xml2.querySelector("Earthquake").getAttribute("Magnitude") && (mostNew || data_M.innerText == "不明")) data_M.innerText = xml2.querySelector("Earthquake").getAttribute("Magnitude")
-              if (xml2.querySelector("Earthquake").getAttribute("Depth") && (mostNew || data_depth.innerText == "不明")) data_depth.innerText = xml2.querySelector("Earthquake").getAttribute("Depth")
+              if (xml2.querySelector("Earthquake").getAttribute("Depth") && !isNaN(xml2.querySelector("Earthquake").getAttribute("Depth")) && (mostNew || data_depth.innerText == "不明")) data_depth.innerText = xml2.querySelector("Earthquake").getAttribute("Depth")
               if (xml2.querySelector("Earthquake").getAttribute("Epicenter") && (mostNew || data_center.innerText == "不明")) data_center.innerText = xml2.querySelector("Earthquake").getAttribute("Epicenter")
 
               if (xml2.querySelector("Earthquake").querySelectorAll("Group") && !narikakunURL && !jmaURL) {
