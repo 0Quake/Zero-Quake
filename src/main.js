@@ -8,7 +8,6 @@ const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
 let fs = require("fs");
 
-//let config = require("config");
 const Store = require("electron-store");
 const store = new Store();
 var config = store.get("config", {
@@ -245,6 +244,7 @@ const createWindow = () => {
         Updatetime: elm.Updatetime,
         LocalTime: elm.LocalTime,
         type: elm.type,
+        condition: "success",
       });
     });
 
@@ -495,14 +495,11 @@ function P2P_WS() {
   });
 
   client.on("connect", function (connection) {
-    console.log("WS__conect");
-    kmoniTimeUpdate(new Date(), "P2P_EEW");
-
     connection.on("error", function (error) {
-      console.log("WS_error", error.toString());
+      kmoniTimeUpdate(new Date(), "P2P_EEW", "Error");
     });
     connection.on("close", function () {
-      console.log("WS_close");
+      kmoniTimeUpdate(new Date(), "P2P_EEW", "Disconnect");
       P2P_WS();
     });
     connection.on("message", function (message) {
@@ -519,11 +516,11 @@ function P2P_WS() {
                 {
                   eventId: data,
                   category: "?",
-                  Timestamp: new Date(xml2.querySelector("Earthquake").getAttribute("Time")),
+                  OriginTime: new Date(xml2.querySelector("Earthquake").getAttribute("Time")),
                   epiCenter: xml2.querySelector("Earthquake").getAttribute("Epicenter"),
                   M: xml2.querySelector("Earthquake").getAttribute("Magnitude"),
                   maxI: xml2.querySelector("Earthquake").getAttribute("Intensity"),
-                  reportDateTime: new Date(xml2.querySelector("Timestamp").textContent),
+                  reportDateTime: new Date(xml2.querySelector("OriginTime").textContent),
                   DetailURL: [],
                 },
               ],
@@ -543,29 +540,6 @@ function P2P_WS() {
             }
             break;
           case 554:
-            //	緊急地震速報の発表検出
-            /*
-            if (EEWNow) {
-              if (
-                !EEW_nowList.find(function (elm) {
-                  return elm.alertflg == "警報";
-                })
-              ) {
-                createWindow();
-                if (mainWindow) {
-                  mainWindow.webContents.send("message2", {
-                    action: "EEW_Detection",
-                  });
-                }
-              }
-            } else {
-              createWindow();
-              if (mainWindow) {
-                mainWindow.webContents.send("message2", {
-                  action: "EEW_Detection",
-                });
-              }
-            }*/
             break;
           case 556:
             //緊急地震速報（警報）
@@ -576,101 +550,15 @@ function P2P_WS() {
             break;
         }
         if (data.time) {
-          kmoniTimeUpdate(new Date(data.time), "P2P_EEW");
+          kmoniTimeUpdate(new Date(data.time), "P2P_EEW", "success");
         }
       }
     });
-    kmoniTimeUpdate(new Date(), "P2P_EEW");
+    kmoniTimeUpdate(new Date(), "P2P_EEW", "success");
   });
 
   client.connect("wss://api.p2pquake.net/v2/ws");
 }
-
-/*
-function nakn_WS() {
-  process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
-  var WebSocketClient = require("websocket").client;
-  var client = new WebSocketClient();
-
-  client.on("connectFailed", function (error) {
-    console.log("WS__connectFailed:", error.toString());
-  });
-
-  client.on("connect", function (connection) {
-    console.log("WS__conect");
-
-    connection.on("error", function (error) {
-      console.log("WS_error", error.toString());
-    });
-    connection.on("close", function () {
-      console.log("WS_close");
-      nakn_WS();
-    });
-    connection.on("message", function (message) {
-      if (message.type === "utf8") {
-        var data = JSON.parse(message.utf8Data);
-
-        console.log("WS_message");
-
-        if (new Date() - origin_timeTmp > 300000) {
-          var calcintensityTmp;
-          var isFinalTmp;
-          var latitudeTmp;
-          var longitudeTmp;
-          var region_codeTmp;
-          var region_nameTmp;
-          var origin_timeTmp;
-          var intensityAreas;
-          var warnZones;
-          var warnPref;
-          var warnRegions;
-          if (data.intensity) calcintensityTmp = data.intensity;
-          if (data.isFinal) isFinalTmp = data.isFinal;
-          if (data.hypocenter && data.hypocenter.latitude) latitudeTmp = Number(data.hypocenter.latitude);
-          if (data.hypocenter && data.hypocenter.longitude) longitudeTmp = Number(data.hypocenter.longitude);
-          if (data.hypocenter && data.hypocenter.code) region_codeTmp = Number(data.hypocenter.code);
-          if (data.hypocenter && data.hypocenter.name) region_nameTmp = data.hypocenter.name;
-          if (data.originTime) origin_timeTmp = new Date(data.originTime);
-          if (data.intensityAreas && Object.keys(data.intensityAreas).length !== 0) intensityAreas = data.intensityAreas;
-          if (data.warnZones && Object.keys(data.warnZones).length !== 0) warnZones = data.warnZones;
-          if (data.warnPref && Object.keys(data.warnPref).length !== 0) warnPref = data.warnPref;
-          if (data.warnRegions && Object.keys(data.warnRegions).length !== 0) warnRegions = data.warnRegions;
-
-          var EEWdata = {
-            alertflg: data.alertFlg ? "警報" : "予報", //種別
-            report_id: data.eventId, //地震ID
-            report_num: data.eventSerial, //第n報
-            report_time: new Date(new Date() - 5000), //new Date(data.reportTime), //発表時刻
-            magunitude: Number(data.magnitude), //マグニチュード
-            calcintensity: calcintensityTmp, //最大深度
-            depth: Number(data.hypocenter.depth.replace("km", "")), //深さ
-            is_cancel: data.isCancel, //キャンセル
-            is_final: isFinalTmp, //最終報
-            is_training: data.isTraining, //訓練報
-            latitude: latitudeTmp, //緯度
-            longitude: longitudeTmp, //経度
-            region_code: region_codeTmp, //震央地域コード
-            region_name: region_nameTmp, //震央地域
-            origin_time: new Date(), //origin_timeTmp, //発生時刻
-            isPlum: data.isPlum, //🔴PLUM法かどうか
-            intensityAreas: intensityAreas, //細分区分ごとの予想震度
-            warnZones: {
-              zone: warnZones,
-              Pref: warnPref,
-              Regions: warnRegions,
-            },
-            source: "narikakun",
-          };
-
-          EEWcontrol(EEWdata);
-        }
-      }
-    });
-    kmoniTimeUpdate(new Date(), "narikakun");
-  });
-
-  client.connect("wss://eew.ws.nakn.jp:8080/eew");
-}*/
 
 function start() {
   //↓接続処理
@@ -712,7 +600,7 @@ function EEWdetect(type, json, KorL) {
     //yahookmoni
     const request_time = new Date(json.realTimeData.dataTime); //monthは0オリジン
 
-    kmoniTimeUpdate(request_time, "YahooKmoni", monitorVendor);
+    kmoniTimeUpdate(request_time, "YahooKmoni", "success", monitorVendor);
 
     if (json.hypoInfo) {
       EEWNow = true;
@@ -768,7 +656,7 @@ function EEWdetect(type, json, KorL) {
     if (KorL == 1) sourceTmp = "kmoni";
     else if (KorL == 2) sourceTmp = "Lmoni";
 
-    kmoniTimeUpdate(request_time, sourceTmp);
+    kmoniTimeUpdate(request_time, sourceTmp, "success");
 
     if (json.result.message == "") {
       EEWNow = true;
@@ -891,7 +779,7 @@ function EEWdetect(type, json, KorL) {
       source: "P2P_EEW",
     };
 
-    kmoniTimeUpdate(new Date(json.issue.time), "P2P_EEW");
+    kmoniTimeUpdate(new Date(json.issue.time), "P2P_EEW", "success");
 
     var areaTmp = [];
     json.areas.forEach(function (elm) {
@@ -961,20 +849,6 @@ function EEWcontrol(data) {
       data: [data],
     });
   }
-  /*
-  if (EEW_history[EEWdata.source]) {
-    EEW_history[EEWdata.source]
-      .filter(function (elm) {
-        return elm.code !== data.report_id;
-      })
-      .forEach(function (elm2) {
-        EEWClear(EEWdata.source, elm2.code);
-      });
-  }*/
-
-  /*
-  if (!EEW_history[data.source]) EEW_history[data.source] = [];
-  EEW_history[data.source].push({ code: data.report_id, reportnum: data.report_num });*/
 }
 function EEWAlert(data, first) {
   EEW_nowList = EEW_nowList.filter(function (elm) {
@@ -983,16 +857,6 @@ function EEWAlert(data, first) {
   EEW_nowList.push(data);
 
   if (mainWindow) {
-    /*
-    if (data.longitude && data.latitude) {
-      mainWindow.webContents.send("message2", {
-        action: "EpiCenterUpdate",
-        data: {
-          
-        },
-      });
-    }*/
-
     mainWindow.webContents.send("message2", {
       action: "EEWAlertUpdate",
       data: EEW_nowList,
@@ -1037,7 +901,6 @@ function EEWClear(source, code, reportnum, bypass) {
       EEW_nowList = EEW_nowList.filter(function (elm) {
         return elm.report_id !== code;
       });
-
       if (mainWindow) {
         mainWindow.webContents.send("message2", {
           action: "EEWAlertUpdate",
@@ -1059,7 +922,6 @@ function EEWClear(source, code, reportnum, bypass) {
 //地震情報
 var eqInfo = { jma: [], usgs: [] };
 function eqInfoControl(dataList, type) {
-  console.log(dataList);
   switch (type) {
     case "jma":
       dataList.forEach(function (data) {
@@ -1070,7 +932,7 @@ function eqInfoControl(dataList, type) {
         if (EQElm) {
           /*          category: json[i].ttl,    */
 
-          if (data.Timestamp && (!EQElm.Timestamp || EQElm.reportDateTime < data.reportDateTime)) EQElm.Timestamp = data.Timestamp;
+          if (data.OriginTime && (!EQElm.OriginTime || EQElm.reportDateTime < data.reportDateTime)) EQElm.OriginTime = data.OriginTime;
           if (data.epiCenter && (!EQElm.epiCenter || EQElm.reportDateTime < data.reportDateTime)) EQElm.epiCenter = data.epiCenter;
           if (data.M && (!EQElm.M || EQElm.reportDateTime < data.reportDateTime)) EQElm.M = data.M;
           if (data.maxI && (!EQElm.maxI || EQElm.reportDateTime < data.reportDateTime)) EQElm.maxI = data.maxI;
@@ -1083,9 +945,9 @@ function eqInfoControl(dataList, type) {
 
       eqInfo.jma.sort(function (a, b) {
         var r = 0;
-        if (a.Timestamp < b.Timestamp) {
+        if (a.OriginTime < b.OriginTime) {
           r = -1;
-        } else if (a.Timestamp > b.Timestamp) {
+        } else if (a.OriginTime > b.OriginTime) {
           r = 1;
         }
         return r;
@@ -1144,7 +1006,7 @@ function eqInfoUpdate() {
         dataTmp2.push({
           eventId: json[i].eid,
           category: json[i].ttl,
-          Timestamp: new Date(json[i].at),
+          OriginTime: new Date(json[i].at),
           epiCenter: json[i].anm,
           M: json[i].mag,
           maxI: maxi,
@@ -1215,33 +1077,33 @@ function eqInfoUpdate() {
             const xml2 = parser.parseFromString(dataTmp2, "text/html");
 
             var eid = "20" + urls[i].split("data/")[1].split("_")[0].slice(-12);
-            //console.log({ "地震ID:": eid, 情報の種別: "?", 発生時刻: new Date(xml2.querySelector("Timestamp").textContent), 震源: xml2.querySelector("Earthquake").getAttribute("Epicenter"), M: xml2.querySelector("Earthquake").getAttribute("Magnitude"), 最大震度: xml2.querySelector("Earthquake").getAttribute("Intensity"), 詳細JSONURL: urls[i] });
+            //console.log({ "地震ID:": eid, 情報の種別: "?", 発生時刻: new Date(xml2.querySelector("OriginTime").textContent), 震源: xml2.querySelector("Earthquake").getAttribute("Epicenter"), M: xml2.querySelector("Earthquake").getAttribute("Magnitude"), 最大震度: xml2.querySelector("Earthquake").getAttribute("Intensity"), 詳細JSONURL: urls[i] });
 
-            var Timestamp;
+            var OriginTime;
             var epiCenter;
             var magnitude;
             var maxI;
             if (xml2.querySelector("Earthquake")) {
-              Timestamp = new Date(xml2.querySelector("Earthquake").getAttribute("Time"));
+              OriginTime = new Date(xml2.querySelector("Earthquake").getAttribute("Time"));
               epiCenter = xml2.querySelector("Earthquake").getAttribute("Epicenter");
               magnitude = xml2.querySelector("Earthquake").getAttribute("Magnitude");
               maxI = xml2.querySelector("Earthquake").getAttribute("Intensity");
             }
 
-            var Timestamp;
-            if (xml2.querySelector("Timestamp")) {
-              Timestamp = new Date(xml2.querySelector("Timestamp").textContent);
+            var OriginTime;
+            if (xml2.querySelector("OriginTime")) {
+              OriginTime = new Date(xml2.querySelector("OriginTime").textContent);
             }
             eqInfoControl(
               [
                 {
                   eventId: eid,
                   category: "?",
-                  Timestamp: Timestamp,
+                  OriginTime: OriginTime,
                   epiCenter: epiCenter,
                   M: magnitude,
                   maxI: maxI,
-                  reportDateTime: Timestamp,
+                  reportDateTime: OriginTime,
                   DetailURL: [urls[i]],
                 },
               ],
@@ -1268,7 +1130,7 @@ function eqInfoUpdate() {
         {
           eventId: json.Head.EventID,
           category: json.Head.Title,
-          Timestamp: new Date(json.Body.Earthquake.OriginTime),
+          OriginTime: new Date(json.Body.Earthquake.OriginTime),
           epiCenter: json.Body.Earthquake.Hypocenter.Name,
           M: json.Body.Earthquake.Magnitude,
           maxI: json.Body.Intensity.Observation.MaxInt,
@@ -1281,135 +1143,6 @@ function eqInfoUpdate() {
   });
   request.end();
 
-  //AQUAリクエスト～パース
-  /*
-  var request = net.request("https://www.hinet.bosai.go.jp/AQUA/aqua_catalogue.php?y=" + new Date().getFullYear() + "&m=" + (new Date().getMonth() + 1) + "&LANG=ja");
-  request.on("response", (res) => {
-    var dataTmp = "";
-    res.on("data", (chunk) => {
-      dataTmp += chunk;
-    });
-    res.on("end", function () {
-      data = iconv.decode(dataTmp, "EUC-JP");
-
-      const parser = new new JSDOM().window.DOMParser();
-      const xml = parser.parseFromString(data, "text/html");
-      var table = xml.querySelector(".aqua_catalogue");
-      dataTmp2 = [];
-      var elms = [].map
-        .call(table.querySelectorAll("tr"), (element) => {
-          return element;
-        })
-        .filter(function (elm) {
-          return elm.classList.contains("off");
-        });
-
-      for (let i = 0; i < Math.min(10, elms.length); i++) {
-        var td = elms[i].querySelectorAll("td");
-        var URLStr = elms[i].getAttribute("onmouseover").split("aquaPreview(")[1].split(",");
-        var url1 = URLStr[1].replaceAll("'", "").replace("../", "https://www.hinet.bosai.go.jp/");
-        var url2 = URLStr[2].split(")")[0].replaceAll("'", "").replace("../", "https://www.hinet.bosai.go.jp/");
-        var Datas = {
-          date: new Date(td[0].textContent),
-          center: td[1].textContent,
-          lat: latitudeConvert(td[2].textContent),
-          lng: latitudeConvert(td[3].textContent),
-          depth: Number(td[4].textContent.replace("km", "")),
-          M: Number(td[5].textContent),
-          souko: td[6].textContent,
-          keisha: td[7].textContent,
-          suberikaku: td[8].textContent,
-          quality: Number(td[9].textContent),
-          pointCount: Number(td[10].textContent),
-          date: td[11].textContent.replace("C", "AQUA-CMT").replace("M", "AQUA-MT"),
-        };
-
-        dataTmp2.push({
-          eventId: null,
-          category: null,
-          Timestamp: new Date(td[0].textContent),
-          epiCenter: td[1].textContent,
-          M: td[5].textContent,
-          maxI: "?",
-          DetailURL: encodeURIComponent(JSON.stringify({ url1: url1, url2: url2, data: Datas })),
-        });
-      }
-
-      if (elms.length < 10) {
-        var yearTmp = Number(new Date().getFullYear());
-        var monthTmp = Number(new Date().getMonth() + 1);
-        if (new Date().getMonth() == 0) {
-          yearTmp -= 1;
-          monthTmp = 11;
-        } else {
-          monthTmp -= 1;
-        }
-
-        var request = net.request("https://www.hinet.bosai.go.jp/AQUA/aqua_catalogue.php?y=" + yearTmp + "&m=" + monthTmp + "&LANG=ja");
-        request.on("response", (res) => {
-          var dataTmp3 = "";
-          res.on("data", (chunk) => {
-            dataTmp3 += chunk;
-          });
-          res.on("end", function () {
-            data = iconv.decode(dataTmp3, "EUC-JP");
-
-            const parser = new new JSDOM().window.DOMParser();
-            const xml = parser.parseFromString(data, "text/html");
-            var table = xml.querySelector(".aqua_catalogue");
-            var elms2 = [].map
-              .call(table.querySelectorAll("tr"), (element) => {
-                return element;
-              })
-              .filter(function (elm) {
-                return elm.classList.contains("off");
-              });
-
-            console.log("dsfjksdf" + table.querySelectorAll("tr").length);
-
-            for (let i = 0; i < 10 - elms.length; i++) {
-              var URLStr = elms2[i].getAttribute("onmouseover").split("aquaPreview(")[1].split(",");
-              var url1 = URLStr[1].replaceAll("'", "").replace("../", "https://www.hinet.bosai.go.jp/");
-              var url2 = URLStr[2].split(")")[0].replaceAll("'", "").replace("../", "https://www.hinet.bosai.go.jp/");
-
-              var td = elms2[i].querySelectorAll("td");
-              var Datas = {
-                date: new Date(td[0].textContent),
-                center: td[1].textContent,
-                lat: latitudeConvert(td[2].textContent),
-                lng: latitudeConvert(td[3].textContent),
-                depth: Number(td[4].textContent.replace("km", "")),
-                M: Number(td[5].textContent),
-                souko: td[6].textContent,
-                keisha: td[7].textContent,
-                suberikaku: td[8].textContent,
-                quality: Number(td[9].textContent),
-                pointCount: Number(td[10].textContent),
-                date: td[11].textContent.replace("C", "AQUA-CMT").replace("M", "AQUA-MT"),
-              };
-
-              dataTmp2.push({
-                eventId: null,
-                category: null,
-                Timestamp: new Date(Datas[0]),
-                epiCenter: Datas[1],
-                M: Datas[5],
-                maxI: "?",
-                DetailURL: encodeURIComponent(JSON.stringify({ url1: url1, url2: url2, data: Datas })),
-              });
-            }
-
-            eqInfoDraw(dataTmp2, document.getElementById("AQUA_EqInfo"), false, "AQUA");
-          });
-        });
-        request.end();
-      } else {
-        eqInfoDraw(dataTmp2, document.getElementById("AQUA_EqInfo"), false, "AQUA");
-      }
-    });
-  });
-  request.end();
-*/
   //USGSリクエスト～パース
   var request = net.request("https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&limit=10");
   request.on("response", (res) => {
@@ -1425,7 +1158,7 @@ function eqInfoUpdate() {
         dataTmp2.push({
           eventId: null,
           category: null,
-          Timestamp: new Date(elm.properties.time),
+          OriginTime: new Date(elm.properties.time),
           epiCenter: elm.properties.place,
           M: elm.properties.mag,
           maxI: "?",
@@ -1450,20 +1183,48 @@ function JMAEQInfoFetch(url) {
     res.on("end", function () {
       const parser = new new JSDOM().window.DOMParser();
       const xml = parser.parseFromString(dataTmp, "text/html");
-      xml.querySelectorAll("entry").forEach(function (elm) {
-        var title = elm.querySelector("title").textContent;
-        var url = elm.querySelector("id").textContent;
-        if (!url) return;
+      console.log("atama" + xml.querySelector("Head") + xml.title);
+      var title = xml.title;
 
-        if (title == "震度速報" || title == "震源に関する情報" || title == "震源・震度情報" || title == "遠地地震に関する情報") {
-          //地震情報
-          JMAEQInfoFetch(url);
-        } else if (/大津波警報|津波警報|津波注意報|津波予報/.test(title)) {
-          //津波予報
+      if (title == "震度速報" || title == "震源に関する情報" || title == "震源・震度情報" || title == "遠地地震に関する情報") {
+        //地震情報
+
+        var EarthquakeElm = xml.querySelector("Body Earthquake");
+        var originTimeTmp;
+        var epiCenterTmp;
+        var magnitudeTmp;
+        if (EarthquakeElm) {
+          originTimeTmp = new Date(EarthquakeElm.querySelector("OriginTime").textContent);
+          epiCenterTmp = EarthquakeElm.querySelector("Name").textContent;
+          magnitudeTmp = Number(EarthquakeElm.getElementsByTagName("jmx_eb:Magnitude").textContent);
         }
-      });
+
+        var IntensityElm = xml.querySelector("Body Intensity");
+        var maxIntTmp;
+        if (IntensityElm) {
+          maxIntTmp = shindoConvert(IntensityElm.querySelector("MaxInt"));
+        }
+        eqInfoControl(
+          [
+            {
+              eventId: xml.querySelector("EventID").textContent,
+              category: xml.title,
+              OriginTime: originTimeTmp,
+              epiCenter: epiCenterTmp,
+              M: magnitudeTmp,
+              maxI: maxIntTmp,
+              reportDateTime: new Date(xml.querySelector("ReportDateTime").textContent),
+              DetailURL: [url],
+            },
+          ],
+          "jma"
+        );
+      } else if (/大津波警報|津波警報|津波注意報|津波予報/.test(title)) {
+        //津波予報
+      }
     });
   });
+
   request.end();
 }
 
@@ -1665,7 +1426,7 @@ async function yoyuSetL(func) {
   return true;
 }
 
-function kmoniTimeUpdate(Updatetime, type, vendor) {
+function kmoniTimeUpdate(Updatetime, type, condition, vendor) {
   if (mainWindow) {
     mainWindow.webContents.send("message2", {
       action: "kmoniTimeUpdate",
@@ -1673,6 +1434,7 @@ function kmoniTimeUpdate(Updatetime, type, vendor) {
       LocalTime: new Date(),
       vendor: vendor,
       type: type,
+      condition: condition,
     });
   }
   kmoniTimeTmpElm = kmoniTimeTmp.find(function (elm) {

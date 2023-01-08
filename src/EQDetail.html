@@ -783,13 +783,13 @@
               var parser2 = new DOMParser();
               var xml2 = parser2.parseFromString(data, "application/xml");
               var eid = "20" + nhkURL.split("data/")[1].split("_")[0].slice(-12);
-              //console.log({ "地震ID:": eid, 情報の種別: "?", 発生時刻: new Date(xml2.querySelector("Timestamp").textContent), 震源: xml2.querySelector("Earthquake").getAttribute("Epicenter"), M: xml2.querySelector("Earthquake").getAttribute("Magnitude"), 最大震度: xml2.querySelector("Earthquake").getAttribute("Intensity"), 詳細JSONURL: urls[i] });
+              //console.log({ "地震ID:": eid, 情報の種別: "?", 発生時刻: new Date(xml2.querySelector("OriginTime").textContent), 震源: xml2.querySelector("Earthquake").getAttribute("Epicenter"), M: xml2.querySelector("Earthquake").getAttribute("Magnitude"), 最大震度: xml2.querySelector("Earthquake").getAttribute("Intensity"), 詳細JSONURL: urls[i] });
 
 
 
               var mostNew = false;
-              if (!newInfoDateTime || newInfoDateTime < new Date(new Date(xml2.querySelector("Timestamp").textContent))) {
-                newInfoDateTime = new Date(new Date(xml2.querySelector("Timestamp").textContent))
+              if (!newInfoDateTime || newInfoDateTime < new Date(new Date(xml2.querySelector("OriginTime").textContent))) {
+                newInfoDateTime = new Date(new Date(xml2.querySelector("OriginTime").textContent))
                 mostNew = true
               }
 

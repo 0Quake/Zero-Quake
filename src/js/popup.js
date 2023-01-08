@@ -9,7 +9,7 @@ window.electronAPI.messageSend((event, request) => {
   if (request.action == "EEWAlertUpdate") {
     EEWAlertUpdate(request.data);
   } else if (request.action == "kmoniTimeUpdate") {
-    kmoniTimeUpdate(request.Updatetime, request.LocalTime, request.type, request.vendor);
+    kmoniTimeUpdate(request.Updatetime, request.LocalTime, request.type, request.condition, request.vendor);
   } else if (request.action == "kmoniUpdate") {
     kmoniTimeUpdate(request.Updatetime, request.LocalTime, "kmoniImg");
   } else if (request.action == "MSSelect") {
@@ -352,7 +352,7 @@ function eqInfoControl(dataList) {
     if (EQElm) {
       //         category: json[i].ttl,    
 
-      if (data.Timestamp && (!EQElm.Timestamp || EQElm.reportDateTime < data.reportDateTime)) EQElm.Timestamp = data.Timestamp;
+      if (data.OriginTime && (!EQElm.OriginTime || EQElm.reportDateTime < data.reportDateTime)) EQElm.OriginTime = data.OriginTime;
       if (data.epiCenter && (!EQElm.epiCenter || EQElm.reportDateTime < data.reportDateTime)) EQElm.epiCenter = data.epiCenter;
       if (data.M && (!EQElm.M || EQElm.reportDateTime < data.reportDateTime)) EQElm.M = data.M;
       if (data.maxI && (!EQElm.maxI || EQElm.reportDateTime < data.reportDateTime)) EQElm.maxI = data.maxI;
@@ -365,9 +365,9 @@ function eqInfoControl(dataList) {
 
   eqInfo.sort(function (a, b) {
     var r = 0;
-    if (a.Timestamp < b.Timestamp) {
+    if (a.OriginTime < b.OriginTime) {
       r = -1;
-    } else if (a.Timestamp > b.Timestamp) {
+    } else if (a.OriginTime > b.OriginTime) {
       r = 1;
     }
     return r;
@@ -394,7 +394,7 @@ function eqInfoUpdate() {
         dataTmp.push({
           eventId: json[i].eid,
           category: json[i].ttl,
-          Timestamp: new Date(json[i].at),
+          OriginTime: new Date(json[i].at),
           epiCenter: json[i].anm,
           M: json[i].mag,
           maxI: maxi,
@@ -427,16 +427,16 @@ function eqInfoUpdate() {
             var parser2 = new DOMParser();
             var xml2 = parser2.parseFromString(data, "application/xml");
             var eid = "20" + urls[i].split("data/")[1].split("_")[0].slice(-12);
-            //console.log({ "地震ID:": eid, 情報の種別: "?", 発生時刻: new Date(xml2.querySelector("Timestamp").textContent), 震源: xml2.querySelector("Earthquake").getAttribute("Epicenter"), M: xml2.querySelector("Earthquake").getAttribute("Magnitude"), 最大震度: xml2.querySelector("Earthquake").getAttribute("Intensity"), 詳細JSONURL: urls[i] });
+            //console.log({ "地震ID:": eid, 情報の種別: "?", 発生時刻: new Date(xml2.querySelector("OriginTime").textContent), 震源: xml2.querySelector("Earthquake").getAttribute("Epicenter"), M: xml2.querySelector("Earthquake").getAttribute("Magnitude"), 最大震度: xml2.querySelector("Earthquake").getAttribute("Intensity"), 詳細JSONURL: urls[i] });
             eqInfoControl([
               {
                 eventId: eid,
                 category: "?",
-                Timestamp: new Date(xml2.querySelector("Earthquake").getAttribute("Time")),
+                OriginTime: new Date(xml2.querySelector("Earthquake").getAttribute("Time")),
                 epiCenter: xml2.querySelector("Earthquake").getAttribute("Epicenter"),
                 M: xml2.querySelector("Earthquake").getAttribute("Magnitude"),
                 maxI: xml2.querySelector("Earthquake").getAttribute("Intensity"),
-                reportDateTime: new Date(xml2.querySelector("Timestamp").textContent),
+                reportDateTime: new Date(xml2.querySelector("OriginTime").textContent),
                 DetailURL: [urls[i]],
               },
             ]);
@@ -454,7 +454,7 @@ function eqInfoUpdate() {
         {
           eventId: json.Head.EventID,
           category: json.Head.Title,
-          Timestamp: new Date(json.Body.Earthquake.OriginTime),
+          OriginTime: new Date(json.Body.Earthquake.OriginTime),
           epiCenter: json.Body.Earthquake.Hypocenter.Name,
           M: json.Body.Earthquake.Magnitude,
           maxI: json.Body.Intensity.Observation.MaxInt,
@@ -506,7 +506,7 @@ function eqInfoUpdate() {
         dataTmp.push({
           eventId: null,
           category: null,
-          Timestamp: new Date(td[0].textContent),
+          OriginTime: new Date(td[0].textContent),
           epiCenter: td[1].textContent,
           M: td[5].textContent,
           maxI: "?",
@@ -555,7 +555,7 @@ function eqInfoUpdate() {
               dataTmp.push({
                 eventId: null,
                 category: null,
-                Timestamp: new Date(Datas[0]),
+                OriginTime: new Date(Datas[0]),
                 epiCenter: Datas[1],
                 M: Datas[5],
                 maxI: "?",
@@ -581,7 +581,7 @@ function eqInfoUpdate() {
         dataTmp.push({
           eventId: null,
           category: null,
-          Timestamp: new Date(elm.properties.time),
+          OriginTime: new Date(elm.properties.time),
           epiCenter: elm.properties.place,
           M: elm.properties.mag,
           maxI: "?",
@@ -610,7 +610,7 @@ function eqInfoDraw(data, source) {
     var clone = EQTemplate.content.cloneNode(true);
 
     clone.querySelector(".EQI_epiCenter").innerText = elm.epiCenter;
-    clone.querySelector(".EQI_datetime").innerText = dateEncode(3, elm.Timestamp);
+    clone.querySelector(".EQI_datetime").innerText = dateEncode(3, elm.OriginTime);
     clone.querySelector(".EQI_magnitude").innerText = "M" + elm.M;
 
     if (source == "jma") {
@@ -648,7 +648,7 @@ document.getElementById("EQInfoSelect").addEventListener("change", function () {
 });
 
 var updateTimeTmp = 0;
-function kmoniTimeUpdate(updateTime, LocalTime, type, vendor) {
+function kmoniTimeUpdate(updateTime, LocalTime, type, condition, vendor) {
   if (prepareing) return;
 
   /*
@@ -667,9 +667,17 @@ function kmoniTimeUpdate(updateTime, LocalTime, type, vendor) {
   document.getElementById(type + "_UT").innerText = dateEncode(3, updateTime);
   var iconElm = document.getElementById(type + "_ICN");
 
-  iconElm.classList.add("SuccessAnm");
-  iconElm.classList.add("Success");
-  iconElm.classList.remove("Error");
+  if (condition == "success") {
+    iconElm.classList.add("SuccessAnm");
+    iconElm.classList.add("Success");
+    iconElm.classList.remove("Error");
+  } else if (condition == "Error") {
+    iconElm.classList.remove("Success");
+    iconElm.classList.add("Error");
+  } else if (condition == "Disconnect") {
+    iconElm.classList.remove("Success");
+    iconElm.classList.remove("Error");
+  }
 
   iconElm.addEventListener("animationend", function () {
     this.classList.remove("SuccessAnm");
