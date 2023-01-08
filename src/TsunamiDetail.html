@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="light dark">
 
-  <title>地震詳細情報 - Zero Quake</title>
+  <title>津波詳細情報 - Zero Quake</title>
 
   <link rel="stylesheet" href="./js/leaflet/leaflet.css" />
   <link rel="stylesheet" href="./css/map.css" />
@@ -23,177 +23,6 @@
       padding: 0;
       background: #222;
       color: #FFF;
-    }
-
-    #mapcontainer {
-      width: 100%;
-      height: 50vh;
-      background: #202227;
-      border-bottom: solid 2px #999;
-    }
-
-    h2,
-    .h2 {
-      font-size: 22px;
-      line-height: 50px;
-      padding: 0;
-      margin: 0.1em 0.5em;
-      text-align: center;
-      font-weight: bold;
-    }
-
-    #yahooLink,
-    #tenkijpLink,
-    #gooLink {
-      display: none;
-    }
-
-    table,
-    tr,
-    th,
-    td {
-      border: solid 1px #666;
-      border-collapse: collapse;
-    }
-
-    tr,
-    td {
-      font-size: 18px;
-      padding: 0.2em 0.5em;
-    }
-
-    td {
-      text-align: left;
-    }
-
-    #EQInfo {
-      vertical-align: top;
-      display: inline-table;
-      width: calc(50% - 10px);
-    }
-
-
-    #Shindo {
-      display: inline-block;
-      width: calc(50% - 10px);
-    }
-
-    #Shindo {
-      display: none;
-    }
-
-
-
-    .ShindoItem {
-      background: #333;
-      border-top: solid 1px #666;
-      border-bottom: solid 1px #666;
-      height: 40px;
-      padding: 5px;
-      font-size: 18px;
-    }
-
-    .ShindoItem1:hover,
-    .ShindoItem2:hover,
-    .ShindoItem3:hover {
-      background: #444;
-
-    }
-
-    .ShindoItem1,
-    .ShindoItem2,
-    .ShindoItem3 {
-      cursor: pointer;
-    }
-
-    .ShindoItem4 {
-      cursor: default;
-    }
-
-
-    .ShindoItem::before {
-      content: "";
-      display: inline-block;
-      width: 20px;
-      height: 20px;
-      vertical-align: middle;
-
-    }
-
-
-    .ShindoItem1::before,
-    .ShindoItem2::before,
-    .ShindoItem3::before {
-      background-image: url(./img/expand_more.svg);
-      background-size: cover;
-    }
-
-
-    .ShindoItem1.has-open::before,
-    .ShindoItem2.has-open::before,
-    .ShindoItem3.has-open::before {
-      transform: rotateZ(180deg);
-    }
-
-    .ShindoItem span {
-      display: inline-block;
-      width: 30px;
-      height: 30px;
-      line-height: 30px;
-      text-align: center;
-      border-radius: 4px;
-      margin-right: 10px;
-    }
-
-    .close {
-      display: none;
-    }
-
-    .open {
-      display: block;
-    }
-
-    .WrapLevel1,
-    .WrapLevel2,
-    .WrapLevel3 {
-      padding-left: 15px;
-    }
-
-
-    .ShindoIcon div {
-      display: none;
-      width: 16px;
-      height: 16px;
-      border: solid 1px #000;
-      line-height: 16px;
-      text-align: center;
-      border-radius: 50%;
-
-    }
-
-    .zoomLevel_3 .ShindoIcon div,
-    .zoomLevel_4 .ShindoIcon div {
-      display: block;
-    }
-
-    #ShindoSample {
-      font-size: 0;
-      text-align: center;
-    }
-
-    #ShindoSample span {
-      font-size: 16px;
-    }
-
-    #ShindoSample div {
-      display: inline-block;
-      width: 30px;
-      height: 30px;
-      border-radius: 5px;
-      line-height: 30px;
-      text-align: center;
-      font-size: 18px;
-      margin: 3px;
     }
   </style>
 
@@ -250,6 +79,10 @@
       <button id="AllOpen">すべて展開</button>
       <button id="AllClose">すべて折り畳み</button>
     </div>
+    <div id="AQUAImg">
+      <img alt="AQUAシステムによる震源地図" id="AQUAImg1">
+      <img alt="AQUAシステムによる震源地図" id="AQUAImg2">
+    </div>
 
   </div>
 
@@ -280,6 +113,9 @@
     var sections = [];
     var map_drawed = false;
     var map
+
+    var AQUAData = params.get('dataAQUA')
+
 
     function init() {
       map = L.map("mapcontainer", {
@@ -838,6 +674,36 @@
         document.getElementById("tenkijpLink").style.display = "block"
         document.getElementById("gooLink").setAttribute("href", "https://weather.goo.ne.jp/earthquake/id/" + eid + "/")
         document.getElementById("gooLink").style.display = "block"
+      } else if (AQUAData) {
+        AQUAData = JSON.parse(decodeURIComponent(AQUAData))
+
+        document.getElementById("AQUAImg").style.display = "block"
+        document.getElementById("Shindo").style.display = "none"
+        document.getElementById("AQUAImg1").setAttribute("src", AQUAData.url1)
+        document.getElementById("AQUAImg2").setAttribute("src", AQUAData.url2)
+        /*
+        if (json.Body.Earthquake && json.Body.Earthquake.OriginTime && (mostNew || data_time.innerText == "不明")) data_time.innerText = dateEncode(3, json.Body.Earthquake.OriginTime)
+        if (json.Body.Intensity.Observation.MaxInt && (mostNew || data_maxI.innerText == "不明")) data_maxI.innerText = json.Body.Intensity.Observation.MaxInt
+        if (json.Body.Earthquake && json.Body.Earthquake.Magnitude && (mostNew || data_M.innerText == "不明")) data_M.innerText = json.Body.Earthquake.Magnitude
+        if (LatLngDepth && LatLngDepth[3] && (mostNew || data_depth.innerText == "不明")) data_depth.innerText = Math.abs(Number(LatLngDepth[3]) / 1000) + "km"
+        if (json.Body.Earthquake && json.Body.Earthquake.Hypocenter.Area.Name && (mostNew || data_center.innerText == "不明")) data_center.innerText = json.Body.Earthquake.Hypocenter.Area.Name
+*/
+
+        /*
+                date: new Date(td[0].textContent),
+                  center: td[1].textContent,
+                    lat: latitudeConvert(td[2].textContent),
+                      lng: latitudeConvert(td[3].textContent),
+                        depth: Number(td[4].textContent.replace("km", "")),
+                          M: Number(td[5].textContent),
+                            souko: td[6].textContent,
+                              keisha: td[7].textContent,
+                                suberikaku: td[8].textContent,
+                                  quality: Number(td[9].textContent),
+                                    pointCount: Number(td[10].textContent),
+                                      date: td[11].textContent.replace("C", "AQUA-CMT").replace("M", "AQUA-MT"),
+        */
+
 
       }
     }

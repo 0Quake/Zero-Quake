@@ -169,19 +169,25 @@ main {
   display: none;
 }
 
-.EEWWrap,
-#LWaveWrap,
-#tsunamiWrap {
+.list-item {
   background: #222;
   border-radius: 5px;
   font-size: 18px;
   overflow: hidden;
   margin: 10px;
+  border: solid 1px #666;
 }
 
 #LWaveWrap,
-#tsunamiWrap {
+#tsunamiWrap,
+#tsunamiRevocation,
+#tsunamiCancel {
   display: none;
+}
+#tsunamiCancel,
+#tsunamiRevocation {
+  text-align: center;
+  font-family: "M PLUS 1p", sans-serif;
 }
 h2 {
   font-size: 20px;
@@ -413,9 +419,6 @@ td {
 .EQI_magnitude {
   font-size: 20px;
   float: right;
-}
-.tsunamiElm {
-  animation: flash 2s step-end infinite;
 }
 
 .Wave_progress {

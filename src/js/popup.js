@@ -11,7 +11,7 @@ window.electronAPI.messageSend((event, request) => {
   } else if (request.action == "kmoniTimeUpdate") {
     kmoniTimeUpdate(request.Updatetime, request.LocalTime, request.type, request.condition, request.vendor);
   } else if (request.action == "kmoniUpdate") {
-    kmoniTimeUpdate(request.Updatetime, request.LocalTime, "kmoniImg");
+    kmoniTimeUpdate(request.Updatetime, request.LocalTime, "kmoniImg", "success");
   } else if (request.action == "MSSelect") {
     document.getElementById(request.str).selected = true;
 

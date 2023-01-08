@@ -39,29 +39,57 @@ img.leaflet-control {
   z-index: 100;
 }
 
-.PointPopup .leaflet-popup-content-wrapper,
-.PointPopup .leaflet-popup-tip {
+.PointPopup,
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
   background: #222;
   color: #fff;
   font-size: 14px;
+  border-radius: 3px;
+
+  border: solid 1px #888;
 }
-.PointPopup .leaflet-popup-content-wrapper {
+.leaflet-popup-content-wrapper {
   border-radius: 3px;
   padding: 0;
 }
-
-.PointPopup .leaflet-popup-content {
+.PointPopup,
+.leaflet-popup-content {
   margin: 0;
+  position: relative;
+  padding: 35px 5px 5px 5px;
+  min-width: 180px;
+  text-align: center;
 }
-.PointPopup h3 {
+.PointPopup h3,
+.leaflet-popup-content h3 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 30px;
+  line-height: 30px;
   padding: 0.15em 0.4em;
   margin: 0;
   font-size: 16px;
   background: #444;
+  text-align: left;
 }
+
+.leaflet-popup-content table,
 .PointPopup table {
   border-collapse: collapse;
-  margin: 10px 10px 10px 10px;
+  display: inline-table;
+}
+.leaflet-popup-content th,
+.leaflet-popup-content td,
+.PointPopup table th,
+.PointPopup table td {
+  padding: 0.2em 0.8em;
+}
+.leaflet-popup-content td,
+.PointPopup table td {
+  text-align: left;
 }
 
 .kmoniPointMarker {
@@ -76,12 +104,6 @@ img.leaflet-control {
   border-radius: 50%;
 }
 .PointPopup {
-  background: #333;
-  border-radius: 3px;
-
-  border: solid 1px #888;
-}
-.PointPopup2 {
   position: absolute;
   top: 0;
   left: 25px;
@@ -108,7 +130,7 @@ img.leaflet-control {
   height: 25px;
   margin: 0;
 }
-.popup_show .PointPopup2 {
+.popup_show .PointPopup {
   display: block;
 }
 .leaflet-control-attribution.leaflet-control {
@@ -118,16 +140,16 @@ img.leaflet-control {
   z-index: unset;
 }
 .zoomLevel_1 .tsunamiElm {
-  stroke-width: 5px;
+  stroke-width: 20px;
 }
 .zoomLevel_2 .tsunamiElm {
-  stroke-width: 10px;
+  stroke-width: 25px;
 }
 .zoomLevel_3 .tsunamiElm {
-  stroke-width: 15px;
+  stroke-width: 35px;
 }
 .zoomLevel_4 .tsunamiElm {
-  stroke-width: 20px;
+  stroke-width: 45px;
 }
 #tsunamiSample {
   list-style: none;
@@ -139,26 +161,51 @@ img.leaflet-control {
 }
 #tsunamiSample li span {
   display: inline-block;
-  height: 8px;
+  height: 5px;
   width: 20px;
   vertical-align: middle;
   margin: 0 5px;
 }
 
+.tsunamiElm {
+  animation: flash 2s step-end infinite;
+}
+
+#tsunami_MajorWarning span {
+  background: var(--TsunamiMajorWarningColor);
+}
+#tsunami_Warning span {
+  background: var(--TsunamiWarningColor);
+}
+#tsunami_Watch span {
+  background: var(--TsunamiWatchColor);
+}
+#tsunami_Yoho span {
+  background: var(--TsunamiYohoColor);
+}
+
+/*
+MajorWarning":
+              Tsunami_MajorWarning = true;
+              gradeJa = "大津波警報";
+              break;
+            case "Warning":
+              Tsunami_Warning = true;
+              gradeJa = "津波警報";
+              break;
+            case "Watch":
+              Tsunami_Watch = true;
+              gradeJa = "津波注意報";
+              break;
+            case "Yoho*/
 /*カラーテーマ*/
 :root {
   --PwaveColor: rgb(48, 148, 255);
   --SwaveColor: rgb(255, 62, 48);
-}
-
-#tsunami_MajorWarning span {
-  background: rgb(200, 0, 255);
-}
-#tsunami_Warning span {
-  background: rgb(255, 40, 0);
-}
-#tsunami_Watch span {
-  background: rgb(250, 245, 0);
+  --TsunamiMajorWarningColor: rgb(200, 0, 255);
+  --TsunamiWarningColor: rgb(255, 40, 0);
+  --TsunamiWatchColor: rgb(250, 245, 0);
+  --TsunamiYohoColor: rgb(66, 158, 255);
 }
 
 .PWave {

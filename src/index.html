@@ -94,14 +94,20 @@
 
         <div id="sideBar">
             <div id="sokuho-Panel">
-
-                <div id="tsunamiWrap">
+                <div id="tsunamiRevocation" class="list-item">
+                    津波情報が取り消されました。
+                </div>
+                <div id="tsunamiCancel" class="list-item">
+                    すべての津波情報が解除されました。
+                </div>
+                <div id="tsunamiWrap" class="list-item">
                     <h2 id="tsunamiTitle">津波に関する情報</h2>
 
                     <ul id="tsunamiSample">
                         <li id="tsunami_MajorWarning"><span></span>大津波警報</li>
                         <li id="tsunami_Warning"><span></span>津波警報</li>
                         <li id="tsunami_Watch"><span></span>津波注意報</li>
+                        <li id="tsunami_Yoho"><span></span>津波予報</li>
                     </ul>
                 </div>
 
@@ -109,7 +115,7 @@
                     <div id="offline2">現在オフラインです。<br>最新の情報ではありません</div>
                     <!--<div id="EEWDetection"> 緊急地震速報(警報)の発表が検出されました。続報にご注意ください。 </div>-->
                     <template id="EEWTemplate">
-                        <div class="EEWWrap">
+                        <div class="EEWWrap" class="list-item">
 
                             <h2 class="traning">訓練</h2>
                             <h2>緊急地震速報<span class="alertflg"></span> 第<span class="report_num"></span>報 <span class="is_final">(最終報)</span></h2>
@@ -130,7 +136,7 @@
                     </template>
                 </div>
 
-                <div id="LWaveWrap">
+                <div id="LWaveWrap" class="list-item">
                     <h2>長周期地震動情報</h2>
 
                     <div class="EEW_content_wrap">
