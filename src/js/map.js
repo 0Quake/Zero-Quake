@@ -15,10 +15,7 @@ window.addEventListener("load", function () {
 var psWaveList = [];
 
 window.electronAPI.messageSend((event, request) => {
-  //console.log(request);
   if (request.action == "kmoniUpdate") {
-    var i = 0;
-
     var dataTmp = request.data;
     var dataTmp2 = dataTmp.filter(function (elm) {
       return elm.shindo;
@@ -41,43 +38,45 @@ window.electronAPI.messageSend((event, request) => {
     }
 
     //地図上マーカー
-    (async function () {
-      await (function () {
-        points.forEach(function (elm) {
-          elm2 = dataTmp[i];
-          if (!elm.marker) return;
-          if (elm.Name && elm.Point && elm2.data) {
-            var changed = true;
+    points.forEach(function (elm, index) {
+      elm2 = dataTmp[index];
+      if (!elm.marker) return;
+      if (elm.Name && elm.Point && elm2.data) {
+        var changed = true;
 
-            if (previous_points.length !== 0) {
-              var rgb0 = previous_points[i].rgb;
-              var rgb1 = elm2.rgb;
-              if (rgb0) changed = JSON.stringify(rgb0) !== JSON.stringify(rgb1);
-            }
+        if (previous_points.length !== 0) {
+          var rgb0 = previous_points[index].rgb;
+          var rgb1 = elm2.rgb;
+          if (rgb0) changed = JSON.stringify(rgb0) !== JSON.stringify(rgb1);
+        }
 
-            if (changed) {
-              var popup_content = "<h3 style='border-bottom:solid 2px rgb(" + elm2.rgb.join(",") + ")'>" + elm.Name + "</h3><table><tr><td>震度</td><td>" + Math.round(elm2.shindo * 10) / 10 + " </td></tr><tr><td>PGA</td><td>" + Math.round(elm2.pga * 100) / 100 + "</td></tr></table>";
+        if (changed) {
+          var popup_content = "<h3 style='border-bottom:solid 2px rgb(" + elm2.rgb.join(",") + ")'>" + elm.Name + "</h3><table><tr><td>震度</td><td>" + Math.round(elm2.shindo * 10) / 10 + " </td></tr><tr><td>PGA</td><td>" + Math.round(elm2.pga * 100) / 100 + "</td></tr></table>";
 
-              var kmoniPointMarker = L.divIcon({
-                html: "<div class='marker-circle' style='background:rgb(" + elm2.rgb.join(",") + ")'></div><div class='PointPopup'>" + popup_content + "</div>",
-                className: "kmoniPointMarker",
-                iconSize: 25,
-              });
+          var kmoniPointMarker = L.divIcon({
+            html: "<div class='marker-circle' style='background:rgb(" + elm2.rgb.join(",") + ")'></div><div class='PointPopup'>" + popup_content + "</div>",
+            className: "kmoniPointMarker",
+            iconSize: 25,
+          });
 
-              elm.marker.setIcon(kmoniPointMarker).bindPopup(popup_content);
-            }
-            elm.marker.setOpacity(1);
-          } else {
-            elm.marker.setOpacity(0);
-          }
+          kmoniPointMarker;
 
-          i++;
-        });
-      })();
-      await (function () {
-        previous_points = dataTmp;
-      })();
-    })();
+          elm.marker
+            .setIcon(kmoniPointMarker)
+            .on("popupopen", function (e) {
+              L.DomUtil.addClass(e.target._icon, "popupOpen");
+            })
+            .on("popupclose", function (e) {
+              L.DomUtil.removeClass(e.target._icon, "popupOpen");
+            });
+        }
+        elm.marker.setOpacity(1);
+      } else {
+        elm.marker.setOpacity(0);
+      }
+
+      if (index == points.length - 1) previous_points = dataTmp;
+    });
   } else if (request.action == "longWaveUpdate") {
     document.getElementById("LWaveWrap").style.display = "block";
     document.getElementById("region_name2").innerText = request.data.avrarea_list.join(" ");
@@ -242,8 +241,6 @@ window.electronAPI.messageSend((event, request) => {
 function init() {
   if (inited || !setting || !windowLoaded) return;
   inited = true;
-  console.log(11111111);
-
   map = L.map("mapcontainer", {
     maxBounds: [
       [90, 0],
@@ -420,7 +417,10 @@ function init() {
           });
           elm.marker = L.marker([elm.Location.Latitude, elm.Location.Longitude], {
             icon: kmoniPointMarker,
-          }).addTo(map);
+            pane: "PointsPane",
+          })
+            .bindPopup("", { className: "hidePopup" })
+            .addTo(map);
         }
       });
     });
@@ -437,7 +437,7 @@ function init() {
           fillColor: "#333",
           fillOpacity: 1,
           weight: 1,
-          pane: "overlayPane",
+          pane: "jsonMAPPane",
           attribution: 'Map data <a href="https://www.naturalearthdata.com/">©Natural Earth</a> / <a href="https://www.data.jma.go.jp/developer/gis.html" target="_blank">©JMA</a>',
         },
         onEachFeature: function onEachFeature(feature, layer) {
@@ -532,6 +532,8 @@ function init() {
     return img;
   };
   map.createPane("tsunamiPane").style.zIndex = 201;
+  map.createPane("jsonMAPPane").style.zIndex = 210;
+  map.createPane("PointsPane").style.zIndex = 220;
   /*
   map.createPane("background");
   var imageUrl = "./img/mapbase.png"; //size 5616 x 3744
@@ -652,9 +654,9 @@ function init() {
 function psWaveCalc() {
   now_EEW.forEach(function (elm) {
     if (!elm.is_cancel && elm.origin_time && elm.depth && elm.latitude && elm.longitude) {
-      var distance = Math.floor((new Date() - elm.origin_time) / 1000);
+      var distance = Math.floor((new Date() - Replay - elm.origin_time) / 1000);
 
-      if (elm.depth <= 700 && distance <= 2000) {
+      if (elm.depth <= 700 && distance <= 2000 && TimeTable_JMA2001) {
         var TimeTableTmp = TimeTable_JMA2001[elm.depth];
         var PRadius = 0;
         var SRadius = 0;
@@ -711,7 +713,6 @@ function psWaveCalc() {
             loopI++;
           });
           TimeElmTmpS = [result[1], result2[1]];
-          console.log(distance, result, result2);
         }
 
         PRadius = TimeElmTmpP[0].R + ((TimeElmTmpP[1].R - TimeElmTmpP[0].R) * (distance - TimeElmTmpP[0].P)) / (TimeElmTmpP[1].P - TimeElmTmpP[0].P);
@@ -730,7 +731,6 @@ function psWaveCalc() {
             ArriveTime, //発生からの到達時間
             distance //現在の経過時間
           );
-          console.log(ArriveTime, distance);
         } else {
           SRadius = linear([TimeElmTmpS[0].S, TimeElmTmpS[1].S], [TimeElmTmpS[0].R, TimeElmTmpS[1].R])(distance);
           psWaveReDraw(elm.report_id, elm.latitude, elm.longitude, PRadius * 1000, SRadius * 1000);
@@ -760,7 +760,6 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
   var EQElm2 = now_EEW.find(function (elm) {
     return elm.report_id == report_id;
   });
-  console.log(report_id);
 
   latitude = latitudeConvert(latitude);
   longitude = latitudeConvert(longitude);
@@ -789,7 +788,7 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
       fill: false,
       weight: 2,
       className: "PWave PWaveAnm",
-      pane: "tsunamiPane",
+      pane: "overlayPane",
     }).addTo(map);
     var SCElm = L.circle([latitude, longitude], {
       radius: sRadius,
@@ -800,7 +799,7 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
       fillOpacity: 0.15,
       weight: 2,
       className: "SWave SWaveAnm",
-      pane: "tsunamiPane",
+      pane: "overlayPane",
     }).addTo(map);
 
     map.fitBounds(PCElm.getBounds());
@@ -817,7 +816,7 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
         SWprogressValue.setAttribute("stroke-dashoffset", Number(157 - 157 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect))));
       } else {
         var SIcon = L.divIcon({
-          html: '<svg width="50" height="50"><circle id="SWprogressValue_' + report_id + '" class="SWprogressValue" cx="25" cy="25" r="23.5" fill="none" stroke-width="5px" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="' + Number(157 - 157 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect))) + '"/></path></svg>',
+          html: '<svg width="50" height="50"><circle id="SWprogressValue_' + report_id + '" class="SWprogressValue" cx="25" cy="25" r="22.5" fill="none" stroke-width="5px" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="' + Number(157 - 157 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect))) + '" transform="rotate(270 25 25)"/></svg>',
           className: "SWaveProgress",
           iconSize: 50,
         });
@@ -845,8 +844,8 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
 
   var EEWPanelElm = document.getElementById("EEW-" + report_id);
   if (EQElm2.distance && EEWPanelElm) {
-    EEWPanelElm.querySelector(".Wave_progress .PWave_value").style.width = Math.min(pRadius / 1000 / EQElm2.distance, 1) * 100 + "%";
-    EEWPanelElm.querySelector(".Wave_progress .SWave_value").style.width = Math.min(sRadius / 1000 / EQElm2.distance, 1) * 100 + "%";
+    EEWPanelElm.querySelector(".PWave_value").setAttribute("stroke-dashoffset", 219.91 - 219.91 * Math.min(pRadius / 1000 / EQElm2.distance, 1));
+    EEWPanelElm.querySelector(".SWave_value").setAttribute("stroke-dashoffset", 219.91 - 219.91 * Math.min(sRadius / 1000 / EQElm2.distance, 1));
   }
 }
 

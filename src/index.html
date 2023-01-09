@@ -117,20 +117,32 @@
                     <div id="offline2">現在オフラインです。<br>最新の情報ではありません</div>
                     <!--<div id="EEWDetection"> 緊急地震速報(警報)の発表が検出されました。続報にご注意ください。 </div>-->
                     <template id="EEWTemplate">
-                        <div class="EEWWrap" class="list-item">
+                        <div class="EEWWrap list-item">
 
                             <h2 class="traning">訓練</h2>
-                            <h2>緊急地震速報<span class="alertflg"></span> 第<span class="report_num"></span>報 <span class="is_final">(最終報)</span></h2>
+                            <h2>緊急地震速報<span class="alertflg"></span>
+                                <div class="EEW_MenuRight">第<span class="report_num"></span>報 <span class="is_final">(最終報)</span></div>
+                            </h2>
 
-                            <div class="EEW_content_wrap">
-                                <div class="region_name">地域</div>
-                                <div class="origin_time">発生時刻</div>
-                                <div>最大震度：<span class="calcintensity">0</span>M<span class="magunitude">0</span>深さ：<span class="depth">0</span>km</div>
-                                <div class="Wave_progress">
+                            <div class="Alert_content_wrap EEW_content_wrap">
 
-                                    <div class="PWave_value">P</div>
-                                    <div class="SWave_value">S</div>
-                                    <div class="infoOverlay"><span>距離<span class="distance">?</span>km</span></div>
+                                <div class="calcintensity">0</div>
+
+                                <div class="detail_text">
+                                    <div>M<span class="magunitude">0</span>深さ：<span class="depth">0</span>km</div>
+                                    <div class="region_name">地域</div>
+                                    <div class="origin_time">発生時刻</div>
+                                </div>
+
+                                <div id="graphWrap">
+                                    <svg width="80" height="80">
+                                        <circle cx="40" cy="40" r="35" stroke-width="5px" stroke-linecap="round" stroke="#444" fill="none"></circle>
+
+                                        <circle class="PWave_value" cx="40" cy="40" r="35" stroke-width="5px" stroke-linecap="round" stroke-dasharray="219.91" stroke-dashoffset="219.91" transform="rotate(270 40 40)" fill="none"></circle>
+                                        <circle class="SWave_value" cx="40" cy="40" r="35" stroke-width="5px" stroke-linecap="round" stroke-dasharray="219.91" stroke-dashoffset="219.91" transform="rotate(270 40 40)" fill="none"></circle>
+                                        <text class="countDown" x="50%" y="50%" text-anchor="middle" dominant-baseline="central" fill="#FFF" font-size="20">?:??</text>
+                                        <text class="distance" x="50%" y="75%" text-anchor="middle" dominant-baseline="central" fill="#FFF" font-size="12">000km</text>
+                                    </svg>
                                 </div>
                                 <div class="canceled">キャンセルされました</div>
                             </div>
@@ -141,7 +153,7 @@
                 <div id="LWaveWrap" class="list-item">
                     <h2>長周期地震動情報</h2>
 
-                    <div class="EEW_content_wrap">
+                    <div class="Alert_content_wrap">
                         <div>最大予測階級<span id="maxKaikyu"></span></div>
                         <div>地域：<span id="region_name2"></span></div>
                     </div>
@@ -150,10 +162,6 @@
                 <div id="noEEW">緊急地震速報は発令されていません</div>
 
             </div>
-
-
-
-
             <div id="tab1_wrap">
 
                 <div id="tab1_content">
@@ -220,10 +228,6 @@
                                 <span>PC時刻</span>
                                 <div id="PC_TIME">0000/00/00 00:00:00</div>
                             </div>
-                            <div>
-                                <span>日本標準時</span>
-                                <div id="NICT_JST">0000/00/00 00:00:00</div>
-                            </div>
 
 
 
@@ -285,11 +289,22 @@
 
 
             </div>
-
         </div>
 
-
+        <div id="notification_Area" class="no_notification">
+            <h3>通知センター</h3>
+            <button id="notification_more" aria-label="通知をもっとみる"></button>
+            <div id="plus_badge"></div>
+            <div id="notification_wrap">0</div>
         </div>
+        <template id="notificationTemplate">
+            <div class="notification_item">
+                <div class="notification_title"></div>
+                <div class="notification_content"></div>
+                <div class="notification_time"></div>
+            </div>
+        </template>
+
     </main>
 
 

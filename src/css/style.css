@@ -194,9 +194,12 @@ h2 {
   font-family: "M PLUS 1p", sans-serif;
   margin: 0;
 }
-.EEW_content_wrap {
+.Alert_content_wrap {
   position: relative;
   padding: 0.8em;
+}
+.EEW_content_wrap {
+  display: flex;
 }
 
 .EEWWrap h2,
@@ -206,6 +209,7 @@ h2 {
   padding: 5px 0.5em;
 }
 .EEWWrap h2 {
+  float: none;
   background: rgb(39, 110, 50);
   color: #fff;
 }
@@ -220,6 +224,34 @@ h2 {
 .EEWWrap.keihou h2 {
   background: rgb(175, 54, 54);
   color: #fff;
+}
+
+.graphWrap {
+  width: 80px;
+}
+
+.detail_text {
+  flex: 1;
+}
+
+.calcintensity {
+  width: 70px;
+  height: 70px;
+  border-radius: 35px;
+  margin: 5px;
+  font-size: 30px;
+  text-align: center;
+  line-height: 70px;
+}
+.PWave_value,
+.SWave_value {
+  transition: 1s;
+}
+.PWave_value {
+  stroke: var(--PwaveColor);
+}
+.SWave_value {
+  stroke: var(--SwaveColor);
 }
 
 .canceled {
@@ -237,6 +269,11 @@ h2.traning {
   background: rgb(66, 118, 186);
   color: #fff;
 }
+.EEW_MenuRight {
+  float: right;
+  text-align: right;
+}
+
 @keyframes flash {
   0%,
   100% {
@@ -418,7 +455,7 @@ td {
   float: right;
 }
 
-.Wave_progress {
+/*.Wave_progress {
   display: none;
   position: relative;
   width: 100%;
@@ -443,7 +480,7 @@ td {
   left: 0;
   text-align: right;
   transition: width linear 1s;
-}
+}*/
 .infoOverlay {
   position: absolute;
   inset: 0;
@@ -466,10 +503,12 @@ td {
   z-index: 1000;
   background: #222;
   font-family: ui-monospace, sans-serif;
+  text-align: center;
 }
 #UpdateTimeWrap:hover {
   height: auto;
   padding: 5px;
+  text-align: left;
 }
 #UpdateTime_detail {
   display: none;
@@ -516,6 +555,159 @@ button:hover {
 #TsunamiDetail {
   float: right;
 }
+
+#notification_Area {
+  height: 40px;
+  position: fixed;
+  bottom: 0;
+  left: 5px;
+  background: #444;
+  outline: solid 1px #999;
+  z-index: 1000;
+  box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.4);
+  border-radius: 10px 10px 0 0;
+}
+#notification_Area.open {
+  height: auto;
+}
+
+#notification_Area h3 {
+  display: none;
+  height: 40px;
+  line-height: 40px;
+  text-align: center;
+  padding: 0;
+  margin: 0;
+  background: #222;
+  overflow: hidden;
+}
+#notification_Area.open h3 {
+  display: block;
+}
+#notification_wrap {
+  padding: 5px;
+  max-height: 50vh;
+  height: 40px;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 40px;
+}
+.open #notification_wrap {
+  margin: 0;
+  height: auto;
+}
+
+#plus_badge {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  display: inline-block;
+  background: rgb(203, 27, 27);
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  font-size: 14px;
+  color: #fff;
+  border-radius: 15px;
+  vertical-align: middle;
+  text-align: center;
+  background-image: url(../img/notifications.svg);
+  background-size: contain;
+  background-position: center;
+}
+#notification_more {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 30px;
+  height: 30px;
+  background-color: #222;
+  background-image: url(../img/expand_more.svg);
+  background-size: contain;
+  background-position: center;
+  border-radius: 15px;
+  vertical-align: middle;
+}
+#notification_more:hover {
+  background-color: rgb(203, 27, 27);
+}
+#notification_Area.no_notification {
+  background: none;
+  outline: none;
+  height: 35px;
+}
+
+.no_notification #notification_wrap,
+.no_notification #notification_more {
+  display: none;
+}
+.no_notification #plus_badge {
+  position: static;
+  background-color: #787878;
+  border: solid 1px #ccc;
+}
+
+.notification_item {
+  display: none;
+  border-left: solid 2px transparent;
+  border-right: solid 2px transparent;
+}
+.notification_item:hover {
+  background: #333;
+}
+.notification_item:nth-child(1) {
+  display: inline-block;
+  padding: 0 3px;
+  margin: 0;
+  height: 30px;
+}
+.open .notification_item {
+  padding: 0 5px;
+  margin: 8px 0;
+  height: auto;
+}
+
+.notification_title {
+  font-weight: normal;
+  line-height: 1.5em;
+  padding: 0;
+  margin: 0;
+  font-size: 16px;
+  height: 30px;
+  line-height: 30px;
+}
+.notification_content {
+  display: none;
+  font-size: 14px;
+  padding: 0 5px;
+  color: #ccc;
+}
+.notification_time {
+  display: none;
+  font-size: 12px;
+  color: #999;
+  text-align: right;
+  padding: 0 5px;
+}
+
+.open .notification_item {
+  display: block;
+}
+.open .notification_title {
+  height: 40px;
+  line-height: 40px;
+}
+
+.open .notification_content {
+  display: block;
+}
+.open .notification_time {
+  display: block;
+}
+
 @keyframes flash {
   0% {
     opacity: 1;

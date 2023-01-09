@@ -772,7 +772,7 @@
 
 
               var mostNew = false;
-              if (!newInfoDateTime || newInfoDateTime < new Date(new Date(xml2.querySelector("OriginTime").textContent))) {
+              if (!newInfoDateTime || xml2.querySelector("OriginTime") && newInfoDateTime < new Date(new Date(xml2.querySelector("OriginTime").textContent))) {
                 newInfoDateTime = new Date(new Date(xml2.querySelector("OriginTime").textContent))
                 mostNew = true
               }

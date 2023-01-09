@@ -108,11 +108,37 @@ img.leaflet-control {
   background: #000;
   border-radius: 50%;
 }
+.hidePopup {
+  display: none;
+}
 .PointPopup {
   position: absolute;
-  top: 0;
-  left: 25px;
+  bottom: 40px;
+  left: -75px;
+  width: 150px;
+  height: 110px;
   display: none;
+  padding: 40px 5px 5px 10px;
+}
+.PointPopup::after {
+  display: block;
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  left: 0;
+  right: 0;
+  width: 17px;
+  height: 17px;
+  margin: 0 auto;
+  transform: rotate(45deg);
+  border: none;
+  border-right: solid 1px #888;
+  border-bottom: solid 1px #888;
+  background: #222;
+}
+
+.popupOpen .PointPopup {
+  display: block;
 }
 
 .zoomLevel_1 .marker-circle {
