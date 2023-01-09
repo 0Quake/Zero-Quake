@@ -145,7 +145,7 @@
         document.querySelectorAll(".add-content").forEach(function (elm) {
           elm.remove()
         })
-
+        request.data.areas.reverse()
         request.data.areas.forEach(elm => {
           if (!elm.canceled) {
             var condition = ""

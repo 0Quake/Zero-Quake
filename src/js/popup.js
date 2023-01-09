@@ -41,7 +41,6 @@ window.addEventListener("load", function () {
     })
     .then(function (json) {
       NICT_JST = new Date(json.st * 1000) - new Date();
-      console.log(NICT_JST);
     });
   fetch("http://www.kmoni.bosai.go.jp/webservice/maintenance/message.json")
     .then(function (res) {
@@ -227,7 +226,6 @@ function EEWAlertUpdate(data) {
           var sectTmp = sections.find(function (elm3) {
             return elm3.name == AreaForecastLocalE[elm2.areaCode].name;
           });
-          console.log(elm2.int, elm2.areaCode, shindoConvert(elm2.int, 2), sectTmp, AreaForecastLocalE);
           if (sectTmp && sectTmp.item) sectTmp.item.setStyle({ fillColor: shindoConvert(elm2.int, 2)[0] });
         });
       }

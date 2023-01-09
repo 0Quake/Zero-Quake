@@ -213,6 +213,65 @@
                             <ul id="pointList"></ul>
                         </div>
                     </div>
+                    <div id="UpdateTimeWrap">
+                        <div id="UpdateTime_detail">
+
+                            <div>
+                                <span>PC時刻</span>
+                                <div id="PC_TIME">0000/00/00 00:00:00</div>
+                            </div>
+                            <div>
+                                <span>日本標準時</span>
+                                <div id="NICT_JST">0000/00/00 00:00:00</div>
+                            </div>
+
+
+
+                            <h2>受信状況</h2>
+
+                            <h3>緊急地震速報</h3>
+                            <div>
+                                <div class="statusIcon" id="kmoni_ICN"></div>
+                                <span>強震モニタ</span>
+                                <div id="kmoni_UT">0000/00/00 00:00:00</div>
+                                <div id="kmoni_Message"></div>
+                            </div>
+                            <div>
+                                <div class="statusIcon" id="Lmoni_ICN"></div>
+                                <span>長周期地震動モニタ</span>
+                                <div id="Lmoni_UT">0000/00/00 00:00:00</div>
+                            </div>
+                            <div>
+                                <div class="statusIcon" id="YahooKmoni_ICN"></div>
+                                <span>Yahoo 強震モニタ</span>(<span id="ymoniVendor">---</span>)
+                                <div id="YahooKmoni_UT">0000/00/00 00:00:00</div>
+                            </div>
+                            <div>
+                                <div class="statusIcon" id="P2P_EEW_ICN"></div>
+                                <span>P2P地震情報 API</span>
+                                <div id="P2P_EEW_UT">0000/00/00 00:00:00</div>
+                            </div>
+                            <!--
+                        <div>
+                            <div class="statusIcon" id="narikakun_ICN"></div>
+                            <span>narikakun.net API</span>
+                            <div id="narikakun_UT">0000/00/00 00:00:00</div>
+                        </div>
+                    -->
+                            <h3>リアルタイム震度</h3>
+                            <div>
+                                <div class="statusIcon" id="kmoniImg_ICN"></div>
+                                <span>強震モニタ</span>
+                                <div id="kmoniImg_UT"></div>
+                            </div>
+
+                            <div>最終情報更新時刻</div>
+
+                        </div>
+                        <div id="all_UpdateTime">0000/00/00 00:00:00</div>
+
+                    </div>
+
                 </div>
                 <div id="tab1_bar">
                     <div id="tab1_menu1" class="tabmenu active_tabmenu" data-contentid="tab1_content1">地震情報</div>
@@ -242,64 +301,6 @@
         <button onclick="document.getElementById('offline').close()">閉じる</button>
     </dialog>
 
-    <div id="UpdateTimeWrap">
-        <div id="UpdateTime_detail">
-
-            <div>
-                <span>PC時刻</span>
-                <div id="PC_TIME">0000/00/00 00:00:00</div>
-            </div>
-            <div>
-                <span>日本標準時</span>
-                <div id="NICT_JST">0000/00/00 00:00:00</div>
-            </div>
-
-
-
-            <h2>受信状況</h2>
-
-            <h3>緊急地震速報</h3>
-            <div>
-                <div class="statusIcon" id="kmoni_ICN"></div>
-                <span>強震モニタ</span>
-                <div id="kmoni_UT">0000/00/00 00:00:00</div>
-                <div id="kmoni_Message"></div>
-            </div>
-            <div>
-                <div class="statusIcon" id="Lmoni_ICN"></div>
-                <span>長周期地震動モニタ</span>
-                <div id="Lmoni_UT">0000/00/00 00:00:00</div>
-            </div>
-            <div>
-                <div class="statusIcon" id="YahooKmoni_ICN"></div>
-                <span>Yahoo 強震モニタ</span>(<span id="ymoniVendor">---</span>)
-                <div id="YahooKmoni_UT">0000/00/00 00:00:00</div>
-            </div>
-            <div>
-                <div class="statusIcon" id="P2P_EEW_ICN"></div>
-                <span>P2P地震情報 API</span>
-                <div id="P2P_EEW_UT">0000/00/00 00:00:00</div>
-            </div>
-            <!--
-            <div>
-                <div class="statusIcon" id="narikakun_ICN"></div>
-                <span>narikakun.net API</span>
-                <div id="narikakun_UT">0000/00/00 00:00:00</div>
-            </div>
-        -->
-            <h3>リアルタイム震度</h3>
-            <div>
-                <div class="statusIcon" id="kmoniImg_ICN"></div>
-                <span>強震モニタ</span>
-                <div id="kmoniImg_UT"></div>
-            </div>
-
-            <div>最終情報更新時刻</div>
-
-        </div>
-        <div id="all_UpdateTime">0000/00/00 00:00:00</div>
-
-    </div>
 
 
     <script src="./js/popup.js"></script>
