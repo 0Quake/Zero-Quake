@@ -172,7 +172,7 @@
                                 <div class="EQI_maxI">0</div>
                                 <div class="EQI_detailWrap">
                                     <div class="EQI_datetime">0000/00/00 00:00:00</div>
-                                    <div class="EQI_epiCenter">長野県中部</div>
+                                    <div class="EQI_epiCenter">震源調査中</div>
                                     <div class="EQI_magnitude">M0.0</div>
                                 </div>
                                 <div class="EQItemOverlay">
@@ -183,13 +183,14 @@
                                         <div>詳細情報</div>
                                     </button>
                                 </div>
+                                <div class="canceled">取り消されました。</div>
                             </div>
                         </template>
                         <template id="EQListTemplate2">
                             <div class="EQItem">
                                 <div class="EQI_detailWrap">
                                     <div class="EQI_datetime">0000/00/00 00:00:00</div>
-                                    <div class="EQI_epiCenter">長野県中部</div>
+                                    <div class="EQI_epiCenter">震源調査中</div>
                                     <div class="EQI_magnitude">M0.0</div>
                                 </div>
                                 <div class="EQItemOverlay">
@@ -213,7 +214,6 @@
                         <div id="USGS_EqInfo" class="EQInfo"><span>読み込み中</span></div>
                     </div>
                     <div id="tab1_content2" class="tabcontent">
-                        <label><input type="checkbox" id="hinanjo">避難所</label>
 
                         <div id="kmoniRealtime">
                             <div>強震モニタ最大震度<span id="kmoniMax"></span></div>
@@ -280,9 +280,7 @@
                 <div id="tab1_bar">
                     <div id="tab1_menu1" class="tabmenu active_tabmenu" data-contentid="tab1_content1">地震情報</div>
                     <div id="tab1_menu2" class="tabmenu" data-contentid="tab1_content2">リアルタイム震度</div>
-                    <button id="setting">
-
-                        <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20">
+                    <button id="setting"> <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20">
                             <path d="M11.583 18.333H8.417q-.334 0-.573-.218-.24-.219-.282-.553l-.229-1.854q-.208-.125-.458-.27-.25-.146-.458-.271l-1.729.729q-.313.125-.626.021-.312-.105-.479-.396l-1.562-2.729q-.167-.292-.094-.604.073-.313.323-.521l1.458-1.125V9.458L2.25 8.333q-.25-.208-.323-.521-.073-.312.094-.604l1.562-2.729q.167-.291.479-.396.313-.104.626.021l1.729.729q.208-.125.458-.27.25-.146.458-.271l.229-1.854q.042-.334.282-.553.239-.218.573-.218h3.166q.334 0 .573.218.24.219.282.553l.229 1.854q.208.125.458.271.25.145.458.27l1.729-.729q.313-.125.626-.021.312.105.479.396L18 7.208q.167.292.104.604-.062.313-.333.521l-1.459 1.125v1.084l1.459 1.125q.271.208.333.521.063.312-.104.604l-1.583 2.729q-.167.291-.479.396-.313.104-.626-.021l-1.729-.729q-.208.125-.458.271-.25.145-.458.27l-.229 1.854q-.042.334-.282.553-.239.218-.573.218ZM10 12.979q1.229 0 2.104-.875T12.979 10q0-1.229-.875-2.104T10 7.021q-1.229 0-2.104.875T7.021 10q0 1.229.875 2.104t2.104.875Z" />
                         </svg> </button>
                 </div>

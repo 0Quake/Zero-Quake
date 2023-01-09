@@ -773,7 +773,7 @@
 
               var mostNew = false;
               if (!newInfoDateTime || xml2.querySelector("OriginTime") && newInfoDateTime < new Date(new Date(xml2.querySelector("OriginTime").textContent))) {
-                newInfoDateTime = new Date(new Date(xml2.querySelector("OriginTime").textContent))
+                newInfoDateTime = new Date(new Date(xml2.querySelector("Earthquake").getAttribute("Time")))
                 mostNew = true
               }
 

@@ -9,6 +9,7 @@ const { JSDOM } = jsdom;
 let fs = require("fs");
 
 const Store = require("electron-store");
+const { validateHeaderValue } = require("http");
 const store = new Store();
 var config = store.get("config", {
   setting1: true,
@@ -140,6 +141,21 @@ ipcMain.on("message", (_event, response) => {
 });
 
 function createWindow() {
+  eqInfoControl(
+    [
+      {
+        eventId: "aa",
+        category: null,
+        OriginTime: new Date(),
+        epiCenter: null,
+        cancel: true,
+        reportDateTime: new Date(),
+        DetailURL: [],
+      },
+    ],
+    "jma"
+  );
+
   if (mainWindow) {
     mainWindow.focus();
     return;
@@ -206,68 +222,6 @@ function createWindow() {
         source: "存在しない情報源",
       });
     }, 5000);*/
-
-    var intColorConv = { "0xFFFFFFFF": "0", "0xFFF2F2FF": "1", "0xFF00AAFF": "2", "0xFF0041FF": "3", "0xFFFAE696": "4", "0xFFFFE600": "5-", "0xFFFF9900": "5+", "0xFFFF2800": "6-", "0xFFA50021": "6+", "0xFFB40068": "7" };
-
-    fs.readFile(path.join(userHome, "/AppData/Roaming/StrategyCorporation/SignalNowX/SignalNowX_01.csl"), function (err, content) {
-      if (err) {
-        console.error(err);
-      }
-
-      var buffer = Buffer.from(content);
-      let logData = buffer.toString();
-
-      let dataTmp = logData.split("MsgType=9");
-      dataTmp.forEach(function (elm) {
-        var eidTmp;
-        var reportnumTmp;
-        var origintimeTmp;
-        var reporttimeTmp;
-        var intTmp;
-        elm.split("<BOM>").forEach(function (elm2) {
-          if (elm2.indexOf("対象EQ ID") != -1) {
-            eidTmp = elm2.split(" = ")[1].substring(2, 16);
-            reportnumTmp = elm2.split(" = ")[1].substring(17, 20);
-          } else if (elm2.indexOf("地震発生時刻(a)") != -1) {
-            origintimeTmp = elm2.split(" = ")[1].substring(0, 19);
-          } else if (elm2.indexOf("現在時刻(d)") != -1) {
-            reporttimeTmp = elm2.split(" = ")[1].substring(0, 19);
-          } else if (elm2.indexOf("震度階級色") != -1) {
-            intTmp = intColorConv[elm2.split(" = ")[1].substring(0, 10)];
-          }
-        });
-
-        if (eidTmp || reportnumTmp || origintimeTmp || intTmp) {
-          EEWcontrol({
-            alertflg: null,
-            report_id: eidTmp,
-            report_num: Number(reportnumTmp),
-            report_time: new Date(reporttimeTmp),
-            condition: null,
-            magunitude: null,
-            calcintensity: null,
-            depth: null,
-            is_cancel: null,
-            is_final: null,
-            is_training: null,
-            latitude: null,
-            longitude: null,
-            region_code: null,
-            region_name: null,
-            origin_time: new Date(origintimeTmp),
-            isPlum: null,
-            userIntensity: intTmp,
-            intensityAreas: null, //細分区分ごとの予想震度
-            warnZones: {
-              zone: null,
-              Pref: null,
-              Regions: null,
-            },
-            source: "SignalNow X",
-          });
-        }
-      });
-    });
 
     kmoniTimeTmp.forEach(function (elm) {
       mainWindow.webContents.send("message2", {
@@ -682,6 +636,87 @@ function start() {
   //地震情報
   setInterval(eqInfoUpdate, 10000);
   eqInfoUpdate();
+
+  SNXWatch();
+}
+
+function SNXWatch() {
+  for (let i = 1; i <= 10; i++) {
+    filenameTmp = "SignalNowX_" + String(i).padStart(2, "0") + ".csl";
+    var pathTmp = path.join(userHome, "/AppData/Roaming/StrategyCorporation/SignalNowX/" + filenameTmp);
+    if (fs.existsSync(pathTmp)) {
+      fs.watch(pathTmp, function (eventType, filename) {
+        SNXLogRead(filename);
+      });
+    }
+    SNXLogRead(filenameTmp);
+  }
+}
+
+var intColorConv = { "0xFFFFFFFF": "0", "0xFFF2F2FF": "1", "0xFF00AAFF": "2", "0xFF0041FF": "3", "0xFFFAE696": "4", "0xFFFFE600": "5-", "0xFFFF9900": "5+", "0xFFFF2800": "6-", "0xFFA50021": "6+", "0xFFB40068": "7" };
+function SNXLogRead(str) {
+  var path = path.join(userHome, "/AppData/Roaming/StrategyCorporation/SignalNowX/" + str);
+  if (fs.existsSync(pathTmp)) {
+    fs.readFile(pathTmp, function (err, content) {
+      if (err) {
+        console.error(err);
+      }
+
+      var buffer = Buffer.from(content);
+      let logData = buffer.toString();
+
+      let dataTmp = logData.split("MsgType=9");
+      dataTmp.forEach(function (elm) {
+        var eidTmp;
+        var reportnumTmp;
+        var origintimeTmp;
+        var reporttimeTmp;
+        var intTmp;
+        elm.split("<BOM>").forEach(function (elm2) {
+          if (elm2.indexOf("対象EQ ID") != -1) {
+            eidTmp = elm2.split(" = ")[1].substring(2, 16);
+            reportnumTmp = elm2.split(" = ")[1].substring(17, 20);
+          } else if (elm2.indexOf("地震発生時刻(a)") != -1) {
+            origintimeTmp = elm2.split(" = ")[1].substring(0, 19);
+          } else if (elm2.indexOf("現在時刻(d)") != -1) {
+            reporttimeTmp = elm2.split(" = ")[1].substring(0, 19);
+          } else if (elm2.indexOf("震度階級色") != -1) {
+            intTmp = intColorConv[elm2.split(" = ")[1].substring(0, 10)];
+          }
+        });
+
+        if (origintimeTmp && (eidTmp || reportnumTmp || intTmp)) {
+          EEWcontrol({
+            alertflg: null,
+            report_id: eidTmp,
+            report_num: Number(reportnumTmp),
+            report_time: new Date(reporttimeTmp),
+            condition: null,
+            magunitude: null,
+            calcintensity: null,
+            depth: null,
+            is_cancel: null,
+            is_final: null,
+            is_training: null,
+            latitude: null,
+            longitude: null,
+            region_code: null,
+            region_name: null,
+            origin_time: new Date(origintimeTmp),
+            isPlum: null,
+            userIntensity: intTmp,
+            intensityAreas: null, //細分区分ごとの予想震度
+            warnZones: {
+              zone: null,
+              Pref: null,
+              Regions: null,
+            },
+            source: "SignalNow X",
+          });
+        }
+      });
+    });
+  }
 }
 
 var tsunamiData;
@@ -1101,17 +1136,21 @@ function eqInfoUpdate() {
         return elm.ttl == "震度速報" || elm.ttl == "震源に関する情報" || elm.ttl == "震源・震度情報" || elm.ttl == "遠地地震に関する情報";
       });
       for (let i = 0; i < 10; i++) {
-        var maxi = json[i].maxi;
+        var elm = json[i];
+        validateHeaderValue;
+        var maxi = elm.maxi;
         if (!maxi) maxi = shindoConvert("?", 1);
         dataTmp2.push({
-          eventId: json[i].eid,
-          category: json[i].ttl,
-          OriginTime: new Date(json[i].at),
-          epiCenter: json[i].anm,
-          M: json[i].mag,
+          eventId: elm.eid,
+          category: elm.ttl,
+          OriginTime: new Date(elm.at),
+          epiCenter: elm.anm,
+          M: elm.mag,
           maxI: maxi,
-          reportDateTime: new Date(json[i].rdt),
-          DetailURL: [String("https://www.jma.go.jp/bosai/quake/data/" + json[i].json)],
+          cancel: elm.ift == "取消",
+
+          reportDateTime: new Date(elm.rdt),
+          DetailURL: [String("https://www.jma.go.jp/bosai/quake/data/" + elm.json)],
         });
       }
       eqInfoControl(dataTmp2, "jma");
@@ -1318,6 +1357,7 @@ function EQI_narikakun_Req(url) {
       var epiCenterTmp = json.Body.Earthquake ? json.Body.Earthquake.Hypocenter.Name : null;
       var MagnitudeTmp = json.Body.Earthquake ? json.Body.Earthquake.Magnitude : null;
       var MaxITmp = json.Body.Intensity ? json.Body.Intensity.Observation.MaxInt : null;
+      var cancel = json.Head.InfoType == "取消";
 
       var dataTmp2 = [
         {
@@ -1327,6 +1367,7 @@ function EQI_narikakun_Req(url) {
           epiCenter: epiCenterTmp,
           M: MagnitudeTmp,
           maxI: MaxITmp,
+          cancel: cancel,
           reportDateTime: new Date(json.Head.ReportDateTime),
           DetailURL: [url],
         },
@@ -1352,6 +1393,7 @@ function JMAEQInfoFetch(url) {
       const parser = new new JSDOM().window.DOMParser();
       const xml = parser.parseFromString(dataTmp, "text/html");
       var title = xml.title;
+      var cancel = xml.querySelector("InfoType").textContent == "取り消し";
 
       if (title == "震度速報" || title == "震源に関する情報" || title == "震源・震度情報" || title == "遠地地震に関する情報") {
         //地震情報
@@ -1380,6 +1422,7 @@ function JMAEQInfoFetch(url) {
               epiCenter: epiCenterTmp,
               M: magnitudeTmp,
               maxI: maxIntTmp,
+              cancel: cancel,
               reportDateTime: new Date(xml.querySelector("ReportDateTime").textContent),
               DetailURL: [url],
             },
@@ -1389,7 +1432,7 @@ function JMAEQInfoFetch(url) {
       } else if (/大津波警報|津波警報|津波注意報|津波予報/.test(title)) {
         //津波予報
 
-        if (xml.querySelector("InfoType").textContent == "取消") {
+        if (cancel) {
           var tsunamiDataTmp = {
             issue: { time: new Date(xml.querySelector("ReportDateTime").textContent) },
             areas: [],
@@ -1487,6 +1530,7 @@ function eqInfoControl(dataList, type) {
           if (data.epiCenter && (!EQElm.epiCenter || EQElm.reportDateTime < data.reportDateTime)) EQElm.epiCenter = data.epiCenter;
           if (data.M && (!EQElm.M || EQElm.reportDateTime < data.reportDateTime)) EQElm.M = data.M;
           if (data.maxI && (!EQElm.maxI || EQElm.reportDateTime < data.reportDateTime)) EQElm.maxI = data.maxI;
+          if (data.cancel && (!EQElm.cancel || EQElm.reportDateTime < data.reportDateTime)) EQElm.cancel = data.cancel;
 
           if (data.DetailURL && data.DetailURL[0] !== "" && !EQElm.DetailURL.includes(data.DetailURL[0])) EQElm.DetailURL.push(data.DetailURL[0]);
           eqInfoAlert(EQElm, "jma", true);

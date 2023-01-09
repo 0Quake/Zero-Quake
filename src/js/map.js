@@ -33,7 +33,7 @@ window.electronAPI.messageSend((event, request) => {
       var shindoElm = shindoList[a];
       var newElm = document.createElement("li");
       var shindoColor = shindoConvert(shindoElm.shindo, 2);
-      newElm.innerHTML = "<span style='color:" + shindoColor[1] + ";background:" + shindoColor[0] + "'>" + shindoConvert(shindoElm.shindo, 0) + "</span>" + shindoElm.Name;
+      newElm.innerHTML = "<span class='int' style='color:" + shindoColor[1] + ";background:" + shindoColor[0] + "'>" + shindoConvert(shindoElm.shindo, 0) + "</span>" + shindoElm.Region + " " + shindoElm.Name + "<span class='PGA'>PGA" + Math.round(shindoElm.pga * 100) / 100 + "</span>";
       document.getElementById("pointList").appendChild(newElm);
     }
 
@@ -246,9 +246,7 @@ function init() {
       [90, 0],
       [-90, 360],
     ],
-    //preferCanvas: true,
-    zoomAnimation: false, //←オフにするとずれて不自然
-    //preferCanvas: true,←かるくなる？
+    zoomAnimation: false,
   });
   //L.control.scale({ imperial: false }).addTo(map);←縮尺
   map.setView([32.99125, 138.46], 4);
@@ -259,56 +257,7 @@ function init() {
     maxNativeZoom: 11,
     maxZoom: 21,
     attribution: 'Map data <a href="https://www.data.jma.go.jp/svd/eqdb/data/shindo/" target="_blank">© 気象庁</a>',
-  })
-    .on("tileload", function (event) {
-      if (document.getElementById("hinanjo").checked) {
-        const L = 85.05112878; // 最大緯度
-
-        lat = parseFloat(map.getCenter().lat); // 緯度
-        lon = parseFloat(map.getCenter().lng); // 経度
-        zoom = 10; // 尺度
-
-        var pixelX = parseInt(Math.pow(2, zoom + 7) * (lon / 180 + 1));
-        var tileX = parseInt(pixelX / 256);
-
-        var pixelY = parseInt((Math.pow(2, zoom + 7) / Math.PI) * (-1 * Math.atanh(Math.sin((Math.PI / 180) * lat)) + Math.atanh(Math.sin((Math.PI / 180) * L))));
-        var tileY = parseInt(pixelY / 256);
-
-        var url = "https://cyberjapandata.gsi.go.jp/xyz/skhb04/10/" + tileX + "/" + tileY + ".geojson";
-        fetch(url)
-          .then((a) => (a.ok ? a.json() : null))
-          .then((geojson) => {
-            if (!geojson || !this._map) return;
-            event.tile.geojson = L.geoJSON(geojson, {
-              pointToLayer: function (feature, cordinate) {
-                return L.circleMarker(cordinate, geojsonMarkerOptions);
-              },
-            })
-              .addTo(this._map)
-              .bindPopup("指定緊急避難場所（地震）");
-          });
-        var url = "https://cyberjapandata.gsi.go.jp/xyz/skhb05/10/" + tileX + "/" + tileY + ".geojson";
-
-        fetch(url)
-          .then((a) => (a.ok ? a.json() : null))
-          .then((geojson) => {
-            if (!geojson || !this._map) return;
-            event.tile.geojson2 = L.geoJSON(geojson, {
-              pointToLayer: function (feature, cordinate) {
-                return L.circleMarker(cordinate, geojsonMarkerOptions2);
-              },
-            })
-              .addTo(this._map)
-              .bindPopup("指定緊急避難場所（津波）");
-          });
-      } else if (event.tile.geojson) {
-        this._map.removeLayer(event.tile.geojson);
-      }
-    })
-    .on("tileunload", function (event) {
-      if (event.tile.geojson && this._map) this._map.removeLayer(event.tile.geojson);
-      if (event.tile.geojson2 && this._map) this._map.removeLayer(event.tile.geojson2);
-    });
+  });
 
   var tile2 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png", {
     minZoom: 0,
