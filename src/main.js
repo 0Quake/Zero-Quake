@@ -141,21 +141,6 @@ ipcMain.on("message", (_event, response) => {
 });
 
 function createWindow() {
-  eqInfoControl(
-    [
-      {
-        eventId: "aa",
-        category: null,
-        OriginTime: new Date(),
-        epiCenter: null,
-        cancel: true,
-        reportDateTime: new Date(),
-        DetailURL: [],
-      },
-    ],
-    "jma"
-  );
-
   if (mainWindow) {
     mainWindow.focus();
     return;
@@ -172,8 +157,8 @@ function createWindow() {
   //mainWindow.setMenuBarVisibility(false);
 
   mainWindow.webContents.on("did-finish-load", () => {
-    replay("2022/10/2 0:2:45");
-    //replay("2022/11/3 19:04:40");
+    //    replay("2022/10/2 0:2:45");
+    // replay("2022/11/3 19:04:40");
 
     //replay("2022/04/19 08:16:15");
     //replay("2022/11/09 17:40:05");
@@ -655,7 +640,7 @@ function SNXWatch() {
 
 var intColorConv = { "0xFFFFFFFF": "0", "0xFFF2F2FF": "1", "0xFF00AAFF": "2", "0xFF0041FF": "3", "0xFFFAE696": "4", "0xFFFFE600": "5-", "0xFFFF9900": "5+", "0xFFFF2800": "6-", "0xFFA50021": "6+", "0xFFB40068": "7" };
 function SNXLogRead(str) {
-  var path = path.join(userHome, "/AppData/Roaming/StrategyCorporation/SignalNowX/" + str);
+  var pathTmp = path.join(userHome, "/AppData/Roaming/StrategyCorporation/SignalNowX/" + str);
   if (fs.existsSync(pathTmp)) {
     fs.readFile(pathTmp, function (err, content) {
       if (err) {

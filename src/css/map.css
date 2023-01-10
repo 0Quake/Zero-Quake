@@ -62,9 +62,13 @@ img.leaflet-control {
 .leaflet-popup-content {
   margin: 0;
   position: relative;
-  padding: 35px 5px 5px 5px;
   min-width: 180px;
   text-align: center;
+  padding: 10px;
+}
+.PointPopup,
+.leaflet-popup-content:has(h3) {
+  padding: 35px 5px 5px 5px;
 }
 .PointPopup h3,
 .leaflet-popup-content h3 {

@@ -73,12 +73,12 @@
     }
 
 
-    #Shindo {
+    #ShindoWrap {
       display: inline-block;
       width: calc(50% - 10px);
     }
 
-    #Shindo {
+    #ShindoWrap {
       display: none;
     }
 
@@ -165,15 +165,22 @@
       width: 16px;
       height: 16px;
       border: solid 1px #000;
+      outline: solid 2px #FFF;
       line-height: 16px;
       text-align: center;
       border-radius: 50%;
-
     }
 
     .zoomLevel_3 .ShindoIcon div,
     .zoomLevel_4 .ShindoIcon div {
       display: block;
+    }
+
+    .zoomLevel_4 .ShindoIcon div {
+      width: 23px;
+      height: 23px;
+      line-height: 23px;
+      font-size: 18px;
     }
 
     #ShindoSample {
@@ -195,11 +202,25 @@
       font-size: 18px;
       margin: 3px;
     }
+
+    #canceled {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(5px);
+      color: #FFF;
+      z-index: 999999999999999;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      font-size: 30px;
+    }
   </style>
 
 </head>
 
 <body>
+
 
   <div id="mapcontainer"></div>
   <div id="ShindoSample"><span>凡例：</span>
@@ -245,10 +266,12 @@
       </tr>
     </table>
 
-    <div id="Shindo">
+    <div id="ShindoWrap">
       <h2>各地の震度</h2>
       <button id="AllOpen">すべて展開</button>
       <button id="AllClose">すべて折り畳み</button>
+      <div id="Shindo">
+      </div>
     </div>
 
   </div>
@@ -260,9 +283,15 @@
   <a href="#" target="_blank" id="gooLink">goo地震情報</a>
 
 
+  <div id="canceled">情報がキャンセルされました</div>
 
 
   <script>
+    var pointList
+    fetch("https://files.nakn.jp/earthquake/code/PointSeismicIntensityLocation.json").then(function (res) { return res.json() }).then(function (data) {
+      pointList = data
+    })
+
     var data_time = document.getElementById("data_time")
     var data_maxI = document.getElementById("data_maxI")
     var data_M = document.getElementById("data_M")
@@ -273,15 +302,26 @@
     let url = new URL(window.location.href);
     let params = url.searchParams;
     var eid = params.get('eid')
-    var detailURL = params.get('detailURL')
-    detailURL = decodeURIComponent(detailURL).split("[ZQ_URLSEPARATE]")
     var markerElm;
     var newInfoDateTime = 0;
     var sections = [];
     var map_drawed = false;
     var map
 
-    function init() {
+    var detailURL = decodeURIComponent(params.get('detailURL')).split("[ZQ_URLSEPARATE]")
+    var jmaURL = detailURL.filter(function (elm) { return elm.indexOf('www.jma.go.jp') != -1 })
+    var jmaXMLURL = detailURL.filter(function (elm) { return elm.indexOf('www.data.jma.go.jp') != -1 })
+    var nhkURL = detailURL.filter(function (elm) { return elm.indexOf('nhk.or.jp') != -1 });
+    var narikakunURL = detailURL.filter(function (elm) { return elm.indexOf('dev.narikakun.net') != -1 })
+    var jmaURLHis = [];
+    var jmaXMLURLHis = [];
+    var nhkURLHis = [];
+    var narikakunURLHis = [];
+
+    var mapLevel = 0;//マップの状況　0:なし/1:NHK/2:JMAXML/3:完全/
+
+
+    function Mapinit() {
       map = L.map("mapcontainer", {
         maxBounds: [
           [90, 0],
@@ -350,7 +390,6 @@
         maxZoom: 21,
         attribution: 'Map data <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">©国土地理院</a>',
       });
-
       var tile9 = L.tileLayer("https://www.jma.go.jp/tile/gsi/pale2/{z}/{x}/{y}.png", {
         minZoom: 0,
         minNativeZoom: 2,
@@ -479,350 +518,156 @@
         }
 
       })
+
+
+    }
+
+
+    function jma_ListReq() {
+      fetch("https://www.jma.go.jp/bosai/quake/data/list.json")
+        .then(function (res) {
+          return res.json()
+        })
+        .then(function (data) {
+
+          data.forEach(function (elm) {
+            var urlTmp = "https://www.jma.go.jp/bosai/quake/data/" + elm.json
+            if (elm.eid == eid && !jmaURL.includes(urlTmp)) {
+              jmaURL.push(urlTmp)
+            }
+          })
+
+          mapDraw()
+        })
+        .catch(function (err) {
+          console.log("err", err)
+        });
+
+
+    }
+    function nhk_ListReq() {
+      fetch("https://www3.nhk.or.jp/sokuho/jishin/data/JishinReport.xml")
+        .then(function (res) {
+          return res.arrayBuffer()
+        })
+        .then(function (data) {
+          const td = new TextDecoder("Shift_JIS")
+          data = td.decode(data)
+
+          const parser = new DOMParser();
+          const xml = parser.parseFromString(data, "text/xml");
+
+          var items = xml.querySelectorAll("item");
+
+          items.forEach(function (elm) {
+            var eidTmp = "20" + elm.attributes.url.nodeValue.split("data/")[1].split("_")[0].slice(-12);
+            if (eidTmp == eid && !nhkURL.includes(elm.attributes.url.nodeValue)) {
+              nhkURL.push(elm.attributes.url.nodeValue)
+            }
+
+          })
+          mapDraw()
+
+        }).catch(function (err) {
+          console.log("err", err)
+        });
+
+    }
+    function narikakun_ListReq(year, month, retry) {
+      fetch("https://ntool.online/api/earthquakeList?year=" + year + "&month=" + month)
+        .then(function (res) {
+          return res.json()
+        })
+        .then(function (data) {
+
+          var nakn_detected = false
+          data.lists.forEach(function (elm) {
+            var eidTmp = elm.split("/")
+            eidTmp = eidTmp[eidTmp.length - 1]
+            if (eidTmp.indexOf(eid) !== -1 && !narikakunURL.includes(elm)) {
+              narikakunURL.push(elm)
+              nakn_detected = true
+            }
+          })
+
+          if (!nakn_detected && !retry) {
+            var yearTmp = new Date().getFullYear();
+            var monthTmp = new Date().getMonth();
+            if (monthTmp == 0) {
+              yearTmp = new Date().getFullYear() - 1;
+              monthTmp = 1;
+            }
+
+            narikakun_ListReq(yearTmp, monthTmp, true)
+          }
+          mapDraw()
+
+        })
+        .catch(function (err) {
+          console.log("err", err)
+        });
+    }
+
+    function init() {
+      mapLevel = 0
+
+      nhk_ListReq()
+      jma_ListReq()
+      narikakun_ListReq(new Date().getFullYear(), new Date().getMonth() + 1)
+
+      document.getElementById("ShindoSample0").style.background = shindoConvert2(0)[0]
+      document.getElementById("ShindoSample0").style.color = shindoConvert2(0)[1]
+      document.getElementById("ShindoSample1").style.background = shindoConvert2(1)[0]
+      document.getElementById("ShindoSample1").style.color = shindoConvert2(1)[1]
+      document.getElementById("ShindoSample2").style.background = shindoConvert2(2)[0]
+      document.getElementById("ShindoSample2").style.color = shindoConvert2(2)[1]
+      document.getElementById("ShindoSample3").style.background = shindoConvert2(3)[0]
+      document.getElementById("ShindoSample3").style.color = shindoConvert2(3)[1]
+      document.getElementById("ShindoSample4").style.background = shindoConvert2(4)[0]
+      document.getElementById("ShindoSample4").style.color = shindoConvert2(4)[1]
+      document.getElementById("ShindoSample5-").style.background = shindoConvert2(4.5)[0]
+      document.getElementById("ShindoSample5-").style.color = shindoConvert2(4.5)[1]
+      document.getElementById("ShindoSample5+").style.background = shindoConvert2(5)[0]
+      document.getElementById("ShindoSample5+").style.color = shindoConvert2(5)[1]
+      document.getElementById("ShindoSample6-").style.background = shindoConvert2(5.5)[0]
+      document.getElementById("ShindoSample6-").style.color = shindoConvert2(5.5)[1]
+      document.getElementById("ShindoSample6+").style.background = shindoConvert2(6)[0]
+      document.getElementById("ShindoSample6+").style.color = shindoConvert2(6)[1]
+      document.getElementById("ShindoSample7").style.background = shindoConvert2(7)[0]
+      document.getElementById("ShindoSample7").style.color = shindoConvert2(7)[1]
+
+      Mapinit()
     }
 
     function mapDraw() {
       if (eid && detailURL) {
 
 
-        var jmaURL = detailURL.find(function (elm) { return elm.indexOf('jma.go.jp') != -1 })
-        var nhkURL = detailURL.find(function (elm) { return elm.indexOf('nhk.or.jp') != -1 })
-        var narikakunURL = detailURL.find(function (elm) { return elm.indexOf('dev.narikakun.net') != -1 })
-        console.log(jmaURL, nhkURL, narikakunURL)
-        if (jmaURL) {
-          fetch(jmaURL).then(function (res) { return res.json() }).then(function (json) {
 
-            var mostNew = false;
-            if (!newInfoDateTime || newInfoDateTime <= new Date(json.Head.ReportDateTime)) {
-              newInfoDateTime = new Date(json.Head.ReportDateTime)
-              mostNew = true
-            }
-
-            if (json.Body.Earthquake) {
-              var LatLngDepth = json.Body.Earthquake.Hypocenter.Area.Coordinate.replaceAll("+", "｜+").replaceAll("-", "｜-").replaceAll("/", "").split("｜")
-            } console.log(data_depth.innerText)
-
-            if (json.Body.Earthquake && json.Body.Earthquake.OriginTime && (mostNew || data_time.innerText == "不明")) data_time.innerText = dateEncode(3, json.Body.Earthquake.OriginTime)
-            if (json.Body.Intensity && json.Body.Intensity.Observation.MaxInt && (mostNew || data_maxI.innerText == "不明")) data_maxI.innerText = json.Body.Intensity.Observation.MaxInt
-            if (json.Body.Earthquake && json.Body.Earthquake.Magnitude && (mostNew || data_M.innerText == "不明")) data_M.innerText = json.Body.Earthquake.Magnitude
-            if (LatLngDepth && !isNaN(LatLngDepth[3]) && LatLngDepth[3] && (mostNew || data_depth.innerText == "不明")) data_depth.innerText = Math.abs(Number(LatLngDepth[3]) / 1000) + "km";
-            if (json.Body.Earthquake && json.Body.Earthquake.Hypocenter.Area.Name && (mostNew || data_center.innerText == "不明")) data_center.innerText = json.Body.Earthquake.Hypocenter.Area.Name
-
-            var commentText = "";
-            if (json.Body.Comments && json.Body.Comments.ForecastComment.Text && (mostNew || data_comment.innerText == "")) commentText += json.Body.Comments.ForecastComment.Text
-            if (json.Body.Comments && json.Body.Comments.FreeFormComment && (mostNew || data_comment.innerText == "")) commentText += json.Body.Comments.FreeFormComment
-            data_comment.innerText = commentText
-
-
-
-            if (json.Body.Intensity && json.Body.Intensity.Observation.Pref && !map_drawed) {
-              document.getElementById("Shindo").style.display = "inline-block"
-              map_drawed = true
-              json.Body.Intensity.Observation.Pref.forEach(function (elm) {
-                var newDiv = document.createElement("div")
-                var color1 = shindoConvert2(shindoConvert3(elm.MaxInt))
-                newDiv.innerHTML = "<span style='background:" + color1[0] + ";color:" + color1[1] + ";'>" + elm.MaxInt + "</span>" + elm.Name
-                newDiv.classList.add("ShindoItem", "ShindoItem1")
-                document.getElementById("Shindo").appendChild(newDiv)
-                newDiv.addEventListener('click', function () {
-                  this.classList.toggle('has-open')
-                  this.nextElementSibling.classList.toggle('open')
-                });
-
-                var newDiv = document.createElement("div")
-                newDiv.innerHTML = "<div></div>"
-                newDiv.classList.add("WrapLevel1", "close")
-                document.getElementById("Shindo").appendChild(newDiv)
-
-                if (elm.Area) {
-                  elm.Area.forEach(function (elm2) {
-                    var wrap = document.querySelectorAll(".WrapLevel1")
-
-                    var newDiv = document.createElement("div")
-                    var color2 = shindoConvert2(shindoConvert3(elm2.MaxInt))
-                    newDiv.innerHTML = "<span style='background:" + color2[0] + ";color:" + color2[1] + ";'>" + elm2.MaxInt + "</span>" + elm2.Name
-                    newDiv.classList.add("ShindoItem", "ShindoItem2")
-                    wrap[wrap.length - 1].appendChild(newDiv)
-                    newDiv.addEventListener('click', function () {
-                      this.classList.toggle('has-open')
-                      this.nextElementSibling.classList.toggle('open')
-                    });
-
-                    var newDiv = document.createElement("div")
-                    newDiv.innerHTML = "<div></div>"
-                    newDiv.classList.add("WrapLevel2", "close")
-                    wrap[wrap.length - 1].appendChild(newDiv)
-
-                    var sectionTmp = sections.find(function (elmA) {
-                      return elmA.name == elm2.Name
-                    })
-                    if (sectionTmp) {
-                      sectionTmp.item.setStyle({
-                        fill: true,
-                        fillColor: color2[0]
-                      })
-                      sectionTmp.item.bindPopup(sectionTmp.name + "<br>震度" + elm2.MaxInt)
-                    }
-                    if (elm2.City) {
-                      elm2.City.forEach(function (elm3) {
-                        var wrap2 = document.querySelectorAll(".WrapLevel2")
-
-                        var newDiv = document.createElement("div")
-                        var color3 = shindoConvert2(shindoConvert3(elm3.MaxInt))
-                        newDiv.innerHTML = "<span style='background:" + color3[0] + ";color:" + color3[1] + ";'>" + elm3.MaxInt + "</span>" + elm3.Name
-                        newDiv.classList.add("ShindoItem", "ShindoItem3")
-                        wrap2[wrap2.length - 1].appendChild(newDiv)
-                        newDiv.addEventListener('click', function () {
-                          this.classList.toggle('has-open')
-                          this.nextElementSibling.classList.toggle('open')
-                        });
-
-                        var newDiv = document.createElement("div")
-                        newDiv.innerHTML = "<div></div>"
-                        newDiv.classList.add("WrapLevel3", "close")
-                        wrap2[wrap2.length - 1].appendChild(newDiv)
-
-                        if (elm3.IntensityStation) {
-                          elm3.IntensityStation.forEach(function (elm4) {
-                            var wrap3 = document.querySelectorAll(".WrapLevel3")
-
-                            var newDiv = document.createElement("div")
-                            var color4 = shindoConvert2(shindoConvert3(elm4.Int))
-                            newDiv.innerHTML = "<span style='background:" + color4[0] + ";color:" + color4[1] + ";'>" + elm4.Int + "</span>" + elm4.Name
-                            newDiv.classList.add("ShindoItem", "ShindoItem4")
-
-
-
-                            var divIcon = L.divIcon({
-                              html: '<div style="background:' + color4[0] + ';color:' + color4[1] + '">' + elm4.Int + '</div>',
-                              className: 'ShindoIcon',
-                              iconSize: [16, 16],
-                            });
-
-                            L.marker([elm4.latlon.lat, elm4.latlon.lon], { icon: divIcon, pane: "shadowPane" }).addTo(map).bindPopup(elm4.Name + "<br>震度" + elm4.Int);
-
-                            wrap3[wrap3.length - 1].appendChild(newDiv)
-                          })
-                        }
-
-
-                      })
-                    }
-
-                  })
-                }
-
-              })
-            }
-
-            if (LatLngDepth) {
-              if (!markerElm) {
-                epicenterIcon = L.icon({
-                  iconUrl: "./img/epicenter.svg",
-                  iconSize: [32, 32], // size of the icon
-                  iconAnchor: [16, 16], // point of the icon which will correspond to marker's location
-                  popupAnchor: [0, -20], // point from which the popup should open relative to the iconAnchor
-                });
-
-                markerElm = L.marker([Number(LatLngDepth[1]), Number(LatLngDepth[2])], {
-                  icon: epicenterIcon,
-                  pane: "markerPane"
-                }).addTo(map).bindPopup("震央：" + json.Body.Earthquake.Hypocenter.Area.Name);
-              } else {
-                markerElm.setLatLng([Number(LatLngDepth[1]), Number(LatLngDepth[2])])
-              }
-
-              map.setView([Number(LatLngDepth[1]), Number(LatLngDepth[2])], 6);
-            }
-
-          })
-        }
-
-        if (narikakunURL) {
-
-          fetch(narikakunURL).then(function (res) { return res.json() }).then(function (json) {
-            if (json.Head.EventID == eid) {
-
-              var mostNew = false;
-              if (!newInfoDateTime || newInfoDateTime < new Date(json.Head.ReportDateTime)) {
-                newInfoDateTime = new Date(json.Head.ReportDateTime)
-                mostNew = true
-              }
-
-              if (json.Body.Earthquake.OriginTime && (mostNew || data_time.innerText == "不明")) data_time.innerText = dateEncode(3, json.Body.Earthquake.OriginTime)
-              if (json.Body.Intensity && json.Body.Intensity.Observation.MaxInt && (mostNew || data_maxI.innerText == "不明")) data_maxI.innerText = json.Body.Intensity.Observation.MaxInt
-              if (json.Body.Earthquake.Magnitude && (mostNew || data_M.innerText == "不明")) data_M.innerText = json.Body.Earthquake.Magnitude
-              if (json.Body.Earthquake.Hypocenter.Depth && !isNaN(json.Body.Earthquake.Hypocenter.Depth) && (mostNew || data_depth.innerText == "不明")) data_depth.innerText = json.Body.Earthquake.Hypocenter.Depth + "km"
-              if (json.Body.Earthquake.Hypocenter.Name && (mostNew || data_center.innerText == "不明")) data_center.innerText = json.Body.Earthquake.Hypocenter.Name
-              if (json.Body.Comments && json.Body.Comments.Observation && (mostNew || data_comment.innerText == "")) data_comment.innerText = json.Body.Comments.Observation;
-
-              if (json.Body.Intensity.Observation.Pref && !map_drawed) {
-                document.getElementById("Shindo").style.display = "inline-block"
-
-                map_drawed = true
-                json.Body.Intensity.Observation.Pref.forEach(function (elm) {
-                  var newDiv = document.createElement("div")
-                  var color1 = shindoConvert2(shindoConvert3(elm.MaxInt))
-                  newDiv.innerHTML = "<span style='background:" + color1[0] + ";color:" + color1[1] + ";'>" + elm.MaxInt + "</span>" + elm.Name
-                  newDiv.classList.add("ShindoItem", "ShindoItem1")
-                  document.getElementById("Shindo").appendChild(newDiv)
-                  newDiv.addEventListener('click', function () {
-                    this.classList.toggle('has-open')
-                    this.nextElementSibling.classList.toggle('open')
-                  });
-
-                  var newDiv = document.createElement("div")
-                  newDiv.innerHTML = "<div></div>"
-                  newDiv.classList.add("WrapLevel1", "close")
-                  document.getElementById("Shindo").appendChild(newDiv)
-
-                  elm.Area.forEach(function (elm2) {
-                    var wrap = document.querySelectorAll(".WrapLevel1")
-
-                    var newDiv = document.createElement("div")
-                    var color2 = shindoConvert2(shindoConvert3(elm2.MaxInt))
-                    newDiv.innerHTML = "<span style='background:" + color2[0] + ";color:" + color2[1] + ";'>" + elm2.MaxInt + "</span>" + elm2.Name
-                    newDiv.classList.add("ShindoItem", "ShindoItem2")
-                    wrap[wrap.length - 1].appendChild(newDiv)
-                    newDiv.addEventListener('click', function () {
-                      this.classList.toggle('has-open')
-                      this.nextElementSibling.classList.toggle('open')
-                    });
-
-                    var newDiv = document.createElement("div")
-                    newDiv.innerHTML = "<div></div>"
-                    newDiv.classList.add("WrapLevel2", "close")
-                    wrap[wrap.length - 1].appendChild(newDiv)
-
-                    var sectionTmp = sections.find(function (elmA) {
-                      return elmA.name == elm2.Name
-                    }).item
-                    if (sectionTmp) {
-                      sectionTmp.setStyle({
-                        fill: true,
-                        fillColor: color2[0]
-                      })
-                    }
-
-                    elm2.City.forEach(function (elm3) {
-                      var wrap2 = document.querySelectorAll(".WrapLevel2")
-
-                      var newDiv = document.createElement("div")
-                      var color3 = shindoConvert2(shindoConvert3(elm3.MaxInt))
-                      newDiv.innerHTML = "<span style='background:" + color3[0] + ";color:" + color3[1] + ";'>" + elm3.MaxInt + "</span>" + elm3.Name
-                      newDiv.classList.add("ShindoItem", "ShindoItem3")
-                      wrap2[wrap2.length - 1].appendChild(newDiv)
-                      newDiv.addEventListener('click', function () {
-                        this.classList.toggle('has-open')
-                        this.nextElementSibling.classList.toggle('open')
-                      });
-
-                      var newDiv = document.createElement("div")
-                      newDiv.innerHTML = "<div></div>"
-                      newDiv.classList.add("WrapLevel3", "close")
-                      wrap2[wrap2.length - 1].appendChild(newDiv)
-
-                      elm3.IntensityStation.forEach(function (elm4) {
-                        var wrap3 = document.querySelectorAll(".WrapLevel3")
-
-                        var newDiv = document.createElement("div")
-                        var color4 = shindoConvert2(shindoConvert3(elm4.Int))
-                        newDiv.innerHTML = "<span style='background:" + color4[0] + ";color:" + color4[1] + ";'>" + elm4.Int + "</span>" + elm4.Name
-                        newDiv.classList.add("ShindoItem", "ShindoItem4")
-
-
-
-                        var divIcon = L.divIcon({
-                          html: '<div style="background:' + color4[0] + ';color:' + color4[1] + '">' + elm4.Int + '</div>',
-                          className: 'ShindoIcon',
-                          iconSize: [16, 16],
-
-                        });
-
-                        L.marker([elm4.latlon.lat, elm4.latlon.lon], { icon: divIcon, pane: "shadowPane" }).addTo(map).bindPopup(elm4.Name + "<br>震度" + elm4.Int);
-
-                        wrap3[wrap3.length - 1].appendChild(newDiv)
-                      })
-
-
-                    })
-
-                  })
-
-                })
-              }
-            }
-          })
-
-        }
-
-        if (nhkURL) {
-
-          fetch(nhkURL)
-            .then((response) => {
-              return response.arrayBuffer();
-            }) // (2) レスポンスデータを取得
-            .then((data) => {
-              data = new TextDecoder("shift-jis").decode(data);
-              var parser2 = new DOMParser();
-              var xml2 = parser2.parseFromString(data, "application/xml");
-              var eid = "20" + nhkURL.split("data/")[1].split("_")[0].slice(-12);
-              //console.log({ "地震ID:": eid, 情報の種別: "?", 発生時刻: new Date(xml2.querySelector("OriginTime").textContent), 震源: xml2.querySelector("Earthquake").getAttribute("Epicenter"), M: xml2.querySelector("Earthquake").getAttribute("Magnitude"), 最大震度: xml2.querySelector("Earthquake").getAttribute("Intensity"), 詳細JSONURL: urls[i] });
-
-
-
-              var mostNew = false;
-              if (!newInfoDateTime || xml2.querySelector("OriginTime") && newInfoDateTime < new Date(new Date(xml2.querySelector("OriginTime").textContent))) {
-                newInfoDateTime = new Date(new Date(xml2.querySelector("Earthquake").getAttribute("Time")))
-                mostNew = true
-              }
-
-              if (xml2.querySelector("Earthquake").getAttribute("Time") && (mostNew || data_time.innerText == "不明")) data_time.innerText = dateEncode(3, new Date(xml2.querySelector("Earthquake").getAttribute("Time")))
-              if (xml2.querySelector("Earthquake").getAttribute("Intensity") && (mostNew || data_maxI.innerText == "不明")) data_maxI.innerText = xml2.querySelector("Earthquake").getAttribute("Intensity")
-              if (xml2.querySelector("Earthquake").getAttribute("Magnitude") && (mostNew || data_M.innerText == "不明")) data_M.innerText = xml2.querySelector("Earthquake").getAttribute("Magnitude")
-              if (xml2.querySelector("Earthquake").getAttribute("Depth") && !isNaN(xml2.querySelector("Earthquake").getAttribute("Depth")) && (mostNew || data_depth.innerText == "不明")) data_depth.innerText = xml2.querySelector("Earthquake").getAttribute("Depth")
-              if (xml2.querySelector("Earthquake").getAttribute("Epicenter") && (mostNew || data_center.innerText == "不明")) data_center.innerText = xml2.querySelector("Earthquake").getAttribute("Epicenter")
-
-              if (xml2.querySelector("Earthquake").querySelectorAll("Group") && !narikakunURL && !jmaURL) {
-                document.getElementById("Shindo").style.display = "inline-block"
-
-                xml2.querySelector("Earthquake").querySelectorAll("Group").forEach(function (elm) {
-                  var newDiv = document.createElement("div")
-                  var color1 = shindoConvert2(shindoConvert3(elm.getAttribute("Intensity")))
-                  var shindoJP = elm.getAttribute("Intensity").replace("-", "弱").replace("+", "強")
-                  newDiv.innerHTML = "<span style='background:" + color1[0] + ";color:" + color1[1] + ";'>" + shindoJP + "</span>震度" + shindoJP + "を観測した地域"
-                  newDiv.classList.add("ShindoItem", "ShindoItem1")
-                  document.getElementById("Shindo").appendChild(newDiv)
-                  newDiv.addEventListener('click', function () {
-                    this.classList.toggle('has-open')
-                    this.nextElementSibling.classList.toggle('open')
-                  });
-
-                  var newDiv = document.createElement("div")
-                  newDiv.innerHTML = "<div></div>"
-                  newDiv.classList.add("WrapLevel1", "close")
-                  document.getElementById("Shindo").appendChild(newDiv)
-                  elm.querySelectorAll("Area").forEach(function (elm2) {
-                    var wrap = document.querySelectorAll(".WrapLevel1")
-
-                    var newDiv = document.createElement("div")
-                    newDiv.innerHTML = "<span style='background:" + color1[0] + ";color:" + color1[1] + ";'>" + shindoJP + "</span>" + elm2.getAttribute("Name")
-                    newDiv.classList.add("ShindoItem", "ShindoItem4")
-                    wrap[wrap.length - 1].appendChild(newDiv)
-                  })
-                })
-              }
-            });
-
-        }
-
-
-
-
-
-
-
-
+        jmaURL.forEach(function (elm) {
+          jma_Fetch(elm)
+        })
+
+        narikakunURL.forEach(function (elm) {
+          narikakun_Fetch(elm)
+        })
+
+        nhkURL.forEach(function (elm) {
+          nhkFetch(elm)
+        })
+        jmaXMLURL.forEach(function (elm) {
+          jmaXMLFetch(elm)
+        })
+
+
+        jmaURLHis = jmaURLHis.concat(jmaURL)
+        jmaXMLURLHis = jmaXMLURLHis.concat(jmaXMLURL)
+        nhkURLHis = nhkURLHis.concat(nhkURL)
+        narikakunURLHis = narikakunURLHis.concat(narikakunURL)
+        jmaURL = []
+        jmaXMLURL = []
+        nhkURL = []
+        narikakunURL = []
 
         const year = (eid.substring(0, 4)); //2022
         const month = (eid.substring(4, 6)); //2
@@ -844,10 +689,594 @@
 
 
 
+    function jma_Fetch(url) {
+      fetch(url).then(function (res) { return res.json() }).then(function (json) {
+
+        var mostNew = false;
+
+        if (!newInfoDateTime || newInfoDateTime <= new Date(json.Head.ReportDateTime)) {
+          newInfoDateTime = new Date(json.Head.ReportDateTime)
+          mostNew = true
+        }
+
+        if (json.Head.InfoType == "取消") {
+          document.getElementById("canceled").style.display = "flex"
+        }
+
+
+        if (json.Body.Earthquake) {
+          var LatLngDepth = json.Body.Earthquake.Hypocenter.Area.Coordinate.replaceAll("+", "｜+").replaceAll("-", "｜-").replaceAll("/", "").split("｜")
+        } console.log(data_depth.innerText)
+
+        if (json.Body.Earthquake && json.Body.Earthquake.OriginTime && (mostNew || data_time.innerText == "不明")) data_time.innerText = dateEncode(3, json.Body.Earthquake.OriginTime)
+        if (json.Body.Intensity && json.Body.Intensity.Observation.MaxInt && (mostNew || data_maxI.innerText == "不明")) data_maxI.innerText = json.Body.Intensity.Observation.MaxInt
+        if (json.Body.Earthquake && json.Body.Earthquake.Magnitude && (mostNew || data_M.innerText == "不明")) data_M.innerText = json.Body.Earthquake.Magnitude
+        if (LatLngDepth && !isNaN(LatLngDepth[3]) && LatLngDepth[3] && (mostNew || data_depth.innerText == "不明")) data_depth.innerText = Math.abs(Number(LatLngDepth[3]) / 1000) + "km";
+        if (json.Body.Earthquake && json.Body.Earthquake.Hypocenter.Area.Name && (mostNew || data_center.innerText == "不明")) data_center.innerText = json.Body.Earthquake.Hypocenter.Area.Name
+
+        var commentText = "";
+        if (json.Body.Comments && json.Body.Comments.ForecastComment.Text && (mostNew || data_comment.innerText == "")) commentText += json.Body.Comments.ForecastComment.Text
+        if (json.Body.Comments && json.Body.Comments.FreeFormComment && (mostNew || data_comment.innerText == "")) commentText += json.Body.Comments.FreeFormComment
+        data_comment.innerText = commentText
+
+
+
+        if (json.Body.Intensity && json.Body.Intensity.Observation.Pref && mapLevel < 3) {
+          mapLevel = 3
+          removeChild(document.getElementById("Shindo"))
+          document.getElementById("ShindoWrap").style.display = "inline-block"
+          map_drawed = true
+          json.Body.Intensity.Observation.Pref.forEach(function (elm) {
+            var newDiv = document.createElement("div")
+            var color1 = shindoConvert2(shindoConvert3(elm.MaxInt))
+            newDiv.innerHTML = "<span style='background:" + color1[0] + ";color:" + color1[1] + ";'>" + elm.MaxInt + "</span>" + elm.Name
+            newDiv.classList.add("ShindoItem", "ShindoItem1")
+            document.getElementById("Shindo").appendChild(newDiv)
+            newDiv.addEventListener('click', function () {
+              this.classList.toggle('has-open')
+              this.nextElementSibling.classList.toggle('open')
+            });
+
+            var newDiv = document.createElement("div")
+            newDiv.innerHTML = "<div></div>"
+            newDiv.classList.add("WrapLevel1", "close")
+            document.getElementById("Shindo").appendChild(newDiv)
+
+            if (elm.Area) {
+              elm.Area.forEach(function (elm2) {
+                var wrap = document.querySelectorAll(".WrapLevel1")
+
+                var newDiv = document.createElement("div")
+                var color2 = shindoConvert2(shindoConvert3(elm2.MaxInt))
+                newDiv.innerHTML = "<span style='background:" + color2[0] + ";color:" + color2[1] + ";'>" + elm2.MaxInt + "</span>" + elm2.Name
+                newDiv.classList.add("ShindoItem", "ShindoItem2")
+                wrap[wrap.length - 1].appendChild(newDiv)
+                newDiv.addEventListener('click', function () {
+                  this.classList.toggle('has-open')
+                  this.nextElementSibling.classList.toggle('open')
+                });
+
+                var newDiv = document.createElement("div")
+                newDiv.innerHTML = "<div></div>"
+                newDiv.classList.add("WrapLevel2", "close")
+                wrap[wrap.length - 1].appendChild(newDiv)
+
+                var sectionTmp = sections.find(function (elmA) {
+                  return elmA.name == elm2.Name
+                })
+                if (sectionTmp) {
+                  sectionTmp.item.setStyle({
+                    fill: true,
+                    fillColor: color2[0]
+                  })
+                  sectionTmp.item.bindPopup(sectionTmp.name + "<br>震度" + elm2.MaxInt)
+                }
+                if (elm2.City) {
+                  elm2.City.forEach(function (elm3) {
+                    var wrap2 = document.querySelectorAll(".WrapLevel2")
+
+                    var newDiv = document.createElement("div")
+                    var color3 = shindoConvert2(shindoConvert3(elm3.MaxInt))
+                    newDiv.innerHTML = "<span style='background:" + color3[0] + ";color:" + color3[1] + ";'>" + elm3.MaxInt + "</span>" + elm3.Name
+                    newDiv.classList.add("ShindoItem", "ShindoItem3")
+                    wrap2[wrap2.length - 1].appendChild(newDiv)
+                    newDiv.addEventListener('click', function () {
+                      this.classList.toggle('has-open')
+                      this.nextElementSibling.classList.toggle('open')
+                    });
+
+                    var newDiv = document.createElement("div")
+                    newDiv.innerHTML = "<div></div>"
+                    newDiv.classList.add("WrapLevel3", "close")
+                    wrap2[wrap2.length - 1].appendChild(newDiv)
+
+                    if (elm3.IntensityStation) {
+                      elm3.IntensityStation.forEach(function (elm4) {
+                        var wrap3 = document.querySelectorAll(".WrapLevel3")
+
+                        var newDiv = document.createElement("div")
+                        var color4 = shindoConvert2(shindoConvert3(elm4.Int))
+                        newDiv.innerHTML = "<span style='background:" + color4[0] + ";color:" + color4[1] + ";'>" + elm4.Int + "</span>" + elm4.Name
+                        newDiv.classList.add("ShindoItem", "ShindoItem4")
+
+
+
+                        var divIcon = L.divIcon({
+                          html: '<div style="background:' + color4[0] + ';color:' + color4[1] + '">' + elm4.Int + '</div>',
+                          className: 'ShindoIcon',
+                          iconSize: [16, 16],
+                        });
+
+                        L.marker([elm4.latlon.lat, elm4.latlon.lon], { icon: divIcon, pane: "shadowPane" }).addTo(map).bindPopup(elm4.Name + "<br>震度" + elm4.Int);
+
+                        wrap3[wrap3.length - 1].appendChild(newDiv)
+                      })
+                    }
+
+
+                  })
+                }
+
+              })
+            }
+
+          })
+        }
+
+        if (LatLngDepth) {
+          if (!markerElm) {
+            epicenterIcon = L.icon({
+              iconUrl: "./img/epicenter.svg",
+              iconSize: [32, 32], // size of the icon
+              iconAnchor: [16, 16], // point of the icon which will correspond to marker's location
+              popupAnchor: [0, -20], // point from which the popup should open relative to the iconAnchor
+            });
+
+            markerElm = L.marker([Number(LatLngDepth[1]), Number(LatLngDepth[2])], {
+              icon: epicenterIcon,
+              pane: "markerPane"
+            }).addTo(map).bindPopup("震央：" + json.Body.Earthquake.Hypocenter.Area.Name);
+          } else {
+            markerElm.setLatLng([Number(LatLngDepth[1]), Number(LatLngDepth[2])])
+          }
+
+          map.setView([Number(LatLngDepth[1]), Number(LatLngDepth[2])], 6);
+        }
+
+      })
+
+    }
+
+    function narikakun_Fetch(url) {
+
+      fetch(url).then(function (res) { return res.json() }).then(function (json) {
+        console.log(json.Head.EventID == eid, json.Head.EventID, eid)
+        if (json.Head.EventID == eid) {
+          if (json.Head.InfoType == "取消") {
+            document.getElementById("canceled").style.display = "flex"
+          }
+
+          var mostNew = false;
+
+          if (!newInfoDateTime || newInfoDateTime <= new Date(json.Head.ReportDateTime)) {
+            newInfoDateTime = new Date(json.Head.ReportDateTime)
+            mostNew = true
+          } else if (newInfoDateTime == new Date(json.Head.ReportDateTime)) {
+            oneBefore = true
+
+          }
+
+          if (json.Body.Earthquake.OriginTime && (mostNew || data_time.innerText == "不明")) data_time.innerText = dateEncode(3, json.Body.Earthquake.OriginTime)
+          if (json.Body.Intensity && json.Body.Intensity.Observation.MaxInt && (mostNew || data_maxI.innerText == "不明")) data_maxI.innerText = json.Body.Intensity.Observation.MaxInt
+          if (json.Body.Earthquake.Magnitude && (mostNew || data_M.innerText == "不明")) data_M.innerText = json.Body.Earthquake.Magnitude
+          if (json.Body.Earthquake.Hypocenter.Depth && !isNaN(json.Body.Earthquake.Hypocenter.Depth) && (mostNew || data_depth.innerText == "不明")) data_depth.innerText = json.Body.Earthquake.Hypocenter.Depth + "km"
+          if (json.Body.Earthquake.Hypocenter.Name && (mostNew || data_center.innerText == "不明")) data_center.innerText = json.Body.Earthquake.Hypocenter.Name
+          if (json.Body.Comments && json.Body.Comments.Observation && (mostNew || data_comment.innerText == "")) data_comment.innerText = json.Body.Comments.Observation;
+
+          if (json.Body.Intensity.Observation.Pref && mapLevel < 3) {
+            mapLevel = 3
+            removeChild(document.getElementById("Shindo"))
+            document.getElementById("ShindoWrap").style.display = "inline-block"
+
+            map_drawed = true
+            json.Body.Intensity.Observation.Pref.forEach(function (elm) {
+              var newDiv = document.createElement("div")
+              var color1 = shindoConvert2(shindoConvert3(elm.MaxInt))
+              newDiv.innerHTML = "<span style='background:" + color1[0] + ";color:" + color1[1] + ";'>" + elm.MaxInt + "</span>" + elm.Name
+              newDiv.classList.add("ShindoItem", "ShindoItem1")
+              document.getElementById("Shindo").appendChild(newDiv)
+              newDiv.addEventListener('click', function () {
+                this.classList.toggle('has-open')
+                this.nextElementSibling.classList.toggle('open')
+              });
+
+              var newDiv = document.createElement("div")
+              newDiv.innerHTML = "<div></div>"
+              newDiv.classList.add("WrapLevel1", "close")
+              document.getElementById("Shindo").appendChild(newDiv)
+
+              elm.Area.forEach(function (elm2) {
+                var wrap = document.querySelectorAll(".WrapLevel1")
+
+                var newDiv = document.createElement("div")
+                var color2 = shindoConvert2(shindoConvert3(elm2.MaxInt))
+                newDiv.innerHTML = "<span style='background:" + color2[0] + ";color:" + color2[1] + ";'>" + elm2.MaxInt + "</span>" + elm2.Name
+                newDiv.classList.add("ShindoItem", "ShindoItem2")
+                wrap[wrap.length - 1].appendChild(newDiv)
+                newDiv.addEventListener('click', function () {
+                  this.classList.toggle('has-open')
+                  this.nextElementSibling.classList.toggle('open')
+                });
+
+                var newDiv = document.createElement("div")
+                newDiv.innerHTML = "<div></div>"
+                newDiv.classList.add("WrapLevel2", "close")
+                wrap[wrap.length - 1].appendChild(newDiv)
+
+                gjmap.setStyle({
+                  fill: false,
+                  fillColor: color2[0]
+                })
+
+                var sectionTmp = sections.find(function (elmA) {
+                  return elmA.name == elm2.Name
+                }).item
+                if (sectionTmp) {
+                  sectionTmp.setStyle({
+                    fill: true,
+                    fillColor: color2[0]
+                  })
+                }
+
+                elm2.City.forEach(function (elm3) {
+                  var wrap2 = document.querySelectorAll(".WrapLevel2")
+
+                  var newDiv = document.createElement("div")
+                  var color3 = shindoConvert2(shindoConvert3(elm3.MaxInt))
+                  newDiv.innerHTML = "<span style='background:" + color3[0] + ";color:" + color3[1] + ";'>" + elm3.MaxInt + "</span>" + elm3.Name
+                  newDiv.classList.add("ShindoItem", "ShindoItem3")
+                  wrap2[wrap2.length - 1].appendChild(newDiv)
+                  newDiv.addEventListener('click', function () {
+                    this.classList.toggle('has-open')
+                    this.nextElementSibling.classList.toggle('open')
+                  });
+
+                  var newDiv = document.createElement("div")
+                  newDiv.innerHTML = "<div></div>"
+                  newDiv.classList.add("WrapLevel3", "close")
+                  wrap2[wrap2.length - 1].appendChild(newDiv)
+
+                  elm3.IntensityStation.forEach(function (elm4) {
+                    var wrap3 = document.querySelectorAll(".WrapLevel3")
+
+                    var newDiv = document.createElement("div")
+                    var color4 = shindoConvert2(shindoConvert3(elm4.Int))
+                    newDiv.innerHTML = "<span style='background:" + color4[0] + ";color:" + color4[1] + ";'>" + elm4.Int + "</span>" + elm4.Name
+                    newDiv.classList.add("ShindoItem", "ShindoItem4")
+
+
+
+                    var divIcon = L.divIcon({
+                      html: '<div style="background:' + color4[0] + ';color:' + color4[1] + '">' + elm4.Int + '</div>',
+                      className: 'ShindoIcon',
+                      iconSize: [16, 16],
+                    });
+
+
+                    L.marker([pointList[elm4.Code].location[0], pointList[elm4.Code].location[1]], { icon: divIcon, pane: "shadowPane" }).addTo(map).bindPopup(elm4.Name + "<br>震度" + elm4.Int);
+
+                    wrap3[wrap3.length - 1].appendChild(newDiv)
+                  })
+
+
+                })
+
+              })
+
+            })
+          }
+        }
+
+        var Latitude = json.Body.Earthquake.Hypocenter.Latitude
+        var Longitude = json.Body.Earthquake.Hypocenter.Longitude
+        if (json.Body.Earthquake && json.Body.Earthquake.Hypocenter && Latitude && Longitude) {
+          if (!markerElm) {
+            epicenterIcon = L.icon({
+              iconUrl: "./img/epicenter.svg",
+              iconSize: [32, 32], // size of the icon
+              iconAnchor: [16, 16], // point of the icon which will correspond to marker's location
+              popupAnchor: [0, -20], // point from which the popup should open relative to the iconAnchor
+            });
+
+            markerElm = L.marker([Latitude, Longitude], {
+              icon: epicenterIcon,
+              pane: "markerPane"
+            }).addTo(map).bindPopup("震央：" + json.Body.Earthquake.Hypocenter.Area.Name);
+          } else {
+            markerElm.setLatLng([Latitude, Longitude])
+          }
+
+          map.setView([Latitude, Longitude], 6);
+        }
+
+
+      })
+
+    }
+
+    function nhkFetch(url) {
+      fetch(url)
+        .then((response) => {
+          return response.arrayBuffer();
+        }) // (2) レスポンスデータを取得
+        .then((data) => {
+          data = new TextDecoder("shift-jis").decode(data);
+          var parser2 = new DOMParser();
+          var xml2 = parser2.parseFromString(data, "application/xml");
+          var eid = "20" + url.split("data/")[1].split("_")[0].slice(-12);
+          //console.log({ "地震ID:": eid, 情報の種別: "?", 発生時刻: new Date(xml2.querySelector("OriginTime").textContent), 震源: xml2.querySelector("Earthquake").getAttribute("Epicenter"), M: xml2.querySelector("Earthquake").getAttribute("Magnitude"), 最大震度: xml2.querySelector("Earthquake").getAttribute("Intensity"), 詳細JSONURL: urls[i] });
+
+
+
+          var mostNew = false;
+
+          if (!newInfoDateTime || xml2.querySelector("OriginTime") && newInfoDateTime < new Date(new Date(xml2.querySelector("OriginTime").textContent))) {
+            newInfoDateTime = new Date(new Date(xml2.querySelector("Earthquake").getAttribute("Time")))
+            mostNew = true
+          }
+
+
+          if (xml2.querySelector("Earthquake").getAttribute("Time") && (mostNew || data_time.innerText == "不明")) data_time.innerText = dateEncode(3, new Date(xml2.querySelector("Earthquake").getAttribute("Time")))
+          if (xml2.querySelector("Earthquake").getAttribute("Intensity") && (mostNew || data_maxI.innerText == "不明")) data_maxI.innerText = xml2.querySelector("Earthquake").getAttribute("Intensity")
+          if (xml2.querySelector("Earthquake").getAttribute("Magnitude") && (mostNew || data_M.innerText == "不明")) data_M.innerText = xml2.querySelector("Earthquake").getAttribute("Magnitude")
+          if (xml2.querySelector("Earthquake").getAttribute("Depth") && !isNaN(xml2.querySelector("Earthquake").getAttribute("Depth")) && (mostNew || data_depth.innerText == "不明")) data_depth.innerText = xml2.querySelector("Earthquake").getAttribute("Depth")
+          if (xml2.querySelector("Earthquake").getAttribute("Epicenter") && (mostNew || data_center.innerText == "不明")) data_center.innerText = xml2.querySelector("Earthquake").getAttribute("Epicenter")
+
+          if (xml2.querySelector("Earthquake").querySelectorAll("Group") && mapLevel < 1) {
+            removeChild(document.getElementById("Shindo"))
+            document.getElementById("ShindoWrap").style.display = "inline-block"
+
+            xml2.querySelector("Earthquake").querySelectorAll("Group").forEach(function (elm) {
+              var newDiv = document.createElement("div")
+              var color1 = shindoConvert2(shindoConvert3(elm.getAttribute("Intensity")))
+              var shindoJP = elm.getAttribute("Intensity").replace("-", "弱").replace("+", "強")
+              newDiv.innerHTML = "<span style='background:" + color1[0] + ";color:" + color1[1] + ";'>" + shindoJP + "</span>震度" + shindoJP + "を観測した地域"
+              newDiv.classList.add("ShindoItem", "ShindoItem1")
+              document.getElementById("Shindo").appendChild(newDiv)
+              newDiv.addEventListener('click', function () {
+                this.classList.toggle('has-open')
+                this.nextElementSibling.classList.toggle('open')
+              });
+
+              var newDiv = document.createElement("div")
+              newDiv.innerHTML = "<div></div>"
+              newDiv.classList.add("WrapLevel1", "close")
+              document.getElementById("Shindo").appendChild(newDiv)
+              elm.querySelectorAll("Area").forEach(function (elm2) {
+                var wrap = document.querySelectorAll(".WrapLevel1")
+
+                var newDiv = document.createElement("div")
+                newDiv.innerHTML = "<span style='background:" + color1[0] + ";color:" + color1[1] + ";'>" + shindoJP + "</span>" + elm2.getAttribute("Name")
+                newDiv.classList.add("ShindoItem", "ShindoItem4")
+                wrap[wrap.length - 1].appendChild(newDiv)
+              })
+            })
+          }
+
+          var LatLng = [
+            Number(xml2.querySelector("Earthquake").getAttribute("Latitude").replace("北緯 ", "+").replace("南緯 ", "-").replace("度", "")),
+            Number(xml2.querySelector("Earthquake").getAttribute("Longitude").replace("東経 ", "+").replace("西経 ", "-").replace("度", "")),
+          ]
+          if (LatLng) {
+            if (!markerElm) {
+              epicenterIcon = L.icon({
+                iconUrl: "./img/epicenter.svg",
+                iconSize: [32, 32], // size of the icon
+                iconAnchor: [16, 16], // point of the icon which will correspond to marker's location
+                popupAnchor: [0, -20], // point from which the popup should open relative to the iconAnchor
+              });
+
+              markerElm = L.marker([Number(LatLng[0]), Number(LatLng[1])], {
+                icon: epicenterIcon,
+                pane: "markerPane"
+              }).addTo(map).bindPopup("震央：" + xml2.querySelector("Earthquake").getAttribute("Epicenter"));
+            } else {
+              markerElm.setLatLng([Number(LatLng[0]), Number(LatLng[1])])
+            }
+
+            map.setView([Number(LatLng[0]), Number(LatLng[1])], 6);
+          }
+
+        });
+
+    }
+
+    function jmaXMLFetch(url) {
+      fetch(url)
+        .then((response) => {
+          return response.text();
+        }) // (2) レスポンスデータを取得
+        .then((data) => {
+          var parser = new DOMParser();
+          var xml = parser.parseFromString(data, "application/xml");
+
+          if (xml.querySelector("InfoType").textContent == "取消") {
+            document.getElementById("canceled").style.display = "flex"
+          }
+
+          var EarthquakeElm = xml.querySelector("Body Earthquake");
+          var mostNew = false;
+
+          if (!newInfoDateTime || newInfoDateTime <= new Date(EarthquakeElm.querySelector("OriginTime").textContent)) {
+            newInfoDateTime = new Date(EarthquakeElm.querySelector("OriginTime").textContent)
+            mostNew = true
+          }
+
+          var originTimeTmp;
+          var epiCenterTmp;
+          var magnitudeTmp;
+          var LatLngDepth
+          if (EarthquakeElm) {
+            originTimeTmp = new Date(EarthquakeElm.querySelector("OriginTime").textContent);
+            epiCenterTmp = EarthquakeElm.querySelector("Name").textContent;
+            magnitudeTmp = Number(EarthquakeElm.getElementsByTagName("jmx_eb:Magnitude")[0].textContent);
+            LatLngDepth = xml.querySelector("Body Earthquake Hypocenter").getElementsByTagName("jmx_eb:Coordinate")[0].textContent.replaceAll("+", "｜+").replaceAll("-", "｜-").replaceAll("/", "").split("｜")
+          }
+
+          var IntensityElm = xml.querySelector("Body Intensity");
+          var maxIntTmp;
+          if (IntensityElm) {
+            maxIntTmp = shindoConvert3(IntensityElm.querySelector("MaxInt").textContent);
+          }
+
+
+          if (originTimeTmp && (mostNew || data_time.innerText == "不明")) data_time.innerText = dateEncode(3, originTimeTmp)
+          if (maxIntTmp && (mostNew || data_maxI.innerText == "不明")) data_maxI.innerText = maxIntTmp
+          if (magnitudeTmp && (mostNew || data_M.innerText == "不明")) data_M.innerText = magnitudeTmp
+          if (LatLngDepth && !isNaN(LatLngDepth[3]) && LatLngDepth[3] && (mostNew || data_depth.innerText == "不明")) data_depth.innerText = Math.abs(Number(LatLngDepth[3]) / 1000) + "km";
+          if (epiCenterTmp && (mostNew || data_center.innerText == "不明")) data_center.innerText = epiCenterTmp
+
+          if (xml.querySelector("Body Comments")) {
+            var commentText = "";
+            if (xml.querySelector("Body Comments ForecastComment") && (mostNew || data_comment.innerText == "")) commentText += xml.querySelector("Body Comments ForecastComment Text").textContent
+            if (xml.querySelector("Body Comments FreeFormComment") && (mostNew || data_comment.innerText == "")) commentText += xml.querySelector("Body Comments FreeFormComment Text").textContent
+          }
+
+
+          if (xml.querySelector("Body Intensity") && xml.querySelector("Body Intensity Observation Pref") && mapLevel < 3) {
+            mapLevel = 3
+            removeChild(document.getElementById("Shindo"))
+            document.getElementById("ShindoWrap").style.display = "inline-block"
+            map_drawed = true
+
+
+            xml.querySelectorAll("Body Intensity Observation Pref").forEach(function (elm) {
+              var newDiv = document.createElement("div")
+              var color1 = shindoConvert2(shindoConvert3(elm.querySelector("MaxInt").textContent))
+              newDiv.innerHTML = "<span style='background:" + color1[0] + ";color:" + color1[1] + ";'>" + elm.querySelector("MaxInt").textContent + "</span>" + elm.querySelector("Name").textContent
+              newDiv.classList.add("ShindoItem", "ShindoItem1")
+              document.getElementById("Shindo").appendChild(newDiv)
+              newDiv.addEventListener('click', function () {
+                this.classList.toggle('has-open')
+                this.nextElementSibling.classList.toggle('open')
+              });
+
+              var newDiv = document.createElement("div")
+              newDiv.innerHTML = "<div></div>"
+              newDiv.classList.add("WrapLevel1", "close")
+              document.getElementById("Shindo").appendChild(newDiv)
+
+              if (elm.querySelectorAll("Area")) {
+                elm.querySelectorAll("Area").forEach(function (elm2) {
+                  var wrap = document.querySelectorAll(".WrapLevel1")
+
+                  var newDiv = document.createElement("div")
+                  var color2 = shindoConvert2(shindoConvert3(elm2.querySelector("MaxInt").textContent))
+                  newDiv.innerHTML = "<span style='background:" + color2[0] + ";color:" + color2[1] + ";'>" + elm2.querySelector("MaxInt").textContent + "</span>" + elm2.querySelector("Name").textContent
+                  newDiv.classList.add("ShindoItem", "ShindoItem2")
+                  wrap[wrap.length - 1].appendChild(newDiv)
+                  newDiv.addEventListener('click', function () {
+                    this.classList.toggle('has-open')
+                    this.nextElementSibling.classList.toggle('open')
+                  });
+
+                  var newDiv = document.createElement("div")
+                  newDiv.innerHTML = "<div></div>"
+                  newDiv.classList.add("WrapLevel2", "close")
+                  wrap[wrap.length - 1].appendChild(newDiv)
+
+                  var sectionTmp = sections.find(function (elmA) {
+                    return elmA.name == elm2.querySelector("Name").textContent
+                  })
+                  if (sectionTmp) {
+                    sectionTmp.item.setStyle({
+                      fill: true,
+                      fillColor: color2[0]
+                    })
+                    sectionTmp.item.bindPopup(sectionTmp.name + "<br>震度" + elm2.querySelector("MaxInt").textContent)
+                  }
+                  if (elm2.querySelectorAll("City")) {
+                    elm2.querySelectorAll("City").forEach(function (elm3) {
+                      var wrap2 = document.querySelectorAll(".WrapLevel2")
+
+                      var newDiv = document.createElement("div")
+                      var color3 = shindoConvert2(shindoConvert3(elm3.querySelector("MaxInt").textContent))
+                      newDiv.innerHTML = "<span style='background:" + color3[0] + ";color:" + color3[1] + ";'>" + elm3.querySelector("MaxInt").textContent + "</span>" + elm3.querySelector("Name").textContent
+                      newDiv.classList.add("ShindoItem", "ShindoItem3")
+                      wrap2[wrap2.length - 1].appendChild(newDiv)
+                      newDiv.addEventListener('click', function () {
+                        this.classList.toggle('has-open')
+                        this.nextElementSibling.classList.toggle('open')
+                      });
+
+                      var newDiv = document.createElement("div")
+                      newDiv.innerHTML = "<div></div>"
+                      newDiv.classList.add("WrapLevel3", "close")
+                      wrap2[wrap2.length - 1].appendChild(newDiv)
+
+                      if (elm3.querySelectorAll("IntensityStation")) {
+                        elm3.querySelectorAll("IntensityStation").forEach(function (elm4) {
+                          var wrap3 = document.querySelectorAll(".WrapLevel3")
+
+                          var newDiv = document.createElement("div")
+                          var color4 = shindoConvert2(shindoConvert3(elm4.querySelector("Int").textContent))
+                          newDiv.innerHTML = "<span style='background:" + color4[0] + ";color:" + color4[1] + ";'>" + elm4.querySelector("Int").textContent + "</span>" + elm4.querySelector("Name").textContent
+                          newDiv.classList.add("ShindoItem", "ShindoItem4")
+
+                          var divIcon = L.divIcon({
+                            html: '<div style="background:' + color4[0] + ';color:' + color4[1] + '">' + elm4.querySelector("Int").textContent + '</div>',
+                            className: 'ShindoIcon',
+                            iconSize: [16, 16],
+                          });
+
+                          L.marker([pointList[elm4.querySelector("Code").textContent].location[0], pointList[elm4.querySelector("Code").textContent].location[1]], { icon: divIcon, pane: "shadowPane" }).addTo(map).bindPopup(elm4.querySelector("Name").textContent + "<br>震度" + elm4.querySelector("Int").textContent);
+
+
+                          wrap3[wrap3.length - 1].appendChild(newDiv)
+                        })
+                      }
+
+
+                    })
+                  }
+
+                })
+              }
+
+            })
+          }
+
+          if (LatLngDepth) {
+            if (!markerElm) {
+              epicenterIcon = L.icon({
+                iconUrl: "./img/epicenter.svg",
+                iconSize: [32, 32], // size of the icon
+                iconAnchor: [16, 16], // point of the icon which will correspond to marker's location
+                popupAnchor: [0, -20], // point from which the popup should open relative to the iconAnchor
+              });
+
+              markerElm = L.marker([Number(LatLngDepth[1]), Number(LatLngDepth[2])], {
+                icon: epicenterIcon,
+                pane: "markerPane"
+              }).addTo(map).bindPopup("震央：" + xml.querySelector("Body Earthquake Hypocenter Area Name").textContent);
+            } else {
+              markerElm.setLatLng([Number(LatLngDepth[1]), Number(LatLngDepth[2])])
+            }
+
+            map.setView([Number(LatLngDepth[1]), Number(LatLngDepth[2])], 6);
+          }
+
+        })
+    }
     init()
+    jmaXMLFetch("https://www.data.jma.go.jp/developer/xml/data/20230110085901_0_VXSE53_010000.xml")
 
 
-
+    function removeChild(element) {
+      while (element.firstChild) {
+        element.removeChild(element.firstChild);
+      }
+    }
 
 
     function dateEncode(type, dateTmp, inputtype) {
@@ -952,26 +1381,6 @@
       }
     }
 
-    document.getElementById("ShindoSample0").style.background = shindoConvert2(0)[0]
-    document.getElementById("ShindoSample0").style.color = shindoConvert2(0)[1]
-    document.getElementById("ShindoSample1").style.background = shindoConvert2(1)[0]
-    document.getElementById("ShindoSample1").style.color = shindoConvert2(1)[1]
-    document.getElementById("ShindoSample2").style.background = shindoConvert2(2)[0]
-    document.getElementById("ShindoSample2").style.color = shindoConvert2(2)[1]
-    document.getElementById("ShindoSample3").style.background = shindoConvert2(3)[0]
-    document.getElementById("ShindoSample3").style.color = shindoConvert2(3)[1]
-    document.getElementById("ShindoSample4").style.background = shindoConvert2(4)[0]
-    document.getElementById("ShindoSample4").style.color = shindoConvert2(4)[1]
-    document.getElementById("ShindoSample5-").style.background = shindoConvert2(4.5)[0]
-    document.getElementById("ShindoSample5-").style.color = shindoConvert2(4.5)[1]
-    document.getElementById("ShindoSample5+").style.background = shindoConvert2(5)[0]
-    document.getElementById("ShindoSample5+").style.color = shindoConvert2(5)[1]
-    document.getElementById("ShindoSample6-").style.background = shindoConvert2(5.5)[0]
-    document.getElementById("ShindoSample6-").style.color = shindoConvert2(5.5)[1]
-    document.getElementById("ShindoSample6+").style.background = shindoConvert2(6)[0]
-    document.getElementById("ShindoSample6+").style.color = shindoConvert2(6)[1]
-    document.getElementById("ShindoSample7").style.background = shindoConvert2(7)[0]
-    document.getElementById("ShindoSample7").style.color = shindoConvert2(7)[1]
 
     document.getElementById("AllOpen").addEventListener("click", function () {
       document.querySelectorAll(".ShindoItem1,.ShindoItem2,.ShindoItem3").forEach(function (elm) {
