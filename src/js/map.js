@@ -23,7 +23,6 @@ window.electronAPI.messageSend((event, request) => {
 
     //リアルタイム震度タブ
     var maxShindo = dataTmp2.reduce((a, b) => (a.shindo > b.shindo ? a : b)).shindo;
-    document.getElementById("kmoniMax").innerText = Math.round(maxShindo * 10) / 10;
 
     var shindoList = dataTmp2.sort(function (a, b) {
       return b.shindo - a.shindo;
@@ -33,7 +32,9 @@ window.electronAPI.messageSend((event, request) => {
       var shindoElm = shindoList[a];
       var newElm = document.createElement("li");
       var shindoColor = shindoConvert(shindoElm.shindo, 2);
-      newElm.innerHTML = "<span class='int' style='color:" + shindoColor[1] + ";background:" + shindoColor[0] + "'>" + shindoConvert(shindoElm.shindo, 0) + "</span>" + shindoElm.Region + " " + shindoElm.Name + "<span class='PGA'>PGA" + Math.round(shindoElm.pga * 100) / 100 + "</span>";
+      var IntDetail = "";
+      if (a == 0) IntDetail = "<div class='intDetail'>" + Math.round(maxShindo * 10) / 10 + "</div>";
+      newElm.innerHTML = "<div class='int' style='color:" + shindoColor[1] + ";background:" + shindoColor[0] + "'>" + shindoConvert(shindoElm.shindo, 0) + IntDetail + "</div><div class='Pointname'>" + shindoElm.Region + " " + shindoElm.Name + "</div><div class='PGA'>PGA" + Math.round(shindoElm.pga * 100) / 100 + "</div>";
       document.getElementById("pointList").appendChild(newElm);
     }
 
