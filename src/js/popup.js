@@ -1,6 +1,6 @@
 var now_EEW = [];
 var EEWDetectionTimeout;
-var Replay;
+var Replay = 0;
 var ICT_JST = 0;
 var setting;
 var AreaForecastLocalE;
