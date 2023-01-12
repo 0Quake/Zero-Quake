@@ -1264,7 +1264,7 @@ function eqInfoUpdate() {
       var dataTmp2 = [];
       json.features.forEach(function (elm) {
         dataTmp2.push({
-          eventId: null,
+          eventId: elm.id,
           category: null,
           OriginTime: new Date(elm.properties.time),
           epiCenter: elm.properties.place,
@@ -1272,13 +1272,6 @@ function eqInfoUpdate() {
           maxI: null,
           DetailURL: [elm.properties.url],
         });
-      });
-
-      dataTmp2.filter((item, index, self) => {
-        const idList = self.map((item) => item.eventId);
-        if (idList.indexOf(item.eventId) === index) {
-          return item;
-        }
       });
 
       eqInfoControl(dataTmp2, "usgs");
@@ -1531,7 +1524,9 @@ function eqInfoControl(dataList, type) {
       break;
 
     case "usgs":
-      eqInfoAlert(dataList, "usgs");
+      dataList.forEach(function (elm) {
+        eqInfoAlert(elm, "usgs");
+      });
 
       break;
     default:
@@ -1568,7 +1563,13 @@ function eqInfoAlert(data, source, update) {
       });
     }
   } else if (source == "usgs") {
+    console.log(data.eventId);
+
+    eqInfo.usgs = eqInfo.usgs.filter((item) => {
+      return item.eventId !== data.eventId;
+    });
     eqInfo.usgs = eqInfo.usgs.concat(data);
+
     if (mainWindow) {
       mainWindow.webContents.send("message2", {
         action: "EQInfo",
