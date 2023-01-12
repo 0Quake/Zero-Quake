@@ -244,10 +244,19 @@ function init() {
   inited = true;
   map = L.map("mapcontainer", {
     maxBounds: [
-      [90, 0],
-      [-90, 360],
+      [90, -180],
+      [-90, 180],
     ],
+    minZoom: 2,
+    maxZoom: 21,
     zoomAnimation: false,
+  });
+  map.on("click", function (e) {
+    //クリック位置経緯度取得
+    lat = e.latlng.lat;
+    lng = e.latlng.lng;
+    //経緯度表示
+    alert("lat: " + lat + ", lng: " + lng);
   });
   //L.control.scale({ imperial: false }).addTo(map);←縮尺
   map.setView([32.99125, 138.46], 4);
@@ -388,16 +397,38 @@ function init() {
           fillOpacity: 1,
           weight: 1,
           pane: "jsonMAPPane",
-          attribution: 'Map data <a href="https://www.naturalearthdata.com/">©Natural Earth</a> / <a href="https://www.data.jma.go.jp/developer/gis.html" target="_blank">©JMA</a>',
+          attribution: 'Map data <a href="https://www.data.jma.go.jp/developer/gis.html" target="_blank">©JMA</a>',
         },
         onEachFeature: function onEachFeature(feature, layer) {
-          if (feature.properties && feature.properties.NAME) {
-            sections.push({ name: feature.properties.NAME, item: layer });
-            layer.bindPopup("<h3>地震情報/細分区域</h3>" + feature.properties.NAME);
+          if (feature.properties && feature.properties.name) {
+            sections.push({ name: feature.properties.name, item: layer });
+            layer.bindPopup("<h3>地震情報/細分区域</h3>" + feature.properties.name);
           }
         },
       }).addTo(map);
-
+      fetch("./Resource/World.json")
+        .then(function (res) {
+          return res.json();
+        })
+        .then(function (json) {
+          gjmap = L.geoJSON(json, {
+            style: {
+              color: "#666",
+              fill: true,
+              fillColor: "#333",
+              fillOpacity: 1,
+              weight: 1,
+              pane: "jsonMAPPane",
+              attribution: 'Map data <a href="https://www.naturalearthdata.com/">©Natural Earth</a>',
+            },
+            onEachFeature: function onEachFeature(feature, layer) {
+              if (feature.properties && feature.properties.NAME_JA) {
+                sections.push({ name: feature.properties.NAME_JA, item: layer });
+                layer.bindPopup("<h3>国</h3>" + feature.properties.NAME_JA);
+              }
+            },
+          }).addTo(map);
+        });
       L.control
         .layers(
           {
