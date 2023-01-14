@@ -226,22 +226,40 @@ h2 {
   color: #fff;
 }
 
-.graphWrap {
-  width: 80px;
-}
-
 .detail_text {
   flex: 1;
 }
 
+.userDataWrap {
+  display: flex;
+  height: 50px;
+  border-radius: 25px;
+}
+.graphWrap {
+  border-radius: 22px;
+  width: 44px;
+  height: 44px;
+  margin: 3px;
+  background: #222;
+}
+
 .calcintensity {
-  width: 70px;
-  height: 70px;
-  border-radius: 8px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
   margin: 5px;
   font-size: 40px;
   text-align: center;
-  line-height: 70px;
+  line-height: 60px;
+}
+.userIntensity {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin: 5px;
+  font-size: 30px;
+  text-align: center;
+  line-height: 40px;
 }
 .PWave_value,
 .SWave_value {

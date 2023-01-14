@@ -41,14 +41,29 @@ window.electronAPI.messageSend((event, request) => {
     //地図上マーカー
     points.forEach(function (elm, index) {
       elm2 = dataTmp[index];
-      if (!elm.marker) return;
       if (elm.Name && elm.Point && elm2.data) {
-        var changed = true;
+        if (!elm.marker) {
+          var kmoniPointMarker = L.divIcon({
+            html: "<div class='marker-circle' style='background:rgba(128,128,128,0.2)'></div><div class='PointPopup'>読み込み中</div>",
+            className: "kmoniPointMarker",
+            iconSize: 25,
+          });
+          elm.marker = L.marker([elm.Location.Latitude, elm.Location.Longitude], {
+            icon: kmoniPointMarker,
+            pane: "PointsPane",
+          })
+            .bindPopup("", { className: "hidePopup" })
+            .addTo(map);
+        }
+
+        var changed;
 
         if (previous_points.length !== 0) {
           var rgb0 = previous_points[index].rgb;
           var rgb1 = elm2.rgb;
           if (rgb0) changed = JSON.stringify(rgb0) !== JSON.stringify(rgb1);
+        } else {
+          changed = true;
         }
 
         if (changed) {
@@ -60,20 +75,10 @@ window.electronAPI.messageSend((event, request) => {
             iconSize: 25,
           });
 
-          kmoniPointMarker;
-
-          elm.marker
-            .setIcon(kmoniPointMarker)
-            .on("popupopen", function (e) {
-              L.DomUtil.addClass(e.target._icon, "popupOpen");
-            })
-            .on("popupclose", function (e) {
-              L.DomUtil.removeClass(e.target._icon, "popupOpen");
-            });
+          elm.marker.setIcon(kmoniPointMarker);
         }
-        elm.marker.setOpacity(1);
       } else {
-        elm.marker.setOpacity(0);
+        map.removeLayer(elm.marker);
       }
 
       if (index == points.length - 1) previous_points = dataTmp;
@@ -251,13 +256,6 @@ function init() {
     maxZoom: 21,
     zoomAnimation: false,
   });
-  map.on("click", function (e) {
-    //クリック位置経緯度取得
-    lat = e.latlng.lat;
-    lng = e.latlng.lng;
-    //経緯度表示
-    alert("lat: " + lat + ", lng: " + lng);
-  });
   //L.control.scale({ imperial: false }).addTo(map);←縮尺
   map.setView([32.99125, 138.46], 4);
 
@@ -266,7 +264,7 @@ function init() {
     minNativeZoom: 0,
     maxNativeZoom: 11,
     maxZoom: 21,
-    attribution: 'Map data <a href="https://www.data.jma.go.jp/svd/eqdb/data/shindo/" target="_blank">© 気象庁</a>',
+    attribution: '<a href="https://www.data.jma.go.jp/svd/eqdb/data/shindo/" target="_blank">© 気象庁</a>',
   });
 
   var tile2 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png", {
@@ -274,49 +272,49 @@ function init() {
     minNativeZoom: 2,
     maxNativeZoom: 18,
     maxZoom: 21,
-    attribution: 'Map data <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">©国土地理院</a>',
+    attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">©国土地理院</a>',
   });
   var tile3 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg", {
     minZoom: 9,
     minNativeZoom: 9,
     maxNativeZoom: 18,
     maxZoom: 21,
-    attribution: 'Map data <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">©国土地理院</a>',
+    attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">©国土地理院</a>',
   });
   var tile4 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/blank/{z}/{x}/{y}.png", {
     minZoom: 0,
     minNativeZoom: 5,
     maxNativeZoom: 14,
     maxZoom: 21,
-    attribution: 'Map data <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">©国土地理院</a>',
+    attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">©国土地理院</a>',
   });
   var tile5 = L.tileLayer("http://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     minZoom: 0,
     minNativeZoom: 0,
     maxNativeZoom: 19,
     maxZoom: 21,
-    attribution: 'Map data <a href="https://www.openstreetmap.org/" target="_blank">©OpenStreetMap contributors</a>',
+    attribution: '<a href="https://www.openstreetmap.org/" target="_blank">©OpenStreetMap contributors</a>',
   });
   var tile6 = L.tileLayer("https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}", {
     minZoom: 0,
     minNativeZoom: 0,
     maxNativeZoom: 21,
     maxZoom: 21,
-    attribution: 'Map data <a href="https://www.google.com/maps" target="_blank">©google</a>',
+    attribution: '<a href="https://www.google.com/maps" target="_blank">©google</a>',
   });
   var tile7 = L.tileLayer("https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}", {
     minZoom: 0,
     minNativeZoom: 0,
     maxNativeZoom: 21,
     maxZoom: 21,
-    attribution: 'Map data <a href="https://www.google.com/maps" target="_blank">©google</a>',
+    attribution: '<a href="https://www.google.com/maps" target="_blank">©google</a>',
   });
   var tile8 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png", {
     minZoom: 0,
     minNativeZoom: 0,
     maxNativeZoom: 18,
     maxZoom: 21,
-    attribution: 'Map data <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">©国土地理院</a>',
+    attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">©国土地理院</a>',
   });
 
   var tile9 = L.tileLayer("https://www.jma.go.jp/tile/gsi/pale2/{z}/{x}/{y}.png", {
@@ -324,40 +322,40 @@ function init() {
     minNativeZoom: 2,
     maxNativeZoom: 11,
     maxZoom: 21,
-    attribution: 'Map data <a href="https://www.jma.go.jp/bosai/map.html#5/28.835/168.548/&elem=int&contents=earthquake_map" target="_blank">©気象庁</a>',
+    attribution: '<a href="https://www.jma.go.jp/bosai/map.html#5/28.835/168.548/&elem=int&contents=earthquake_map" target="_blank">©気象庁</a>',
   });
 
   var overlay1 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/hillshademap/{z}/{x}/{y}.png", {
     minZoom: 2,
     maxZoom: 16,
-    attribution: 'Map data <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">©国土地理院</a>',
+    attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">©国土地理院</a>',
   });
   var overlay2 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/vbmd_colorrel/{z}/{x}/{y}.png", {
     minZoom: 11,
     maxZoom: 18,
-    attribution: 'Map data <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">©国土地理院</a>',
+    attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">©国土地理院</a>',
   });
   var overlay3 = L.tileLayer("https://disaportaldata.gsi.go.jp/raster/04_tsunami_newlegend_data/{z}/{x}/{y}.png", {
     minZoom: 7,
     maxZoom: 12,
-    attribution: 'Map data <a href="https://disaportal.gsi.go.jp/hazardmap/copyright/opendata.html#tsunami" target="_blank">©国土地理院</a>',
+    attribution: '<a href="https://disaportal.gsi.go.jp/hazardmap/copyright/opendata.html#tsunami" target="_blank">©国土地理院</a>',
   });
   var overlay4 = L.tileLayer("https://disaportaldata.gsi.go.jp/raster/05_kyukeishakeikaikuiki/{z}/{x}/{y}.png", {
     minZoom: 7,
     maxZoom: 12,
-    attribution: 'Map data <a href="https://disaportal.gsi.go.jp/hazardmap/copyright/opendata.html#dosekiryukeikaikuiki" target="_blank">©国土地理院</a>',
+    attribution: '<a href="https://disaportal.gsi.go.jp/hazardmap/copyright/opendata.html#dosekiryukeikaikuiki" target="_blank">©国土地理院</a>',
   });
   var overlay5 = L.tileLayer("https://disaportaldata.gsi.go.jp/raster/05_jisuberikeikaikuiki/{z}/{x}/{y}.png", {
     minZoom: 7,
     maxZoom: 12,
-    attribution: 'Map data <a href="https://disaportal.gsi.go.jp/hazardmap/copyright/opendata.html#jisuberikeikaikuiki" target="_blank">©国土地理院</a>',
+    attribution: '<a href="https://disaportal.gsi.go.jp/hazardmap/copyright/opendata.html#jisuberikeikaikuiki" target="_blank">©国土地理院</a>',
   });
   var overlay6 = L.tileLayer("https://www.jma.go.jp/tile/jma/transparent-cities/{z}/{x}/{y}.png", {
     minZoom: 0,
     minNativeZoom: 2,
     maxNativeZoom: 11,
     maxZoom: 21,
-    attribution: 'Map data <a href="https://www.jma.go.jp/bosai/map.html#5/28.835/168.548/&elem=int&contents=earthquake_map" target="_blank">©JMA</a>',
+    attribution: '<a href="https://www.jma.go.jp/bosai/map.html#5/28.835/168.548/&elem=int&contents=earthquake_map" target="_blank">©JMA</a>',
   });
 
   fetch("./Resource/Knet_Points.json")
@@ -379,6 +377,12 @@ function init() {
             pane: "PointsPane",
           })
             .bindPopup("", { className: "hidePopup" })
+            .on("popupopen", function (e) {
+              L.DomUtil.addClass(e.target._icon, "popupOpen");
+            })
+            .on("popupclose", function (e) {
+              L.DomUtil.removeClass(e.target._icon, "popupOpen");
+            })
             .addTo(map);
         }
       });
@@ -397,7 +401,7 @@ function init() {
           fillOpacity: 1,
           weight: 1,
           pane: "jsonMAPPane",
-          attribution: 'Map data <a href="https://www.data.jma.go.jp/developer/gis.html" target="_blank">©JMA</a>',
+          attribution: '<a href="https://www.data.jma.go.jp/developer/gis.html" target="_blank">©JMA</a>',
         },
         onEachFeature: function onEachFeature(feature, layer) {
           if (feature.properties && feature.properties.name) {
@@ -419,7 +423,7 @@ function init() {
               fillOpacity: 1,
               weight: 1,
               pane: "jsonMAPPane",
-              attribution: 'Map data <a href="https://www.naturalearthdata.com/">©Natural Earth</a>',
+              attribution: '<a href="https://www.naturalearthdata.com/">©Natural Earth</a>',
             },
             onEachFeature: function onEachFeature(feature, layer) {
               if (feature.properties && feature.properties.NAME_JA) {
@@ -472,7 +476,7 @@ function init() {
           fill: false,
           pane: "tsunamiPane",
           className: "tsunamiElm",
-          attribution: 'Map data <a href="https://www.data.jma.go.jp/developer/gis.html" target="_blank">©JMA</a>',
+          attribution: '<a href="https://www.data.jma.go.jp/developer/gis.html" target="_blank">©JMA</a>',
         },
         onEachFeature: function onEachFeature(feature, layer) {
           if (feature.properties && feature.properties.name) {
@@ -825,8 +829,8 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
 
   var EEWPanelElm = document.getElementById("EEW-" + report_id);
   if (EQElm2.distance && EEWPanelElm) {
-    EEWPanelElm.querySelector(".PWave_value").setAttribute("stroke-dashoffset", 219.91 - 219.91 * Math.min(pRadius / 1000 / EQElm2.distance, 1));
-    EEWPanelElm.querySelector(".SWave_value").setAttribute("stroke-dashoffset", 219.91 - 219.91 * Math.min(sRadius / 1000 / EQElm2.distance, 1));
+    EEWPanelElm.querySelector(".PWave_value").setAttribute("stroke-dashoffset", 125.66 - 125.66 * Math.min(pRadius / 1000 / EQElm2.distance, 1));
+    EEWPanelElm.querySelector(".SWave_value").setAttribute("stroke-dashoffset", 125.66 - 125.66 * Math.min(sRadius / 1000 / EQElm2.distance, 1));
   }
 }
 

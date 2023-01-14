@@ -137,6 +137,23 @@ ipcMain.on("message", (_event, response) => {
     tsunamiWindow.on("closed", () => {
       tsunamiWindow = null;
     });
+  } else if (response.action == "EQInfoWindowOpen") {
+    mainWindow = new BrowserWindow({
+      webPreferences: {
+        preload: path.join(__dirname, "js/preload.js"),
+        title: "Zero Quake",
+        webSecurity: false,
+        backgroundColor: "#202227",
+        icon: path.join(__dirname, "img/icon.ico"),
+      },
+    });
+    //mainWindow.setMenuBarVisibility(false);
+
+    mainWindow.webContents.on("did-finish-load", () => {});
+
+    mainWindow.loadFile("src/index.html");
+
+    mainWindow.on("closed", () => {});
   }
 });
 
@@ -162,6 +179,32 @@ function createWindow() {
 
     //replay("2022/04/19 08:16:15");
     //replay("2022/11/09 17:40:05");
+
+    EEWcontrol({
+      alertflg: "警報", //種別
+      report_id: "20991111111111", //地震ID
+      report_num: 1, //第n報
+      report_time: new Date() - Replay, //発表時刻
+      magunitude: 9, //マグニチュード
+      calcintensity: "5-", //最大深度
+      depth: 10, //深さ
+      is_cancel: false, //キャンセル
+      is_final: false, //最終報
+      is_training: true, //訓練報
+      latitude: 35.6, //緯度
+      longitude: 140.3, //経度
+      region_code: "", //震央地域コード
+      region_name: "存在しない地名", //震央地域
+      origin_time: new Date(new Date() - Replay - 2000), //発生時刻
+      isPlum: false,
+      userIntensity: "4",
+      intensityAreas: null, //細分区分ごとの予想震度
+      warnZones: {
+        zone: null,
+        Pref: null,
+        Regions: null,
+      },
+    });
 
     /*
     EEWcontrol({
@@ -260,7 +303,7 @@ function createWindow() {
   mainWindow.on("closed", () => {
     mainWindow = null;
   });
-  // kmonicreateWindow();
+  kmonicreateWindow();
 }
 
 function kmonicreateWindow() {
@@ -1563,8 +1606,6 @@ function eqInfoAlert(data, source, update) {
       });
     }
   } else if (source == "usgs") {
-    console.log(data.eventId);
-
     eqInfo.usgs = eqInfo.usgs.filter((item) => {
       return item.eventId !== data.eventId;
     });

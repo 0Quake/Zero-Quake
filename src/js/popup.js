@@ -119,6 +119,11 @@ function EEWAlertUpdate(data) {
       clone.querySelector(".depth").innerText = elm.depth ? elm.depth : "不明";
       clone.querySelector(".traning").style.display = elm.is_training ? "block" : "none";
 
+      clone.querySelector(".userIntensity").style.display = Boolean(elm.userIntensity) ? "block" : "none";
+      clone.querySelector(".userIntensity").innerText = elm.userIntensity;
+      clone.querySelector(".userDataWrap").style.background = shindoConvert(elm.userIntensity, 2)[0];
+      clone.querySelector(".userDataWrap").style.color = shindoConvert(elm.userIntensity, 2)[1];
+
       if (elm.distance) {
         clone.querySelector(".distance").textContent = Math.round(elm.distance) + "km";
       }
