@@ -191,6 +191,9 @@ function Mapinit() {
             sections.push({ name: feature.properties.name, item: layer });
             layer.bindPopup("<h3>地震情報/細分区域</h3>" + feature.properties.name);
           }
+          if (config.home.Saibun == feature.properties.name) {
+            layer.setStyle({ color: "#fff", weight: 2 });
+          }
         },
       }).addTo(map);
 

@@ -186,8 +186,9 @@ function createWindow() {
   //mainWindow.setMenuBarVisibility(false);
 
   mainWindow.webContents.on("did-finish-load", () => {
-    replay("2023/01/15 20:37:45");
+    //replay("2023/01/15 20:37:45");
 
+    /*
     EEWcontrol({
       alertflg: "予報", //種別
       report_id: "20230115203744", //地震ID
@@ -213,7 +214,7 @@ function createWindow() {
         Pref: null,
         Regions: null,
       },
-    });
+    });*/
 
     //    replay("2022/10/2 0:2:45");
     // replay("2022/11/3 19:04:40");

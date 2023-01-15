@@ -262,58 +262,53 @@ function EEWAlertUpdate(data) {
   }
 }
 
-var latitudeTmp = 0;
-var longitudeTmp = 0;
 function epiCenterUpdate(eid, latitude, longitude) {
+  console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaa");
   if (prepareing) return;
 
-  latitude = latitudeConvert(latitude);
-  longitude = latitudeConvert(longitude);
-  if (latitude !== latitudeTmp || longitude !== longitudeTmp) {
-    eid = Number(eid);
+  eid = Number(eid);
 
-    if (map) {
-      var epicenterElm = epiCenter.find(function (elm2) {
-        return elm2.eid == eid;
-      });
-      if (epicenterElm && epicenterElm.markerElm) {
-        epicenterElm.markerElm.setLatLng([latitude, longitude]);
-        epicenterElm.latitude = latitude;
-        epicenterElm.longitude = longitude;
-      } else {
-        var ESMarker = L.marker([latitude, longitude], {
-          icon: epicenterIcon,
-          pane: "overlayPane",
-        }).addTo(map);
-
-        epiCenter.push({ eid: eid, markerElm: ESMarker, latitude: latitude, longitude: longitude });
-      }
-    }
-
-    var EQElm = psWaveList.find(function (elm) {
-      return elm.id == eid;
+  if (map) {
+    var epicenterElm = epiCenter.find(function (elm2) {
+      return elm2.eid == eid;
     });
-    if (EQElm) {
-      document.querySelectorAll(".SWave,.PWave").forEach(function (elm) {
-        elm.classList.remove("SWaveAnm");
-        elm.classList.remove("PWaveAnm");
-      });
-      setTimeout(function () {
-        document.querySelectorAll(".SWave").forEach(function (elm) {
-          elm.classList.add("SWaveAnm");
-        });
-        document.querySelectorAll(".PWave").forEach(function (elm) {
-          elm.classList.add("PWaveAnm");
-        });
-      }, 100);
+    if (epicenterElm && epicenterElm.markerElm) {
+      epicenterElm.markerElm.setLatLng([latitude, longitude]);
+      epicenterElm.latitude = latitude;
+      epicenterElm.longitude = longitude;
+    } else {
+      var ESMarker = L.marker([latitude, longitude], {
+        icon: epicenterIcon,
+        pane: "overlayPane",
+      }).addTo(map);
 
-      if (EQElm.PCircleElm) EQElm.PCircleElm.setLatLng([latitude, longitude]);
-      if (EQElm.SCircleElm) EQElm.SCircleElm.setLatLng([latitude, longitude]);
-      if (EQElm.SIElm) EQElm.SIElm.setLatLng([latitude, longitude]);
+      epiCenter.push({ eid: eid, markerElm: ESMarker, latitude: latitude, longitude: longitude });
     }
-    latitudeTmp = latitude;
-    longitudeTmp = longitude;
   }
+
+  var EQElm = psWaveList.find(function (elm) {
+    return elm.id == eid;
+  });
+  if (EQElm) {
+    document.querySelectorAll(".SWave,.PWave").forEach(function (elm) {
+      elm.classList.remove("SWaveAnm");
+      elm.classList.remove("PWaveAnm");
+    });
+    setTimeout(function () {
+      document.querySelectorAll(".SWave").forEach(function (elm) {
+        elm.classList.add("SWaveAnm");
+      });
+      document.querySelectorAll(".PWave").forEach(function (elm) {
+        elm.classList.add("PWaveAnm");
+      });
+    }, 100);
+
+    if (EQElm.PCircleElm) EQElm.PCircleElm.setLatLng([latitude, longitude]);
+    if (EQElm.SCircleElm) EQElm.SCircleElm.setLatLng([latitude, longitude]);
+    if (EQElm.SIElm) EQElm.SIElm.setLatLng([latitude, longitude]);
+  }
+  latitudeTmp = latitude;
+  longitudeTmp = longitude;
 }
 function epiCenterClear(eid) {
   if (prepareing) return;
