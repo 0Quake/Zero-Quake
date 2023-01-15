@@ -222,16 +222,18 @@ img.leaflet-control {
 #tsunami_Yoho span {
   background: var(--TsunamiYohoColor);
 }
-.mapItem {
-  fill: transparent;
-  fill-opacity: 0;
-}
-
-.GJMap .mapItem {
-  fill: #333;
+* {
   fill-opacity: 1;
 }
 
+*[fill="transparent"] {
+  fill-opacity: 0;
+}
+
+.GJMap *[fill="transparent"] {
+  fill-opacity: 1;
+  fill: #333;
+}
 /*
 MajorWarning":
               Tsunami_MajorWarning = true;

@@ -396,9 +396,12 @@ function init() {
       L.geoJSON(json, {
         style: {
           color: "#999",
+          fill: true,
+          fillColor: "transparent",
+          fillOpacity: 1,
           weight: 1,
           pane: "jsonMAPPane",
-          className: "mapItem",
+          className: "GJMap",
           attribution: '<a href="https://www.data.jma.go.jp/developer/gis.html" target="_blank">©JMA</a>',
         },
         onEachFeature: function onEachFeature(feature, layer) {
@@ -416,9 +419,12 @@ function init() {
           L.geoJSON(json, {
             style: {
               color: "#666",
+              fill: true,
+              fillColor: "transparent",
+              fillOpacity: 1,
               weight: 1,
               pane: "jsonMAPPane",
-              className: "mapItem",
+              className: "GJMap",
               attribution: '<a href="https://www.naturalearthdata.com/">©Natural Earth</a>',
             },
             onEachFeature: function onEachFeature(feature, layer) {

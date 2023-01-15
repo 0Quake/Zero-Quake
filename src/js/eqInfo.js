@@ -156,20 +156,21 @@ function Mapinit() {
   });
 
   map.createPane("pane300").style.zIndex = 300;
+  map.createPane("jsonMAPPane").style.zIndex = 210;
 
   fetch("./Resource/basemap.json")
     .then(function (res) {
       return res.json();
     })
     .then(function (json) {
-      gjmap = L.geoJSON(json, {
+      L.geoJSON(json, {
         style: {
           color: "#999",
           fill: true,
-          fillColor: "#333",
+          fillColor: "transparent",
           fillOpacity: 1,
           weight: 1,
-          pane: "tilePane",
+          pane: "jsonMAPPane",
           attribution: 'Map data <a href="https://www.data.jma.go.jp/developer/gis.html" target="_blank">©JMA</a>',
         },
         onEachFeature: function onEachFeature(feature, layer) {
@@ -179,6 +180,32 @@ function Mapinit() {
           }
         },
       }).addTo(map);
+
+      fetch("./Resource/World.json")
+        .then(function (res) {
+          return res.json();
+        })
+        .then(function (json) {
+          L.geoJSON(json, {
+            style: {
+              color: "#666",
+              fill: true,
+              fillColor: "transparent",
+              fillOpacity: 1,
+              weight: 1,
+              pane: "jsonMAPPane",
+              attribution: 'Map data <a href="https://www.naturalearthdata.com/">©Natural Earth</a>',
+            },
+            onEachFeature: function onEachFeature(feature, layer) {
+              if (feature.properties && feature.properties.NAME_JA) {
+                sections.push({ name: feature.properties.NAME_JA, item: layer });
+                layer.bindPopup("<h3>国</h3>" + feature.properties.NAME_JA);
+              }
+            },
+          }).addTo(map);
+        });
+
+      gjmap = L.geoJSON({ type: "FeatureCollection", features: [] }).addTo(map);
 
       L.control
         .layers(
@@ -209,29 +236,13 @@ function Mapinit() {
       mapDraw();
     });
 
-  fetch("./Resource/World.json")
-    .then(function (res) {
-      return res.json();
-    })
-    .then(function (json) {
-      gjmap = L.geoJSON(json, {
-        style: {
-          color: "#666",
-          fill: true,
-          fillColor: "#333",
-          fillOpacity: 1,
-          weight: 1,
-          pane: "tilePane",
-          attribution: 'Map data <a href="https://www.naturalearthdata.com/">©Natural Earth</a>',
-        },
-        onEachFeature: function onEachFeature(feature, layer) {
-          if (feature.properties && feature.properties.NAME_JA) {
-            sections.push({ name: feature.properties.NAME_JA, item: layer });
-            layer.bindPopup("<h3>国</h3>" + feature.properties.NAME_JA);
-          }
-        },
-      }).addTo(map);
-    });
+  map.on("baselayerchange", function (layer) {
+    if (layer.name == "オフライン地図") {
+      document.getElementById("mapcontainer").classList.add("GJMap");
+    } else {
+      document.getElementById("mapcontainer").classList.remove("GJMap");
+    }
+  });
 
   var currentZoom = map.getZoom();
   if (currentZoom < 6) {
@@ -415,7 +426,6 @@ function mapDraw() {
 }
 
 function jma_Fetch(url) {
-  return;
   fetch(url)
     .then(function (res) {
       return res.json();
@@ -503,6 +513,7 @@ function jma_Fetch(url) {
                   .setStyle({
                     fill: true,
                     fillColor: color2[0],
+                    fillOpacity: 1,
                   })
                   .bindPopup("<h3>細分区分：" + sectionTmp.name + "</h3>最大震度" + elm2.MaxInt);
               }
@@ -635,6 +646,7 @@ function narikakun_Fetch(url) {
                 gjmap.setStyle({
                   fill: false,
                   fillColor: color2[0],
+                  fillOpacity: 1,
                 });
 
                 var sectionTmp = sections.find(function (elmA) {
@@ -645,6 +657,7 @@ function narikakun_Fetch(url) {
                     .setStyle({
                       fill: true,
                       fillColor: color2[0],
+                      fillOpacity: 1,
                     })
                     .bindPopup("<h3>細分区分：" + sectionTmp.name + "</h3>最大震度" + elm2.MaxInt);
                 }
@@ -701,7 +714,6 @@ function narikakun_Fetch(url) {
 }
 
 function nhkFetch(url) {
-  return;
   fetch(url)
     .then((response) => {
       return response.arrayBuffer();
@@ -780,7 +792,6 @@ function nhkFetch(url) {
 }
 
 function jmaXMLFetch(url) {
-  return;
   fetch(url)
     .then((response) => {
       return response.text();
@@ -893,6 +904,7 @@ function jmaXMLFetch(url) {
                   .setStyle({
                     fill: true,
                     fillColor: color2[0],
+                    className: "FilledPath",
                   })
                   .bindPopup("<h3>細分区分：" + sectionTmp.name + "</h3>最大震度" + elm2.querySelector("MaxInt").textContent);
               }
