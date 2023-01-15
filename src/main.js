@@ -153,6 +153,10 @@ ipcMain.on("message", (_event, response) => {
 
     EQInfoWindow.webContents.on("did-finish-load", () => {
       EQInfoWindow.webContents.send("message2", {
+        action: "setting",
+        data: config,
+      });
+      EQInfoWindow.webContents.send("message2", {
         action: "metaData",
         eid: response.eid,
         urls: response.urls,
@@ -160,7 +164,6 @@ ipcMain.on("message", (_event, response) => {
     });
 
     EQInfoWindow.loadFile(response.url);
-    console.log(response.url);
 
     //EQInfoWindow.on("closed", () => {});
   }
@@ -183,6 +186,35 @@ function createWindow() {
   //mainWindow.setMenuBarVisibility(false);
 
   mainWindow.webContents.on("did-finish-load", () => {
+    replay("2023/01/15 20:37:45");
+
+    EEWcontrol({
+      alertflg: "予報", //種別
+      report_id: "20230115203744", //地震ID
+      report_num: 1, //第n報
+      report_time: new Date() - Replay, //発表時刻
+      magunitude: 9, //マグニチュード
+      calcintensity: "5-", //最大深度
+      depth: 10, //深さ
+      is_cancel: false, //キャンセル
+      is_final: false, //最終報
+      is_training: true, //訓練報
+      latitude: 35.6, //緯度
+      longitude: 140.3, //経度
+      region_code: "", //震央地域コード
+      region_name: "存在しない地名", //震央地域
+      origin_time: new Date(new Date() - Replay - 2000), //発生時刻
+      isPlum: false,
+      userIntensity: "4",
+      arrivalTime: new Date() - Replay + 100000,
+      intensityAreas: null, //細分区分ごとの予想震度
+      warnZones: {
+        zone: null,
+        Pref: null,
+        Regions: null,
+      },
+    });
+
     //    replay("2022/10/2 0:2:45");
     // replay("2022/11/3 19:04:40");
 
@@ -1040,6 +1072,30 @@ function EEWcontrol(data) {
 
     if (!EEWJSON && saishin) {
       //第２報以降
+
+      var EQJSON = EEW_Data.find(function (elm) {
+        return elm.EQ_id == data.report_id;
+      });
+
+      if (!data.arrivalTime) {
+        var oneBeforeData = EQJSON.data.filter(function (elm) {
+          return elm.arrivalTime;
+        });
+        var newEstID = Math.max.apply(
+          null,
+          oneBeforeData.map(function (o) {
+            return o.report_num;
+          })
+        );
+
+        oneBeforeData = oneBeforeData.find(function (elm) {
+          return elm.report_num == newEstID;
+        });
+        if (oneBeforeData) {
+          data.arrivalTime = oneBeforeData.arrivalTime;
+        }
+      }
+
       EEWAlert(data, false);
       EQJSON.data.push(data);
       if (data.is_cancel) {
@@ -1115,13 +1171,13 @@ function EEWcontrol(data) {
         oneBeforeData.userIntensity = data.userIntensity;
         changed = true;
       }
-      if ((!oneBeforeData.arrivalTime && data.arrivalTime) || oneBeforeData.arrivalTime > data.arrivalTime) {
+      if (data.arrivalTime && !oneBeforeData.arrivalTime) {
         oneBeforeData.arrivalTime = data.arrivalTime;
         changed = true;
       }
 
       if (changed) {
-        EEWAlert(data, false, true);
+        EEWAlert(oneBeforeData, false, true);
       }
     }
   } else {

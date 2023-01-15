@@ -16,73 +16,7 @@ var psWaveList = [];
 
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "kmoniUpdate") {
-    var dataTmp = request.data;
-    var dataTmp2 = dataTmp.filter(function (elm) {
-      return elm.shindo;
-    });
-
-    //リアルタイム震度タブ
-    var maxShindo = dataTmp2.reduce((a, b) => (a.shindo > b.shindo ? a : b)).shindo;
-
-    var shindoList = dataTmp2.sort(function (a, b) {
-      return b.shindo - a.shindo;
-    });
-    removeChild(document.getElementById("pointList"));
-    for (let a = 0; a < 10; a++) {
-      var shindoElm = shindoList[a];
-      var newElm = document.createElement("li");
-      var shindoColor = shindoConvert(shindoElm.shindo, 2);
-      var IntDetail = "";
-      if (a == 0) IntDetail = "<div class='intDetail'>" + Math.round(maxShindo * 10) / 10 + "</div>";
-      newElm.innerHTML = "<div class='int' style='color:" + shindoColor[1] + ";background:" + shindoColor[0] + "'>" + shindoConvert(shindoElm.shindo, 0) + IntDetail + "</div><div class='Pointname'>" + shindoElm.Region + " " + shindoElm.Name + "</div><div class='PGA'>PGA" + Math.round(shindoElm.pga * 100) / 100 + "</div>";
-      document.getElementById("pointList").appendChild(newElm);
-    }
-
-    //地図上マーカー
-    points.forEach(function (elm, index) {
-      elm2 = dataTmp[index];
-      if (elm.Name && elm.Point && elm2.data) {
-        if (!elm.marker) {
-          var kmoniPointMarker = L.divIcon({
-            html: "<div class='marker-circle' style='background:rgba(128,128,128,0.2)'></div><div class='PointPopup'>読み込み中</div>",
-            className: "kmoniPointMarker",
-            iconSize: 25,
-          });
-          elm.marker = L.marker([elm.Location.Latitude, elm.Location.Longitude], {
-            icon: kmoniPointMarker,
-            pane: "PointsPane",
-          })
-            .bindPopup("", { className: "hidePopup" })
-            .addTo(map);
-        }
-
-        var changed;
-
-        if (previous_points.length !== 0) {
-          var rgb0 = previous_points[index].rgb;
-          var rgb1 = elm2.rgb;
-          if (rgb0) changed = JSON.stringify(rgb0) !== JSON.stringify(rgb1);
-        } else {
-          changed = true;
-        }
-
-        if (changed) {
-          var popup_content = "<h3 style='border-bottom:solid 2px rgb(" + elm2.rgb.join(",") + ")'>" + elm.Name + "</h3><table><tr><td>震度</td><td>" + Math.round(elm2.shindo * 10) / 10 + " </td></tr><tr><td>PGA</td><td>" + Math.round(elm2.pga * 100) / 100 + "</td></tr></table>";
-
-          var kmoniPointMarker = L.divIcon({
-            html: "<div class='marker-circle' style='background:rgb(" + elm2.rgb.join(",") + ")'></div><div class='PointPopup'>" + popup_content + "</div>",
-            className: "kmoniPointMarker",
-            iconSize: 25,
-          });
-
-          elm.marker.setIcon(kmoniPointMarker);
-        }
-      } else {
-        map.removeLayer(elm.marker);
-      }
-
-      if (index == points.length - 1) previous_points = dataTmp;
-    });
+    kmoniMapUpdate(request.data);
   } else if (request.action == "longWaveUpdate") {
     document.getElementById("LWaveWrap").style.display = "block";
     document.getElementById("region_name2").innerText = request.data.avrarea_list.join(" ");
@@ -245,7 +179,7 @@ window.electronAPI.messageSend((event, request) => {
 });
 
 function init() {
-  if (inited || !setting || !windowLoaded) return;
+  if (inited || !config || !windowLoaded) return;
   inited = true;
   map = L.map("mapcontainer", {
     maxBounds: [
@@ -468,9 +402,9 @@ function init() {
     });
   map.on("baselayerchange", function (layer) {
     if (layer.name == "オフライン地図") {
-      document.getElementById("mapcontainer").classList.add("GJMap");
+      document.getElementById("mapcontainer").classList.add("GJMapActive");
     } else {
-      document.getElementById("mapcontainer").classList.remove("GJMap");
+      document.getElementById("mapcontainer").classList.remove("GJMapActive");
     }
   });
 
@@ -633,7 +567,7 @@ function init() {
     iconAnchor: [15, 30],
   });
 
-  markerElm = L.marker([setting.home.latitude, setting.home.longitude], { keyboard: false, icon: homeIcon }).addTo(map).bindPopup("自宅");
+  markerElm = L.marker([config.home.latitude, config.home.longitude], { keyboard: false, icon: homeIcon }).addTo(map).bindPopup(config.home.name);
 
   fetch("./Resource/TimeTable_JMA2001.json")
     .then(function (res) {
@@ -645,6 +579,77 @@ function init() {
       psWaveCalc();
       this.setInterval(psWaveCalc, 1000);
     });
+}
+
+var kmoniMapData;
+function kmoniMapUpdate(dataTmp) {
+  var dataTmp2 = dataTmp.filter(function (elm) {
+    return elm.shindo;
+  });
+  kmoniMapData = dataTmp;
+
+  //リアルタイム震度タブ
+  var maxShindo = dataTmp2.reduce((a, b) => (a.shindo > b.shindo ? a : b)).shindo;
+
+  var shindoList = dataTmp2.sort(function (a, b) {
+    return b.shindo - a.shindo;
+  });
+  removeChild(document.getElementById("pointList"));
+  for (let a = 0; a < 10; a++) {
+    var shindoElm = shindoList[a];
+    var newElm = document.createElement("li");
+    var shindoColor = shindoConvert(shindoElm.shindo, 2);
+    var IntDetail = "";
+    if (a == 0) IntDetail = "<div class='intDetail'>" + Math.round(maxShindo * 10) / 10 + "</div>";
+    newElm.innerHTML = "<div class='int' style='color:" + shindoColor[1] + ";background:" + shindoColor[0] + "'>" + shindoConvert(shindoElm.shindo, 0) + IntDetail + "</div><div class='Pointname'>" + shindoElm.Region + " " + shindoElm.Name + "</div><div class='PGA'>PGA" + Math.round(shindoElm.pga * 100) / 100 + "</div>";
+    document.getElementById("pointList").appendChild(newElm);
+  }
+
+  //地図上マーカー
+  points.forEach(function (elm, index) {
+    elm2 = dataTmp[index];
+    if (elm.Name && elm.Point && elm2.data) {
+      if (!elm.marker) {
+        var kmoniPointMarker = L.divIcon({
+          html: "<div class='marker-circle' style='background:rgba(128,128,128,0.2)'></div><div class='PointPopup'>読み込み中</div>",
+          className: "kmoniPointMarker",
+          iconSize: 25,
+        });
+        elm.marker = L.marker([elm.Location.Latitude, elm.Location.Longitude], {
+          icon: kmoniPointMarker,
+          pane: "PointsPane",
+        })
+          .bindPopup("", { className: "hidePopup" })
+          .addTo(map);
+      }
+
+      var changed;
+
+      if (previous_points.length !== 0) {
+        var rgb0 = previous_points[index].rgb;
+        var rgb1 = elm2.rgb;
+        if (rgb0) changed = JSON.stringify(rgb0) !== JSON.stringify(rgb1);
+      } else {
+        changed = true;
+      }
+
+      if (changed) {
+        var popup_content = "<h3 style='border-bottom:solid 2px rgb(" + elm2.rgb.join(",") + ")'>" + elm.Name + "</h3><table><tr><td>震度</td><td>" + Math.round(elm2.shindo * 10) / 10 + " </td></tr><tr><td>PGA</td><td>" + Math.round(elm2.pga * 100) / 100 + "</td></tr></table>";
+
+        var kmoniPointMarker = L.divIcon({
+          html: "<div class='marker-circle' style='background:rgb(" + elm2.rgb.join(",") + ")'></div><div class='PointPopup'>" + popup_content + "</div>",
+          className: "kmoniPointMarker",
+          iconSize: 25,
+        });
+
+        elm.marker.setIcon(kmoniPointMarker);
+      }
+    } else {
+      map.removeLayer(elm.marker);
+    }
+
+    if (index == points.length - 1) previous_points = dataTmp;
+  });
 }
 
 function psWaveCalc() {

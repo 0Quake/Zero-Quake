@@ -26,6 +26,7 @@ var jmaURL;
 var jmaXMLURL;
 var nhkURL;
 var narikakunURL;
+var config;
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "metaData") {
     eid = request.eid;
@@ -42,6 +43,8 @@ window.electronAPI.messageSend((event, request) => {
       return elm.indexOf("dev.narikakun.net") != -1;
     });
     init();
+  } else if (request.action == "setting") {
+    config = request.data;
   }
 });
 
@@ -180,6 +183,7 @@ function Mapinit() {
           fillOpacity: 1,
           weight: 1,
           pane: "jsonMAPPane",
+          className: "GJMap",
           attribution: 'Map data <a href="https://www.data.jma.go.jp/developer/gis.html" target="_blank">©JMA</a>',
         },
         onEachFeature: function onEachFeature(feature, layer) {
@@ -203,6 +207,7 @@ function Mapinit() {
               fillOpacity: 1,
               weight: 1,
               pane: "jsonMAPPane",
+              className: "GJMap",
               attribution: 'Map data <a href="https://www.naturalearthdata.com/">©Natural Earth</a>',
             },
             onEachFeature: function onEachFeature(feature, layer) {
@@ -247,9 +252,9 @@ function Mapinit() {
 
   map.on("baselayerchange", function (layer) {
     if (layer.name == "オフライン地図") {
-      document.getElementById("mapcontainer").classList.add("GJMap");
+      document.getElementById("mapcontainer").classList.add("GJMapActive");
     } else {
-      document.getElementById("mapcontainer").classList.remove("GJMap");
+      document.getElementById("mapcontainer").classList.remove("GJMapActive");
     }
   });
 
@@ -281,6 +286,14 @@ function Mapinit() {
       document.getElementById("mapcontainer").classList.add("zoomLevel_4");
     }
   });
+
+  var homeIcon = L.icon({
+    iconUrl: "img/homePin.svg",
+    iconSize: [30, 30],
+    iconAnchor: [15, 30],
+  });
+
+  L.marker([config.home.latitude, config.home.longitude], { keyboard: false, icon: homeIcon }).addTo(map).bindPopup(config.home.name);
 }
 
 function jma_ListReq() {

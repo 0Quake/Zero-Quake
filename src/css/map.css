@@ -222,15 +222,15 @@ img.leaflet-control {
 #tsunami_Yoho span {
   background: var(--TsunamiYohoColor);
 }
-* {
+.GJMapActive {
   fill-opacity: 1;
 }
 
-*[fill="transparent"] {
+.GJMap[fill="transparent"] {
   fill-opacity: 0;
 }
 
-.GJMap *[fill="transparent"] {
+.GJMapActive .GJMap[fill="transparent"] {
   fill-opacity: 1;
   fill: #333;
 }
@@ -278,4 +278,11 @@ MajorWarning":
 }
 .SWaveProgress .SWprogressValue {
   transition: linear 1000ms;
+}
+
+.leaflet-fade-anim .leaflet-popup {
+  transition: none !important;
+}
+.leaflet-zoom-anim .leaflet-zoom-animated {
+  transition: none !important;
 }

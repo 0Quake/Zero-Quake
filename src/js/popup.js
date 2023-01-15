@@ -2,13 +2,12 @@ var now_EEW = [];
 var EEWDetectionTimeout;
 var Replay = 0;
 var ICT_JST = 0;
-var setting;
+var config;
 var AreaForecastLocalE;
 var prepareing = true;
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "EEWAlertUpdate") {
     EEWAlertUpdate(request.data);
-    console.log("c", request.data);
   } else if (request.action == "kmoniTimeUpdate") {
     kmoniTimeUpdate(request.Updatetime, request.LocalTime, request.type, request.condition, request.vendor);
   } else if (request.action == "kmoniUpdate") {
@@ -27,7 +26,7 @@ window.electronAPI.messageSend((event, request) => {
   } else if (request.action == "PSWaveClear") {
     epiCenterClear(request.data);
   } else if (request.action == "setting") {
-    setting = request.data;
+    config = request.data;
   } else if (request.action == "Replay") {
     Replay = request.data;
   } else if (request.action == "EQInfo") {
@@ -81,7 +80,6 @@ var template = document.getElementById("EEWTemplate");
 var epiCenter = [];
 
 function EEWAlertUpdate(data) {
-  console.log("b", data);
   if (prepareing) return;
   data.forEach((elm) => {
     var same = now_EEW.find(function (elm2) {
@@ -119,8 +117,7 @@ function EEWAlertUpdate(data) {
       clone.querySelector(".depth").innerText = elm.depth ? elm.depth : "不明";
       clone.querySelector(".traning").style.display = elm.is_training ? "block" : "none";
 
-      clone.querySelector(".userIntensity").style.display = Boolean(elm.userIntensity) ? "block" : "none";
-      clone.querySelector(".userIntensity").innerText = elm.userIntensity;
+      clone.querySelector(".userIntensity").innerText = Boolean(elm.userIntensity) ? elm.userIntensity : "?";
       clone.querySelector(".userDataWrap").style.background = shindoConvert(elm.userIntensity, 2)[0];
       clone.querySelector(".userDataWrap").style.color = shindoConvert(elm.userIntensity, 2)[1];
 
@@ -246,11 +243,9 @@ function EEWAlertUpdate(data) {
     });
     //終わった地震
     if (!stillEQ) {
-      console.log("a", data);
       document.getElementById("EEW-" + elm.report_id).remove();
       epiCenterClear(elm.report_id);
     } else if (elm.is_cancel) {
-      console.log("a2", data);
       epiCenterClear(elm.report_id);
       //setTimeout(function () {
       document.getElementById("EEW-" + elm.report_id).remove();
