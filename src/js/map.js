@@ -19,8 +19,16 @@ window.electronAPI.messageSend((event, request) => {
     kmoniMapUpdate(request.data);
   } else if (request.action == "longWaveUpdate") {
     document.getElementById("LWaveWrap").style.display = "block";
-    document.getElementById("region_name2").innerText = request.data.avrarea_list.join(" ");
     document.getElementById("maxKaikyu").innerText = request.data.avrrank;
+    document.getElementById("region_name2").innerText = request.data.avrarea_list.join(" ");
+    request.data.avrarea_list.forEach(function (elm) {
+      var section = sections.find(function (elm2) {
+        return elm2.name == elm;
+      });
+      if (section) {
+        section.item.setStyle({ fill: true, fillColor: "#FFF" });
+      }
+    });
   } else if (request.action == "longWaveClear") {
     document.getElementById("LWaveWrap").style.display = "none";
   } else if (request.action == "EEWAlertUpdate") {
@@ -191,7 +199,6 @@ function init() {
     zoomAnimation: false,
   });
   //L.control.scale({ imperial: false }).addTo(map);←縮尺
-  map.setView([32.99125, 138.46], 4);
 
   var tile1 = L.tileLayer("https://www.data.jma.go.jp/svd/eqdb/data/shindo/map/{z}/{x}/{y}.png", {
     minZoom: 0,
@@ -320,6 +327,32 @@ function init() {
             .addTo(map);
         }
       });
+      if (kmoniMapData) kmoniMapUpdate(kmoniMapData);
+    });
+
+  fetch("./Resource/World.json")
+    .then(function (res) {
+      return res.json();
+    })
+    .then(function (json) {
+      L.geoJSON(json, {
+        style: {
+          color: "#666",
+          fill: true,
+          fillColor: "transparent",
+          fillOpacity: 1,
+          weight: 1,
+          pane: "jsonMAPPane",
+          className: "GJMap",
+          attribution: '<a href="https://www.naturalearthdata.com/">©Natural Earth</a>',
+        },
+        onEachFeature: function onEachFeature(feature, layer) {
+          if (feature.properties && feature.properties.NAME_JA) {
+            sections.push({ name: feature.properties.NAME_JA, item: layer });
+            layer.bindPopup("<h3>国</h3>" + feature.properties.NAME_JA);
+          }
+        },
+      }).addTo(map);
     });
 
   fetch("./Resource/basemap.json")
@@ -345,30 +378,6 @@ function init() {
           }
         },
       }).addTo(map);
-      fetch("./Resource/World.json")
-        .then(function (res) {
-          return res.json();
-        })
-        .then(function (json) {
-          L.geoJSON(json, {
-            style: {
-              color: "#666",
-              fill: true,
-              fillColor: "transparent",
-              fillOpacity: 1,
-              weight: 1,
-              pane: "jsonMAPPane",
-              className: "GJMap",
-              attribution: '<a href="https://www.naturalearthdata.com/">©Natural Earth</a>',
-            },
-            onEachFeature: function onEachFeature(feature, layer) {
-              if (feature.properties && feature.properties.NAME_JA) {
-                sections.push({ name: feature.properties.NAME_JA, item: layer });
-                layer.bindPopup("<h3>国</h3>" + feature.properties.NAME_JA);
-              }
-            },
-          }).addTo(map);
-        });
 
       gjmap = L.geoJSON({ type: "FeatureCollection", features: [] }).addTo(map);
       L.control
@@ -532,7 +541,9 @@ function init() {
       }
     }
   });
-
+  map.on("load", function () {
+    if (kmoniMapData) kmoniMapUpdate(kmoniMapData);
+  });
   epicenterIcon = L.icon({
     iconUrl: "../src/img/epicenter.svg",
     iconSize: [32, 32],
@@ -579,6 +590,8 @@ function init() {
       psWaveCalc();
       this.setInterval(psWaveCalc, 1000);
     });
+
+  map.setView([32.99125, 138.46], 4);
 }
 
 var kmoniMapData;
@@ -809,6 +822,7 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
       weight: 2,
       className: "PWave PWaveAnm",
       pane: "overlayPane",
+      interactive: false,
     }).addTo(map);
     var SCElm = L.circle([latitude, longitude], {
       radius: sRadius,
@@ -820,6 +834,7 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
       weight: 2,
       className: "SWave SWaveAnm",
       pane: "overlayPane",
+      interactive: false,
     }).addTo(map);
 
     map.fitBounds(PCElm.getBounds());

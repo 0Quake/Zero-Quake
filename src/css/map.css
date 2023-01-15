@@ -261,10 +261,12 @@ MajorWarning":
 .PWave {
   stroke: var(--PwaveColor);
   transform: translate3d(0, 0, 0);
+  pointer-events: none;
 }
 .SWave {
   stroke: var(--SwaveColor);
   transform: translate3d(0, 0, 0);
+  pointer-events: none;
 }
 .Wave_progress .PWave_value {
   background: var(--PwaveColor);

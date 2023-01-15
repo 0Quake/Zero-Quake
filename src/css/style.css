@@ -184,6 +184,11 @@ main {
 #tsunamiCancel {
   display: none;
 }
+
+#LWaveWrap .Alert_content_wrap {
+  max-height: 130px;
+  overflow: scroll;
+}
 #tsunamiCancel,
 #tsunamiRevocation {
   text-align: center;
@@ -196,7 +201,7 @@ h2 {
 }
 .Alert_content_wrap {
   position: relative;
-  padding: 0.8em;
+  padding: 10px;
 }
 .EEW_content_wrap {
   display: flex;
@@ -228,14 +233,44 @@ h2 {
 
 .detail_text {
   flex: 1;
+  padding: 10px 5px;
 }
 .GraphicalDataWrap {
   text-align: center;
+  margin: 0;
 }
 .userDataWrap {
   display: flex;
   height: 50px;
   border-radius: 25px;
+}
+
+.dataGroup1 {
+  margin-bottom: 8px;
+  font-size: 15px;
+  text-align: center;
+  line-height: 30px;
+}
+.magunitude {
+  font-size: 35px;
+  margin: 0 10px 0 5px;
+  font-family: ui-monospace;
+}
+.depth {
+  font-size: 25px;
+  font-family: ui-monospace;
+}
+.region_name {
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.origin_time {
+  font-size: 14px;
+  color: #ccc;
+  text-align: center;
+  white-space: nowrap;
+  font-family: ui-monospace;
 }
 .graphWrap {
   border-radius: 22px;
@@ -243,13 +278,22 @@ h2 {
   height: 44px;
   margin: 3px;
   background: #222;
+  overflow: hidden;
+}
+.countDown {
+  font-size: 16px;
+  font-family: ui-monospace;
+}
+.distance {
+  font-size: 10px;
+  font-family: ui-monospace;
 }
 
 .calcintensity {
   width: 60px;
   height: 60px;
-  border-radius: 50%;
-  margin: 5px auto;
+  border-radius: 15px;
+  margin: 0 auto 5px auto;
   font-size: 40px;
   text-align: center;
   line-height: 60px;

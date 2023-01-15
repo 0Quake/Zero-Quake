@@ -175,6 +175,8 @@ function createWindow() {
     return;
   }
   mainWindow = new BrowserWindow({
+    minWidth: 600,
+    minHeight: 300,
     webPreferences: {
       preload: path.join(__dirname, "js/preload.js"),
       title: "Zero Quake",
