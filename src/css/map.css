@@ -222,6 +222,15 @@ img.leaflet-control {
 #tsunami_Yoho span {
   background: var(--TsunamiYohoColor);
 }
+.mapItem {
+  fill: transparent;
+  fill-opacity: 0;
+}
+
+.GJMap .mapItem {
+  fill: #333;
+  fill-opacity: 1;
+}
 
 /*
 MajorWarning":

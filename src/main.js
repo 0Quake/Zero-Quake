@@ -44,17 +44,19 @@ if (!gotTheLock) {
   app.quit();
 }
 
+var kmoniPointsDataTmp;
 ipcMain.on("message", (_event, response) => {
   if (response.action == "kmoniReturn") {
     kmoniActive = true;
-    if (mainWindow) {
-      mainWindow.webContents.send("message2", {
-        action: "kmoniUpdate",
-        Updatetime: new Date(response.date),
-        LocalTime: new Date(),
+    kmoniPointsDataTmp = {
+      action: "kmoniUpdate",
+      Updatetime: new Date(response.date),
+      LocalTime: new Date(),
 
-        data: response.data,
-      });
+      data: response.data,
+    };
+    if (mainWindow) {
+      mainWindow.webContents.send("message2", kmoniPointsDataTmp);
     }
   } else if (response.action == "tsunamiReqest") {
     if (tsunamiData) {
@@ -180,6 +182,7 @@ function createWindow() {
     //replay("2022/04/19 08:16:15");
     //replay("2022/11/09 17:40:05");
 
+    /*
     EEWcontrol({
       alertflg: "警報", //種別
       report_id: "20991111111111", //地震ID
@@ -204,7 +207,7 @@ function createWindow() {
         Pref: null,
         Regions: null,
       },
-    });
+    });*/
 
     /*
     EEWcontrol({
@@ -276,7 +279,7 @@ function createWindow() {
     mainWindow.webContents.send("message2", {
       action: "EQInfo",
       source: "jma",
-      data: [...eqInfo.jma].reverse(),
+      data: eqInfo.jma,
     });
 
     if (notifications.length > 0) {
@@ -295,6 +298,10 @@ function createWindow() {
           condition: P2P_ConnectData[2],
         });
       }
+    }
+
+    if (kmoniPointsDataTmp) {
+      mainWindow.webContents.send("message2", kmoniPointsDataTmp);
     }
   });
 
@@ -408,13 +415,6 @@ var Replay = 0;
 var EEWNow = false;
 
 var errorCount = 0;
-
-ipcMain.on("message", (event, request) => {
-  if (request.action == "monitorSelect") {
-    monitorVendor = request.data;
-  }
-  return true;
-});
 
 function kmoniRequest() {
   if (net.online) {
@@ -693,12 +693,15 @@ function SNXLogRead(str) {
       var buffer = Buffer.from(content);
       let logData = buffer.toString();
 
+      var SNXDataTmp = [];
+
       let dataTmp = logData.split("MsgType=9");
       dataTmp.forEach(function (elm) {
         var eidTmp;
         var reportnumTmp;
         var origintimeTmp;
         var reporttimeTmp;
+        var arrivaltimeTmp;
         var intTmp;
         elm.split("<BOM>").forEach(function (elm2) {
           if (elm2.indexOf("対象EQ ID") != -1) {
@@ -706,6 +709,8 @@ function SNXLogRead(str) {
             reportnumTmp = elm2.split(" = ")[1].substring(17, 20);
           } else if (elm2.indexOf("地震発生時刻(a)") != -1) {
             origintimeTmp = elm2.split(" = ")[1].substring(0, 19);
+          } else if (elm2.indexOf("地震到達予測時刻(c)") != -1) {
+            arrivaltimeTmp = elm2.split(" = ")[1].substring(0, 19);
           } else if (elm2.indexOf("現在時刻(d)") != -1) {
             reporttimeTmp = elm2.split(" = ")[1].substring(0, 19);
           } else if (elm2.indexOf("震度階級色") != -1) {
@@ -714,7 +719,7 @@ function SNXLogRead(str) {
         });
 
         if (origintimeTmp && (eidTmp || reportnumTmp || intTmp)) {
-          EEWcontrol({
+          SNXDataTmp.push({
             alertflg: null,
             report_id: eidTmp,
             report_num: Number(reportnumTmp),
@@ -733,6 +738,7 @@ function SNXLogRead(str) {
             origin_time: new Date(origintimeTmp),
             isPlum: null,
             userIntensity: intTmp,
+            arrivalTime: new Date(arrivaltimeTmp),
             intensityAreas: null, //細分区分ごとの予想震度
             warnZones: {
               zone: null,
@@ -742,6 +748,36 @@ function SNXLogRead(str) {
             source: "SignalNow X",
           });
         }
+      });
+
+      let dataTmp2 = logData.split("<BOM>");
+      var eidTmp;
+      dataTmp2.forEach(function (elm) {
+        if (elm.indexOf("[OnEq01Queued]() Objective EqId =") != -1) {
+          eidTmp = elm.split("[OnEq01Queued]() Objective EqId = ")[1].split('"')[0].replace("ND", "");
+        } else if (eidTmp && elm.indexOf("[CalculateEqEffect()]()") != -1) {
+          var item = elm.split("[CalculateEqEffect()]()")[1].split("|")[0].split(",");
+          if (item.length == 11) {
+            var latTmp = Number(item[0].split(": ")[1]);
+            var lngTmp = Number(item[1].split(": ")[1]);
+            var depthTmp = Number(item[2].split(": ")[1]);
+            var magTmp = Number(item[3].split(": ")[1]);
+
+            var SNXDataItem = SNXDataTmp.find(function (elm) {
+              return elm.report_id == eidTmp;
+            });
+            if (SNXDataItem) {
+              SNXDataItem.magunitude = magTmp;
+              SNXDataItem.latitude = latTmp;
+              SNXDataItem.longitude = lngTmp;
+              SNXDataItem.depth = depthTmp;
+            }
+          }
+        }
+      });
+
+      SNXDataTmp.forEach(function (elm) {
+        EEWcontrol(elm);
       });
     });
   }
@@ -778,6 +814,7 @@ function EEWdetect(type, json, KorL) {
           origin_time: new Date(elm.originTime), //発生時刻
           isPlum: false,
           userIntensity: null,
+          arrivalTime: null,
           intensityAreas: null, //細分区分ごとの予想震度
           warnZones: {
             zone: null,
@@ -827,6 +864,7 @@ function EEWdetect(type, json, KorL) {
         origin_time: origin_timeTmp, //発生時刻
         isPlum: false,
         userIntensity: null,
+        arrivalTime: null,
         intensityAreas: null, //細分区分ごとの予想震度
         warnZones: {
           zone: null,
@@ -913,6 +951,7 @@ function EEWdetect(type, json, KorL) {
       origin_time: origin_timeTmp, //発生時刻
       isPlum: conditionTmp == "仮定震源要素", //🔴PLUM法かどうか
       userIntensity: null,
+      arrivalTime: null,
       intensityAreas: null, //細分区分ごとの予想震度
       warnZones: {
         zone: null,
@@ -941,6 +980,15 @@ function EEWdetect(type, json, KorL) {
   }
 }
 function EEWcontrol(data) {
+  /*
+  if (!data.origin_time) {
+    var eqj = EEW_Data.find(function (elm) {
+      return elm.EQ_id == data.report_id;
+    });
+    if (eqj) {
+      data.origin_time = eqj.data[eqj.data.length - 1].origin_time;
+    }
+  }*/
   var pastTime = new Date() - Replay - data.origin_time;
   if (pastTime > 300000 || pastTime < 0) return;
   if (!EEW_history[data.source]) EEW_history[data.source] = [];
@@ -955,6 +1003,7 @@ function EEWcontrol(data) {
   if (data.latitude && data.longitude) {
     data.distance = geosailing(data.latitude, data.longitude, config.home.latitude, config.home.longitude);
   }
+
   var EQJSON = EEW_Data.find(function (elm) {
     return elm.EQ_id == data.report_id;
   });
@@ -1059,6 +1108,11 @@ function EEWcontrol(data) {
         oneBeforeData.userIntensity = data.userIntensity;
         changed = true;
       }
+      if ((!oneBeforeData.arrivalTime && data.arrivalTime) || oneBeforeData.arrivalTime > data.arrivalTime) {
+        oneBeforeData.arrivalTime = data.arrivalTime;
+        changed = true;
+      }
+
       if (changed) {
         EEWAlert(data, false, true);
       }
@@ -1586,9 +1640,8 @@ function eqInfoAlert(data, source, update) {
       EQInfoTmp = data;
     } else {
       eqInfo.jma = eqInfo.jma.concat(data);
-      data.forEach(function (elm) {});
     }
-    eqInfo.jma.sort(function (a, b) {
+    eqInfo.jma = eqInfo.jma.sort(function (a, b) {
       var r = 0;
       if (a.OriginTime > b.OriginTime) {
         r = -1;
@@ -1597,7 +1650,6 @@ function eqInfoAlert(data, source, update) {
       }
       return r;
     });
-
     if (mainWindow) {
       mainWindow.webContents.send("message2", {
         action: "EQInfo",

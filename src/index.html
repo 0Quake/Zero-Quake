@@ -90,7 +90,7 @@
 
     <div id="alertFrame"></div>
     <main>
-        <div id="mapcontainer"></div>
+        <div id="mapcontainer" class="GJMap"></div>
 
         <div id="sideBar">
             <div id="sokuho-Panel">
@@ -126,27 +126,31 @@
 
                             <div class="Alert_content_wrap EEW_content_wrap">
 
-                                <div class="calcintensity">0</div>
+                                <div class="GraphicalDataWrap">
+                                    <div class="calcintensity">0</div>
 
+                                    <div class="userDataWrap">
+
+                                        <div class="userIntensity"></div>
+                                        <div class="graphWrap">
+                                            <svg width="44" height="44">
+                                                <circle cx="22" cy="22" r="17" stroke-width="5px" stroke-linecap="round" stroke="#444" fill="none"></circle>
+
+                                                <circle class="PWave_value" cx="22" cy="22" r="20" stroke-width="5px" stroke-linecap="round" stroke-dasharray="125.66" stroke-dashoffset="125.66" transform="rotate(270 22 22)" fill="none"></circle>
+                                                <circle class="SWave_value" cx="22" cy="22" r="20" stroke-width="5px" stroke-linecap="round" stroke-dasharray="125.66" stroke-dashoffset="125.66" transform="rotate(270 22 22)" fill="none"></circle>
+                                                <text class="countDown" x="50%" y="50%" text-anchor="middle" dominant-baseline="central" fill="#FFF" font-size="20">?:??</text>
+                                                <text class="distance" x="50%" y="75%" text-anchor="middle" dominant-baseline="central" fill="#FFF" font-size="12">000km</text>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="detail_text">
                                     <div>M<span class="magunitude">0</span>深さ：<span class="depth">0</span>km</div>
                                     <div class="region_name">地域</div>
                                     <div class="origin_time">発生時刻</div>
                                 </div>
 
-                                <div class="userDataWrap">
-                                    <div class="userIntensity"></div>
-                                    <div class="graphWrap">
-                                        <svg width="44" height="44">
-                                            <circle cx="22" cy="22" r="17" stroke-width="5px" stroke-linecap="round" stroke="#444" fill="none"></circle>
 
-                                            <circle class="PWave_value" cx="22" cy="22" r="20" stroke-width="5px" stroke-linecap="round" stroke-dasharray="125.66" stroke-dashoffset="125.66" transform="rotate(270 22 22)" fill="none"></circle>
-                                            <circle class="SWave_value" cx="22" cy="22" r="20" stroke-width="5px" stroke-linecap="round" stroke-dasharray="125.66" stroke-dashoffset="125.66" transform="rotate(270 22 22)" fill="none"></circle>
-                                            <text class="countDown" x="50%" y="50%" text-anchor="middle" dominant-baseline="central" fill="#FFF" font-size="20">?:??</text>
-                                            <text class="distance" x="50%" y="75%" text-anchor="middle" dominant-baseline="central" fill="#FFF" font-size="12">000km</text>
-                                        </svg>
-                                    </div>
-                                </div>
                                 <div class="canceled">キャンセルされました</div>
                             </div>
                         </div>

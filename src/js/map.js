@@ -393,14 +393,12 @@ function init() {
       return res.json();
     })
     .then(function (json) {
-      gjmap = L.geoJSON(json, {
+      L.geoJSON(json, {
         style: {
           color: "#999",
-          fill: true,
-          fillColor: "#333",
-          fillOpacity: 1,
           weight: 1,
           pane: "jsonMAPPane",
+          className: "mapItem",
           attribution: '<a href="https://www.data.jma.go.jp/developer/gis.html" target="_blank">©JMA</a>',
         },
         onEachFeature: function onEachFeature(feature, layer) {
@@ -415,14 +413,12 @@ function init() {
           return res.json();
         })
         .then(function (json) {
-          gjmap = L.geoJSON(json, {
+          L.geoJSON(json, {
             style: {
               color: "#666",
-              fill: true,
-              fillColor: "#333",
-              fillOpacity: 1,
               weight: 1,
               pane: "jsonMAPPane",
+              className: "mapItem",
               attribution: '<a href="https://www.naturalearthdata.com/">©Natural Earth</a>',
             },
             onEachFeature: function onEachFeature(feature, layer) {
@@ -433,6 +429,8 @@ function init() {
             },
           }).addTo(map);
         });
+
+      gjmap = L.geoJSON({ type: "FeatureCollection", features: [] }).addTo(map);
       L.control
         .layers(
           {
@@ -462,6 +460,13 @@ function init() {
         )
         .addTo(map);
     });
+  map.on("baselayerchange", function (layer) {
+    if (layer.name == "オフライン地図") {
+      document.getElementById("mapcontainer").classList.add("GJMap");
+    } else {
+      document.getElementById("mapcontainer").classList.remove("GJMap");
+    }
+  });
 
   tsunamiLayer = L.featureGroup();
 
@@ -638,6 +643,25 @@ function init() {
 
 function psWaveCalc() {
   now_EEW.forEach(function (elm) {
+    if (!elm.is_cancel && elm.arrivalTime) {
+      var countDownElm = document.getElementById("EEW-" + elm.report_id).querySelector(".countDown");
+      if (countDownElm) {
+        var countDown = (elm.arrivalTime - (new Date() - Replay)) / 1000;
+
+        if (countDown > 0) {
+          var countDown_min = Math.floor(countDown / 60);
+          var countDown_sec = Math.floor(countDown % 60);
+
+          if (countDown_min == 0) {
+            countDownElm.textContent = countDown_sec;
+          } else {
+            countDownElm.textContent = countDown_min + ":" + String(countDown_sec).padStart(2, "0");
+          }
+        } else {
+          countDownElm.textContent = "0";
+        }
+      }
+    }
     if (!elm.is_cancel && elm.origin_time && elm.depth && elm.latitude && elm.longitude) {
       var distance = Math.floor((new Date() - Replay - elm.origin_time) / 1000);
 

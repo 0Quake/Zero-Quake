@@ -124,9 +124,7 @@ function EEWAlertUpdate(data) {
       clone.querySelector(".userDataWrap").style.background = shindoConvert(elm.userIntensity, 2)[0];
       clone.querySelector(".userDataWrap").style.color = shindoConvert(elm.userIntensity, 2)[1];
 
-      if (elm.distance) {
-        clone.querySelector(".distance").textContent = Math.round(elm.distance) + "km";
-      }
+      clone.querySelector(".distance").textContent = elm.distance ? Math.round(elm.distance) + "km" : "";
 
       clone.querySelector(".EEWWrap").setAttribute("id", "EEW-" + elm.report_id);
 
@@ -164,9 +162,7 @@ function EEWAlertUpdate(data) {
       EQMenu.querySelector(".magunitude").innerText = elm.magunitude ? elm.magunitude : "不明";
       EQMenu.querySelector(".depth").innerText = elm.depth ? elm.depth : "不明";
 
-      if (elm.distance) {
-        EQMenu.querySelector(".distance").innerText = Math.round(elm.distance) + "km";
-      }
+      EQMenu.querySelector(".distance").innerText = elm.distance ? Math.round(elm.distance) + "km" : "";
     }
     /*
     if (elm.intensityAreas) {
