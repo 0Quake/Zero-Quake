@@ -9,7 +9,7 @@ const { JSDOM } = jsdom;
 let fs = require("fs");
 
 const Store = require("electron-store");
-const { validateHeaderValue } = require("http");
+const { validateHeaderValue, request } = require("http");
 const store = new Store();
 var config = store.get("config", {
   setting1: true,
@@ -140,10 +140,10 @@ ipcMain.on("message", (_event, response) => {
       tsunamiWindow = null;
     });
   } else if (response.action == "EQInfoWindowOpen") {
-    mainWindow = new BrowserWindow({
+    var EQInfoWindow = new BrowserWindow({
       webPreferences: {
         preload: path.join(__dirname, "js/preload.js"),
-        title: "Zero Quake",
+        title: "地震詳細情報 - Zero Quake",
         webSecurity: false,
         backgroundColor: "#202227",
         icon: path.join(__dirname, "img/icon.ico"),
@@ -151,11 +151,18 @@ ipcMain.on("message", (_event, response) => {
     });
     //mainWindow.setMenuBarVisibility(false);
 
-    mainWindow.webContents.on("did-finish-load", () => {});
+    EQInfoWindow.webContents.on("did-finish-load", () => {
+      EQInfoWindow.webContents.send("message2", {
+        action: "metaData",
+        eid: response.eid,
+        urls: response.urls,
+      });
+    });
 
-    mainWindow.loadFile("src/index.html");
+    EQInfoWindow.loadFile(response.url);
+    console.log(response.url);
 
-    mainWindow.on("closed", () => {});
+    //EQInfoWindow.on("closed", () => {});
   }
 });
 

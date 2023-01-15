@@ -378,11 +378,16 @@ function eqInfoDraw(data, source) {
       clone.querySelector(".canceled").style.display = elm.cancel ? "flex" : "none";
 
       clone.querySelector(".EQDetailButton").addEventListener("click", function () {
-        window.open("EQDetail.html?eid=" + elm.eventId + "&detailURL=" + encodeURIComponent(elm.DetailURL.join("[ZQ_URLSEPARATE]")), "地震情報 - Zero Quake");
+        window.electronAPI.messageReturn({
+          action: "EQInfoWindowOpen",
+          url: "src/EQDetail.html", //?eid=" + elm.eventId + "&detailURL=" + encodeURIComponent(elm.DetailURL.join("[ZQ_URLSEPARATE]")),
+          eid: elm.eventId,
+          urls: elm.DetailURL,
+        });
       });
     } else if (source == "usgs") {
       clone.querySelector(".EQDetailButton").addEventListener("click", function () {
-        window.open(elm.DetailURL, "地震情報 - Zero Quake");
+        window.open(elm.DetailURL);
       });
     }
     EQListWrap.appendChild(clone);

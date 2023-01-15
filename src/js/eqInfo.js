@@ -16,26 +16,35 @@ var data_comment = document.getElementById("data_comment");
 
 let url = new URL(window.location.href);
 let params = url.searchParams;
-var eid = params.get("eid");
+var eid;
 var markerElm;
 var newInfoDateTime = 0;
 var sections = [];
 var map_drawed = false;
 var map;
+var jmaURL;
+var jmaXMLURL;
+var nhkURL;
+var narikakunURL;
+window.electronAPI.messageSend((event, request) => {
+  if (request.action == "metaData") {
+    eid = request.eid;
+    jmaURL = request.urls.filter(function (elm) {
+      return elm.indexOf("www.jma.go.jp") != -1;
+    });
+    jmaXMLURL = request.urls.filter(function (elm) {
+      return elm.indexOf("www.data.jma.go.jp") != -1;
+    });
+    nhkURL = request.urls.filter(function (elm) {
+      return elm.indexOf("nhk.or.jp") != -1;
+    });
+    narikakunURL = request.urls.filter(function (elm) {
+      return elm.indexOf("dev.narikakun.net") != -1;
+    });
+    init();
+  }
+});
 
-var detailURL = decodeURIComponent(params.get("detailURL")).split("[ZQ_URLSEPARATE]");
-var jmaURL = detailURL.filter(function (elm) {
-  return elm.indexOf("www.jma.go.jp") != -1;
-});
-var jmaXMLURL = detailURL.filter(function (elm) {
-  return elm.indexOf("www.data.jma.go.jp") != -1;
-});
-var nhkURL = detailURL.filter(function (elm) {
-  return elm.indexOf("nhk.or.jp") != -1;
-});
-var narikakunURL = detailURL.filter(function (elm) {
-  return elm.indexOf("dev.narikakun.net") != -1;
-});
 var jmaURLHis = [];
 var jmaXMLURLHis = [];
 var nhkURLHis = [];
@@ -384,7 +393,7 @@ function init() {
 }
 
 function mapDraw() {
-  if (eid && detailURL) {
+  if (eid) {
     jmaURL.forEach(function (elm) {
       jma_Fetch(elm);
     });
@@ -957,7 +966,6 @@ function jmaXMLFetch(url) {
       }
     });
 }
-init();
 
 var EQInfo = { originTime: null, maxI: null, mag: null, lat: null, lng: null, depth: null, epiCenter: null, comment: null };
 
