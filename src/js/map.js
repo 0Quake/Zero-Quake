@@ -418,6 +418,29 @@ function init() {
       document.getElementById("mapcontainer").classList.remove("GJMapActive");
     }
   });
+  map.on("overlayadd", function (eventLayer) {
+    document.getElementById("mapcontainer").classList.remove("GJMapActive");
+
+    if (eventLayer.name === "地理院 津波浸水想定 ハザードマップ") {
+      legend.addTo(map);
+    } else if (eventLayer.name === "地理院 土砂災害警戒区域（地すべり） ハザードマップ" || "地理院 土砂災害警戒区域（急傾斜地の崩壊） ハザードマップ") {
+      legend2.addTo(map);
+      overlayTmp.push(eventLayer.name);
+    }
+  });
+  map.on("overlayremove", function (eventLayer) {
+    if (eventLayer.name === "地理院 津波浸水想定 ハザードマップ") {
+      map.removeControl(legend);
+    } else if (eventLayer.name === "地理院 土砂災害警戒区域（地すべり） ハザードマップ" || "地理院 土砂災害警戒区域（急傾斜地の崩壊） ハザードマップ") {
+      overlayTmp = overlayTmp.filter(function (elm) {
+        return elm !== eventLayer.name;
+      });
+      if (overlayTmp.length == 0) {
+        map.removeControl(legend2);
+        document.getElementById("mapcontainer").classList.add("GJMapActive");
+      }
+    }
+  });
 
   tsunamiLayer = L.featureGroup();
 
@@ -523,26 +546,6 @@ function init() {
     }
   });
 
-  map.on("overlayadd", function (eventLayer) {
-    if (eventLayer.name === "地理院 津波浸水想定 ハザードマップ") {
-      legend.addTo(map);
-    } else if (eventLayer.name === "地理院 土砂災害警戒区域（地すべり） ハザードマップ" || "地理院 土砂災害警戒区域（急傾斜地の崩壊） ハザードマップ") {
-      legend2.addTo(map);
-      overlayTmp.push(eventLayer.name);
-    }
-  });
-  map.on("overlayremove", function (eventLayer) {
-    if (eventLayer.name === "地理院 津波浸水想定 ハザードマップ") {
-      map.removeControl(legend);
-    } else if (eventLayer.name === "地理院 土砂災害警戒区域（地すべり） ハザードマップ" || "地理院 土砂災害警戒区域（急傾斜地の崩壊） ハザードマップ") {
-      overlayTmp = overlayTmp.filter(function (elm) {
-        return elm !== eventLayer.name;
-      });
-      if (overlayTmp.length == 0) {
-        map.removeControl(legend2);
-      }
-    }
-  });
   map.on("load", function () {
     if (kmoniMapData) kmoniMapUpdate(kmoniMapData);
   });

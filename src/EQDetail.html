@@ -161,7 +161,8 @@
 
 
     .ShindoIcon div {
-      display: none;
+      display: block;
+      opacity: 0;
       width: 16px;
       height: 16px;
       border: solid 1px #000;
@@ -169,11 +170,12 @@
       line-height: 16px;
       text-align: center;
       border-radius: 50%;
+      transition: opacity 200ms;
     }
 
     .zoomLevel_3 .ShindoIcon div,
     .zoomLevel_4 .ShindoIcon div {
-      display: block;
+      opacity: 1;
     }
 
     .zoomLevel_4 .ShindoIcon div {
@@ -216,11 +218,15 @@
       font-size: 30px;
     }
 
-    .zoomLevel_4 * {
+    .GJMap {
+      transition: fill-opacity 500ms;
+    }
+
+    .zoomLevel_4 .GJMap {
       fill-opacity: 0.3;
     }
 
-    .zoomLevel_3 * {
+    .zoomLevel_3 .GJMap {
       fill-opacity: 0.5;
     }
   </style>
