@@ -4,7 +4,7 @@
 
 - 緊急地震速報（予報・警報）※PLUM 法・深発地震含む
 - 津波情報（大津波警報・津波警報・津波注意報）
-- 地震情報（震度速報・震源に関する情報・震度・震源に関する情報・遠地地震に関する情報）
+- 地震情報（震度速報／震源に関する情報／震度・震源に関する情報／遠地地震に関する情報／顕著な地震の震源要素更新のお知らせ）
 
 ## 情報源
 
@@ -18,7 +18,7 @@ Zero Quake が情報を取得している情報源
   - [Yahoo 強震モニタ](https://typhoon.yahoo.co.jp/weather/jp/earthquake/kyoshin/)
 - [P2P 地震情報 API](https://www.p2pquake.net/json_api_v2/)
 
-### 地震情報(震度速報／震源に関する情報／震度・震源に関する情報)
+### 地震情報(震度速報／震源に関する情報／震度・震源に関する情報／顕著な地震の震源要素更新のお知らせ)
 
 - [気象庁](https://www.jma.go.jp/bosai/map.html?contents=earthquake_map)
 - [NHK](https://www.nhk.or.jp/kishou-saigai/earthquake/)
