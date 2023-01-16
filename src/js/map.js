@@ -308,11 +308,13 @@ function init() {
 
       points.forEach(function (elm) {
         if (elm.Name && elm.Point) {
+          var popup_content = "<h3 class='PointName' style='border-bottom:solid 2px transparent'>" + elm.Name + "</h3><table><tr><td>震度</td><td class='PointInt'></td></tr><tr><td>PGA</td><td class='PointPGA'></td></tr></table>";
           var kmoniPointMarker = L.divIcon({
-            html: "<div class='marker-circle' style='background:rgba(128,128,128,0.2)'></div><div class='PointPopup'>読み込み中</div>",
-            className: "kmoniPointMarker",
+            html: "<div class='marker-circle' style='background:rgba(128,128,128,0.2)'></div><div class='PointPopup'>" + popup_content + "</div>",
+            className: "kmoniPointMarker KmoniPoint_" + elm.Code,
             iconSize: 25,
           });
+
           elm.marker = L.marker([elm.Location.Latitude, elm.Location.Longitude], {
             icon: kmoniPointMarker,
             pane: "PointsPane",
@@ -619,13 +621,14 @@ function kmoniMapUpdate(dataTmp) {
   }
 
   //地図上マーカー
-  points.forEach(function (elm, index) {
-    elm2 = dataTmp[index];
+  dataTmp.forEach(function (elm2, index) {
+    elm = points[index];
     if (elm.Name && elm.Point && elm2.data) {
       if (!elm.marker) {
+        var popup_content = "<h3 class='PointName' style='border-bottom:solid 2px transparent'>" + elm.Name + "</h3><table><tr><td>震度</td><td class='PointInt'></td></tr><tr><td>PGA</td><td class='PointPGA'></td></tr></table>";
         var kmoniPointMarker = L.divIcon({
-          html: "<div class='marker-circle' style='background:rgba(128,128,128,0.2)'></div><div class='PointPopup'>読み込み中</div>",
-          className: "kmoniPointMarker",
+          html: "<div class='marker-circle' style='background:rgba(128,128,128,0.2)'></div><div class='PointPopup'>" + popup_content + "</div>",
+          className: "kmoniPointMarker KmoniPoint_" + elm.Code,
           iconSize: 25,
         });
         elm.marker = L.marker([elm.Location.Latitude, elm.Location.Longitude], {
@@ -647,15 +650,14 @@ function kmoniMapUpdate(dataTmp) {
       }
 
       if (changed) {
-        var popup_content = "<h3 style='border-bottom:solid 2px rgb(" + elm2.rgb.join(",") + ")'>" + elm.Name + "</h3><table><tr><td>震度</td><td>" + Math.round(elm2.shindo * 10) / 10 + " </td></tr><tr><td>PGA</td><td>" + Math.round(elm2.pga * 100) / 100 + "</td></tr></table>";
-
-        var kmoniPointMarker = L.divIcon({
-          html: "<div class='marker-circle' style='background:rgb(" + elm2.rgb.join(",") + ")'></div><div class='PointPopup'>" + popup_content + "</div>",
-          className: "kmoniPointMarker",
-          iconSize: 25,
-        });
-
-        elm.marker.setIcon(kmoniPointMarker);
+        var markerElement = document.querySelector(".KmoniPoint_" + elm.Code);
+        if (markerElement) {
+          markerElement.querySelector(".PointName").style.borderBottom = "solid 2px rgb(" + elm2.rgb.join(",") + ")";
+          markerElement.querySelector(".PointName").innerText = elm.Name;
+          markerElement.querySelector(".PointInt").innerText = Math.round(elm2.shindo * 10) / 10;
+          markerElement.querySelector(".PointPGA").innerText = Math.round(elm2.pga * 100) / 100;
+          markerElement.querySelector(".marker-circle").style.background = "rgb(" + elm2.rgb.join(",") + ")";
+        }
       }
     } else {
       map.removeLayer(elm.marker);
