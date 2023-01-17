@@ -624,29 +624,13 @@ function kmoniMapUpdate(dataTmp) {
   }
 
   //地図上マーカー
-  dataTmp.forEach(function (elm2, index) {
-    elm = points[index];
-    if (elm.Name && elm.Point && elm2.data) {
-      if (!elm.marker) {
-        var popup_content = "<h3 class='PointName' style='border-bottom:solid 2px transparent'>" + elm.Name + "</h3><table><tr><td>震度</td><td class='PointInt'></td></tr><tr><td>PGA</td><td class='PointPGA'></td></tr></table>";
-        var kmoniPointMarker = L.divIcon({
-          html: "<div class='marker-circle' style='background:rgba(128,128,128,0.2)'></div><div class='PointPopup'>" + popup_content + "</div>",
-          className: "kmoniPointMarker KmoniPoint_" + elm.Code,
-          iconSize: 25,
-        });
-        elm.marker = L.marker([elm.Location.Latitude, elm.Location.Longitude], {
-          icon: kmoniPointMarker,
-          pane: "PointsPane",
-        })
-          .bindPopup("", { className: "hidePopup" })
-          .addTo(map);
-      }
-
+  dataTmp.forEach(function (elm, index) {
+    if (elm.Name && elm.Point && elm.data) {
       var changed;
 
       if (previous_points.length !== 0) {
         var rgb0 = previous_points[index].rgb;
-        var rgb1 = elm2.rgb;
+        var rgb1 = elm.rgb;
         if (rgb0) changed = JSON.stringify(rgb0) !== JSON.stringify(rgb1);
       } else {
         changed = true;
@@ -655,15 +639,22 @@ function kmoniMapUpdate(dataTmp) {
       if (changed) {
         var markerElement = document.querySelector(".KmoniPoint_" + elm.Code);
         if (markerElement) {
-          markerElement.querySelector(".PointName").style.borderBottom = "solid 2px rgb(" + elm2.rgb.join(",") + ")";
-          markerElement.querySelector(".PointName").innerText = elm.Name;
-          markerElement.querySelector(".PointInt").innerText = Math.round(elm2.shindo * 10) / 10;
-          markerElement.querySelector(".PointPGA").innerText = Math.round(elm2.pga * 100) / 100;
-          markerElement.querySelector(".marker-circle").style.background = "rgb(" + elm2.rgb.join(",") + ")";
+          markerElement.style.display = "block";
+          markerElement.querySelector(".PointName").style.borderBottom = "solid 2px rgb(" + elm.rgb.join(",") + ")";
+          markerElement.querySelector(".PointInt").innerText = Math.round(elm.shindo * 10) / 10;
+          markerElement.querySelector(".PointPGA").innerText = Math.round(elm.pga * 100) / 100;
+          markerElement.querySelector(".marker-circle").style.background = "rgb(" + elm.rgb.join(",") + ")";
         }
       }
     } else {
-      map.removeLayer(elm.marker);
+      var markerElement = document.querySelector(".KmoniPoint_" + elm.Code);
+      if (markerElement) {
+        markerElement.style.display = "none";
+        markerElement.querySelector(".PointName").style.borderBottom = "solid 2px transparnt";
+        markerElement.querySelector(".PointInt").innerText = "";
+        markerElement.querySelector(".PointPGA").innerText = "";
+        markerElement.querySelector(".marker-circle").style.background = "rgba(127.5,127.5,127.5,0.3)";
+      }
     }
 
     if (index == points.length - 1) previous_points = dataTmp;

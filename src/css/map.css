@@ -145,6 +145,10 @@ img.leaflet-control {
   display: block;
 }
 
+.PointPGA::after {
+  content: " gal";
+}
+
 .zoomLevel_1 .marker-circle {
   width: 3px;
   height: 3px;
