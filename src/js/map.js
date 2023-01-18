@@ -649,6 +649,7 @@ function kmoniMapUpdate(dataTmp) {
     } else {
       var markerElement = document.querySelector(".KmoniPoint_" + elm.Code);
       if (markerElement) {
+        if (markerElement.style.display != "none") console.log("なん", elm.Name, elm.Point, elm.data);
         markerElement.style.display = "none";
         markerElement.querySelector(".PointName").style.borderBottom = "solid 2px transparnt";
         markerElement.querySelector(".PointInt").innerText = "";

@@ -238,21 +238,11 @@ img.leaflet-control {
   fill-opacity: 1;
   fill: #333;
 }
-/*
-MajorWarning":
-              Tsunami_MajorWarning = true;
-              gradeJa = "大津波警報";
-              break;
-            case "Warning":
-              Tsunami_Warning = true;
-              gradeJa = "津波警報";
-              break;
-            case "Watch":
-              Tsunami_Watch = true;
-              gradeJa = "津波注意報";
-              break;
-            case "Yoho*/
-/*カラーテーマ*/
+
+.EQDetectCircle {
+  transition: 500ms;
+}
+
 :root {
   --PwaveColor: rgb(48, 148, 255);
   --SwaveColor: rgb(255, 62, 48);

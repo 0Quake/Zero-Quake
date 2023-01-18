@@ -33,6 +33,10 @@ window.electronAPI.messageSend((event, request) => {
     eqInfoDraw(request.data, request.source);
   } else if (request.action == "notification_Update") {
     Show_notification(request.data);
+  } else if (request.action == "EQDetect") {
+    EQDetect(request.data);
+  } else if (request.action == "EQDetectFinish") {
+    EQDetectFinish(request.data);
   }
   return true;
 });
@@ -263,7 +267,6 @@ function EEWAlertUpdate(data) {
 }
 
 function epiCenterUpdate(eid, latitude, longitude) {
-  console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaa");
   if (prepareing) return;
 
   eid = Number(eid);
@@ -383,10 +386,44 @@ function eqInfoDraw(data, source) {
     EQListWrap.appendChild(clone);
   });
 }
-/*
-setInterval(eqInfoUpdate, 10000);
-eqInfoUpdate();
-*/
+
+var EQDetectItem = [];
+function EQDetect(data) {
+  var EQD_Item = EQDetectItem.find(function (elm) {
+    return elm.id == data.id;
+  });
+  if (EQD_Item) {
+    EQD_Item.lat = data.lat;
+    EQD_Item.lng = data.lng;
+    EQD_Item.marker.setRadius(data.Radius * 1000);
+  } else {
+    console.log("検出！", data.lat, data.lng);
+    //var EQmarker = L.marker([data.lat, data.lng]).addTo(map);
+    var EQmarker = L.circle([data.lat, data.lng], {
+      radius: data.Radius * 1000,
+      color: "blue",
+      fillColor: "#399ade",
+      fillOpacity: 0.5,
+      className: "EQDetectCircle",
+    }).addTo(map);
+
+    EQDetectItem.push({
+      id: data.id,
+      lat: data.lat,
+      lng: data.lng,
+      marker: EQmarker,
+    });
+  }
+}
+
+function EQDetectFinish(id) {
+  EQDetectItem.forEach(function (elmA, index) {
+    if (elmA.id == id) {
+      map.removeLayer(elmA.marker);
+      EQDetectItem.splice(index, 1);
+    }
+  });
+}
 
 //
 //

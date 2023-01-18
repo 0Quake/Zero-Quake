@@ -486,6 +486,7 @@ td {
   vertical-align: middle;
   text-align: right;
   margin-left: auto;
+  font-family: ui-monospace;
 }
 .EQInfo {
   display: none;

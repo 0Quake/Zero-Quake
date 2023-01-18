@@ -47,17 +47,7 @@ if (!gotTheLock) {
 var kmoniPointsDataTmp;
 ipcMain.on("message", (_event, response) => {
   if (response.action == "kmoniReturn") {
-    kmoniActive = true;
-    kmoniPointsDataTmp = {
-      action: "kmoniUpdate",
-      Updatetime: new Date(response.date),
-      LocalTime: new Date(),
-
-      data: response.data,
-    };
-    if (mainWindow) {
-      mainWindow.webContents.send("message2", kmoniPointsDataTmp);
-    }
+    kmoniControl(response.data, response.date);
   } else if (response.action == "tsunamiReqest") {
     if (tsunamiData) {
       mainWindow.webContents.send("message2", {
@@ -188,6 +178,8 @@ function createWindow() {
   //mainWindow.setMenuBarVisibility(false);
 
   mainWindow.webContents.on("did-finish-load", () => {
+    replay("2023/01/18 21:41:00");
+    //replay("2023/01/18 18:54:45");
     //replay("2023/01/15 20:37:45");
 
     /*
@@ -382,6 +374,11 @@ app.whenReady().then(() => {
     await start();
   })();
 
+  /*
+  setTimeout(function () {
+    start();
+  }, 10000);
+*/
   // アプリケーションがアクティブになった時の処理(Macだと、Dockがクリックされた時）
   app.on("activate", () => {
     // メインウィンドウが消えている場合は再度メインウィンドウを作成する
@@ -424,26 +421,6 @@ electron.app.on("ready", () => {
   });
 });
 
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
 var EEW_Data = []; //地震速報リスト
 var EEW_nowList = []; //現在発報中リスト
 var EEW_history = []; //起動中に発生したリスト
@@ -457,6 +434,127 @@ var Replay = 0;
 var EEWNow = false;
 
 var errorCount = 0;
+
+var kmoniDataHistory = [];
+var EQDetect_List = [];
+/*{
+  id:0,
+  lat:0,
+  lng:0,
+  Codes:[]
+}*/
+var EQDetectID = 0;
+
+var historyCount = 5; //比較する件数
+var threshold01 = 5; //検出とする観測点数
+var threshold02 = 0.02; //1次フラグ条件のPGA増加量[gal]
+var threshold03 = 0.5; //2次フラグ条件のPGA増加量[gal]
+var threshold04 = 0.5; //フラグ条件の震度
+var MargeRange = 50; //地震の同定範囲[km]
+var time00 = 300000; //最初の検出~解除
+var time01 = 10000; //最後の検出~解除
+function kmoniControl(data, date) {
+  kmoniActive = true;
+  kmoniPointsDataTmp = {
+    action: "kmoniUpdate",
+    Updatetime: new Date(date),
+    LocalTime: new Date(),
+    data: data,
+  };
+  if (mainWindow) {
+    mainWindow.webContents.send("message2", kmoniPointsDataTmp);
+  }
+
+  data.forEach(function (elm, index) {
+    elm.pga;
+  });
+
+  kmoniDataHistory.push(data);
+
+  if (kmoniDataHistory.length > historyCount) kmoniDataHistory = kmoniDataHistory.slice(kmoniDataHistory.length - historyCount);
+
+  data.forEach(function (elm, index) {
+    var dataItemHistory = kmoniDataHistory.map(function (elm2) {
+      return elm2[index].pga;
+    });
+    var pgaMax = Math.max.apply(null, dataItemHistory);
+    var pgaMin = Math.min.apply(null, dataItemHistory);
+    var detect = pgaMax - pgaMin > threshold02 || elm.shindo > threshold04;
+
+    var DetectedEQ = EQDetect_List.find(function (elm2) {
+      return elm2.Codes.find(function (elm3) {
+        return elm3 && geosailing(elm.Location.Latitude, elm.Location.Longitude, elm3.Location.Latitude, elm3.Location.Longitude) <= MargeRange;
+      });
+    });
+
+    if (detect) {
+      if (DetectedEQ) {
+        if (
+          !DetectedEQ.Codes.find(function (elm2) {
+            return elm2 && elm2.Code == elm.Code;
+          })
+        ) {
+          //新しく観測された観測点
+          DetectedEQ.Codes.push(elm);
+          var radiusTmp = geosailing(elm.Location.Latitude, elm.Location.Longitude, DetectedEQ.lat, DetectedEQ.lng);
+          if (DetectedEQ.Radius < radiusTmp) DetectedEQ.Radius = radiusTmp;
+        }
+
+        DetectedEQ.last_Detect = new Date();
+
+        if (DetectedEQ.Codes.length >= threshold01) {
+          //初報
+          if (mainWindow) {
+            mainWindow.webContents.send("message2", {
+              action: "EQDetect",
+              data: DetectedEQ,
+            });
+          }
+        }
+        if ((DetectedEQ.Codes.length = threshold01)) {
+          console.log("Detect!!!Detect!!!Detect!!!Detect!!!Detect!!!");
+        }
+      } else {
+        var detect2 = pgaMax - pgaMin > threshold03 || elm.shindo > threshold04;
+        if (detect2) {
+          EQDetect_List.push({ id: EQDetectID, lat: elm.Location.Latitude, lng: elm.Location.Longitude, Codes: [elm], Radius: 0, last_Detect: new Date(), origin_Time: new Date() });
+          EQDetectID++;
+        }
+      }
+      /*
+      var detectedPoints = kmoniDataHistory[9].filter(function (elm2) {
+        return elm2.detect && geosailing(elm.Location.Latitude, elm.Location.Longitude, elm2.Location.Latitude, elm2.Location.Longitude) <= 50;
+      });*/
+    } else {
+      if (DetectedEQ) {
+        if (
+          !DetectedEQ.Codes.find(function (elm2) {
+            return elm2 && elm2.Code == elm.Code;
+          })
+        )
+          DetectedEQ.Codes = DetectedEQ.Codes.filter(function (elm2) {
+            return elm2.Code !== elm.Code;
+          });
+      }
+    }
+
+    elm.detect = detect;
+  });
+}
+
+setInterval(function () {
+  EQDetect_List.forEach(function (elm, index) {
+    if (new Date() - elm.origin_Time > time00 || new Date() - elm.last_Detect > time01) {
+      EQDetect_List.splice(index, 1);
+      if (mainWindow) {
+        mainWindow.webContents.send("message2", {
+          action: "EQDetectFinish",
+          data: elm.id,
+        });
+      }
+    }
+  });
+}, 1000);
 
 function kmoniRequest() {
   if (net.online) {
@@ -490,7 +588,7 @@ function kmoniRequest() {
 
   if (net.online) {
     var ReqTime = new Date() - yoyuK;
-    Request({ method: "GET", url: "http://www.kmoni.bosai.go.jp/data/map_img/RealTimeImg/acmap_s/" + dateEncode(2, ReqTime /*- Replay*/) + "/" + dateEncode(1, ReqTime /*- Replay*/) + ".acmap_s.gif", encoding: null }, (error, response, body) => {
+    Request({ method: "GET", url: "http://www.kmoni.bosai.go.jp/data/map_img/RealTimeImg/acmap_s/" + dateEncode(2, ReqTime - Replay) + "/" + dateEncode(1, ReqTime - Replay) + ".acmap_s.gif", encoding: null }, (error, response, body) => {
       // エラーチェック
       if (error !== null) {
         NetworkError(error, "強震モニタ");

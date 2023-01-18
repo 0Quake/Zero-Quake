@@ -30,13 +30,7 @@
                 image.onload = function () {
                     context.clearRect(0, 0, canvas.width, canvas.height);
                     context.drawImage(image, 0, 0);
-                    kmoniRedraw()
-                    window.electronAPI.messageReturn({
-                        action: "kmoniReturn",
-                        data: points,
-                        date: request.date
-                    })
-
+                    kmoniRedraw(request.date)
                 };
             } else if (request.action == "speak") {
                 speechSynthesis.cancel()
@@ -52,8 +46,8 @@
 
 
         })
-        function kmoniRedraw() {
-            points.forEach(function (elm) {
+        function kmoniRedraw(dateTmp) {
+            points.forEach(function (elm, index) {
                 if (elm.Name && elm.Point) {
                     var rgb = point2RGB(elm.Point.X, elm.Point.Y);
                     if (rgb[0] + rgb[1] + rgb[2] !== 0) {
@@ -87,6 +81,13 @@
                     elm.rgb = false
                     elm.shindo = null
                     elm.pga = null
+                }
+                if (index == points.length - 1) {
+                    window.electronAPI.messageReturn({
+                        action: "kmoniReturn",
+                        data: points,
+                        date: dateTmp
+                    })
                 }
             });
         }
