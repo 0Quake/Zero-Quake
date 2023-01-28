@@ -211,7 +211,6 @@ function init() {
     maxZoom: 21,
     attribution: '<a href="https://www.data.jma.go.jp/svd/eqdb/data/shindo/" target="_blank">© 気象庁</a>',
   });
-
   var tile2 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png", {
     minZoom: 0,
     minNativeZoom: 2,
@@ -302,6 +301,57 @@ function init() {
     maxZoom: 21,
     attribution: '<a href="https://www.jma.go.jp/bosai/map.html#5/28.835/168.548/&elem=int&contents=earthquake_map" target="_blank">©JMA</a>',
   });
+  var overlay7 = L.tileLayer("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVQI12NgYAAAAAMAASDVlMcAAAAASUVORK5CYII=", {
+    minNativeZoom: 10,
+    maxNativeZoom: 10,
+    minZoom: 10,
+    maxZoom: 21,
+    attribution: '<a href="https://disaportal.gsi.go.jp/hazardmap/copyright/opendata.html#jisuberikeikaikuiki" target="_blank">©国土地理院</a>',
+  })
+    .on("tileloadstart", function (event) {
+      var tilePath = event.coords;
+      var tileX = tilePath.x;
+      var tileY = tilePath.y;
+
+      var url = "https://cyberjapandata.gsi.go.jp/xyz/skhb04/10/" + tileX + "/" + tileY + ".geojson";
+      fetch(url)
+        .then((a) => (a.ok ? a.json() : null))
+        .then((geojson) => {
+          if (!geojson || !this._map) return;
+          event.tile.geojson = L.geoJSON(geojson, {
+            pointToLayer: function (feature, cordinate) {
+              return L.circleMarker(cordinate, geojsonMarkerOptions);
+            },
+          })
+            .addTo(this._map)
+            .bindPopup("指定緊急避難場所（地震）");
+        })
+        .catch(function (err) {
+          console.log();
+        });
+      var url = "https://cyberjapandata.gsi.go.jp/xyz/skhb05/10/" + tileX + "/" + tileY + ".geojson";
+
+      fetch(url)
+        .then((a) => (a.ok ? a.json() : null))
+        .then((geojson) => {
+          if (!geojson || !this._map) return;
+          event.tile.geojson2 = L.geoJSON(geojson, {
+            pointToLayer: function (feature, cordinate) {
+              return L.circleMarker(cordinate, geojsonMarkerOptions2);
+            },
+          })
+            .addTo(this._map)
+            .bindPopup("指定緊急避難場所（津波）");
+        })
+        .catch(function (err) {
+          console.log();
+        });
+      //     this._map.removeLayer(event.tile.geojson);
+    })
+    .on("tileunload", function (event) {
+      if (event.tile.geojson && this._map) this._map.removeLayer(event.tile.geojson);
+      if (event.tile.geojson2 && this._map) this._map.removeLayer(event.tile.geojson2);
+    });
 
   fetch("./Resource/Knet_Points.json")
     .then(function (res) {
@@ -441,6 +491,7 @@ function init() {
             "地理院 土砂災害警戒区域（急傾斜地の崩壊） ハザードマップ": overlay4,
             "地理院 土砂災害警戒区域（地すべり） ハザードマップ": overlay5,
             "気象庁　境界線": overlay6,
+            避難所: overlay7,
           },
           {
             position: "topleft",
@@ -448,6 +499,23 @@ function init() {
         )
         .addTo(map);
     });
+  var vectorTile = L.geoJSON(null, {
+    pointToLayer: function (feature, latlng) {
+      if (feature.properties.icon !== "") {
+        icn = L.icon({
+          iconUrl: feature.properties.icon,
+          //shadowUrl: 'leaf-shadow.png',
+          iconSize: [20, 20],
+        });
+      }
+      return L.marker(latlng, { icon: icn });
+    },
+  }).addTo(map);
+
+  // ズームが変更されたら GeoJSON レイヤーをクリアします。
+  map.on("zoomend", function () {
+    vectorTile.clearLayers();
+  });
   map.on("baselayerchange", function (layer) {
     if (layer.name == "オフライン地図") {
       document.getElementById("mapcontainer").classList.add("GJMapActive");
@@ -460,7 +528,7 @@ function init() {
 
     if (eventLayer.name === "地理院 津波浸水想定 ハザードマップ") {
       legend.addTo(map);
-    } else if (eventLayer.name === "地理院 土砂災害警戒区域（地すべり） ハザードマップ" || "地理院 土砂災害警戒区域（急傾斜地の崩壊） ハザードマップ") {
+    } else if (eventLayer.name === "地理院 土砂災害警戒区域（地すべり） ハザードマップ" || eventLayer.name === "地理院 土砂災害警戒区域（急傾斜地の崩壊） ハザードマップ") {
       legend2.addTo(map);
       overlayTmp.push(eventLayer.name);
     }
@@ -468,14 +536,14 @@ function init() {
   map.on("overlayremove", function (eventLayer) {
     if (eventLayer.name === "地理院 津波浸水想定 ハザードマップ") {
       map.removeControl(legend);
-    } else if (eventLayer.name === "地理院 土砂災害警戒区域（地すべり） ハザードマップ" || "地理院 土砂災害警戒区域（急傾斜地の崩壊） ハザードマップ") {
+    } else if (eventLayer.name === "地理院 土砂災害警戒区域（地すべり） ハザードマップ" || eventLayer.name === "地理院 土砂災害警戒区域（急傾斜地の崩壊） ハザードマップ") {
       overlayTmp = overlayTmp.filter(function (elm) {
         return elm !== eventLayer.name;
       });
-      if (overlayTmp.length == 0) {
-        map.removeControl(legend2);
-        document.getElementById("mapcontainer").classList.add("GJMapActive");
-      }
+    }
+    if (overlayTmp.length == 0) {
+      map.removeControl(legend2);
+      document.getElementById("mapcontainer").classList.add("GJMapActive");
     }
   });
 
