@@ -355,12 +355,12 @@ function createWindow() {
   mainWindow.on("closed", () => {
     mainWindow = null;
   });
-  kmonicreateWindow();
 }
 
 function kmonicreateWindow() {
   if (kmoniWorker) {
     kmoniWorker.close();
+    kmoniWorker = null;
   }
   kmoniWorker = new BrowserWindow({
     webPreferences: {
@@ -374,9 +374,8 @@ function kmonicreateWindow() {
 }
 
 app.whenReady().then(() => {
-  createWindow();
   kmonicreateWindow();
-
+  createWindow();
   points = JSON.parse(fs.readFileSync(path.join(__dirname, "Resource/Knet_Points.json"), "utf8"));
 
   (async function () {
@@ -586,27 +585,13 @@ function SnetControl(data, date) {
   }
 }
 
-setInterval(function () {
-  EQDetect_List.forEach(function (elm, index) {
-    if (new Date() - elm.origin_Time > time00 || new Date() - elm.last_Detect > time01) {
-      EQDetect_List.splice(index, 1);
-      if (mainWindow) {
-        mainWindow.webContents.send("message2", {
-          action: "EQDetectFinish",
-          data: elm.id,
-        });
-      }
-    }
-  });
-}, 1000);
-
 function kmoniRequest() {
   if (net.online) {
     var request = net.request("http://www.kmoni.bosai.go.jp/webservice/hypo/eew/" + dateEncode(1, new Date() - yoyuK - Replay) + ".json");
     request.on("response", (res) => {
       var dataTmp = "";
       if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
-        yoyuY += 100;
+        yoyuK += 100;
         errorCount++;
         if (errorCount > 3) {
           kmoniServerSelect();
@@ -628,9 +613,7 @@ function kmoniRequest() {
     });
 
     request.end();
-  }
 
-  if (net.online) {
     var ReqTime = new Date() - yoyuK;
     Request({ method: "GET", url: "http://www.kmoni.bosai.go.jp/data/map_img/RealTimeImg/acmap_s/" + dateEncode(2, ReqTime - Replay) + "/" + dateEncode(1, ReqTime - Replay) + ".acmap_s.gif", encoding: null }, (error, response, body) => {
       // エラーチェック
@@ -647,6 +630,7 @@ function kmoniRequest() {
       }
     });
   }
+  kmoniInterval = setTimeout(kmoniRequest, 1000);
 }
 function lmoniRequest() {
   if (net.online) {
@@ -654,7 +638,7 @@ function lmoniRequest() {
     request.on("response", (res) => {
       var dataTmp = "";
       if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
-        yoyuY += 100;
+        yoyuL += 100;
         errorCount++;
         if (errorCount > 3) {
           kmoniServerSelect();
@@ -677,6 +661,7 @@ function lmoniRequest() {
 
     request.end();
   }
+  lmoniInterval = setTimeout(lmoniRequest, 1000);
 }
 function ymoniRequest() {
   if (net.online) {
@@ -738,6 +723,7 @@ function ymoniRequest() {
       request.end();
     }
   }
+  ymoniInterval = setTimeout(ymoniRequest, 1000);
 }
 function SnetRequest() {
   if (net.online) {
@@ -777,6 +763,9 @@ function SnetRequest() {
 
     request.end();
   }
+  setTimeout(function () {
+    SnetRequest();
+  }, 60000);
 }
 function P2P_WS() {
   var WebSocketClient = require("websocket").client;
@@ -851,48 +840,64 @@ function P2P_WS() {
   client.connect("wss://api.p2pquake.net/v2/ws");
 }
 
+var ymoniInterval;
+var kmoniInterval;
+var lmoniInterval;
 function start() {
   //↓接続処理
-  ymoniRequest();
-  kmoniRequest();
-  lmoniRequest();
-
   P2P_WS();
+  SNXWatch();
   //nakn_WS();
-  yoyuSetK(function () {
-    setInterval(kmoniRequest, 1000);
-  });
-  yoyuSetL(function () {
-    setInterval(lmoniRequest, 1000);
-  });
-  setInterval(ymoniRequest, 1000);
-  //↑接続処理
 
   SnetRequest();
-  setInterval(function () {
-    SnetRequest();
-  }, 60000);
 
-  setInterval(function () {
-    if (!kmoniActive) {
-      kmonicreateWindow();
-    }
-  }, 10000);
-
-  //EEW解除
-  setInterval(function () {
-    EEW_nowList.forEach(function (elm) {
-      if (new Date() - Replay - new Date(dateEncode(3, Number(elm.origin_time), 1)) > 300000) {
-        EEWClear(null, elm.report_id, null, true);
-      }
-    });
-  }, 1000);
+  kmoniRequest();
+  lmoniRequest();
+  ymoniRequest();
+  //kmoniInterval = setInterval(kmoniRequest, 1000);
+  //lmoniInterval = setInterval(lmoniRequest, 1000);
+  yoyuSetK(function () {
+    clearTimeout(kmoniInterval);
+    kmoniRequest();
+  });
+  yoyuSetL(function () {
+    clearTimeout(lmoniInterval);
+    lmoniRequest();
+  });
+  //↑接続処理
 
   //地震情報
-  setInterval(eqInfoUpdate, 10000);
   eqInfoUpdate();
 
-  SNXWatch();
+  RegularExecution();
+}
+
+function RegularExecution() {
+  //EEW解除
+  EEW_nowList.forEach(function (elm) {
+    if (new Date() - Replay - new Date(dateEncode(3, Number(elm.origin_time), 1)) > 300000) {
+      EEWClear(null, elm.report_id, null, true);
+    }
+  });
+
+  //地震検知解除
+  EQDetect_List.forEach(function (elm, index) {
+    if (new Date() - elm.origin_Time > time00 || new Date() - elm.last_Detect > time01) {
+      EQDetect_List.splice(index, 1);
+      if (mainWindow) {
+        mainWindow.webContents.send("message2", {
+          action: "EQDetectFinish",
+          data: elm.id,
+        });
+      }
+    }
+  });
+
+  //kmoniWorker監視
+  if (!kmoniActive) {
+    kmonicreateWindow();
+  }
+  setTimeout(RegularExecution, 1000);
 }
 
 function SNXWatch() {
@@ -1633,6 +1638,8 @@ function eqInfoUpdate() {
   });
 
   request.end();
+
+  setTimeout(eqInfoUpdate, 10000);
 }
 
 var narikakun_URLs = [];
