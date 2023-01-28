@@ -475,11 +475,6 @@ function kmoniControl(data, date) {
     var pgaMin = Math.min.apply(null, dataItemHistory);
     var detect = (pgaMax - pgaMin >= threshold02 || elm.pga > threshold03 || elm.shindo > threshold04 || elm.detectCount > 2) && elm.pga > 0.01;
 
-    var DetectedEQ = EQDetect_List.find(function (elm2) {
-      return elm2.Codes.find(function (elm3) {
-        return elm3 && geosailing(elm.Location.Latitude, elm.Location.Longitude, elm3.Location.Latitude, elm3.Location.Longitude) <= MargeRange;
-      });
-    });
     elm.detect = detect;
     elm.detect2 = pgaMax - pgaMin >= threshold03 || elm.shindo >= threshold04;
 
@@ -487,32 +482,41 @@ function kmoniControl(data, date) {
       if (!elm.detectCount) elm.detectCount = 0;
       elm.detectCount++;
 
-      return;
       var already = EQDetect_List.find(function (elm2) {
         return elm2.Codes.find(function (elm3) {
           return elm3.Name == elm.Name;
         });
       });
+
       var EQD_ItemTmp = EQDetect_List.find(function (elm2) {
-        if (!already) {
-          var CodesTmp = elm2.Codes.find(function (elm3) {
-            return geosailing(elm.Location.Latitude, elm.Location.Longitude, elm3.Location.Latitude, elm3.Location.Longitude) <= MargeRange;
-          });
-          if (CodesTmp) {
-            var already2 = elm2.Codes.find(function (elm3) {
-              return elm3.Name == elm.Name;
-            });
-
-            if (!already2) {
-              elm2.Codes.push(elm);
-              if (elm2.detect2) elm2.detect2Count++;
-              var radiusTmp = geosailing(elm.Location.Latitude, elm.Location.Longitude, elm2.lat, elm2.lng);
-              if (elm2.Radius < radiusTmp) elm2.Radius = radiusTmp;
-            }
-
-            return !already2;
+        if (geosailing(elm.Location.Latitude, elm.Location.Longitude, elm2.lat, elm2.lng) - elm2.Radius <= MargeRange) {
+          if (!already) {
+            elm2.Codes.push(elm);
+            if (elm2.detect2) elm2.detect2Count++;
+            var radiusTmp = geosailing(elm.Location.Latitude, elm.Location.Longitude, elm2.lat, elm2.lng);
+            if (elm2.Radius < radiusTmp) elm2.Radius = radiusTmp;
           }
+          return true;
         }
+
+        /*
+        var CodesTmp = elm2.Codes.find(function (elm3) {
+          return geosailing(elm.Location.Latitude, elm.Location.Longitude, elm3.Location.Latitude, elm3.Location.Longitude) <= MargeRange;
+        });
+        if (CodesTmp) {
+          var already2 = elm2.Codes.find(function (elm3) {
+            return elm3.Name == elm.Name;
+          });
+
+          if (!already2) {
+            elm2.Codes.push(elm);
+            if (elm2.detect2) elm2.detect2Count++;
+            var radiusTmp = geosailing(elm.Location.Latitude, elm.Location.Longitude, elm2.lat, elm2.lng);
+            if (elm2.Radius < radiusTmp) elm2.Radius = radiusTmp;
+          }
+
+          return !already2;
+        }*/
       });
 
       if (EQD_ItemTmp) {
@@ -530,18 +534,28 @@ function kmoniControl(data, date) {
             });
           }
         }
-      } else {
-        if (elm.detect2) {
-          EQDetect_List.push({ id: EQDetectID, lat: elm.Location.Latitude, lng: elm.Location.Longitude, Codes: [elm], Radius: 0, detectCount: 1, detect2Count: 1, last_Detect: new Date(), origin_Time: new Date() });
-          EQDetectID++;
-        }
+      } else if (elm.detect2) {
+        EQDetect_List.push({ id: EQDetectID, lat: elm.Location.Latitude, lng: elm.Location.Longitude, Codes: [elm], Radius: 0, detectCount: 1, detect2Count: 1, last_Detect: new Date(), origin_Time: new Date() });
+        EQDetectID++;
       }
     } else {
       elm.detectCount = 0;
+
+      /*
+    var DetectedEQ = EQDetect_List.find(function (elm2) {
+      return elm2.Codes.find(function (elm3) {
+        return geosailing(elm.Location.Latitude, elm.Location.Longitude, elm3.Location.Latitude, elm3.Location.Longitude) <= MargeRange;
+      });
+    });*/
+
+      var DetectedEQ = EQDetect_List.find(function (elm2) {
+        return geosailing(elm.Location.Latitude, elm.Location.Longitude, elm2.lat, elm2.lng) - elm2.Radius <= MargeRange;
+      });
+
       if (DetectedEQ) {
         if (
           !DetectedEQ.Codes.find(function (elm2) {
-            return elm2 && elm2.Code == elm.Code;
+            return elm2.Code == elm.Code;
           })
         ) {
           DetectedEQ.Codes = DetectedEQ.Codes.filter(function (elm2) {
