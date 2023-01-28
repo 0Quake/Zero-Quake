@@ -28,7 +28,7 @@
         var canvas = document.getElementById("kmoniCanvas");
         var context = canvas.getContext("2d");
         var Scanvas = document.getElementById("SnetCanvas");
-        var Scontext = canvas.getContext("2d");
+        var Scontext = Scanvas.getContext("2d");
 
         window.electronAPI.messageSend((event, request) => {
 
@@ -67,7 +67,7 @@
         function kmoniRedraw(dateTmp) {
             points.forEach(function (elm, index) {
                 if (elm.Name && elm.Point) {
-                    var rgb = point2RGB(elm.Point.X, elm.Point.Y);
+                    var rgb = point2RGB(elm.Point.X, elm.Point.Y, "knet");
                     if (rgb[0] + rgb[1] + rgb[2] !== 0) {
                         var hsv = RGB2HSV(rgb[0], rgb[1], rgb[2]);
                         var p = HSVtoP(hsv[0], hsv[1], hsv[2]);
@@ -114,7 +114,7 @@
         function SnetRedraw(dateTmp) {
             Spoints.forEach(function (elm, index) {
                 if (elm.Code && elm.Point) {
-                    var rgb = point2RGB(elm.Point.X, elm.Point.Y);
+                    var rgb = point2RGB(elm.Point.X, elm.Point.Y, "snet");
                     if (rgb[0] + rgb[1] + rgb[2] !== 0) {
                         var hsv = RGB2HSV(rgb[0], rgb[1], rgb[2]);
                         var p = HSVtoP(hsv[0], hsv[1], hsv[2]);
@@ -149,9 +149,12 @@
 
 
 
-        function point2RGB(x, y) {
+        function point2RGB(x, y, type) {
+            var ctxTmp;
+            if (type == "knet") { ctxTmp = context }
+            else if (type == "snet") { ctxTmp = Scontext }
             // 指定座標から幅1,高さ1のImageDataオブジェクトの取得。
-            var imagedata = context.getImageData(x, y, 1, 1);
+            var imagedata = ctxTmp.getImageData(x, y, 1, 1);
 
             // RGBAの取得。
             var r = imagedata.data[0];
