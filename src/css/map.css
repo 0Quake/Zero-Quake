@@ -35,8 +35,8 @@ img.leaflet-control {
   background: #fff;
   border-radius: 5px;
 }
-.PWaveAnm,
-.SWaveAnm {
+.transitionActive .PWave,
+.transitionActive .SWave {
   transition: linear 1s;
 }
 
@@ -72,6 +72,7 @@ img.leaflet-control {
 }
 .PointPopup h3,
 .leaflet-popup-content h3 {
+  float: none;
   position: absolute;
   top: 0;
   left: 0;
@@ -83,6 +84,13 @@ img.leaflet-control {
   font-size: 16px;
   background: #444;
   text-align: left;
+}
+.PointPopup h3 span {
+  float: right;
+  font-size: 11px;
+  font-weight: normal;
+  font-family: "BIZ UDPGothic", sans-serif;
+  color: #ccc;
 }
 
 .leaflet-popup-content table,
@@ -111,6 +119,13 @@ img.leaflet-control {
   height: 10px;
   background: #000;
   border-radius: 50%;
+  outline-offset: 2px;
+  z-index: 220;
+}
+.zoomLevel_3 .detectingMarker,
+.zoomLevel_4 .detectingMarker {
+  outline: solid 2px #fff;
+  z-index: 221;
 }
 .hidePopup {
   display: none;
@@ -143,6 +158,11 @@ img.leaflet-control {
 
 .popupOpen .PointPopup {
   display: block;
+}
+
+.detecting {
+  display: none;
+  margin: 3px 0;
 }
 
 .PointPGA::after {

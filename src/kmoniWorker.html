@@ -9,17 +9,26 @@
 
 <body>
     <canvas id="kmoniCanvas" width="352" height="400"></canvas>
+    <canvas id="SnetCanvas" width="400" height="400"></canvas>
 
     <script>
         var points;
+        var Spoints;
         fetch("./Resource/Knet_Points.json").then(function (res) {
             return res.json()
         }).then(function (json) {
             points = json;
         })
+        fetch("./Resource/Snet_Points.json").then(function (res) {
+            return res.json()
+        }).then(function (json) {
+            Spoints = json;
+        })
 
         var canvas = document.getElementById("kmoniCanvas");
         var context = canvas.getContext("2d");
+        var Scanvas = document.getElementById("SnetCanvas");
+        var Scontext = canvas.getContext("2d");
 
         window.electronAPI.messageSend((event, request) => {
 
@@ -31,6 +40,15 @@
                     context.clearRect(0, 0, canvas.width, canvas.height);
                     context.drawImage(image, 0, 0);
                     kmoniRedraw(request.date)
+                };
+            } else if (request.action == "SnetImgUpdate") {
+                var image = new Image();
+                image.src = request.data;
+
+                image.onload = function () {
+                    Scontext.clearRect(0, 0, Scanvas.width, Scanvas.height);
+                    Scontext.drawImage(image, 0, 0);
+                    SnetRedraw(request.date)
                 };
             } else if (request.action == "speak") {
                 speechSynthesis.cancel()
@@ -91,6 +109,45 @@
                 }
             });
         }
+
+
+        function SnetRedraw(dateTmp) {
+            Spoints.forEach(function (elm, index) {
+                if (elm.Code && elm.Point) {
+                    var rgb = point2RGB(elm.Point.X, elm.Point.Y);
+                    if (rgb[0] + rgb[1] + rgb[2] !== 0) {
+                        var hsv = RGB2HSV(rgb[0], rgb[1], rgb[2]);
+                        var p = HSVtoP(hsv[0], hsv[1], hsv[2]);
+                        var shindo = (10 * p - 3);
+                        var pga = 10 ** (5 * p - 2);
+
+                        elm.data = true
+                        elm.rgb = rgb
+                        elm.shindo = shindo
+                        elm.pga = pga
+                    } else {
+                        elm.data = false
+                        elm.rgb = null
+                        elm.shindo = null
+                        elm.pga = null
+                    }
+                } else {
+                    elm.data = false
+                    elm.rgb = null
+                    elm.shindo = null
+                    elm.pga = null
+                }
+                if (index == Spoints.length - 1) {
+                    window.electronAPI.messageReturn({
+                        action: "SnetReturn",
+                        data: Spoints,
+                        date: dateTmp
+                    })
+                }
+            });
+        }
+
+
 
         function point2RGB(x, y) {
             // 指定座標から幅1,高さ1のImageDataオブジェクトの取得。

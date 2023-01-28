@@ -509,7 +509,7 @@ function jma_Fetch(url) {
           var newDiv = document.createElement("div");
           newDiv.innerHTML = "<div></div>";
           newDiv.classList.add("WrapLevel1", "close");
-          document.getElementById("Shindo").apfkependChild(newDiv);
+          document.getElementById("Shindo").appendChild(newDiv);
 
           if (elm.Area) {
             elm.Area.forEach(function (elm2) {

@@ -1,6 +1,8 @@
 var map;
 var previous_points = [];
+var previous_Spoints = [];
 var points = [];
+var Spoints = [];
 var Tsunami_MajorWarning, Tsunami_Warning, Tsunami_Watch, Tsunami_Yoho;
 var tsunamiLayer;
 var gjmap; //オフライン地図
@@ -17,6 +19,8 @@ var psWaveList = [];
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "kmoniUpdate") {
     kmoniMapUpdate(request.data);
+  } else if (request.action == "SnetUpdate") {
+    SnetMapUpdate(request.data);
   } else if (request.action == "longWaveUpdate") {
     document.getElementById("LWaveWrap").style.display = "block";
     document.getElementById("maxKaikyu").innerText = request.data.avrrank;
@@ -26,7 +30,7 @@ window.electronAPI.messageSend((event, request) => {
         return elm2.name == elm;
       });
       if (section) {
-        section.item.setStyle({ fill: true, fillColor: "#FFF" });
+        //section.item.setStyle({ fill: true, fillColor: "#FFF" });
       }
     });
   } else if (request.action == "longWaveClear") {
@@ -308,7 +312,7 @@ function init() {
 
       points.forEach(function (elm) {
         if (elm.Name && elm.Point) {
-          var popup_content = "<h3 class='PointName' style='border-bottom:solid 2px transparent'>" + elm.Name + "</h3><table><tr><td>震度</td><td class='PointInt'></td></tr><tr><td>PGA</td><td class='PointPGA'></td></tr></table>";
+          var popup_content = "<h3 class='PointName' style='border-bottom:solid 2px transparent'>" + elm.Name + "<span>" + elm.Code + "</span></h3><h4 class='detecting'>地震検知中</h4><table><tr><td>震度</td><td class='PointInt'></td></tr><tr><td>PGA</td><td class='PointPGA'></td></tr></table>";
           var kmoniPointMarker = L.divIcon({
             html: "<div class='marker-circle' style='background:rgba(128,128,128,0.2)'></div><div class='PointPopup'>" + popup_content + "</div>",
             className: "kmoniPointMarker KmoniPoint_" + elm.Code,
@@ -330,6 +334,39 @@ function init() {
         }
       });
       if (kmoniMapData) kmoniMapUpdate(kmoniMapData);
+    });
+
+  fetch("./Resource/Snet_Points.json")
+    .then(function (res) {
+      return res.json();
+    })
+    .then(function (json) {
+      Spoints = json;
+
+      Spoints.forEach(function (elm) {
+        if (elm.Code && elm.Point) {
+          var popup_content = "<h3 class='PointName' style='border-bottom:solid 2px transparent'>S-net " + elm.Code + "</h3><h4 class='detecting'>地震検知中</h4><table><tr><td>震度</td><td class='PointInt'></td></tr><tr><td>PGA</td><td class='PointPGA'></td></tr></table>";
+          var kmoniPointMarker = L.divIcon({
+            html: "<div class='marker-circle' style='background:rgba(128,128,128,0.2)'></div><div class='PointPopup'>" + popup_content + "</div>",
+            className: "SnetPointMarker SnetPoint_" + elm.Code.replace(".", "-"),
+            iconSize: 25,
+          });
+
+          elm.marker = L.marker([elm.Location.Latitude, elm.Location.Longitude], {
+            icon: kmoniPointMarker,
+            pane: "PointsPane",
+          })
+            .bindPopup("", { className: "hidePopup" })
+            .on("popupopen", function (e) {
+              L.DomUtil.addClass(e.target._icon, "popupOpen");
+            })
+            .on("popupclose", function (e) {
+              L.DomUtil.removeClass(e.target._icon, "popupOpen");
+            })
+            .addTo(map);
+        }
+      });
+      //     if (kmoniMapData) kmoniMapUpdate(kmoniMapData);
     });
 
   fetch("./Resource/World.json")
@@ -511,18 +548,10 @@ function init() {
   }).addTo(map);*/
 
   map.on("zoom", function () {
-    document.querySelectorAll(".SWave,.PWave").forEach(function (elm) {
-      elm.classList.remove("SWaveAnm");
-      elm.classList.remove("PWaveAnm");
-    });
+    document.getElementById("mapcontainer").classList.remove("transitionActive");
     setTimeout(function () {
-      document.querySelectorAll(".SWave").forEach(function (elm) {
-        elm.classList.add("SWaveAnm");
-      });
-      document.querySelectorAll(".PWave").forEach(function (elm) {
-        elm.classList.add("PWaveAnm");
-      });
-    }, 100);
+      document.getElementById("mapcontainer").classList.add("transitionActive");
+    }, 10);
 
     var currentZoom = map.getZoom();
     document.getElementById("mapcontainer").classList.remove("zoomLevel_1");
@@ -625,7 +654,7 @@ function kmoniMapUpdate(dataTmp) {
 
   //地図上マーカー
   dataTmp.forEach(function (elm, index) {
-    if (elm.Name && elm.Point && elm.data) {
+    if (elm.Name && elm.Point && elm.data && !elm.IsSuspended) {
       var changed;
 
       if (previous_points.length !== 0) {
@@ -639,26 +668,90 @@ function kmoniMapUpdate(dataTmp) {
       if (changed) {
         var markerElement = document.querySelector(".KmoniPoint_" + elm.Code);
         if (markerElement) {
-          markerElement.style.display = "block";
           markerElement.querySelector(".PointName").style.borderBottom = "solid 2px rgb(" + elm.rgb.join(",") + ")";
           markerElement.querySelector(".PointInt").innerText = Math.round(elm.shindo * 10) / 10;
           markerElement.querySelector(".PointPGA").innerText = Math.round(elm.pga * 100) / 100;
           markerElement.querySelector(".marker-circle").style.background = "rgb(" + elm.rgb.join(",") + ")";
+          if (elm.detect) {
+            markerElement.querySelector(".marker-circle").classList.add("detectingMarker");
+          } else {
+            markerElement.querySelector(".marker-circle").classList.remove("detectingMarker");
+          }
+          markerElement.querySelector(".detecting").innerText = elm.detect ? "block" : "none";
+          markerElement.style.display = "block";
         }
       }
     } else {
       var markerElement = document.querySelector(".KmoniPoint_" + elm.Code);
       if (markerElement) {
-        if (markerElement.style.display != "none") console.log("なん", elm.Name, elm.Point, elm.data);
         markerElement.style.display = "none";
-        markerElement.querySelector(".PointName").style.borderBottom = "solid 2px transparnt";
-        markerElement.querySelector(".PointInt").innerText = "";
-        markerElement.querySelector(".PointPGA").innerText = "";
-        markerElement.querySelector(".marker-circle").style.background = "rgba(127.5,127.5,127.5,0.3)";
       }
     }
 
     if (index == points.length - 1) previous_points = dataTmp;
+  });
+}
+function SnetMapUpdate(dataTmp) {
+  var dataTmp2 = dataTmp.filter(function (elm) {
+    return elm.shindo;
+  });
+  kmoniMapData = dataTmp;
+
+  //リアルタイム震度タブ
+
+  /*  var maxShindo = dataTmp2.reduce((a, b) => (a.shindo > b.shindo ? a : b)).shindo;
+
+  var shindoList = dataTmp2.sort(function (a, b) {
+    return b.shindo - a.shindo;
+  });
+  removeChild(document.getElementById("pointList"));
+  for (let a = 0; a < 10; a++) {
+    var shindoElm = shindoList[a];
+    var newElm = document.createElement("li");
+    var shindoColor = shindoConvert(shindoElm.shindo, 2);
+    var IntDetail = "";
+    if (a == 0) IntDetail = "<div class='intDetail'>" + Math.round(maxShindo * 10) / 10 + "</div>";
+    newElm.innerHTML = "<div class='int' style='color:" + shindoColor[1] + ";background:" + shindoColor[0] + "'>" + shindoConvert(shindoElm.shindo, 0) + IntDetail + "</div><div class='Pointname'>" + shindoElm.Region + " " + shindoElm.Name + "</div><div class='PGA'>PGA" + Math.round(shindoElm.pga * 100) / 100 + "</div>";
+    document.getElementById("pointList").appendChild(newElm);
+  }*/
+
+  //地図上マーカー
+  dataTmp.forEach(function (elm, index) {
+    if (elm.Code && elm.Point && elm.data && !elm.IsSuspended) {
+      var changed;
+
+      if (previous_Spoints.length !== 0) {
+        var rgb0 = previous_Spoints[index].rgb;
+        var rgb1 = elm.rgb;
+        if (rgb0) changed = JSON.stringify(rgb0) !== JSON.stringify(rgb1);
+      } else {
+        changed = true;
+      }
+
+      if (changed) {
+        var markerElement = document.querySelector(".SnetPoint_" + elm.Code.replace(".", "-"));
+        if (markerElement) {
+          markerElement.querySelector(".PointName").style.borderBottom = "solid 2px rgb(" + elm.rgb.join(",") + ")";
+          markerElement.querySelector(".PointInt").innerText = Math.round(elm.shindo * 10) / 10;
+          markerElement.querySelector(".PointPGA").innerText = Math.round(elm.pga * 100) / 100;
+          markerElement.querySelector(".marker-circle").style.background = "rgb(" + elm.rgb.join(",") + ")";
+          if (elm.detect) {
+            markerElement.querySelector(".marker-circle").classList.add("detectingMarker");
+          } else {
+            markerElement.querySelector(".marker-circle").classList.remove("detectingMarker");
+          }
+          markerElement.querySelector(".detecting").innerText = elm.detect ? "block" : "none";
+          markerElement.style.display = "block";
+        }
+      }
+    } else {
+      var markerElement = document.querySelector(".SnetPoint_" + elm.Code.replace(".", "-"));
+      if (markerElement) {
+        markerElement.style.display = "none";
+      }
+    }
+
+    if (index == points.length - 1) previous_Spoints = dataTmp;
   });
 }
 
@@ -817,7 +910,7 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
       stroke: true,
       fill: false,
       weight: 2,
-      className: "PWave PWaveAnm",
+      className: "PWave",
       pane: "overlayPane",
       interactive: false,
     }).addTo(map);
@@ -829,7 +922,7 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
       fillColor: "#F00",
       fillOpacity: 0.15,
       weight: 2,
-      className: "SWave SWaveAnm",
+      className: "SWave",
       pane: "overlayPane",
       interactive: false,
     }).addTo(map);

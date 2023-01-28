@@ -48,6 +48,8 @@ var kmoniPointsDataTmp;
 ipcMain.on("message", (_event, response) => {
   if (response.action == "kmoniReturn") {
     kmoniControl(response.data, response.date);
+  } else if (response.action == "SnetReturn") {
+    SnetControl(response.data, response.date);
   } else if (response.action == "tsunamiReqest") {
     if (tsunamiData) {
       mainWindow.webContents.send("message2", {
@@ -178,7 +180,14 @@ function createWindow() {
   //mainWindow.setMenuBarVisibility(false);
 
   mainWindow.webContents.on("did-finish-load", () => {
-    replay("2023/01/18 21:41:00");
+    // replay("2023/01/22 11:13:20");
+    //replay("2023/01/27 23:26:00");
+    //replay("2023/01/22 10:58:50");
+    //replay("2023/01/21 22:41:00");
+    //  replay("2023/01/21 14:18:20");
+    //replay("2023/01/19 21:24:35");
+    // replay("2023/01/19 16:28:35");
+    //replay("2023/01/18 21:41:00");
     //replay("2023/01/18 18:54:45");
     //replay("2023/01/15 20:37:45");
 
@@ -445,16 +454,104 @@ var EQDetect_List = [];
 }*/
 var EQDetectID = 0;
 
-var historyCount = 5; //比較する件数
-var threshold01 = 5; //検出とする観測点数
+var historyCount = 10; //比較する件数
+var threshold01 = 3; //検出とする観測点数
 var threshold02 = 0.02; //1次フラグ条件のPGA増加量[gal]
-var threshold03 = 0.5; //2次フラグ条件のPGA増加量[gal]
+var threshold03 = 0.1; //2次フラグ条件のPGA増加量[gal]
 var threshold04 = 0.5; //フラグ条件の震度
 var MargeRange = 50; //地震の同定範囲[km]
 var time00 = 300000; //最初の検出~解除
 var time01 = 10000; //最後の検出~解除
 function kmoniControl(data, date) {
   kmoniActive = true;
+
+  if (kmoniDataHistory.length > historyCount) kmoniDataHistory = kmoniDataHistory.slice(kmoniDataHistory.length - historyCount);
+
+  data.forEach(function (elm, index) {
+    var dataItemHistory = kmoniDataHistory.map(function (elm2) {
+      return elm2[index].pga;
+    });
+    var pgaMax = Math.max.apply(null, dataItemHistory);
+    var pgaMin = Math.min.apply(null, dataItemHistory);
+    var detect = (pgaMax - pgaMin >= threshold02 || elm.pga > threshold03 || elm.shindo > threshold04 || elm.detectCount > 2) && elm.pga > 0.01;
+
+    var DetectedEQ = EQDetect_List.find(function (elm2) {
+      return elm2.Codes.find(function (elm3) {
+        return elm3 && geosailing(elm.Location.Latitude, elm.Location.Longitude, elm3.Location.Latitude, elm3.Location.Longitude) <= MargeRange;
+      });
+    });
+    elm.detect = detect;
+    elm.detect2 = pgaMax - pgaMin >= threshold03 || elm.shindo >= threshold04;
+
+    if (detect) {
+      if (!elm.detectCount) elm.detectCount = 0;
+      elm.detectCount++;
+
+      return;
+      var already = EQDetect_List.find(function (elm2) {
+        return elm2.Codes.find(function (elm3) {
+          return elm3.Name == elm.Name;
+        });
+      });
+      var EQD_ItemTmp = EQDetect_List.find(function (elm2) {
+        if (!already) {
+          var CodesTmp = elm2.Codes.find(function (elm3) {
+            return geosailing(elm.Location.Latitude, elm.Location.Longitude, elm3.Location.Latitude, elm3.Location.Longitude) <= MargeRange;
+          });
+          if (CodesTmp) {
+            var already2 = elm2.Codes.find(function (elm3) {
+              return elm3.Name == elm.Name;
+            });
+
+            if (!already2) {
+              elm2.Codes.push(elm);
+              if (elm2.detect2) elm2.detect2Count++;
+              var radiusTmp = geosailing(elm.Location.Latitude, elm.Location.Longitude, elm2.lat, elm2.lng);
+              if (elm2.Radius < radiusTmp) elm2.Radius = radiusTmp;
+            }
+
+            return !already2;
+          }
+        }
+      });
+
+      if (EQD_ItemTmp) {
+        EQD_ItemTmp.last_Detect = new Date();
+
+        var detectPoint2 = EQD_ItemTmp.Codes.filter(function (elm2) {
+          return elm2.detectCount >= 2;
+        });
+
+        if (detectPoint2.length >= threshold01) {
+          if (mainWindow) {
+            mainWindow.webContents.send("message2", {
+              action: "EQDetect",
+              data: EQD_ItemTmp,
+            });
+          }
+        }
+      } else {
+        if (elm.detect2) {
+          EQDetect_List.push({ id: EQDetectID, lat: elm.Location.Latitude, lng: elm.Location.Longitude, Codes: [elm], Radius: 0, detectCount: 1, detect2Count: 1, last_Detect: new Date(), origin_Time: new Date() });
+          EQDetectID++;
+        }
+      }
+    } else {
+      elm.detectCount = 0;
+      if (DetectedEQ) {
+        if (
+          !DetectedEQ.Codes.find(function (elm2) {
+            return elm2 && elm2.Code == elm.Code;
+          })
+        ) {
+          DetectedEQ.Codes = DetectedEQ.Codes.filter(function (elm2) {
+            return elm2.Code !== elm.Code;
+          });
+        }
+      }
+    }
+  });
+
   kmoniPointsDataTmp = {
     action: "kmoniUpdate",
     Updatetime: new Date(date),
@@ -465,81 +562,18 @@ function kmoniControl(data, date) {
     mainWindow.webContents.send("message2", kmoniPointsDataTmp);
   }
 
-  data.forEach(function (elm, index) {
-    elm.pga;
-  });
-
   kmoniDataHistory.push(data);
-
-  if (kmoniDataHistory.length > historyCount) kmoniDataHistory = kmoniDataHistory.slice(kmoniDataHistory.length - historyCount);
-
-  data.forEach(function (elm, index) {
-    var dataItemHistory = kmoniDataHistory.map(function (elm2) {
-      return elm2[index].pga;
-    });
-    var pgaMax = Math.max.apply(null, dataItemHistory);
-    var pgaMin = Math.min.apply(null, dataItemHistory);
-    var detect = pgaMax - pgaMin > threshold02 || elm.shindo > threshold04;
-
-    var DetectedEQ = EQDetect_List.find(function (elm2) {
-      return elm2.Codes.find(function (elm3) {
-        return elm3 && geosailing(elm.Location.Latitude, elm.Location.Longitude, elm3.Location.Latitude, elm3.Location.Longitude) <= MargeRange;
-      });
-    });
-
-    if (detect) {
-      if (DetectedEQ) {
-        if (
-          !DetectedEQ.Codes.find(function (elm2) {
-            return elm2 && elm2.Code == elm.Code;
-          })
-        ) {
-          //新しく観測された観測点
-          DetectedEQ.Codes.push(elm);
-          var radiusTmp = geosailing(elm.Location.Latitude, elm.Location.Longitude, DetectedEQ.lat, DetectedEQ.lng);
-          if (DetectedEQ.Radius < radiusTmp) DetectedEQ.Radius = radiusTmp;
-        }
-
-        DetectedEQ.last_Detect = new Date();
-
-        if (DetectedEQ.Codes.length >= threshold01) {
-          //初報
-          if (mainWindow) {
-            mainWindow.webContents.send("message2", {
-              action: "EQDetect",
-              data: DetectedEQ,
-            });
-          }
-        }
-        if ((DetectedEQ.Codes.length = threshold01)) {
-          console.log("Detect!!!Detect!!!Detect!!!Detect!!!Detect!!!");
-        }
-      } else {
-        var detect2 = pgaMax - pgaMin > threshold03 || elm.shindo > threshold04;
-        if (detect2) {
-          EQDetect_List.push({ id: EQDetectID, lat: elm.Location.Latitude, lng: elm.Location.Longitude, Codes: [elm], Radius: 0, last_Detect: new Date(), origin_Time: new Date() });
-          EQDetectID++;
-        }
-      }
-      /*
-      var detectedPoints = kmoniDataHistory[9].filter(function (elm2) {
-        return elm2.detect && geosailing(elm.Location.Latitude, elm.Location.Longitude, elm2.Location.Latitude, elm2.Location.Longitude) <= 50;
-      });*/
-    } else {
-      if (DetectedEQ) {
-        if (
-          !DetectedEQ.Codes.find(function (elm2) {
-            return elm2 && elm2.Code == elm.Code;
-          })
-        )
-          DetectedEQ.Codes = DetectedEQ.Codes.filter(function (elm2) {
-            return elm2.Code !== elm.Code;
-          });
-      }
-    }
-
-    elm.detect = detect;
-  });
+}
+function SnetControl(data, date) {
+  kmoniPointsDataTmp = {
+    action: "SnetUpdate",
+    Updatetime: new Date(date),
+    LocalTime: new Date(),
+    data: data,
+  };
+  if (mainWindow) {
+    mainWindow.webContents.send("message2", kmoniPointsDataTmp);
+  }
 }
 
 setInterval(function () {
@@ -695,7 +729,45 @@ function ymoniRequest() {
     }
   }
 }
+function SnetRequest() {
+  if (net.online) {
+    var request = net.request("https://www.msil.go.jp/arcgis/rest/services/Msil/DisasterPrevImg1/ImageServer/query?f=json&returnGeometry=false&outFields=msilstarttime%2Cmsilendtime&_=" + new Date());
+    request.on("response", (res) => {
+      var dataTmp = "";
+      res.on("data", (chunk) => {
+        dataTmp += chunk;
+      });
+      res.on("end", function () {
+        var json = jsonParse(dataTmp);
+        //json.features[json.features.length - 1].attributes.msilstarttime;
 
+        var dateTime = json.features.sort((a, b) => b.attributes.msilstarttime - a.attributes.msilstarttime)[0].attributes.msilstarttime;
+
+        Request({ method: "GET", url: "https://www.msil.go.jp/arcgis/rest/services/Msil/DisasterPrevImg1/ImageServer//exportImage?f=image&time=" + dateTime + "%2C" + dateTime + "&bbox=13409547.546603577%2C2713376.239114911%2C16907305.960932314%2C5966536.162931148&size=400%2C400", encoding: null }, (error, response, body) => {
+          // エラーチェック
+          if (error !== null) {
+            NetworkError(error, "海しる");
+            return false;
+          }
+          if (kmoniWorker) {
+            var ReqTime = new Date();
+            kmoniWorker.webContents.send("message2", {
+              action: "SnetImgUpdate",
+              data: "data:image/png;base64," + body.toString("base64"),
+              date: ReqTime,
+            });
+          }
+        });
+      });
+    });
+    request.on("error", (error) => {
+      NetworkError(error, "海しる");
+      kmoniTimeUpdate(new Date(), "Lmoni", "Error");
+    });
+
+    request.end();
+  }
+}
 function P2P_WS() {
   var WebSocketClient = require("websocket").client;
   var client = new WebSocketClient();
@@ -785,6 +857,11 @@ function start() {
   });
   setInterval(ymoniRequest, 1000);
   //↑接続処理
+
+  SnetRequest();
+  setInterval(function () {
+    SnetRequest();
+  }, 60000);
 
   setInterval(function () {
     if (!kmoniActive) {

@@ -12,6 +12,8 @@ window.electronAPI.messageSend((event, request) => {
     kmoniTimeUpdate(request.Updatetime, request.LocalTime, request.type, request.condition, request.vendor);
   } else if (request.action == "kmoniUpdate") {
     kmoniTimeUpdate(request.Updatetime, request.LocalTime, "kmoniImg", "success");
+  } else if (request.action == "SnetUpdate") {
+    kmoniTimeUpdate(request.Updatetime, request.LocalTime, "msilImg", "success");
   } else if (request.action == "MSSelect") {
     document.getElementById(request.str).selected = true;
 
@@ -293,19 +295,12 @@ function epiCenterUpdate(eid, latitude, longitude) {
     return elm.id == eid;
   });
   if (EQElm) {
-    document.querySelectorAll(".SWave,.PWave").forEach(function (elm) {
-      elm.classList.remove("SWaveAnm");
-      elm.classList.remove("PWaveAnm");
-    });
+    /*
+    document.getElementById("mapcontainer").classList.remove("transitionActive");
     setTimeout(function () {
-      document.querySelectorAll(".SWave").forEach(function (elm) {
-        elm.classList.add("SWaveAnm");
-      });
-      document.querySelectorAll(".PWave").forEach(function (elm) {
-        elm.classList.add("PWaveAnm");
-      });
-    }, 100);
-
+      document.getElementById("mapcontainer").classList.add("transitionActive");
+    }, 10);
+*/
     if (EQElm.PCircleElm) EQElm.PCircleElm.setLatLng([latitude, longitude]);
     if (EQElm.SCircleElm) EQElm.SCircleElm.setLatLng([latitude, longitude]);
     if (EQElm.SIElm) EQElm.SIElm.setLatLng([latitude, longitude]);
