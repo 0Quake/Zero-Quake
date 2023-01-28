@@ -9,7 +9,6 @@ const { JSDOM } = jsdom;
 let fs = require("fs");
 
 const Store = require("electron-store");
-const { validateHeaderValue, request } = require("http");
 const store = new Store();
 var config = store.get("config", {
   setting1: true,
@@ -1476,7 +1475,6 @@ function eqInfoUpdate() {
       });
       for (let i = 0; i < 10; i++) {
         var elm = json[i];
-        validateHeaderValue;
         var maxi = elm.maxi;
         if (!maxi) maxi = shindoConvert("?", 1);
         dataTmp2.push({
