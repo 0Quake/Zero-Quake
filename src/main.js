@@ -44,6 +44,7 @@ if (!gotTheLock) {
 }
 
 var kmoniPointsDataTmp;
+var SnetPointsDataTmp;
 ipcMain.on("message", (_event, response) => {
   if (response.action == "kmoniReturn") {
     kmoniControl(response.data, response.date);
@@ -54,13 +55,6 @@ ipcMain.on("message", (_event, response) => {
       mainWindow.webContents.send("message2", {
         action: "tsunamiUpdate",
         data: tsunamiData,
-      });
-    }
-  } else if (response.action == "EEWReqest") {
-    if (EEWNow) {
-      mainWindow.webContents.send("message2", {
-        action: "EEWAlertUpdate",
-        data: EEW_nowList,
       });
     }
   } else if (response.action == "settingWindowOpen") {
@@ -157,6 +151,13 @@ ipcMain.on("message", (_event, response) => {
     EQInfoWindow.loadFile(response.url);
 
     //EQInfoWindow.on("closed", () => {});
+  } else if (response.action == "mapLoaded") {
+    if (kmoniPointsDataTmp) {
+      mainWindow.webContents.send("message2", kmoniPointsDataTmp);
+    }
+    if (SnetPointsDataTmp) {
+      mainWindow.webContents.send("message2", SnetPointsDataTmp);
+    }
   }
 });
 
@@ -330,20 +331,22 @@ function createWindow() {
         data: notifications,
       });
     }
+
     if (P2P_ConnectData) {
-      if (mainWindow) {
-        mainWindow.webContents.send("message2", {
-          action: "kmoniTimeUpdate",
-          Updatetime: P2P_ConnectData[0],
-          LocalTime: P2P_ConnectData[0],
-          type: "P2P_EEW",
-          condition: P2P_ConnectData[2],
-        });
-      }
+      mainWindow.webContents.send("message2", {
+        action: "kmoniTimeUpdate",
+        Updatetime: P2P_ConnectData[0],
+        LocalTime: P2P_ConnectData[0],
+        type: "P2P_EEW",
+        condition: P2P_ConnectData[2],
+      });
     }
 
     if (kmoniPointsDataTmp) {
       mainWindow.webContents.send("message2", kmoniPointsDataTmp);
+    }
+    if (SnetPointsDataTmp) {
+      mainWindow.webContents.send("message2", SnetPointsDataTmp);
     }
   });
 
@@ -445,12 +448,6 @@ var errorCount = 0;
 
 var kmoniDataHistory = [];
 var EQDetect_List = [];
-/*{
-  id:0,
-  lat:0,
-  lng:0,
-  Codes:[]
-}*/
 var EQDetectID = 0;
 
 var historyCount = 10; //比較する件数
@@ -578,14 +575,14 @@ function kmoniControl(data, date) {
   kmoniDataHistory.push(data);
 }
 function SnetControl(data, date) {
-  kmoniPointsDataTmp = {
+  SnetPointsDataTmp = {
     action: "SnetUpdate",
     Updatetime: new Date(date),
     LocalTime: new Date(),
     data: data,
   };
   if (mainWindow) {
-    mainWindow.webContents.send("message2", kmoniPointsDataTmp);
+    mainWindow.webContents.send("message2", SnetPointsDataTmp);
   }
 }
 

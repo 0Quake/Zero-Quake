@@ -57,9 +57,6 @@ window.addEventListener("load", function () {
     .then(function (json) {
       AreaForecastLocalE = json;
       prepareing = false;
-      window.electronAPI.messageReturn({
-        action: "EEWReqest",
-      });
     });
   setInterval(function () {
     document.getElementById("PC_TIME").innerText = dateEncode(3, new Date());

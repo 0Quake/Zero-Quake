@@ -360,7 +360,7 @@ function init() {
     .then(function (json) {
       points = json;
 
-      points.forEach(function (elm) {
+      points.forEach(function (elm, index) {
         if (elm.Name && elm.Point) {
           var popup_content = "<h3 class='PointName' style='border-bottom:solid 2px transparent'>" + elm.Name + "<span>" + elm.Code + "</span></h3><h4 class='detecting'>地震検知中</h4><table><tr><td>震度</td><td class='PointInt'></td></tr><tr><td>PGA</td><td class='PointPGA'></td></tr></table>";
           var kmoniPointMarker = L.divIcon({
@@ -383,7 +383,9 @@ function init() {
             .addTo(map);
         }
       });
-      if (kmoniMapData) kmoniMapUpdate(kmoniMapData);
+      if (kmoniMapData) {
+        kmoniMapUpdate(kmoniMapData);
+      }
     });
 
   fetch("./Resource/Snet_Points.json")
@@ -416,7 +418,9 @@ function init() {
             .addTo(map);
         }
       });
-      //     if (kmoniMapData) kmoniMapUpdate(kmoniMapData);
+      if (SnetMapData) {
+        SnetMapUpdate(SnetMapData);
+      }
     });
 
   fetch("./Resource/World.json")
@@ -645,16 +649,13 @@ function init() {
 
   map.on("load", function () {
     if (kmoniMapData) kmoniMapUpdate(kmoniMapData);
+    if (SnetMapData) SnetMapUpdate(SnetMapData);
   });
   epicenterIcon = L.icon({
     iconUrl: "../src/img/epicenter.svg",
     iconSize: [32, 32],
     iconAnchor: [16, 16],
     popupAnchor: [0, -20],
-  });
-
-  window.electronAPI.messageReturn({
-    action: "EEWReqest",
   });
 
   var currentZoom = map.getZoom();
@@ -697,11 +698,14 @@ function init() {
 }
 
 var kmoniMapData;
-function kmoniMapUpdate(dataTmp) {
+var SnetMapData;
+function kmoniMapUpdate(dataTmp, type) {
+  kmoniMapData = dataTmp;
+
+  if (!dataTmp) return;
   var dataTmp2 = dataTmp.filter(function (elm) {
     return elm.shindo;
   });
-  kmoniMapData = dataTmp;
 
   //リアルタイム震度タブ
   var maxShindo = dataTmp2.reduce((a, b) => (a.shindo > b.shindo ? a : b)).shindo;
@@ -760,28 +764,7 @@ function kmoniMapUpdate(dataTmp) {
   });
 }
 function SnetMapUpdate(dataTmp) {
-  var dataTmp2 = dataTmp.filter(function (elm) {
-    return elm.shindo;
-  });
-  kmoniMapData = dataTmp;
-
-  //リアルタイム震度タブ
-
-  /*  var maxShindo = dataTmp2.reduce((a, b) => (a.shindo > b.shindo ? a : b)).shindo;
-
-  var shindoList = dataTmp2.sort(function (a, b) {
-    return b.shindo - a.shindo;
-  });
-  removeChild(document.getElementById("pointList"));
-  for (let a = 0; a < 10; a++) {
-    var shindoElm = shindoList[a];
-    var newElm = document.createElement("li");
-    var shindoColor = shindoConvert(shindoElm.shindo, 2);
-    var IntDetail = "";
-    if (a == 0) IntDetail = "<div class='intDetail'>" + Math.round(maxShindo * 10) / 10 + "</div>";
-    newElm.innerHTML = "<div class='int' style='color:" + shindoColor[1] + ";background:" + shindoColor[0] + "'>" + shindoConvert(shindoElm.shindo, 0) + IntDetail + "</div><div class='Pointname'>" + shindoElm.Region + " " + shindoElm.Name + "</div><div class='PGA'>PGA" + Math.round(shindoElm.pga * 100) / 100 + "</div>";
-    document.getElementById("pointList").appendChild(newElm);
-  }*/
+  SnetMapData = dataTmp;
 
   //地図上マーカー
   dataTmp.forEach(function (elm, index) {
