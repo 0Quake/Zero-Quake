@@ -96,13 +96,25 @@ window.electronAPI.messageSend((event, request) => {
           }
 
           if (tsunamiItem && tsunamiItem.item) {
+            var firstWave = "";
+            var maxWave = "";
+            var firstCondition = "";
+            if (elm.firstHeight) {
+              firstWave = "<p>第１波 予想到達時刻:" + elm.firstHeight + "</p>";
+            }
+            if (elm.maxHeight) {
+              maxWave = "<p>予想される津波の高さ" + elm.maxHeight + "</p>";
+            }
+            if (elm.firstHeightCondition) {
+              firstCondition = "<p>" + elm.firstHeightCondition + "</p>";
+            }
             tsunamiItem.item
               .setStyle({
                 stroke: true,
                 color: tsunamiColorConv(elm.grade),
                 weight: 5,
               })
-              .bindPopup("<h3 style='border-bottom:solid 2px " + tsunamiColorConv(elm.grade) + "'>" + gradeJa + " 発令中</h3><br>津波予報区:" + tsunamiItem.feature.properties.name);
+              .bindPopup("<h3 style='border-bottom:solid 2px " + tsunamiColorConv(elm.grade) + "'>" + gradeJa + " 発令中</h3><p>津波予報区:" + tsunamiItem.feature.properties.name + "</p>" + firstWave + maxWave + firstCondition);
           }
         }
       });
