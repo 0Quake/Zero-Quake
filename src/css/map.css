@@ -115,6 +115,7 @@ img.leaflet-control {
 }
 
 .marker-circle {
+  position: absolute;
   width: 10px;
   height: 10px;
   background: #000;
@@ -127,6 +128,11 @@ img.leaflet-control {
   outline: solid 2px #fff;
   z-index: 221;
 }
+.strongDetectingMarker {
+  outline: solid 4px rgb(214, 214, 9);
+  z-index: 222;
+}
+
 .hidePopup {
   display: none;
 }

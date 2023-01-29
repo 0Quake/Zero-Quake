@@ -756,9 +756,15 @@ function kmoniMapUpdate(dataTmp, type) {
           markerElement.querySelector(".PointInt").innerText = Math.round(elm.shindo * 10) / 10;
           markerElement.querySelector(".PointPGA").innerText = Math.round(elm.pga * 100) / 100;
           markerElement.querySelector(".marker-circle").style.background = "rgb(" + elm.rgb.join(",") + ")";
-          if (elm.detect) {
+          if (elm.detect2) {
+            markerElement.querySelector(".marker-circle").classList.remove("detectingMarker");
+            markerElement.querySelector(".marker-circle").classList.add("strongDetectingMarker");
+            console.log("aaaaaaaads");
+          } else if (elm.detect) {
+            markerElement.querySelector(".marker-circle").classList.remove("strongDetectingMarker");
             markerElement.querySelector(".marker-circle").classList.add("detectingMarker");
           } else {
+            markerElement.querySelector(".marker-circle").classList.remove("strongDetectingMarker");
             markerElement.querySelector(".marker-circle").classList.remove("detectingMarker");
           }
           markerElement.querySelector(".detecting").innerText = elm.detect ? "block" : "none";
@@ -798,9 +804,14 @@ function SnetMapUpdate(dataTmp) {
           markerElement.querySelector(".PointInt").innerText = Math.round(elm.shindo * 10) / 10;
           markerElement.querySelector(".PointPGA").innerText = Math.round(elm.pga * 100) / 100;
           markerElement.querySelector(".marker-circle").style.background = "rgb(" + elm.rgb.join(",") + ")";
-          if (elm.detect) {
+          if (elm.detect2) {
+            markerElement.querySelector(".marker-circle").classList.remove("detectingMarker");
+            markerElement.querySelector(".marker-circle").classList.add("strongDetectingMarker");
+          } else if (elm.detect) {
+            markerElement.querySelector(".marker-circle").classList.remove("strongDetectingMarker");
             markerElement.querySelector(".marker-circle").classList.add("detectingMarker");
           } else {
+            markerElement.querySelector(".marker-circle").classList.remove("strongDetectingMarker");
             markerElement.querySelector(".marker-circle").classList.remove("detectingMarker");
           }
           markerElement.querySelector(".detecting").innerText = elm.detect ? "block" : "none";
