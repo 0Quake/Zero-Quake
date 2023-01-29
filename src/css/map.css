@@ -85,6 +85,10 @@ img.leaflet-control {
   background: #444;
   text-align: left;
 }
+.leaflet-popup-content p {
+  padding: 0.3em 0;
+  margin: 0;
+}
 .PointPopup h3 span {
   float: right;
   font-size: 11px;

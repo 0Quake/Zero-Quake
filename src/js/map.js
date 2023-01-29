@@ -100,13 +100,15 @@ window.electronAPI.messageSend((event, request) => {
             var maxWave = "";
             var firstCondition = "";
             if (elm.firstHeight) {
-              firstWave = "<p>第１波 予想到達時刻:" + elm.firstHeight + "</p>";
+              firstWave = "<div>第１波 予想到達時刻:" + dateEncode(5, elm.firstHeight) + "</div>";
             }
             if (elm.maxHeight) {
-              maxWave = "<p>予想される津波の高さ" + elm.maxHeight + "</p>";
+              maxWave = "<div>予想される津波の高さ:" + elm.maxHeight + "</div>";
+            } else if (elm.grade == "Yoho") {
+              maxWave = "<div>予想される津波の高さ:若干の海面変動</div>";
             }
             if (elm.firstHeightCondition) {
-              firstCondition = "<p>" + elm.firstHeightCondition + "</p>";
+              firstCondition = "<div>" + elm.firstHeightCondition + "</div>";
             }
             tsunamiItem.item
               .setStyle({

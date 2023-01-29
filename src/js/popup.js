@@ -576,6 +576,12 @@ function dateEncode(type, dateTmp, inputtype) {
     var hh = String(dateTmp.getHours()).padStart(2, "0");
     var mm = String(dateTmp.getMinutes()).padStart(2, "0");
     return YYYY + "/" + MM + "/" + DD + " " + hh + ":" + mm;
+  } else if (type == 5) {
+    var MM = String(dateTmp.getMonth() + 1).padStart(2, "0");
+    var DD = String(dateTmp.getDate()).padStart(2, "0");
+    var hh = String(dateTmp.getHours()).padStart(2, "0");
+    var mm = String(dateTmp.getMinutes()).padStart(2, "0");
+    return MM + "/" + DD + " " + hh + ":" + mm;
   } else {
     //free
     var YYYY = String(dateTmp.getFullYear());

@@ -27,28 +27,12 @@
       text-align: center;
     }
 
-    #MajorWarningInfo,
-    #WarningInfo,
-    #WatchInfo,
-    #YohoInfo {
-      height: 50px;
-      font-size: 20px;
-    }
-
-    #MajorWarningInfo {
-      border: solid 2px var(--TsunamiMajorWarningColor);
-    }
-
-    #WarningInfo {
-      border: solid 2px var(--TsunamiWarningColor);
-    }
-
-    #WatchInfo {
-      border: solid 2px var(--TsunamiWatchColor);
-    }
-
-    #YohoInfo {
-      border: solid 2px var(--TsunamiYohoColor);
+    table th,
+    table tr,
+    table td {
+      position: relative;
+      border: none;
+      border-collapse: separate;
     }
 
     table {
@@ -58,8 +42,54 @@
       text-align: left;
     }
 
-    table th {
+
+    #MajorWarningInfo,
+    #WarningInfo,
+    #WatchInfo,
+    #YohoInfo,
+    table thead {
       text-align: center;
+      position: -webkit-sticky;
+      position: sticky;
+      top: 50px;
+      z-index: 1;
+      background: #222;
+      height: 50px;
+      font-size: 20px;
+    }
+
+    table thead {
+      font-size: 16px;
+
+    }
+
+    #MajorWarningInfo th,
+    #WarningInfo th,
+    #WatchInfo th,
+    #YohoInfo th,
+    table thead th {
+      height: 50px;
+    }
+
+    .ListIcon_MajorWarning,
+    .ListIcon_Warning,
+    .ListIcon_Watch,
+    .ListIcon_Yoho {
+      display: inline-block;
+      color: #000;
+      border-radius: 50%;
+      height: 25px;
+      width: 25px;
+      font-size: 16px;
+      text-align: center;
+      line-height: 25px;
+      vertical-align: middle;
+      font-size: 16px;
+    }
+
+
+    table thead {
+      top: 0;
     }
 
     table td {
@@ -67,21 +97,72 @@
       font-size: 18px;
     }
 
-
     table tr:nth-child(2n) {
       background: #444;
-
     }
 
-    table tr,
-    table td {
-      border-bottom: none;
-      border-top: none;
+
+    #MajorWarningInfo::after {
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      border: solid 2px var(--TsunamiMajorWarningColor);
+    }
+
+    #WarningInfo::after {
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      border: solid 2px var(--TsunamiWarningColor);
+    }
+
+    #WatchInfo::after {
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      border: solid 2px var(--TsunamiWatchColor);
+    }
+
+    #YohoInfo::after {
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      border: solid 2px var(--TsunamiYohoColor);
     }
 
     #revocation,
     #DTWrap {
       display: none;
+    }
+
+
+
+    .ListIcon_MajorWarning {
+      background: var(--TsunamiMajorWarningColor);
+    }
+
+    .ListIcon_Warning {
+      background: var(--TsunamiWarningColor);
+    }
+
+    .ListIcon_Watch {
+      background: var(--TsunamiWatchColor);
+    }
+
+    .ListIcon_Yoho {
+      background: var(--TsunamiYohoColor);
     }
   </style>
 
@@ -96,26 +177,32 @@
 
     <table>
       <caption class="h2">津波情報</caption>
-      <tr>
-        <th>津波予報区</th>
-        <th>第１波<br>予想到達時刻</th>
-        <th>予想される<br>津波の高さ</th>
-      </tr>
-      <tr id="MajorWarningInfo">
-        <th colspan="4">大津波警報</th>
-      </tr>
-      <tr id="WarningInfo">
-        <th colspan="4">津波警報</th>
-      </tr>
-      <tr id="WatchInfo">
-        <th colspan="4">津波注意報</th>
-      </tr>
-      <tr id="YohoInfo">
-        <th colspan="4">津波予報</th>
-      </tr>
-      <tr id="no-data">
-        <th colspan="4">データがありません</th>
-      </tr>
+      <thead>
+        <tr>
+          <th></th>
+          <th>津波予報区</th>
+          <th>第１波<br>予想到達時刻</th>
+          <th>予想される<br>津波の高さ</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr id="MajorWarningInfo">
+          <th colspan="5">大津波警報</th>
+        </tr>
+        <tr id="WarningInfo">
+          <th colspan="5">津波警報</th>
+        </tr>
+        <tr id="WatchInfo">
+          <th colspan="5">津波注意報</th>
+        </tr>
+        <tr id="YohoInfo">
+          <th colspan="5">津波予報</th>
+        </tr>
+        <tr id="no-data">
+          <th colspan="5">データがありません</th>
+        </tr>
+      </tbody>
     </table>
 
 
@@ -151,7 +238,7 @@
             var condition = ""
             var arrivalTime = "不明"
             if (elm.firstHeight) {
-              arrivalTime = dateEncode(elm.firstHeight, 4)
+              arrivalTime = dateEncode(5, elm.firstHeight)
               if (elm.firstHeightCondition) {
                 condition = elm.firstHeightCondition
               }
@@ -164,21 +251,25 @@
             if (elm.maxHeight) {
               maxHeight = elm.maxHeight
             }
-
+            var IconTxt = "";
             switch (elm.grade) {
               case "MajorWarning":
                 Tsunami_MajorWarning = true
+                IconTxt = "大"
                 break;
               case "Warning":
                 Tsunami_Warning = true
+                IconTxt = "警"
                 break;
               case "Watch":
                 Tsunami_Watch = true
+                IconTxt = "注"
                 break;
               case "Yoho":
                 Tsunami_Yoho = true
                 arrivalTime = "-"
-                maxHeight = "-"
+                maxHeight = "若干の海面変動"
+                IconTxt = "予"
                 break;
 
               default:
@@ -186,8 +277,9 @@
             }
 
             var new_tr = document.createElement("tr");
-            new_tr.innerHTML = "<td>" + elm.name + "</td><td>" + arrivalTime + "</td><td>" + maxHeight + "</td><td>" + condition + "</td>"
+            new_tr.innerHTML = "<td><div class='ListIcon_" + elm.grade + "'>" + IconTxt + "</div></td><td>" + elm.name + "</td><td>" + arrivalTime + "</td><td>" + maxHeight + "</td><td>" + condition + "</td>"
             new_tr.classList.add("add-content")
+            new_tr.classList.add("ListItem_" + elm.grade)
             document.getElementById(elm.grade + "Info").after(new_tr)
           }
         });
@@ -231,7 +323,12 @@
         var DD = String(dateTmp.getDate()).padStart(2, "0");
         var hh = String(dateTmp.getHours()).padStart(2, "0");
         var mm = String(dateTmp.getMinutes()).padStart(2, "0");
-        var ss = String(dateTmp.getSeconds()).padStart(2, "0");
+        return YYYY + "/" + MM + "/" + DD + " " + hh + ":" + mm;
+      } else if (type == 5) {
+        var MM = String(dateTmp.getMonth() + 1).padStart(2, "0");
+        var DD = String(dateTmp.getDate()).padStart(2, "0");
+        var hh = String(dateTmp.getHours()).padStart(2, "0");
+        var mm = String(dateTmp.getMinutes()).padStart(2, "0");
         return MM + "/" + DD + " " + hh + ":" + mm;
       } else {
         var YYYY = String(dateTmp.getFullYear());
