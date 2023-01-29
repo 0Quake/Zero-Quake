@@ -18,9 +18,9 @@ var config = store.get("config", {
     longitude: 139.767,
     Saibun: "東京都２３区",
   },
-  KmoniInterval: 1000,
-  LmoniInterval: 1000,
-  YmoniInterval: 1000,
+  lmoniTimeout: 1000,
+  lmoniTimeout: 1000,
+  ymoniTimeout: 1000,
   notice: {
     voice: {
       EEW: "緊急地震速報です。強い揺れに警戒してください。",
@@ -333,13 +333,7 @@ function createWindow() {
     }
 
     if (P2P_ConnectData) {
-      mainWindow.webContents.send("message2", {
-        action: "kmoniTimeUpdate",
-        Updatetime: P2P_ConnectData[0],
-        LocalTime: P2P_ConnectData[0],
-        type: "P2P_EEW",
-        condition: P2P_ConnectData[2],
-      });
+      mainWindow.webContents.send("message2", P2P_ConnectData);
     }
 
     if (kmoniPointsDataTmp) {
@@ -384,11 +378,10 @@ app.whenReady().then(() => {
     await start();
   })();
 
-  /*
   setTimeout(function () {
-    start();
+    if (!started) start();
   }, 10000);
-*/
+
   // アプリケーションがアクティブになった時の処理(Macだと、Dockがクリックされた時）
   app.on("activate", () => {
     // メインウィンドウが消えている場合は再度メインウィンドウを作成する
@@ -630,7 +623,8 @@ function kmoniRequest() {
       }
     });
   }
-  kmoniInterval = setTimeout(kmoniRequest, 1000);
+  if (kmoniTimeout) clearTimeout(kmoniTimeout);
+  kmoniTimeout = setTimeout(kmoniRequest, 1000);
 }
 function lmoniRequest() {
   if (net.online) {
@@ -661,7 +655,8 @@ function lmoniRequest() {
 
     request.end();
   }
-  lmoniInterval = setTimeout(lmoniRequest, 1000);
+  if (lmoniTimeout) clearTimeout(lmoniTimeout);
+  lmoniTimeout = setTimeout(lmoniRequest, 1000);
 }
 function ymoniRequest() {
   if (net.online) {
@@ -723,7 +718,9 @@ function ymoniRequest() {
       request.end();
     }
   }
-  ymoniInterval = setTimeout(ymoniRequest, 1000);
+
+  if (ymoniTimeout) clearTimeout(ymoniTimeout);
+  ymoniTimeout = setTimeout(ymoniRequest, 1000);
 }
 function SnetRequest() {
   if (net.online) {
@@ -840,10 +837,12 @@ function P2P_WS() {
   client.connect("wss://api.p2pquake.net/v2/ws");
 }
 
-var ymoniInterval;
-var kmoniInterval;
-var lmoniInterval;
+var kmoniTimeout;
+var lmoniTimeout;
+var ymoniTimeout;
+var started = false;
 function start() {
+  started = true;
   //↓接続処理
   P2P_WS();
   SNXWatch();
@@ -854,14 +853,11 @@ function start() {
   kmoniRequest();
   lmoniRequest();
   ymoniRequest();
-  //kmoniInterval = setInterval(kmoniRequest, 1000);
-  //lmoniInterval = setInterval(lmoniRequest, 1000);
   yoyuSetK(function () {
-    clearTimeout(kmoniInterval);
     kmoniRequest();
   });
   yoyuSetL(function () {
-    clearTimeout(lmoniInterval);
+    //clearTimeout(lmoniTimeout);
     lmoniRequest();
   });
   //↑接続処理
@@ -2204,19 +2200,20 @@ function Boolean2(str) {
 
 var P2P_ConnectData;
 function kmoniTimeUpdate(Updatetime, type, condition, vendor) {
+  var sendData = {
+    action: "kmoniTimeUpdate",
+    Updatetime: Updatetime,
+    LocalTime: new Date(),
+    vendor: vendor,
+    type: type,
+    condition: condition,
+  };
   if (mainWindow) {
-    mainWindow.webContents.send("message2", {
-      action: "kmoniTimeUpdate",
-      Updatetime: Updatetime,
-      LocalTime: new Date(),
-      vendor: vendor,
-      type: type,
-      condition: condition,
-    });
+    mainWindow.webContents.send("message2", sendData);
   }
 
   if (type == "P2P_EEW") {
-    P2P_ConnectData = [Updatetime, type, condition, vendor];
+    P2P_ConnectData = sendData;
   }
   kmoniTimeTmpElm = kmoniTimeTmp.find(function (elm) {
     return elm.type == type;
