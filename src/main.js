@@ -180,6 +180,7 @@ function createWindow() {
   //mainWindow.setMenuBarVisibility(false);
 
   mainWindow.webContents.on("did-finish-load", () => {
+    //replay("2023/01/29 17:03:20");
     //replay("2023/01/29 12:36:00");
     // replay("2023/01/29 12:07:20");
     // replay("2023/01/22 11:13:20");
@@ -379,10 +380,6 @@ app.whenReady().then(() => {
     await kmoniServerSelect();
     await start();
   })();
-
-  setTimeout(function () {
-    if (!started) start();
-  }, 10000);
 
   // アプリケーションがアクティブになった時の処理(Macだと、Dockがクリックされた時）
   app.on("activate", () => {
@@ -885,6 +882,9 @@ function RegularExecution() {
   if (!kmoniActive) {
     kmonicreateWindow();
   }
+
+  if (!started) start();
+
   setTimeout(RegularExecution, 1000);
 }
 
@@ -1447,7 +1447,6 @@ function EEWClear(source, code, reportnum, bypass) {
 //
 //地震情報
 var eqInfo = { jma: [], usgs: [] };
-var aaa = 0;
 
 function eqInfoUpdate() {
   //気象庁JSONリクエスト～パース
@@ -1500,16 +1499,16 @@ function eqInfoUpdate() {
       const parser = new new JSDOM().window.DOMParser();
       const xml = parser.parseFromString(dataTmp, "text/html");
       xml.querySelectorAll("entry").forEach(function (elm) {
-        //" || elm.ttl == "震源に関する情報" || elm.ttl == "震源・震度情報" || elm.ttl == "遠地地震に関する情報
         var title = elm.querySelector("title").textContent;
         var url = elm.querySelector("id").textContent;
         if (!url) return;
 
-        if (title == "震度速報" || title == "震源に関する情報" || title == "震源・震度情報" || title == "遠地地震に関する情報" || title == "顕著な地震の震源要素更新のお知らせ") {
+        if (title == "震度速報" || title == "震源に関する情報" || title == "震源・震度に関する情報" || title == "遠地地震に関する情報" || title == "顕著な地震の震源要素更新のお知らせ") {
           //地震情報
           JMAEQInfoFetch(url);
         } else if (/大津波警報|津波警報|津波注意報|津波予報/.test(title)) {
           //津波予報
+          JMAEQInfoFetch(url);
         }
       });
     });
@@ -1712,15 +1711,12 @@ function JMAEQInfoFetch(url) {
       dataTmp += chunk;
     });
     res.on("end", function () {
-      if (aaa == 0) dataTmp = '<Report xmlns="http://xml.kishou.go.jp/jmaxml1/" xmlns:jmx="http://xml.kishou.go.jp/jmaxml1/"><Control><Title>顕著な地震の震源要素更新のお知らせ</Title><DateTime>2022-11-09T10:40:13Z</DateTime><Status>通常</Status><EditorialOffice>気象庁本庁</EditorialOffice><PublishingOffice>気象庁</PublishingOffice></Control><Head xmlns="http://xml.kishou.go.jp/jmaxml1/informationBasis1/"><Title>顕著な地震の震源要素更新のお知らせ</Title><ReportDateTime>2022-11-09T19:40:00+09:00</ReportDateTime><TargetDateTime>2022-11-09T19:40:00+09:00</TargetDateTime><EventID>20221109174020</EventID><InfoType>発表</InfoType><Serial/><InfoKind>震源要素更新のお知らせ</InfoKind><InfoKindVersion>1.0_0</InfoKindVersion><Headline><Text>令和　４年１１月　９日１９時４０分をもって、地震の発生場所と規模を更新します。</Text></Headline></Head><Body xmlns="http://xml.kishou.go.jp/jmaxml1/body/seismology1/" xmlns:jmx_eb="http://xml.kishou.go.jp/jmaxml1/elementBasis1/"><Earthquake><OriginTime>2022-11-09T17:40:00+09:00</OriginTime><ArrivalTime>2022-11-09T17:40:00+09:00</ArrivalTime><Hypocenter><Area><Name>茨城県南部</Name><Code type="震央地名">301</Code><jmx_eb:Coordinate description="北緯３６．２度　東経１４０．０度　深さ　５０ｋｍ" datum="日本測地系">+36.2+140.0-50000/</jmx_eb:Coordinate><jmx_eb:Coordinate type="震源位置（度分）" description="北緯３６度１１．１分　東経１４０度０１．６分　深さ　５１ｋｍ">+3611.1+14001.6-51000/</jmx_eb:Coordinate></Area></Hypocenter><jmx_eb:Magnitude type="Mj" description="Ｍ４．９">4.9</jmx_eb:Magnitude></Earthquake><Comments><FreeFormComment>度単位の震源要素は、津波情報等を引き続き発表する場合に使用されます。</FreeFormComment></Comments></Body></Report>';
-      aaa++;
-
       const parser = new new JSDOM().window.DOMParser();
       const xml = parser.parseFromString(dataTmp, "text/html");
       var title = xml.title;
       var cancel = xml.querySelector("InfoType").textContent == "取り消し";
 
-      if (title == "震度速報" || title == "震源に関する情報" || title == "震源・震度情報" || title == "遠地地震に関する情報" || title == "顕著な地震の震源要素更新のお知らせ") {
+      if (title == "震度速報" || title == "震源に関する情報" || title == "震源・震度に関する情報" || title == "遠地地震に関する情報" || title == "顕著な地震の震源要素更新のお知らせ") {
         //地震情報
 
         var EarthquakeElm = xml.querySelector("Body Earthquake");
@@ -1924,8 +1920,9 @@ function eqInfoAlert(data, source, update) {
 }
 
 function TsunamiInfoControl(data) {
-  var newInfo = tsunamiData.issue.time < data.issue.time;
-  var stilANDjma = tsunamiData.issue.time == data.issue.time && data.source == "jmaXML" && tsunamiData.source == "P2P";
+  console.log(data);
+  var newInfo = !tsunamiData || tsunamiData.issue.time < data.issue.time;
+  var stilANDjma = !tsunamiData || (tsunamiData.issue.time == data.issue.time && data.source == "jmaXML" && tsunamiData.source == "P2P");
   if (!tsunamiData || newInfo || stilANDjma) {
     tsunamiData = data;
 
