@@ -17,6 +17,34 @@
   box-sizing: border-box;
 }
 
+:root {
+  --IntTheme_Q_BgColor: #bfbfbf;
+  --IntTheme_0_BgColor: #bfbfbf;
+  --IntTheme_1_BgColor: #79a8b3;
+  --IntTheme_2_BgColor: #3685e0;
+  --IntTheme_3_BgColor: #4db051;
+  --IntTheme_4_BgColor: #bfb837;
+  --IntTheme_5m_BgColor: #f09629;
+  --IntTheme_5p_BgColor: #f5713d;
+  --IntTheme_6m_BgColor: #e60000;
+  --IntTheme_6p_BgColor: #8a0a0a;
+  --IntTheme_7_BgColor: #c400de;
+  --IntTheme_7p_BgColor: #c400de;
+
+  --IntTheme_Q_color: #444;
+  --IntTheme_0_color: #444;
+  --IntTheme_1_color: #222;
+  --IntTheme_2_color: #fff;
+  --IntTheme_3_color: #fff;
+  --IntTheme_4_color: #000;
+  --IntTheme_5m_color: #000;
+  --IntTheme_5p_color: #000;
+  --IntTheme_6m_color: #fff;
+  --IntTheme_6p_color: #fff;
+  --IntTheme_7_color: #fff;
+  --IntTheme_7p_color: #fff;
+}
+
 html,
 body {
   min-width: 300px;

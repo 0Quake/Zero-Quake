@@ -817,6 +817,23 @@ function SnetMapUpdate(dataTmp) {
           }
           markerElement.querySelector(".detecting").innerText = elm.detect ? "block" : "none";
           markerElement.style.display = "block";
+
+          markerElement.classList.remove("marker_Int1");
+          markerElement.classList.remove("marker_Int2");
+          markerElement.classList.remove("marker_Int3");
+          markerElement.classList.remove("marker_Int4");
+          markerElement.classList.remove("marker_Int5-");
+          markerElement.classList.remove("marker_Int5p");
+          markerElement.classList.remove("marker_Int6-");
+          markerElement.classList.remove("marker_Int6p");
+          markerElement.classList.remove("marker_Int7");
+          markerElement.classList.remove("marker_Int7p");
+
+          var IntTmp = shindoConvert(elm.shindo, 3);
+          if (IntTmp) {
+            markerElement.classList.add("marker_Int" + IntTmp);
+            markerElement.querySelector(".marker-circle").style.background = "";
+          }
         }
       }
     } else {

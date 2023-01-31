@@ -2444,6 +2444,7 @@ function shindoConvert(str, responseType) {
           "7+": ["#C400DE", "#FFF"],
         };
         return ConvTable[ShindoTmp];
+
         break;
 
       case 0:
