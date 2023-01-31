@@ -357,6 +357,7 @@ function eqInfoDraw(data, source) {
         maxITmp = "?";
         shindoColor = ["auto", "auto"];
       }
+
       clone.querySelector(".EQI_maxI").innerText = maxITmp;
       clone.querySelector(".EQI_maxI").style.background = shindoColor[0];
       clone.querySelector(".EQI_maxI").style.color = shindoColor[1];

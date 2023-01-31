@@ -180,7 +180,8 @@ function createWindow() {
   //mainWindow.setMenuBarVisibility(false);
 
   mainWindow.webContents.on("did-finish-load", () => {
-    //replay("2023/01/29 17:03:20");
+    // replay("2023/01/31 17:48:30");
+    //replay("2023/01/30 00:30:00");
     //replay("2023/01/29 12:36:00");
     // replay("2023/01/29 12:07:20");
     // replay("2023/01/22 11:13:20");
@@ -453,7 +454,7 @@ var historyCount = 5; //比較する件数
 var threshold01 = 5; //検出とする観測点数
 var threshold02 = 0.075; //1次フラグ条件のPGA増加量[gal]
 var threshold03 = 0.5; //2次フラグ条件のPGA増加量[gal]
-var threshold04 = 0.5; //フラグ条件の震度
+var threshold04 = 1; //フラグ条件の震度
 var MargeRange = 30; //地震の同定範囲[km]
 var time00 = 300000; //最初の検出~解除
 var time01 = 10000; //最後の検出~解除
@@ -479,30 +480,32 @@ function kmoniControl(data, date) {
     var detect = (pgaMax - pgaMin >= threshold02 || elm.pga > threshold03 || elm.shindo > threshold04) && elm.pga > 0.01;
 
     elm.detect = detect;
-    elm.detect2 = detect && elm.detectCount >= 1 && (pgaMax - pgaMin >= threshold03 || elm.shindo >= threshold04);
+    elm.detect2 = detect && (pgaMax - pgaMin >= threshold03 || elm.shindo >= threshold04 || elm.detectCount >= 2);
     if (detect) {
       if (!elm.detectCount) elm.detectCount = 0;
       elm.detectCount++;
-
-      var EQD_ItemTmp = EQDetect_List.find(function (elm2) {
-        if (geosailing(elm.Location.Latitude, elm.Location.Longitude, elm2.lat, elm2.lng) - elm2.Radius <= MargeRange) {
-          var CodesTmp = elm2.Codes.find(function (elm3) {
-            return geosailing(elm.Location.Latitude, elm.Location.Longitude, elm3.Location.Latitude, elm3.Location.Longitude) <= MargeRange;
-          });
-          if (CodesTmp) {
-            var already = EQDetect_List.findIndex(function (elm3) {
-              return elm3.Codes.find(function (elm4) {
-                return elm4.Name == elm.Name;
-              });
+    }
+    if (!EEWNow) {
+      if (detect) {
+        var EQD_ItemTmp = EQDetect_List.find(function (elm2) {
+          if (geosailing(elm.Location.Latitude, elm.Location.Longitude, elm2.lat, elm2.lng) - elm2.Radius <= MargeRange) {
+            var CodesTmp = elm2.Codes.find(function (elm3) {
+              return geosailing(elm.Location.Latitude, elm.Location.Longitude, elm3.Location.Latitude, elm3.Location.Longitude) <= MargeRange;
             });
+            if (CodesTmp) {
+              var already = EQDetect_List.findIndex(function (elm3) {
+                return elm3.Codes.find(function (elm4) {
+                  return elm4.Name == elm.Name;
+                });
+              });
 
-            if (already == -1) {
-              return addPoint(elm, elm2);
+              if (already == -1) {
+                return addPoint(elm, elm2);
+              }
             }
           }
-        }
 
-        /*
+          /*
         var CodesTmp = elm2.Codes.find(function (elm3) {
           return geosailing(elm.Location.Latitude, elm.Location.Longitude, elm3.Location.Latitude, elm3.Location.Longitude) <= MargeRange;
         });
@@ -520,35 +523,30 @@ function kmoniControl(data, date) {
 
           return !already2;
         }*/
-      });
-      if (EQD_ItemTmp) {
-        EQD_ItemTmp.last_Detect = new Date();
-
-        /*
-        var detectPoint2 = EQD_ItemTmp.Codes.filter(function (elm2) {
-          return elm2.detectCount >= 2;
-          return elm2.detect2;
-        });*/
-
-        if (EQD_ItemTmp.Codes.length >= threshold01) {
-          if (mainWindow) {
-            mainWindow.webContents.send("message2", {
-              action: "EQDetect",
-              data: EQD_ItemTmp,
-            });
-          }
-        }
-      } else if (elm.detect2) {
-        EQDetect_List.push({ id: EQDetectID, lat: elm.Location.Latitude, lng: elm.Location.Longitude, Codes: [elm], Radius: 0, maxPGA: elm.pga, detectCount: 1, detect2Count: 1, last_Detect: new Date(), origin_Time: new Date() });
-        EQDetectID++;
-      }
-    } else {
-      elm.detectCount = 0;
-      EQDetect_List.forEach(function (elm2) {
-        elm2.Codes = elm2.Codes.filter(function (elm3) {
-          return elm3.Code !== elm.Code;
         });
-      });
+        if (EQD_ItemTmp) {
+          EQD_ItemTmp.last_Detect = new Date();
+
+          if (EQD_ItemTmp.Codes.length >= threshold01) {
+            if (mainWindow) {
+              mainWindow.webContents.send("message2", {
+                action: "EQDetect",
+                data: EQD_ItemTmp,
+              });
+            }
+          }
+        } else if (elm.detect2) {
+          EQDetect_List.push({ id: EQDetectID, lat: elm.Location.Latitude, lng: elm.Location.Longitude, Codes: [elm], Radius: 0, maxPGA: elm.pga, detectCount: 1, detect2Count: 1, last_Detect: new Date(), origin_Time: new Date() });
+          EQDetectID++;
+        }
+      } else {
+        elm.detectCount = 0;
+        EQDetect_List.forEach(function (elm2) {
+          elm2.Codes = elm2.Codes.filter(function (elm3) {
+            return elm3.Code !== elm.Code;
+          });
+        });
+      }
     }
   });
   kmoniPointsDataTmp = {
@@ -875,7 +873,7 @@ function RegularExecution() {
 
   //地震検知解除
   EQDetect_List.forEach(function (elm, index) {
-    if (new Date() - elm.origin_Time > time00 || new Date() - elm.last_Detect > time01) {
+    if (EEWNow || new Date() - elm.origin_Time > time00 || new Date() - elm.last_Detect > time01) {
       EQDetect_List.splice(index, 1);
       if (mainWindow) {
         mainWindow.webContents.send("message2", {
@@ -1505,17 +1503,10 @@ function eqInfoUpdate() {
       const parser = new new JSDOM().window.DOMParser();
       const xml = parser.parseFromString(dataTmp, "text/html");
       xml.querySelectorAll("entry").forEach(function (elm) {
-        var title = elm.querySelector("title").textContent;
         var url = elm.querySelector("id").textContent;
         if (!url) return;
 
-        if (title == "震度速報" || title == "震源に関する情報" || title == "震源・震度に関する情報" || title == "遠地地震に関する情報" || title == "顕著な地震の震源要素更新のお知らせ") {
-          //地震情報
-          JMAEQInfoFetch(url);
-        } else if (/大津波警報|津波警報|津波注意報|津波予報/.test(title)) {
-          //津波予報
-          JMAEQInfoFetch(url);
-        }
+        JMAEQInfoFetch(url);
       });
     });
   });
@@ -1648,14 +1639,14 @@ function EQI_narikakunList_Req(url, num, first) {
 
       narikakun_URLs = narikakun_URLs.concat(json.lists);
 
-      if (narikakun_URLs.length < num && first) {
+      if (narikakun_URLs.length < 10 && first) {
         var yearTmp = new Date().getFullYear();
         var monthTmp = new Date().getMonth();
         if (monthTmp == 0) {
           yearTmp = new Date().getFullYear() - 1;
           monthTmp = 1;
         }
-        EQI_narikakun_Req("ntool.online/api/earthquakeList?year=" + yearTmp + "&month=" + monthTmp, num - json.lists.length, false);
+        EQI_narikakunList_Req("https://ntool.online/api/earthquakeList?year=" + yearTmp + "&month=" + monthTmp, 10 - json.lists.length, false);
       } else {
         narikakun_URLs.slice(0, 10).forEach(function (elm) {
           EQI_narikakun_Req(elm);
@@ -1717,8 +1708,6 @@ function JMAEQInfoFetch(url) {
       dataTmp += chunk;
     });
     res.on("end", function () {
-      dataTmp =
-        '<?xml version="1.0" encoding="UTF-8"?><Report xmlns="http://xml.kishou.go.jp/jmaxml1/" xmlns:jmx="http://xml.kishou.go.jp/jmaxml1/"><Control>	<Title>津波警報・注意報・予報a</Title>	<DateTime>2011-03-11T05:49:59Z</DateTime>	<Status>通常</Status>	<EditorialOffice>大阪管区気象台</EditorialOffice>	<PublishingOffice>気象庁</PublishingOffice></Control><Head xmlns="http://xml.kishou.go.jp/jmaxml1/informationBasis1/">	<Title>大津波警報・津波警報・津波注意報・津波予報</Title>	<ReportDateTime>2011-03-11T14:49:00+09:00</ReportDateTime>	<TargetDateTime>2011-03-11T14:49:00+09:00</TargetDateTime>	<EventID>20110311144640</EventID>	<InfoType>発表</InfoType>	<Serial></Serial>	<InfoKind>津波警報・注意報・予報</InfoKind>	<InfoKindVersion>1.0_1</InfoKindVersion>	<Headline>		<Text>東日本大震災クラスの津波が来襲します。大津波警報・津波警報を発表しました。ただちに避難してください。</Text>		<Information type="津波予報領域表現">			<Item>				<Kind><Name>大津波警報</Name><Code>52</Code></Kind>				<Areas codeType="津波予報区">					<Area><Name>東北地方太平洋沿岸</Name><Code>291</Code></Area>				</Areas>			</Item>			<Item>				<Kind><Name>津波警報</Name><Code>51</Code></Kind>				<Areas codeType="津波予報区">					<Area><Name>北海道太平洋沿岸中部</Name><Code>101</Code></Area>					<Area><Name>茨城県</Name><Code>300</Code></Area>					<Area><Name>千葉県九十九里・外房</Name><Code>310</Code></Area>					<Area><Name>伊豆諸島</Name><Code>320</Code></Area>				</Areas>			</Item>		</Information>	</Headline></Head><Body xmlns="http://xml.kishou.go.jp/jmaxml1/body/seismology1/" xmlns:jmx_eb="http://xml.kishou.go.jp/jmaxml1/elementBasis1/">	<Tsunami>	<Forecast>		<CodeDefine>			<Type xpath="Item/Area/Code">津波予報区</Type>			<Type xpath="Item/Category/Kind/Code">警報等情報要素／津波警報・注意報・予報</Type>			<Type xpath="Item/Category/LastKind/Code">警報等情報要素／津波警報・注意報・予報</Type>		</CodeDefine>		<Item>			<Area><Name>岩手県</Name><Code>210</Code></Area>			<Category>				<Kind><Name>大津波警報：発表</Name><Code>53</Code></Kind>				<LastKind><Name>津波なし</Name><Code>00</Code></LastKind>			</Category>			<FirstHeight>				<Condition>津波到達中と推測</Condition>			</FirstHeight>			<MaxHeight>				<jmx_eb:TsunamiHeight type="津波の高さ" unit="m" condition="不明" description="巨大">NaN</jmx_eb:TsunamiHeight>			</MaxHeight>		</Item>		<Item>			<Area><Name>宮城県</Name><Code>220</Code></Area>			<Category>				<Kind><Name>大津波警報：発表</Name><Code>53</Code></Kind>				<LastKind><Name>津波なし</Name><Code>00</Code></LastKind>			</Category>			<FirstHeight>				<ArrivalTime>2011-03-11T15:00:00+09:00</ArrivalTime>			</FirstHeight>			<MaxHeight>				<jmx_eb:TsunamiHeight type="津波の高さ" unit="m" condition="不明" description="巨大">NaN</jmx_eb:TsunamiHeight>			</MaxHeight>		</Item>		<Item>			<Area><Name>福島県</Name><Code>250</Code></Area>			<Category>				<Kind><Name>大津波警報：発表</Name><Code>53</Code></Kind>				<LastKind><Name>津波なし</Name><Code>00</Code></LastKind>			</Category>			<FirstHeight>				<ArrivalTime>2011-03-11T15:10:00+09:00</ArrivalTime>			</FirstHeight>			<MaxHeight>				<jmx_eb:TsunamiHeight type="津波の高さ" unit="m" condition="不明" description="巨大">NaN</jmx_eb:TsunamiHeight>			</MaxHeight>		</Item>		<Item>			<Area><Name>北海道太平洋沿岸中部</Name><Code>101</Code></Area>			<Category>				<Kind><Name>津波警報</Name><Code>51</Code></Kind>				<LastKind><Name>津波なし</Name><Code>00</Code></LastKind>			</Category>			<FirstHeight>				<ArrivalTime>2011-03-11T15:30:00+09:00</ArrivalTime>			</FirstHeight>			<MaxHeight>				<jmx_eb:TsunamiHeight type="津波の高さ" unit="m" condition="不明" description="高い">NaN</jmx_eb:TsunamiHeight>			</MaxHeight>		</Item>		<Item>			<Area><Name>青森県太平洋沿岸</Name><Code>201</Code></Area>			<Category>				<Kind><Name>津波警報</Name><Code>51</Code></Kind>				<LastKind><Name>津波なし</Name><Code>00</Code></LastKind>			</Category>			<FirstHeight>				<ArrivalTime>2011-03-11T15:30:00+09:00</ArrivalTime>			</FirstHeight>			<MaxHeight>				<jmx_eb:TsunamiHeight type="津波の高さ" unit="m" condition="不明" description="高い">NaN</jmx_eb:TsunamiHeight>			</MaxHeight>		</Item>		<Item>			<Area><Name>茨城県</Name><Code>300</Code></Area>			<Category>				<Kind><Name>津波警報</Name><Code>51</Code></Kind>				<LastKind><Name>津波なし</Name><Code>00</Code></LastKind>			</Category>			<FirstHeight>				<ArrivalTime>2011-03-11T15:30:00+09:00</ArrivalTime>			</FirstHeight>			<MaxHeight>				<jmx_eb:TsunamiHeight type="津波の高さ" unit="m" condition="不明" description="高い">NaN</jmx_eb:TsunamiHeight>			</MaxHeight>		</Item>		<Item>			<Area><Name>千葉県九十九里・外房</Name><Code>310</Code></Area>			<Category>				<Kind><Name>津波警報</Name><Code>51</Code></Kind>				<LastKind><Name>津波なし</Name><Code>00</Code></LastKind>			</Category>			<FirstHeight>				<ArrivalTime>2011-03-11T15:20:00+09:00</ArrivalTime>			</FirstHeight>			<MaxHeight>				<jmx_eb:TsunamiHeight type="津波の高さ" unit="m" condition="不明" description="高い">NaN</jmx_eb:TsunamiHeight>			</MaxHeight>		</Item>		<Item>			<Area><Name>伊豆諸島</Name><Code>320</Code></Area>			<Category>				<Kind><Name>津波警報</Name><Code>51</Code></Kind>				<LastKind><Name>津波なし</Name><Code>00</Code></LastKind>			</Category>			<FirstHeight>				<ArrivalTime>2011-03-11T15:20:00+09:00</ArrivalTime>			</FirstHeight>			<MaxHeight>				<jmx_eb:TsunamiHeight type="津波の高さ" unit="m" condition="不明" description="高い">NaN</jmx_eb:TsunamiHeight>			</MaxHeight>		</Item>		<Item>			<Area><Name>北海道太平洋沿岸東部</Name><Code>100</Code></Area>			<Category>				<Kind><Name>津波注意報</Name><Code>62</Code></Kind>				<LastKind><Name>津波なし</Name><Code>00</Code></LastKind>			</Category>			<FirstHeight>				<ArrivalTime>2011-03-11T15:30:00+09:00</ArrivalTime>			</FirstHeight>			<MaxHeight>				<jmx_eb:TsunamiHeight type="津波の高さ" unit="m" condition="不明" description="">NaN</jmx_eb:TsunamiHeight>			</MaxHeight>		</Item>		<Item>			<Area><Name>北海道太平洋沿岸西部</Name><Code>102</Code></Area>			<Category>				<Kind><Name>津波注意報</Name><Code>62</Code></Kind>				<LastKind><Name>津波なし</Name><Code>00</Code></LastKind>			</Category>			<FirstHeight>				<ArrivalTime>2011-03-11T15:40:00+09:00</ArrivalTime>			</FirstHeight>			<MaxHeight>				<jmx_eb:TsunamiHeight type="津波の高さ" unit="m" condition="不明" description="">NaN</jmx_eb:TsunamiHeight>			</MaxHeight>		</Item>		<Item>			<Area><Name>青森県日本海沿岸</Name><Code>200</Code></Area>			<Category>				<Kind><Name>津波注意報</Name><Code>62</Code></Kind>				<LastKind><Name>津波なし</Name><Code>00</Code></LastKind>			</Category>			<FirstHeight>				<ArrivalTime>2011-03-11T16:10:00+09:00</ArrivalTime>			</FirstHeight>			<MaxHeight>				<jmx_eb:TsunamiHeight type="津波の高さ" unit="m" condition="不明" description="">NaN</jmx_eb:TsunamiHeight>			</MaxHeight>		</Item>		<Item>			<Area><Name>千葉県内房</Name><Code>311</Code></Area>			<Category>				<Kind><Name>津波注意報</Name><Code>62</Code></Kind>				<LastKind><Name>津波なし</Name><Code>00</Code></LastKind>			</Category>			<FirstHeight>				<ArrivalTime>2011-03-11T15:20:00+09:00</ArrivalTime>			</FirstHeight>			<MaxHeight>				<jmx_eb:TsunamiHeight type="津波の高さ" unit="m" condition="不明" description="">NaN</jmx_eb:TsunamiHeight>			</MaxHeight>		</Item>		<Item>			<Area><Name>小笠原諸島</Name><Code>321</Code></Area>			<Category>				<Kind><Name>津波注意報</Name><Code>62</Code></Kind>				<LastKind><Name>津波なし</Name><Code>00</Code></LastKind>			</Category>			<FirstHeight>				<ArrivalTime>2011-03-11T16:00:00+09:00</ArrivalTime>			</FirstHeight>			<MaxHeight>				<jmx_eb:TsunamiHeight type="津波の高さ" unit="m" condition="不明" description="">NaN</jmx_eb:TsunamiHeight>			</MaxHeight>		</Item>		<Item>			<Area><Name>相模湾・三浦半島</Name><Code>330</Code></Area>			<Category>				<Kind><Name>津波注意報</Name><Code>62</Code></Kind>				<LastKind><Name>津波なし</Name><Code>00</Code></LastKind>			</Category>			<FirstHeight>				<ArrivalTime>2011-03-11T15:30:00+09:00</ArrivalTime>			</FirstHeight>			<MaxHeight>				<jmx_eb:TsunamiHeight type="津波の高さ" unit="m" condition="不明" description="">NaN</jmx_eb:TsunamiHeight>			</MaxHeight>		</Item>		<Item>			<Area><Name>静岡県</Name><Code>380</Code></Area>			<Category>				<Kind><Name>津波注意報</Name><Code>62</Code></Kind>				<LastKind><Name>津波なし</Name><Code>00</Code></LastKind>			</Category>			<FirstHeight>				<ArrivalTime>2011-03-11T15:30:00+09:00</ArrivalTime>			</FirstHeight>			<MaxHeight>				<jmx_eb:TsunamiHeight type="津波の高さ" unit="m" condition="不明" description="">NaN</jmx_eb:TsunamiHeight>			</MaxHeight>		</Item>		<Item>			<Area><Name>愛知県外海</Name><Code>390</Code></Area>			<Category>				<Kind><Name>津波注意報</Name><Code>62</Code></Kind>				<LastKind><Name>津波なし</Name><Code>00</Code></LastKind>			</Category>			<FirstHeight>				<ArrivalTime>2011-03-11T16:10:00+09:00</ArrivalTime>			</FirstHeight>			<MaxHeight>				<jmx_eb:TsunamiHeight type="津波の高さ" unit="m" condition="不明" description="">NaN</jmx_eb:TsunamiHeight>			</MaxHeight>		</Item>		<Item>			<Area><Name>三重県南部</Name><Code>400</Code></Area>			<Category>				<Kind><Name>津波注意報</Name><Code>62</Code></Kind>				<LastKind><Name>津波なし</Name><Code>00</Code></LastKind>			</Category>			<FirstHeight>				<ArrivalTime>2011-03-11T16:00:00+09:00</ArrivalTime>			</FirstHeight>			<MaxHeight>				<jmx_eb:TsunamiHeight type="津波の高さ" unit="m" condition="不明" description="">NaN</jmx_eb:TsunamiHeight>			</MaxHeight>		</Item>		<Item>			<Area><Name>和歌山県</Name><Code>530</Code></Area>			<Category>				<Kind><Name>津波注意報</Name><Code>62</Code></Kind>				<LastKind><Name>津波なし</Name><Code>00</Code></LastKind>			</Category>			<FirstHeight>				<ArrivalTime>2011-03-11T16:10:00+09:00</ArrivalTime>			</FirstHeight>			<MaxHeight>				<jmx_eb:TsunamiHeight type="津波の高さ" unit="m" condition="不明" description="">NaN</jmx_eb:TsunamiHeight>			</MaxHeight>		</Item>		<Item>			<Area><Name>徳島県</Name><Code>580</Code></Area>			<Category>				<Kind><Name>津波注意報</Name><Code>62</Code></Kind>				<LastKind><Name>津波なし</Name><Code>00</Code></LastKind>			</Category>			<FirstHeight>				<ArrivalTime>2011-03-11T16:40:00+09:00</ArrivalTime>			</FirstHeight>			<MaxHeight>				<jmx_eb:TsunamiHeight type="津波の高さ" unit="m" condition="不明" description="">NaN</jmx_eb:TsunamiHeight>			</MaxHeight>		</Item>		<Item>			<Area><Name>高知県</Name><Code>610</Code></Area>			<Category>				<Kind><Name>津波注意報</Name><Code>62</Code></Kind>				<LastKind><Name>津波なし</Name><Code>00</Code></LastKind>			</Category>			<FirstHeight>				<ArrivalTime>2011-03-11T16:30:00+09:00</ArrivalTime>			</FirstHeight>			<MaxHeight>				<jmx_eb:TsunamiHeight type="津波の高さ" unit="m" condition="不明" description="">NaN</jmx_eb:TsunamiHeight>			</MaxHeight>		</Item>		<Item>			<Area><Name>宮崎県</Name><Code>760</Code></Area>			<Category>				<Kind><Name>津波注意報</Name><Code>62</Code></Kind>				<LastKind><Name>津波なし</Name><Code>00</Code></LastKind>			</Category>			<FirstHeight>				<ArrivalTime>2011-03-11T17:00:00+09:00</ArrivalTime>			</FirstHeight>			<MaxHeight>				<jmx_eb:TsunamiHeight type="津波の高さ" unit="m" condition="不明" description="">NaN</jmx_eb:TsunamiHeight>			</MaxHeight>		</Item>		<Item>			<Area><Name>種子島・屋久島地方</Name><Code>771</Code></Area>			<Category>				<Kind><Name>津波注意報</Name><Code>62</Code></Kind>				<LastKind><Name>津波なし</Name><Code>00</Code></LastKind>			</Category>			<FirstHeight>				<ArrivalTime>2011-03-11T17:10:00+09:00</ArrivalTime>			</FirstHeight>			<MaxHeight>				<jmx_eb:TsunamiHeight type="津波の高さ" unit="m" condition="不明" description="">NaN</jmx_eb:TsunamiHeight>			</MaxHeight>		</Item>		<Item>			<Area><Name>奄美諸島・トカラ列島</Name><Code>772</Code></Area>			<Category>				<Kind><Name>津波注意報</Name><Code>62</Code></Kind>				<LastKind><Name>津波なし</Name><Code>00</Code></LastKind>			</Category>			<FirstHeight>				<ArrivalTime>2011-03-11T17:10:00+09:00</ArrivalTime>			</FirstHeight>			<MaxHeight>				<jmx_eb:TsunamiHeight type="津波の高さ" unit="m" condition="不明" description="">NaN</jmx_eb:TsunamiHeight>			</MaxHeight>		</Item>		<Item>			<Area><Name>北海道日本海沿岸南部</Name><Code>111</Code></Area>			<Category>				<Kind><Name>津波予報（若干の海面変動）</Name><Code>71</Code></Kind>				<LastKind><Name>津波なし</Name><Code>00</Code></LastKind>			</Category>			<MaxHeight>				<jmx_eb:TsunamiHeight type="津波の高さ" unit="m" condition="不明" description="">NaN</jmx_eb:TsunamiHeight>			</MaxHeight>		</Item>		<Item>			<Area><Name>陸奥湾</Name><Code>202</Code></Area>			<Category>				<Kind><Name>津波予報（若干の海面変動）</Name><Code>71</Code></Kind>				<LastKind><Name>津波なし</Name><Code>00</Code></LastKind>			</Category>			<MaxHeight>				<jmx_eb:TsunamiHeight type="津波の高さ" unit="m" condition="不明" description="">NaN</jmx_eb:TsunamiHeight>			</MaxHeight>		</Item>		<Item>			<Area><Name>東京湾内湾</Name><Code>312</Code></Area>			<Category>				<Kind><Name>津波予報（若干の海面変動）</Name><Code>71</Code></Kind>				<LastKind><Name>津波なし</Name><Code>00</Code></LastKind>			</Category>			<MaxHeight>				<jmx_eb:TsunamiHeight type="津波の高さ" unit="m" condition="不明" description="">NaN</jmx_eb:TsunamiHeight>			</MaxHeight>		</Item>		<Item>			<Area><Name>伊勢・三河湾</Name><Code>391</Code></Area>			<Category>				<Kind><Name>津波予報（若干の海面変動）</Name><Code>71</Code></Kind>				<LastKind><Name>津波なし</Name><Code>00</Code></LastKind>			</Category>			<MaxHeight>				<jmx_eb:TsunamiHeight type="津波の高さ" unit="m" condition="不明" description="">NaN</jmx_eb:TsunamiHeight>			</MaxHeight>		</Item>		<Item>			<Area><Name>大阪府</Name><Code>510</Code></Area>			<Category>				<Kind><Name>津波予報（若干の海面変動）</Name><Code>71</Code></Kind>				<LastKind><Name>津波なし</Name><Code>00</Code></LastKind>			</Category>			<MaxHeight>				<jmx_eb:TsunamiHeight type="津波の高さ" unit="m" condition="不明" description="">NaN</jmx_eb:TsunamiHeight>			</MaxHeight>		</Item>		<Item>			<Area><Name>兵庫県瀬戸内海沿岸</Name><Code>521</Code></Area>			<Category>				<Kind><Name>津波予報（若干の海面変動）</Name><Code>71</Code></Kind>				<LastKind><Name>津波なし</Name><Code>00</Code></LastKind>			</Category>			<MaxHeight>				<jmx_eb:TsunamiHeight type="津波の高さ" unit="m" condition="不明" description="">NaN</jmx_eb:TsunamiHeight>			</MaxHeight>		</Item>		<Item>			<Area><Name>淡路島南部</Name><Code>522</Code></Area>			<Category>				<Kind><Name>津波予報（若干の海面変動）</Name><Code>71</Code></Kind>				<LastKind><Name>津波なし</Name><Code>00</Code></LastKind>			</Category>			<MaxHeight>				<jmx_eb:TsunamiHeight type="津波の高さ" unit="m" condition="不明" description="">NaN</jmx_eb:TsunamiHeight>			</MaxHeight>		</Item>		<Item>			<Area><Name>岡山県</Name><Code>560</Code></Area>			<Category>				<Kind><Name>津波予報（若干の海面変動）</Name><Code>71</Code></Kind>				<LastKind><Name>津波なし</Name><Code>00</Code></LastKind>			</Category>			<MaxHeight>				<jmx_eb:TsunamiHeight type="津波の高さ" unit="m" condition="不明" description="">NaN</jmx_eb:TsunamiHeight>			</MaxHeight>		</Item>		<Item>			<Area><Name>香川県</Name><Code>590</Code></Area>			<Category>				<Kind><Name>津波予報（若干の海面変動）</Name><Code>71</Code></Kind>				<LastKind><Name>津波なし</Name><Code>00</Code></LastKind>			</Category>			<MaxHeight>				<jmx_eb:TsunamiHeight type="津波の高さ" unit="m" condition="不明" description="">NaN</jmx_eb:TsunamiHeight>			</MaxHeight>		</Item>		<Item>			<Area><Name>愛媛県宇和海沿岸</Name><Code>600</Code></Area>			<Category>				<Kind><Name>津波予報（若干の海面変動）</Name><Code>71</Code></Kind>				<LastKind><Name>津波なし</Name><Code>00</Code></LastKind>			</Category>			<MaxHeight>				<jmx_eb:TsunamiHeight type="津波の高さ" unit="m" condition="不明" description="">NaN</jmx_eb:TsunamiHeight>			</MaxHeight>		</Item>		<Item>			<Area><Name>有明・八代海</Name><Code>712</Code></Area>			<Category>				<Kind><Name>津波予報（若干の海面変動）</Name><Code>71</Code></Kind>				<LastKind><Name>津波なし</Name><Code>00</Code></LastKind>			</Category>			<MaxHeight>				<jmx_eb:TsunamiHeight type="津波の高さ" unit="m" condition="不明" description="">NaN</jmx_eb:TsunamiHeight>			</MaxHeight>		</Item>		<Item>			<Area><Name>長崎県西方</Name><Code>730</Code></Area>			<Category>				<Kind><Name>津波予報（若干の海面変動）</Name><Code>71</Code></Kind>				<LastKind><Name>津波なし</Name><Code>00</Code></LastKind>			</Category>			<MaxHeight>				<jmx_eb:TsunamiHeight type="津波の高さ" unit="m" condition="不明" description="">NaN</jmx_eb:TsunamiHeight>			</MaxHeight>		</Item>		<Item>			<Area><Name>熊本県天草灘沿岸</Name><Code>740</Code></Area>			<Category>				<Kind><Name>津波予報（若干の海面変動）</Name><Code>71</Code></Kind>				<LastKind><Name>津波なし</Name><Code>00</Code></LastKind>			</Category>			<MaxHeight>				<jmx_eb:TsunamiHeight type="津波の高さ" unit="m" condition="不明" description="">NaN</jmx_eb:TsunamiHeight>			</MaxHeight>		</Item>		<Item>			<Area><Name>大分県瀬戸内海沿岸</Name><Code>750</Code></Area>			<Category>				<Kind><Name>津波予報（若干の海面変動）</Name><Code>71</Code></Kind>				<LastKind><Name>津波なし</Name><Code>00</Code></LastKind>			</Category>			<MaxHeight>				<jmx_eb:TsunamiHeight type="津波の高さ" unit="m" condition="不明" description="">NaN</jmx_eb:TsunamiHeight>			</MaxHeight>		</Item>		<Item>			<Area><Name>大分県豊後水道沿岸</Name><Code>751</Code></Area>			<Category>				<Kind><Name>津波予報（若干の海面変動）</Name><Code>71</Code></Kind>				<LastKind><Name>津波なし</Name><Code>00</Code></LastKind>			</Category>			<MaxHeight>				<jmx_eb:TsunamiHeight type="津波の高さ" unit="m" condition="不明" description="">NaN</jmx_eb:TsunamiHeight>			</MaxHeight>		</Item>		<Item>			<Area><Name>鹿児島県東部</Name><Code>770</Code></Area>			<Category>				<Kind><Name>津波予報（若干の海面変動）</Name><Code>71</Code></Kind>				<LastKind><Name>津波なし</Name><Code>00</Code></LastKind>			</Category>			<MaxHeight>				<jmx_eb:TsunamiHeight type="津波の高さ" unit="m" condition="不明" description="">NaN</jmx_eb:TsunamiHeight>			</MaxHeight>		</Item>		<Item>			<Area><Name>鹿児島県西部</Name><Code>773</Code></Area>			<Category>				<Kind><Name>津波予報（若干の海面変動）</Name><Code>71</Code></Kind>				<LastKind><Name>津波なし</Name><Code>00</Code></LastKind>			</Category>			<MaxHeight>				<jmx_eb:TsunamiHeight type="津波の高さ" unit="m" condition="不明" description="">NaN</jmx_eb:TsunamiHeight>			</MaxHeight>		</Item>		<Item>			<Area><Name>沖縄本島地方</Name><Code>800</Code></Area>			<Category>				<Kind><Name>津波予報（若干の海面変動）</Name><Code>71</Code></Kind>				<LastKind><Name>津波なし</Name><Code>00</Code></LastKind>			</Category>			<MaxHeight>				<jmx_eb:TsunamiHeight type="津波の高さ" unit="m" condition="不明" description="">NaN</jmx_eb:TsunamiHeight>			</MaxHeight>		</Item>		<Item>			<Area><Name>大東島地方</Name><Code>801</Code></Area>			<Category>				<Kind><Name>津波予報（若干の海面変動）</Name><Code>71</Code></Kind>				<LastKind><Name>津波なし</Name><Code>00</Code></LastKind>			</Category>			<MaxHeight>				<jmx_eb:TsunamiHeight type="津波の高さ" unit="m" condition="不明" description="">NaN</jmx_eb:TsunamiHeight>			</MaxHeight>		</Item>		<Item>			<Area><Name>宮古島・八重山地方</Name><Code>802</Code></Area>			<Category>				<Kind><Name>津波予報（若干の海面変動）</Name><Code>71</Code></Kind>				<LastKind><Name>津波なし</Name><Code>00</Code></LastKind>			</Category>			<MaxHeight>				<jmx_eb:TsunamiHeight type="津波の高さ" unit="m" condition="不明" description="">NaN</jmx_eb:TsunamiHeight>			</MaxHeight>		</Item>	</Forecast>	</Tsunami>	<Earthquake>		<OriginTime>2011-03-11T14:46:00+09:00</OriginTime>		<ArrivalTime>2011-03-11T14:46:00+09:00</ArrivalTime>		<Hypocenter>			<Area>				<Name>三陸沖</Name>				<Code type="震央地名">288</Code>				<jmx_eb:Coordinate description="北緯３８．０度　東経１４２．９度　深さ　１０ｋｍ" datum="日本測地系">+38.0+142.9-10000/</jmx_eb:Coordinate>				<NameFromMark>牡鹿半島の東南東１３０ｋｍ付近</NameFromMark>				<MarkCode type="震央補助">202</MarkCode>				<Direction>東南東</Direction>				<Distance unit="km">130</Distance>			</Area>		</Hypocenter>		<jmx_eb:Magnitude type="Mj" condition="不明" description="Ｍ８を超える巨大地震">NaN</jmx_eb:Magnitude>	</Earthquake>	<Comments>		<WarningComment codeType="固定付加文">			<Text>東日本大震災クラスの津波が来襲します。ただちに避難してください。＜大津波警報＞大きな津波が襲い甚大な被害が発生します。沿岸部や川沿いにいる人はただちに高台や避難ビルなど安全な場所へ避難してください。津波は繰り返し襲ってきます。警報が解除されるまで安全な場所から離れないでください。＜津波警報＞津波による被害が発生します。沿岸部や川沿いにいる人はただちに高台や避難ビルなど安全な場所へ避難してください。津波は繰り返し襲ってきます。警報が解除されるまで安全な場所から離れないでください。＜津波注意報＞海の中や海岸付近は危険です。海の中にいる人はただちに海から上がって、海岸から離れてください。潮の流れが速い状態が続きますので、注意報が解除されるまで海に入ったり海岸に近づいたりしないようにしてください。＜津波予報（若干の海面変動）＞若干の海面変動が予想されますが、被害の心配はありません。警報が発表された沿岸部や川沿いにいる人はただちに高台や避難ビルなど安全な場所へ避難してください。到達予想時刻は、予報区のなかで最も早く津波が到達する時刻です。場所によっては、この時刻よりもかなり遅れて津波が襲ってくることがあります。到達予想時刻から津波が最も高くなるまでに数時間以上かかることがありますので、観測された津波の高さにかかわらず、警報が解除されるまで安全な場所から離れないでください。</Text>			<Code>0141 0149 0121 0122 0123 0124 0131</Code>		</WarningComment>	</Comments></Body></Report>';
       const parser = new new JSDOM().window.DOMParser();
       const xml = parser.parseFromString(dataTmp, "text/html");
       var title = xml.title;
@@ -1758,7 +1747,7 @@ function JMAEQInfoFetch(url) {
           ],
           "jma"
         );
-      } else if (/大津波警報|津波警報|津波注意報|津波予報/.test(title)) {
+      } else if ((title = "津波情報a" || /大津波警報|津波警報|津波注意報|津波予報/.test(title))) {
         //津波予報
 
         if (cancel) {
@@ -1813,12 +1802,34 @@ function JMAEQInfoFetch(url) {
                 if (elm.querySelector("FirstHeight Condition")) {
                   firstHeightConditionTmp = elm.querySelector("FirstHeight Condition").textContent;
                 }
+              }
+              if (elm.querySelector("MaxHeight")) {
                 if (elm.querySelector("MaxHeight").getElementsByTagName("jmx_eb:TsunamiHeight")) {
                   maxHeightTmp = elm.querySelector("MaxHeight").getElementsByTagName("jmx_eb:TsunamiHeight")[0].getAttribute("description");
                   maxHeightTmp = maxHeightTmp.replace(/[Ａ-Ｚａ-ｚ０-９．]/g, function (s) {
                     return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
                   });
                 }
+              }
+              var stations = [];
+              if (elm.querySelector("Station")) {
+                elm.querySelectorAll("Station").forEach(function (elm2) {
+                  var nameTmp;
+                  var highTideTimeTmp;
+                  var ArrivalTimeTmp;
+                  var ConditionTmp;
+                  nameTmp = elm2.querySelector("Name").textContent;
+                  highTideTimeTmp = new Date(elm2.querySelector("HighTideDateTime").textContent);
+                  if (elm2.querySelector("FirstHeight")) ArrivalTimeTmp = new Date(elm2.querySelector("FirstHeight").textContent);
+                  if (elm2.querySelector("Condition")) ConditionTmp = elm2.querySelector("Condition").textContent;
+                  stations.push({
+                    name: nameTmp,
+                    HighTideDateTime: highTideTimeTmp,
+                    ArrivalTime: ArrivalTimeTmp,
+                    Condition: ConditionTmp,
+                  });
+                });
+                HighTideDateTime = new Date(elm.querySelector("HighTideDateTime").textContent);
               }
 
               tsunamiDataTmp.areas.push({
@@ -1828,6 +1839,7 @@ function JMAEQInfoFetch(url) {
                 canceled: canceledTmp,
                 firstHeight: firstHeightTmp,
                 firstHeightCondition: firstHeightConditionTmp,
+                stations: stations,
                 maxHeight: maxHeightTmp,
               });
             });
@@ -1888,9 +1900,6 @@ function eqInfoControl(dataList, type) {
 function eqInfoAlert(data, source, update) {
   if (source == "jma") {
     if (update) {
-      var EQInfoTmp = eqInfo.jma.find(function (elm) {
-        return elm.eventId == data.eventId;
-      });
       EQInfoTmp = data;
     } else {
       eqInfo.jma = eqInfo.jma.concat(data);
@@ -1928,10 +1937,45 @@ function eqInfoAlert(data, source, update) {
 }
 
 function TsunamiInfoControl(data) {
-  var newInfo = !tsunamiData || tsunamiData.issue.time < data.issue.time;
-  var stilANDjma = !tsunamiData || (tsunamiData.issue.time == data.issue.time && data.source == "jmaXML" && tsunamiData.source == "P2P");
-  if (!tsunamiData || newInfo || stilANDjma) {
-    tsunamiData = data;
+  var newInfo = !tsunamiData || !tsunamiData.issue || tsunamiData.issue.time < data.issue.time;
+  if (newInfo) {
+    if (!tsunamiData) tsunamiData = {};
+    if (data.revocation) tsunamiData.revocation = data.revocation;
+    if (data.issue) tsunamiData.issue = data.issue;
+    if (data.source) tsunamiData.source = data.source;
+    if (!tsunamiData.areas) tsunamiData.areas = [];
+    data.areas.forEach(function (elm, index) {
+      var areaData;
+
+      if (tsunamiData.areas.length !== 0 && tsunamiData) {
+        areaData = tsunamiData.areas.find(function (elm2) {
+          return elm2.name == elm.name;
+        });
+      }
+      if (areaData) {
+        if (elm.canceled) areaData.canceled = true;
+        if (elm.firstHeight) areaData.firstHeight = elm.firstHeight;
+        if (elm.firstHeightCondition) areaData.firstHeightCondition = elm.firstHeightCondition;
+        if (elm.maxHeight) areaData.maxHeight = elm.maxHeight;
+
+        elm.stations.forEach(function (elm2) {
+          if (areaData.stations && Array.isArray(areaData.stations)) {
+            var areaData2 = areaData.stations.find(function (elm3) {
+              return elm3.name == elm2.name;
+            });
+          }
+          if (areaData2) {
+            if (elm2.HighTideDateTime) areaData2.HighTideDateTime = elm2.HighTideDateTime;
+            if (elm2.ArrivalTime) areaData2.ArrivalTime = elm2.ArrivalTime;
+            if (elm2.Condition) areaData2.Condition = elm2.Condition;
+          } else {
+            areaData.stations = elm2;
+          }
+        });
+      } else {
+        tsunamiData.areas.push(elm);
+      }
+    });
 
     if (newInfo) {
       //アラート

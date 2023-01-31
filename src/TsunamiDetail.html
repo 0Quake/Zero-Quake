@@ -35,8 +35,14 @@
       border-collapse: separate;
     }
 
+    .ListItem_detail * {
+      font-size: 14px;
+      line-height: 1.2em;
+      padding: 10px;
+      color: #CCC;
+    }
+
     table {
-      width: 50%;
       min-width: 500px;
       display: inline-table;
       text-align: left;
@@ -51,7 +57,7 @@
       text-align: center;
       position: -webkit-sticky;
       position: sticky;
-      top: 50px;
+      top: 120px;
       z-index: 1;
       background: #222;
       height: 50px;
@@ -89,11 +95,11 @@
 
 
     table thead {
-      top: 0;
+      top: 70px;
     }
 
     table td {
-      padding: 0.5em 0.5em;
+      padding: 9px 10px;
       font-size: 18px;
     }
 
@@ -109,7 +115,7 @@
       height: 100%;
       top: 0;
       left: 0;
-      border: solid 2px var(--TsunamiMajorWarningColor);
+      outline: solid 2px var(--TsunamiMajorWarningColor);
     }
 
     #WarningInfo::after {
@@ -119,7 +125,7 @@
       height: 100%;
       top: 0;
       left: 0;
-      border: solid 2px var(--TsunamiWarningColor);
+      outline: solid 2px var(--TsunamiWarningColor);
     }
 
     #WatchInfo::after {
@@ -129,7 +135,7 @@
       height: 100%;
       top: 0;
       left: 0;
-      border: solid 2px var(--TsunamiWatchColor);
+      outline: solid 2px var(--TsunamiWatchColor);
     }
 
     #YohoInfo::after {
@@ -139,7 +145,7 @@
       height: 100%;
       top: 0;
       left: 0;
-      border: solid 2px var(--TsunamiYohoColor);
+      outline: solid 2px var(--TsunamiYohoColor);
     }
 
     #revocation,
@@ -164,6 +170,19 @@
     .ListIcon_Yoho {
       background: var(--TsunamiYohoColor);
     }
+
+    h1 {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 70px;
+      margin: 0;
+      line-height: 70px;
+      z-index: 1000;
+      background: #333;
+      border-bottom: solid 1px #666;
+    }
   </style>
 
 </head>
@@ -175,32 +194,33 @@
     <div id="revocation">津波情報は取り消されました。</div>
     <div id="DTWrap">発表日時：<span id="dateTime">不明</span></div>
 
+    <h1 id="title">津波情報</h1>
     <table>
-      <caption class="h2">津波情報</caption>
       <thead>
         <tr>
           <th></th>
           <th>津波予報区</th>
           <th>第１波<br>予想到達時刻</th>
           <th>予想される<br>津波の高さ</th>
+          <th>満潮時刻</th>
           <th></th>
         </tr>
       </thead>
       <tbody>
         <tr id="MajorWarningInfo">
-          <th colspan="5">大津波警報</th>
+          <th colspan="6">大津波警報</th>
         </tr>
         <tr id="WarningInfo">
-          <th colspan="5">津波警報</th>
+          <th colspan="6">津波警報</th>
         </tr>
         <tr id="WatchInfo">
-          <th colspan="5">津波注意報</th>
+          <th colspan="6">津波注意報</th>
         </tr>
         <tr id="YohoInfo">
-          <th colspan="5">津波予報</th>
+          <th colspan="6">津波予報</th>
         </tr>
         <tr id="no-data">
-          <th colspan="5">データがありません</th>
+          <th colspan="6">データがありません</th>
         </tr>
       </tbody>
     </table>
@@ -210,12 +230,13 @@
 
 
   <script>
-
+    var data
 
     window.electronAPI.messageSend((event, request) => {
 
 
       if (request.action == "tsunamiUpdate") {
+        data = request.data
         var Tsunami_MajorWarning = Tsunami_Warning = Tsunami_Watch = Tsunami_Yoho = false;
         document.getElementById("dateTime").style.display = "block"
         document.getElementById("revocation").style.display = "none"
@@ -267,7 +288,7 @@
                 break;
               case "Yoho":
                 Tsunami_Yoho = true
-                arrivalTime = "-"
+                arrivalTime = ""
                 maxHeight = "若干の海面変動"
                 IconTxt = "予"
                 break;
@@ -277,10 +298,35 @@
             }
 
             var new_tr = document.createElement("tr");
-            new_tr.innerHTML = "<td><div class='ListIcon_" + elm.grade + "'>" + IconTxt + "</div></td><td>" + elm.name + "</td><td>" + arrivalTime + "</td><td>" + maxHeight + "</td><td>" + condition + "</td>"
+            new_tr.innerHTML = "<td><div class='ListIcon_" + elm.grade + "'>" + IconTxt + "</div></td><td>" + elm.name + "</td><td>" + arrivalTime + "</td><td>" + maxHeight + "</td><td></td><td>" + condition + "</td>"
             new_tr.classList.add("add-content")
             new_tr.classList.add("ListItem_" + elm.grade)
             document.getElementById(elm.grade + "Info").after(new_tr)
+
+            if (elm.stations && Array.isArray(elm.stations)) {
+              elm.stations.forEach(function (elm2) {
+                var condition = ""
+                var arrivalTime = "不明"
+                var HighTideDateTime = "不明"
+                if (elm2.ArrivalTime) {
+                  arrivalTime = dateEncode(5, elm2.ArrivalTime)
+                }
+                if (elm2.Conditions) {
+                  condition = elm2.Conditions
+                }
+                if (elm2.HighTideDateTime) {
+                  HighTideDateTime = dateEncode(5, elm2.HighTideDateTime)
+                }
+
+
+                var new_tr2 = document.createElement("tr");
+
+                new_tr2.innerHTML = "<td></td><td>" + elm2.name + "</td><td>" + arrivalTime + "</td><td></td><td>" + HighTideDateTime + "</td><td>" + condition + "</td>"
+                new_tr2.classList.add("add-content")
+                new_tr2.classList.add("ListItem_detail")
+                new_tr.after(new_tr2)
+              })
+            }
           }
         });
 

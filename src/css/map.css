@@ -30,10 +30,8 @@ a.leaflet-control-zoom-out:hover {
 }
 
 img.leaflet-control {
-  max-height: 200px;
-  max-width: 200px;
-  background: #fff;
-  border-radius: 5px;
+  max-height: 250px;
+  max-width: 100px;
 }
 .transitionActive .PWave,
 .transitionActive .SWave {
@@ -127,14 +125,15 @@ img.leaflet-control {
   outline-offset: 2px;
   z-index: 220;
 }
-.zoomLevel_3 .detectingMarker,
-.zoomLevel_4 .detectingMarker {
+.zoomLevel_3 .detectingMarker {
   outline: solid 2px #fff;
   z-index: 221;
+  transform: scale(1.2);
 }
 .strongDetectingMarker {
-  outline: solid 4px rgb(214, 214, 9);
+  outline: solid 2px rgb(214, 214, 9);
   z-index: 222;
+  transform: scale(1.5);
 }
 
 .hidePopup {
@@ -185,8 +184,8 @@ img.leaflet-control {
   margin: 10px;
 }
 .zoomLevel_2 .marker-circle {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   margin: 7.5px;
 }
 .zoomLevel_3 .marker-circle {

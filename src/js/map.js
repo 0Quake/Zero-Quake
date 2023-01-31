@@ -602,7 +602,7 @@ function init() {
   var legend = L.control({ position: "bottomright" });
   legend.onAdd = function (map) {
     var img = L.DomUtil.create("img");
-    img.src = "./img/nied_acmap_s_w_scale.gif";
+    img.src = "./img/nied_acmap_s_w_scale.svg";
     return img;
   };
   legend.addTo(map);
@@ -751,9 +751,10 @@ function kmoniMapUpdate(dataTmp, type) {
         changed = true;
       }
 
-      if (changed) {
-        var markerElement = document.querySelector(".KmoniPoint_" + elm.Code);
-        if (markerElement) {
+      var markerElement = document.querySelector(".KmoniPoint_" + elm.Code);
+      if (markerElement) {
+        markerElement.style.display = "block";
+        if (changed) {
           markerElement.querySelector(".PointName").style.borderBottom = "solid 2px rgb(" + elm.rgb.join(",") + ")";
           markerElement.querySelector(".PointInt").innerText = Math.round(elm.shindo * 10) / 10;
           markerElement.querySelector(".PointPGA").innerText = Math.round(elm.pga * 100) / 100;
@@ -761,7 +762,6 @@ function kmoniMapUpdate(dataTmp, type) {
           if (elm.detect2) {
             markerElement.querySelector(".marker-circle").classList.remove("detectingMarker");
             markerElement.querySelector(".marker-circle").classList.add("strongDetectingMarker");
-            console.log("aaaaaaaads");
           } else if (elm.detect) {
             markerElement.querySelector(".marker-circle").classList.remove("strongDetectingMarker");
             markerElement.querySelector(".marker-circle").classList.add("detectingMarker");
@@ -770,7 +770,6 @@ function kmoniMapUpdate(dataTmp, type) {
             markerElement.querySelector(".marker-circle").classList.remove("detectingMarker");
           }
           markerElement.querySelector(".detecting").innerText = elm.detect ? "block" : "none";
-          markerElement.style.display = "block";
         }
       }
     } else {
