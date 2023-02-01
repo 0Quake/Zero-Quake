@@ -1939,6 +1939,9 @@ function eqInfoAlert(data, source, update) {
 function TsunamiInfoControl(data) {
   var newInfo = !tsunamiData || !tsunamiData.issue || tsunamiData.issue.time < data.issue.time;
   if (newInfo) {
+    tsunamiData = data;
+
+    /*
     if (!tsunamiData) tsunamiData = {};
     if (data.revocation) tsunamiData.revocation = data.revocation;
     if (data.issue) tsunamiData.issue = data.issue;
@@ -1975,7 +1978,7 @@ function TsunamiInfoControl(data) {
       } else {
         tsunamiData.areas.push(elm);
       }
-    });
+    });*/
 
     if (newInfo) {
       //アラート
