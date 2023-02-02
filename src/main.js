@@ -56,6 +56,7 @@ ipcMain.on("message", (_event, response) => {
         action: "tsunamiUpdate",
         data: tsunamiData,
       });
+      console.log(tsunamiData);
     }
   } else if (response.action == "settingWindowOpen") {
     if (!settingWindow) {
@@ -180,6 +181,7 @@ function createWindow() {
   //mainWindow.setMenuBarVisibility(false);
 
   mainWindow.webContents.on("did-finish-load", () => {
+    replay("2023/02/02 19:39:40");
     // replay("2023/01/31 17:48:30");
     //replay("2023/01/30 00:30:00");
     //replay("2023/01/29 12:36:00");
@@ -1747,7 +1749,7 @@ function JMAEQInfoFetch(url) {
           ],
           "jma"
         );
-      } else if ((title = "津波情報a" || /大津波警報|津波警報|津波注意報|津波予報/.test(title))) {
+      } else if (title == "津波情報a" || /大津波警報|津波警報|津波注意報|津波予報/.test(title)) {
         //津波予報
 
         if (cancel) {
@@ -1764,7 +1766,7 @@ function JMAEQInfoFetch(url) {
             revocation: false,
             source: "jmaXML",
           };
-
+          console.log(title);
           if (xml.querySelector("Body Tsunami")) {
             xml.querySelectorAll("Body Tsunami Forecast Item").forEach(function (elm) {
               var gradeTmp;
@@ -2438,7 +2440,7 @@ function shindoConvert(str, responseType) {
           1: ["#79A8B3", "#222"],
           2: ["#3685E0", "#FFF"],
           3: ["#4DB051", "#FFF"],
-          4: ["#BFB837", "#000"],
+          4: ["#BFB837", "#333"],
           "5-": ["#F09629", "#000"],
           "5+": ["#F5713D", "#000"],
           "6-": ["#E60000", "#FFF"],
