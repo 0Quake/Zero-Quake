@@ -193,6 +193,35 @@
       text-align: center;
       height: 50px;
     }
+
+    .disabled-cell {
+      text-align: center;
+      font-size: 16px;
+      color: #999;
+    }
+
+    .disabled-wrap {
+      display: block;
+      text-align: center;
+      font-size: 16px;
+      color: #999;
+    }
+
+    .TxtIcon {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #CCC;
+      color: #000;
+      font-size: 12px;
+      line-height: 16px;
+      text-align: center;
+      padding: 0;
+      margin-right: 3px;
+      overflow: hidden;
+      vertical-align: middle;
+    }
   </style>
 
 </head>
@@ -211,7 +240,7 @@
           <th></th>
           <th>津波予報区</th>
           <th>第１波<br>予想到達時刻</th>
-          <th>予想される<br>津波の高さ</th>
+          <th>津波の高さ<br>予想/観測</th>
           <th>満潮時刻</th>
           <th></th>
         </tr>
@@ -275,12 +304,12 @@
               }
             } else if (elm.firstHeightCondition) {
               arrivalTime = elm.firstHeightCondition
-
             }
+
 
             var maxHeight = "不明"
             if (elm.maxHeight) {
-              maxHeight = elm.maxHeight
+              maxHeight = "<span class='TxtIcon'>観</span>" + elm.maxHeight
             }
             var IconTxt = "";
             switch (elm.grade) {
@@ -298,8 +327,8 @@
                 break;
               case "Yoho":
                 Tsunami_Yoho = true
-                arrivalTime = ""
-                maxHeight = "若干の海面変動"
+                arrivalTime = "<span class='disabled-wrap'>-</span>"
+                if (!maxHeight) maxHeight = "若干の海面変動"
                 IconTxt = "予"
                 break;
 
@@ -308,7 +337,7 @@
             }
 
             var new_tr = document.createElement("tr");
-            new_tr.innerHTML = "<td><div class='ListIcon_" + elm.grade + "'>" + IconTxt + "</div></td><td>" + elm.name + "</td><td>" + arrivalTime + "</td><td>" + maxHeight + "</td><td></td><td>" + condition + "</td>"
+            new_tr.innerHTML = "<td><div class='ListIcon_" + elm.grade + "'>" + IconTxt + "</div></td><td>" + elm.name + "</td><td>" + arrivalTime + "</td><td>" + maxHeight + "</td><td class='disabled-cell'>-</td><td>" + condition + "</td>"
             new_tr.classList.add("add-content")
             new_tr.classList.add("ListItem_" + elm.grade)
             document.getElementById(elm.grade + "Info").after(new_tr)
@@ -318,20 +347,42 @@
                 var condition = ""
                 var arrivalTime = "不明"
                 var HighTideDateTime = "不明"
-                if (elm2.ArrivalTime) {
-                  arrivalTime = dateEncode(5, elm2.ArrivalTime)
-                }
+                var omaxHeight = "不明"
+
                 if (elm2.Conditions) {
                   condition = elm2.Conditions
                 }
                 if (elm2.HighTideDateTime) {
                   HighTideDateTime = dateEncode(5, elm2.HighTideDateTime)
                 }
+                if (elm2.omaxHeight) {
+                  omaxHeight = "<span class='TxtIcon'>予</span>" + elm2.omaxHeight
+                  if (elm2.firstHeightInitial) {
+                    omaxHeight = "<span class='TxtIcon'>予</span>" + elm2.omaxHeight + " (" + elm2.firstHeightInitial + ")"
+                  }
+                } else {
+                  omaxHeight = maxHeightCondition
+                }
 
+                if (elm2.Condition == "第１波の到達を確認" || elm2.Condition == "津波到達中と推測") {
+                  arrivalTime = elm2.Condition
+                } else if (elm2.firstHeightCondition == "第１波識別不能") {
+                  arrivalTime = elm2.firstHeightCondition
+                } else if (elm2.ArrivedTime) {
+                  arrivalTime = dateEncode(5, elm2.ArrivedTime)
+                } else if (elm2.ArrivalTime) {
+                  arrivalTime = dateEncode(5, elm2.ArrivalTime)
+                }
+                /*
+                                      firstHeightCondition: firstHeightConditionTmp,
+                                      firstHeightInitial: firstHeightInitialTmp,
+                                      maxHeightTime: maxheightTime,
+                                      maxHeightCondition: maxHeightCondition,
+                */
 
                 var new_tr2 = document.createElement("tr");
 
-                new_tr2.innerHTML = "<td></td><td>" + elm2.name + "</td><td>" + arrivalTime + "</td><td></td><td>" + HighTideDateTime + "</td><td>" + condition + "</td>"
+                new_tr2.innerHTML = "<td></td><td>" + elm2.name + "</td><td>" + arrivalTime + "</td><td>" + omaxHeight + "</td><td>" + HighTideDateTime + "</td><td>" + condition + "</td>"
                 new_tr2.classList.add("add-content")
                 new_tr2.classList.add("ListItem_detail")
                 new_tr.after(new_tr2)
