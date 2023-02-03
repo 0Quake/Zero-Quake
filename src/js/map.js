@@ -37,7 +37,7 @@ window.electronAPI.messageSend((event, request) => {
   } else if (request.action == "longWaveClear") {
     document.getElementById("LWaveWrap").style.display = "none";
   } else if (request.action == "EEWAlertUpdate") {
-    psWaveCalc();
+    psWaveEntry();
   } else if (request.action == "tsunamiUpdate") {
     if (gjmapT) {
       gjmapT.setStyle({
@@ -344,9 +344,7 @@ function init() {
             .addTo(this._map)
             .bindPopup("指定緊急避難場所（地震）");
         })
-        .catch(function (err) {
-          console.log();
-        });
+        .catch(function (err) {});
       var url = "https://cyberjapandata.gsi.go.jp/xyz/skhb05/10/" + tileX + "/" + tileY + ".geojson";
 
       fetch(url)
@@ -361,9 +359,7 @@ function init() {
             .addTo(this._map)
             .bindPopup("指定緊急避難場所（津波）");
         })
-        .catch(function (err) {
-          console.log();
-        });
+        .catch(function (err) {});
       //     this._map.removeLayer(event.tile.geojson);
     })
     .on("tileunload", function (event) {
@@ -641,6 +637,11 @@ function init() {
     document.getElementById("mapcontainer").classList.remove("transitionActive");
     setTimeout(function () {
       document.getElementById("mapcontainer").classList.add("transitionActive");
+      setTimeout(function () {
+        psWaveList.forEach(function (elm) {
+          psWaveCalc(elm.id);
+        });
+      }, 100);
     }, 10);
 
     var currentZoom = map.getZoom();
@@ -708,8 +709,13 @@ function init() {
     .then(function (json) {
       TimeTable_JMA2001 = json;
 
-      psWaveCalc();
-      this.setInterval(psWaveCalc, 1000);
+      psWaveEntry();
+      /*
+      this.setInterval(function () {
+        psWaveList.forEach(function (elm) {
+          psWaveCalc(elm.id);
+        });
+      }, 1000);*/
     });
 
   map.setView([32.99125, 138.46], 4);
@@ -851,7 +857,7 @@ function SnetMapUpdate(dataTmp) {
   });
 }
 
-function psWaveCalc() {
+function psWaveEntry() {
   now_EEW.forEach(function (elm) {
     if (!elm.is_cancel && elm.arrivalTime) {
       var countDownElm = document.getElementById("EEW-" + elm.report_id).querySelector(".countDown");
@@ -877,6 +883,25 @@ function psWaveCalc() {
 
       if (elm.depth <= 700 && distance <= 2000 && TimeTable_JMA2001) {
         var TimeTableTmp = TimeTable_JMA2001[elm.depth];
+        var pswaveFind = psWaveList.find(function (elm2) {
+          return elm2.id == elm.report_id;
+        });
+
+        if (pswaveFind) {
+          pswaveFind.data.longitude = elm.longitude;
+          pswaveFind.data.latitude = elm.latitude;
+        } else {
+          psWaveList.push({
+            id: elm.report_id,
+            PCircleElm: null,
+            SCircleElm: null,
+            data: { latitude: elm.latitude, longitude: elm.longitude, originTime: elm.origin_time, pRadius: 0, sRadius: 0 },
+            TimeTable: TimeTableTmp,
+          });
+        }
+        psWaveCalc(elm.report_id);
+
+        /*
         var PRadius = 0;
         var SRadius = 0;
         distance += 1;
@@ -954,6 +979,7 @@ function psWaveCalc() {
           SRadius = linear([TimeElmTmpS[0].S, TimeElmTmpS[1].S], [TimeElmTmpS[0].R, TimeElmTmpS[1].R])(distance);
           psWaveReDraw(elm.report_id, elm.latitude, elm.longitude, PRadius * 1000, SRadius * 1000);
         }
+        */
       }
     }
   });
@@ -970,7 +996,101 @@ function psWaveCalc() {
     return stillEEW;
   });
 }
+function psWaveCalc(eid) {
+  var pswaveFind = psWaveList.find(function (elm2) {
+    return elm2.id == eid;
+  });
+  if (pswaveFind) {
+    var TimeTableTmp = pswaveFind.TimeTable;
+    var SWmin;
+    var distance = Math.floor((new Date() - Replay - pswaveFind.data.originTime) / 1000);
+    distance += 1;
 
+    var PRadius = 0;
+    var SRadius = 0;
+
+    var TimeElmTmpP;
+    var TimeElmTmpS;
+
+    var Pfind = TimeTableTmp.find(function (elm2) {
+      return elm2.P == distance;
+    });
+
+    if (Pfind) {
+      TimeElmTmpP = [Pfind, Pfind];
+    } else {
+      var result = [Infinity, 0];
+      var result2 = [Infinity, 0];
+      TimeTableTmp.forEach((a) => {
+        var b = Math.abs(a.P - distance);
+        if (result[0] > b) {
+          result2 = result;
+          result = [b, a];
+        }
+      });
+      TimeElmTmpP = [result[1], result2[1]];
+    }
+
+    var Sfind = TimeTableTmp.find(function (elm2) {
+      return elm2.S == distance;
+    });
+
+    var SWmin = Math.min.apply(
+      null,
+      TimeTableTmp.map(function (elm2) {
+        return elm2.S;
+      })
+    );
+    if (Sfind) {
+      TimeElmTmpS = [Sfind, Sfind];
+    } else {
+      var loopI = 0;
+      var result;
+      var result2;
+      TimeTableTmp.forEach((a) => {
+        var b = Math.abs(a.S - distance);
+        if (result[0] >= b || loopI == 0) {
+          if (loopI == 0) {
+            result2 = [null, TimeTableTmp[1]];
+          } else {
+            result2 = result;
+          }
+          result = [b, a];
+        }
+        loopI++;
+      });
+      TimeElmTmpS = [result[1], result2[1]];
+    }
+
+    PRadius = TimeElmTmpP[0].R + ((TimeElmTmpP[1].R - TimeElmTmpP[0].R) * (distance - TimeElmTmpP[0].P)) / (TimeElmTmpP[1].P - TimeElmTmpP[0].P);
+
+    if (SWmin > distance) {
+      var ArriveTime = TimeTableTmp.find(function (elm2) {
+        return elm2.R == 0;
+      }).S;
+      psWaveReDraw(
+        pswaveFind.id,
+        pswaveFind.data.latitude,
+        pswaveFind.data.longitude,
+        PRadius * 1000,
+        0,
+        true, //S波未到達
+        ArriveTime, //発生からの到達時間
+        distance //現在の経過時間
+      );
+    } else {
+      SRadius = linear([TimeElmTmpS[0].S, TimeElmTmpS[1].S], [TimeElmTmpS[0].R, TimeElmTmpS[1].R])(distance);
+      psWaveReDraw(pswaveFind.id, pswaveFind.data.latitude, pswaveFind.data.longitude, PRadius * 1000, SRadius * 1000);
+
+      /*
+        id: elm.report_id,
+            PCircleElm: null,
+            SCircleElm: null,
+            data: [{ latitude: elm.latitude, longitude: elm.longitude, originTime: elm.origin_time, pRadius: 0, sRadius: 0 }],
+            TimeTable: TimeTableTmp,*/
+    }
+  }
+}
 function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArrived, SArriveTime, nowDistance) {
   if (!pRadius || (!sRadius && !SnotArrived)) return;
   var EQElm = psWaveList.find(function (elm) {
@@ -982,14 +1102,14 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
 
   latitude = latitudeConvert(latitude);
   longitude = latitudeConvert(longitude);
+  if (EQElm) {
+    if (EQElm.PCircleElm && EQElm.SCircleElm) {
+      //EQElm.markerElm.setLatLng([data.latitude, data.longitude]);
 
-  if (EQElm && EQElm.PCircleElm && EQElm.SCircleElm) {
-    //EQElm.markerElm.setLatLng([data.latitude, data.longitude]);
+      EQElm.PCircleElm.setRadius(pRadius).setLatLng([latitude, longitude]);
+      EQElm.SCircleElm.setRadius(sRadius).setLatLng([latitude, longitude]).setStyle({ stroke: !SnotArrived });
 
-    EQElm.PCircleElm.setRadius(pRadius).setLatLng([latitude, longitude]);
-    EQElm.SCircleElm.setRadius(sRadius).setLatLng([latitude, longitude]).setStyle({ stroke: !SnotArrived });
-
-    /*
+      /*
     var overflow1 = map.getBounds()._northEast.lat < EQElm.PCircleElm.getBounds()._northEast.lat;
     var overflow2 = map.getBounds()._northEast.lng < EQElm.PCircleElm.getBounds()._northEast.lng;
     var overflow3 = map.getBounds()._southWest.lat > EQElm.PCircleElm.getBounds()._southWest.lat;
@@ -998,36 +1118,44 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
       map.fitBounds(EQElm.PCircleElm.getBounds());
     }*/
 
-    EQElm.data = { latitude: latitude, longitude: longitude, pRadius: pRadius, sRadius: sRadius };
-  } else {
-    var PCElm = L.circle([latitude, longitude], {
-      radius: pRadius,
-      color: "#3094ff",
-      stroke: true,
-      fill: false,
-      weight: 2,
-      className: "PWave",
-      pane: "overlayPane",
-      interactive: false,
-    }).addTo(map);
-    var SCElm = L.circle([latitude, longitude], {
-      radius: sRadius,
-      color: "#ff3e30",
-      stroke: !SnotArrived,
-      fill: true,
-      fillColor: "#F00",
-      fillOpacity: 0.15,
-      weight: 2,
-      className: "SWave",
-      pane: "overlayPane",
-      interactive: false,
-    }).addTo(map);
+      //EQElm.data = { latitude: latitude, longitude: longitude, pRadius: pRadius, sRadius: sRadius };
+    } else {
+      var PCElm = L.circle([latitude, longitude], {
+        radius: pRadius,
+        color: "#3094ff",
+        stroke: true,
+        fill: false,
+        weight: 2,
+        className: "PWave PWave_" + report_id,
+        pane: "overlayPane",
+        interactive: false,
+      }).addTo(map);
 
-    map.fitBounds(PCElm.getBounds());
-    map.setView([latitude, longitude, 10]);
+      document.querySelector(".PWave_" + report_id).addEventListener("transitionend", function () {
+        console.log("anmEnd");
+        psWaveCalc(report_id);
+      });
 
-    psWaveList.push({ id: report_id, PCircleElm: PCElm, SCircleElm: SCElm, data: [{ latitude: latitude, longitude: longitude, pRadius: pRadius, sRadius: sRadius }] });
-    EQElm = psWaveList[psWaveList.length - 1];
+      var SCElm = L.circle([latitude, longitude], {
+        radius: sRadius,
+        color: "#ff3e30",
+        stroke: !SnotArrived,
+        fill: true,
+        fillColor: "#F00",
+        fillOpacity: 0.15,
+        weight: 2,
+        className: "SWave",
+        pane: "overlayPane",
+        interactive: false,
+      }).addTo(map);
+
+      map.fitBounds(PCElm.getBounds());
+      map.setView([latitude, longitude, 10]);
+
+      EQElm.PCircleElm = PCElm;
+      EQElm.SCircleElm = SCElm;
+      EQElm = psWaveList[psWaveList.length - 1];
+    }
   }
 
   if (EQElm.SIElm) {
