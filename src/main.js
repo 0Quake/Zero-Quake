@@ -180,7 +180,7 @@ function createWindow() {
   //mainWindow.setMenuBarVisibility(false);
 
   mainWindow.webContents.on("did-finish-load", () => {
-    //replay("2023/02/03 02:58:40");
+    replay("2023/02/03 02:58:40");
     // replay("2023/01/31 17:48:30");
     //replay("2023/01/30 00:30:00");
     //replay("2023/01/29 12:36:00");

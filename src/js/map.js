@@ -637,11 +637,9 @@ function init() {
     document.getElementById("mapcontainer").classList.remove("transitionActive");
     setTimeout(function () {
       document.getElementById("mapcontainer").classList.add("transitionActive");
-      setTimeout(function () {
-        psWaveList.forEach(function (elm) {
-          psWaveCalc(elm.id);
-        });
-      }, 100);
+      psWaveList.forEach(function (elm) {
+        psWaveCalc(elm.id);
+      });
     }, 10);
 
     var currentZoom = map.getZoom();
@@ -996,11 +994,13 @@ function psWaveEntry() {
     return stillEEW;
   });
 }
-function psWaveCalc(eid) {
+function psWaveCalc(eid, AnmEnd) {
   var pswaveFind = psWaveList.find(function (elm2) {
     return elm2.id == eid;
   });
   if (pswaveFind) {
+    document.getElementById("mapcontainer").classList.add("transitionActive");
+
     var TimeTableTmp = pswaveFind.TimeTable;
     var SWmin;
     var distance = Math.floor((new Date() - Replay - pswaveFind.data.originTime) / 1000);
@@ -1132,8 +1132,7 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
       }).addTo(map);
 
       document.querySelector(".PWave_" + report_id).addEventListener("transitionend", function () {
-        console.log("anmEnd");
-        psWaveCalc(report_id);
+        psWaveCalc(report_id, true);
       });
 
       var SCElm = L.circle([latitude, longitude], {
