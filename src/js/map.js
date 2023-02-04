@@ -634,13 +634,14 @@ function init() {
   }).addTo(map);*/
 
   map.on("zoom", function () {
-    document.getElementById("mapcontainer").classList.remove("transitionActive");
-    setTimeout(function () {
-      document.getElementById("mapcontainer").classList.add("transitionActive");
+    if (psWaveList.length > 0) {
+      document.querySelectorAll(".PWave,.SWave").forEach(function (elm) {
+        elm.style.transitionTimingFunction = "step-start";
+      });
       psWaveList.forEach(function (elm) {
         psWaveCalc(elm.id);
       });
-    }, 10);
+    }
 
     var currentZoom = map.getZoom();
     document.getElementById("mapcontainer").classList.remove("zoomLevel_1");
@@ -994,13 +995,11 @@ function psWaveEntry() {
     return stillEEW;
   });
 }
-function psWaveCalc(eid, AnmEnd) {
+function psWaveCalc(eid) {
   var pswaveFind = psWaveList.find(function (elm2) {
     return elm2.id == eid;
   });
   if (pswaveFind) {
-    document.getElementById("mapcontainer").classList.add("transitionActive");
-
     var TimeTableTmp = pswaveFind.TimeTable;
     var SWmin;
     var distance = Math.floor((new Date() - Replay - pswaveFind.data.originTime) / 1000);
@@ -1068,19 +1067,23 @@ function psWaveCalc(eid, AnmEnd) {
       var ArriveTime = TimeTableTmp.find(function (elm2) {
         return elm2.R == 0;
       }).S;
-      psWaveReDraw(
-        pswaveFind.id,
-        pswaveFind.data.latitude,
-        pswaveFind.data.longitude,
-        PRadius * 1000,
-        0,
-        true, //S波未到達
-        ArriveTime, //発生からの到達時間
-        distance //現在の経過時間
-      );
+      window.requestAnimationFrame(function () {
+        psWaveReDraw(
+          pswaveFind.id,
+          pswaveFind.data.latitude,
+          pswaveFind.data.longitude,
+          PRadius * 1000,
+          0,
+          true, //S波未到達
+          ArriveTime, //発生からの到達時間
+          distance //現在の経過時間
+        );
+      });
     } else {
       SRadius = linear([TimeElmTmpS[0].S, TimeElmTmpS[1].S], [TimeElmTmpS[0].R, TimeElmTmpS[1].R])(distance);
-      psWaveReDraw(pswaveFind.id, pswaveFind.data.latitude, pswaveFind.data.longitude, PRadius * 1000, SRadius * 1000);
+      window.requestAnimationFrame(function () {
+        psWaveReDraw(pswaveFind.id, pswaveFind.data.latitude, pswaveFind.data.longitude, PRadius * 1000, SRadius * 1000);
+      });
 
       /*
         id: elm.report_id,
@@ -1105,6 +1108,9 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
   if (EQElm) {
     if (EQElm.PCircleElm && EQElm.SCircleElm) {
       //EQElm.markerElm.setLatLng([data.latitude, data.longitude]);
+
+      document.querySelector(".PWave_" + report_id).style.transitionTimingFunction = "linear";
+      document.querySelector(".SWave_" + report_id).style.transitionTimingFunction = "linear";
 
       EQElm.PCircleElm.setRadius(pRadius).setLatLng([latitude, longitude]);
       EQElm.SCircleElm.setRadius(sRadius).setLatLng([latitude, longitude]).setStyle({ stroke: !SnotArrived });
@@ -1143,7 +1149,7 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
         fillColor: "#F00",
         fillOpacity: 0.15,
         weight: 2,
-        className: "SWave",
+        className: "SWave SWave_" + report_id,
         pane: "overlayPane",
         interactive: false,
       }).addTo(map);

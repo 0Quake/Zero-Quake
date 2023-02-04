@@ -33,10 +33,6 @@ img.leaflet-control {
   max-height: 250px;
   max-width: 100px;
 }
-.transitionActive .PWave,
-.transitionActive .SWave {
-  transition: linear 1s;
-}
 
 .leaflet-background-pane {
   z-index: 100;
@@ -396,16 +392,19 @@ div.marker-circle.marker_Int7p {
   --TsunamiYohoColor: rgb(66, 158, 255);
 }
 
-.PWave {
-  stroke: var(--PwaveColor);
+.PWave,
+.SWave {
+  transition: linear 1s;
   transform: translate3d(0, 0, 0);
   pointer-events: none;
+}
+.PWave {
+  stroke: var(--PwaveColor);
 }
 .SWave {
   stroke: var(--SwaveColor);
-  transform: translate3d(0, 0, 0);
-  pointer-events: none;
 }
+
 .Wave_progress .PWave_value {
   background: var(--PwaveColor);
 }
@@ -417,7 +416,7 @@ div.marker-circle.marker_Int7p {
   stroke: var(--SwaveColor);
 }
 .SWaveProgress .SWprogressValue {
-  transition: linear 1000ms;
+  transition: linear 1s;
 }
 
 .leaflet-fade-anim .leaflet-popup {
