@@ -59,8 +59,6 @@ Zero Quake が情報を取得している情報源
 「地理院 写真」© 国土地理院  
 「地理院 白地図」© 国土地理院  
 「OpenStreetMap」© OpenStreetMap contributors  
-「Google Map」© Google  
-「Google Map 写真」© Google  
 「地理院 陰影起伏図」© 国土地理院  
 「地理院 火山基本図データ」© 国土地理院  
 「地理院 津波浸水想定 ハザードマップ」© 国土地理院  
