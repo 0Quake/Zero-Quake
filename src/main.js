@@ -63,7 +63,6 @@ ipcMain.on("message", (_event, response) => {
         webPreferences: {
           preload: path.join(__dirname, "js/preload.js"),
           title: "設定 - Zero Quake",
-          webSecurity: false,
           parent: mainWindow,
           modal: true,
           center: true,
@@ -82,7 +81,7 @@ ipcMain.on("message", (_event, response) => {
       });
 
       settingWindow.setMenuBarVisibility(false);
-      settingWindow.webContents.openDevTools();
+      // settingWindow.webContents.openDevTools();
 
       settingWindow.loadFile("src/settings.html");
     }
@@ -103,13 +102,12 @@ ipcMain.on("message", (_event, response) => {
       webPreferences: {
         preload: path.join(__dirname, "js/preload.js"),
         title: "Zero Quake",
-        webSecurity: false,
         backgroundColor: "#202227",
         icon: path.join(__dirname, "img/icon.ico"),
       },
     });
     //mainWindow.setMenuBarVisibility(false);
-    tsunamiWindow.webContents.openDevTools();
+    // tsunamiWindow.webContents.openDevTools();
 
     tsunamiWindow.webContents.on("did-finish-load", () => {
       if (tsunamiWindow) {
@@ -129,7 +127,6 @@ ipcMain.on("message", (_event, response) => {
       webPreferences: {
         preload: path.join(__dirname, "js/preload.js"),
         title: "地震詳細情報 - Zero Quake",
-        webSecurity: false,
         backgroundColor: "#202227",
         icon: path.join(__dirname, "img/icon.ico"),
       },
@@ -172,7 +169,6 @@ function createWindow() {
     webPreferences: {
       preload: path.join(__dirname, "js/preload.js"),
       title: "Zero Quake",
-      webSecurity: false,
       backgroundColor: "#202227",
       icon: path.join(__dirname, "img/icon.ico"),
     },
