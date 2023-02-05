@@ -257,20 +257,6 @@ function init() {
     maxZoom: 21,
     attribution: '<a href="https://www.openstreetmap.org/" target="_blank">©OpenStreetMap contributors</a>',
   });
-  var tile6 = L.tileLayer("https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}", {
-    minZoom: 0,
-    minNativeZoom: 0,
-    maxNativeZoom: 21,
-    maxZoom: 21,
-    attribution: '<a href="https://www.google.com/maps" target="_blank">©google</a>',
-  });
-  var tile7 = L.tileLayer("https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}", {
-    minZoom: 0,
-    minNativeZoom: 0,
-    maxNativeZoom: 21,
-    maxZoom: 21,
-    attribution: '<a href="https://www.google.com/maps" target="_blank">©google</a>',
-  });
   var tile8 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png", {
     minZoom: 0,
     minNativeZoom: 0,
@@ -486,8 +472,6 @@ function init() {
             "地理院 写真": tile3,
             "地理院 白地図": tile4,
             OpenStreetMap: tile5,
-            "Google Map": tile6,
-            "Google Map 写真": tile7,
           },
           {
             "地理院 陰影起伏図": overlay1,
@@ -730,7 +714,6 @@ function kmoniMapUpdate(dataTmp, type) {
   }
   document.getElementById("pointList").innerHTML = htmlTmp;
 
-  console.time("aaa");
   //地図上マーカー
   dataTmp.forEach(function (elm, index) {
     if (elm.Name && elm.Point && elm.data && !elm.IsSuspended) {
@@ -781,7 +764,6 @@ function kmoniMapUpdate(dataTmp, type) {
 
     if (index == points.length - 1) previous_points = dataTmp;
   });
-  console.timeEnd("aaa");
 }
 function SnetMapUpdate(dataTmp) {
   SnetMapData = dataTmp;

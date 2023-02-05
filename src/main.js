@@ -909,7 +909,7 @@ function SNXLogRead(str) {
   if (fs.existsSync(pathTmp)) {
     fs.readFile(pathTmp, function (err, content) {
       if (err) {
-        console.error(err);
+        return;
       }
 
       var buffer = Buffer.from(content);
@@ -2135,8 +2135,6 @@ async function kmoniServerSelect() {
       monitorVendor = "L";
       MSSelect("MS-L");
     }*/
-    console.log({ "YE(Yahoo強震モニタEast)": YmoniE, "YE(Yahoo強震モニタWest)": YmoniW, "K(強震モニタ)": yoyuK, "L(長周期地震動モニタ)": yoyuL });
-    console.log("選択結果：" + monitorVendor);
   })();
 }
 
