@@ -116,7 +116,7 @@ img.leaflet-control {
   position: absolute;
   width: 10px;
   height: 10px;
-  background: #000;
+  background: rgba(128, 128, 128, 0.2);
   border-radius: 50%;
   outline-offset: 2px;
   z-index: 220;
@@ -275,7 +275,9 @@ div.marker-circle.marker_Int7p {
   border-bottom: solid 1px #888;
   background: #222;
 }
-
+.PointName {
+  border-bottom: solid 2px transparent;
+}
 .popupOpen .PointPopup {
   display: block;
 }
@@ -417,11 +419,4 @@ div.marker-circle.marker_Int7p {
 }
 .SWaveProgress .SWprogressValue {
   transition: linear 1s;
-}
-
-.leaflet-fade-anim .leaflet-popup {
-  transition: none !important;
-}
-.leaflet-zoom-anim .leaflet-zoom-animated {
-  transition: none !important;
 }

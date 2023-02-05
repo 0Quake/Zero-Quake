@@ -17,18 +17,23 @@ Zero Quake が情報を取得している情報源
   - [長周期地震動モニタ](lmoni.bosai.go.jp)
   - [Yahoo 強震モニタ](https://typhoon.yahoo.co.jp/weather/jp/earthquake/kyoshin/)
 - [P2P 地震情報 API](https://www.p2pquake.net/json_api_v2/)
+- (SignalNow X 連携)
 
 ### 地震情報(震度速報／震源に関する情報／震度・震源に関する情報／顕著な地震の震源要素更新のお知らせ)
 
 - [気象庁](https://www.jma.go.jp/bosai/map.html?contents=earthquake_map)
 - [NHK](https://www.nhk.or.jp/kishou-saigai/earthquake/)
 - [narikakun.net 地震情報 API](https://dev.narikakun.net/doc/earthquake)
-- [AQUA システム](https://www.hinet.bosai.go.jp/AQUA/aqua_catalogue.php?LANG=ja)
 - [FDSN Web Service](https://earthquake.usgs.gov/fdsnws/event/1/)
 
-### 津波情報
+### 大津波警報／津波警報／津波注意報
 
 - [P2P 地震情報 API](https://www.p2pquake.net/json_api_v2/)
+
+### 津波情報／津波予報
+
+- [P2P 地震情報 API](https://www.p2pquake.net/json_api_v2/)
+- [気象庁防災情報 XML](https://xml.kishou.go.jp/xmlpull.html)
 
 ### P 波・S 波 予報円
 

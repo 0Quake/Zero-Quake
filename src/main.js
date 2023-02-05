@@ -180,7 +180,8 @@ function createWindow() {
   //mainWindow.setMenuBarVisibility(false);
 
   mainWindow.webContents.on("did-finish-load", () => {
-    replay("2023/02/03 02:58:40");
+    //replay("2023/02/05 16:13:20");
+    //replay("2023/02/03 02:58:40");
     // replay("2023/01/31 17:48:30");
     //replay("2023/01/30 00:30:00");
     //replay("2023/01/29 12:36:00");
@@ -1529,6 +1530,7 @@ function eqInfoUpdate() {
       const xml = parser.parseFromString(dataTmp, "text/html");
 
       var items = xml.getElementsByTagName("item");
+      if (!items) return;
       var urls = [];
 
       for (let i = 0; i < 10; i++) {
@@ -1637,7 +1639,7 @@ function EQI_narikakunList_Req(url, num, first) {
     });
     res.on("end", function () {
       var json = jsonParse(dataTmp);
-
+      if (!json) return;
       narikakun_URLs = narikakun_URLs.concat(json.lists);
 
       if (narikakun_URLs.length < 10 && first) {
@@ -2319,7 +2321,7 @@ function replay(ReplayDate) {
     Replay = new Date() - new Date(ReplayDate);
     mainWindow.webContents.send("message2", {
       action: "Replay",
-      data: Replay,
+      data: new Date(ReplayDate),
     });
   } else {
     Replay = 0;

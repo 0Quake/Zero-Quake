@@ -8,11 +8,6 @@ var tsunamiLayer;
 var gjmap; //オフライン地図
 var gjmapT; //津波用geojson
 var sections = [];
-window.addEventListener("load", function () {
-  this.setTimeout(function () {
-    document.getElementById("splash").style.display = "none";
-  }, 2000);
-});
 
 var psWaveList = [];
 var tsunamiAlertNow = false;
@@ -155,7 +150,10 @@ window.electronAPI.messageSend((event, request) => {
         document.getElementById("tsunamiTitle").style.borderColor = tsunamiColorConv("Yoho");
       }
     }
+  } else if (request.action == "setting") {
+    init();
   }
+
   document.getElementById("splash").style.display = "none";
 });
 
@@ -201,12 +199,7 @@ window.addEventListener("load", function () {
   windowLoaded = true;
 });
 
-window.electronAPI.messageSend((event, request) => {
-  if (request.action == "setting") {
-    init();
-  }
-  return true;
-});
+var mapLayer;
 
 function init() {
   if (inited || !config || !windowLoaded) return;
@@ -218,9 +211,16 @@ function init() {
     ],
     minZoom: 2,
     maxZoom: 21,
-    zoomAnimation: false,
+    zoomAnimation: true,
+    zoomSnap: 0.1,
   });
+  map.setView([32.99125, 138.46], 4);
+
   //L.control.scale({ imperial: false }).addTo(map);←縮尺
+
+  mapLayer = new L.LayerGroup();
+  mapLayer.id = "mapLayer";
+  mapLayer.addTo(map);
 
   var tile1 = L.tileLayer("https://www.data.jma.go.jp/svd/eqdb/data/shindo/map/{z}/{x}/{y}.png", {
     minZoom: 0,
@@ -375,26 +375,8 @@ function init() {
       points = json;
 
       points.forEach(function (elm, index) {
-        if (elm.Name && elm.Point) {
-          var popup_content = "<h3 class='PointName' style='border-bottom:solid 2px transparent'>" + elm.Name + "<span>" + elm.Code + "</span></h3><h4 class='detecting'>地震検知中</h4><table><tr><td>震度</td><td class='PointInt'></td></tr><tr><td>PGA</td><td class='PointPGA'></td></tr></table>";
-          var kmoniPointMarker = L.divIcon({
-            html: "<div class='marker-circle' style='background:rgba(128,128,128,0.2)'></div><div class='PointPopup'>" + popup_content + "</div>",
-            className: "kmoniPointMarker KmoniPoint_" + elm.Code,
-            iconSize: 25,
-          });
-
-          elm.marker = L.marker([elm.Location.Latitude, elm.Location.Longitude], {
-            icon: kmoniPointMarker,
-            pane: "PointsPane",
-          })
-            .bindPopup("", { className: "hidePopup" })
-            .on("popupopen", function (e) {
-              L.DomUtil.addClass(e.target._icon, "popupOpen");
-            })
-            .on("popupclose", function (e) {
-              L.DomUtil.removeClass(e.target._icon, "popupOpen");
-            })
-            .addTo(map);
+        if (elm.Name && elm.Point && !elm.IsSuspended) {
+          addPointMarker(elm);
         }
       });
       if (kmoniMapData) {
@@ -442,24 +424,26 @@ function init() {
       return res.json();
     })
     .then(function (json) {
-      L.geoJSON(json, {
-        style: {
-          color: "#666",
-          fill: true,
-          fillColor: "transparent",
-          fillOpacity: 1,
-          weight: 1,
-          pane: "jsonMAPPane",
-          className: "GJMap",
-          attribution: '<a href="https://www.naturalearthdata.com/">©Natural Earth</a>',
-        },
-        onEachFeature: function onEachFeature(feature, layer) {
-          if (feature.properties && feature.properties.NAME_JA) {
-            sections.push({ name: feature.properties.NAME_JA, item: layer });
-            layer.bindPopup("<h3>国</h3>" + feature.properties.NAME_JA);
-          }
-        },
-      }).addTo(map);
+      mapLayer.addLayer(
+        L.geoJSON(json, {
+          style: {
+            color: "#666",
+            fill: true,
+            fillColor: "transparent",
+            fillOpacity: 1,
+            weight: 1,
+            pane: "jsonMAPPane",
+            className: "GJMap",
+            attribution: '<a href="https://www.naturalearthdata.com/">©Natural Earth</a>',
+          },
+          onEachFeature: function onEachFeature(feature, layer) {
+            if (feature.properties && feature.properties.NAME_JA) {
+              sections.push({ name: feature.properties.NAME_JA, item: layer });
+              layer.bindPopup("<h3>国</h3>" + feature.properties.NAME_JA);
+            }
+          },
+        })
+      );
     });
 
   fetch("./Resource/basemap.json")
@@ -467,26 +451,29 @@ function init() {
       return res.json();
     })
     .then(function (json) {
-      L.geoJSON(json, {
-        style: {
-          color: "#999",
-          fill: true,
-          fillColor: "transparent",
-          fillOpacity: 1,
-          weight: 1,
-          pane: "jsonMAPPane",
-          className: "GJMap",
-          attribution: '<a href="https://www.data.jma.go.jp/developer/gis.html" target="_blank">©JMA</a>',
-        },
-        onEachFeature: function onEachFeature(feature, layer) {
-          if (feature.properties && feature.properties.name) {
-            sections.push({ name: feature.properties.name, item: layer });
-            layer.bindPopup("<h3>地震情報/細分区域</h3>" + feature.properties.name);
-          }
-        },
-      }).addTo(map);
+      mapLayer.addLayer(
+        L.geoJSON(json, {
+          style: {
+            color: "#999",
+            fill: true,
+            fillColor: "transparent",
+            fillOpacity: 1,
+            weight: 1,
+            pane: "jsonMAPPane",
+            className: "GJMap",
+            attribution: '<a href="https://www.data.jma.go.jp/developer/gis.html" target="_blank">©JMA</a>',
+          },
+          onEachFeature: function onEachFeature(feature, layer) {
+            if (feature.properties && feature.properties.name) {
+              sections.push({ name: feature.properties.name, item: layer });
+              layer.bindPopup("<h3>地震情報/細分区域</h3>" + feature.properties.name);
+            }
+          },
+        })
+      );
 
-      gjmap = L.geoJSON({ type: "FeatureCollection", features: [] }).addTo(map);
+      gjmap = L.geoJSON({ type: "FeatureCollection", features: [] });
+      mapLayer.addLayer(gjmap);
       L.control
         .layers(
           {
@@ -516,24 +503,8 @@ function init() {
           }
         )
         .addTo(map);
+      document.getElementById("splash").style.display = "none";
     });
-  var vectorTile = L.geoJSON(null, {
-    pointToLayer: function (feature, latlng) {
-      if (feature.properties.icon !== "") {
-        icn = L.icon({
-          iconUrl: feature.properties.icon,
-          //shadowUrl: 'leaf-shadow.png',
-          iconSize: [20, 20],
-        });
-      }
-      return L.marker(latlng, { icon: icn });
-    },
-  }).addTo(map);
-
-  // ズームが変更されたら GeoJSON レイヤーをクリアします。
-  map.on("zoomend", function () {
-    vectorTile.clearLayers();
-  });
   map.on("baselayerchange", function (layer) {
     if (layer.name == "オフライン地図") {
       document.getElementById("mapcontainer").classList.add("GJMapActive");
@@ -709,40 +680,51 @@ function init() {
       TimeTable_JMA2001 = json;
 
       psWaveEntry();
-      /*
-      this.setInterval(function () {
-        psWaveList.forEach(function (elm) {
-          psWaveCalc(elm.id);
-        });
-      }, 1000);*/
     });
-
-  map.setView([32.99125, 138.46], 4);
 }
+function addPointMarker(elm) {
+  var popup_content = "<h3 class='PointName'>" + elm.Name + "<span>" + elm.Code + "</span></h3><h4 class='detecting'>地震検知中</h4><table><tr><td>震度</td><td class='PointInt'></td></tr><tr><td>PGA</td><td class='PointPGA'></td></tr></table>";
+  var kmoniPointMarker = L.divIcon({
+    html: "<div class='marker-circle'></div><div class='PointPopup'>" + popup_content + "</div>",
+    className: "kmoniPointMarker KmoniPoint_" + elm.Code,
+    iconSize: 25,
+  });
 
+  elm.marker = L.marker([elm.Location.Latitude, elm.Location.Longitude], {
+    icon: kmoniPointMarker,
+    pane: "PointsPane",
+  })
+    .bindPopup("", { className: "hidePopup" })
+    .on("popupopen", function (e) {
+      L.DomUtil.addClass(e.target._icon, "popupOpen");
+    })
+    .on("popupclose", function (e) {
+      L.DomUtil.removeClass(e.target._icon, "popupOpen");
+    })
+    .addTo(map);
+}
 var kmoniMapData;
 var SnetMapData;
 function kmoniMapUpdate(dataTmp, type) {
+  if (!dataTmp) return;
+
   kmoniMapData = dataTmp;
 
-  if (!dataTmp) return;
   var dataTmp2 = dataTmp.filter(function (elm) {
     return elm.shindo;
   });
 
   //リアルタイム震度タブ
-  var maxShindo = dataTmp2.reduce((a, b) => (a.shindo > b.shindo ? a : b)).shindo;
-
   var shindoList = dataTmp2.sort(function (a, b) {
     return b.shindo - a.shindo;
   });
   removeChild(document.getElementById("pointList"));
   for (let a = 0; a < 10; a++) {
     var shindoElm = shindoList[a];
-    var newElm = document.createElement("li");
     var shindoColor = shindoConvert(shindoElm.shindo, 2);
     var IntDetail = "";
-    if (a == 0) IntDetail = "<div class='intDetail'>" + Math.round(maxShindo * 10) / 10 + "</div>";
+    if (a == 0) IntDetail = "<div class='intDetail'>" + Math.round(shindoElm.shindo * 10) / 10 + "</div>";
+    var newElm = document.createElement("li");
     newElm.innerHTML = "<div class='int' style='color:" + shindoColor[1] + ";background:" + shindoColor[0] + "'>" + shindoConvert(shindoElm.shindo, 0) + IntDetail + "</div><div class='Pointname'>" + shindoElm.Region + " " + shindoElm.Name + "</div><div class='PGA'>PGA" + Math.round(shindoElm.pga * 100) / 100 + "</div>";
     document.getElementById("pointList").appendChild(newElm);
   }
@@ -752,40 +734,46 @@ function kmoniMapUpdate(dataTmp, type) {
     if (elm.Name && elm.Point && elm.data && !elm.IsSuspended) {
       var changed;
 
-      if (previous_points.length !== 0) {
-        var rgb0 = previous_points[index].rgb;
-        var rgb1 = elm.rgb;
-        if (rgb0) changed = JSON.stringify(rgb0) !== JSON.stringify(rgb1);
-      } else {
+      if (previous_points.length == 0) {
         changed = true;
+      } else {
+        var pga0 = previous_points[index].pga;
+        if (pga0) changed = pga0 !== elm.pga;
       }
 
-      var markerElement = document.querySelector(".KmoniPoint_" + elm.Code);
-      if (markerElement) {
+      if (changed) {
+        var markerElement = document.querySelector(".KmoniPoint_" + elm.Code);
+        if (!markerElement) {
+          addPointMarker(elm);
+        }
         markerElement.style.display = "block";
-        if (changed) {
-          markerElement.querySelector(".PointName").style.borderBottom = "solid 2px rgb(" + elm.rgb.join(",") + ")";
-          markerElement.querySelector(".PointInt").innerText = Math.round(elm.shindo * 10) / 10;
-          markerElement.querySelector(".PointPGA").innerText = Math.round(elm.pga * 100) / 100;
-          markerElement.querySelector(".marker-circle").style.background = "rgb(" + elm.rgb.join(",") + ")";
-          if (elm.detect2) {
-            markerElement.querySelector(".marker-circle").classList.remove("detectingMarker");
-            markerElement.querySelector(".marker-circle").classList.add("strongDetectingMarker");
-          } else if (elm.detect) {
-            markerElement.querySelector(".marker-circle").classList.remove("strongDetectingMarker");
-            markerElement.querySelector(".marker-circle").classList.add("detectingMarker");
-          } else {
-            markerElement.querySelector(".marker-circle").classList.remove("strongDetectingMarker");
-            markerElement.querySelector(".marker-circle").classList.remove("detectingMarker");
-          }
-          markerElement.querySelector(".detecting").innerText = elm.detect ? "block" : "none";
+        markerElement.querySelector(".PointName").style.borderBottom = "solid 2px rgb(" + elm.rgb.join(",") + ")";
+        markerElement.querySelector(".PointInt").innerText = Math.round(elm.shindo * 10) / 10;
+        markerElement.querySelector(".PointPGA").innerText = Math.round(elm.pga * 100) / 100;
+        markerElement.querySelector(".marker-circle").style.background = "rgb(" + elm.rgb.join(",") + ")";
+        markerElement.querySelector(".detecting").style.display = elm.detect || elm.detect2 ? "block" : "none";
+        var markerCircleElm = markerElement.querySelector(".marker-circle");
+        if (elm.detect2) {
+          markerCircleElm.classList.remove("detectingMarker");
+          markerCircleElm.classList.add("strongDetectingMarker");
+        } else if (elm.detect) {
+          markerCircleElm.classList.remove("strongDetectingMarker");
+          markerCircleElm.classList.add("detectingMarker");
+        } else {
+          markerCircleElm.classList.remove("strongDetectingMarker");
+          markerCircleElm.classList.remove("detectingMarker");
         }
       }
     } else {
+      if (points && points[index].marker) {
+        map.removeLayer(points[index].marker);
+        points[index].marker = null;
+      }
+      /*
       var markerElement = document.querySelector(".KmoniPoint_" + elm.Code);
       if (markerElement) {
         markerElement.style.display = "none";
-      }
+      }*/
     }
 
     if (index == points.length - 1) previous_points = dataTmp;
@@ -799,12 +787,11 @@ function SnetMapUpdate(dataTmp) {
     if (elm.Code && elm.Point && elm.data && !elm.IsSuspended) {
       var changed;
 
-      if (previous_Spoints.length !== 0) {
-        var rgb0 = previous_Spoints[index].rgb;
-        var rgb1 = elm.rgb;
-        if (rgb0) changed = JSON.stringify(rgb0) !== JSON.stringify(rgb1);
-      } else {
+      if (previous_Spoints.length == 0) {
         changed = true;
+      } else {
+        var pga0 = previous_Spoints[index].pga;
+        if (pga0) changed = pga0 !== elm.pga;
       }
 
       if (changed) {
@@ -846,10 +833,12 @@ function SnetMapUpdate(dataTmp) {
         }
       }
     } else {
+      //if (Spoints[index].marker) map.removeLayer(Spoints[index].marker);
+      /*
       var markerElement = document.querySelector(".SnetPoint_" + elm.Code.replace(".", "-"));
       if (markerElement) {
         markerElement.style.display = "none";
-      }
+      }*/
     }
 
     if (index == points.length - 1) previous_Spoints = dataTmp;
@@ -1109,11 +1098,13 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
     if (EQElm.PCircleElm && EQElm.SCircleElm) {
       //EQElm.markerElm.setLatLng([data.latitude, data.longitude]);
 
-      document.querySelector(".PWave_" + report_id).style.transitionTimingFunction = "linear";
-      document.querySelector(".SWave_" + report_id).style.transitionTimingFunction = "linear";
+      setTimeout(function () {
+        document.querySelector(".PWave_" + report_id).style.transitionTimingFunction = "linear";
+        document.querySelector(".SWave_" + report_id).style.transitionTimingFunction = "linear";
 
-      EQElm.PCircleElm.setRadius(pRadius).setLatLng([latitude, longitude]);
-      EQElm.SCircleElm.setRadius(sRadius).setLatLng([latitude, longitude]).setStyle({ stroke: !SnotArrived });
+        EQElm.PCircleElm.setRadius(pRadius).setLatLng([latitude, longitude]);
+        EQElm.SCircleElm.setRadius(sRadius).setLatLng([latitude, longitude]).setStyle({ stroke: !SnotArrived });
+      }, 10);
 
       /*
     var overflow1 = map.getBounds()._northEast.lat < EQElm.PCircleElm.getBounds()._northEast.lat;
