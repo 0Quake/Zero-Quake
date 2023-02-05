@@ -1518,6 +1518,7 @@ function eqInfoUpdate() {
 
   request.end();
 
+  /*
   //NHKリクエスト～パース
   var request = net.request("https://www3.nhk.or.jp/sokuho/jishin/data/JishinReport.xml");
   request.on("response", (res) => {
@@ -1590,6 +1591,7 @@ function eqInfoUpdate() {
     NetworkError(error, "NHKホームページ");
   });
   request.end();
+  */
 
   EQI_narikakunList_Req("https://ntool.online/api/earthquakeList?year=" + new Date().getFullYear() + "&month=" + (new Date().getMonth() + 1), 10, true);
 

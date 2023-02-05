@@ -22,7 +22,6 @@ Zero Quake が情報を取得している情報源
 ### 地震情報(震度速報／震源に関する情報／震度・震源に関する情報／顕著な地震の震源要素更新のお知らせ)
 
 - [気象庁](https://www.jma.go.jp/bosai/map.html?contents=earthquake_map)
-- [NHK](https://www.nhk.or.jp/kishou-saigai/earthquake/)
 - [narikakun.net 地震情報 API](https://dev.narikakun.net/doc/earthquake)
 - [FDSN Web Service](https://earthquake.usgs.gov/fdsnws/event/1/)
 
