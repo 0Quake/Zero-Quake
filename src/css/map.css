@@ -78,6 +78,9 @@ img.leaflet-control {
   font-size: 16px;
   background: #444;
   text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .leaflet-popup-content p {
   padding: 0.3em 0;

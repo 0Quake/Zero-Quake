@@ -19,8 +19,8 @@ window.electronAPI.messageSend((event, request) => {
     SnetMapUpdate(request.data);
   } else if (request.action == "longWaveUpdate") {
     document.getElementById("LWaveWrap").style.display = "block";
-    document.getElementById("maxKaikyu").innerText = request.data.avrrank;
-    document.getElementById("region_name2").innerText = request.data.avrarea_list.join(" ");
+    document.getElementById("maxKaikyu").textContent = request.data.avrrank;
+    //document.getElementById("region_name2").textContent = request.data.avrarea_list.join(" ");
     request.data.avrarea_list.forEach(function (elm) {
       var section = sections.find(function (elm2) {
         return elm2.name == elm;
@@ -689,11 +689,11 @@ function addPointMarker(elm) {
     className: "kmoniPointMarker KmoniPoint_" + elm.Code,
     iconSize: 25,
   });
-
   elm.marker = L.marker([elm.Location.Latitude, elm.Location.Longitude], {
     icon: kmoniPointMarker,
     pane: "PointsPane",
-  })
+  });
+  elm.marker
     .bindPopup("", { className: "hidePopup" })
     .on("popupopen", function (e) {
       L.DomUtil.addClass(e.target._icon, "popupOpen");
@@ -718,17 +718,19 @@ function kmoniMapUpdate(dataTmp, type) {
   var shindoList = dataTmp2.sort(function (a, b) {
     return b.shindo - a.shindo;
   });
-  removeChild(document.getElementById("pointList"));
+  //removeChild(document.getElementById("pointList"));
+  var htmlTmp = "";
   for (let a = 0; a < 10; a++) {
     var shindoElm = shindoList[a];
     var shindoColor = shindoConvert(shindoElm.shindo, 2);
     var IntDetail = "";
     if (a == 0) IntDetail = "<div class='intDetail'>" + Math.round(shindoElm.shindo * 10) / 10 + "</div>";
-    var newElm = document.createElement("li");
-    newElm.innerHTML = "<div class='int' style='color:" + shindoColor[1] + ";background:" + shindoColor[0] + "'>" + shindoConvert(shindoElm.shindo, 0) + IntDetail + "</div><div class='Pointname'>" + shindoElm.Region + " " + shindoElm.Name + "</div><div class='PGA'>PGA" + Math.round(shindoElm.pga * 100) / 100 + "</div>";
-    document.getElementById("pointList").appendChild(newElm);
-  }
 
+    htmlTmp += "<li><div class='int' style='color:" + shindoColor[1] + ";background:" + shindoColor[0] + "'>" + shindoConvert(shindoElm.shindo, 0) + IntDetail + "</div><div class='Pointname'>" + shindoElm.Region + " " + shindoElm.Name + "</div><div class='PGA'>PGA" + Math.round(shindoElm.pga * 100) / 100 + "</div></li>";
+  }
+  document.getElementById("pointList").innerHTML = htmlTmp;
+
+  console.time("aaa");
   //地図上マーカー
   dataTmp.forEach(function (elm, index) {
     if (elm.Name && elm.Point && elm.data && !elm.IsSuspended) {
@@ -745,11 +747,12 @@ function kmoniMapUpdate(dataTmp, type) {
         var markerElement = document.querySelector(".KmoniPoint_" + elm.Code);
         if (!markerElement) {
           addPointMarker(elm);
+          return;
         }
         markerElement.style.display = "block";
         markerElement.querySelector(".PointName").style.borderBottom = "solid 2px rgb(" + elm.rgb.join(",") + ")";
-        markerElement.querySelector(".PointInt").innerText = Math.round(elm.shindo * 10) / 10;
-        markerElement.querySelector(".PointPGA").innerText = Math.round(elm.pga * 100) / 100;
+        markerElement.querySelector(".PointInt").textContent = Math.round(elm.shindo * 10) / 10;
+        markerElement.querySelector(".PointPGA").textContent = Math.round(elm.pga * 100) / 100;
         markerElement.querySelector(".marker-circle").style.background = "rgb(" + elm.rgb.join(",") + ")";
         markerElement.querySelector(".detecting").style.display = elm.detect || elm.detect2 ? "block" : "none";
         var markerCircleElm = markerElement.querySelector(".marker-circle");
@@ -765,7 +768,7 @@ function kmoniMapUpdate(dataTmp, type) {
         }
       }
     } else {
-      if (points && points[index].marker) {
+      if (points && points[index] && points[index].marker) {
         map.removeLayer(points[index].marker);
         points[index].marker = null;
       }
@@ -778,6 +781,7 @@ function kmoniMapUpdate(dataTmp, type) {
 
     if (index == points.length - 1) previous_points = dataTmp;
   });
+  console.timeEnd("aaa");
 }
 function SnetMapUpdate(dataTmp) {
   SnetMapData = dataTmp;
@@ -798,8 +802,8 @@ function SnetMapUpdate(dataTmp) {
         var markerElement = document.querySelector(".SnetPoint_" + elm.Code.replace(".", "-"));
         if (markerElement) {
           markerElement.querySelector(".PointName").style.borderBottom = "solid 2px rgb(" + elm.rgb.join(",") + ")";
-          markerElement.querySelector(".PointInt").innerText = Math.round(elm.shindo * 10) / 10;
-          markerElement.querySelector(".PointPGA").innerText = Math.round(elm.pga * 100) / 100;
+          markerElement.querySelector(".PointInt").textContent = Math.round(elm.shindo * 10) / 10;
+          markerElement.querySelector(".PointPGA").textContent = Math.round(elm.pga * 100) / 100;
           markerElement.querySelector(".marker-circle").style.background = "rgb(" + elm.rgb.join(",") + ")";
           if (elm.detect2) {
             markerElement.querySelector(".marker-circle").classList.remove("detectingMarker");
@@ -811,7 +815,7 @@ function SnetMapUpdate(dataTmp) {
             markerElement.querySelector(".marker-circle").classList.remove("strongDetectingMarker");
             markerElement.querySelector(".marker-circle").classList.remove("detectingMarker");
           }
-          markerElement.querySelector(".detecting").innerText = elm.detect ? "block" : "none";
+          markerElement.querySelector(".detecting").textContent = elm.detect ? "block" : "none";
           markerElement.style.display = "block";
 
           markerElement.classList.remove("marker_Int1");
@@ -1222,3 +1226,9 @@ const linear = (x, y) => {
     return ((y[i + 1] - y[i]) / (x[i + 1] - x[i])) * (x0 - x[i]) + y[i]; //線形補間の関数を返す
   };
 };
+
+function forEach2(array, func) {
+  for (let i = 0; i < array.length; i++) {
+    func(array[i], i);
+  }
+}

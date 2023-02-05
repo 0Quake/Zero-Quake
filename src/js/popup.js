@@ -48,7 +48,7 @@ window.addEventListener("load", function () {
       return res.json();
     })
     .then(function (json) {
-      document.getElementById("kmoni_Message").innerHTML = json.message;
+      document.getElementById("kmoni_Message").textContent = json.message;
     });
   fetch("./Resource/AreaForecastLocalE.json")
     .then(function (res) {
@@ -59,7 +59,7 @@ window.addEventListener("load", function () {
       prepareing = false;
     });
   setInterval(function () {
-    document.getElementById("PC_TIME").innerText = dateEncode(3, new Date());
+    document.getElementById("PC_TIME").textContent = dateEncode(3, new Date());
   }, 200);
 });
 
@@ -98,7 +98,7 @@ function EEWAlertUpdate(data) {
 
       alertflgTmp = "(" + elm.alertflg + ")";
       if (!elm.alertflg) alertflgTmp = "";
-      clone.querySelector(".alertflg").innerText = alertflgTmp;
+      clone.querySelector(".alertflg").textContent = alertflgTmp;
 
       if (elm.alertflg == "警報") {
         clone.querySelector(".EEWWrap").classList.add("keihou");
@@ -106,21 +106,21 @@ function EEWAlertUpdate(data) {
         clone.querySelector(".EEWWrap").classList.add("yohou");
       }
 
-      clone.querySelector(".report_num").innerText = elm.report_num;
+      clone.querySelector(".report_num").textContent = elm.report_num;
 
-      clone.querySelector(".calcintensity").innerText = elm.calcintensity ? elm.calcintensity : "?";
+      clone.querySelector(".calcintensity").textContent = elm.calcintensity ? elm.calcintensity : "?";
       clone.querySelector(".calcintensity").style.background = shindoConvert(elm.calcintensity, 2)[0];
       clone.querySelector(".calcintensity").style.color = shindoConvert(elm.calcintensity, 2)[1];
 
       clone.querySelector(".is_final").style.display = elm.is_final ? "inline" : "none";
       clone.querySelector(".canceled").style.display = elm.is_cancel ? "flex" : "none";
-      clone.querySelector(".region_name").innerText = elm.region_name ? elm.region_name : "震源地域不明";
-      clone.querySelector(".origin_time").innerText = dateEncode(3, elm.origin_time);
-      clone.querySelector(".magunitude").innerText = elm.magunitude ? elm.magunitude : "不明";
-      clone.querySelector(".depth").innerText = elm.depth ? elm.depth : "不明";
+      clone.querySelector(".region_name").textContent = elm.region_name ? elm.region_name : "震源地域不明";
+      clone.querySelector(".origin_time").textContent = dateEncode(3, elm.origin_time);
+      clone.querySelector(".magunitude").textContent = elm.magunitude ? elm.magunitude : "不明";
+      clone.querySelector(".depth").textContent = elm.depth ? elm.depth : "不明";
       clone.querySelector(".traning").style.display = elm.is_training ? "block" : "none";
 
-      clone.querySelector(".userIntensity").innerText = Boolean(elm.userIntensity) ? elm.userIntensity : "?";
+      clone.querySelector(".userIntensity").textContent = Boolean(elm.userIntensity) ? elm.userIntensity : "?";
       clone.querySelector(".userDataWrap").style.background = shindoConvert(elm.userIntensity, 2)[0];
       clone.querySelector(".userDataWrap").style.color = shindoConvert(elm.userIntensity, 2)[1];
 
@@ -139,9 +139,9 @@ function EEWAlertUpdate(data) {
 
       alertflgTmp = "(" + elm.alertflg + ")";
       if (!elm.alertflg) alertflgTmp = "";
-      EQMenu.querySelector(".alertflg").innerText = alertflgTmp;
+      EQMenu.querySelector(".alertflg").textContent = alertflgTmp;
 
-      EQMenu.querySelector(".report_num").innerText = elm.report_num;
+      EQMenu.querySelector(".report_num").textContent = elm.report_num;
 
       if (elm.alertflg == "警報") {
         EQMenu.classList.add("keihou");
@@ -151,18 +151,18 @@ function EEWAlertUpdate(data) {
         EQMenu.classList.remove("keihou");
       }
 
-      EQMenu.querySelector(".calcintensity").innerText = elm.calcintensity ? elm.calcintensity : "?";
+      EQMenu.querySelector(".calcintensity").textContent = elm.calcintensity ? elm.calcintensity : "?";
       EQMenu.querySelector(".calcintensity").style.background = shindoConvert(elm.calcintensity, 2)[0];
       EQMenu.querySelector(".calcintensity").style.color = shindoConvert(elm.calcintensity, 2)[1];
 
       EQMenu.querySelector(".is_final").style.display = elm.is_final ? "inline" : "none";
       EQMenu.querySelector(".canceled").style.display = elm.is_cancel ? "flex" : "none";
-      EQMenu.querySelector(".region_name").innerText = elm.region_name ? elm.region_name : "震源地域不明";
-      EQMenu.querySelector(".origin_time").innerText = dateEncode(3, elm.origin_time);
-      EQMenu.querySelector(".magunitude").innerText = elm.magunitude ? elm.magunitude : "不明";
-      EQMenu.querySelector(".depth").innerText = elm.depth ? elm.depth : "不明";
+      EQMenu.querySelector(".region_name").textContent = elm.region_name ? elm.region_name : "震源地域不明";
+      EQMenu.querySelector(".origin_time").textContent = dateEncode(3, elm.origin_time);
+      EQMenu.querySelector(".magunitude").textContent = elm.magunitude ? elm.magunitude : "不明";
+      EQMenu.querySelector(".depth").textContent = elm.depth ? elm.depth : "不明";
 
-      EQMenu.querySelector(".distance").innerText = elm.distance ? Math.round(elm.distance) + "km" : "";
+      EQMenu.querySelector(".distance").textContent = elm.distance ? Math.round(elm.distance) + "km" : "";
     }
     /*
     if (elm.intensityAreas) {
@@ -346,9 +346,9 @@ function eqInfoDraw(data, source) {
   data.forEach(function (elm) {
     var clone = EQTemplate.content.cloneNode(true);
 
-    clone.querySelector(".EQI_epiCenter").innerText = elm.epiCenter ? elm.epiCenter : "震源調査中";
-    clone.querySelector(".EQI_datetime").innerText = elm.OriginTime ? dateEncode(3, elm.OriginTime) : "発生時刻不明";
-    clone.querySelector(".EQI_magnitude").innerText = "M" + (elm.M ? elm.M : "不明");
+    clone.querySelector(".EQI_epiCenter").textContent = elm.epiCenter ? elm.epiCenter : "震源調査中";
+    clone.querySelector(".EQI_datetime").textContent = elm.OriginTime ? dateEncode(3, elm.OriginTime) : "発生時刻不明";
+    clone.querySelector(".EQI_magnitude").textContent = "M" + (elm.M ? elm.M : "不明");
 
     if (source == "jma") {
       var maxITmp = shindoConvert(elm.maxI, 0);
@@ -358,7 +358,7 @@ function eqInfoDraw(data, source) {
         shindoColor = ["auto", "auto"];
       }
 
-      clone.querySelector(".EQI_maxI").innerText = maxITmp;
+      clone.querySelector(".EQI_maxI").textContent = maxITmp;
       clone.querySelector(".EQI_maxI").style.background = shindoColor[0];
       clone.querySelector(".EQI_maxI").style.color = shindoColor[1];
       clone.querySelector(".canceled").style.display = elm.cancel ? "flex" : "none";
@@ -390,7 +390,6 @@ function EQDetect(data) {
     EQD_Item.lng = data.lng;
     EQD_Item.marker.setRadius(data.Radius * 1000);
   } else {
-    console.log("検出！", data.lat, data.lng);
     //var EQmarker = L.marker([data.lat, data.lng]).addTo(map);
     var EQmarker = L.circle([data.lat, data.lng], {
       radius: data.Radius * 1000,
@@ -447,13 +446,13 @@ function kmoniTimeUpdate(updateTime, LocalTime, type, condition, vendor) {
 */
   if (Math.floor(updateTimeTmp / 1000) < Math.floor(updateTime / 1000)) {
     updateTimeTmp = updateTime;
-    document.getElementById("all_UpdateTime").innerText = dateEncode(3, updateTime);
+    document.getElementById("all_UpdateTime").textContent = dateEncode(3, updateTime);
   }
 
   if (vendor) {
-    document.getElementById("ymoniVendor").innerText = vendor == "YE" ? "East" : "West";
+    document.getElementById("ymoniVendor").textContent = vendor == "YE" ? "East" : "West";
   }
-  document.getElementById(type + "_UT").innerText = dateEncode(3, updateTime);
+  document.getElementById(type + "_UT").textContent = dateEncode(3, updateTime);
   var iconElm = document.getElementById(type + "_ICN");
 
   if (condition == "success") {
@@ -490,7 +489,7 @@ function Show_notification(data) {
 
   var notifyNum = notifications.length;
   if (notifyNum > 9) notifyNum = "9+";
-  document.getElementById("plus_badge").innerText = notifyNum;
+  document.getElementById("plus_badge").textContent = notifyNum;
 
   notificationsTmp = notifications.reverse();
   removeChild(document.getElementById("notification_wrap"));
@@ -498,9 +497,9 @@ function Show_notification(data) {
     var template = document.getElementById("notificationTemplate");
 
     var clone = template.content.cloneNode(true);
-    clone.querySelector(".notification_title").innerText = elm.title;
-    clone.querySelector(".notification_content").innerText = elm.detail;
-    clone.querySelector(".notification_time").innerText = dateEncode(3, elm.time);
+    clone.querySelector(".notification_title").textContent = elm.title;
+    clone.querySelector(".notification_content").textContent = elm.detail;
+    clone.querySelector(".notification_time").textContent = dateEncode(3, elm.time);
 
     var keyColor = "transparent";
     switch (elm.type) {
