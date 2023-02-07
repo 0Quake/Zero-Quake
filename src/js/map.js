@@ -8,6 +8,10 @@ var tsunamiLayer;
 var gjmap; //オフライン地図
 var gjmapT; //津波用geojson
 var sections = [];
+var basemap;
+var worldmap;
+var offlineMapActive = true;
+var overlayActive = false;
 
 var psWaveList = [];
 var tsunamiAlertNow = false;
@@ -213,8 +217,17 @@ function init() {
     maxZoom: 21,
     zoomAnimation: true,
     zoomSnap: 0.1,
+    zoomDelta: 0.5,
+    preferCanvas: false,
+    zoomControl: false,
   });
   map.setView([32.99125, 138.46], 4);
+
+  map.createPane("tsunamiPane").style.zIndex = 201;
+  map.createPane("jsonMAPPane").style.zIndex = 210;
+  var jsonMAPCanvas = L.canvas({ pane: "jsonMAPPane" });
+
+  map.createPane("PointsPane").style.zIndex = 220;
 
   //L.control.scale({ imperial: false }).addTo(map);←縮尺
 
@@ -263,14 +276,6 @@ function init() {
     maxNativeZoom: 18,
     maxZoom: 21,
     attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">©国土地理院</a>',
-  });
-
-  var tile9 = L.tileLayer("https://www.jma.go.jp/tile/gsi/pale2/{z}/{x}/{y}.png", {
-    minZoom: 0,
-    minNativeZoom: 2,
-    maxNativeZoom: 11,
-    maxZoom: 21,
-    attribution: '<a href="https://www.jma.go.jp/bosai/map.html#5/28.835/168.548/&elem=int&contents=earthquake_map" target="_blank">©気象庁</a>',
   });
 
   var overlay1 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/hillshademap/{z}/{x}/{y}.png", {
@@ -410,26 +415,21 @@ function init() {
       return res.json();
     })
     .then(function (json) {
-      mapLayer.addLayer(
-        L.geoJSON(json, {
-          style: {
-            color: "#666",
-            fill: true,
-            fillColor: "transparent",
-            fillOpacity: 1,
-            weight: 1,
-            pane: "jsonMAPPane",
-            className: "GJMap",
-            attribution: '<a href="https://www.naturalearthdata.com/">©Natural Earth</a>',
-          },
-          onEachFeature: function onEachFeature(feature, layer) {
-            if (feature.properties && feature.properties.NAME_JA) {
-              sections.push({ name: feature.properties.NAME_JA, item: layer });
-              layer.bindPopup("<h3>国</h3>" + feature.properties.NAME_JA);
-            }
-          },
-        })
-      );
+      worldmap = L.geoJSON(json, {
+        style: {
+          color: "#444",
+          fill: true,
+          fillColor: "#222",
+          fillOpacity: 1,
+          weight: 1,
+          pane: "jsonMAPPane",
+          interactive: false,
+          attribution: '<a href="https://www.naturalearthdata.com/">©Natural Earth</a>',
+          renderer: jsonMAPCanvas,
+        },
+      });
+
+      mapLayer.addLayer(worldmap);
     });
 
   fetch("./Resource/basemap.json")
@@ -437,26 +437,25 @@ function init() {
       return res.json();
     })
     .then(function (json) {
-      mapLayer.addLayer(
-        L.geoJSON(json, {
-          style: {
-            color: "#999",
-            fill: true,
-            fillColor: "transparent",
-            fillOpacity: 1,
-            weight: 1,
-            pane: "jsonMAPPane",
-            className: "GJMap",
-            attribution: '<a href="https://www.data.jma.go.jp/developer/gis.html" target="_blank">©JMA</a>',
-          },
-          onEachFeature: function onEachFeature(feature, layer) {
-            if (feature.properties && feature.properties.name) {
-              sections.push({ name: feature.properties.name, item: layer });
-              layer.bindPopup("<h3>地震情報/細分区域</h3>" + feature.properties.name);
-            }
-          },
-        })
-      );
+      basemap = L.geoJSON(json, {
+        style: {
+          color: "#999",
+          fill: true,
+          fillColor: "#333",
+          fillOpacity: 1,
+          weight: 1,
+          pane: "jsonMAPPane",
+          attribution: '<a href="https://www.data.jma.go.jp/developer/gis.html" target="_blank">©JMA</a>',
+          renderer: jsonMAPCanvas,
+        },
+        onEachFeature: function onEachFeature(feature, layer) {
+          if (feature.properties && feature.properties.name) {
+            sections.push({ name: feature.properties.name, item: layer });
+            layer.bindPopup("<h3>地震情報/細分区域</h3>" + feature.properties.name);
+          }
+        },
+      });
+      mapLayer.addLayer(basemap);
 
       gjmap = L.geoJSON({ type: "FeatureCollection", features: [] });
       mapLayer.addLayer(gjmap);
@@ -465,7 +464,6 @@ function init() {
           {
             オフライン地図: gjmap,
             気象庁: tile1,
-            気象庁2: tile9,
             "地理院 標準地図": tile8,
 
             "地理院 淡色地図": tile2,
@@ -490,14 +488,15 @@ function init() {
       document.getElementById("splash").style.display = "none";
     });
   map.on("baselayerchange", function (layer) {
-    if (layer.name == "オフライン地図") {
-      document.getElementById("mapcontainer").classList.add("GJMapActive");
-    } else {
-      document.getElementById("mapcontainer").classList.remove("GJMapActive");
-    }
+    offlineMapActive = layer.name == "オフライン地図";
+
+    basemap.setStyle({ fill: offlineMapActive && !overlayActive });
+    worldmap.setStyle({ fill: offlineMapActive && !overlayActive });
   });
   map.on("overlayadd", function (eventLayer) {
-    document.getElementById("mapcontainer").classList.remove("GJMapActive");
+    overlayActive = true;
+    basemap.setStyle({ fill: offlineMapActive && !overlayActive });
+    worldmap.setStyle({ fill: offlineMapActive && !overlayActive });
 
     if (eventLayer.name === "地理院 津波浸水想定 ハザードマップ") {
       legend.addTo(map);
@@ -515,8 +514,10 @@ function init() {
       });
     }
     if (overlayTmp.length == 0) {
+      overlayActive = false;
       map.removeControl(legend2);
-      document.getElementById("mapcontainer").classList.add("GJMapActive");
+      basemap.setStyle({ fill: offlineMapActive && !overlayActive });
+      worldmap.setStyle({ fill: offlineMapActive && !overlayActive });
     }
   });
 
@@ -573,9 +574,6 @@ function init() {
     img.src = "https://disaportal.gsi.go.jp/hazardmap/copyright/img/dosha_keikai.png";
     return img;
   };
-  map.createPane("tsunamiPane").style.zIndex = 201;
-  map.createPane("jsonMAPPane").style.zIndex = 210;
-  map.createPane("PointsPane").style.zIndex = 220;
   /*
   map.createPane("background");
   var imageUrl = "./img/mapbase.png"; //size 5616 x 3744
@@ -728,7 +726,7 @@ function kmoniMapUpdate(dataTmp, type) {
 
       if (changed) {
         var markerElement = document.querySelector(".KmoniPoint_" + elm.Code);
-        if (!markerElement) {
+        if (points.length !== 0 && !markerElement) {
           addPointMarker(elm);
           return;
         }
@@ -751,7 +749,7 @@ function kmoniMapUpdate(dataTmp, type) {
         }
       }
     } else {
-      if (points && points[index] && points[index].marker) {
+      if (points.length !== 0 && points[index] && points[index].marker) {
         map.removeLayer(points[index].marker);
         points[index].marker = null;
       }

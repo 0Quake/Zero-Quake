@@ -62,10 +62,11 @@
             margin: 0 10px;
         }
 
-        .tabcontent {
+        div .tabcontent {
             height: 100%;
             overflow: auto;
-            padding: 20px 20px 60px 20px;
+            padding: 20px 20px 60px 20px !important;
+
         }
 
         #BtnWrap {
@@ -178,8 +179,8 @@
                         <li><a href="kmoni.bosai.go.jp">強震モニタ</a>防災科学技術研究所</li>
                         <li><a href="lmoni.bosai.go.jp">長周期地震動モニタ</a>防災科学技術研究所</li>
                         <li><a href="https://typhoon.yahoo.co.jp/weather/jp/earthquake/kyoshin/">Yahoo 強震モニタ</a>防災科学技術研究所／Yahoo</li>
-                        <li><a href="https://dev.narikakun.net/doc/eew">緊急地震速報 API</a>@narikakun</li>
                         <li><a href="https://www.p2pquake.net/json_api_v2/">P2P 地震情報 API</a>@p2pquake_takuya</li>
+                        <li>(SignalNow X 連携)</li>
                     </ul>
 
                     <h4>震度速報／地震情報(震源に関する情報／震度・震源に関する情報／遠地地震に関する情報／顕著な地震の震源要素更新のお知らせ)</h4>
@@ -203,7 +204,9 @@
                     <ul>
                         <li><a href="https://xml.kishou.go.jp/xmlpull.html">気象庁防災情報XML</a>気象庁</li>
                     </ul>
-
+                    <h4>P 波・S 波 予報円</h4>
+                    緊急地震速報から得られる、地震発生時刻・深さ・震源の緯度・経度をもとに
+                    <a href="https://www.data.jma.go.jp/eqev/data/bulletin/catalog/appendix/trtime/trt_j.html">JMA2001 走時表</a> を利用して計算
 
                     <h3>参考資料</h3>
                     <ul>
@@ -288,6 +291,9 @@
             //L.control.scale({ imperial: false }).addTo(map);←縮尺
 
             map.setView([32.99125, 138.46], 4);
+            map.createPane("jsonMAPPane").style.zIndex = 210;
+            var jsonMAPCanvas = L.canvas({ pane: "jsonMAPPane" });
+
 
             var tile1 = L.tileLayer("https://www.data.jma.go.jp/svd/eqdb/data/shindo/map/{z}/{x}/{y}.png", {
                 minZoom: 0,
@@ -416,15 +422,16 @@
                             weight: 1,
                             pane: "tilePane",
                             attribution: 'Map data <a href="https://www.naturalearthdata.com/">©Natural Earth</a> / <a href="https://www.data.jma.go.jp/developer/gis.html" target="_blank">©JMA</a>',
+                            renderer: L.svg(),
                         },
                         onEachFeature: function onEachFeature(feature, layer) {
 
-                            if (feature.properties && feature.properties.NAME) {
-                                sections.push({ name: feature.properties.NAME, item: layer })
+                            if (feature.properties && feature.properties.name) {
+                                sections.push({ name: feature.properties.name, item: layer })
                                 var saibunElm = document.createElement("option")
-                                saibunElm.innerText = feature.properties.NAME
+                                saibunElm.innerText = feature.properties.name
 
-                                if (setting && setting.home.Saibun == feature.properties.NAME) {
+                                if (setting && setting.home.Saibun == feature.properties.name) {
                                     saibunElm.selected = true; layer.setStyle({ fillColor: "#FFF" })
                                 }
                                 document.getElementById("saibun").appendChild(saibunElm)
@@ -436,46 +443,41 @@
                                     lat = e.latlng.lat;
                                     lng = e.latlng.lng;
                                     markerElm.setLatLng(e.latlng)
-                                    console.log(layer)
-                                    if (feature.properties.layer == "地震情報／細分区域") {
-                                        layer.setStyle({ fillColor: "#FFF" })
-                                        document.getElementById("latitude").value = lat
-                                        document.getElementById("longitude").value = lng
-                                        console.log(feature.properties.NAME)
-                                        Array.from(document.querySelectorAll("#saibun option")).find(function (elm) { return elm.innerText == feature.properties.NAME }).selected = true
-                                    }
+
+                                    layer.setStyle({ fillColor: "#FFF" })
+                                    document.getElementById("latitude").value = lat
+                                    document.getElementById("longitude").value = lng
+                                    var optionElm = Array.from(document.querySelectorAll("#saibun option")).find(function (elm) { return elm.innerText == feature.properties.name })
+                                    optionElm.selected = true
                                 });
 
                             }
                         },
                     }).addTo(map);
+                    fetch("./Resource/World.json")
+                        .then(function (res) {
+                            return res.json();
+                        })
+                        .then(function (json) {
+                            worldmap = L.geoJSON(json, {
+                                style: {
+                                    color: "#444",
+                                    fill: true,
+                                    fillColor: "#222",
+                                    fillOpacity: 1,
+                                    weight: 1,
+                                    pane: "jsonMAPPane",
+                                    interactive: false,
+                                    attribution: '<a href="https://www.naturalearthdata.com/">©Natural Earth</a>',
+                                    renderer: jsonMAPCanvas,
+                                },
+                            });
+
+                            (worldmap).addTo(map);
+                        });
 
 
-                    L.control
-                        .layers(
-                            {
-                                オフライン地図: gjmap,
-                                気象庁: tile1,
-                                気象庁2: tile9,
-                                "地理院 標準地図": tile8,
 
-                                "地理院 淡色地図": tile2,
-                                "地理院 写真": tile3,
-                                "地理院 白地図": tile4,
-                                OpenStreetMap: tile5,
-                                "Google Map": tile6,
-                                "Google Map 写真": tile7,
-                            },
-                            {
-                                "地理院 陰影起伏図": overlay1,
-                                "地理院 火山基本図データ": overlay2,
-                                "地理院 津波浸水想定 ハザードマップ": overlay3,
-                                "地理院 土砂災害警戒区域（急傾斜地の崩壊） ハザードマップ": overlay4,
-                                "地理院 土砂災害警戒区域（地すべり） ハザードマップ": overlay5,
-                                "気象庁　境界線": overlay6,
-                            }
-                        )
-                        .addTo(map);
                 });
 
             var currentZoom = map.getZoom();

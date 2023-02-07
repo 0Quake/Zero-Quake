@@ -343,6 +343,8 @@ function eqInfoDraw(data, source) {
     EQListWrap = document.getElementById("USGS_EqInfo");
   }
   removeChild(EQListWrap);
+  console.log(data);
+
   data.forEach(function (elm) {
     var clone = EQTemplate.content.cloneNode(true);
 
@@ -710,6 +712,10 @@ function shindoConvert(str, responseType) {
         break;
       case 3:
         var ConvTable = { "?": null, 0: null, 1: "1", 2: "2", 3: "3", 4: "4", "5-": "5-", "5+": "5p", "6-": "6-", "6+": "6p", 7: "7", "7+": "7p" };
+        return ConvTable[ShindoTmp];
+        break;
+      case 4:
+        var ConvTable = { "?": null, 0: 0, 1: 1, 2: 2, 3: 3, 4: 4, "5-": 4.5, "5+": 5, "6-": 5.5, "6+": 6, 7: 7, "7+": 7.5 };
         return ConvTable[ShindoTmp];
         break;
 

@@ -80,7 +80,7 @@ ipcMain.on("message", (_event, response) => {
         settingWindow = null;
       });
 
-      settingWindow.setMenuBarVisibility(false);
+      //      settingWindow.setMenuBarVisibility(false);
       // settingWindow.webContents.openDevTools();
 
       settingWindow.loadFile("src/settings.html");
@@ -155,6 +155,9 @@ ipcMain.on("message", (_event, response) => {
     if (SnetPointsDataTmp) {
       mainWindow.webContents.send("message2", SnetPointsDataTmp);
     }
+    if (P2P_ConnectData) {
+      mainWindow.webContents.send("message2", P2P_ConnectData);
+    }
   }
 });
 
@@ -176,6 +179,7 @@ function createWindow() {
   //mainWindow.setMenuBarVisibility(false);
 
   mainWindow.webContents.on("did-finish-load", () => {
+    //replay("2023/02/07 18:41:20");
     //replay("2023/02/05 16:13:20");
     //replay("2023/02/03 02:58:40");
     // replay("2023/01/31 17:48:30");
@@ -1183,8 +1187,6 @@ function EEWdetect(type, json, KorL) {
       source: "P2P_EEW",
     };
 
-    kmoniTimeUpdate(new Date(json.issue.time), "P2P_EEW", "success");
-
     var areaTmp = [];
     json.areas.forEach(function (elm) {
       areaTmp.push({
@@ -1947,7 +1949,7 @@ function eqInfoControl(dataList, type) {
           if (data.OriginTime && (!EQElm.OriginTime || EQElm.reportDateTime < data.reportDateTime)) EQElm.OriginTime = data.OriginTime;
           if (data.epiCenter && (!EQElm.epiCenter || EQElm.reportDateTime < data.reportDateTime)) EQElm.epiCenter = data.epiCenter;
           if (data.M && (!EQElm.M || EQElm.reportDateTime < data.reportDateTime)) EQElm.M = data.M;
-          if (data.maxI && (!EQElm.maxI || EQElm.reportDateTime < data.reportDateTime)) EQElm.maxI = data.maxI;
+          if (data.maxI && data.maxI !== "[objectHTMLUnknownElement]" && (!EQElm.maxI || EQElm.reportDateTime < data.reportDateTime)) EQElm.maxI = data.maxI;
           if (data.cancel && (!EQElm.cancel || EQElm.reportDateTime < data.reportDateTime)) EQElm.cancel = data.cancel;
 
           if (data.DetailURL && data.DetailURL[0] !== "" && !EQElm.DetailURL.includes(data.DetailURL[0])) EQElm.DetailURL.push(data.DetailURL[0]);
@@ -2484,6 +2486,15 @@ function shindoConvert(str, responseType) {
         };
         return ConvTable[ShindoTmp];
 
+        break;
+      case 3:
+        var ConvTable = { "?": null, 0: null, 1: "1", 2: "2", 3: "3", 4: "4", "5-": "5-", "5+": "5p", "6-": "6-", "6+": "6p", 7: "7", "7+": "7p" };
+        return ConvTable[ShindoTmp];
+        break;
+
+      case 4:
+        var ConvTable = { "?": null, 0: 0, 1: 1, 2: 2, 3: 3, 4: 4, "5-": 4.5, "5+": 5, "6-": 5.5, "6+": 6, 7: 7, "7+": 7.5 };
+        return ConvTable[ShindoTmp];
         break;
 
       case 0:

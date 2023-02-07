@@ -21,17 +21,21 @@ Zero Quake が情報を取得している情報源
 
 ### 地震情報(震度速報／震源に関する情報／震度・震源に関する情報／顕著な地震の震源要素更新のお知らせ)
 
-- [気象庁](https://www.jma.go.jp/bosai/map.html?contents=earthquake_map)
+- [気象庁ホームページ](https://www.jma.go.jp/bosai/map.html?contents=earthquake_map)
+- [気象庁防災情報 XML](https://xml.kishou.go.jp/xmlpull.html)
 - [narikakun.net 地震情報 API](https://dev.narikakun.net/doc/earthquake)
+
+### 地震情報(Earthquake Catalog)
+
 - [FDSN Web Service](https://earthquake.usgs.gov/fdsnws/event/1/)
 
 ### 大津波警報／津波警報／津波注意報
 
 - [P2P 地震情報 API](https://www.p2pquake.net/json_api_v2/)
+- [気象庁防災情報 XML](https://xml.kishou.go.jp/xmlpull.html)
 
 ### 津波情報／津波予報
 
-- [P2P 地震情報 API](https://www.p2pquake.net/json_api_v2/)
 - [気象庁防災情報 XML](https://xml.kishou.go.jp/xmlpull.html)
 
 ### P 波・S 波 予報円
@@ -53,12 +57,12 @@ Zero Quake が情報を取得している情報源
 #### タイル地図
 
 「気象庁」© jma  
-「気象庁 2」© jma  
 「地理院 標準地図」© 国土地理院  
 「地理院 淡色地図」© 国土地理院  
 「地理院 写真」© 国土地理院  
 「地理院 白地図」© 国土地理院  
-「OpenStreetMap」© OpenStreetMap contributors  
+「OpenStreetMap」© OpenStreetMap contributors
+
 「地理院 陰影起伏図」© 国土地理院  
 「地理院 火山基本図データ」© 国土地理院  
 「地理院 津波浸水想定 ハザードマップ」© 国土地理院  

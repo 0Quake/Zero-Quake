@@ -24,6 +24,16 @@ a.leaflet-control-zoom-out:hover {
   background: #444;
   color: #666;
 }
+.leaflet-control-layers-toggle,
+.leaflet-retina .leaflet-control-layers-toggle {
+  background-image: url(../img/layers.svg);
+}
+.leaflet-control-layers {
+  border-radius: 50%;
+}
+.leaflet-control-layers:hover {
+  border-radius: 5px;
+}
 
 #kmoniCanvas {
   display: none;
@@ -371,21 +381,9 @@ div.marker-circle.marker_Int7p {
 #tsunami_Yoho span {
   background: var(--TsunamiYohoColor);
 }
-.GJMapActive {
-  fill-opacity: 1;
-}
-
-.GJMap[fill="transparent"] {
-  fill-opacity: 0;
-}
-
-.GJMapActive .GJMap[fill="transparent"] {
-  fill-opacity: 1;
-  fill: #333;
-}
 
 .EQDetectCircle {
-  transition: 500ms;
+  /*transition: 500ms;*/
 }
 
 :root {
