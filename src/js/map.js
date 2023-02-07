@@ -365,6 +365,7 @@ function init() {
     .then(function (json) {
       points = json;
 
+      /*
       points.forEach(function (elm, index) {
         if (elm.Name && elm.Point && !elm.IsSuspended) {
           addPointMarker(elm);
@@ -372,7 +373,7 @@ function init() {
       });
       if (kmoniMapData) {
         kmoniMapUpdate(kmoniMapData);
-      }
+      }*/
     });
 
   fetch("./Resource/Snet_Points.json")
@@ -684,6 +685,7 @@ function addPointMarker(elm) {
       L.DomUtil.removeClass(e.target._icon, "popupOpen");
     })
     .addTo(map);
+  return document.querySelector(".KmoniPoint_" + elm.Code);
 }
 var kmoniMapData;
 var SnetMapData;
@@ -717,6 +719,11 @@ function kmoniMapUpdate(dataTmp, type) {
     if (elm.Name && elm.Point && elm.data && !elm.IsSuspended) {
       var changed;
 
+      var markerElement = document.querySelector(".KmoniPoint_" + elm.Code);
+      if (!markerElement) {
+        markerElement = addPointMarker(elm);
+      }
+
       if (previous_points.length == 0) {
         changed = true;
       } else {
@@ -725,11 +732,6 @@ function kmoniMapUpdate(dataTmp, type) {
       }
 
       if (changed) {
-        var markerElement = document.querySelector(".KmoniPoint_" + elm.Code);
-        if (points.length !== 0 && !markerElement) {
-          addPointMarker(elm);
-          return;
-        }
         markerElement.style.display = "block";
         markerElement.querySelector(".PointName").style.borderBottom = "solid 2px rgb(" + elm.rgb.join(",") + ")";
         markerElement.querySelector(".PointInt").textContent = Math.round(elm.shindo * 10) / 10;
