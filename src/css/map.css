@@ -65,12 +65,10 @@ img.leaflet-control {
 .PointPopup,
 .leaflet-popup-content {
   margin: 0;
-  position: relative;
   min-width: 180px;
   text-align: center;
-  padding: 10px;
 }
-.PointPopup,
+
 .leaflet-popup-content:has(h3) {
   padding: 35px 5px 5px 5px;
 }
@@ -83,7 +81,7 @@ img.leaflet-control {
   right: 0;
   height: 30px;
   line-height: 30px;
-  padding: 0.15em 0.4em;
+  padding: 0 25px 0 5px;
   margin: 0;
   font-size: 16px;
   background: #444;
@@ -102,6 +100,7 @@ img.leaflet-control {
   font-weight: normal;
   font-family: "BIZ UDPGothic", sans-serif;
   color: #ccc;
+  line-height: 30px;
 }
 
 .leaflet-popup-content table,
@@ -144,43 +143,17 @@ img.leaflet-control {
   z-index: 222;
   transform: scale(1.5);
 }
-div.marker-circle.marker_Int1,
-div.marker-circle.marker_Int2,
-div.marker-circle.marker_Int3,
-div.marker-circle.marker_Int4,
-div.marker-circle.marker_Int5-,
-div.marker-circle.marker_Int5p,
-div.marker-circle.marker_Int6-,
-div.marker-circle.marker_Int6p,
-div.marker-circle.marker_Int7,
-div.marker-circle.marker_Int7p {
-  width: 15px;
-  height: 15px;
-  position: relative;
-  top: -15px;
-  left: -15px;
+div.marker-circle.marker_Int {
 }
 
-.marker_Int1::before,
-.marker_Int2::before,
-.marker_Int3::before,
-.marker_Int4::before,
-.marker_Int5-::before,
-.marker_Int5p::before,
-.marker_Int6-::before,
-.marker_Int6p::before,
-.marker_Int7::before,
-.marker_Int7p::before {
+.marker_Int::before {
   position: absolute;
   inset: 0;
-  width: 30px;
-  height: 30px;
-  line-height: 30px;
   text-align: center;
   font-size: 16px;
 }
 div.marker-circle.marker_Int1 {
-  background: var(--IntTheme_1_BgColor);
+  background: var(--IntTheme_1_BgColor) !important;
   transform: scale(1);
 }
 .marker_Int1::before {
@@ -188,7 +161,7 @@ div.marker-circle.marker_Int1 {
   color: var(--IntTheme_1_color);
 }
 div.marker-circle.marker_Int2 {
-  background: var(--IntTheme_2_BgColor);
+  background: var(--IntTheme_2_BgColor) !important;
   transform: scale(1);
 }
 .marker_Int2::before {
@@ -196,7 +169,7 @@ div.marker-circle.marker_Int2 {
   color: var(--IntTheme_2_color);
 }
 div.marker-circle.marker_Int3 {
-  background: var(--IntTheme_3_BgColor);
+  background: var(--IntTheme_3_BgColor) !important;
   transform: scale(1);
 }
 .marker_Int3::before {
@@ -204,7 +177,7 @@ div.marker-circle.marker_Int3 {
   color: var(--IntTheme_3_color);
 }
 div.marker-circle.marker_Int4 {
-  background: var(--IntTheme_4_BgColor);
+  background: var(--IntTheme_4_BgColor) !important;
   transform: scale(1);
 }
 .marker_Int4::before {
@@ -212,7 +185,7 @@ div.marker-circle.marker_Int4 {
   color: var(--IntTheme_4_color);
 }
 div.marker-circle.marker_Int5- {
-  background: var(--IntTheme_5-_BgColor);
+  background: var(--IntTheme_5-_BgColor) !important;
   transform: scale(1);
 }
 .marker_Int5-::before {
@@ -220,7 +193,7 @@ div.marker-circle.marker_Int5- {
   color: var(--IntTheme_5-_color);
 }
 div.marker-circle.marker_Int5p {
-  background: var(--IntTheme_5p_BgColor);
+  background: var(--IntTheme_5p_BgColor) !important;
   transform: scale(1);
 }
 .marker_Int5p::before {
@@ -228,7 +201,7 @@ div.marker-circle.marker_Int5p {
   color: var(--IntTheme_5p_color);
 }
 div.marker-circle.marker_Int6- {
-  background: var(--IntTheme_6-_BgColor);
+  background: var(--IntTheme_6-_BgColor) !important;
   transform: scale(1);
 }
 .marker_Int6-::before {
@@ -236,7 +209,7 @@ div.marker-circle.marker_Int6- {
   color: var(--IntTheme_6-_color);
 }
 div.marker-circle.marker_Int6p {
-  background: var(--IntTheme_6p_BgColor);
+  background: var(--IntTheme_6p_BgColor) !important;
   transform: scale(1);
 }
 .marker_Int6p::before {
@@ -244,7 +217,7 @@ div.marker-circle.marker_Int6p {
   color: var(--IntTheme_6p_color);
 }
 div.marker-circle.marker_Int7 {
-  background: var(--IntTheme_7_BgColor);
+  background: var(--IntTheme_7_BgColor) !important;
   transform: scale(1);
 }
 .marker_Int7::before {
@@ -252,7 +225,7 @@ div.marker-circle.marker_Int7 {
   color: var(--IntTheme_7_color);
 }
 div.marker-circle.marker_Int7p {
-  background: var(--IntTheme_7p_BgColor);
+  background: var(--IntTheme_7p_BgColor) !important;
   transform: scale(1);
 }
 .marker_Int7p::before {
@@ -264,29 +237,7 @@ div.marker-circle.marker_Int7p {
   display: none;
 }
 .PointPopup {
-  position: absolute;
-  bottom: 40px;
-  left: -75px;
   width: 150px;
-  height: 110px;
-  display: none;
-  padding: 40px 5px 5px 10px;
-}
-.PointPopup::after {
-  display: block;
-  content: "";
-  position: absolute;
-  bottom: -10px;
-  left: 0;
-  right: 0;
-  width: 17px;
-  height: 17px;
-  margin: 0 auto;
-  transform: rotate(45deg);
-  border: none;
-  border-right: solid 1px #888;
-  border-bottom: solid 1px #888;
-  background: #222;
 }
 .PointName {
   border-bottom: solid 2px transparent;
@@ -307,23 +258,50 @@ div.marker-circle.marker_Int7p {
 .zoomLevel_1 .marker-circle {
   width: 3px;
   height: 3px;
-  margin: 10px;
+  margin: 16px;
 }
 .zoomLevel_2 .marker-circle {
   width: 8px;
   height: 8px;
-  margin: 7.5px;
+  margin: 13.5px;
 }
 .zoomLevel_3 .marker-circle {
   width: 15px;
   height: 15px;
-  margin: 5px;
+  margin: 10px;
 }
 .zoomLevel_4 .marker-circle {
   width: 25px;
   height: 25px;
+  margin: 5px;
+}
+.zoomLevel_1 .marker_Int,
+.zoomLevel_1 .marker_Int::before,
+.zoomLevel_2 .marker_Int,
+.zoomLevel_2 .marker_Int::before {
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
+  font-size: 16px;
+  margin: 7.5px;
+}
+.zoomLevel_3 .marker_Int,
+.zoomLevel_3 .marker_Int::before {
+  width: 25px;
+  height: 25px;
+  line-height: 25px;
+  font-size: 16px;
+  margin: 5px;
+}
+.zoomLevel_4 .marker_Int,
+.zoomLevel_4 .marker_Int::before {
+  width: 35px;
+  height: 35px;
+  line-height: 35px;
+  font-size: 18px;
   margin: 0;
 }
+
 .popup_show .PointPopup {
   display: block;
 }

@@ -282,6 +282,7 @@ function epiCenterUpdate(eid, latitude, longitude) {
       var ESMarker = L.marker([latitude, longitude], {
         icon: epicenterIcon,
         pane: "overlayPane",
+        renderer: EQDetectCanvas,
       }).addTo(map);
 
       epiCenter.push({ eid: eid, markerElm: ESMarker, latitude: latitude, longitude: longitude });
@@ -343,7 +344,6 @@ function eqInfoDraw(data, source) {
     EQListWrap = document.getElementById("USGS_EqInfo");
   }
   removeChild(EQListWrap);
-  console.log(data);
 
   data.forEach(function (elm) {
     var clone = EQTemplate.content.cloneNode(true);
@@ -399,6 +399,7 @@ function EQDetect(data) {
       fillColor: "#399ade",
       fillOpacity: 0.5,
       className: "EQDetectCircle",
+      pane: "overlayPane",
     }).addTo(map);
 
     EQDetectItem.push({
