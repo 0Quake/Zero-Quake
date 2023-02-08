@@ -397,10 +397,11 @@ function EQDetect(data) {
     var EQmarker = L.circle([data.lat, data.lng], {
       radius: data.Radius * 1000,
       color: "blue",
-      fillColor: "#399ade",
+      fillColor: "#ffffff",
       fillOpacity: 0.5,
       className: "EQDetectCircle",
-      pane: "overlayPane",
+      renderer: EQDetectCanvas,
+      interactive: false,
     }).addTo(map);
 
     EQDetectItem.push({

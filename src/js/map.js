@@ -176,22 +176,6 @@ function latitudeConvert(data) {
     return data;
   }
 }
-let geojsonMarkerOptions = {
-  radius: 8,
-  fillColor: "#ff7800",
-  color: "#000",
-  weight: 1,
-  opacity: 1,
-  fillOpacity: 0.8,
-};
-let geojsonMarkerOptions2 = {
-  radius: 8,
-  fillColor: "#0078ff",
-  color: "#000",
-  weight: 1,
-  opacity: 1,
-  fillOpacity: 0.8,
-};
 var overlayTmp = [];
 var epicenterIcon;
 var tsunamiElm = [];
@@ -227,10 +211,14 @@ function init() {
   map.createPane("jsonMAPPane").style.zIndex = 210;
   var jsonMAPCanvas = L.canvas({ pane: "jsonMAPPane" });
 
-  map.createPane("PointsPane").style.zIndex = 220;
-  map.createPane("PSWavePane").style.zIndex = 220;
+  map.createPane("PointsPane").style.zIndex = 221;
+  map.createPane("PSWavePane").style.zIndex = 300;
+  map.createPane("EQDetectPane").style.zIndex = 250;
+  map.createPane("EQDetectPane").style.pointerEvents = "none";
+  map.createPane("HinanjoPane").style.zIndex = 220;
 
-  EQDetectCanvas = L.canvas({ pane: "overlayPane" });
+  EQDetectCanvas = L.canvas({ pane: "EQDetectPane" });
+  HinanjoCanvas = L.canvas({ pane: "HinanjoPane" });
 
   //L.control.scale({ imperial: false }).addTo(map);←縮尺
 
@@ -332,7 +320,15 @@ function init() {
           if (!geojson || !this._map) return;
           event.tile.geojson = L.geoJSON(geojson, {
             pointToLayer: function (feature, cordinate) {
-              return L.circleMarker(cordinate, geojsonMarkerOptions);
+              return L.circleMarker(cordinate, {
+                radius: 8,
+                fillColor: "#ff7800",
+                color: "#000",
+                weight: 1,
+                opacity: 1,
+                fillOpacity: 0.8,
+                renderer: HinanjoCanvas,
+              });
             },
           })
             .addTo(this._map)
@@ -347,7 +343,15 @@ function init() {
           if (!geojson || !this._map) return;
           event.tile.geojson2 = L.geoJSON(geojson, {
             pointToLayer: function (feature, cordinate) {
-              return L.circleMarker(cordinate, geojsonMarkerOptions2);
+              return L.circleMarker(cordinate, {
+                radius: 8,
+                fillColor: "#0078ff",
+                color: "#000",
+                weight: 1,
+                opacity: 1,
+                fillOpacity: 0.8,
+                renderer: HinanjoCanvas,
+              });
             },
           })
             .addTo(this._map)
@@ -361,31 +365,33 @@ function init() {
       if (event.tile.geojson2 && this._map) this._map.removeLayer(event.tile.geojson2);
     });
 
+  /*
   fetch("./Resource/Knet_Points.json")
     .then(function (res) {
       return res.json();
     })
     .then(function (json) {
       //points = json;
-      /*
-      points.forEach(function (elm, index) {
-        if (elm.Name && elm.Point && !elm.IsSuspended) {
-          addPointMarker(elm);
-        }
-      });
-      if (kmoniMapData) {
-        kmoniMapUpdate(kmoniMapData);
-      }*/
-    });
+      
+      //points.forEach(function (elm, index) {
+      //  if (elm.Name && elm.Point && !elm.IsSuspended) {
+      //    addPointMarker(elm);
+      //  }
+      //});
+      //if (kmoniMapData) {
+      //  kmoniMapUpdate(kmoniMapData);
+      //}
+    });*/
 
+  /*
   fetch("./Resource/Snet_Points.json")
     .then(function (res) {
       return res.json();
     })
     .then(function (json) {
-      Spoints = json;
+      //Spoints = json;
 
-      /*
+      
       Spoints.forEach(function (elm) {
         if (elm.Code && elm.Point) {
           var popup_content = "<h3 class='PointName' style='border-bottom:solid 2px transparent'>S-net " + elm.Code + "</h3><h4 class='detecting'>地震検知中</h4><table><tr><td>震度</td><td class='PointInt'></td></tr><tr><td>PGA</td><td class='PointPGA'></td></tr></table>";
@@ -411,8 +417,8 @@ function init() {
       });
       if (SnetMapData) {
         SnetMapUpdate(SnetMapData);
-      }*/
-    });
+      }
+    });*/
 
   fetch("./Resource/World.json")
     .then(function (res) {
@@ -674,7 +680,7 @@ function addPointMarker(elm) {
     icon: kmoniPointMarker,
     pane: "PointsPane",
   })
-    .bindPopup("", { className: "PointPopup" })
+    .bindPopup("", { offset: [0, -20], className: "PointPopup" })
     .addTo(map);
   return elm;
 }
@@ -758,12 +764,11 @@ function kmoniMapUpdate(dataTmp, type) {
           markerCircleElm.classList.remove("detectingMarker");
         }
 
-        markerElement.classList.remove("marker_Int", "marker_Int1", "marker_Int2", "marker_Int3", "marker_Int4", "marker_Int5-", "marker_Int5p", "marker_Int6-", "marker_Int6p", "marker_Int7", "marker_Int7p");
+        markerCircleElm.classList.remove("marker_Int", "marker_Int1", "marker_Int2", "marker_Int3", "marker_Int4", "marker_Int5-", "marker_Int5p", "marker_Int6-", "marker_Int6p", "marker_Int7", "marker_Int7p");
 
         var IntTmp = shindoConvert(elm.shindo, 3);
         if (IntTmp) {
-          markerElement.classList.add("marker_Int", "marker_Int" + IntTmp);
-          markerElement.querySelector(".marker-circle").style.background = "";
+          markerCircleElm.classList.add("marker_Int", "marker_Int" + IntTmp);
         }
       }
     } else {
