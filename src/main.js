@@ -1949,12 +1949,16 @@ function eqInfoControl(dataList, type) {
           if (data.OriginTime && (!EQElm.OriginTime || EQElm.reportDateTime < data.reportDateTime)) EQElm.OriginTime = data.OriginTime;
           if (data.epiCenter && (!EQElm.epiCenter || EQElm.reportDateTime < data.reportDateTime)) EQElm.epiCenter = data.epiCenter;
           if (data.M && (!EQElm.M || EQElm.reportDateTime < data.reportDateTime)) EQElm.M = data.M;
-          if (data.maxI && data.maxI !== "[objectHTMLUnknownElement]" && (!EQElm.maxI || EQElm.reportDateTime < data.reportDateTime)) EQElm.maxI = data.maxI;
+          if (data.maxI && data.maxI !== "[objectHTMLUnknownElement]" && (!EQElm.maxI || EQElm.reportDateTime < data.reportDateTime)) {
+            EQElm.maxI = data.maxI;
+            console.log(data.maxI);
+          }
           if (data.cancel && (!EQElm.cancel || EQElm.reportDateTime < data.reportDateTime)) EQElm.cancel = data.cancel;
 
           if (data.DetailURL && data.DetailURL[0] !== "" && !EQElm.DetailURL.includes(data.DetailURL[0])) EQElm.DetailURL.push(data.DetailURL[0]);
           eqInfoAlert(EQElm, "jma", true);
         } else {
+          if (data.maxI == "[objectHTMLUnknownElement]") data.maxI = "?";
           eqInfoTmp.push(data);
         }
 

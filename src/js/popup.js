@@ -337,6 +337,7 @@ var EQListWrap;
 function eqInfoDraw(data, source) {
   var EQTemplate;
   if (source == "jma") {
+    eqInfo = data;
     EQTemplate = template2;
     EQListWrap = document.getElementById("JMA_EqInfo");
   } else if (source == "usgs") {
