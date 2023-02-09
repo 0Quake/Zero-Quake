@@ -1,7 +1,7 @@
 const electron = require("electron");
 const { app, BrowserWindow, ipcMain, net, Notification, dialog } = electron;
 const path = require("path");
-const sound = require("sound-play");
+//const sound = require("sound-play");
 //const iconv = require("iconv-lite");
 const Request = require("request");
 const jsdom = require("jsdom");
@@ -162,6 +162,11 @@ ipcMain.on("message", (_event, response) => {
 });
 
 function createWindow() {
+  kmoniWorker.webContents.send("message2", {
+    action: "soundPlay",
+    data: path.join(__dirname, "audio/EEW2.mp3"),
+  });
+
   if (mainWindow) {
     mainWindow.focus();
     return;
@@ -1412,9 +1417,17 @@ function EEWAlert(data, first, update) {
 
     if (first) {
       if (data.alertflg == "警報") {
-        sound.play(path.join(__dirname, "audio/EEW1.mp3"));
+        kmoniWorker.webContents.send("message2", {
+          action: "soundPlay",
+          data: path.join(__dirname, "audio/EEW1.mp3"),
+        });
+
+        //    sound.play(path.join(__dirname, "audio/EEW1.mp3"));
       } else if (data.alertflg == "予報") {
-        sound.play(path.join(__dirname, "audio/EEW2.mp3"));
+        kmoniWorker.webContents.send("message2", {
+          action: "soundPlay",
+          data: path.join(__dirname, "audio/EEW2.mp3"),
+        });
       }
       createWindow();
     }

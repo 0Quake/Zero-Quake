@@ -218,7 +218,8 @@ function init() {
   map.createPane("HinanjoPane").style.zIndex = 220;
 
   EQDetectCanvas = L.canvas({ pane: "EQDetectPane" });
-  HinanjoCanvas = L.canvas({ pane: "HinanjoPane" });
+  EQDetectCanvas = L.canvas({ pane: "EQDetectPane" });
+  PointsCanvas = L.canvas({ pane: "PointsPane" });
 
   //L.control.scale({ imperial: false }).addTo(map);←縮尺
 
@@ -679,6 +680,7 @@ function addPointMarker(elm) {
   elm.marker = L.marker([elm.Location.Latitude, elm.Location.Longitude], {
     icon: kmoniPointMarker,
     pane: "PointsPane",
+    renderer: PointsCanvas,
   })
     .bindPopup("", { offset: [0, -20], className: "PointPopup" })
     .addTo(map);
@@ -742,17 +744,13 @@ function kmoniMapUpdate(dataTmp, type) {
         markerCircleElm.style.background = "rgb(" + elm.rgb.join(",") + ")";
 
         markerElement.style.display = "block";
+        var PNameTmp = elm.Name ? elm.Name : "";
         var detecting = elm.detect || elm.detect2 ? "block" : "none";
         var shindoStr = Math.round(elm.shindo * 10) / 10;
         var pgaStr = Math.round(elm.pga * 100) / 100;
-        var popup_content = "<h3 class='PointName' style='border-bottom:solid 2px rgb(" + elm.rgb.join(",") + ")'>" + elm.Name + "<span>" + elm.Code + "</span></h3><h4 class='detecting' style='display:" + detecting + "'>地震検知中</h4><table><tr><td>震度</td><td class='PointInt'>" + shindoStr + "</td></tr><tr><td>PGA</td><td class='PointPGA'>" + pgaStr + "</td></tr></table>";
+        var popup_content = "<h3 class='PointName' style='border-bottom:solid 2px rgb(" + elm.rgb.join(",") + ")'>" + PNameTmp + "<span>" + elm.Code + "</span></h3><h4 class='detecting' style='display:" + detecting + "'>地震検知中</h4><table><tr><td>震度</td><td class='PointInt'>" + shindoStr + "</td></tr><tr><td>PGA</td><td class='PointPGA'>" + pgaStr + "</td></tr></table>";
         points[elm.Code].marker.setPopupContent(popup_content);
 
-        /*
-        markerElement.querySelector(".PointName").style.borderBottom = "solid 2px rgb(" + elm.rgb.join(",") + ")";
-        markerElement.querySelector(".PointInt").textContent = Math.round(elm.shindo * 10) / 10;
-        markerElement.querySelector(".PointPGA").textContent = Math.round(elm.pga * 100) / 100;
-        markerElement.querySelector(".detecting").style.display = elm.detect || elm.detect2 ? "block" : "none";*/
         if (elm.detect2) {
           markerCircleElm.classList.remove("detectingMarker");
           markerCircleElm.classList.add("strongDetectingMarker");

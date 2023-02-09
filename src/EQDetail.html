@@ -31,6 +31,16 @@
       height: 50vh;
       background: #202227;
       border-bottom: solid 2px #999;
+      position: fixed;
+    }
+
+    main {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50vh;
+      background: #222;
+      display: block;
     }
 
     h2,
@@ -313,67 +323,71 @@
 
 
   <div id="mapcontainer" class="GJMapActive"></div>
-  <div id="ShindoSample"><span>凡例：</span>
-    <div id="ShindoSample0">0</div>
-    <div id="ShindoSample1">1</div>
-    <div id="ShindoSample2">2</div>
-    <div id="ShindoSample3">3</div>
-    <div id="ShindoSample4">4</div>
-    <div id="ShindoSample5-">5弱</div>
-    <div id="ShindoSample5+">5強</div>
-    <div id="ShindoSample6-">6弱</div>
-    <div id="ShindoSample6+">6強</div>
-    <div id="ShindoSample7">7</div>
-  </div>
+  <main>
 
-  <div id="tableWrap">
-
-
-    <table id="EQInfo">
-      <caption class="h2">地震情報</caption>
-      <tr>
-        <th>発生時刻</th>
-        <td id="data_time">不明</td>
-      </tr>
-      <tr>
-        <th>最大震度</th>
-        <td id="data_maxI">不明</td>
-      </tr>
-      <tr>
-        <th>マグニチュード</th>
-        <td id="data_M">不明</td>
-      </tr>
-      <tr>
-        <th>深さ</th>
-        <td id="data_depth">不明</td>
-      </tr>
-      <tr>
-        <th>震源</th>
-        <td id="data_center">不明</td>
-      </tr>
-      <tr>
-        <td id="data_comment" colspan="2"></td>
-      </tr>
-    </table>
-
-    <div id="ShindoWrap">
-      <h2>各地の震度</h2>
-      <div id="btnWrap1">
-        <button id="AllOpen">すべて展開</button>
-        <button id="AllClose">すべて折り畳み</button>
-      </div>
-      <div id="Shindo">
-      </div>
+    <div id="ShindoSample"><span>凡例：</span>
+      <div id="ShindoSample0">0</div>
+      <div id="ShindoSample1">1</div>
+      <div id="ShindoSample2">2</div>
+      <div id="ShindoSample3">3</div>
+      <div id="ShindoSample4">4</div>
+      <div id="ShindoSample5-">5弱</div>
+      <div id="ShindoSample5+">5強</div>
+      <div id="ShindoSample6-">6弱</div>
+      <div id="ShindoSample6+">6強</div>
+      <div id="ShindoSample7">7</div>
     </div>
 
-  </div>
 
-  <hr>
-  <h2>外部リンク</h2>
-  <a href="#" target="_blank" id="yahooLink">Yahoo地震情報</a>
-  <a href="#" target="_blank" id="tenkijpLink">tenki.jp地震情報</a>
-  <a href="#" target="_blank" id="gooLink">goo地震情報</a>
 
+    <div id="tableWrap">
+
+
+      <table id="EQInfo">
+        <caption class="h2">地震情報</caption>
+        <tr>
+          <th>発生時刻</th>
+          <td id="data_time">不明</td>
+        </tr>
+        <tr>
+          <th>最大震度</th>
+          <td id="data_maxI">不明</td>
+        </tr>
+        <tr>
+          <th>マグニチュード</th>
+          <td id="data_M">不明</td>
+        </tr>
+        <tr>
+          <th>深さ</th>
+          <td id="data_depth">不明</td>
+        </tr>
+        <tr>
+          <th>震源</th>
+          <td id="data_center">不明</td>
+        </tr>
+        <tr>
+          <td id="data_comment" colspan="2"></td>
+        </tr>
+      </table>
+
+      <div id="ShindoWrap">
+        <h2>各地の震度</h2>
+        <div id="btnWrap1">
+          <button id="AllOpen">すべて展開</button>
+          <button id="AllClose">すべて折り畳み</button>
+        </div>
+        <div id="Shindo">
+        </div>
+      </div>
+
+    </div>
+
+    <hr>
+    <h2>外部リンク</h2>
+    <a href="#" target="_blank" id="yahooLink">Yahoo地震情報</a>
+    <a href="#" target="_blank" id="tenkijpLink">tenki.jp地震情報</a>
+    <a href="#" target="_blank" id="gooLink">goo地震情報</a>
+  </main>
 
   <div id="canceled">情報がキャンセルされました</div>
 

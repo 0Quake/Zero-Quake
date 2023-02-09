@@ -60,6 +60,8 @@
                 uttr.pitch = 1
                 uttr.volume = 1
                 speechSynthesis.speak(uttr)
+            } else if (request.action == "soundPlay") {
+                new Audio(request.data).play()
             }
 
 
