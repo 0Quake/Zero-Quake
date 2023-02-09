@@ -169,65 +169,6 @@ function Mapinit() {
   map.createPane("pane300").style.zIndex = 300;
   map.createPane("jsonMAPPane").style.zIndex = 210;
 
-  fetch("./Resource/basemap.json")
-    .then(function (res) {
-      return res.json();
-    })
-    .then(function (json) {
-      L.geoJSON(json, {
-        style: {
-          color: "#999",
-          fill: true,
-          fillColor: "transparent",
-          fillOpacity: 1,
-          weight: 1,
-          pane: "jsonMAPPane",
-          className: "GJMap",
-          attribution: 'Map data <a href="https://www.data.jma.go.jp/developer/gis.html" target="_blank">©JMA</a>',
-          renderer: L.svg(),
-        },
-        onEachFeature: function onEachFeature(feature, layer) {
-          if (feature.properties && feature.properties.name) {
-            sections.push({ name: feature.properties.name, item: layer });
-            layer.bindPopup("<h3>地震情報/細分区域</h3>" + feature.properties.name);
-          }
-          if (config.home.Saibun == feature.properties.name) {
-            layer.setStyle({ color: "#fff", weight: 2 });
-          }
-        },
-      }).addTo(map);
-
-      fetch("./Resource/World.json")
-        .then(function (res) {
-          return res.json();
-        })
-        .then(function (json) {
-          L.geoJSON(json, {
-            style: {
-              color: "#666",
-              fill: true,
-              fillColor: "transparent",
-              fillOpacity: 1,
-              weight: 1,
-              pane: "jsonMAPPane",
-              className: "GJMap",
-              attribution: 'Map data <a href="https://www.naturalearthdata.com/">©Natural Earth</a>',
-              renderer: jsonMAPCanvas,
-            },
-            onEachFeature: function onEachFeature(feature, layer) {
-              if (feature.properties && feature.properties.NAME_JA) {
-                sections.push({ name: feature.properties.NAME_JA, item: layer });
-                layer.bindPopup("<h3>国</h3>" + feature.properties.NAME_JA);
-              }
-            },
-          }).addTo(map);
-        });
-
-      gjmap = L.geoJSON({ type: "FeatureCollection", features: [] }).addTo(map);
-
-      mapDraw();
-    });
-
   fetch("./Resource/World.json")
     .then(function (res) {
       return res.json();
@@ -395,9 +336,7 @@ function jma_ListReq() {
 
       mapDraw();
     })
-    .catch(function (err) {
-      console.log("err", err);
-    });
+    .catch(function (err) {});
 }
 function nhk_ListReq() {
   fetch("https://www3.nhk.or.jp/sokuho/jishin/data/JishinReport.xml")
@@ -421,9 +360,7 @@ function nhk_ListReq() {
       });
       mapDraw();
     })
-    .catch(function (err) {
-      console.log("err", err);
-    });
+    .catch(function (err) {});
 }
 function narikakun_ListReq(year, month, retry) {
   fetch("https://ntool.online/api/earthquakeList?year=" + year + "&month=" + month)
@@ -453,9 +390,7 @@ function narikakun_ListReq(year, month, retry) {
       }
       mapDraw();
     })
-    .catch(function (err) {
-      console.log("err", err);
-    });
+    .catch(function (err) {});
 }
 
 function init() {
@@ -622,7 +557,6 @@ function jma_Fetch(url) {
                     fillOpacity: 1,
                   })
                   .bindPopup("<h3>細分区分：" + sectionTmp.name + "</h3>最大震度" + elm2.MaxInt);
-                console.log(sectionTmp.item);
               }
               if (elm2.City) {
                 elm2.City.forEach(function (elm3) {
@@ -680,9 +614,7 @@ function narikakun_Fetch(url) {
       return res.json();
     })
     .then(function (json) {
-      console.log(json.Head.EventID == eid, json.Head.EventID, eid);
       if (json.Head.EventID == eid) {
-        console.log(url);
         if (json.Body.Earthquake) {
           if (json.Body.Earthquake.OriginTime) var originTimeTmp = new Date(json.Body.Earthquake.OriginTime);
           if (json.Body.Earthquake.Magnitude) var magnitudeTmp = Number(json.Body.Earthquake.Magnitude);
@@ -909,13 +841,14 @@ function jmaXMLFetch(url) {
 
       var cancelTmp = xml.querySelector("InfoType").textContent == "取消";
 
-      var EarthquakeElm = xml.querySelector("Body Earthquake");
+      var ReportTime = new Date(xml.querySelector("Head ReportDateTime").textContent);
       var mostNew = false;
 
-      if (!newInfoDateTime || newInfoDateTime <= new Date(EarthquakeElm.querySelector("OriginTime").textContent)) {
-        newInfoDateTime = new Date(EarthquakeElm.querySelector("OriginTime").textContent);
+      if (!newInfoDateTime || newInfoDateTime <= ReportTime) {
+        newInfoDateTime = ReportTime;
         mostNew = true;
       }
+      var EarthquakeElm = xml.querySelector("Body Earthquake");
 
       var originTimeTmp;
       var epiCenterTmp;
@@ -1074,7 +1007,6 @@ function EQInfoControl(data) {
     newInfoDateTime = data.reportTime;
     mostNew = true;
   }
-  console.log(mostNew, data.reportTime);
   if (data.cancel) document.getElementById("canceled").style.display = "flex";
 
   if (data.originTime && (mostNew || !EQInfo.originTime)) EQInfo.originTime = data.originTime;
@@ -1314,7 +1246,7 @@ function shindoConvert(str, responseType) {
         var ConvTable = {
           "?": ["#BFBFBF", "#444"],
           0: ["#BFBFBF", "#444"],
-          1: ["#79A8B3", "#222"],
+          1: ["#79A8B3", "#444"],
           2: ["#3685E0", "#FFF"],
           3: ["#4DB051", "#FFF"],
           4: ["#BFB837", "#333"],

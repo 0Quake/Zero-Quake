@@ -700,7 +700,7 @@ function shindoConvert(str, responseType) {
         var ConvTable = {
           "?": ["#BFBFBF", "#444"],
           0: ["#BFBFBF", "#444"],
-          1: ["#79A8B3", "#222"],
+          1: ["#79A8B3", "#444"],
           2: ["#3685E0", "#FFF"],
           3: ["#4DB051", "#FFF"],
           4: ["#BFB837", "#333"],

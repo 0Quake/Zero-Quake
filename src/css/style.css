@@ -33,7 +33,7 @@
 
   --IntTheme_Q_color: #444;
   --IntTheme_0_color: #444;
-  --IntTheme_1_color: #222;
+  --IntTheme_1_color: #444;
   --IntTheme_2_color: #fff;
   --IntTheme_3_color: #fff;
   --IntTheme_4_color: #000;
@@ -488,6 +488,7 @@ td {
   margin-right: 5px;
   vertical-align: middle;
   flex-basis: 60px;
+  font-family: "M PLUS 1p";
 }
 #pointList li:nth-child(1) .int {
   width: 60px;
@@ -506,6 +507,7 @@ td {
   right: 0;
   text-align: center;
   font-size: 12px;
+  font-family: "BIZ UDPGothic", sans-serif;
 }
 
 #pointList li .PGA {

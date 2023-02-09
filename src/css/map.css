@@ -355,10 +355,6 @@ div.marker-circle.marker_Int7p {
   background: var(--TsunamiYohoColor);
 }
 
-.EQDetectCircle {
-  /*transition: 500ms;*/
-}
-
 :root {
   --PwaveColor: rgb(48, 148, 255);
   --SwaveColor: rgb(255, 62, 48);
