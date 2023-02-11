@@ -679,6 +679,19 @@ td {
   animation-delay: 0ms;
   animation-fill-mode: forwards;
 }
+.timeView {
+  margin-left: 30px;
+  font-size: 14px;
+  color: #ccc;
+}
+.timeItem {
+  margin: 15px 0;
+}
+#kmoni_Message {
+  color: #ccc;
+  font-size: 14px;
+  margin-left: 30px;
+}
 #UpdateTime_detail {
   position: relative;
   padding: 0;
@@ -690,6 +703,10 @@ td {
   max-height: 80vh;
   overflow: auto;
   padding: 15px;
+}
+#UpdateTime_detail_content h3 {
+  text-align: center;
+  margin: 25px 0 0 0;
 }
 .popup_menubar {
   position: absolute;
