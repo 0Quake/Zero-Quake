@@ -10,6 +10,7 @@
 <body>
     <canvas id="kmoniCanvas" width="352" height="400"></canvas>
     <canvas id="SnetCanvas" width="400" height="400"></canvas>
+    <canvas id="EstShindoCanvas" width="400" height="400"></canvas>
 
     <script>
         var points;
@@ -29,6 +30,8 @@
         var context = canvas.getContext("2d");
         var Scanvas = document.getElementById("SnetCanvas");
         var Scontext = Scanvas.getContext("2d");
+        var EScanvas = document.getElementById("EstShindoCanvas");
+        var EScontext = Scanvas.getContext("2d");
 
         window.electronAPI.messageSend((event, request) => {
 
@@ -50,6 +53,16 @@
                     Scontext.drawImage(image, 0, 0);
                     SnetRedraw(request.date)
                 };
+            } else if (request.action == "KmoniEstShindoImgUpdate") {
+                var image = new Image();
+                image.src = request.data;
+
+                image.onload = function () {
+                    EScontext.clearRect(0, 0, EScanvas.width, EScanvas.height);
+                    EScontext.drawImage(image, 0, 0);
+                    EstShindoRedraw(request.date)
+                };
+
             } else if (request.action == "speak") {
                 speechSynthesis.cancel()
                 // 発言を作成
@@ -67,9 +80,9 @@
 
         })
         function kmoniRedraw(dateTmp) {
-            points.forEach(function (elm, index) {
-                if (elm.Name && elm.Point) {
-                    var rgb = point2RGB(elm.Point.X, elm.Point.Y, "knet");
+            var pointsTmp = points.filter(function (elm, index) {
+                if (elm.Name && elm.Point && !elm.IsSuspended) {
+                    var rgb = point2RGB(elm.Point.X, elm.Point.Y, context);
                     if (rgb[0] + rgb[1] + rgb[2] !== 0) {
                         var hsv = RGB2HSV(rgb[0], rgb[1], rgb[2]);
                         var p = HSVtoP(hsv[0], hsv[1], hsv[2]);
@@ -97,26 +110,22 @@
                         elm.pga = null
 
                     }
-                } else {
-                    elm.rgb = false
-                    elm.shindo = null
-                    elm.pga = null
-                }
-                if (index == points.length - 1) {
-                    window.electronAPI.messageReturn({
-                        action: "kmoniReturn",
-                        data: points,
-                        date: dateTmp
-                    })
+                    return true
                 }
             });
+            window.electronAPI.messageReturn({
+                action: "kmoniReturn",
+                data: pointsTmp,
+                date: dateTmp
+            })
+
         }
 
 
         function SnetRedraw(dateTmp) {
-            Spoints.forEach(function (elm, index) {
-                if (elm.Code && elm.Point) {
-                    var rgb = point2RGB(elm.Point.X, elm.Point.Y, "snet");
+            var SpointsTmp = Spoints.filter(function (elm, index) {
+                if (elm.Code && elm.Point && !elm.IsSuspended) {
+                    var rgb = point2RGB(elm.Point.X, elm.Point.Y, Scontext);
                     if (rgb[0] + rgb[1] + rgb[2] !== 0) {
                         var hsv = RGB2HSV(rgb[0], rgb[1], rgb[2]);
                         var p = HSVtoP(hsv[0], hsv[1], hsv[2]);
@@ -133,28 +142,62 @@
                         elm.shindo = null
                         elm.pga = null
                     }
-                } else {
-                    elm.data = false
-                    elm.rgb = null
-                    elm.shindo = null
-                    elm.pga = null
-                }
-                if (index == Spoints.length - 1) {
-                    window.electronAPI.messageReturn({
-                        action: "SnetReturn",
-                        data: Spoints,
-                        date: dateTmp
-                    })
+                    return true
                 }
             });
+            window.electronAPI.messageReturn({
+                action: "SnetReturn",
+                data: SpointsTmp,
+                date: dateTmp
+            })
+
         }
 
 
+        function EstShindoRedraw(dateTmp) {
+            var pointsTmp = points.filter(function (elm, index) {
+                if (elm.Name && elm.Point && !elm.IsSuspended) {
+                    var rgb = point2RGB(elm.Point.X, elm.Point.Y, EScontext);
+                    if (rgb[0] + rgb[1] + rgb[2] !== 0) {
+                        var hsv = RGB2HSV(rgb[0], rgb[1], rgb[2]);
+                        var p = HSVtoP(hsv[0], hsv[1], hsv[2]);
+                        var shindo = (10 * p - 3);
+                        var pga = 10 ** (5 * p - 2);
 
-        function point2RGB(x, y, type) {
-            var ctxTmp;
-            if (type == "knet") { ctxTmp = context }
-            else if (type == "snet") { ctxTmp = Scontext }
+                        elm.data = true
+                        elm.rgb = rgb
+                        elm.shindo = shindo
+                        elm.pga = pga
+
+                        /*
+                    var pulsingIcon = L.icon.pulse({
+                      iconSize: [10, 10],
+                      fillColor: "rgb(" + rgb.join(",") + ")",
+                      animate: false,
+                    });
+                    marker = L.marker([elm.Location.latitude, elm.Location.longitude], { icon: pulsingIcon }).addTo(map).bindPopup(elm.Name);
+                  */
+                    } else {
+                        elm.data = false
+
+                        elm.rgb = null
+                        elm.shindo = null
+                        elm.pga = null
+
+                    }
+                    return true
+                }
+            });
+            window.electronAPI.messageReturn({
+                action: "kmoniEstShindoReturn",
+                data: pointsTmp,
+                date: dateTmp
+            })
+
+
+        }
+
+        function point2RGB(x, y, ctxTmp) {
             // 指定座標から幅1,高さ1のImageDataオブジェクトの取得。
             var imagedata = ctxTmp.getImageData(x, y, 1, 1);
 

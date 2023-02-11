@@ -179,7 +179,6 @@ function createWindow() {
   //mainWindow.setMenuBarVisibility(false);
 
   mainWindow.webContents.on("did-finish-load", () => {
-    replay("2023/2/11 17:44:00");
     //replay("2023/02/07 18:41:20");
     //replay("2023/02/05 16:13:20");
     //replay("2023/02/03 02:58:40");
@@ -447,7 +446,10 @@ var yoyuYOK = false;
 var Replay = 0;
 var EEWNow = false;
 
-var errorCount = 0;
+var errorCountk = 0;
+var errorCountl = 0;
+var errorCountyw = 0;
+var errorCountye = 0;
 
 var kmoniDataHistory = [];
 var EQDetect_List = [];
@@ -583,20 +585,22 @@ function kmoniRequest() {
       var dataTmp = "";
       if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
         yoyuK += 100;
-        errorCount++;
-        if (errorCount > 3) {
+        errorCountk++;
+        if (errorCountk > 3) {
           kmoniServerSelect();
         }
+        NetworkError(res._responseHead.statusCode, "強震モニタ");
+        kmoniTimeUpdate(new Date(), "kmoni", "Error");
       } else {
-        errorCount = 0;
+        errorCountk = 0;
+        res.on("data", (chunk) => {
+          dataTmp += chunk;
+        });
+        res.on("end", function () {
+          var json = jsonParse(dataTmp);
+          if (json) EEWdetect(2, json, 1);
+        });
       }
-      res.on("data", (chunk) => {
-        dataTmp += chunk;
-      });
-      res.on("end", function () {
-        var json = jsonParse(dataTmp);
-        EEWdetect(2, json, 1);
-      });
     });
     request.on("error", (error) => {
       NetworkError(error, "強震モニタ");
@@ -609,12 +613,26 @@ function kmoniRequest() {
     Request({ method: "GET", url: "http://www.kmoni.bosai.go.jp/data/map_img/RealTimeImg/acmap_s/" + dateEncode(2, ReqTime - Replay) + "/" + dateEncode(1, ReqTime - Replay) + ".acmap_s.gif", encoding: null }, (error, response, body) => {
       // エラーチェック
       if (error !== null) {
-        NetworkError(error, "強震モニタ");
+        NetworkError(error, "強震モニタ(画像)");
         return false;
       }
       if (kmoniWorker) {
         kmoniWorker.webContents.send("message2", {
           action: "KmoniImgUpdate",
+          data: "data:image/gif;base64," + body.toString("base64"),
+          date: ReqTime,
+        });
+      }
+    });
+    Request({ method: "GET", url: "http://www.kmoni.bosai.go.jp/data/map_img/EstShindoImg/eew/" + dateEncode(2, ReqTime - Replay) + "/" + dateEncode(1, ReqTime - Replay) + ".eew.gif", encoding: null }, (error, response, body) => {
+      // エラーチェック
+      if (error !== null) {
+        NetworkError(error, "強震モニタ(画像)");
+        return false;
+      }
+      if (kmoniWorker) {
+        kmoniWorker.webContents.send("message2", {
+          action: "KmoniEstShindoImgUpdate",
           data: "data:image/gif;base64," + body.toString("base64"),
           date: ReqTime,
         });
@@ -631,20 +649,22 @@ function lmoniRequest() {
       var dataTmp = "";
       if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
         yoyuL += 100;
-        errorCount++;
-        if (errorCount > 3) {
+        errorCountl++;
+        if (errorCountl > 3) {
           kmoniServerSelect();
         }
+        NetworkError(res._responseHead.statusCode, "長周期地震動モニタ");
+        kmoniTimeUpdate(new Date(), "Lmoni", "Error");
       } else {
-        errorCount = 0;
+        errorCountl = 0;
+        res.on("data", (chunk) => {
+          dataTmp += chunk;
+        });
+        res.on("end", function () {
+          var json = jsonParse(dataTmp);
+          if (json) EEWdetect(2, json, 2);
+        });
       }
-      res.on("data", (chunk) => {
-        dataTmp += chunk;
-      });
-      res.on("end", function () {
-        var json = jsonParse(dataTmp);
-        EEWdetect(2, json, 2);
-      });
     });
     request.on("error", (error) => {
       NetworkError(error, "長周期地震動モニタ");
@@ -664,25 +684,26 @@ function ymoniRequest() {
         var dataTmp = "";
         if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
           yoyuY += 100;
-          errorCount++;
-          if (errorCount > 3) {
+          errorCountye++;
+          if (errorCountye > 3) {
             kmoniServerSelect();
           }
+          NetworkError(res._responseHead.statusCode, "Yahoo強震モニタ(East)");
+          kmoniTimeUpdate(new Date(), "YahooKmoni", "Error", "East");
         } else {
-          errorCount = 0;
-        }
-        res.on("data", (chunk) => {
-          dataTmp += chunk;
-        });
+          errorCountye = 0;
+          res.on("data", (chunk) => {
+            dataTmp += chunk;
+          });
 
-        res.on("end", function () {
-          var json = jsonParse(dataTmp);
-          EEWdetect(1, json);
-        });
+          res.on("end", function () {
+            var json = jsonParse(dataTmp);
+            if (json) EEWdetect(1, json);
+          });
+        }
       });
       request.on("error", (error) => {
         NetworkError(error, "Yahoo強震モニタ(East)");
-
         kmoniTimeUpdate(new Date(), "YahooKmoni", "Error", "East");
       });
 
@@ -693,20 +714,22 @@ function ymoniRequest() {
         var dataTmp = "";
         if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
           yoyuY += 100;
-          errorCount++;
-          if (errorCount > 3) {
+          errorCountyw++;
+          if (errorCountyw > 3) {
             kmoniServerSelect();
           }
+          NetworkError(res._responseHead.statusCode, "Yahoo強震モニタ(West)");
+          kmoniTimeUpdate(new Date(), "YahooKmoni", "Error", "West");
         } else {
-          errorCount = 0;
+          errorCountyw = 0;
+          res.on("data", (chunk) => {
+            dataTmp += chunk;
+          });
+          res.on("end", function () {
+            var json = jsonParse(dataTmp);
+            if (json) EEWdetect(1, json);
+          });
         }
-        res.on("data", (chunk) => {
-          dataTmp += chunk;
-        });
-        res.on("end", function () {
-          var json = jsonParse(dataTmp);
-          EEWdetect(1, json);
-        });
       });
       request.on("error", (error) => {
         NetworkError(error, "Yahoo強震モニタ(West)");
@@ -731,7 +754,7 @@ function SnetRequest() {
       res.on("end", function () {
         var json = jsonParse(dataTmp);
         //json.features[json.features.length - 1].attributes.msilstarttime;
-
+        if (!json || !json.features || !Array.isArray(json.features)) return false;
         var dateTime = json.features.sort((a, b) => b.attributes.msilstarttime - a.attributes.msilstarttime)[0].attributes.msilstarttime;
 
         Request({ method: "GET", url: "https://www.msil.go.jp/arcgis/rest/services/Msil/DisasterPrevImg1/ImageServer//exportImage?f=image&time=" + dateTime + "%2C" + dateTime + "&bbox=13409547.546603577%2C2713376.239114911%2C16907305.960932314%2C5966536.162931148&size=400%2C400", encoding: null }, (error, response, body) => {
@@ -1471,6 +1494,7 @@ function eqInfoUpdate() {
     });
     res.on("end", function () {
       var json = jsonParse(dataTmp);
+      if (!json) return false;
       var dataTmp2 = [];
       json = json.filter(function (elm) {
         return elm.ttl == "震度速報" || elm.ttl == "震源に関する情報" || elm.ttl == "震源・震度情報" || elm.ttl == "遠地地震に関する情報" || elm.ttl == "顕著な地震の震源要素更新のお知らせ";
@@ -1511,6 +1535,7 @@ function eqInfoUpdate() {
     res.on("end", function () {
       const parser = new new JSDOM().window.DOMParser();
       const xml = parser.parseFromString(dataTmp, "text/html");
+      if (!xml) return;
       xml.querySelectorAll("entry").forEach(function (elm) {
         var url = elm.querySelector("id").textContent;
         if (!url) return;
@@ -1611,6 +1636,7 @@ function eqInfoUpdate() {
     });
     res.on("end", function () {
       var json = jsonParse(dataTmp);
+      if (!json) return false;
       var dataTmp2 = [];
       json.features.forEach(function (elm) {
         dataTmp2.push({
@@ -1648,7 +1674,7 @@ function EQI_narikakunList_Req(url, num, first) {
     });
     res.on("end", function () {
       var json = jsonParse(dataTmp);
-      if (!json) return;
+      if (!json || !json.lists) return false;
       narikakun_URLs = narikakun_URLs.concat(json.lists);
 
       if (narikakun_URLs.length < 10 && first) {
@@ -1682,6 +1708,8 @@ function EQI_narikakun_Req(url) {
     });
     res.on("end", function () {
       var json = jsonParse(dataTmp);
+
+      if (!json) return;
 
       var originTimeTmp = json.Body.Earthquake ? new Date(json.Body.Earthquake.OriginTime) : null;
       var epiCenterTmp = json.Body.Earthquake ? json.Body.Earthquake.Hypocenter.Name : null;
@@ -1722,6 +1750,7 @@ function JMAEQInfoFetch(url) {
     res.on("end", function () {
       const parser = new new JSDOM().window.DOMParser();
       const xml = parser.parseFromString(dataTmp, "text/html");
+      if (!xml) return false;
       var title = xml.title;
       var cancel = xml.querySelector("InfoType").textContent == "取り消し";
 
@@ -2118,14 +2147,16 @@ async function kmoniServerSelect() {
     if (net.online) {
       var request = net.request("https://weather-kyoshin.west.edge.storage-yahoo.jp/RealTimeData/" + dateEncode(2, new Date() - yoyuY - Replay) + "/" + dateEncode(1, new Date() - yoyuY - Replay) + ".json");
       request.on("response", (res) => {
-        if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
-          YmoniW = 10000000;
-        } else {
-          YmoniW = new Date() - TestStartTime;
-          if (YmoniE + YmoniW /*+ Kmoni + Lmoni*/ < Infinity) {
-            resolve();
+        res.on("end", function () {
+          if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
+            YmoniW = 10000000;
+          } else {
+            YmoniW = new Date() - TestStartTime;
+            if (YmoniE + YmoniW /*+ Kmoni + Lmoni*/ < Infinity) {
+              resolve();
+            }
           }
-        }
+        });
       });
       request.on("error", (error) => {
         NetworkError(error, "Yahoo強震モニタ(West)");
@@ -2177,13 +2208,15 @@ async function yoyuSetYCore(delay) {
         if (net.online) {
           var request = net.request("https://weather-kyoshin.west.edge.storage-yahoo.jp/RealTimeData/" + dateEncode(2, new Date() - yoyuY - Replay) + "/" + dateEncode(1, new Date() - yoyuY - Replay) + ".json");
           request.on("response", (res) => {
-            if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
-              yoyuY += delay;
-              setTimeout(resolve, 10);
-            } else {
-              yoyuYOK = true;
-              setTimeout(resolve, 10);
-            }
+            res.on("end", function () {
+              if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
+                yoyuY += delay;
+                setTimeout(resolve, 10);
+              } else {
+                yoyuYOK = true;
+                setTimeout(resolve, 10);
+              }
+            });
           });
           request.on("error", (error) => {
             NetworkError(error, "Yahoo強震モニタ(West)");
