@@ -681,7 +681,7 @@ function init() {
   var homeIcon = L.icon({
     iconUrl: "img/homePin.svg",
     iconSize: [30, 30],
-    iconAnchor: [15, 30],
+    iconAnchor: [15, 15],
   });
 
   markerElm = L.marker([config.home.latitude, config.home.longitude], { keyboard: false, icon: homeIcon }).addTo(map).bindPopup(config.home.name);
@@ -703,13 +703,15 @@ function addPointMarker(elm) {
   var kmoniPointMarker = L.divIcon({
     html: "<div class='marker-circle'></div>" /*<div class='PointPopup'>" + popup_content + "</div>"*/,
     className: "kmoniPointMarker KmoniPoint_" + codeEscaped,
-    iconSize: 35,
+    iconSize: [35, 35],
+    iconAnchor: [17.5, 17.5],
   });
   if (PointsCanvas) {
     elm.marker = L.marker([elm.Location.Latitude, elm.Location.Longitude], {
       icon: kmoniPointMarker,
       pane: "PointsPane",
-      renderer: PointsCanvas,
+      //renderer: PointsCanvas,
+      keyboard: false,
     })
       .bindPopup("", { offset: [0, -20], className: "PointPopup" })
       .addTo(map);
@@ -1205,7 +1207,8 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
         var SIcon = L.divIcon({
           html: '<svg width="50" height="50"><circle id="SWprogressValue_' + report_id + '" class="SWprogressValue" cx="25" cy="25" r="22.5" fill="none" stroke-width="5px" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="' + Number(157 - 157 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect))) + '" transform="rotate(270 25 25)"/></svg>',
           className: "SWaveProgress",
-          iconSize: 50,
+          iconSize: [50, 50],
+          iconAnchor: [25, 25],
         });
         EQElm.SIElm.setIcon(SIcon);
       }
@@ -1219,11 +1222,15 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
     var SIcon = L.divIcon({
       html: '<svg width="50" height="50"><circle id="SWprogressValue_' + report_id + '" class="SWprogressValue" cx="25" cy="25" r="23.5" fill="none" stroke-width="5px" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="' + Number(157 - 157 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect))) + '"/></path></svg>',
       className: "SWaveProgress",
-      iconSize: 50,
+      iconSize: [50, 50],
+      iconAnchor: [25, 25],
     });
 
     SIElm = L.marker([latitude, longitude], {
       icon: SIcon,
+      pane: "PointsPane",
+      //renderer: PointsCanvas,
+      keyboard: false,
     }).addTo(map);
 
     EQElm.SIElm = SIElm;
