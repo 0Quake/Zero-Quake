@@ -1045,13 +1045,19 @@ function EQInfoControl(data) {
   if (data.originTime && (mostNew || !EQInfo.originTime)) EQInfo.originTime = data.originTime;
   if (data.maxI && (mostNew || !EQInfo.maxI)) EQInfo.maxI = data.maxI;
   if (data.mag && (mostNew || !EQInfo.mag)) EQInfo.mag = data.mag;
-  if (data.depth && (mostNew || !EQInfo.depth)) EQInfo.depth = data.depth;
+  if ((data.depth || data.depth === 0) && (mostNew || !EQInfo.depth)) EQInfo.depth = data.depth;
   if (data.epiCenter && (mostNew || !EQInfo.epiCenter)) EQInfo.epiCenter = data.epiCenter;
 
   if (EQInfo.originTime) data_time.innerText = dateEncode(3, EQInfo.originTime);
   if (EQInfo.maxI) data_maxI.innerText = EQInfo.maxI;
   if (EQInfo.mag) data_M.innerText = EQInfo.mag;
-  if (EQInfo.depth) data_depth.innerText = Math.round(EQInfo.depth) + "km";
+  if (EQInfo.depth) {
+    data_depth.innerText = Math.round(EQInfo.depth) + "km";
+  } else if (EQInfo.depth == 0) {
+    data_depth.innerText = "ごく浅い";
+  }
+  console.log(EQInfo.depth == 0, EQInfo.depth);
+
   if (EQInfo.epiCenter) data_center.innerText = EQInfo.epiCenter;
 
   if (data.lat && data.lng) {
