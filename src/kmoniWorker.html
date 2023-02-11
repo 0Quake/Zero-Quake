@@ -80,7 +80,7 @@
 
         })
         function kmoniRedraw(dateTmp) {
-            var pointsTmp = points.filter(function (elm, index) {
+            points.forEach(function (elm, index) {
                 if (elm.Name && elm.Point && !elm.IsSuspended) {
                     var rgb = point2RGB(elm.Point.X, elm.Point.Y, context);
                     if (rgb[0] + rgb[1] + rgb[2] !== 0) {
@@ -110,20 +110,24 @@
                         elm.pga = null
 
                     }
-                    return true
+                } else {
+                    elm.rgb = false
+                    elm.shindo = null
+                    elm.pga = null
+                }
+                if (index == points.length - 1) {
+                    window.electronAPI.messageReturn({
+                        action: "kmoniReturn",
+                        data: points,
+                        date: dateTmp
+                    })
                 }
             });
-            window.electronAPI.messageReturn({
-                action: "kmoniReturn",
-                data: pointsTmp,
-                date: dateTmp
-            })
-
         }
 
 
         function SnetRedraw(dateTmp) {
-            var SpointsTmp = Spoints.filter(function (elm, index) {
+            Spoints.forEach(function (elm, index) {
                 if (elm.Code && elm.Point && !elm.IsSuspended) {
                     var rgb = point2RGB(elm.Point.X, elm.Point.Y, Scontext);
                     if (rgb[0] + rgb[1] + rgb[2] !== 0) {
@@ -142,20 +146,26 @@
                         elm.shindo = null
                         elm.pga = null
                     }
-                    return true
+                } else {
+                    elm.data = false
+                    elm.rgb = null
+                    elm.shindo = null
+                    elm.pga = null
+                }
+                if (index == Spoints.length - 1) {
+                    window.electronAPI.messageReturn({
+                        action: "SnetReturn",
+                        data: Spoints,
+                        date: dateTmp
+                    })
                 }
             });
-            window.electronAPI.messageReturn({
-                action: "SnetReturn",
-                data: SpointsTmp,
-                date: dateTmp
-            })
-
         }
 
 
         function EstShindoRedraw(dateTmp) {
-            var pointsTmp = points.filter(function (elm, index) {
+            return false;
+            points.forEach(function (elm, index) {
                 if (elm.Name && elm.Point && !elm.IsSuspended) {
                     var rgb = point2RGB(elm.Point.X, elm.Point.Y, EScontext);
                     if (rgb[0] + rgb[1] + rgb[2] !== 0) {
@@ -185,15 +195,19 @@
                         elm.pga = null
 
                     }
-                    return true
+                } else {
+                    elm.rgb = false
+                    elm.shindo = null
+                    elm.pga = null
+                }
+                if (index == points.length - 1) {
+                    window.electronAPI.messageReturn({
+                        action: "kmoniEstShindoReturn",
+                        data: points,
+                        date: dateTmp
+                    })
                 }
             });
-            window.electronAPI.messageReturn({
-                action: "kmoniEstShindoReturn",
-                data: pointsTmp,
-                date: dateTmp
-            })
-
 
         }
 
