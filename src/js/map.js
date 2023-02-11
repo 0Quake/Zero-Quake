@@ -778,7 +778,9 @@ function kmoniMapUpdate(dataTmp, type) {
         var detecting = elm.detect || elm.detect2 ? "block" : "none";
         var shindoStr = Math.round(elm.shindo * 10) / 10;
         var pgaStr = Math.round(elm.pga * 100) / 100;
-        var popup_content = "<h3 class='PointName' style='border-bottom:solid 2px rgb(" + elm.rgb.join(",") + ")'>" + PNameTmp + "<span>" + elm.Code + "</span></h3><h4 class='detecting' style='display:" + detecting + "'>地震検知中</h4><table><tr><td>震度</td><td class='PointInt'>" + shindoStr + "</td></tr><tr><td>PGA</td><td class='PointPGA'>" + pgaStr + "</td></tr></table>";
+        var connectStr = "";
+        if (elm.Type == "S-net") connectStr = "_";
+        var popup_content = "<h3 class='PointName' style='border-bottom:solid 2px rgb(" + elm.rgb.join(",") + ")'>" + PNameTmp + "<span>" + elm.Type + connectStr + elm.Code + "</span></h3><h4 class='detecting' style='display:" + detecting + "'>地震検知中</h4><table><tr><td>震度</td><td class='PointInt'>" + shindoStr + "</td></tr><tr><td>PGA</td><td class='PointPGA'>" + pgaStr + "</td></tr></table>";
         points[elm.Code].marker.setPopupContent(popup_content);
 
         if (elm.detect2) {
