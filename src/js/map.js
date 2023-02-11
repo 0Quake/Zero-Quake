@@ -355,12 +355,6 @@ window.electronAPI.messageSend((event, request) => {
         return elm2.Region == elm.Region;
       });
       SectionTmp.forEach(function (elm2) {
-        console.log(elm2.section, sections); /*
-        console.log(
-          sections.find(function (elm3) {
-            return elm3.name == elm2.section;
-          })
-        );*/
         var section = sections.find(function (elm3) {
           return elm3.name == elm2.section;
         });

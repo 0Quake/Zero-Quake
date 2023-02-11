@@ -198,7 +198,7 @@ function createWindow() {
     //replay("2023/01/18 21:41:00");
     //replay("2023/01/18 18:54:45");
     //replay("2023/01/15 20:37:45");
-
+    /*
     EEWcontrol({
       alertflg: "予報", //種別
       report_id: "20230115203744", //地震ID
@@ -224,7 +224,7 @@ function createWindow() {
         Pref: null,
         Regions: null,
       },
-    });
+    });*/
 
     //    replay("2022/10/2 0:2:45");
     // replay("2022/11/3 19:04:40");
@@ -711,7 +711,7 @@ function ymoniRequest() {
       request.on("response", (res) => {
         var dataTmp = "";
         if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
-          yoyuY += 100;
+          yoyuY += 300;
           errorCountye++;
           if (errorCountye > 3) {
             kmoniServerSelect();
@@ -2165,9 +2165,6 @@ async function kmoniServerSelect() {
           }
         }
       });
-      request.on("error", (error) => {
-        NetworkError(error, "Yahoo強震モニタ(East)");
-      });
 
       request.end();
     }
@@ -2236,15 +2233,13 @@ async function yoyuSetYCore(delay) {
         if (net.online) {
           var request = net.request("https://weather-kyoshin.west.edge.storage-yahoo.jp/RealTimeData/" + dateEncode(2, new Date() - yoyuY - Replay) + "/" + dateEncode(1, new Date() - yoyuY - Replay) + ".json");
           request.on("response", (res) => {
-            res.on("end", function () {
-              if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
-                yoyuY += delay;
-                setTimeout(resolve, 10);
-              } else {
-                yoyuYOK = true;
-                setTimeout(resolve, 10);
-              }
-            });
+            if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
+              yoyuY += delay;
+              setTimeout(resolve, 10);
+            } else {
+              yoyuYOK = true;
+              setTimeout(resolve, 10);
+            }
           });
           request.on("error", (error) => {
             NetworkError(error, "Yahoo強震モニタ(West)");
