@@ -43,12 +43,12 @@ window.electronAPI.messageSend((event, request) => {
   return true;
 });
 window.addEventListener("load", function () {
-  fetch("http://www.kmoni.bosai.go.jp/webservice/maintenance/message.json")
+  fetch("http://www.kmoni.bosai.go.jp/webservice/maintenance/message.json?_=" + Number(new Date()))
     .then(function (res) {
       return res.json();
     })
     .then(function (json) {
-      document.getElementById("kmoni_Message").textContent = json.message;
+      document.getElementById("kmoni_Message").innerHTML = json.message;
     });
   fetch("./Resource/AreaForecastLocalE.json")
     .then(function (res) {
@@ -476,6 +476,14 @@ function kmoniTimeUpdate(updateTime, LocalTime, type, condition, vendor) {
     this.classList.remove("SuccessAnm");
   });
 }
+
+var updateTimeDialog = document.getElementById("UpdateTime_detail");
+document.getElementById("UpdateTimeWrap").addEventListener("click", function () {
+  updateTimeDialog.showModal();
+});
+document.getElementById("UpdateTimeClose").addEventListener("click", function () {
+  updateTimeDialog.close();
+});
 document.getElementById("setting").addEventListener("click", function () {
   window.electronAPI.messageReturn({
     action: "settingWindowOpen",

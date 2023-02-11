@@ -27,6 +27,9 @@ var jmaXMLURL;
 var nhkURL;
 var narikakunURL;
 var config;
+var overlayActive;
+var overlayTmp = [];
+var offlineMapActive = true;
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "metaData") {
     eid = request.eid;
@@ -72,8 +75,10 @@ function Mapinit() {
   map.setView([32.99125, 138.46], 4);
 
   map.createPane("tsunamiPane").style.zIndex = 201;
-  map.createPane("jsonMAPPane").style.zIndex = 210;
-  var jsonMAPCanvas = L.canvas({ pane: "jsonMAPPane" });
+  map.createPane("jsonMAP1Pane").style.zIndex = 210;
+  map.createPane("jsonMAP2Pane").style.zIndex = 211;
+  var jsonMAP1Canvas = L.canvas({ pane: "jsonMAP1Pane" });
+  var jsonMAP2Canvas = L.canvas({ pane: "jsonMAP2Pane" });
 
   map.createPane("PointsPane").style.zIndex = 220;
 
@@ -184,11 +189,28 @@ function Mapinit() {
           pane: "jsonMAPPane",
           interactive: false,
           attribution: '<a href="https://www.naturalearthdata.com/">©Natural Earth</a>',
-          renderer: jsonMAPCanvas,
+          renderer: jsonMAP1Canvas,
         },
       });
 
       mapLayer.addLayer(worldmap);
+    });
+  fetch("./Resource/prefectures.json")
+    .then(function (res) {
+      return res.json();
+    })
+    .then(function (json) {
+      prefecturesMap = L.geoJSON(json, {
+        style: {
+          color: "#999",
+          fill: false,
+          weight: 1,
+          interactive: false,
+          renderer: jsonMAP2Canvas,
+        },
+      });
+
+      mapLayer.addLayer(prefecturesMap);
     });
 
   fetch("./Resource/basemap.json")
@@ -198,14 +220,14 @@ function Mapinit() {
     .then(function (json) {
       basemap = L.geoJSON(json, {
         style: {
-          color: "#999",
+          color: "#666",
           fill: true,
           fillColor: "#333",
           fillOpacity: 1,
           weight: 1,
           pane: "jsonMAPPane",
           attribution: '<a href="https://www.data.jma.go.jp/developer/gis.html" target="_blank">©JMA</a>',
-          renderer: jsonMAPCanvas,
+          renderer: jsonMAP1Canvas,
         },
         onEachFeature: function onEachFeature(feature, layer) {
           if (feature.properties && feature.properties.name) {
@@ -293,6 +315,12 @@ function Mapinit() {
   } else {
     document.getElementById("mapcontainer").classList.add("zoomLevel_4");
   }
+  var legend2 = L.control({ position: "bottomright" });
+  legend2.onAdd = function (map) {
+    var img = L.DomUtil.create("img");
+    img.src = "https://disaportal.gsi.go.jp/hazardmap/copyright/img/dosha_keikai.png";
+    return img;
+  };
 
   map.on("zoom", function () {
     var currentZoom = map.getZoom();
@@ -309,6 +337,11 @@ function Mapinit() {
       document.getElementById("mapcontainer").classList.add("zoomLevel_3");
     } else {
       document.getElementById("mapcontainer").classList.add("zoomLevel_4");
+    }
+    if (currentZoom >= 7) {
+      basemap.setStyle({ stroke: true });
+    } else {
+      basemap.setStyle({ stroke: false });
     }
   });
 
@@ -556,7 +589,7 @@ function jma_Fetch(url) {
                     fillColor: color2[0],
                     fillOpacity: 1,
                   })
-                  .bindPopup("<h3>細分区分：" + sectionTmp.name + "</h3>最大震度" + elm2.MaxInt);
+                  .setPopupContent("<h3>細分区分：" + sectionTmp.name + "</h3>最大震度" + elm2.MaxInt);
               }
               if (elm2.City) {
                 elm2.City.forEach(function (elm3) {
@@ -698,7 +731,7 @@ function narikakun_Fetch(url) {
                       fillColor: color2[0],
                       fillOpacity: 1,
                     })
-                    .bindPopup("<h3>細分区分：" + sectionTmp.name + "</h3>最大震度" + elm2.MaxInt);
+                    .setPopupContent("<h3>細分区分：" + sectionTmp.name + "</h3>最大震度" + elm2.MaxInt);
                 }
 
                 if (elm2.City) {
@@ -946,7 +979,7 @@ function jmaXMLFetch(url) {
                     fillColor: color2[0],
                     className: "FilledPath",
                   })
-                  .bindPopup("<h3>細分区分：" + sectionTmp.name + "</h3>最大震度" + elm2.querySelector("MaxInt").textContent);
+                  .setPopupContent("<h3>細分区分：" + sectionTmp.name + "</h3>最大震度" + elm2.querySelector("MaxInt").textContent);
               }
               if (elm2.querySelectorAll("City")) {
                 elm2.querySelectorAll("City").forEach(function (elm3) {

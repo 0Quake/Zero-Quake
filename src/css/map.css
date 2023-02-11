@@ -5,6 +5,11 @@
   font-size: 14px;
   flex: 1;
   background: #272020;
+  outline: none;
+  border: none;
+}
+.leaflet-zoom-anim .leaflet-zoom-animated {
+  transition: transform 0.15s ease-out;
 }
 
 .leaflet-control-layers,
@@ -44,8 +49,8 @@ img.leaflet-control {
   max-width: 100px;
 }
 
-.leaflet-background-pane {
-  z-index: 100;
+.leaflet-jsonMAP2-pane {
+  pointer-events: none;
 }
 
 .PointPopup,
@@ -133,17 +138,23 @@ img.leaflet-control {
   outline-offset: 2px;
   z-index: 220;
 }
-.zoomLevel_3 .detectingMarker {
+.zoomLevel_3 .detectingMarker,
+.zoomLevel_4 .detectingMarker {
   outline: solid 2px #fff;
   z-index: 221;
-  transform: scale(1.2);
+  /*transform: scale(1.2);*/
 }
-.strongDetectingMarker {
+.zoomLevel_1 .strongDetectingMarker,
+.zoomLevel_2 .strongDetectingMarker {
+  outline-offset: 1px;
   outline: solid 2px rgb(214, 214, 9);
-  z-index: 222;
-  transform: scale(1.5);
+  /*transform: scale(1.5);*/
 }
-
+.zoomLevel_3 .strongDetectingMarker,
+.zoomLevel_4 .strongDetectingMarker {
+  outline-offset: 4px;
+  outline: solid 3px rgb(214, 214, 9);
+}
 .marker_Int::before {
   position: absolute;
   inset: 0;
@@ -367,7 +378,6 @@ div.marker-circle.marker_Int7p {
 .PWave,
 .SWave {
   transition: linear 1s;
-  transform: translate3d(0, 0, 0);
   pointer-events: none;
 }
 .PWave {

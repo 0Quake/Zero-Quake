@@ -162,11 +162,6 @@ ipcMain.on("message", (_event, response) => {
 });
 
 function createWindow() {
-  kmoniWorker.webContents.send("message2", {
-    action: "soundPlay",
-    data: path.join(__dirname, "audio/EEW2.mp3"),
-  });
-
   if (mainWindow) {
     mainWindow.focus();
     return;
@@ -184,6 +179,7 @@ function createWindow() {
   //mainWindow.setMenuBarVisibility(false);
 
   mainWindow.webContents.on("did-finish-load", () => {
+    replay("2023/2/11 17:44:00");
     //replay("2023/02/07 18:41:20");
     //replay("2023/02/05 16:13:20");
     //replay("2023/02/03 02:58:40");
@@ -1964,7 +1960,6 @@ function eqInfoControl(dataList, type) {
           if (data.M && (!EQElm.M || EQElm.reportDateTime < data.reportDateTime)) EQElm.M = data.M;
           if (data.maxI && data.maxI !== "[objectHTMLUnknownElement]" && (!EQElm.maxI || EQElm.reportDateTime < data.reportDateTime)) {
             EQElm.maxI = data.maxI;
-            console.log(data.maxI);
           }
           if (data.cancel && (!EQElm.cancel || EQElm.reportDateTime < data.reportDateTime)) EQElm.cancel = data.cancel;
 

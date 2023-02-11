@@ -574,13 +574,19 @@ td {
 }
 .EQItemOverlay button {
   display: block;
+  position: relative;
   height: 100%;
-  border-radius: 0;
+  width: 100px;
+  border-radius: 50% 0 0 50%;
   border: none;
-  background: #666;
+  background-color: #444;
+  background-image: url(../img/IconDocument.svg);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 50%;
 }
 .EQItemOverlay button:hover {
-  background: rgb(203, 27, 27);
+  background-color: rgb(203, 27, 27);
 }
 .canceled {
   position: absolute;
@@ -652,17 +658,6 @@ td {
   font-family: ui-monospace, sans-serif;
   text-align: center;
 }
-#UpdateTimeWrap:hover {
-  height: auto;
-  padding: 5px;
-  text-align: left;
-}
-#UpdateTime_detail {
-  display: none;
-}
-#UpdateTimeWrap:hover #UpdateTime_detail {
-  display: block;
-}
 .statusIcon {
   display: inline-block;
   width: 6px;
@@ -684,7 +679,43 @@ td {
   animation-delay: 0ms;
   animation-fill-mode: forwards;
 }
-
+#UpdateTime_detail {
+  position: relative;
+  padding: 0;
+  border: none;
+  border-radius: 20px;
+}
+#UpdateTime_detail_content {
+  margin-top: 40px;
+  max-height: 80vh;
+  overflow: auto;
+  padding: 15px;
+}
+.popup_menubar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 40px;
+  background: #333;
+  line-height: 40px;
+}
+.popup_menubar h2 {
+  display: inline-block;
+  padding: 0 20px;
+}
+.popup_menubar button {
+  height: 40px;
+  width: 40px;
+  float: right;
+  background-image: url(../img/close.svg);
+  background-size: 65%;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+dialog::backdrop {
+  background: rgba(0, 0, 0, 0.4);
+}
 button {
   background: #333;
   color: #fff;
@@ -695,7 +726,7 @@ button {
   cursor: pointer;
 }
 button:hover {
-  background: rgb(203, 27, 27);
+  background-color: rgb(203, 27, 27);
   color: #fff;
 }
 

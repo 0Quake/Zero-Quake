@@ -162,7 +162,7 @@
 
                     <div class="Alert_content_wrap">
                         <div>最大予測階級<span id="maxKaikyu"></span></div>
-                        <div>地域：<span id="region_name2"></span></div>
+                        <!--<div>地域：<span id="region_name2"></span></div>-->
                     </div>
                 </div>
 
@@ -176,19 +176,14 @@
 
                         <template id="EQListTemplate">
                             <div class="EQItem">
-                                <div class="EQI_maxI">0</div>
+                                <div class="EQI_maxI"></div>
                                 <div class="EQI_detailWrap">
-                                    <div class="EQI_datetime">0000/00/00 00:00:00</div>
-                                    <div class="EQI_epiCenter">震源調査中</div>
-                                    <div class="EQI_magnitude">M0.0</div>
+                                    <div class="EQI_datetime"></div>
+                                    <div class="EQI_epiCenter"></div>
+                                    <div class="EQI_magnitude"></div>
                                 </div>
                                 <div class="EQItemOverlay">
-                                    <button class="EQDetailButton">
-                                        <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48">
-                                            <path fill="#FFF" d="M17.45 35.5h13.1q.65 0 1.075-.425.425-.425.425-1.075 0-.65-.425-1.075-.425-.425-1.075-.425h-13.1q-.65 0-1.075.425-.425.425-.425 1.075 0 .65.425 1.075.425.425 1.075.425Zm0-8.5h13.1q.65 0 1.075-.425.425-.425.425-1.075 0-.65-.425-1.075Q31.2 24 30.55 24h-13.1q-.65 0-1.075.425-.425.425-.425 1.075 0 .65.425 1.075Q16.8 27 17.45 27ZM11 44q-1.2 0-2.1-.9Q8 42.2 8 41V7q0-1.2.9-2.1Q9.8 4 11 4h16.8q.6 0 1.175.25.575.25.975.65l9.15 9.15q.4.4.65.975T40 16.2V41q0 1.2-.9 2.1-.9.9-2.1.9Zm16.55-29.2q0 .65.425 1.075.425.425 1.075.425H37L27.55 7Z" />
-                                        </svg>
-                                        <div>詳細情報</div>
-                                    </button>
+                                    <button class="EQDetailButton"> </button>
                                 </div>
                                 <div class="canceled">取り消されました。</div>
                             </div>
@@ -196,43 +191,39 @@
                         <template id="EQListTemplate2">
                             <div class="EQItem">
                                 <div class="EQI_detailWrap">
-                                    <div class="EQI_datetime">0000/00/00 00:00:00</div>
-                                    <div class="EQI_epiCenter">震源調査中</div>
-                                    <div class="EQI_magnitude">M0.0</div>
+                                    <div class="EQI_datetime"></div>
+                                    <div class="EQI_epiCenter"></div>
+                                    <div class="EQI_magnitude"></div>
                                 </div>
                                 <div class="EQItemOverlay">
-                                    <button class="EQDetailButton">
-                                        <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48">
-                                            <path fill="#FFF" d="M17.45 35.5h13.1q.65 0 1.075-.425.425-.425.425-1.075 0-.65-.425-1.075-.425-.425-1.075-.425h-13.1q-.65 0-1.075.425-.425.425-.425 1.075 0 .65.425 1.075.425.425 1.075.425Zm0-8.5h13.1q.65 0 1.075-.425.425-.425.425-1.075 0-.65-.425-1.075Q31.2 24 30.55 24h-13.1q-.65 0-1.075.425-.425.425-.425 1.075 0 .65.425 1.075Q16.8 27 17.45 27ZM11 44q-1.2 0-2.1-.9Q8 42.2 8 41V7q0-1.2.9-2.1Q9.8 4 11 4h16.8q.6 0 1.175.25.575.25.975.65l9.15 9.15q.4.4.65.975T40 16.2V41q0 1.2-.9 2.1-.9.9-2.1.9Zm16.55-29.2q0 .65.425 1.075.425.425 1.075.425H37L27.55 7Z" />
-                                        </svg>
-                                        <div>詳細情報</div>
-                                    </button>
+                                    <button class="EQDetailButton"> </button>
                                 </div>
                             </div>
                         </template>
 
                         <select id="EQInfoSelect">
                             <option value="JMA_EqInfo">気象庁</option>
-                            <!--<option value="AQUA_EqInfo">AQUAシステム</option>-->
                             <option value="USGS_EqInfo">USGS</option>
                         </select>
                         <div id="JMA_EqInfo" class="EQInfo activeEQInfo"><span>読み込み中</span></div>
-                        <!--<div id="AQUA_EqInfo" class="EQInfo"><span>読み込み中</span></div>-->
                         <div id="USGS_EqInfo" class="EQInfo"><span>読み込み中</span></div>
                     </div>
                     <div id="tab1_content2" class="tabcontent">
 
                         <div id="kmoniRealtime">
-                            上位の観測点
                             <ul id="pointList"></ul>
                         </div>
                     </div>
-                    <div id="UpdateTimeWrap">
-                        <div id="UpdateTime_detail">
+                    <dialog id="UpdateTime_detail">
+                        <div class="popup_menubar">
+                            <h2>接続状況</h2>
+                            <button id="UpdateTimeClose"></button>
+                        </div>
+                        <div id="UpdateTime_detail_content">
 
                             <div>
                                 <span>PC時刻</span>
-                                <div id="PC_TIME">0000/00/00 00:00:00</div>
+                                <div id="PC_TIME">読み込み中...</div>
                             </div>
 
 
@@ -243,31 +234,24 @@
                             <div>
                                 <div class="statusIcon" id="kmoni_ICN"></div>
                                 <span>強震モニタ</span>
-                                <div id="kmoni_UT">0000/00/00 00:00:00</div>
+                                <div id="kmoni_UT">読み込み中...</div>
                                 <div id="kmoni_Message"></div>
                             </div>
                             <div>
                                 <div class="statusIcon" id="Lmoni_ICN"></div>
                                 <span>長周期地震動モニタ</span>
-                                <div id="Lmoni_UT">0000/00/00 00:00:00</div>
+                                <div id="Lmoni_UT">読み込み中...</div>
                             </div>
                             <div>
                                 <div class="statusIcon" id="YahooKmoni_ICN"></div>
                                 <span>Yahoo 強震モニタ</span>(<span id="ymoniVendor">---</span>)
-                                <div id="YahooKmoni_UT">0000/00/00 00:00:00</div>
+                                <div id="YahooKmoni_UT">読み込み中...</div>
                             </div>
                             <div>
                                 <div class="statusIcon" id="P2P_EEW_ICN"></div>
                                 <span>P2P地震情報 API</span>
-                                <div id="P2P_EEW_UT">0000/00/00 00:00:00</div>
+                                <div id="P2P_EEW_UT">読み込み中...</div>
                             </div>
-                            <!--
-                        <div>
-                            <div class="statusIcon" id="narikakun_ICN"></div>
-                            <span>narikakun.net API</span>
-                            <div id="narikakun_UT">0000/00/00 00:00:00</div>
-                        </div>
-                    -->
                             <h3>リアルタイム震度</h3>
                             <div>
                                 <div class="statusIcon" id="kmoniImg_ICN"></div>
@@ -283,7 +267,10 @@
                             <div>最終情報更新時刻</div>
 
                         </div>
-                        <div id="all_UpdateTime">0000/00/00 00:00:00</div>
+
+                    </dialog>
+                    <div id="UpdateTimeWrap">
+                        <div id="all_UpdateTime">読み込み中...</div>
 
                     </div>
 

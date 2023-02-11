@@ -10,6 +10,7 @@ var gjmapT; //津波用geojson
 var sections = [];
 var basemap;
 var worldmap;
+var prefecturesMap;
 var offlineMapActive = true;
 var overlayActive = false;
 
@@ -69,7 +70,7 @@ window.electronAPI.messageSend((event, request) => {
                 stroke: false,
                 className: "tsunamiElm",
               })
-              .bindPopup("<h3></h3>津波予報区:" + tsunamiItem.feature.properties.name);
+              .setPopupContent("<h3>津波予報区</h3>" + tsunamiItem.feature.properties.name);
           }
         } else {
           alertNowTmp = true;
@@ -116,7 +117,7 @@ window.electronAPI.messageSend((event, request) => {
                 color: tsunamiColorConv(elm.grade),
                 weight: 5,
               })
-              .bindPopup("<h3 style='border-bottom:solid 2px " + tsunamiColorConv(elm.grade) + "'>" + gradeJa + " 発令中</h3><p>津波予報区:" + tsunamiItem.feature.properties.name + "</p>" + firstWave + maxWave + firstCondition);
+              .setPopupContent("<h3 style='border-bottom:solid 2px " + tsunamiColorConv(elm.grade) + "'>" + gradeJa + " 発令中</h3><p>津波予報区:" + tsunamiItem.feature.properties.name + "</p>" + firstWave + maxWave + firstCondition);
           }
         }
       });
@@ -208,8 +209,10 @@ function init() {
   map.setView([32.99125, 138.46], 4);
 
   map.createPane("tsunamiPane").style.zIndex = 201;
-  map.createPane("jsonMAPPane").style.zIndex = 210;
-  var jsonMAPCanvas = L.canvas({ pane: "jsonMAPPane" });
+  map.createPane("jsonMAP1Pane").style.zIndex = 210;
+  map.createPane("jsonMAP2Pane").style.zIndex = 211;
+  var jsonMAP1Canvas = L.canvas({ pane: "jsonMAP1Pane" });
+  var jsonMAP2Canvas = L.canvas({ pane: "jsonMAP2Pane" });
 
   map.createPane("PointsPane").style.zIndex = 221;
   map.createPane("PSWavePane").style.zIndex = 300;
@@ -436,11 +439,29 @@ function init() {
           pane: "jsonMAPPane",
           interactive: false,
           attribution: '<a href="https://www.naturalearthdata.com/">©Natural Earth</a>',
-          renderer: jsonMAPCanvas,
+          renderer: jsonMAP1Canvas,
         },
       });
 
       mapLayer.addLayer(worldmap);
+    });
+
+  fetch("./Resource/prefectures.json")
+    .then(function (res) {
+      return res.json();
+    })
+    .then(function (json) {
+      prefecturesMap = L.geoJSON(json, {
+        style: {
+          color: "#999",
+          fill: false,
+          weight: 1,
+          interactive: false,
+          renderer: jsonMAP2Canvas,
+        },
+      });
+
+      mapLayer.addLayer(prefecturesMap);
     });
 
   fetch("./Resource/basemap.json")
@@ -450,21 +471,23 @@ function init() {
     .then(function (json) {
       basemap = L.geoJSON(json, {
         style: {
-          color: "#999",
+          stroke: false,
+          color: "#666",
           fill: true,
           fillColor: "#333",
           fillOpacity: 1,
           weight: 1,
           pane: "jsonMAPPane",
+          interactive: false,
           attribution: '<a href="https://www.data.jma.go.jp/developer/gis.html" target="_blank">©JMA</a>',
-          renderer: jsonMAPCanvas,
-        },
+          renderer: jsonMAP1Canvas,
+        } /*
         onEachFeature: function onEachFeature(feature, layer) {
           if (feature.properties && feature.properties.name) {
             sections.push({ name: feature.properties.name, item: layer });
             layer.bindPopup("<h3>地震情報/細分区域</h3>" + feature.properties.name);
           }
-        },
+        },*/,
       });
       mapLayer.addLayer(basemap);
 
@@ -555,7 +578,7 @@ function init() {
               feature: feature,
             });
 
-            layer.bindPopup("<h3></h3>津波予報区:" + feature.properties.name);
+            layer.bindPopup("<h3>津波予報区</h3>" + feature.properties.name);
           }
         },
       });
@@ -622,6 +645,11 @@ function init() {
     if (currentZoom > 11) {
       document.getElementById("mapcontainer").classList.add("popup_show");
     }
+    if (currentZoom >= 7) {
+      basemap.setStyle({ stroke: true });
+    } else {
+      basemap.setStyle({ stroke: false });
+    }
   });
 
   map.on("load", function () {
@@ -677,13 +705,15 @@ function addPointMarker(elm) {
     className: "kmoniPointMarker KmoniPoint_" + codeEscaped,
     iconSize: 35,
   });
-  elm.marker = L.marker([elm.Location.Latitude, elm.Location.Longitude], {
-    icon: kmoniPointMarker,
-    pane: "PointsPane",
-    renderer: PointsCanvas,
-  })
-    .bindPopup("", { offset: [0, -20], className: "PointPopup" })
-    .addTo(map);
+  if (PointsCanvas) {
+    elm.marker = L.marker([elm.Location.Latitude, elm.Location.Longitude], {
+      icon: kmoniPointMarker,
+      pane: "PointsPane",
+      renderer: PointsCanvas,
+    })
+      .bindPopup("", { offset: [0, -20], className: "PointPopup" })
+      .addTo(map);
+  }
   return elm;
 }
 var kmoniMapData;
@@ -766,7 +796,10 @@ function kmoniMapUpdate(dataTmp, type) {
 
         var IntTmp = shindoConvert(elm.shindo, 3);
         if (IntTmp) {
+          points[elm.Code].marker.setZIndexOffset(3000);
           markerCircleElm.classList.add("marker_Int", "marker_Int" + IntTmp);
+        } else {
+          points[elm.Code].marker.setZIndexOffset(0);
         }
       }
     } else {
