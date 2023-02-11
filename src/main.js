@@ -33,7 +33,7 @@ let mainWindow;
 var settingWindow;
 var tsunamiWindow;
 let kmoniWorker;
-var kmoniActive;
+var kmoniActive = false;
 
 var kmoniTimeTmp = [];
 
@@ -57,6 +57,8 @@ ipcMain.on("message", (_event, response) => {
         data: tsunamiData,
       });
     }
+  } else if (response.action == "kmoniEstShindoReturn") {
+    estShindoControl(response);
   } else if (response.action == "settingWindowOpen") {
     if (!settingWindow) {
       settingWindow = new BrowserWindow({
@@ -197,7 +199,6 @@ function createWindow() {
     //replay("2023/01/18 18:54:45");
     //replay("2023/01/15 20:37:45");
 
-    /*
     EEWcontrol({
       alertflg: "予報", //種別
       report_id: "20230115203744", //地震ID
@@ -223,7 +224,7 @@ function createWindow() {
         Pref: null,
         Regions: null,
       },
-    });*/
+    });
 
     //    replay("2022/10/2 0:2:45");
     // replay("2022/11/3 19:04:40");
@@ -371,6 +372,7 @@ function kmonicreateWindow() {
   });
 
   kmoniWorker.loadFile("src/kmoniWorker.html");
+  kmoniActive = new Date();
 }
 
 app.whenReady().then(() => {
@@ -472,7 +474,7 @@ function addPoint(elm, elm2) {
   return true;
 }
 function kmoniControl(data, date) {
-  kmoniActive = true;
+  kmoniActive = new Date();
 
   if (kmoniDataHistory.length > historyCount) kmoniDataHistory = kmoniDataHistory.slice(kmoniDataHistory.length - historyCount);
 
@@ -577,7 +579,28 @@ function SnetControl(data, date) {
     mainWindow.webContents.send("message2", SnetPointsDataTmp);
   }
 }
+function estShindoControl(response) {
+  if (EEWNow) {
+    var EidTmp;
+    if (kmoniEid) {
+      EidTmp = kmoniEid;
+    } else if (!EidTmp) {
+      EidTmp = EEW_nowList[0].report_id;
+    } else {
+      return false;
+    }
+    if (mainWindow) {
+      mainWindow.webContents.send("message2", {
+        action: "EstShindoUpdate",
+        data: response.data,
+        date: response.date,
+        eid: EidTmp,
+      });
+    }
+  }
+}
 
+var kmoniEid;
 function kmoniRequest() {
   if (net.online) {
     var request = net.request("http://www.kmoni.bosai.go.jp/webservice/hypo/eew/" + dateEncode(1, new Date() - yoyuK - Replay) + ".json");
@@ -598,7 +621,10 @@ function kmoniRequest() {
         });
         res.on("end", function () {
           var json = jsonParse(dataTmp);
-          if (json) EEWdetect(2, json, 1);
+          if (json) {
+            kmoniEid = json.report_id;
+            EEWdetect(2, json, 1);
+          }
         });
       }
     });
@@ -624,20 +650,22 @@ function kmoniRequest() {
         });
       }
     });
-    Request({ method: "GET", url: "http://www.kmoni.bosai.go.jp/data/map_img/EstShindoImg/eew/" + dateEncode(2, ReqTime - Replay) + "/" + dateEncode(1, ReqTime - Replay) + ".eew.gif", encoding: null }, (error, response, body) => {
-      // エラーチェック
-      if (error !== null) {
-        NetworkError(error, "強震モニタ(画像)");
-        return false;
-      }
-      if (kmoniWorker) {
-        kmoniWorker.webContents.send("message2", {
-          action: "KmoniEstShindoImgUpdate",
-          data: "data:image/gif;base64," + body.toString("base64"),
-          date: ReqTime,
-        });
-      }
-    });
+    if (EEWNow) {
+      Request({ method: "GET", url: "http://www.kmoni.bosai.go.jp/data/map_img/EstShindoImg/eew/" + dateEncode(2, ReqTime - Replay) + "/" + dateEncode(1, ReqTime - Replay) + ".eew.gif", encoding: null }, (error, response, body) => {
+        // エラーチェック
+        if (error !== null) {
+          NetworkError(error, "強震モニタ(画像)");
+          return false;
+        }
+        if (kmoniWorker) {
+          kmoniWorker.webContents.send("message2", {
+            action: "KmoniEstShindoImgUpdate",
+            data: "data:image/gif;base64," + body.toString("base64"),
+            date: ReqTime,
+          });
+        }
+      });
+    }
   }
   if (kmoniTimeout) clearTimeout(kmoniTimeout);
   kmoniTimeout = setTimeout(kmoniRequest, 1000);
@@ -911,7 +939,7 @@ function RegularExecution() {
   });
 
   //kmoniWorker監視
-  if (!kmoniActive) {
+  if (new Date() - kmoniActive > 5000) {
     kmonicreateWindow();
   }
 

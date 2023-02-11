@@ -164,46 +164,28 @@
 
 
         function EstShindoRedraw(dateTmp) {
-            return false;
+            var estShindos = []
             points.forEach(function (elm, index) {
                 if (elm.Name && elm.Point && !elm.IsSuspended) {
                     var rgb = point2RGB(elm.Point.X, elm.Point.Y, EScontext);
                     if (rgb[0] + rgb[1] + rgb[2] !== 0) {
                         var hsv = RGB2HSV(rgb[0], rgb[1], rgb[2]);
                         var p = HSVtoP(hsv[0], hsv[1], hsv[2]);
-                        var shindo = (10 * p - 3);
-                        var pga = 10 ** (5 * p - 2);
-
-                        elm.data = true
-                        elm.rgb = rgb
-                        elm.shindo = shindo
-                        elm.pga = pga
-
-                        /*
-                    var pulsingIcon = L.icon.pulse({
-                      iconSize: [10, 10],
-                      fillColor: "rgb(" + rgb.join(",") + ")",
-                      animate: false,
-                    });
-                    marker = L.marker([elm.Location.latitude, elm.Location.longitude], { icon: pulsingIcon }).addTo(map).bindPopup(elm.Name);
-                  */
-                    } else {
-                        elm.data = false
-
-                        elm.rgb = null
-                        elm.shindo = null
-                        elm.pga = null
-
+                        var tmpNum = 10 ** (5 * p - 2);
+                        var EstShindo = 0.868589 * Math.log(tmpNum) + 1
+                        var RegionTmp = estShindos.find(function (elm2) { return elm2.Region == elm.Region })
+                        if (RegionTmp) {
+                            RegionTmp.estShindo = Math.max(EstShindo, RegionTmp.estShindo)
+                        } else {
+                            estShindos.push({ Region: elm.Region, estShindo: EstShindo })
+                        }
                     }
-                } else {
-                    elm.rgb = false
-                    elm.shindo = null
-                    elm.pga = null
                 }
-                if (index == points.length - 1) {
+
+                if (index == points.length - 1 && estShindos.length !== 0) {
                     window.electronAPI.messageReturn({
                         action: "kmoniEstShindoReturn",
-                        data: points,
+                        data: estShindos,
                         date: dateTmp
                     })
                 }
