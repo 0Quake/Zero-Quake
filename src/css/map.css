@@ -123,7 +123,16 @@ img.leaflet-control {
 .PointPopup table td {
   text-align: left;
 }
-
+.leaflet-container .leaflet-control-attribution.leaflet-control {
+  background: #444;
+  color: #ccc;
+  border-radius: 5px;
+  margin: 5px;
+  padding: 3px 8px;
+}
+.leaflet-container .leaflet-control-attribution.leaflet-control a {
+  color: #ccc;
+}
 .kmoniPointMarker {
   width: 25px;
   height: 25px;

@@ -56,19 +56,19 @@ Zero Quake が情報を取得している情報源
 
 #### タイル地図
 
-「気象庁」© jma  
-「地理院 標準地図」© 国土地理院  
-「地理院 淡色地図」© 国土地理院  
-「地理院 写真」© 国土地理院  
-「地理院 白地図」© 国土地理院  
+「気象庁」© 気象庁
+「地理院 標準地図」© [国土地理院](https://maps.gsi.go.jp/development/ichiran.html)  
+「地理院 淡色地図」© [国土地理院](https://maps.gsi.go.jp/development/ichiran.html)  
+「地理院 写真」© [国土地理院](https://maps.gsi.go.jp/development/ichiran.html)  
+「地理院 白地図」© [国土地理院](https://maps.gsi.go.jp/development/ichiran.html)  
 「OpenStreetMap」© OpenStreetMap contributors
 
-「地理院 陰影起伏図」© 国土地理院  
-「地理院 火山基本図データ」© 国土地理院  
-「地理院 津波浸水想定 ハザードマップ」© 国土地理院  
-「地理院 土砂災害警戒区域（急傾斜地の崩壊） ハザードマップ」© 国土地理院  
-「地理院 土砂災害警戒区域（地すべり） ハザードマップ」© 国土地理院  
-「気象庁　境界線」© jma
+「地理院 陰影起伏図」© [国土地理院](https://maps.gsi.go.jp/development/ichiran.html)  
+「地理院 火山基本図データ」© [国土地理院](https://maps.gsi.go.jp/development/ichiran.html)  
+「地理院 津波浸水想定 ハザードマップ」© [国土地理院](https://maps.gsi.go.jp/development/ichiran.html)  
+「地理院 土砂災害警戒区域（急傾斜地の崩壊） ハザードマップ」© [国土地理院](https://maps.gsi.go.jp/development/ichiran.html)  
+「地理院 土砂災害警戒区域（地すべり） ハザードマップ」© [国土地理院](https://maps.gsi.go.jp/development/ichiran.html)  
+「気象庁　境界線」© 気象庁
 
 ## 参考資料
 

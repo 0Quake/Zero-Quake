@@ -157,7 +157,7 @@ main {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: rgb(69, 63, 63);
+  background: #444;
   border-left: solid 1px #444;
   width: 350px;
 }
@@ -752,15 +752,15 @@ button:hover {
 }
 
 #notification_Area {
-  height: 40px;
+  height: 30px;
   position: fixed;
-  bottom: 0;
+  bottom: 5px;
   left: 5px;
   background: #444;
   outline: solid 1px #999;
   z-index: 1000;
   box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.4);
-  border-radius: 10px 10px 0 0;
+  border-radius: 5px;
 }
 #notification_Area.open {
   height: auto;
@@ -802,9 +802,9 @@ button:hover {
   left: 5px;
   display: inline-block;
   background: rgb(203, 27, 27);
-  width: 30px;
-  height: 30px;
-  line-height: 30px;
+  width: 23px;
+  height: 23px;
+  line-height: 23px;
   font-size: 14px;
   color: #fff;
   border-radius: 15px;
@@ -814,18 +814,27 @@ button:hover {
   background-size: contain;
   background-position: center;
 }
+.open #plus_badge {
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+}
 #notification_more {
   position: absolute;
   top: 5px;
   right: 5px;
-  width: 30px;
-  height: 30px;
+  width: 23px;
+  height: 23px;
   background-color: #222;
   background-image: url(../img/expand_more.svg);
   background-size: contain;
   background-position: center;
   border-radius: 15px;
   vertical-align: middle;
+}
+.open #notification_more {
+  width: 30px;
+  height: 30px;
 }
 #notification_more:hover {
   background-color: rgb(203, 27, 27);
@@ -861,7 +870,7 @@ button:hover {
   display: inline-block;
   padding: 0 3px;
   margin: 0;
-  height: 30px;
+  height: 23px;
 }
 .open .notification_item {
   padding: 0 5px;
@@ -871,16 +880,15 @@ button:hover {
 
 .notification_title {
   font-weight: normal;
-  line-height: 1.5em;
   padding: 0;
   margin: 0;
-  font-size: 16px;
-  height: 30px;
-  max-width: 40vw;
+  font-size: 13px;
+  height: 23px;
+  max-width: 20vw;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  line-height: 30px;
+  line-height: 23px;
 }
 .notification_content {
   display: none;
@@ -903,6 +911,7 @@ button:hover {
   height: 40px;
   line-height: 40px;
   max-width: 100vw;
+  font-size: 16px;
 }
 
 .open .notification_content {

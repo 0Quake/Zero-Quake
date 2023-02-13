@@ -93,35 +93,35 @@ function Mapinit() {
     minNativeZoom: 0,
     maxNativeZoom: 11,
     maxZoom: 21,
-    attribution: '<a href="https://www.data.jma.go.jp/svd/eqdb/data/shindo/" target="_blank">© 気象庁</a>',
+    attribution: "©JMA",
   });
   var tile2 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png", {
     minZoom: 0,
     minNativeZoom: 2,
     maxNativeZoom: 18,
     maxZoom: 21,
-    attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">©国土地理院</a>',
+    attribution: "©国土地理院",
   });
   var tile3 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg", {
     minZoom: 9,
     minNativeZoom: 9,
     maxNativeZoom: 18,
     maxZoom: 21,
-    attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">©国土地理院</a>',
+    attribution: "©国土地理院",
   });
   var tile4 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/blank/{z}/{x}/{y}.png", {
     minZoom: 0,
     minNativeZoom: 5,
     maxNativeZoom: 14,
     maxZoom: 21,
-    attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">©国土地理院</a>',
+    attribution: "©国土地理院",
   });
   var tile5 = L.tileLayer("http://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     minZoom: 0,
     minNativeZoom: 0,
     maxNativeZoom: 19,
     maxZoom: 21,
-    attribution: '<a href="https://www.openstreetmap.org/" target="_blank">©OpenStreetMap contributors</a>',
+    attribution: "©OpenStreetMap contributors",
   });
   var tile8 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png", {
     minZoom: 0,
@@ -134,7 +134,7 @@ function Mapinit() {
   var overlay1 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/hillshademap/{z}/{x}/{y}.png", {
     minZoom: 2,
     maxZoom: 16,
-    attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">©国土地理院</a>',
+    attribution: "©国土地理院",
   });
   var overlay2 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/vbmd_colorrel/{z}/{x}/{y}.png", {
     minZoom: 11,
@@ -144,31 +144,24 @@ function Mapinit() {
   var overlay3 = L.tileLayer("https://disaportaldata.gsi.go.jp/raster/04_tsunami_newlegend_data/{z}/{x}/{y}.png", {
     minZoom: 7,
     maxZoom: 12,
-    attribution: '<a href="https://disaportal.gsi.go.jp/hazardmap/copyright/opendata.html#tsunami" target="_blank">©国土地理院</a>',
+    attribution: "©国土地理院",
   });
   var overlay4 = L.tileLayer("https://disaportaldata.gsi.go.jp/raster/05_kyukeishakeikaikuiki/{z}/{x}/{y}.png", {
     minZoom: 7,
     maxZoom: 12,
-    attribution: '<a href="https://disaportal.gsi.go.jp/hazardmap/copyright/opendata.html#dosekiryukeikaikuiki" target="_blank">©国土地理院</a>',
+    attribution: "©国土地理院",
   });
   var overlay5 = L.tileLayer("https://disaportaldata.gsi.go.jp/raster/05_jisuberikeikaikuiki/{z}/{x}/{y}.png", {
     minZoom: 7,
     maxZoom: 12,
-    attribution: '<a href="https://disaportal.gsi.go.jp/hazardmap/copyright/opendata.html#jisuberikeikaikuiki" target="_blank">©国土地理院</a>',
+    attribution: "©国土地理院",
   });
   var overlay6 = L.tileLayer("https://www.jma.go.jp/tile/jma/transparent-cities/{z}/{x}/{y}.png", {
     minZoom: 0,
     minNativeZoom: 2,
     maxNativeZoom: 11,
     maxZoom: 21,
-    attribution: '<a href="https://www.jma.go.jp/bosai/map.html#5/28.835/168.548/&elem=int&contents=earthquake_map" target="_blank">©JMA</a>',
-  });
-  var overlay7 = L.tileLayer("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVQI12NgYAAAAAMAASDVlMcAAAAASUVORK5CYII=", {
-    minNativeZoom: 10,
-    maxNativeZoom: 10,
-    minZoom: 10,
-    maxZoom: 21,
-    attribution: '<a href="https://disaportal.gsi.go.jp/hazardmap/copyright/opendata.html#jisuberikeikaikuiki" target="_blank">©国土地理院</a>',
+    attribution: "©JMA",
   });
 
   map.createPane("pane300").style.zIndex = 300;
@@ -183,12 +176,12 @@ function Mapinit() {
         style: {
           color: "#444",
           fill: true,
-          fillColor: "#222",
+          fillColor: "#333",
           fillOpacity: 1,
           weight: 1,
           pane: "jsonMAPPane",
           interactive: false,
-          attribution: '<a href="https://www.naturalearthdata.com/">©Natural Earth</a>',
+          attribution: "©Natural Earth",
           renderer: jsonMAP1Canvas,
         },
       });
@@ -226,7 +219,7 @@ function Mapinit() {
           fillOpacity: 1,
           weight: 1,
           pane: "jsonMAPPane",
-          attribution: '<a href="https://www.data.jma.go.jp/developer/gis.html" target="_blank">©JMA</a>',
+          attribution: "©JMA",
           renderer: jsonMAP1Canvas,
         },
         onEachFeature: function onEachFeature(feature, layer) {
@@ -262,7 +255,6 @@ function Mapinit() {
             "地理院 土砂災害警戒区域（急傾斜地の崩壊） ハザードマップ": overlay4,
             "地理院 土砂災害警戒区域（地すべり） ハザードマップ": overlay5,
             "気象庁　境界線": overlay6,
-            避難所: overlay7,
           },
           {
             position: "topleft",
@@ -616,7 +608,7 @@ function jma_Fetch(url) {
 
                       var newDiv = document.createElement("div");
                       var color4 = shindoConvert(elm4.Int, 2);
-                      newDiv.innerHTML = "<span style='background:" + color4[0] + ";color:" + color4[1] + ";'>" + elm4.Int + "</span>" + elm4.Name;
+                      newDiv.innerHTML = "<span style='background:" + color4[0] + ";color:" + color4[1] + ";'>" + elm4.Int + "</span>" + elm4.Name.replace("＊", "");
                       newDiv.classList.add("ShindoItem", "ShindoItem4");
 
                       var divIcon = L.divIcon({
@@ -627,7 +619,7 @@ function jma_Fetch(url) {
 
                       L.marker([elm4.latlon.lat, elm4.latlon.lon], { icon: divIcon, pane: "shadowPane" })
                         .addTo(map)
-                        .bindPopup("<h3>観測点：" + elm4.Name + "</h3>震度" + elm4.Int);
+                        .bindPopup("<h3>観測点：" + elm4.Name.replace("＊", "") + "</h3>震度" + elm4.Int);
 
                       wrap3[wrap3.length - 1].appendChild(newDiv);
                     });
@@ -759,7 +751,7 @@ function narikakun_Fetch(url) {
 
                         var newDiv = document.createElement("div");
                         var color4 = shindoConvert(elm4.Int, 2);
-                        newDiv.innerHTML = "<span style='background:" + color4[0] + ";color:" + color4[1] + ";'>" + elm4.Int + "</span>" + elm4.Name;
+                        newDiv.innerHTML = "<span style='background:" + color4[0] + ";color:" + color4[1] + ";'>" + elm4.Int + "</span>" + elm4.Name.replace("＊", "");
                         newDiv.classList.add("ShindoItem", "ShindoItem4");
 
                         var divIcon = L.divIcon({
@@ -770,7 +762,7 @@ function narikakun_Fetch(url) {
 
                         L.marker([pointList[elm4.Code].location[0], pointList[elm4.Code].location[1]], { icon: divIcon, pane: "shadowPane" })
                           .addTo(map)
-                          .bindPopup("<h3>観測点：" + elm4.Name + "</h3>震度" + elm4.Int);
+                          .bindPopup("<h3>観測点：" + elm4.Name.replace("＊", "") + "</h3>震度" + elm4.Int);
 
                         wrap3[wrap3.length - 1].appendChild(newDiv);
                       });
@@ -854,7 +846,7 @@ function nhkFetch(url) {
               var wrap = document.querySelectorAll(".WrapLevel1");
 
               var newDiv = document.createElement("div");
-              newDiv.innerHTML = "<span style='background:" + color1[0] + ";color:" + color1[1] + ";'>" + shindoJP + "</span>" + elm2.getAttribute("Name");
+              newDiv.innerHTML = "<span style='background:" + color1[0] + ";color:" + color1[1] + ";'>" + shindoJP + "</span>" + elm2.getAttribute("Name").replace("＊", "");
               newDiv.classList.add("ShindoItem", "ShindoItem4");
               wrap[wrap.length - 1].appendChild(newDiv);
             });
@@ -1006,7 +998,7 @@ function jmaXMLFetch(url) {
 
                       var newDiv = document.createElement("div");
                       var color4 = shindoConvert(elm4.querySelector("Int").textContent, 3);
-                      newDiv.innerHTML = "<span style='background:" + color4[0] + ";color:" + color4[1] + ";'>" + elm4.querySelector("Int").textContent + "</span>" + elm4.querySelector("Name").textContent;
+                      newDiv.innerHTML = "<span style='background:" + color4[0] + ";color:" + color4[1] + ";'>" + elm4.querySelector("Int").textContent + "</span>" + elm4.querySelector("Name").textContent.replace("＊", "");
                       newDiv.classList.add("ShindoItem", "ShindoItem4");
 
                       var divIcon = L.divIcon({
