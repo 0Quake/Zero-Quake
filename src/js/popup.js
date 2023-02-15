@@ -3,7 +3,7 @@ var EEWDetectionTimeout;
 var Replay = 0;
 var ICT_JST = 0;
 var config;
-var AreaForecastLocalE;
+//var AreaForecastLocalE;
 var prepareing = true;
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "EEWAlertUpdate") {
@@ -50,6 +50,7 @@ window.addEventListener("load", function () {
     .then(function (json) {
       document.getElementById("kmoni_Message").innerHTML = json.message;
     });
+  /*
   fetch("./Resource/AreaForecastLocalE.json")
     .then(function (res) {
       return res.json();
@@ -57,7 +58,7 @@ window.addEventListener("load", function () {
     .then(function (json) {
       AreaForecastLocalE = json;
       prepareing = false;
-    });
+    });*/
   setInterval(function () {
     document.getElementById("PC_TIME").textContent = dateEncode(3, new Date());
   }, 200);
@@ -442,7 +443,7 @@ document.getElementById("EQInfoSelect").addEventListener("change", function () {
 
 var updateTimeTmp = 0;
 function kmoniTimeUpdate(updateTime, LocalTime, type, condition, vendor) {
-  if (prepareing) return;
+  //if (prepareing) return;
 
   /*
   Updatetime: new Date(data.time),

@@ -385,7 +385,7 @@ function latitudeConvert(data) {
     return data;
   }
 }
-var overlayTmp = [];
+var overlayTmp = 0;
 var epicenterIcon;
 var tsunamiElm = [];
 var inited = false;
@@ -396,7 +396,9 @@ window.addEventListener("load", function () {
   windowLoaded = true;
 });
 var EQDetectCanvas;
+var PointsCanvas;
 var mapLayer;
+var hinanjoLayer;
 
 function init() {
   if (inited || !config || !windowLoaded) return;
@@ -406,31 +408,34 @@ function init() {
       [90, -180],
       [-90, 180],
     ],
-    minZoom: 2,
+    center: [32.99125, 138.46],
+    zoom: 4,
+    minZoom: 3.5,
     maxZoom: 21,
-    zoomAnimation: true,
+    zoomAnimation: false,
     zoomSnap: 0.1,
     zoomDelta: 0.5,
     preferCanvas: false,
     zoomControl: false,
+    worldCopyJump: true,
+    inertia: false,
+    maxBoundsViscosity: 1,
   });
-  map.setView([32.99125, 138.46], 4);
 
   map.createPane("tsunamiPane").style.zIndex = 201;
   map.createPane("jsonMAP1Pane").style.zIndex = 210;
   map.createPane("jsonMAP2Pane").style.zIndex = 211;
-  var jsonMAP1Canvas = L.canvas({ pane: "jsonMAP1Pane" });
-  var jsonMAP2Canvas = L.canvas({ pane: "jsonMAP2Pane" });
-
   map.createPane("PointsPane").style.zIndex = 221;
   map.createPane("PSWavePane").style.zIndex = 300;
   map.createPane("EQDetectPane").style.zIndex = 250;
   map.createPane("EQDetectPane").style.pointerEvents = "none";
   map.createPane("HinanjoPane").style.zIndex = 220;
 
-  EQDetectCanvas = L.canvas({ pane: "EQDetectPane" });
+  var jsonMAP1Canvas = L.canvas({ pane: "jsonMAP1Pane" });
+  var jsonMAP2Canvas = L.canvas({ pane: "jsonMAP2Pane" });
   EQDetectCanvas = L.canvas({ pane: "EQDetectPane" });
   PointsCanvas = L.canvas({ pane: "PointsPane" });
+  HinanjoCanvas = L.canvas({ pane: "HinanjoPane" });
 
   //L.control.scale({ imperial: false }).addTo(map);←縮尺
 
@@ -438,87 +443,105 @@ function init() {
   mapLayer.id = "mapLayer";
   mapLayer.addTo(map);
 
+  hinanjoLayer = new L.LayerGroup();
+  hinanjoLayer.id = "hinanjoLayer";
+
   var tile1 = L.tileLayer("https://www.data.jma.go.jp/svd/eqdb/data/shindo/map/{z}/{x}/{y}.png", {
     minZoom: 0,
     minNativeZoom: 0,
     maxNativeZoom: 11,
     maxZoom: 21,
-    attribution: "©JMA",
+    attribution: "JMA",
   });
   var tile2 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png", {
     minZoom: 0,
     minNativeZoom: 2,
     maxNativeZoom: 18,
     maxZoom: 21,
-    attribution: "©国土地理院",
+    attribution: "国土地理院",
   });
   var tile3 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg", {
     minZoom: 9,
     minNativeZoom: 9,
     maxNativeZoom: 18,
     maxZoom: 21,
-    attribution: "©国土地理院",
+    attribution: "国土地理院",
   });
   var tile4 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/blank/{z}/{x}/{y}.png", {
     minZoom: 0,
     minNativeZoom: 5,
     maxNativeZoom: 14,
     maxZoom: 21,
-    attribution: "©国土地理院",
+    attribution: "国土地理院",
   });
   var tile5 = L.tileLayer("http://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     minZoom: 0,
     minNativeZoom: 0,
     maxNativeZoom: 19,
     maxZoom: 21,
-    attribution: "©OpenStreetMap contributors",
+    attribution: "OpenStreetMap contributors",
   });
   var tile8 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png", {
     minZoom: 0,
     minNativeZoom: 0,
     maxNativeZoom: 18,
     maxZoom: 21,
-    attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">©国土地理院</a>',
+    attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">国土地理院</a>',
   });
 
   var overlay1 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/hillshademap/{z}/{x}/{y}.png", {
-    minZoom: 2,
-    maxZoom: 16,
-    attribution: "©国土地理院",
+    minNativeZoom: 2,
+    maxNativeZoom: 16,
+    minZoom: 0,
+    maxZoom: 21,
+
+    attribution: "国土地理院",
   });
   var overlay2 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/vbmd_colorrel/{z}/{x}/{y}.png", {
-    minZoom: 11,
-    maxZoom: 18,
-    attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">©国土地理院</a>',
+    minNativeZoom: 11,
+    maxNativeZoom: 18,
+    minZoom: 0,
+    maxZoom: 21,
+
+    attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">国土地理院</a>',
   });
   var overlay3 = L.tileLayer("https://disaportaldata.gsi.go.jp/raster/04_tsunami_newlegend_data/{z}/{x}/{y}.png", {
-    minZoom: 7,
-    maxZoom: 12,
-    attribution: "©国土地理院",
+    minNativeZoom: 7,
+    maxNativeZoom: 12,
+    minZoom: 0,
+    maxZoom: 21,
+
+    attribution: "国土地理院",
   });
   var overlay4 = L.tileLayer("https://disaportaldata.gsi.go.jp/raster/05_kyukeishakeikaikuiki/{z}/{x}/{y}.png", {
-    minZoom: 7,
-    maxZoom: 12,
-    attribution: "©国土地理院",
+    minNativeZoom: 7,
+    maxNativeZoom: 12,
+    minZoom: 0,
+    maxZoom: 21,
+
+    attribution: "国土地理院",
   });
   var overlay5 = L.tileLayer("https://disaportaldata.gsi.go.jp/raster/05_jisuberikeikaikuiki/{z}/{x}/{y}.png", {
-    minZoom: 7,
-    maxZoom: 12,
-    attribution: "©国土地理院",
+    minNativeZoom: 7,
+    maxNativeZoom: 12,
+    minZoom: 0,
+    maxZoom: 21,
+
+    attribution: "国土地理院",
   });
   var overlay6 = L.tileLayer("https://www.jma.go.jp/tile/jma/transparent-cities/{z}/{x}/{y}.png", {
     minZoom: 0,
     minNativeZoom: 2,
     maxNativeZoom: 11,
     maxZoom: 21,
-    attribution: "©JMA",
+    attribution: "JMA",
   });
   var overlay7 = L.tileLayer("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVQI12NgYAAAAAMAASDVlMcAAAAASUVORK5CYII=", {
     minNativeZoom: 10,
     maxNativeZoom: 10,
-    minZoom: 10,
+    minZoom: 11,
     maxZoom: 21,
-    attribution: "©国土地理院",
+    attribution: "国土地理院",
   })
     .on("tileloadstart", function (event) {
       var tilePath = event.coords;
@@ -529,7 +552,7 @@ function init() {
       fetch(url)
         .then((a) => (a.ok ? a.json() : null))
         .then((geojson) => {
-          if (!geojson || !this._map) return;
+          if (!geojson) return;
           event.tile.geojson = L.geoJSON(geojson, {
             pointToLayer: function (feature, cordinate) {
               return L.circleMarker(cordinate, {
@@ -542,9 +565,8 @@ function init() {
                 renderer: HinanjoCanvas,
               });
             },
-          })
-            .addTo(this._map)
-            .bindPopup("指定緊急避難場所（地震）");
+          }).bindPopup("指定緊急避難場所（地震）");
+          hinanjoLayer.addLayer(event.tile.geojson);
         })
         .catch(function (err) {});
       var url = "https://cyberjapandata.gsi.go.jp/xyz/skhb05/10/" + tileX + "/" + tileY + ".geojson";
@@ -552,7 +574,7 @@ function init() {
       fetch(url)
         .then((a) => (a.ok ? a.json() : null))
         .then((geojson) => {
-          if (!geojson || !this._map) return;
+          if (!geojson) return;
           event.tile.geojson2 = L.geoJSON(geojson, {
             pointToLayer: function (feature, cordinate) {
               return L.circleMarker(cordinate, {
@@ -565,9 +587,8 @@ function init() {
                 renderer: HinanjoCanvas,
               });
             },
-          })
-            .addTo(this._map)
-            .bindPopup("指定緊急避難場所（津波）");
+          }).bindPopup("指定緊急避難場所（津波）");
+          hinanjoLayer.addLayer(event.tile.geojson2);
         })
         .catch(function (err) {});
       //     this._map.removeLayer(event.tile.geojson);
@@ -646,7 +667,7 @@ function init() {
           weight: 1,
           pane: "jsonMAPPane",
           interactive: false,
-          attribution: "©Natural Earth",
+          attribution: "Natural Earth",
           renderer: jsonMAP1Canvas,
         },
       });
@@ -665,6 +686,7 @@ function init() {
           fill: false,
           weight: 1,
           interactive: false,
+          attribution: "JMA",
           renderer: jsonMAP2Canvas,
         },
       });
@@ -687,7 +709,7 @@ function init() {
           weight: 1,
           pane: "jsonMAPPane",
           interactive: false,
-          attribution: "©JMA",
+          attribution: "JMA",
           renderer: jsonMAP1Canvas,
         },
         onEachFeature: function onEachFeature(feature, layer) {
@@ -709,17 +731,17 @@ function init() {
             "地理院 標準地図": tile8,
 
             "地理院 淡色地図": tile2,
-            "地理院 写真": tile3,
-            "地理院 白地図": tile4,
+            衛星写真: tile3,
+            白地図: tile4,
             OpenStreetMap: tile5,
           },
           {
-            "地理院 陰影起伏図": overlay1,
-            "地理院 火山基本図データ": overlay2,
-            "地理院 津波浸水想定 ハザードマップ": overlay3,
-            "地理院 土砂災害警戒区域（急傾斜地の崩壊） ハザードマップ": overlay4,
-            "地理院 土砂災害警戒区域（地すべり） ハザードマップ": overlay5,
-            "気象庁　境界線": overlay6,
+            陰影起伏図: overlay1,
+            火山基本図データ: overlay2,
+            "津波浸水想定 ハザードマップ": overlay3,
+            "土砂災害警戒区域（急傾斜地の崩壊） ハザードマップ": overlay4,
+            "土砂災害警戒区域（地すべり） ハザードマップ": overlay5,
+            境界線: overlay6,
             避難所: overlay7,
           },
           {
@@ -735,29 +757,35 @@ function init() {
     basemap.setStyle({ fill: offlineMapActive && !overlayActive });
     worldmap.setStyle({ fill: offlineMapActive && !overlayActive });
   });
+  map.on("locationerror", function (e) {
+    e.preventDefault();
+  });
   map.on("overlayadd", function (eventLayer) {
+    overlayTmp++;
     overlayActive = true;
     basemap.setStyle({ fill: offlineMapActive && !overlayActive });
     worldmap.setStyle({ fill: offlineMapActive && !overlayActive });
 
     if (eventLayer.name === "地理院 津波浸水想定 ハザードマップ") {
       legend.addTo(map);
+    } else if (eventLayer.name === "避難所") {
+      hinanjoLayer.addTo(map);
     } else if (eventLayer.name === "地理院 土砂災害警戒区域（地すべり） ハザードマップ" || eventLayer.name === "地理院 土砂災害警戒区域（急傾斜地の崩壊） ハザードマップ") {
       legend2.addTo(map);
-      overlayTmp.push(eventLayer.name);
     }
   });
   map.on("overlayremove", function (eventLayer) {
+    overlayTmp -= 1;
+
     if (eventLayer.name === "地理院 津波浸水想定 ハザードマップ") {
       map.removeControl(legend);
+    } else if (eventLayer.name === "避難所") {
+      map.removeLayer(hinanjoLayer);
     } else if (eventLayer.name === "地理院 土砂災害警戒区域（地すべり） ハザードマップ" || eventLayer.name === "地理院 土砂災害警戒区域（急傾斜地の崩壊） ハザードマップ") {
-      overlayTmp = overlayTmp.filter(function (elm) {
-        return elm !== eventLayer.name;
-      });
-    }
-    if (overlayTmp.length == 0) {
-      overlayActive = false;
       map.removeControl(legend2);
+    }
+    if (overlayTmp == 0) {
+      overlayActive = false;
       basemap.setStyle({ fill: offlineMapActive && !overlayActive });
       worldmap.setStyle({ fill: offlineMapActive && !overlayActive });
     }
@@ -776,7 +804,7 @@ function init() {
           fill: false,
           pane: "tsunamiPane",
           className: "tsunamiElm",
-          attribution: "©JMA",
+          attribution: "JMA",
         },
         onEachFeature: function onEachFeature(feature, layer) {
           if (feature.properties && feature.properties.name) {
@@ -938,24 +966,26 @@ function kmoniMapUpdate(dataTmp, type) {
     SnetMapData = dataTmp;
   }
 
-  var dataTmp2 = dataTmp.filter(function (elm) {
-    return elm.shindo;
-  });
-
   if (type == "knet") {
     //リアルタイム震度タブ
-    var shindoList = dataTmp2.sort(function (a, b) {
-      return b.shindo - a.shindo;
-    });
+    var shindoList = dataTmp
+      .filter(function (elm) {
+        return elm.shindo;
+      })
+      .sort(function (a, b) {
+        return b.shindo - a.shindo;
+      });
     //removeChild(document.getElementById("pointList"));
     var htmlTmp = "";
     for (let a = 0; a < 10; a++) {
       var shindoElm = shindoList[a];
-      var shindoColor = shindoConvert(shindoElm.shindo, 2);
-      var IntDetail = "";
-      if (a == 0) IntDetail = "<div class='intDetail'>" + Math.round(shindoElm.shindo * 10) / 10 + "</div>";
+      if (shindoElm.shindo) {
+        var shindoColor = shindoConvert(shindoElm.shindo, 2);
+        var IntDetail = "";
+        if (a == 0) IntDetail = "<div class='intDetail'>" + Math.round(shindoElm.shindo * 10) / 10 + "</div>";
 
-      htmlTmp += "<li><div class='int' style='color:" + shindoColor[1] + ";background:" + shindoColor[0] + "'>" + shindoConvert(shindoElm.shindo, 0) + IntDetail + "</div><div class='Pointname'>" + shindoElm.Region + " " + shindoElm.Name + "</div><div class='PGA'>PGA" + Math.round(shindoElm.pga * 100) / 100 + "</div></li>";
+        htmlTmp += "<li><div class='int' style='color:" + shindoColor[1] + ";background:" + shindoColor[0] + "'>" + shindoConvert(shindoElm.shindo, 0) + IntDetail + "</div><div class='Pointname'>" + shindoElm.Region + " " + shindoElm.Name + "</div><div class='PGA'>PGA" + Math.round(shindoElm.pga * 100) / 100 + "</div></li>";
+      }
     }
     document.getElementById("pointList").innerHTML = htmlTmp;
   }
@@ -978,14 +1008,14 @@ function kmoniMapUpdate(dataTmp, type) {
         changed = true;
       } else {
         var pga0 = previous_points[elm.Code].pga;
-        if (pga0) changed = pga0 !== elm.pga;
+        changed = pga0 && pga0 !== elm.pga;
       }
 
       if (changed || marker_add) {
         var markerCircleElm = markerElement.querySelector(".marker-circle");
         markerCircleElm.style.background = "rgb(" + elm.rgb.join(",") + ")";
 
-        markerElement.style.display = "block";
+        //markerElement.style.display = "block";
         var PNameTmp = elm.Name ? elm.Name : "";
         var detecting = elm.detect || elm.detect2 ? "block" : "none";
         var shindoStr = Math.round(elm.shindo * 10) / 10;
@@ -995,18 +1025,13 @@ function kmoniMapUpdate(dataTmp, type) {
         var popup_content = "<h3 class='PointName' style='border-bottom:solid 2px rgb(" + elm.rgb.join(",") + ")'>" + PNameTmp + "<span>" + elm.Type + connectStr + elm.Code + "</span></h3><h4 class='detecting' style='display:" + detecting + "'>地震検知中</h4><table><tr><td>震度</td><td class='PointInt'>" + shindoStr + "</td></tr><tr><td>PGA</td><td class='PointPGA'>" + pgaStr + "</td></tr></table>";
         points[elm.Code].marker.setPopupContent(popup_content);
 
+        markerCircleElm.classList.remove("strongDetectingMarker", "detectingMarker", "marker_Int", "marker_Int1", "marker_Int2", "marker_Int3", "marker_Int4", "marker_Int5-", "marker_Int5p", "marker_Int6-", "marker_Int6p", "marker_Int7", "marker_Int7p");
+
         if (elm.detect2) {
-          markerCircleElm.classList.remove("detectingMarker");
           markerCircleElm.classList.add("strongDetectingMarker");
         } else if (elm.detect) {
-          markerCircleElm.classList.remove("strongDetectingMarker");
           markerCircleElm.classList.add("detectingMarker");
-        } else {
-          markerCircleElm.classList.remove("strongDetectingMarker");
-          markerCircleElm.classList.remove("detectingMarker");
         }
-
-        markerCircleElm.classList.remove("marker_Int", "marker_Int1", "marker_Int2", "marker_Int3", "marker_Int4", "marker_Int5-", "marker_Int5p", "marker_Int6-", "marker_Int6p", "marker_Int7", "marker_Int7p");
 
         var IntTmp = shindoConvert(elm.shindo, 3);
         if (IntTmp) {

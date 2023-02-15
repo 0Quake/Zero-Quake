@@ -13,6 +13,7 @@ var data_M = document.getElementById("data_M");
 var data_depth = document.getElementById("data_depth");
 var data_center = document.getElementById("data_center");
 var data_comment = document.getElementById("data_comment");
+var areaLocation = { 100: ["43.23", "141.65"], 101: ["43.12", "141.55"], 102: ["42.99", "141.55"], 105: ["42.49", "140.35"], 106: ["42.12", "140.67"], 107: ["41.68", "140.43"], 110: ["42.42", 139.885], 115: ["43.08", "140.82"], 116: ["42.91", "140.77"], 117: ["43.14", "140.44"], 119: ["42.17", "139.51"], 120: ["43.80", "141.93"], 121: ["43.64", "141.89"], 122: ["43.34", "141.66"], 125: ["44.28", "142.16"], 126: ["43.62", "142.68"], 127: ["42.98", "142.40"], 130: ["44.88", "141.75"], 131: ["44.05", "141.86"], 135: ["45.02", "141.85"], 136: ["44.74", "142.76"], 139: ["45.25", "141.22"], 140: ["43.91", "144.17"], 141: ["44.02", "143.77"], 142: ["44.58", "142.96"], 145: ["42.65", "140.83"], 146: ["42.76", "142.13"], 150: ["42.73", "142.30"], 151: ["42.42", "142.50"], 152: ["41.94", "143.24"], 155: ["43.47", "143.75"], 156: ["42.81", "143.66"], 157: ["42.29", "143.30"], 160: ["43.64", "144.39"], 161: ["42.96", "144.07"], 165: ["44.11", "145.25"], 166: ["43.39", "145.28"], 167: ["43.37", "145.80"], 200: ["40.96", "140.43"], 201: ["40.63", "140.55"], 202: ["40.47", "141.17"], 203: ["41.43", "140.86"], 210: ["40.28", "141.62"], 211: ["39.36", "141.90"], 212: ["40.21", "141.30"], 213: ["38.99", "141.11"], 220: ["38.72", "141.52"], 221: ["37.96", "140.88"], 222: ["38.45", "141.44"], 230: ["40.02", "139.96"], 231: ["39.20", "139.91"], 232: ["40.06", "140.30"], 233: ["39.18", "140.65"], 240: ["39.01", 139.915], 241: ["38.74", "140.14"], 242: ["38.59", "140.37"], 243: ["38.05", "139.99"], 250: ["37.29", "140.63"], 251: ["37.68", "140.74"], 252: ["37.47", "139.83"], 300: ["36.78", "140.36"], 301: ["35.86", "140.14"], 310: ["37.02", "140.12"], 311: ["36.76", "140.13"], 320: ["36.69", "138.93"], 321: ["36.25", "139.46"], 330: ["36.12", "139.19"], 331: ["35.93", "139.82"], 332: ["36.01", "138.97"], 340: ["35.39", "140.24"], 341: ["35.84", "140.24"], 342: ["35.11", "139.84"], 350: ["35.68", "139.87"], 351: ["35.77", "139.35"], 352: ["35.80", "139.09"], 354: ["34.21", "139.13"], 355: ["34.69", "139.44"], 356: ["34.38", "139.26"], 357: ["33.89", "139.59"], 358: ["32.46", "139.76"], 359: ["26.63", "142.18"], 360: ["35.31", "139.25"], 361: ["35.48", "139.28"], 370: ["37.16", "138.09"], 371: ["37.42", "138.62"], 372: ["38.47", "139.25"], 375: ["37.82", "138.28"], 380: ["36.98", "137.63"], 381: ["36.74", "137.15"], 390: ["37.35", "137.24"], 391: ["36.65", "136.65"], 400: ["35.97", "136.13"], 401: ["35.55", "135.91"], 411: ["35.63", "138.53"], 412: ["35.79", "138.92"], 420: ["36.87", "138.63"], 421: ["36.43", "138.02"], 422: ["35.85", "137.70"], 430: ["36.27", "136.90"], 431: ["35.43", "137.13"], 432: ["35.44", "136.68"], 440: ["35.09", "138.95"], 441: ["35.36", "138.87"], 442: ["35.05", "138.08"], 443: ["34.84", "137.93"], 450: ["35.19", "137.81"], 451: ["34.87", "137.16"], 460: ["35.02", "136.67"], 461: ["34.55", "136.62"], 462: ["33.75", "136.01"], 500: ["35.22", "136.29"], 501: ["35.06", "136.12"], 510: ["35.53", "135.10"], 511: ["35.17", "135.42"], 520: ["34.97", "135.41"], 521: ["34.46", "135.62"], 530: ["35.55", "134.49"], 531: ["34.72", "134.87"], 532: ["34.99", "134.44"], 535: ["34.59", "135.02"], 540: ["34.40", "135.97"], 550: ["33.98", "135.37"], 551: ["33.51", "135.83"], 560: ["35.36", "134.36"], 562: ["35.48", "133.82"], 563: ["35.28", "133.49"], 570: ["35.00", "132.71"], 571: ["34.44", "131.87"], 575: ["36.21", "133.31"], 580: ["34.95", "134.06"], 581: ["34.86", "133.69"], 590: ["34.77", "132.46"], 591: ["34.70", "133.25"], 592: ["34.27", "132.92"], 600: ["34.04", "133.94"], 601: ["33.57", "134.30"], 610: ["34.46", "134.00"], 611: ["34.15", "133.84"], 620: ["34.25", "133.15"], 621: ["33.75", "132.79"], 622: ["32.96", "132.58"], 630: ["33.53", "133.81"], 631: ["33.53", "133.37"], 632: ["33.08", "133.10"], 700: ["34.50", "131.47"], 702: ["34.06", "131.16"], 703: ["33.94", "132.07"], 704: ["34.07", "131.75"], 710: ["33.61", "130.48"], 711: ["33.66", "131.06"], 712: ["33.69", "130.79"], 713: ["33.24", "130.55"], 720: ["33.21", "129.85"], 721: ["33.02", "130.18"], 730: ["33.24", "129.65"], 731: ["32.83", "129.85"], 732: ["32.67", "130.30"], 735: ["34.64", "129.40"], 736: ["33.85", "129.69"], 737: ["32.84", "129.06"], 740: ["32.85", "131.02"], 741: ["32.56", "130.68"], 742: ["32.24", "130.87"], 743: ["32.51", "130.05"], 750: ["33.72", "131.65"], 751: ["33.37", "131.53"], 752: ["32.97", "131.47"], 753: ["33.28", "131.15"], 760: ["32.47", "131.65"], 761: ["32.68", "131.20"], 762: ["32.00", "131.25"], 763: ["31.93", "131.01"], 770: ["32.01", "130.74"], 771: ["31.34", "130.95"], 774: ["29.22", "129.33"], 775: ["31.78", "129.79"], 776: ["30.41", "130.90"], 777: ["30.47", 130.195], 778: ["28.32", "129.94"], 779: ["27.05", "128.42"], 800: ["26.93", "127.94"], 801: ["26.16", "127.72"], 802: ["26.34", 126.815], 803: ["25.95", 131.305], 804: ["24.67", "124.70"], 805: ["24.34", "124.18"], 806: ["24.47", "123.00"], 807: ["24.43", "123.78"] };
 
 let url = new URL(window.location.href);
 let params = url.searchParams;
@@ -64,13 +65,18 @@ function Mapinit() {
       [90, -180],
       [-90, 180],
     ],
-    minZoom: 2,
+    center: [32.99125, 138.46],
+    zoom: 4,
+    minZoom: 3.5,
     maxZoom: 21,
-    zoomAnimation: true,
+    zoomAnimation: false,
     zoomSnap: 0.1,
     zoomDelta: 0.5,
     preferCanvas: false,
     zoomControl: false,
+    worldCopyJump: true,
+    inertia: false,
+    maxBoundsViscosity: 1,
   });
   map.setView([32.99125, 138.46], 4);
 
@@ -93,77 +99,76 @@ function Mapinit() {
     minNativeZoom: 0,
     maxNativeZoom: 11,
     maxZoom: 21,
-    attribution: "©JMA",
+    attribution: "JMA",
   });
   var tile2 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png", {
     minZoom: 0,
     minNativeZoom: 2,
     maxNativeZoom: 18,
     maxZoom: 21,
-    attribution: "©国土地理院",
+    attribution: "国土地理院",
   });
   var tile3 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg", {
     minZoom: 9,
     minNativeZoom: 9,
     maxNativeZoom: 18,
     maxZoom: 21,
-    attribution: "©国土地理院",
+    attribution: "国土地理院",
   });
   var tile4 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/blank/{z}/{x}/{y}.png", {
     minZoom: 0,
     minNativeZoom: 5,
     maxNativeZoom: 14,
     maxZoom: 21,
-    attribution: "©国土地理院",
+    attribution: "国土地理院",
   });
   var tile5 = L.tileLayer("http://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     minZoom: 0,
     minNativeZoom: 0,
     maxNativeZoom: 19,
     maxZoom: 21,
-    attribution: "©OpenStreetMap contributors",
+    attribution: "OpenStreetMap contributors",
   });
   var tile8 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png", {
     minZoom: 0,
     minNativeZoom: 0,
     maxNativeZoom: 18,
     maxZoom: 21,
-    attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">©国土地理院</a>',
+    attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">国土地理院</a>',
   });
 
   var overlay1 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/hillshademap/{z}/{x}/{y}.png", {
     minZoom: 2,
     maxZoom: 16,
-    attribution: "©国土地理院",
+    attribution: "国土地理院",
   });
   var overlay2 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/vbmd_colorrel/{z}/{x}/{y}.png", {
     minZoom: 11,
     maxZoom: 18,
-    attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">©国土地理院</a>',
+    attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">国土地理院</a>',
   });
   var overlay3 = L.tileLayer("https://disaportaldata.gsi.go.jp/raster/04_tsunami_newlegend_data/{z}/{x}/{y}.png", {
     minZoom: 7,
     maxZoom: 12,
-    attribution: "©国土地理院",
+    attribution: "国土地理院",
   });
   var overlay4 = L.tileLayer("https://disaportaldata.gsi.go.jp/raster/05_kyukeishakeikaikuiki/{z}/{x}/{y}.png", {
     minZoom: 7,
     maxZoom: 12,
-    attribution: "©国土地理院",
+    attribution: "国土地理院",
   });
   var overlay5 = L.tileLayer("https://disaportaldata.gsi.go.jp/raster/05_jisuberikeikaikuiki/{z}/{x}/{y}.png", {
     minZoom: 7,
     maxZoom: 12,
-    attribution: "©国土地理院",
+    attribution: "国土地理院",
   });
   var overlay6 = L.tileLayer("https://www.jma.go.jp/tile/jma/transparent-cities/{z}/{x}/{y}.png", {
     minZoom: 0,
     minNativeZoom: 2,
     maxNativeZoom: 11,
     maxZoom: 21,
-    attribution: "©JMA",
+    attribution: "JMA",
   });
-
   map.createPane("pane300").style.zIndex = 300;
   map.createPane("jsonMAPPane").style.zIndex = 210;
 
@@ -181,7 +186,7 @@ function Mapinit() {
           weight: 1,
           pane: "jsonMAPPane",
           interactive: false,
-          attribution: "©Natural Earth",
+          attribution: "Natural Earth",
           renderer: jsonMAP1Canvas,
         },
       });
@@ -199,6 +204,8 @@ function Mapinit() {
           fill: false,
           weight: 1,
           interactive: false,
+          attribution: "JMA",
+
           renderer: jsonMAP2Canvas,
         },
       });
@@ -219,7 +226,7 @@ function Mapinit() {
           fillOpacity: 1,
           weight: 1,
           pane: "jsonMAPPane",
-          attribution: "©JMA",
+          attribution: "JMA",
           renderer: jsonMAP1Canvas,
         },
         onEachFeature: function onEachFeature(feature, layer) {
@@ -244,17 +251,17 @@ function Mapinit() {
             "地理院 標準地図": tile8,
 
             "地理院 淡色地図": tile2,
-            "地理院 写真": tile3,
-            "地理院 白地図": tile4,
+            衛星写真: tile3,
+            白地図: tile4,
             OpenStreetMap: tile5,
           },
           {
-            "地理院 陰影起伏図": overlay1,
-            "地理院 火山基本図データ": overlay2,
-            "地理院 津波浸水想定 ハザードマップ": overlay3,
-            "地理院 土砂災害警戒区域（急傾斜地の崩壊） ハザードマップ": overlay4,
-            "地理院 土砂災害警戒区域（地すべり） ハザードマップ": overlay5,
-            "気象庁　境界線": overlay6,
+            陰影起伏図: overlay1,
+            火山基本図データ: overlay2,
+            "津波浸水想定 ハザードマップ": overlay3,
+            "土砂災害警戒区域（急傾斜地の崩壊） ハザードマップ": overlay4,
+            "土砂災害警戒区域（地すべり） ハザードマップ": overlay5,
+            境界線: overlay6,
           },
           {
             position: "topleft",
@@ -356,6 +363,28 @@ function jma_ListReq() {
         var urlTmp = "https://www.jma.go.jp/bosai/quake/data/" + elm.json;
         if (elm.eid == eid && !jmaURL.includes(urlTmp)) {
           jmaURL.push(urlTmp);
+        }
+      });
+
+      mapDraw();
+    })
+    .catch(function (err) {});
+}
+function jma_B_ListReq() {
+  fetch("https://www.jma.go.jp/bosai/estimated_intensity_map/data/list.json")
+    .then(function (res) {
+      return res.json();
+    })
+    .then(function (data) {
+      data.forEach(function (elm) {
+        if (elm.url.substring(0, 12) == eid) {
+          var urlTmp = "https://www.jma.go.jp/bosai/estimated_intensity_map/data/" + elm.url + "/{x}{y}.png";
+          jmaURL.push(urlTmp);
+
+          L.tileLayer(urlTmp, {
+            attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>',
+            variant: "toner-lite",
+          }).addTo(map_102);
         }
       });
 
@@ -571,6 +600,22 @@ function jma_Fetch(url) {
               newDiv.classList.add("WrapLevel2", "close");
               wrap[wrap.length - 1].appendChild(newDiv);
 
+              var pointLocation = areaLocation[String(elm2.Code)];
+              if (pointLocation) {
+                var color4 = shindoConvert(elm2.MaxInt, 2);
+
+                var divIcon = L.divIcon({
+                  html: '<div style="background:' + color4[0] + ";color:" + color4[1] + '">' + elm2.MaxInt + "</div>",
+                  className: "MaxShindoIcon",
+                  iconSize: [22, 22],
+                });
+
+                L.marker([Number(pointLocation[0]), Number(pointLocation[1])], { icon: divIcon, pane: "shadowPane" }).addTo(map);
+              }
+
+              gjmap.setStyle({
+                fill: false,
+              });
               var sectionTmp = sections.find(function (elmA) {
                 return elmA.name == elm2.Name;
               });
@@ -709,8 +754,6 @@ function narikakun_Fetch(url) {
 
                 gjmap.setStyle({
                   fill: false,
-                  fillColor: color2[0],
-                  fillOpacity: 1,
                 });
 
                 var sectionTmp = sections.find(function (elmA) {

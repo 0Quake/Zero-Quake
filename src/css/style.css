@@ -843,9 +843,7 @@ button:hover {
   transform: rotate(180deg);
 }
 #notification_Area.no_notification {
-  background: none;
-  outline: none;
-  height: 35px;
+  display: none;
 }
 
 .no_notification #notification_wrap,
@@ -854,8 +852,8 @@ button:hover {
 }
 .no_notification #plus_badge {
   position: static;
-  background-color: #787878;
-  border: solid 1px #ccc;
+  background-color: #444;
+  border: solid 1px #999;
 }
 
 .notification_item {

@@ -16,7 +16,7 @@
 .leaflet-control-zoom,
 a.leaflet-control-zoom-in,
 a.leaflet-control-zoom-out {
-  background: #333;
+  background: #444;
   color: #fff;
   border: solid 1px #999 !important;
 }
@@ -122,16 +122,6 @@ img.leaflet-control {
 .leaflet-popup-content td,
 .PointPopup table td {
   text-align: left;
-}
-.leaflet-container .leaflet-control-attribution.leaflet-control {
-  background: #444;
-  color: #ccc;
-  border-radius: 5px;
-  margin: 5px;
-  padding: 3px 8px;
-}
-.leaflet-container .leaflet-control-attribution.leaflet-control a {
-  color: #ccc;
 }
 .kmoniPointMarker {
   width: 25px;
@@ -320,15 +310,28 @@ div.marker-circle.marker_Int7p {
 .popup_show .PointPopup {
   display: block;
 }
-.leaflet-control-attribution.leaflet-control {
-  font-size: 12px;
-}
 .leaflet-map-pane svg {
   z-index: unset;
 }
 
-.leaflet-control-attribution.leaflet-control span::after {
+.leaflet-container .leaflet-control-attribution.leaflet-control {
+  background: #444;
+  color: #ccc;
+  border-radius: 5px;
+  margin: 5px;
+  padding: 3px 8px;
+  font-size: 12px;
+}
+.leaflet-container .leaflet-control-attribution.leaflet-control a {
+  display: none;
+}
+
+.leaflet-control-attribution.leaflet-control span {
+  font-size: 0;
+}
+.leaflet-control-attribution.leaflet-control::before {
   content: " Map:";
+  font-size: 12px;
 }
 .zoomLevel_1 .tsunamiElm {
   stroke-width: 20px;

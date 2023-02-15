@@ -185,6 +185,8 @@
       text-align: center;
       border-radius: 50%;
       transition: opacity 200ms;
+      font-size: 12px;
+
     }
 
     .zoomLevel_3 .ShindoIcon div,
@@ -197,6 +199,30 @@
       height: 23px;
       line-height: 23px;
       font-size: 18px;
+    }
+
+    .MaxShindoIcon div {
+      display: block;
+      opacity: 0;
+      width: 22px;
+      height: 22px;
+      border: solid 1px #000;
+      outline: solid 2px #FFF;
+      font-size: 16px;
+      line-height: 22px;
+      border-radius: 2px;
+      text-align: center;
+      transition: opacity 200ms;
+    }
+
+    .zoomLevel_1 .MaxShindoIcon div,
+    .zoomLevel_2 .MaxShindoIcon div {
+      opacity: 1;
+    }
+
+    .zoomLevel_3 .MaxShindoIcon div,
+    .zoomLevel_4 .MaxShindoIcon div {
+      opacity: 0;
     }
 
     #ShindoSample {
