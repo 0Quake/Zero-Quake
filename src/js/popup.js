@@ -84,7 +84,7 @@ var template = document.getElementById("EEWTemplate");
 var epiCenter = [];
 
 function EEWAlertUpdate(data) {
-  if (prepareing) return;
+  //if (prepareing) return;
   data.forEach((elm) => {
     var same = now_EEW.find(function (elm2) {
       return elm.report_id == elm2.report_id && elm.report_num == elm2.report_num;
@@ -99,6 +99,7 @@ function EEWAlertUpdate(data) {
 
       alertflgTmp = "(" + elm.alertflg + ")";
       if (!elm.alertflg) alertflgTmp = "";
+
       clone.querySelector(".alertflg").textContent = alertflgTmp;
 
       if (elm.alertflg == "警報") {
@@ -108,7 +109,6 @@ function EEWAlertUpdate(data) {
       }
 
       clone.querySelector(".report_num").textContent = elm.report_num;
-
       clone.querySelector(".calcintensity").textContent = elm.calcintensity ? elm.calcintensity : "?";
       clone.querySelector(".calcintensity").style.background = shindoConvert(elm.calcintensity, 2)[0];
       clone.querySelector(".calcintensity").style.color = shindoConvert(elm.calcintensity, 2)[1];
@@ -138,32 +138,33 @@ function EEWAlertUpdate(data) {
       }
       var EQMenu = document.getElementById("EEW-" + elm.report_id);
 
-      alertflgTmp = "(" + elm.alertflg + ")";
-      if (!elm.alertflg) alertflgTmp = "";
-      EQMenu.querySelector(".alertflg").textContent = alertflgTmp;
+      if (EQMenu) {
+        alertflgTmp = "(" + elm.alertflg + ")";
+        if (!elm.alertflg) alertflgTmp = "";
+        EQMenu.querySelector(".alertflg").textContent = alertflgTmp;
+        EQMenu.querySelector(".report_num").textContent = elm.report_num;
 
-      EQMenu.querySelector(".report_num").textContent = elm.report_num;
+        if (elm.alertflg == "警報") {
+          EQMenu.classList.add("keihou");
+          EQMenu.classList.remove("yohou");
+        } else if (elm.alertflg == "予報") {
+          EQMenu.classList.add("yohou");
+          EQMenu.classList.remove("keihou");
+        }
 
-      if (elm.alertflg == "警報") {
-        EQMenu.classList.add("keihou");
-        EQMenu.classList.remove("yohou");
-      } else if (elm.alertflg == "予報") {
-        EQMenu.classList.add("yohou");
-        EQMenu.classList.remove("keihou");
+        EQMenu.querySelector(".calcintensity").textContent = elm.calcintensity ? elm.calcintensity : "?";
+        EQMenu.querySelector(".calcintensity").style.background = shindoConvert(elm.calcintensity, 2)[0];
+        EQMenu.querySelector(".calcintensity").style.color = shindoConvert(elm.calcintensity, 2)[1];
+
+        EQMenu.querySelector(".is_final").style.display = elm.is_final ? "inline" : "none";
+        EQMenu.querySelector(".canceled").style.display = elm.is_cancel ? "flex" : "none";
+        EQMenu.querySelector(".region_name").textContent = elm.region_name ? elm.region_name : "震源地域不明";
+        EQMenu.querySelector(".origin_time").textContent = dateEncode(3, elm.origin_time);
+        EQMenu.querySelector(".magunitude").textContent = elm.magunitude ? elm.magunitude : "不明";
+        EQMenu.querySelector(".depth").textContent = elm.depth ? elm.depth : "不明";
+
+        EQMenu.querySelector(".distance").textContent = elm.distance ? Math.round(elm.distance) + "km" : "";
       }
-
-      EQMenu.querySelector(".calcintensity").textContent = elm.calcintensity ? elm.calcintensity : "?";
-      EQMenu.querySelector(".calcintensity").style.background = shindoConvert(elm.calcintensity, 2)[0];
-      EQMenu.querySelector(".calcintensity").style.color = shindoConvert(elm.calcintensity, 2)[1];
-
-      EQMenu.querySelector(".is_final").style.display = elm.is_final ? "inline" : "none";
-      EQMenu.querySelector(".canceled").style.display = elm.is_cancel ? "flex" : "none";
-      EQMenu.querySelector(".region_name").textContent = elm.region_name ? elm.region_name : "震源地域不明";
-      EQMenu.querySelector(".origin_time").textContent = dateEncode(3, elm.origin_time);
-      EQMenu.querySelector(".magunitude").textContent = elm.magunitude ? elm.magunitude : "不明";
-      EQMenu.querySelector(".depth").textContent = elm.depth ? elm.depth : "不明";
-
-      EQMenu.querySelector(".distance").textContent = elm.distance ? Math.round(elm.distance) + "km" : "";
     }
     /*
     if (elm.intensityAreas) {
@@ -267,7 +268,7 @@ function EEWAlertUpdate(data) {
 }
 
 function epiCenterUpdate(eid, latitude, longitude) {
-  if (prepareing) return;
+  //if (prepareing) return;
 
   eid = Number(eid);
 
@@ -280,6 +281,7 @@ function epiCenterUpdate(eid, latitude, longitude) {
       epicenterElm.latitude = latitude;
       epicenterElm.longitude = longitude;
     } else {
+      console.log(epicenterIcon);
       var ESMarker = L.marker([latitude, longitude], {
         icon: epicenterIcon,
         pane: "overlayPane",
@@ -497,6 +499,8 @@ document.getElementById("setting").addEventListener("click", function () {
 //汎用関数 map.js共用
 
 var notifications = [];
+var templateN = document.getElementById("notificationTemplate");
+
 function Show_notification(data) {
   document.getElementById("notification_Area").classList.remove("no_notification");
   notifications = notifications.concat(data);
@@ -508,9 +512,7 @@ function Show_notification(data) {
   notificationsTmp = notifications.reverse();
   removeChild(document.getElementById("notification_wrap"));
   notificationsTmp.forEach(function (elm) {
-    var template = document.getElementById("notificationTemplate");
-
-    var clone = template.content.cloneNode(true);
+    var clone = templateN.content.cloneNode(true);
     clone.querySelector(".notification_title").textContent = elm.title;
     clone.querySelector(".notification_content").textContent = elm.detail;
     clone.querySelector(".notification_time").textContent = dateEncode(3, elm.time);

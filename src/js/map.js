@@ -1127,21 +1127,24 @@ function SnetMapUpdate(dataTmp) {
 function psWaveEntry() {
   now_EEW.forEach(function (elm) {
     if (!elm.is_cancel && elm.arrivalTime) {
-      var countDownElm = document.getElementById("EEW-" + elm.report_id).querySelector(".countDown");
+      var countDownElm = document.getElementById("EEW-" + elm.report_id);
       if (countDownElm) {
-        var countDown = (elm.arrivalTime - (new Date() - Replay)) / 1000;
+        countDownElm = countDownElm.querySelector(".countDown");
+        if (countDownElm) {
+          var countDown = (elm.arrivalTime - (new Date() - Replay)) / 1000;
 
-        if (countDown > 0) {
-          var countDown_min = Math.floor(countDown / 60);
-          var countDown_sec = Math.floor(countDown % 60);
+          if (countDown > 0) {
+            var countDown_min = Math.floor(countDown / 60);
+            var countDown_sec = Math.floor(countDown % 60);
 
-          if (countDown_min == 0) {
-            countDownElm.textContent = countDown_sec;
+            if (countDown_min == 0) {
+              countDownElm.textContent = countDown_sec;
+            } else {
+              countDownElm.textContent = countDown_min + ":" + String(countDown_sec).padStart(2, "0");
+            }
           } else {
-            countDownElm.textContent = countDown_min + ":" + String(countDown_sec).padStart(2, "0");
+            countDownElm.textContent = "0";
           }
-        } else {
-          countDownElm.textContent = "0";
         }
       }
     }
@@ -1264,14 +1267,20 @@ function psWaveEntry() {
   });
 }
 function psWaveCalc(eid) {
+  console.log("a");
   var pswaveFind = psWaveList.find(function (elm2) {
     return elm2.id == eid;
   });
   if (pswaveFind) {
     var TimeTableTmp = pswaveFind.TimeTable;
     var SWmin;
+    var EQElm = psWaveList.find(function (elm) {
+      return elm.id == eid;
+    });
+
     var distance = Math.floor((new Date() - Replay - pswaveFind.data.originTime) / 1000);
-    distance += 1;
+
+    if (EQElm) distance += 1;
 
     var PRadius = 0;
     var SRadius = 0;
@@ -1374,7 +1383,7 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
   latitude = latitudeConvert(latitude);
   longitude = latitudeConvert(longitude);
   if (EQElm) {
-    if (EQElm.PCircleElm && EQElm.SCircleElm) {
+    if (EQElm.PCircleElm) {
       //EQElm.markerElm.setLatLng([data.latitude, data.longitude]);
 
       setTimeout(function () {
@@ -1425,11 +1434,13 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
       }).addTo(map);
 
       map.fitBounds(PCElm.getBounds());
-      map.setView([latitude, longitude, 10]);
+      map.setView([latitude, longitude, 9]);
 
       EQElm.PCircleElm = PCElm;
       EQElm.SCircleElm = SCElm;
       EQElm = psWaveList[psWaveList.length - 1];
+
+      psWaveCalc(report_id);
     }
   }
 
@@ -1440,7 +1451,7 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
         SWprogressValue.setAttribute("stroke-dashoffset", Number(157 - 157 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect))));
       } else {
         var SIcon = L.divIcon({
-          html: '<svg width="50" height="50"><circle id="SWprogressValue_' + report_id + '" class="SWprogressValue" cx="25" cy="25" r="22.5" fill="none" stroke-width="5px" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="' + Number(157 - 157 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect))) + '" transform="rotate(270 25 25)"/></svg>',
+          html: '<svg width="50" height="50"><circle cx="25" cy="25" r="23.5" fill="none" stroke-width="5px" stroke="#777"/><circle id="SWprogressValue_' + report_id + '" class="SWprogressValue" cx="25" cy="25" r="23.5" fill="none" stroke-width="5px" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="' + Number(157 - 157 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect))) + '"/></path></svg>',
           className: "SWaveProgress",
           iconSize: [50, 50],
           iconAnchor: [25, 25],
@@ -1455,7 +1466,7 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
 
     EQElm.firstDetect = nowDistance;
     var SIcon = L.divIcon({
-      html: '<svg width="50" height="50"><circle id="SWprogressValue_' + report_id + '" class="SWprogressValue" cx="25" cy="25" r="23.5" fill="none" stroke-width="5px" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="' + Number(157 - 157 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect))) + '"/></path></svg>',
+      html: '<svg width="50" height="50"><circle cx="25" cy="25" r="23.5" fill="none" stroke-width="5px" stroke="#777"/><circle id="SWprogressValue_' + report_id + '" class="SWprogressValue" cx="25" cy="25" r="23.5" fill="none" stroke-width="5px" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="' + Number(157 - 157 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect))) + '"/></path></svg>',
       className: "SWaveProgress",
       iconSize: [50, 50],
       iconAnchor: [25, 25],
@@ -1475,6 +1486,22 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
   if (EQElm2.distance && EEWPanelElm) {
     EEWPanelElm.querySelector(".PWave_value").setAttribute("stroke-dashoffset", 125.66 - 125.66 * Math.min(pRadius / 1000 / EQElm2.distance, 1));
     EEWPanelElm.querySelector(".SWave_value").setAttribute("stroke-dashoffset", 125.66 - 125.66 * Math.min(sRadius / 1000 / EQElm2.distance, 1));
+    var countDownElm = EEWPanelElm.querySelector(".countDown");
+
+    var countDown = (EQElm2.arrivalTime - (new Date() - Replay)) / 1000;
+
+    if (countDown > 0) {
+      var countDown_min = Math.floor(countDown / 60);
+      var countDown_sec = Math.floor(countDown % 60);
+
+      if (countDown_min == 0) {
+        countDownElm.textContent = countDown_sec;
+      } else {
+        countDownElm.textContent = countDown_min + ":" + String(countDown_sec).padStart(2, "0");
+      }
+    } else {
+      countDownElm.textContent = "0";
+    }
   }
 }
 
