@@ -484,7 +484,7 @@ function kmoniControl(data, date) {
     });
     var pgaMax = Math.max.apply(null, dataItemHistory);
     var pgaMin = Math.min.apply(null, dataItemHistory);
-    var detect = (pgaMax - pgaMin >= threshold02 || elm.pga > threshold03 || elm.shindo > threshold04) && elm.pga > 0.01;
+    var detect = (pgaMax - pgaMin >= threshold02 /*|| elm.pga > threshold03*/ || elm.shindo > threshold04) && elm.pga > 0.01;
 
     elm.detect = detect;
     elm.detect2 = detect && (pgaMax - pgaMin >= threshold03 || elm.shindo >= threshold04 || elm.detectCount >= 2);
@@ -540,6 +540,7 @@ function kmoniControl(data, date) {
                 action: "EQDetect",
                 data: EQD_ItemTmp,
               });
+              soundPlay(path.join(__dirname, "audio/EQDetect.mp3"));
             }
           }
         } else if (elm.detect2) {
@@ -1463,17 +1464,11 @@ function EEWAlert(data, first, update) {
 
     if (first) {
       if (data.alertflg == "警報") {
-        kmoniWorker.webContents.send("message2", {
-          action: "soundPlay",
-          data: path.join(__dirname, "audio/EEW1.mp3"),
-        });
+        soundPlay(path.join(__dirname, "audio/EEW1.mp3"));
 
         //    sound.play(path.join(__dirname, "audio/EEW1.mp3"));
       } else if (data.alertflg == "予報") {
-        kmoniWorker.webContents.send("message2", {
-          action: "soundPlay",
-          data: path.join(__dirname, "audio/EEW2.mp3"),
-        });
+        soundPlay(path.join(__dirname, "audio/EEW2.mp3"));
       }
       createWindow();
     }
@@ -2623,4 +2618,13 @@ function latitudeConvert(data) {
 }
 function geosailing(a, b, c, d) {
   with (Math) return acos(sin(a * (i = PI / 180)) * sin(c * i) + cos(a * i) * cos(c * i) * cos(b * i - d * i)) * 6371.008;
+}
+
+function soundPlay(path) {
+  if (kmoniWorker) {
+    kmoniWorker.webContents.send("message2", {
+      action: "soundPlay",
+      data: path,
+    });
+  }
 }
