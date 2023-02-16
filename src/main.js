@@ -844,28 +844,14 @@ function P2P_WS() {
         var data = message.utf8Data;
         switch (data.code) {
           case 551:
+            eqInfoUpdate(true);
+            setTimeout(function () {
+              eqInfoUpdate(true);
+            }, 1000);
             //地震情報
-
-            /*
-            eqInfoControl(
-              [
-                {
-                  eventId: data,
-                  category: "?",
-                  OriginTime: new Date(xml2.querySelector("Earthquake").getAttribute("Time")),
-                  epiCenter: xml2.querySelector("Earthquake").getAttribute("Epicenter"),
-                  M: xml2.querySelector("Earthquake").getAttribute("Magnitude"),
-                  maxI: xml2.querySelector("Earthquake").getAttribute("Intensity"),
-                  reportDateTime: new Date(xml2.querySelector("OriginTime").textContent),
-                  DetailURL: [],
-                },
-              ],
-              "jma"
-            );*/
-
             break;
           case 552:
-            //津波予報
+            //津波情報
             if (data.canceled) {
               data.forEach(function (elm) {
                 elm.canceled = true;
@@ -1525,7 +1511,7 @@ function EEWClear(source, code, reportnum, bypass) {
 //地震情報
 var eqInfo = { jma: [], usgs: [] };
 
-function eqInfoUpdate() {
+function eqInfoUpdate(disableRepeat) {
   //気象庁JSONリクエスト～パース
   var request = net.request("https://www.jma.go.jp/bosai/quake/data/list.json");
   request.on("response", (res) => {
@@ -1702,7 +1688,7 @@ function eqInfoUpdate() {
 
   request.end();
 
-  setTimeout(eqInfoUpdate, 10000);
+  if (!disableRepeat) setTimeout(eqInfoUpdate, 10000);
 }
 
 var narikakun_URLs = [];
