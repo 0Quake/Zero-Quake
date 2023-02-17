@@ -1713,9 +1713,15 @@ function EQI_narikakunList_Req(url, num, first) {
         }
         EQI_narikakunList_Req("https://ntool.online/api/earthquakeList?year=" + yearTmp + "&month=" + monthTmp, 10 - json.lists.length, false);
       } else {
-        narikakun_URLs.slice(0, 10).forEach(function (elm) {
-          EQI_narikakun_Req(elm);
-        });
+        var index = 0;
+        while (index < 10) {
+          if (jmaXML_Fetched.indexOf(url) === -1) {
+            jmaJSON_Fetched.push(narikakun_URLs[index]);
+            EQI_narikakun_Req(narikakun_URLs[index]);
+            index++;
+          }
+        }
+
         narikakun_URLs = [];
       }
     });
@@ -1766,8 +1772,14 @@ function EQI_narikakun_Req(url) {
   request.end();
 }
 
+var jmaXML_Fetched = [];
+var jmaJSON_Fetched = [];
+var nakn_Fetched = [];
+
 function JMAEQInfoFetch(url) {
   if (!url) return;
+  if (jmaXML_Fetched.indexOf(url) === -1) return;
+  jmaXML_Fetched.push(url);
   var request = net.request(url);
   request.on("response", (res) => {
     var dataTmp = "";
@@ -1779,7 +1791,9 @@ function JMAEQInfoFetch(url) {
       const xml = parser.parseFromString(dataTmp, "text/html");
       if (!xml) return false;
       var title = xml.title;
-      var cancel = xml.querySelector("InfoType").textContent == "取り消し";
+      var cancel = false;
+      var cancelElm = xml.querySelector("InfoType");
+      if (cancelElm) cancel = cancelElm.textContent == "取り消し";
 
       if (title == "震度速報" || title == "震源に関する情報" || title == "震源・震度に関する情報" || title == "遠地地震に関する情報" || title == "顕著な地震の震源要素更新のお知らせ") {
         //地震情報
