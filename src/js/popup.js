@@ -271,7 +271,6 @@ function epiCenterUpdate(eid, latitude, longitude) {
       var ESMarker = L.marker([latitude, longitude], {
         icon: epicenterIcon,
         pane: "overlayPane",
-        renderer: EQDetectCanvas,
       }).addTo(map);
 
       epiCenter.push({ eid: eid, markerElm: ESMarker, latitude: latitude, longitude: longitude });
@@ -383,10 +382,11 @@ function EQDetect(data) {
     //var EQmarker = L.marker([data.lat, data.lng]).addTo(map);
     var EQmarker = L.circle([data.lat, data.lng], {
       radius: data.Radius * 1000,
-      color: "blue",
-      fillColor: "#ffffff",
-      fillOpacity: 0.5,
-      className: "EQDetectCircle",
+      color: "#ffffff",
+      fill: false,
+      // fillColor: "#ffffff",
+      // fillOpacity: 0.5,
+      // className: "EQDetectCircle",
       renderer: EQDetectCanvas,
       interactive: false,
     }).addTo(map);

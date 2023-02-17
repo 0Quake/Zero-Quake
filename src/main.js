@@ -181,6 +181,7 @@ function createWindow() {
   //mainWindow.setMenuBarVisibility(false);
 
   mainWindow.webContents.on("did-finish-load", () => {
+    //replay("2023/02/17 19:38:35");
     //replay("2023/02/16 21:20:40");
     //replay("2023/02/07 18:41:20");
     //replay("2023/02/05 16:13:20");
@@ -458,11 +459,11 @@ var EQDetect_List = [];
 var EQDetectID = 0;
 
 var historyCount = 5; //比較する件数
-var threshold01 = 5; //検出とする観測点数
-var threshold02 = 0.075; //1次フラグ条件のPGA増加量[gal]
-var threshold03 = 0.5; //2次フラグ条件のPGA増加量[gal]
-var threshold04 = 1; //フラグ条件の震度
-var MargeRange = 30; //地震の同定範囲[km]
+var threshold01 = 3; //検出とする観測点数
+var threshold02 = 0.2; //1次フラグ条件のPGA増加量[gal]
+var threshold03 = 2; //2次フラグ条件のPGA増加量[gal]
+var threshold04 = 0.5; //フラグ条件の震度
+var MargeRange = 40; //地震の同定範囲[km]
 var time00 = 300000; //最初の検出~解除
 var time01 = 10000; //最後の検出~解除
 
@@ -484,10 +485,11 @@ function kmoniControl(data, date) {
     });
     var pgaMax = Math.max.apply(null, dataItemHistory);
     var pgaMin = Math.min.apply(null, dataItemHistory);
-    var detect = (pgaMax - pgaMin >= threshold02 /*|| elm.pga > threshold03*/ || elm.shindo > threshold04) && elm.pga > 0.01;
+    var detect = (elm.pga - pgaMin >= threshold02 /*|| elm.pga > threshold03*/ || elm.shindo > threshold04) && elm.pga > 0.01;
+    var detect2 = elm.pga - pgaMin >= threshold03 || elm.shindo >= threshold04 || elm.detectCount >= 2;
 
-    elm.detect = detect;
-    elm.detect2 = detect && (pgaMax - pgaMin >= threshold03 || elm.shindo >= threshold04 || elm.detectCount >= 2);
+    elm.detect = detect || detect2;
+    elm.detect2 = detect2;
     if (detect) {
       if (!elm.detectCount) elm.detectCount = 0;
       elm.detectCount++;
@@ -535,16 +537,19 @@ function kmoniControl(data, date) {
           EQD_ItemTmp.last_Detect = new Date();
 
           if (EQD_ItemTmp.Codes.length >= threshold01) {
+            if (!EQD_ItemTmp.showed) {
+              soundPlay(path.join(__dirname, "audio/EQDetect.mp3"));
+            }
             if (mainWindow) {
               mainWindow.webContents.send("message2", {
                 action: "EQDetect",
                 data: EQD_ItemTmp,
               });
-              soundPlay(path.join(__dirname, "audio/EQDetect.mp3"));
             }
+            EQD_ItemTmp.showed = true;
           }
         } else if (elm.detect2) {
-          EQDetect_List.push({ id: EQDetectID, lat: elm.Location.Latitude, lng: elm.Location.Longitude, Codes: [elm], Radius: 0, maxPGA: elm.pga, detectCount: 1, detect2Count: 1, last_Detect: new Date(), origin_Time: new Date() });
+          EQDetect_List.push({ id: EQDetectID, lat: elm.Location.Latitude, lng: elm.Location.Longitude, Codes: [elm], Radius: 0, maxPGA: elm.pga, detectCount: 1, detect2Count: 1, last_Detect: new Date(), origin_Time: new Date(), showed: false });
           EQDetectID++;
 
           //新報
@@ -2017,7 +2022,7 @@ function eqInfoControl(dataList, type) {
           if (data.DetailURL && data.DetailURL[0] !== "" && !EQElm.DetailURL.includes(data.DetailURL[0])) EQElm.DetailURL.push(data.DetailURL[0]);
           eqInfoAlert(EQElm, "jma", true);
         } else {
-          if (data.maxI == "[objectHTMLUnknownElement]") data.maxI = "?";
+          if (data.maxI == "[objectHTMLUnknownElement]") data.maxI = null;
           eqInfoTmp.push(data);
         }
 

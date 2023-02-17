@@ -49,6 +49,7 @@ img.leaflet-control {
   max-width: 100px;
 }
 
+.leaflet-jsonMAP1-pane,
 .leaflet-jsonMAP2-pane {
   pointer-events: none;
 }

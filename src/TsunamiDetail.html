@@ -281,10 +281,11 @@
         document.getElementById("revocation").style.display = "none"
         document.getElementById("no-data").style.display = "none"
 
-        document.getElementById("dateTime").innerText = dateEncode(3, new Date(request.data.issue.time))
-        if (request.data.revocation) {
+        console.log(request.data)
+        document.getElementById("dateTime").innerText = dateEncode(3, new Date(request.data.data.issue.time))
+        if (request.data.data.revocation) {
           document.getElementById("revocation").style.display = "block"
-        } else if (!request.data || request.data.areas.length == 0) {
+        } else if (!request.data.data || request.data.data.areas.length == 0) {
           document.getElementById("no-data").style.display = "table-row"
           document.getElementById("dateTime").style.display = "none"
 
@@ -292,8 +293,8 @@
         document.querySelectorAll(".add-content").forEach(function (elm) {
           elm.remove()
         })
-        request.data.areas.reverse()
-        request.data.areas.forEach(elm => {
+        request.data.data.areas.reverse()
+        request.data.data.areas.forEach(elm => {
           if (!elm.canceled) {
             var condition = ""
             var arrivalTime = "不明"

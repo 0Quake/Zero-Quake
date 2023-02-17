@@ -203,6 +203,7 @@ var sectionTable = [
   { Region: "沖縄県", section: "沖縄県与那国島" },
   { Region: "沖縄県", section: "沖縄県西表島" },
 ];
+var tsunamiLayerAdded = false;
 
 var psWaveList = [];
 var tsunamiAlertNow = false;
@@ -231,6 +232,9 @@ window.electronAPI.messageSend((event, request) => {
     psWaveEntry();
   } else if (request.action == "tsunamiUpdate") {
     if (gjmapT) {
+      if (!tsunamiLayerAdded) tsunamiLayer.addLayer(gjmapT);
+      tsunamiLayerAdded = true;
+
       gjmapT.setStyle({
         stroke: false,
       });
@@ -238,7 +242,7 @@ window.electronAPI.messageSend((event, request) => {
 
     Tsunami_MajorWarning = Tsunami_Warning = Tsunami_Watch = Tsunami_Yoho = false;
 
-    if (request.data.cancelled) {
+    if (request.data.data.cancelled) {
       document.getElementById("tsunamiWrap").style.display = "none";
 
       document.body.classList.remove("TsunamiMode");
@@ -249,7 +253,7 @@ window.electronAPI.messageSend((event, request) => {
 
       document.body.classList.add("TsunamiMode");
       var alertNowTmp = false;
-      request.data.areas.forEach(function (elm) {
+      request.data.data.areas.forEach(function (elm) {
         var tsunamiItem = tsunamiElm.find(function (elm2) {
           return elm2.name == elm.name;
         });
@@ -313,7 +317,7 @@ window.electronAPI.messageSend((event, request) => {
         }
       });
 
-      if (request.data.revocation) {
+      if (request.data.data.revocation) {
         document.getElementById("tsunamiWrap").style.display = "none";
         document.body.classList.remove("TsunamiMode");
         map.removeLayer(tsunamiLayer);
@@ -805,6 +809,7 @@ function init() {
           pane: "tsunamiPane",
           className: "tsunamiElm",
           attribution: "JMA",
+          interactive: true,
         },
         onEachFeature: function onEachFeature(feature, layer) {
           if (feature.properties && feature.properties.name) {
@@ -819,7 +824,6 @@ function init() {
         },
       });
 
-      tsunamiLayer.addLayer(gjmapT);
       window.electronAPI.messageReturn({
         action: "tsunamiReqest",
       });
@@ -1442,54 +1446,54 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
 
       psWaveCalc(report_id);
     }
-  }
 
-  if (EQElm.SIElm) {
-    if (SnotArrived) {
-      var SWprogressValue = document.getElementById("SWprogressValue_" + report_id);
-      if (SWprogressValue) {
-        SWprogressValue.setAttribute("stroke-dashoffset", Number(157 - 157 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect))));
+    if (EQElm.SIElm) {
+      if (SnotArrived) {
+        var SWprogressValue = document.getElementById("SWprogressValue_" + report_id);
+        if (SWprogressValue) {
+          SWprogressValue.setAttribute("stroke-dashoffset", Number(157 - 157 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect))));
+        } else {
+          var SIcon = L.divIcon({
+            html: '<svg width="50" height="50"><circle cx="25" cy="25" r="23.5" fill="none" stroke-width="5px" stroke="#777"/><circle id="SWprogressValue_' + report_id + '" class="SWprogressValue" cx="25" cy="25" r="23.5" fill="none" stroke-width="5px" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="' + Number(157 - 157 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect))) + '"/></path></svg>',
+            className: "SWaveProgress",
+            iconSize: [50, 50],
+            iconAnchor: [25, 25],
+          });
+          EQElm.SIElm.setIcon(SIcon);
+        }
       } else {
-        var SIcon = L.divIcon({
-          html: '<svg width="50" height="50"><circle cx="25" cy="25" r="23.5" fill="none" stroke-width="5px" stroke="#777"/><circle id="SWprogressValue_' + report_id + '" class="SWprogressValue" cx="25" cy="25" r="23.5" fill="none" stroke-width="5px" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="' + Number(157 - 157 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect))) + '"/></path></svg>',
-          className: "SWaveProgress",
-          iconSize: [50, 50],
-          iconAnchor: [25, 25],
-        });
-        EQElm.SIElm.setIcon(SIcon);
+        map.removeLayer(EQElm.SIElm);
       }
-    } else {
-      map.removeLayer(EQElm.SIElm);
+    } else if (SnotArrived) {
+      var SIElm;
+
+      EQElm.firstDetect = nowDistance;
+      var SIcon = L.divIcon({
+        html: '<svg width="50" height="50"><circle cx="25" cy="25" r="23.5" fill="none" stroke-width="5px" stroke="#777"/><circle id="SWprogressValue_' + report_id + '" class="SWprogressValue" cx="25" cy="25" r="23.5" fill="none" stroke-width="5px" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="' + Number(157 - 157 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect))) + '"/></path></svg>',
+        className: "SWaveProgress",
+        iconSize: [50, 50],
+        iconAnchor: [25, 25],
+      });
+
+      SIElm = L.marker([latitude, longitude], {
+        icon: SIcon,
+        pane: "PointsPane",
+        //renderer: PointsCanvas,
+        keyboard: false,
+      }).addTo(map);
+
+      EQElm.SIElm = SIElm;
     }
-  } else if (SnotArrived) {
-    var SIElm;
-
-    EQElm.firstDetect = nowDistance;
-    var SIcon = L.divIcon({
-      html: '<svg width="50" height="50"><circle cx="25" cy="25" r="23.5" fill="none" stroke-width="5px" stroke="#777"/><circle id="SWprogressValue_' + report_id + '" class="SWprogressValue" cx="25" cy="25" r="23.5" fill="none" stroke-width="5px" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="' + Number(157 - 157 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect))) + '"/></path></svg>',
-      className: "SWaveProgress",
-      iconSize: [50, 50],
-      iconAnchor: [25, 25],
-    });
-
-    SIElm = L.marker([latitude, longitude], {
-      icon: SIcon,
-      pane: "PointsPane",
-      //renderer: PointsCanvas,
-      keyboard: false,
-    }).addTo(map);
-
-    EQElm.SIElm = SIElm;
   }
 
   var EEWPanelElm = document.getElementById("EEW-" + report_id);
-  if (EQElm2.distance && EEWPanelElm) {
+  if (EQElm2.distance && EQElm2.arrivalTime && EEWPanelElm) {
     EEWPanelElm.querySelector(".PWave_value").setAttribute("stroke-dashoffset", 125.66 - 125.66 * Math.min(pRadius / 1000 / EQElm2.distance, 1));
     EEWPanelElm.querySelector(".SWave_value").setAttribute("stroke-dashoffset", 125.66 - 125.66 * Math.min(sRadius / 1000 / EQElm2.distance, 1));
     var countDownElm = EEWPanelElm.querySelector(".countDown");
 
     var countDown = (EQElm2.arrivalTime - (new Date() - Replay)) / 1000;
-
+    console.log(EQElm2);
     if (countDown > 0) {
       var countDown_min = Math.floor(countDown / 60);
       var countDown_sec = Math.floor(countDown % 60);
