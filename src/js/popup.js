@@ -4,7 +4,6 @@ var Replay = 0;
 var ICT_JST = 0;
 var config;
 //var AreaForecastLocalE;
-var prepareing = true;
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "EEWAlertUpdate") {
     EEWAlertUpdate(request.data);
@@ -50,15 +49,6 @@ window.addEventListener("load", function () {
     .then(function (json) {
       document.getElementById("kmoni_Message").innerHTML = json.message;
     });
-  /*
-  fetch("./Resource/AreaForecastLocalE.json")
-    .then(function (res) {
-      return res.json();
-    })
-    .then(function (json) {
-      AreaForecastLocalE = json;
-      prepareing = false;
-    });*/
   setInterval(function () {
     document.getElementById("PC_TIME").textContent = dateEncode(3, new Date());
   }, 200);
@@ -84,7 +74,6 @@ var template = document.getElementById("EEWTemplate");
 var epiCenter = [];
 
 function EEWAlertUpdate(data) {
-  //if (prepareing) return;
   data.forEach((elm) => {
     var same = now_EEW.find(function (elm2) {
       return elm.report_id == elm2.report_id && elm.report_num == elm2.report_num;
@@ -268,8 +257,6 @@ function EEWAlertUpdate(data) {
 }
 
 function epiCenterUpdate(eid, latitude, longitude) {
-  //if (prepareing) return;
-
   eid = Number(eid);
 
   if (map) {
@@ -281,7 +268,6 @@ function epiCenterUpdate(eid, latitude, longitude) {
       epicenterElm.latitude = latitude;
       epicenterElm.longitude = longitude;
     } else {
-      console.log(epicenterIcon);
       var ESMarker = L.marker([latitude, longitude], {
         icon: epicenterIcon,
         pane: "overlayPane",
@@ -310,8 +296,6 @@ function epiCenterUpdate(eid, latitude, longitude) {
   longitudeTmp = longitude;
 }
 function epiCenterClear(eid) {
-  if (prepareing) return;
-
   eid = Number(eid);
   if (map) {
     var epicenterElm = epiCenter.find(function (elm2) {
