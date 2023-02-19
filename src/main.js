@@ -178,6 +178,7 @@ function createWindow() {
   //mainWindow.setMenuBarVisibility(false);
 
   mainWindow.webContents.on("did-finish-load", () => {
+    replay("2023/02/19 1:44:10");
     //replay("2023/02/17 19:38:35");
     //replay("2023/02/16 21:20:40");
     //replay("2023/02/07 18:41:20");
@@ -455,11 +456,11 @@ var kmoniDataHistory = [];
 var EQDetect_List = [];
 var EQDetectID = 0;
 
-var historyCount = 5; //比較する件数
-var threshold01 = 3; //検出とする観測点数
-var threshold02 = 0.2; //1次フラグ条件のPGA増加量[gal]
+var historyCount = 10; //比較する件数
+var threshold01 = 5; //検出とする観測点数
+var threshold02 = 0.03; //1次フラグ条件のPGA増加量[gal]
 var threshold03 = 2; //2次フラグ条件のPGA増加量[gal]
-var threshold04 = 1; //フラグ条件の震度
+var threshold04 = 0.5; //フラグ条件の震度
 var MargeRange = 30; //地震の同定範囲[km]
 var time00 = 300000; //最初の検出~解除
 var time01 = 10000; //最後の検出~解除
@@ -481,20 +482,32 @@ function kmoniControl(data, date) {
       return elm2[index].pga;
     });
     //var pgaMax = Math.max.apply(null, dataItemHistory);
+    var oneBeforeDetect;
+    if (kmoniDataHistory.length > 0) {
+      var oneBefore = kmoniDataHistory[kmoniDataHistory.length - 1][index];
+      var oneBeforeDetect = oneBefore.detect;
+    }
     var pgaMin = Math.min.apply(null, dataItemHistory);
-    var detect = (elm.pga - pgaMin >= threshold02 /*|| elm.pga > threshold03*/ || elm.shindo > threshold04) && elm.pga > 0.01;
-    var detect2 = (elm.pga - pgaMin >= threshold03 || elm.shindo >= threshold04) && elm.detectCount >= 2;
+    var detect = elm.pga - pgaMin >= threshold02 || elm.UpCount > 1 || (oneBeforeDetect && elm.pga > 0.1);
+    var detect2 = elm.pga - pgaMin >= threshold03 || elm.shindo >= threshold04 || elm.detectCount > 1;
 
     elm.detect = detect || detect2;
     elm.detect2 = detect && detect2;
-  });
-
-  data.forEach(function (elm, index) {
     if (elm.detect) {
       if (!elm.detectCount) elm.detectCount = 0;
       elm.detectCount++;
+    } else {
+      elm.detectCount = 0;
     }
-    if (!EEWNow) {
+
+    if (kmoniDataHistory.length > 0 && elm.pga - oneBefore.pga > 0) {
+      elm.UpCount++;
+    } else {
+      elm.UpCount = 0;
+    }
+  });
+  if (!EEWNow) {
+    data.forEach(function (elm, index) {
       if (elm.detect) {
         var EQD_ItemTmp = EQDetect_List.find(function (elm2) {
           if (geosailing(elm.Location.Latitude, elm.Location.Longitude, elm2.lat, elm2.lng) - elm2.Radius <= MargeRange) {
@@ -530,21 +543,20 @@ function kmoniControl(data, date) {
             EQD_ItemTmp.showed = true;
           }
         } else if (elm.detect2) {
-          EQDetect_List.push({ id: EQDetectID, lat: elm.Location.Latitude, lng: elm.Location.Longitude, Codes: [elm], Radius: 0, maxPGA: elm.pga, detectCount: 1, detect2Count: 1, last_Detect: new Date(), origin_Time: new Date(), showed: false });
+          EQDetect_List.push({ id: EQDetectID, lat: elm.Location.Latitude, lng: elm.Location.Longitude, Codes: [elm], Radius: 0, maxPGA: elm.pga, detectCount: 1, detect2Count: 1, UpCount: 0, last_Detect: new Date(), origin_Time: new Date(), showed: false });
           EQDetectID++;
 
           //新報
         }
       } else {
-        elm.detectCount = 0;
         EQDetect_List.forEach(function (elm2) {
           elm2.Codes = elm2.Codes.filter(function (elm3) {
             return elm3.Code !== elm.Code;
           });
         });
       }
-    }
-  });
+    });
+  }
   kmoniPointsDataTmp = {
     action: "kmoniUpdate",
     Updatetime: new Date(date),
@@ -796,21 +808,29 @@ function SnetRequest() {
         if (!json || !json.features || !Array.isArray(json.features)) return false;
         var dateTime = json.features.sort((a, b) => b.attributes.msilstarttime - a.attributes.msilstarttime)[0].attributes.msilstarttime;
         if (msil_lastTime < dateTime) {
-          Request({ method: "GET", url: "https://www.msil.go.jp/arcgis/rest/services/Msil/DisasterPrevImg1/ImageServer//exportImage?f=image&time=" + dateTime + "%2C" + dateTime + "&bbox=13409547.546603577%2C2713376.239114911%2C16907305.960932314%2C5966536.162931148&size=400%2C400", encoding: null }, (error, response, body) => {
-            // エラーチェック
-            if (error !== null) {
-              NetworkError(error, "海しる");
-              return false;
-            }
-            if (kmoniWorker) {
-              var ReqTime = new Date(dateTime);
-              kmoniWorker.webContents.send("message2", {
-                action: "SnetImgUpdate",
-                data: "data:image/png;base64," + body.toString("base64"),
-                date: ReqTime,
-              });
-            }
+          var request = net.request("https://www.msil.go.jp/arcgis/rest/services/Msil/DisasterPrevImg1/ImageServer//exportImage?f=image&time=" + dateTime + "%2C" + dateTime + "&bbox=13409547.546603577%2C2713376.239114911%2C16907305.960932314%2C5966536.162931148&size=400%2C400");
+          request.on("response", (res) => {
+            var dataTmp = [];
+            res.on("data", (chunk) => {
+              dataTmp.push(chunk);
+            });
+            res.on("end", () => {
+              var bufTmp = Buffer.concat(dataTmp);
+              if (kmoniWorker) {
+                var ReqTime = new Date(dateTime);
+                kmoniWorker.webContents.send("message2", {
+                  action: "SnetImgUpdate",
+                  data: "data:image/png;base64," + bufTmp.toString("base64"),
+                  date: ReqTime,
+                });
+              }
+            });
           });
+          request.on("error", (error) => {
+            NetworkError(error, "海しる");
+          });
+          request.end();
+
           msil_lastTime = dateTime;
         }
       });
