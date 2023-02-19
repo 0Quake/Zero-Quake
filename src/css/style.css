@@ -19,7 +19,7 @@
 
 :root {
   --IntTheme_Q_BgColor: #bfbfbf;
-  --IntTheme_0_BgColor: #bfbfbf;
+  --IntTheme_0_BgColor: #575e6f;
   --IntTheme_1_BgColor: #79a8b3;
   --IntTheme_2_BgColor: #3685e0;
   --IntTheme_3_BgColor: #4db051;
@@ -32,7 +32,7 @@
   --IntTheme_7p_BgColor: #c400de;
 
   --IntTheme_Q_color: #444;
-  --IntTheme_0_color: #444;
+  --IntTheme_0_color: #ccc;
   --IntTheme_1_color: #444;
   --IntTheme_2_color: #fff;
   --IntTheme_3_color: #fff;

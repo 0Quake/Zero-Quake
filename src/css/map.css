@@ -189,10 +189,10 @@ div.marker-circle.marker_Int4 {
   content: "4";
   color: var(--IntTheme_4_color);
 }
-div.marker-circle.marker_Int5- {
-  background: var(--IntTheme_5-_BgColor) !important;
+div.marker-circle.marker_Int5m {
+  background: var(--IntTheme_5m_BgColor) !important;
 }
-.marker_Int5-::before {
+.marker_Int5m::before {
   content: "5-";
   color: var(--IntTheme_5-_color);
 }
@@ -203,10 +203,10 @@ div.marker-circle.marker_Int5p {
   content: "5+";
   color: var(--IntTheme_5p_color);
 }
-div.marker-circle.marker_Int6- {
-  background: var(--IntTheme_6-_BgColor) !important;
+div.marker-circle.marker_Int6m {
+  background: var(--IntTheme_6m_BgColor) !important;
 }
-.marker_Int6-::before {
+.marker_Int6m::before {
   content: "6-";
   color: var(--IntTheme_6-_color);
 }

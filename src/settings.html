@@ -14,18 +14,18 @@
         body {
             overflow: hidden;
         }
-        
+
         #tab1_wrap {
             display: flex;
             height: 100%;
             overflow: hidden;
         }
-        
+
         .EEWMode #tab1_wrap,
         .TsunamiMode #tab1_wrap {
             height: 100%;
         }
-        
+
         #tab1_bar {
             min-width: 250px;
             width: auto;
@@ -33,41 +33,41 @@
             writing-mode: unset;
             text-orientation: unset;
         }
-        
+
         .tabmenu {
             display: block;
             padding: 0.5em;
         }
-        
+
         .active_tabmenu {
             border-left: solid 2px rgb(203, 27, 27);
             background: rgba(255, 0, 0, 0.2);
             color: #fff;
         }
-        
+
         .active_tabmenu:hover {
             color: #fff;
         }
-        
+
         #softName {
             font-size: 25px;
             line-height: 50px;
             text-align: center;
         }
-        
+
         #softName img {
             height: 50px;
             width: 50px;
             vertical-align: middle;
             margin: 0 10px;
         }
-        
+
         div .tabcontent {
             height: 100%;
             overflow: auto;
             padding: 20px 20px 60px 20px !important;
         }
-        
+
         #BtnWrap {
             position: absolute;
             left: 0;
@@ -80,7 +80,7 @@
             text-align: right;
             font-size: 0;
         }
-        
+
         #BtnWrap button {
             height: 30px;
             margin: 5px;
@@ -91,19 +91,35 @@
             color: #fff;
             transition: 200ms;
         }
-        
+
         #BtnWrap button:hover {
             background: rgb(83, 0, 0);
         }
-        
+
         #mapcontainer {
             width: 100%;
             height: 300px;
             background: rgb(39, 32, 32);
         }
-        
+
         .ActiveSaibun {
             fill: rgb(167, 40, 40);
+        }
+
+        #smallWrap {
+            text-align: center;
+        }
+
+        h3 {
+            margin: 2em 0 0.5em 0.5em;
+        }
+
+        h4 {
+            margin: 0.5em 0 0 1.5em;
+        }
+
+        .contentWrap {
+            margin: 0 0 0 2.5em;
         }
     </style>
 </head>
@@ -139,110 +155,133 @@
 
                 <h2 id="softName"><img src="./img/icon.svg">Zero Quake V<span id="softVersion">0.0.0</span></h2>
 
-                <div>
+                <div id="smallWrap">
                     <small>&copy;2022 Acialnat</small>
-                    <p>ライセンス：GNU General Public License v2.0</p>
+                    <p>ライセンス：<a href="../LICENSE.md" target="_blank">GNU General Public License v2.0</a></p>
                     <p>このソフトウェアは無保証です。</p>
                 </div>
 
                 <div>
                     <h3>取得する情報</h3>
                     <h4>気象庁</h4>
-                    <ul>
-                        <li>緊急地震速報(予報・警報)</li>
-                        <li>震度速報</li>
-                        <li>地震情報（震源に関する情報） </li>
-                        <li>地震情報（震源・震度に関する情報） </li>
-                        <li>地震情報（遠地地震に関する情報） </li>
-                        <li>地震情報（顕著な地震の震源要素更新のお知らせ） </li>
-                        <li>大津波警報・津波警報・注意報・予報 </li>
-                        <li>津波情報 </li>
-                    </ul>
+                    <div class="contentWrap">
+                        <ul>
+                            <li>緊急地震速報(予報・警報)</li>
+                            <li>地震情報（震度速報／震源に関する情報／震源・震度に関する情報／遠地地震に関する情報／顕著な地震の震源要素更新のお知らせ） </li>
+                            <li>大津波警報／津波警報／津波注意報／津波予報／津波情報／沖合の津波観測に関する情報 </li>
+                            <li>津波情報 </li>
+                        </ul>
+                    </div>
                     <h4>防災科学技術研究所</h4>
-                    <ul>
-                        <li>リアルタイム 揺れ情報</li>
-                        <li>長周期地震動情報</li>
-                    </ul>
+                    <div class="contentWrap">
+
+                        <ul>
+                            <li>リアルタイム 揺れ情報</li>
+                            <li>長周期地震動情報</li>
+                        </ul>
+                    </div>
                     <h4>USGS(アメリカ地質調査所)</h4>
-                    <ul>
-                        <li>Earthquake Catalog</li>
-                    </ul>
+                    <div class="contentWrap">
+
+                        <ul>
+                            <li>Earthquake Catalog</li>
+                        </ul>
+                    </div>
                 </div>
 
                 <div>
-                    <h3>情報の取得先</h3>
+                    <h3>情報源</h3>
 
                     <h4>緊急地震速報</h4>
-                    <ul>
-                        <li>強震モニタ <a href="kmoni.bosai.go.jp">&copy;防災科学技術研究所</a></li>
-                        <li>長周期地震動モニタ <a href="lmoni.bosai.go.jp">&copy;防災科学技術研究所</a></li>
-                        <li>Yahoo 強震モニタ <a href="https://typhoon.yahoo.co.jp/weather/jp/earthquake/kyoshin/">&copy;防災科学技術研究所／Yahoo</a></li>
-                        <li>P2P 地震情報 API <a href="https://www.p2pquake.net/json_api_v2/">&copy;@p2pquake_takuya</a></li>
-                        <li>(SignalNow X 連携)</li>
-                    </ul>
+                    <div class="contentWrap">
+                        <ul>
+                            <li>強震モニタ <a href="kmoni.bosai.go.jp">&copy;防災科学技術研究所</a></li>
+                            <li>長周期地震動モニタ <a href="lmoni.bosai.go.jp">&copy;防災科学技術研究所</a></li>
+                            <li>Yahoo 強震モニタ <a href="https://typhoon.yahoo.co.jp/weather/jp/earthquake/kyoshin/">&copy;防災科学技術研究所／Yahoo Japan</a></li>
+                            <li>P2P 地震情報 API <a href="https://www.p2pquake.net/json_api_v2/">&copy;@p2pquake_takuya</a></li>
+                            <li>(SignalNow X 連携)</li>
+                        </ul>
+                    </div>
 
                     <h4>震度速報／地震情報(震源に関する情報／震度・震源に関する情報／遠地地震に関する情報／顕著な地震の震源要素更新のお知らせ)</h4>
-                    <ul>
-                        <li>気象庁ホームページ <a href="https://www.jma.go.jp/bosai/map.html?contents=earthquake_map">&copy;気象庁</a></li>
-                        <li>気象庁防災情報XML <a href="https://xml.kishou.go.jp/xmlpull.html">&copy;気象庁</a></li>
-                        <li>地震情報 API <a href="https://dev.narikakun.net/doc/earthquake">&copy;@narikakun</a></li>
-                    </ul>
+                    <div class="contentWrap">
+                        <ul>
+                            <li>気象庁ホームページ <a href="https://www.jma.go.jp/bosai/map.html?contents=earthquake_map">&copy;気象庁</a></li>
+                            <li>気象庁防災情報XML <a href="https://xml.kishou.go.jp/xmlpull.html">&copy;気象庁</a></li>
+                            <li>地震情報 API <a href="https://dev.narikakun.net/doc/earthquake">&copy;@narikakun</a></li>
+                        </ul>
+                    </div>
 
                     <h4>地震情報(Earthquake Catalog)</h4>
-                    <ul>
-                        <li>FDSN Web Service <a href="https://earthquake.usgs.gov/fdsnws/event/1/">USGS</a></li>
-                    </ul>
+                    <div class="contentWrap">
+                        <ul>
+                            <li>FDSN Web Service <a href="https://earthquake.usgs.gov/fdsnws/event/1/">&copy;USGS</a></li>
+                        </ul>
+                    </div>
 
                     <h4>大津波警報／津波警報／津波注意報</h4>
-                    <ul>
-                        <li>P2P 地震情報 API <a href="https://www.p2pquake.net/json_api_v2/">&copy;@p2pquake_takuya</a></li>
-                        <li>気象庁防災情報XML<a href="https://xml.kishou.go.jp/xmlpull.html">&copy;気象庁</a></li>
-                    </ul>
+                    <div class="contentWrap">
+                        <ul>
+                            <li>P2P 地震情報 API <a href="https://www.p2pquake.net/json_api_v2/">&copy;@p2pquake_takuya</a></li>
+                            <li>気象庁防災情報XML<a href="https://xml.kishou.go.jp/xmlpull.html">&copy;気象庁</a></li>
+                        </ul>
+                    </div>
                     <h4>津波情報／津波予報</h4>
-                    <ul>
-                        <li>気象庁防災情報XML <a href="https://xml.kishou.go.jp/xmlpull.html">&copy;気象庁</a></li>
-                    </ul>
+                    <div class="contentWrap">
+                        <ul>
+                            <li>気象庁防災情報XML <a href="https://xml.kishou.go.jp/xmlpull.html">&copy;気象庁</a></li>
+                        </ul>
+                    </div>
                     <h4>P 波・S 波 予報円</h4>
-                    緊急地震速報から得られる、地震発生時刻・深さ・震源の緯度・経度をもとに
-                    <a href="https://www.data.jma.go.jp/eqev/data/bulletin/catalog/appendix/trtime/trt_j.html">JMA2001 走時表</a> を利用して計算
+                    <div class="contentWrap">
+                        緊急地震速報から得られる、地震発生時刻・深さ・震源の緯度・経度をもとに
+                        <a href="https://www.data.jma.go.jp/eqev/data/bulletin/catalog/appendix/trtime/trt_j.html">JMA2001 走時表</a> を利用して計算
+                    </div>
 
                     <h3>地図データ</h3>
                     <h4>「オフラインマップ」</h4>
-                    <ul>
-                        <li>国内：気象庁 予報区等 GIS データ &copy; <a href="https://www.data.jma.go.jp/developer/gis.html">気象庁</a></li>
-                        <li>国外：ne_110m_admin_0_countries &copy; <a href="https://www.naturalearthdata.com/downloads/110m-cultural-vectors/">Natural Earth</a></li>
-                        <li> (mapshaperで単純化)</li>
-                    </ul>
+                    <div class="contentWrap">
+                        <ul>
+                            <li>国内：気象庁 予報区等 GIS データ &copy; <a href="https://www.data.jma.go.jp/developer/gis.html">気象庁</a></li>
+                            <li>国外：ne_110m_admin_0_countries &copy; <a href="https://www.naturalearthdata.com/downloads/110m-cultural-vectors/">Natural Earth</a></li>
+                        </ul>
+                        <span> (mapshaperで単純化)</span>
+                    </div>
 
                     <h4>タイル地図</h4>
-                    <ul>
-                        <li>「気象庁」&copy; 気象庁</li>
-                        <li> 「地理院 標準地図」 <a href="https://maps.gsi.go.jp/development/ichiran.html">&copy;国土地理院</a></li>
-                        <li>「地理院 淡色地図」 <a href="https://maps.gsi.go.jp/development/ichiran.html">&copy;国土地理院</a></li>
-                        <li>「地理院 写真」 <a href="https://maps.gsi.go.jp/development/ichiran.html">&copy;国土地理院</a></li>
-                        <li>「地理院 白地図」 <a href="https://maps.gsi.go.jp/development/ichiran.html">&copy;国土地理院</a></li>
-                        <li>「OpenStreetMap」 <a href="https://www.openstreetmap.org/copyright/">&copy;OpenStreetMap contributors</a></li>
-                    </ul>
+                    <div class="contentWrap">
+                        <ul>
+                            <li>「気象庁」&copy; 気象庁</li>
+                            <li> 「地理院 標準地図」 <a href="https://maps.gsi.go.jp/development/ichiran.html">&copy;国土地理院</a></li>
+                            <li>「地理院 淡色地図」 <a href="https://maps.gsi.go.jp/development/ichiran.html">&copy;国土地理院</a></li>
+                            <li>「地理院 写真」 <a href="https://maps.gsi.go.jp/development/ichiran.html">&copy;国土地理院</a></li>
+                            <li>「地理院 白地図」 <a href="https://maps.gsi.go.jp/development/ichiran.html">&copy;国土地理院</a></li>
+                            <li>「OpenStreetMap」 <a href="https://www.openstreetmap.org/copyright/">&copy;OpenStreetMap contributors</a></li>
+                        </ul>
+                    </div>
                     <h4>オーバーレイ</h4>
-                    <ul>
-                        <li>「地理院 陰影起伏図」 <a href="https://maps.gsi.go.jp/development/ichiran.html">&copy;国土地理院</a></li>
-                        <li>「地理院 火山基本図データ」 <a href="https://maps.gsi.go.jp/development/ichiran.html">&copy;国土地理院</a></li>
-                        <li>「地理院 津波浸水想定 ハザードマップ」 <a href="https://maps.gsi.go.jp/development/ichiran.html">&copy;国土地理院</a></li>
-                        <li>「地理院 土砂災害警戒区域（急傾斜地の崩壊） ハザードマップ」 <a href="https://maps.gsi.go.jp/development/ichiran.html">&copy;国土地理院</a></li>
-                        <li>「地理院 土砂災害警戒区域（地すべり） ハザードマップ」 <a href="https://maps.gsi.go.jp/development/ichiran.html">&copy;国土地理院</a></li>
-                        <li>「気象庁　境界線」 <a href="https://www.jma.go.jp/bosai/map.html#contents=earthquake_map">&copy;気象庁</a></li>
-                    </ul>
+                    <div class="contentWrap">
+                        <ul>
+                            <li>「地理院 陰影起伏図」 <a href="https://maps.gsi.go.jp/development/ichiran.html">&copy;国土地理院</a></li>
+                            <li>「地理院 火山基本図データ」 <a href="https://maps.gsi.go.jp/development/ichiran.html">&copy;国土地理院</a></li>
+                            <li>「地理院 津波浸水想定 ハザードマップ」 <a href="https://maps.gsi.go.jp/development/ichiran.html">&copy;国土地理院</a></li>
+                            <li>「地理院 土砂災害警戒区域（急傾斜地の崩壊） ハザードマップ」 <a href="https://maps.gsi.go.jp/development/ichiran.html">&copy;国土地理院</a></li>
+                            <li>「地理院 土砂災害警戒区域（地すべり） ハザードマップ」 <a href="https://maps.gsi.go.jp/development/ichiran.html">&copy;国土地理院</a></li>
+                            <li>「気象庁　境界線」 <a href="https://www.jma.go.jp/bosai/map.html#contents=earthquake_map">&copy;気象庁</a></li>
+                        </ul>
+                    </div>
 
                     <h3>参考資料</h3>
-                    <ul>
-                        <li>
-                            <a href="https://qiita.com/NoneType1/items/a4d2cf932e20b56ca444">多項式補間を使用して強震モニタ画像から数値データを決定する</a>@NoneType1
-                        </li>
-                        <li>
-                            <a href="https://qiita.com/ingen084/items/7e91f8da2996972ac586">強震モニタの画像から震度と地点を特定するまで</a>@ingen084
-                        </li>
-
-                    </ul>
+                    <div class="contentWrap">
+                        <ul>
+                            <li>
+                                <a href="https://qiita.com/NoneType1/items/a4d2cf932e20b56ca444">多項式補間を使用して強震モニタ画像から数値データを決定する</a>@NoneType1
+                            </li>
+                            <li>
+                                <a href="https://qiita.com/ingen084/items/7e91f8da2996972ac586">強震モニタの画像から震度と地点を特定するまで</a>@ingen084
+                            </li>
+                        </ul>
+                    </div>
 
 
                 </div>
@@ -276,7 +315,7 @@
                 document.getElementById("latitude").value = setting.home.latitude
                 document.getElementById("longitude").value = setting.home.longitude
                 document.getElementById("EEW_Voice").value = setting.notice.voice.EEW
-                var SaibunElm = Array.from(document.querySelectorAll("#saibun option")).find(function(elm) {
+                var SaibunElm = Array.from(document.querySelectorAll("#saibun option")).find(function (elm) {
                     return elm.innerText == setting.home.Saibun
                 })
                 if (SaibunElm) SaibunElm.selected = true
@@ -288,7 +327,7 @@
             }
         })
 
-        document.getElementById("apply").addEventListener("click", function() {
+        document.getElementById("apply").addEventListener("click", function () {
             setting.setting1 = document.getElementById("setting1").checked;
             setting.home.latitude = document.getElementById("latitude").value
             setting.home.longitude = document.getElementById("longitude").value
@@ -301,7 +340,7 @@
             })
             window.close()
         })
-        document.getElementById("cancel").addEventListener("click", function() {
+        document.getElementById("cancel").addEventListener("click", function () {
             window.close()
         })
 
@@ -434,16 +473,16 @@
             markerElm =
                 L.marker(
                     [setting.home.latitude, setting.home.longitude], {
-                        keyboard: false,
-                        icon: homeIcon
-                    }
+                    keyboard: false,
+                    icon: homeIcon
+                }
                 ).addTo(map);
 
             fetch("./Resource/basemap.json")
-                .then(function(res) {
+                .then(function (res) {
                     return res.json();
                 })
-                .then(function(json) {
+                .then(function (json) {
                     gjmap = L.geoJSON(json, {
                         style: {
                             color: "#999",
@@ -473,7 +512,7 @@
                                 }
                                 document.getElementById("saibun").appendChild(saibunElm)
 
-                                layer.on('click', function(e) {
+                                layer.on('click', function (e) {
                                     gjmap.setStyle({
                                         fillColor: "#333",
                                     })
@@ -486,7 +525,7 @@
                                     })
                                     document.getElementById("latitude").value = lat
                                     document.getElementById("longitude").value = lng
-                                    var optionElm = Array.from(document.querySelectorAll("#saibun option")).find(function(elm) {
+                                    var optionElm = Array.from(document.querySelectorAll("#saibun option")).find(function (elm) {
                                         return elm.innerText == feature.properties.name
                                     })
                                     optionElm.selected = true
@@ -496,10 +535,10 @@
                         },
                     }).addTo(map);
                     fetch("./Resource/World.json")
-                        .then(function(res) {
+                        .then(function (res) {
                             return res.json();
                         })
-                        .then(function(json) {
+                        .then(function (json) {
                             worldmap = L.geoJSON(json, {
                                 style: {
                                     color: "#444",
@@ -533,7 +572,7 @@
             }
 
 
-            map.on("zoom", function() {
+            map.on("zoom", function () {
                 var currentZoom = map.getZoom();
                 document.getElementById("mapcontainer").classList.remove("zoomLevel_1");
                 document.getElementById("mapcontainer").classList.remove("zoomLevel_2");
@@ -551,7 +590,7 @@
                 }
 
             })
-            map.on('click', function(e) {
+            map.on('click', function (e) {
                 lat = e.latlng.lat;
                 lng = e.latlng.lng;
                 document.getElementById("latitude").value = lat
@@ -566,7 +605,7 @@
             lat = document.getElementById("latitude").value;
             lng = document.getElementById("longitude").value;
             markerElm.setLatLng([lat, lng])
-            sections.find(function(elm) {
+            sections.find(function (elm) {
                 return elm.name == document.getElementById("saibun").value
             }).item.setStyle({
                 fillColor: "#FFF"

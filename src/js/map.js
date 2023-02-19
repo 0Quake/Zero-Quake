@@ -1029,7 +1029,7 @@ function kmoniMapUpdate(dataTmp, type) {
         var popup_content = "<h3 class='PointName' style='border-bottom:solid 2px rgb(" + elm.rgb.join(",") + ")'>" + PNameTmp + "<span>" + elm.Type + connectStr + elm.Code + "</span></h3><h4 class='detecting' style='display:" + detecting + "'>地震検知中</h4><table><tr><td>震度</td><td class='PointInt'>" + shindoStr + "</td></tr><tr><td>PGA</td><td class='PointPGA'>" + pgaStr + "</td></tr></table>";
         points[elm.Code].marker.setPopupContent(popup_content);
 
-        markerCircleElm.classList.remove("strongDetectingMarker", "detectingMarker", "marker_Int", "marker_Int1", "marker_Int2", "marker_Int3", "marker_Int4", "marker_Int5-", "marker_Int5p", "marker_Int6-", "marker_Int6p", "marker_Int7", "marker_Int7p");
+        markerCircleElm.classList.remove("strongDetectingMarker", "detectingMarker", "marker_Int", "marker_Int1", "marker_Int2", "marker_Int3", "marker_Int4", "marker_Int5m", "marker_Int5p", "marker_Int6m", "marker_Int6p", "marker_Int7", "marker_Int7p");
 
         if (elm.detect2) {
           markerCircleElm.classList.add("strongDetectingMarker");
