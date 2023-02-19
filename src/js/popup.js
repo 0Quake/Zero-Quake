@@ -390,6 +390,7 @@ function EQDetect(data) {
       renderer: EQDetectCanvas,
       interactive: false,
     }).addTo(map);
+    map.setView([data.lat, data.lng], 9);
 
     EQDetectItem.push({
       id: data.id,

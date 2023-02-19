@@ -354,20 +354,20 @@ window.electronAPI.messageSend((event, request) => {
     init();
   } else if (request.action == "EstShindoUpdate") {
     if (sections.length == 0) return;
-    request.data.forEach(function (elm) {
-      SectionTmp = sectionTable.filter(function (elm2) {
-        return elm2.Region == elm.Region;
-      });
-      SectionTmp.forEach(function (elm2) {
-        var section = sections.find(function (elm3) {
-          return elm3.name == elm2.section;
-        });
+    sections.forEach(function (elm) {
+      elm.item.setStyle({ fill: false });
+    });
 
-        if (section && section.item) {
-          var colorTmp = shindoConvert(elm.estShindo, 2)[0];
-          section.item.setStyle({ fill: true, fillColor: colorTmp });
-        }
+    console.log(request.data);
+    request.data.forEach(function (elm) {
+      var section = sections.find(function (elm3) {
+        return elm3.name == elm.Section;
       });
+
+      if (section && section.item) {
+        var colorTmp = shindoConvert(elm.estShindo, 2)[0];
+        section.item.setStyle({ fill: true, fillColor: colorTmp });
+      }
     });
   }
 
@@ -608,8 +608,6 @@ function init() {
       return res.json();
     })
     .then(function (json) {
-      //points = json;
-      
       //points.forEach(function (elm, index) {
       //  if (elm.Name && elm.Point && !elm.IsSuspended) {
       //    addPointMarker(elm);
@@ -712,7 +710,7 @@ function init() {
           fillOpacity: 1,
           weight: 1,
           pane: "jsonMAPPane",
-          interactive: false,
+          //interactive: false,
           attribution: "JMA",
           renderer: jsonMAP1Canvas,
         },
@@ -1437,7 +1435,6 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
         interactive: false,
       }).addTo(map);
 
-      map.fitBounds(PCElm.getBounds());
       map.setView([latitude, longitude, 9]);
 
       EQElm.PCircleElm = PCElm;

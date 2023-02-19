@@ -33,6 +33,7 @@ let kmoniWorker;
 var kmoniActive = false;
 
 var kmoniTimeTmp = [];
+var EstShindoFetch = false;
 
 //多重起動防止
 const gotTheLock = app.requestSingleInstanceLock();
@@ -162,7 +163,7 @@ ipcMain.on("message", (_event, response) => {
 
 function createWindow() {
   if (mainWindow) {
-    mainWindow.focus();
+    mainWindow.restore();
     return;
   }
   mainWindow = new BrowserWindow({
@@ -178,6 +179,7 @@ function createWindow() {
   //mainWindow.setMenuBarVisibility(false);
 
   mainWindow.webContents.on("did-finish-load", () => {
+    replay("2023/02/19 17:50:10");
     // replay("2023/02/19 1:44:10");
     //replay("2023/02/17 19:38:35");
     //replay("2023/02/16 21:20:40");
@@ -361,7 +363,6 @@ function createWindow() {
 function kmonicreateWindow() {
   if (kmoniWorker) {
     kmoniWorker.close();
-    kmoniWorker = null;
   }
   kmoniWorker = new BrowserWindow({
     webPreferences: {
@@ -369,6 +370,9 @@ function kmonicreateWindow() {
     },
     backgroundThrottling: false,
     show: false,
+  });
+  kmoniWorker.on("close", () => {
+    kmoniWorker = null;
   });
 
   kmoniWorker.loadFile("src/kmoniWorker.html");
@@ -458,10 +462,11 @@ var EQDetectID = 0;
 
 var historyCount = 10; //比較する件数
 var threshold01 = 5; //検出とする観測点数
-var threshold02 = 0.03; //1次フラグ条件のPGA増加量[gal]
-var threshold03 = 2; //2次フラグ条件のPGA増加量[gal]
+var threshold02 = 0.06; //1次フラグ条件のPGA増加量[gal]
+var threshold03 = 0.6; //2次フラグ条件のPGA増加量[gal]
 var threshold04 = 0.5; //フラグ条件の震度
-var MargeRange = 30; //地震の同定範囲[km]
+var threshold05 = 0.03; //検知中の臨時閾値[gal]
+var MargeRange = 40; //地震の同定範囲[km]
 var time00 = 300000; //最初の検出~解除
 var time01 = 10000; //最後の検出~解除
 
@@ -474,8 +479,8 @@ function addPoint(elm, elm2) {
 }
 function kmoniControl(data, date) {
   kmoniActive = new Date();
-
-  if (kmoniDataHistory.length > historyCount) kmoniDataHistory = kmoniDataHistory.slice(kmoniDataHistory.length - historyCount);
+  var kmoniHistoryFlag = kmoniDataHistory.length > historyCount;
+  if (kmoniHistoryFlag) kmoniDataHistory = kmoniDataHistory.slice(kmoniDataHistory.length - historyCount);
 
   data.forEach(function (elm, index) {
     var dataItemHistory = kmoniDataHistory.map(function (elm2) {
@@ -483,27 +488,36 @@ function kmoniControl(data, date) {
     });
     //var pgaMax = Math.max.apply(null, dataItemHistory);
     var oneBeforeDetect;
-    if (kmoniDataHistory.length > 0) {
+    if (kmoniHistoryFlag) {
       var oneBefore = kmoniDataHistory[kmoniDataHistory.length - 1][index];
       var oneBeforeDetect = oneBefore.detect;
     }
     var pgaMin = Math.min.apply(null, dataItemHistory);
-    var detect = elm.pga - pgaMin >= threshold02 || elm.UpCount > 1 || (oneBeforeDetect && elm.pga > 0.1);
-    var detect2 = elm.pga - pgaMin >= threshold03 || elm.shindo >= threshold04 || elm.detectCount > 1;
+    if (kmoniHistoryFlag) {
+      if (elm.pga - oneBefore.pga > 0) {
+        elm.UpCount++;
+      } else if (elm.pga - oneBefore.pga < 0) {
+        elm.UpCount = 0;
+      }
+    }
+
+    if (elm.Region == "東京都") {
+      threshold02 = 0.1;
+      MargeRange = 20;
+    } else {
+      threshold02 = 0.05;
+      MargeRange = 40;
+    }
+    var detect = elm.pga - pgaMin >= threshold02 || (oneBeforeDetect && elm.pga >= threshold05);
+    var detect2 = (elm.pga - pgaMin >= threshold03 || elm.shindo >= threshold04 || elm.UpCount > 2) && elm.detectCount > 2; /* || elm.detectCount > 1*/
 
     elm.detect = detect || detect2;
     elm.detect2 = detect && detect2;
     if (elm.detect) {
-      if (!elm.detectCount) elm.detectCount = 0;
+      if (!elm.detectCount) elm.detectCount = 1;
       elm.detectCount++;
     } else {
       elm.detectCount = 0;
-    }
-
-    if (kmoniDataHistory.length > 0 && elm.pga - oneBefore.pga > 0) {
-      elm.UpCount++;
-    } else {
-      elm.UpCount = 0;
     }
   });
   if (!EEWNow) {
@@ -533,6 +547,7 @@ function kmoniControl(data, date) {
           if (EQD_ItemTmp.Codes.length >= threshold01) {
             if (!EQD_ItemTmp.showed) {
               soundPlay(path.join(__dirname, "audio/EQDetect.mp3"));
+              createWindow();
             }
             if (mainWindow) {
               mainWindow.webContents.send("message2", {
@@ -543,7 +558,7 @@ function kmoniControl(data, date) {
             EQD_ItemTmp.showed = true;
           }
         } else if (elm.detect2) {
-          EQDetect_List.push({ id: EQDetectID, lat: elm.Location.Latitude, lng: elm.Location.Longitude, Codes: [elm], Radius: 0, maxPGA: elm.pga, detectCount: 1, detect2Count: 1, UpCount: 0, last_Detect: new Date(), origin_Time: new Date(), showed: false });
+          EQDetect_List.push({ id: EQDetectID, lat: elm.Location.Latitude, lng: elm.Location.Longitude, Codes: [elm], Radius: 0, maxPGA: elm.pga, detectCount: 1, detect2Count: 1, UpCount: 0, Up: false, last_Detect: new Date(), origin_Time: new Date(), showed: false });
           EQDetectID++;
 
           //新報
@@ -581,23 +596,23 @@ function SnetControl(data, date) {
   }
 }
 function estShindoControl(response) {
-  if (EEWNow) {
-    var EidTmp;
-    if (kmoniEid) {
-      EidTmp = kmoniEid;
-    } else if (!EidTmp) {
-      EidTmp = EEW_nowList[0].report_id;
-    } else {
-      return false;
-    }
-    if (mainWindow) {
-      mainWindow.webContents.send("message2", {
-        action: "EstShindoUpdate",
-        data: response.data,
-        date: response.date,
-        eid: EidTmp,
-      });
-    }
+  var EidTmp;
+  if (kmoniEid) {
+    EidTmp = kmoniEid;
+  } else if (!EidTmp) {
+    EidTmp = EEW_nowList[0].report_id;
+  } else {
+    return false;
+  }
+  if (response.nodata) EstShindoFetch = false;
+  if (mainWindow) {
+    mainWindow.webContents.send("message2", {
+      action: "EstShindoUpdate",
+      data: response.data,
+      date: response.date,
+      eid: EidTmp,
+      nodata: response.nodata,
+    });
   }
 }
 
@@ -661,8 +676,8 @@ function kmoniRequest() {
     });
     request.end();
 
-    if (EEWNow) {
-      var request = net.request("http://www.kmoni.bosai.go.jp/data/map_img/EstShindoImg/eew/" + dateEncode(2, ReqTime - Replay) + "/" + dateEncode(1, ReqTime - Replay) + ".eew.gif");
+    if (EstShindoFetch) {
+      var request = net.request("http://www.kmoni.bosai.go.jp/data/map_img/EstShindoImg/eew/" + dateEncode(2, ReqTime) + "/" + dateEncode(1, ReqTime) + ".eew.gif");
       request.on("response", (res) => {
         var dataTmp = [];
         res.on("data", (chunk) => {
@@ -673,7 +688,7 @@ function kmoniRequest() {
           if (kmoniWorker) {
             kmoniWorker.webContents.send("message2", {
               action: "KmoniEstShindoImgUpdate",
-              data: "data:image/gif;base64," + body.toString("base64"),
+              data: "data:image/gif;base64," + bufTmp.toString("base64"),
               date: ReqTime,
             });
           }
@@ -1451,7 +1466,7 @@ function EEWcontrol(data) {
 }
 function EEWAlert(data, first, update) {
   EEWNow = true;
-
+  EstShindoFetch = true;
   EEW_nowList = EEW_nowList.filter(function (elm) {
     return elm.report_id !== data.report_id;
   });
@@ -1463,36 +1478,33 @@ function EEWAlert(data, first, update) {
       data: EEW_nowList,
       update: Boolean(update),
     });
-  } else {
-    if (!update) {
-      var EEWNotification = new Notification({
-        title: "緊急地震速報（" + data.alertflg + "）#" + data.report_num,
-        body: data.region_name + "\n推定震度：" + data.calcintensity + "  M" + data.magunitude + "  深さ：" + data.depth,
-      });
-      EEWNotification.show();
-      EEWNotification.on("click", function () {
-        createWindow();
-      });
-    }
   }
 
   if (!update) {
+    if (first) {
+      if (data.alertflg == "警報") {
+        soundPlay(path.join(__dirname, "audio/EEW1.mp3"));
+        //    sound.play(path.join(__dirname, "audio/EEW1.mp3"));
+      } else {
+        soundPlay(path.join(__dirname, "audio/EEW2.mp3"));
+      }
+      createWindow();
+    }
+
+    var EEWNotification = new Notification({
+      title: "緊急地震速報（" + data.alertflg + "）#" + data.report_num,
+      body: data.region_name + "\n推定震度：" + data.calcintensity + "  M" + data.magunitude + "  深さ：" + data.depth,
+    });
+    EEWNotification.show();
+    EEWNotification.on("click", function () {
+      createWindow();
+    });
+
     if (kmoniWorker) {
       kmoniWorker.webContents.send("message2", {
         action: "speak",
         data: "緊急地震速報です。",
       });
-    }
-
-    if (first) {
-      if (data.alertflg == "警報") {
-        soundPlay(path.join(__dirname, "audio/EEW1.mp3"));
-
-        //    sound.play(path.join(__dirname, "audio/EEW1.mp3"));
-      } else if (data.alertflg == "予報") {
-        soundPlay(path.join(__dirname, "audio/EEW2.mp3"));
-      }
-      createWindow();
     }
   }
 }

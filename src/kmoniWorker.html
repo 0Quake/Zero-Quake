@@ -5,6 +5,11 @@
     <meta charset="UTF-8">
 
     <title>Worker For Kmoni Image</title>
+    <style>
+        canvas {
+            /*display: none;*/
+        }
+    </style>
 </head>
 
 <body>
@@ -13,17 +18,20 @@
     <canvas id="EstShindoCanvas" width="400" height="400"></canvas>
 
     <script>
+        var Allpoints;
         var points;
         var Spoints;
         fetch("./Resource/Knet_Points.json").then(function (res) {
             return res.json()
         }).then(function (json) {
-            points = json;
+            Allpoints = json
+            points = json.filter(function (elm) { return elm.Point && !elm.IsSuspended })
+
         })
         fetch("./Resource/Snet_Points.json").then(function (res) {
             return res.json()
         }).then(function (json) {
-            Spoints = json;
+            Spoints = json.filter(function (elm) { return elm.Point && !elm.IsSuspended })
         })
 
         var canvas = document.getElementById("kmoniCanvas");
@@ -31,7 +39,7 @@
         var Scanvas = document.getElementById("SnetCanvas");
         var Scontext = Scanvas.getContext("2d");
         var EScanvas = document.getElementById("EstShindoCanvas");
-        var EScontext = Scanvas.getContext("2d");
+        var EScontext = EScanvas.getContext("2d");
 
         window.electronAPI.messageSend((event, request) => {
 
@@ -79,143 +87,112 @@
 
 
         })
+
         function kmoniRedraw(dateTmp) {
-            points.forEach(function (elm, index) {
-                if (elm.Name && elm.Point && !elm.IsSuspended) {
-                    var rgb = point2RGB(elm.Point.X, elm.Point.Y, context);
-                    if (rgb[0] + rgb[1] + rgb[2] !== 0) {
-                        var hsv = RGB2HSV(rgb[0], rgb[1], rgb[2]);
-                        var p = HSVtoP(hsv[0], hsv[1], hsv[2]);
-                        var shindo = (10 * p - 3);
-                        var pga = 10 ** (5 * p - 2);
+            points.forEach(function (elm) {
+                elm.data = false
 
-                        elm.data = true
-                        elm.rgb = rgb
-                        elm.shindo = shindo
-                        elm.pga = pga
+                var rgb = point2RGB(elm.Point.X, elm.Point.Y, context);
+                if (rgb[0] + rgb[1] + rgb[2] !== 0) {
+                    var hsv = RGB2HSV(rgb[0], rgb[1], rgb[2]);
+                    var p = HSVtoP(hsv[0], hsv[1], hsv[2]);
+                    var shindo = (10 * p - 3);
+                    var pga = 10 ** (5 * p - 2);
 
-                        /*
-                    var pulsingIcon = L.icon.pulse({
-                      iconSize: [10, 10],
-                      fillColor: "rgb(" + rgb.join(",") + ")",
-                      animate: false,
-                    });
-                    marker = L.marker([elm.Location.latitude, elm.Location.longitude], { icon: pulsingIcon }).addTo(map).bindPopup(elm.Name);
-                  */
-                    } else {
-                        elm.data = false
-
-                        elm.rgb = null
-                        elm.shindo = null
-                        elm.pga = null
-
-                    }
-                } else {
-                    elm.rgb = false
-                    elm.shindo = null
-                    elm.pga = null
-                }
-                if (index == points.length - 1) {
-                    window.electronAPI.messageReturn({
-                        action: "kmoniReturn",
-                        data: points,
-                        date: dateTmp
-                    })
+                    elm.data = true
+                    elm.rgb = rgb
+                    elm.shindo = shindo
+                    elm.pga = pga
                 }
             });
+            window.electronAPI.messageReturn({
+                action: "kmoniReturn",
+                data: points,
+                date: dateTmp
+            })
         }
 
 
         function SnetRedraw(dateTmp) {
             Spoints.forEach(function (elm, index) {
-                if (elm.Code && elm.Point && !elm.IsSuspended) {
-                    var rgb = point2RGB(elm.Point.X, elm.Point.Y, Scontext);
-                    if (rgb[0] + rgb[1] + rgb[2] !== 0) {
-                        var hsv = RGB2HSV(rgb[0], rgb[1], rgb[2]);
-                        var p = HSVtoP(hsv[0], hsv[1], hsv[2]);
-                        var shindo = (10 * p - 3);
-                        var pga = 10 ** (5 * p - 2);
+                elm.data = false
 
-                        elm.data = true
-                        elm.rgb = rgb
-                        elm.shindo = shindo
-                        elm.pga = pga
-                    } else {
-                        elm.data = false
-                        elm.rgb = null
-                        elm.shindo = null
-                        elm.pga = null
-                    }
-                } else {
-                    elm.data = false
-                    elm.rgb = null
-                    elm.shindo = null
-                    elm.pga = null
-                }
-                if (index == Spoints.length - 1) {
-                    window.electronAPI.messageReturn({
-                        action: "SnetReturn",
-                        data: Spoints,
-                        date: dateTmp
-                    })
+                var rgb = point2RGB(elm.Point.X, elm.Point.Y, Scontext);
+                if (rgb[0] + rgb[1] + rgb[2] !== 0) {
+                    var hsv = RGB2HSV(rgb[0], rgb[1], rgb[2]);
+                    var p = HSVtoP(hsv[0], hsv[1], hsv[2]);
+                    var shindo = (10 * p - 3);
+                    var pga = 10 ** (5 * p - 2);
+
+                    elm.data = true
+                    elm.rgb = rgb
+                    elm.shindo = shindo
+                    elm.pga = pga
                 }
             });
+            window.electronAPI.messageReturn({
+                action: "SnetReturn",
+                data: Spoints,
+                date: dateTmp
+            })
+
         }
 
+        var oneBeforeData = {}
 
         function EstShindoRedraw(dateTmp) {
             var estShindos = []
-            points.forEach(function (elm, index) {
-                if (elm.Name && elm.Point && !elm.IsSuspended) {
-                    var rgb = point2RGB(elm.Point.X, elm.Point.Y, EScontext);
-                    if (rgb[0] + rgb[1] + rgb[2] !== 0) {
-                        var hsv = RGB2HSV(rgb[0], rgb[1], rgb[2]);
-                        var p = HSVtoP(hsv[0], hsv[1], hsv[2]);
-                        var tmpNum = 10 ** (5 * p - 2);
-                        var EstShindo = 0.868589 * Math.log(tmpNum) + 1
-                        var RegionTmp = estShindos.find(function (elm2) { return elm2.Region == elm.Region })
-                        if (RegionTmp) {
-                            RegionTmp.estShindo = Math.max(EstShindo, RegionTmp.estShindo)
-                        } else {
-                            estShindos.push({ Region: elm.Region, estShindo: EstShindo })
-                        }
+            Allpoints.forEach(function (elm, index) {
+                var rgb = point2RGB(elm.Point.X, elm.Point.Y, EScontext);
+                if (rgb[0] + rgb[1] + rgb[2] !== 0) {
+                    var hsv = RGB2HSV(rgb[0], rgb[1], rgb[2]);
+                    var p = HSVtoP(hsv[0], hsv[1], hsv[2]);
+                    var tmpNum = 10 ** (5 * p - 2);
+                    var EstShindo = 0.868589 * Math.log(tmpNum) + 1
+                    var SectionTmp = estShindos.find(function (elm2) { return elm2.Section == elm.Section })
+                    if (SectionTmp) {
+                        SectionTmp.estShindo = Math.max(EstShindo, SectionTmp.estShindo)
+                    } else {
+                        estShindos.push({ Section: elm.Section, estShindo: EstShindo })
                     }
                 }
-
-                if (index == points.length - 1 && estShindos.length !== 0) {
+            });
+            var nowDataStr = JSON.stringify(estShindos)
+            if (estShindos.length !== 0) {
+                if (oneBeforeData !== nowDataStr) {
                     window.electronAPI.messageReturn({
                         action: "kmoniEstShindoReturn",
                         data: estShindos,
-                        date: dateTmp
+                        date: dateTmp,
+                        nodata: false
                     })
                 }
-            });
+            } else {
+                window.electronAPI.messageReturn({
+                    action: "kmoniEstShindoReturn",
+                    date: dateTmp,
+                    data: [],
+                    nodata: true
+                })
+            }
+            oneBeforeData = nowDataStr
+
 
         }
 
         function point2RGB(x, y, ctxTmp) {
-            // 指定座標から幅1,高さ1のImageDataオブジェクトの取得。
             var imagedata = ctxTmp.getImageData(x, y, 1, 1);
-
-            // RGBAの取得。
-            var r = imagedata.data[0];
-            var g = imagedata.data[1];
-            var b = imagedata.data[2];
-            return [r, g, b];
+            return [imagedata.data[0], imagedata.data[1], imagedata.data[2]];
         }
         function RGB2HSV(r, g, b) {
-            var max = Math.max(r, g, b);
-            var min = Math.min(r, g, b);
-            var diff = max - min;
-
             var v = Math.max(r, g, b),
                 d = v - Math.min(r, g, b),
                 s = v ? d / v : 0,
                 a = [r, g, b, r, g],
                 i = a.indexOf(v),
                 h = s ? (((a[i + 1] - a[i + 2]) / d + i * 2 + 6) % 6) * 60 : 0;
-            v = v / 255;
-            h = h / 260;
+            v /= 255;
+            h /= 260;
             return [h, s, v];
         }
 
@@ -225,13 +202,9 @@
             if (v > 0.1 && s > 0.75) {
                 if (h > 0.1476) {
                     p = 280.31 * Math.pow(h, 6) - 916.05 * Math.pow(h, 5) + 1142.6 * Math.pow(h, 4) - 709.95 * Math.pow(h, 3) + 234.65 * Math.pow(h, 2) - 40.27 * h + 3.2217;
-                }
-
-                if (h <= 0.1476 && h > 0.001) {
+                } else if (h > 0.001) {
                     p = 151.4 * Math.pow(h, 4) - 49.32 * Math.pow(h, 3) + 6.753 * Math.pow(h, 2) - 2.481 * h + 0.9033;
-                }
-
-                if (h <= 0.001) {
+                } else {
                     p = -0.005171 * Math.pow(v, 2) - 0.3282 * v + 1.2236;
                 }
             }

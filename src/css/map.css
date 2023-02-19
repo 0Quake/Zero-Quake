@@ -135,25 +135,26 @@ img.leaflet-control {
   height: 10px;
   background: rgba(128, 128, 128, 0.2);
   border-radius: 50%;
-  outline-offset: 2px;
   z-index: 220;
+}
+.zoomLevel_1 .detectingMarker,
+.zoomLevel_2 .detectingMarker {
+  outline: solid 2px rgb(203, 99, 43);
+  /*transform: scale(1.2);*/
 }
 .zoomLevel_3 .detectingMarker,
 .zoomLevel_4 .detectingMarker {
-  outline: solid 2px #fff;
-  z-index: 221;
+  outline: solid 3px rgb(203, 99, 43);
   /*transform: scale(1.2);*/
 }
 .zoomLevel_1 .strongDetectingMarker,
 .zoomLevel_2 .strongDetectingMarker {
-  outline-offset: 1px;
-  outline: solid 2px rgb(214, 214, 9);
+  outline: solid 2px rgb(203, 43, 43);
   /*transform: scale(1.5);*/
 }
 .zoomLevel_3 .strongDetectingMarker,
 .zoomLevel_4 .strongDetectingMarker {
-  outline-offset: 4px;
-  outline: solid 3px rgb(214, 214, 9);
+  outline: solid 3px rgb(203, 43, 43);
 }
 .marker_Int::before {
   position: absolute;
