@@ -176,136 +176,10 @@ function createWindow() {
       icon: path.join(__dirname, "img/icon.ico"),
     },
   });
+  mainWindow.maximize();
   //mainWindow.setMenuBarVisibility(false);
 
   mainWindow.webContents.on("did-finish-load", () => {
-    replay("2023/02/19 17:50:10");
-    // replay("2023/02/19 1:44:10");
-    //replay("2023/02/17 19:38:35");
-    //replay("2023/02/16 21:20:40");
-    //replay("2023/02/07 18:41:20");
-    //replay("2023/02/05 16:13:20");
-    //replay("2023/02/03 02:58:40");
-    // replay("2023/01/31 17:48:30");
-    //replay("2023/01/30 00:30:00");
-    //replay("2023/01/29 12:36:00");
-    // replay("2023/01/29 12:07:20");
-    // replay("2023/01/22 11:13:20");
-    //replay("2023/01/27 23:26:00");
-    //replay("2023/01/22 10:58:50");
-    //replay("2023/01/21 22:41:00");
-    //  replay("2023/01/21 14:18:20");
-    //replay("2023/01/19 21:24:35");
-    // replay("2023/01/19 16:28:35");
-    //replay("2023/01/18 21:41:00");
-    //replay("2023/01/18 18:54:45");
-    //replay("2023/01/15 20:37:45");
-    /*
-    EEWcontrol({
-      alertflg: "予報", //種別
-      report_id: "20230115203744", //地震ID
-      report_num: 1, //第n報
-      report_time: new Date() - Replay, //発表時刻
-      magunitude: 9, //マグニチュード
-      calcintensity: "5-", //最大深度
-      depth: 10, //深さ
-      is_cancel: false, //キャンセル
-      is_final: false, //最終報
-      is_training: true, //訓練報
-      latitude: 35.6, //緯度
-      longitude: 140.3, //経度
-      region_code: "", //震央地域コード
-      region_name: "存在しない地名", //震央地域
-      origin_time: new Date(new Date() - Replay - 2000), //発生時刻
-      isPlum: false,
-      userIntensity: "4",
-      arrivalTime: new Date() - Replay + 100000,
-      intensityAreas: null, //細分区分ごとの予想震度
-      warnZones: {
-        zone: null,
-        Pref: null,
-        Regions: null,
-      },
-    });*/
-
-    //    replay("2022/10/2 0:2:45");
-    // replay("2022/11/3 19:04:40");
-
-    //replay("2022/04/19 08:16:15");
-    //replay("2022/11/09 17:40:05");
-
-    /*
-    EEWcontrol({
-      alertflg: "警報", //種別
-      report_id: "20991111111111", //地震ID
-      report_num: 1, //第n報
-      report_time: new Date() - Replay, //発表時刻
-      magunitude: 9, //マグニチュード
-      calcintensity: "5-", //最大深度
-      depth: 10, //深さ
-      is_cancel: false, //キャンセル
-      is_final: false, //最終報
-      is_training: true, //訓練報
-      latitude: 35.6, //緯度
-      longitude: 140.3, //経度
-      region_code: "", //震央地域コード
-      region_name: "存在しない地名", //震央地域
-      origin_time: new Date(new Date() - Replay - 2000), //発生時刻
-      isPlum: false,
-      userIntensity: "4",
-      intensityAreas: null, //細分区分ごとの予想震度
-      warnZones: {
-        zone: null,
-        Pref: null,
-        Regions: null,
-      },
-    });*/
-
-    /*
-    EEWcontrol({
-      report_time: new Date() - Replay, //発表時刻
-      region_code: "", //震央地域コード
-      region_name: "存在しない地名", //震央地域
-      latitude: 35.6, //緯度
-      longitude: 140.3, //経度
-      is_cancel: false, //キャンセル
-      depth: 10, //深さ
-      calcintensity: 7, //最大深度
-      is_final: false, //最終報
-      is_training: true, //訓練報
-      origin_time: new Date(new Date() - Replay - 2000), //発生時刻
-      magunitude: 9, //マグニチュード
-      report_num: 1, //第n報
-      report_id: "20991111111111", //地震ID
-      alertflg: "警報", //種別
-      condition: "",
-      source: "存在しない情報源",
-      intensityAreas: { 4: ["301", "331", "341"] },
-    });*/
-
-    /*
-    setTimeout(function () {
-      EEWcontrol({
-        report_time: new Date() - Replay, //発表時刻
-        region_code: "", //震央地域コード
-        region_name: "存在しない地名", //震央地域
-        latitude: 35.6, //緯度
-        longitude: 140.3, //経度
-        is_cancel: true, //キャンセル
-        depth: 10, //深さ
-        calcintensity: 7, //最大深度
-        is_final: false, //最終報
-        is_training: false, //訓練報
-        origin_time: new Date(new Date() - Replay - 2000), //発生時刻
-        magunitude: 9, //マグニチュード
-        report_num: 2, //第n報
-        report_id: "20991111111111", //地震ID
-        alertflg: "警報", //種別
-        condition: "",
-        source: "存在しない情報源",
-      });
-    }, 5000);*/
-
     kmoniTimeTmp.forEach(function (elm) {
       mainWindow.webContents.send("message2", {
         action: "kmoniTimeUpdate",
@@ -404,6 +278,107 @@ app.whenReady().then(() => {
       clearInterval(startInterval);
     }
   }, 1000);
+
+  replay("2023/02/20 18:19:30");
+  /*
+  EEWcontrol({
+    alertflg: "予報", //種別
+    report_id: "20230115203744", //地震ID
+    report_num: 1, //第n報
+    report_time: new Date() - Replay, //発表時刻
+    magunitude: 9, //マグニチュード
+    calcintensity: "5-", //最大深度
+    depth: 10, //深さ
+    is_cancel: false, //キャンセル
+    is_final: false, //最終報
+    is_training: true, //訓練報
+    latitude: 35.6, //緯度
+    longitude: 140.3, //経度
+    region_code: "", //震央地域コード
+    region_name: "存在しない地名", //震央地域
+    origin_time: new Date(new Date() - Replay - 2000), //発生時刻
+    isPlum: false,
+    userIntensity: "4",
+    arrivalTime: new Date() - Replay + 100000,
+    intensityAreas: null, //細分区分ごとの予想震度
+    warnZones: {
+      zone: null,
+      Pref: null,
+      Regions: null,
+    },
+  });*/
+
+  /*
+  EEWcontrol({
+    alertflg: "警報", //種別
+    report_id: "20991111111111", //地震ID
+    report_num: 1, //第n報
+    report_time: new Date() - Replay, //発表時刻
+    magunitude: 9, //マグニチュード
+    calcintensity: "5-", //最大深度
+    depth: 10, //深さ
+    is_cancel: false, //キャンセル
+    is_final: false, //最終報
+    is_training: true, //訓練報
+    latitude: 35.6, //緯度
+    longitude: 140.3, //経度
+    region_code: "", //震央地域コード
+    region_name: "存在しない地名", //震央地域
+    origin_time: new Date(new Date() - Replay - 2000), //発生時刻
+    isPlum: false,
+    userIntensity: "4",
+    intensityAreas: null, //細分区分ごとの予想震度
+    warnZones: {
+      zone: null,
+      Pref: null,
+      Regions: null,
+    },
+  });*/
+
+  /*
+  EEWcontrol({
+    report_time: new Date() - Replay, //発表時刻
+    region_code: "", //震央地域コード
+    region_name: "存在しない地名", //震央地域
+    latitude: 35.6, //緯度
+    longitude: 140.3, //経度
+    is_cancel: false, //キャンセル
+    depth: 10, //深さ
+    calcintensity: 7, //最大深度
+    is_final: false, //最終報
+    is_training: true, //訓練報
+    origin_time: new Date(new Date() - Replay - 2000), //発生時刻
+    magunitude: 9, //マグニチュード
+    report_num: 1, //第n報
+    report_id: "20991111111111", //地震ID
+    alertflg: "警報", //種別
+    condition: "",
+    source: "存在しない情報源",
+    intensityAreas: { 4: ["301", "331", "341"] },
+  });*/
+
+  /*
+  setTimeout(function () {
+    EEWcontrol({
+      report_time: new Date() - Replay, //発表時刻
+      region_code: "", //震央地域コード
+      region_name: "存在しない地名", //震央地域
+      latitude: 35.6, //緯度
+      longitude: 140.3, //経度
+      is_cancel: true, //キャンセル
+      depth: 10, //深さ
+      calcintensity: 7, //最大深度
+      is_final: false, //最終報
+      is_training: false, //訓練報
+      origin_time: new Date(new Date() - Replay - 2000), //発生時刻
+      magunitude: 9, //マグニチュード
+      report_num: 2, //第n報
+      report_id: "20991111111111", //地震ID
+      alertflg: "警報", //種別
+      condition: "",
+      source: "存在しない情報源",
+    });
+  }, 5000);*/
 });
 
 // 全てのウィンドウが閉じたときの処理
@@ -462,7 +437,7 @@ var EQDetectID = 0;
 
 var historyCount = 10; //比較する件数
 var threshold01 = 5; //検出とする観測点数
-var threshold02 = 0.06; //1次フラグ条件のPGA増加量[gal]
+var threshold02 = 0.04; //1次フラグ条件のPGA増加量[gal]
 var threshold03 = 0.6; //2次フラグ条件のPGA増加量[gal]
 var threshold04 = 0.5; //フラグ条件の震度
 var threshold05 = 0.03; //検知中の臨時閾値[gal]
@@ -477,6 +452,7 @@ function addPoint(elm, elm2) {
   if (elm2.Radius < radiusTmp) elm2.Radius = radiusTmp;
   return true;
 }
+var pointsData = {};
 function kmoniControl(data, date) {
   kmoniActive = new Date();
   var kmoniHistoryFlag = kmoniDataHistory.length > historyCount;
@@ -508,16 +484,24 @@ function kmoniControl(data, date) {
       threshold02 = 0.05;
       MargeRange = 40;
     }
-    var detect = elm.pga - pgaMin >= threshold02 || (oneBeforeDetect && elm.pga >= threshold05);
-    var detect2 = (elm.pga - pgaMin >= threshold03 || elm.shindo >= threshold04 || elm.UpCount > 2) && elm.detectCount > 2; /* || elm.detectCount > 1*/
+    var ptDataTmp = pointsData[elm.Code];
+    if (!ptDataTmp) {
+      pointsData[elm.Code] = { detectCount: 0 };
+      ptDataTmp = pointsData[elm.Code];
+    } else if (!ptDataTmp.detectCount) {
+      ptDataTmp.detectCount = 0;
+    }
 
-    elm.detect = detect || detect2;
-    elm.detect2 = detect && detect2;
-    if (elm.detect) {
-      if (!elm.detectCount) elm.detectCount = 1;
-      elm.detectCount++;
+    var detect0 = elm.pga - pgaMin >= threshold02; /*|| (oneBeforeDetect && elm.pga >= threshold05)*/
+    var detect1 = detect0 && ptDataTmp.detectCount >= 1;
+    var detect2 = (elm.pga - pgaMin >= threshold03 || elm.shindo >= threshold04 || elm.UpCount > 2) && elm.detectCount >= 2; /* || elm.detectCount > 1*/
+
+    elm.detect = detect1 || detect2;
+    elm.detect2 = detect1 && detect2;
+    if (detect0) {
+      ptDataTmp.detectCount++;
     } else {
-      elm.detectCount = 0;
+      ptDataTmp.detectCount = 0;
     }
   });
   if (!EEWNow) {
@@ -1491,9 +1475,12 @@ function EEWAlert(data, first, update) {
       createWindow();
     }
 
+    var alertFlg = "";
+    if (data.alertflg) alertFlg = "（" + data.alertflg + "）";
     var EEWNotification = new Notification({
-      title: "緊急地震速報（" + data.alertflg + "）#" + data.report_num,
+      title: "緊急地震速報" + alertFlg + "#" + data.report_num,
       body: data.region_name + "\n推定震度：" + data.calcintensity + "  M" + data.magunitude + "  深さ：" + data.depth,
+      icon: path.join(__dirname, "img/icon.ico"),
     });
     EEWNotification.show();
     EEWNotification.on("click", function () {

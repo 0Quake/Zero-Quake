@@ -141,3 +141,80 @@ function shindoConvert(str, responseType) {
     return str;
   }
 }
+
+function dateEncode(type, dateTmp, inputtype) {
+  if (inputtype == 1) {
+    var str = String(dateTmp);
+    const year = Number(str.substring(0, 4)); //2022
+    const month = Number(str.substring(4, 6)); //2
+    const day = Number(str.substring(6, 8)); //5
+    const hour = Number(str.substring(8, 10)); //21
+    const min = Number(str.substring(10, 12)); //0
+    const sec = Number(str.substring(12, 14)); //0
+    dateTmp = new Date(year, month - 1, day, hour, min, sec); //monthは0オリジン
+  } else {
+    dateTmp = new Date(dateTmp);
+  }
+  if (type == 1) {
+    //YYYYMMDDHHMMSS
+    var YYYY = String(dateTmp.getFullYear());
+    var MM = String(dateTmp.getMonth() + 1).padStart(2, "0");
+    var DD = String(dateTmp.getDate()).padStart(2, "0");
+    var hh = String(dateTmp.getHours()).padStart(2, "0");
+    var mm = String(dateTmp.getMinutes()).padStart(2, "0");
+    var ss = String(dateTmp.getSeconds()).padStart(2, "0");
+    return YYYY + MM + DD + hh + mm + ss;
+  } else if (type == 2) {
+    //YYYYMMDD
+    var YYYY = String(dateTmp.getFullYear());
+    var MM = String(dateTmp.getMonth() + 1).padStart(2, "0");
+    var DD = String(dateTmp.getDate()).padStart(2, "0");
+    return YYYY + MM + DD;
+  } else if (type == 3) {
+    //YYYY/MM/DD HH:MM:SS
+    var YYYY = String(dateTmp.getFullYear());
+    var MM = String(dateTmp.getMonth() + 1).padStart(2, "0");
+    var DD = String(dateTmp.getDate()).padStart(2, "0");
+    var hh = String(dateTmp.getHours()).padStart(2, "0");
+    var mm = String(dateTmp.getMinutes()).padStart(2, "0");
+    var ss = String(dateTmp.getSeconds()).padStart(2, "0");
+    return YYYY + "/" + MM + "/" + DD + " " + hh + ":" + mm + ":" + ss;
+  } else if (type == 4) {
+    //YYYY/MM/DD HH:MM
+    var YYYY = String(dateTmp.getFullYear());
+    var MM = String(dateTmp.getMonth() + 1).padStart(2, "0");
+    var DD = String(dateTmp.getDate()).padStart(2, "0");
+    var hh = String(dateTmp.getHours()).padStart(2, "0");
+    var mm = String(dateTmp.getMinutes()).padStart(2, "0");
+    return YYYY + "/" + MM + "/" + DD + " " + hh + ":" + mm;
+  } else if (type == 5) {
+    var MM = String(dateTmp.getMonth() + 1).padStart(2, "0");
+    var DD = String(dateTmp.getDate()).padStart(2, "0");
+    var hh = String(dateTmp.getHours()).padStart(2, "0");
+    var mm = String(dateTmp.getMinutes()).padStart(2, "0");
+    return MM + "/" + DD + " " + hh + ":" + mm;
+  } else {
+    //free
+    var YYYY = String(dateTmp.getFullYear());
+    var MM = String(dateTmp.getMonth() + 1).padStart(2, "0");
+    var DD = String(dateTmp.getDate()).padStart(2, "0");
+    var hh = String(dateTmp.getHours()).padStart(2, "0");
+    var mm = String(dateTmp.getMinutes()).padStart(2, "0");
+    var ss = String(dateTmp.getSeconds()).padStart(2, "0");
+
+    type.replaceAll("YYYY", YYYY);
+    type.replaceAll("MM", MM);
+    type.replaceAll("DD", DD);
+    type.replaceAll("hh", hh);
+    type.replaceAll("mm", mm);
+    type.replaceAll("ss", ss);
+
+    return type;
+  }
+}
+
+function removeChild(element) {
+  while (element.firstChild) {
+    element.removeChild(element.firstChild);
+  }
+}
