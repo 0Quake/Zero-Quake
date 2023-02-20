@@ -279,7 +279,7 @@ app.whenReady().then(() => {
     }
   }, 1000);
 
-  replay("2023/02/20 18:19:30");
+  replay("2023/02/20 22:41:40");
   /*
   EEWcontrol({
     alertflg: "予報", //種別
@@ -437,7 +437,7 @@ var EQDetectID = 0;
 
 var historyCount = 10; //比較する件数
 var threshold01 = 5; //検出とする観測点数
-var threshold02 = 0.04; //1次フラグ条件のPGA増加量[gal]
+var threshold02 = 0.03; //1次フラグ条件のPGA増加量[gal]
 var threshold03 = 0.6; //2次フラグ条件のPGA増加量[gal]
 var threshold04 = 0.5; //フラグ条件の震度
 var threshold05 = 0.03; //検知中の臨時閾値[gal]
@@ -478,10 +478,10 @@ function kmoniControl(data, date) {
     }
 
     if (elm.Region == "東京都") {
-      threshold02 = 0.1;
+      threshold02 = 0.07;
       MargeRange = 20;
     } else {
-      threshold02 = 0.05;
+      threshold02 = 0.04;
       MargeRange = 40;
     }
     var ptDataTmp = pointsData[elm.Code];
@@ -492,9 +492,9 @@ function kmoniControl(data, date) {
       ptDataTmp.detectCount = 0;
     }
 
-    var detect0 = elm.pga - pgaMin >= threshold02; /*|| (oneBeforeDetect && elm.pga >= threshold05)*/
-    var detect1 = detect0 && ptDataTmp.detectCount >= 1;
-    var detect2 = (elm.pga - pgaMin >= threshold03 || elm.shindo >= threshold04 || elm.UpCount > 2) && elm.detectCount >= 2; /* || elm.detectCount > 1*/
+    var detect0 = elm.pga - pgaMin >= threshold02 || (oneBeforeDetect && elm.pga >= threshold05);
+    var detect1 = detect0; /*&& ptDataTmp.detectCount >= 1*/
+    var detect2 = (elm.pga - pgaMin >= threshold03 || elm.shindo >= threshold04 || elm.UpCount > 2) && ptDataTmp.detectCount >= 2; /* || elm.detectCount > 1*/
 
     elm.detect = detect1 || detect2;
     elm.detect2 = detect1 && detect2;
@@ -1526,7 +1526,7 @@ function EEWClear(source, code, reportnum, bypass) {
 //
 //地震情報
 var eqInfo = { jma: [], usgs: [] };
-
+var jmaJsonEIDs = [];
 function eqInfoUpdate(disableRepeat) {
   //気象庁JSONリクエスト～パース
   var request = net.request("https://www.jma.go.jp/bosai/quake/data/list.json");
@@ -1542,23 +1542,31 @@ function eqInfoUpdate(disableRepeat) {
       json = json.filter(function (elm) {
         return elm.ttl == "震度速報" || elm.ttl == "震源に関する情報" || elm.ttl == "震源・震度情報" || elm.ttl == "遠地地震に関する情報" || elm.ttl == "顕著な地震の震源要素更新のお知らせ";
       });
-      for (let i = 0; i < 10; i++) {
-        var elm = json[i];
-        var maxi = elm.maxi;
-        if (!maxi) maxi = shindoConvert("?", 1);
-        dataTmp2.push({
-          eventId: elm.eid,
-          category: elm.ttl,
-          OriginTime: new Date(elm.at),
-          epiCenter: elm.anm,
-          M: elm.mag,
-          maxI: maxi,
-          cancel: elm.ift == "取消",
+      for (let elm of json) {
+        var eidTmp = elm.eid;
+        if (!jmaJsonEIDs.includes(eidTmp)) {
+          jmaJsonEIDs.push(eidTmp);
 
-          reportDateTime: new Date(elm.rdt),
-          DetailURL: [String("https://www.jma.go.jp/bosai/quake/data/" + elm.json)],
-        });
+          var maxi = elm.maxi;
+          if (!maxi) maxi = shindoConvert("?", 1);
+          dataTmp2.push({
+            eventId: elm.eid,
+            category: elm.ttl,
+            OriginTime: new Date(elm.at),
+            epiCenter: elm.anm,
+            M: elm.mag,
+            maxI: maxi,
+            cancel: elm.ift == "取消",
+
+            reportDateTime: new Date(elm.rdt),
+            DetailURL: [String("https://www.jma.go.jp/bosai/quake/data/" + elm.json)],
+          });
+
+          if (jmaJsonEIDs == 10) break;
+        }
       }
+      jmaJsonEIDs = [];
+
       eqInfoControl(dataTmp2, "jma");
     });
   });
@@ -1580,9 +1588,10 @@ function eqInfoUpdate(disableRepeat) {
       const xml = parser.parseFromString(dataTmp, "text/html");
       if (!xml) return;
       xml.querySelectorAll("entry").forEach(function (elm) {
-        var url = elm.querySelector("id").textContent;
+        var url;
+        var urlElm = elm.querySelector("id");
+        if (urlElm) url = urlElm.textContent;
         if (!url) return;
-
         JMAEQInfoFetch(url);
       });
     });
@@ -1708,6 +1717,7 @@ function eqInfoUpdate(disableRepeat) {
 }
 
 var narikakun_URLs = [];
+var narikakun_EIDs = [];
 function EQI_narikakunList_Req(url, num, first) {
   var request = net.request(url);
   request.on("response", (res) => {
@@ -1718,7 +1728,7 @@ function EQI_narikakunList_Req(url, num, first) {
     res.on("end", function () {
       var json = jsonParse(dataTmp);
       if (!json || !json.lists) return false;
-      narikakun_URLs = narikakun_URLs.concat(json.lists);
+      narikakun_URLs = narikakun_URLs.concat(json.lists.reverse());
 
       if (narikakun_URLs.length < 10 && first) {
         var yearTmp = new Date().getFullYear();
@@ -1729,15 +1739,17 @@ function EQI_narikakunList_Req(url, num, first) {
         }
         EQI_narikakunList_Req("https://ntool.online/api/earthquakeList?year=" + yearTmp + "&month=" + monthTmp, 10 - json.lists.length, false);
       } else {
-        var index = 0;
-        while (index < 10) {
-          if (jmaXML_Fetched.indexOf(url) === -1) {
-            jmaJSON_Fetched.push(narikakun_URLs[index]);
-            EQI_narikakun_Req(narikakun_URLs[index]);
-            index++;
+        for (let elm of narikakun_URLs) {
+          var eidTmp = elm.split("_")[2];
+          if (nakn_Fetched.indexOf(url) === -1) {
+            nakn_Fetched.push(elm);
+            EQI_narikakun_Req(elm);
+          }
+          if (!narikakun_EIDs.includes(eidTmp)) {
+            narikakun_EIDs.push(eidTmp);
+            if (narikakun_EIDs.length == 10) break;
           }
         }
-
         narikakun_URLs = [];
       }
     });
@@ -1789,12 +1801,11 @@ function EQI_narikakun_Req(url) {
 }
 
 var jmaXML_Fetched = [];
-var jmaJSON_Fetched = [];
 var nakn_Fetched = [];
 
 function JMAEQInfoFetch(url) {
   if (!url) return;
-  if (jmaXML_Fetched.indexOf(url) === -1) return;
+  if (jmaXML_Fetched.includes(url)) return;
   jmaXML_Fetched.push(url);
   var request = net.request(url);
   request.on("response", (res) => {
@@ -1806,6 +1817,7 @@ function JMAEQInfoFetch(url) {
       const parser = new new JSDOM().window.DOMParser();
       const xml = parser.parseFromString(dataTmp, "text/html");
       if (!xml) return false;
+
       var title = xml.title;
       var cancel = false;
       var cancelElm = xml.querySelector("InfoType");
@@ -1813,7 +1825,6 @@ function JMAEQInfoFetch(url) {
 
       if (title == "震度速報" || title == "震源に関する情報" || title == "震源・震度に関する情報" || title == "遠地地震に関する情報" || title == "顕著な地震の震源要素更新のお知らせ") {
         //地震情報
-
         var EarthquakeElm = xml.querySelector("Body Earthquake");
         var originTimeTmp;
         var epiCenterTmp;
@@ -1821,13 +1832,13 @@ function JMAEQInfoFetch(url) {
         if (EarthquakeElm) {
           originTimeTmp = new Date(EarthquakeElm.querySelector("OriginTime").textContent);
           epiCenterTmp = EarthquakeElm.querySelector("Name").textContent;
-          magnitudeTmp = Number(EarthquakeElm.getElementsByTagName("jmx_eb:Magnitude").textContent);
+          magnitudeTmp = Number(EarthquakeElm.getElementsByTagName("jmx_eb:Magnitude")[0].textContent);
         }
 
         var IntensityElm = xml.querySelector("Body Intensity");
         var maxIntTmp;
         if (IntensityElm) {
-          maxIntTmp = shindoConvert(IntensityElm.querySelector("MaxInt"));
+          maxIntTmp = shindoConvert(IntensityElm.querySelector("Observation > MaxInt").textContent);
         }
         eqInfoControl(
           [

@@ -168,7 +168,6 @@ window.electronAPI.messageSend((event, request) => {
       elm.item.setStyle({ fillColor: "#333" });
     });
 
-    console.log(request.data);
     request.data.forEach(function (elm) {
       var section = sections.find(function (elm3) {
         return elm3.name == elm.Section;
@@ -1079,7 +1078,6 @@ function psWaveEntry() {
   });
 }
 function psWaveCalc(eid) {
-  console.log("a");
   var pswaveFind = psWaveList.find(function (elm2) {
     return elm2.id == eid;
   });
@@ -1300,7 +1298,6 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
     var countDownElm = EEWPanelElm.querySelector(".countDown");
 
     var countDown = (EQElm2.arrivalTime - (new Date() - Replay)) / 1000;
-    console.log(EQElm2);
     if (countDown > 0) {
       var countDown_min = Math.floor(countDown / 60);
       var countDown_sec = Math.floor(countDown % 60);
