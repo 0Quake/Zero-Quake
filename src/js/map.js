@@ -165,7 +165,7 @@ window.electronAPI.messageSend((event, request) => {
   } else if (request.action == "EstShindoUpdate") {
     if (sections.length == 0) return;
     sections.forEach(function (elm) {
-      elm.item.setStyle({ fill: false });
+      elm.item.setStyle({ fillColor: "#333" });
     });
 
     console.log(request.data);
