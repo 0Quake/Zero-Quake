@@ -87,9 +87,7 @@ function EEWAlertUpdate(data) {
       var clone = template.content.cloneNode(true);
 
       alertflgTmp = "(" + elm.alertflg + ")";
-      if (!elm.alertflg) alertflgTmp = "";
-
-      clone.querySelector(".alertflg").textContent = alertflgTmp;
+      if (elm.alertflg) clone.querySelector(".alertflg").textContent = alertflgTmp;
 
       if (elm.alertflg == "警報") {
         clone.querySelector(".EEWWrap").classList.add("keihou");
@@ -293,6 +291,14 @@ function epiCenterUpdate(eid, latitude, longitude) {
   }
   latitudeTmp = latitude;
   longitudeTmp = longitude;
+  if (psWaveList.length > 0) {
+    document.querySelectorAll(".PWave,.SWave").forEach(function (elm) {
+      elm.style.transitionTimingFunction = "step-start";
+    });
+    psWaveList.forEach(function (elm) {
+      psWaveCalc(elm.id);
+    });
+  }
 }
 function epiCenterClear(eid) {
   eid = Number(eid);

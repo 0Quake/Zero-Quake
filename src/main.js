@@ -280,7 +280,6 @@ app.whenReady().then(() => {
     }
   }, 1000);
 
-  replay("2023/02/23 0:40:05");
   //replay("2023/02/20 22:41:40");
   /*
   EEWcontrol({
