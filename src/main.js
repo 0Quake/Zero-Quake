@@ -163,8 +163,9 @@ ipcMain.on("message", (_event, response) => {
 
 function createWindow() {
   if (mainWindow) {
-    mainWindow.restore();
-    return;
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    if (!mainWindow.isFocused()) mainWindow.focus();
+    return false;
   }
   mainWindow = new BrowserWindow({
     minWidth: 600,
@@ -279,7 +280,8 @@ app.whenReady().then(() => {
     }
   }, 1000);
 
-  replay("2023/02/20 22:41:40");
+  replay("2023/02/23 0:40:05");
+  //replay("2023/02/20 22:41:40");
   /*
   EEWcontrol({
     alertflg: "予報", //種別
@@ -431,81 +433,79 @@ var errorCountl = 0;
 var errorCountyw = 0;
 var errorCountye = 0;
 
-var kmoniDataHistory = [];
 var EQDetect_List = [];
 var EQDetectID = 0;
 
 var historyCount = 10; //比較する件数
-var threshold01 = 5; //検出とする観測点数
-var threshold02 = 0.03; //1次フラグ条件のPGA増加量[gal]
-var threshold03 = 0.6; //2次フラグ条件のPGA増加量[gal]
-var threshold04 = 0.5; //フラグ条件の震度
-var threshold05 = 0.03; //検知中の臨時閾値[gal]
+var threshold01 = 3; //検出とする観測点数
+var threshold02 = 0.06; //1次フラグ条件のPGA増加量[gal]
+var threshold03 = 0.2; //2次フラグ条件のPGA増加量[gal]
+var threshold04 = 1; //1次フラグ条件の震度
 var MargeRange = 40; //地震の同定範囲[km]
 var time00 = 300000; //最初の検出~解除
 var time01 = 10000; //最後の検出~解除
 
-function addPoint(elm, elm2) {
-  elm2.Codes.push(elm);
-  if (elm2.detect2) elm2.detect2Count++;
-  var radiusTmp = geosailing(elm.Location.Latitude, elm.Location.Longitude, elm2.lat, elm2.lng);
-  if (elm2.Radius < radiusTmp) elm2.Radius = radiusTmp;
-  return true;
-}
 var pointsData = {};
 function kmoniControl(data, date) {
   kmoniActive = new Date();
-  var kmoniHistoryFlag = kmoniDataHistory.length > historyCount;
-  if (kmoniHistoryFlag) kmoniDataHistory = kmoniDataHistory.slice(kmoniDataHistory.length - historyCount);
 
-  data.forEach(function (elm, index) {
-    var dataItemHistory = kmoniDataHistory.map(function (elm2) {
-      return elm2[index].pga;
-    });
-    //var pgaMax = Math.max.apply(null, dataItemHistory);
-    var oneBeforeDetect;
-    if (kmoniHistoryFlag) {
-      var oneBefore = kmoniDataHistory[kmoniDataHistory.length - 1][index];
-      var oneBeforeDetect = oneBefore.detect;
-    }
-    var pgaMin = Math.min.apply(null, dataItemHistory);
-    if (kmoniHistoryFlag) {
-      if (elm.pga - oneBefore.pga > 0) {
-        elm.UpCount++;
-      } else if (elm.pga - oneBefore.pga < 0) {
-        elm.UpCount = 0;
-      }
-    }
-
-    if (elm.Region == "東京都") {
-      threshold02 = 0.07;
-      MargeRange = 20;
-    } else {
-      threshold02 = 0.04;
-      MargeRange = 40;
-    }
+  data.forEach(function (elm) {
     var ptDataTmp = pointsData[elm.Code];
     if (!ptDataTmp) {
-      pointsData[elm.Code] = { detectCount: 0 };
+      pointsData[elm.Code] = { detectCount: 0, detectCount2: 0, SUMTmp: [elm.pga], Event: null, oneBeforePGA: elm.pga };
       ptDataTmp = pointsData[elm.Code];
-    } else if (!ptDataTmp.detectCount) {
-      ptDataTmp.detectCount = 0;
     }
+    if (ptDataTmp.SUMTmp.length > 0) {
+      var pgaAvr =
+        ptDataTmp.SUMTmp.reduce(function (acc, cur) {
+          return acc + cur;
+        }) / ptDataTmp.SUMTmp.length;
+    }
+    if (!pgaAvr) var pgaAvr = 0.05;
 
-    var detect0 = elm.pga - pgaMin >= threshold02 || (oneBeforeDetect && elm.pga >= threshold05);
-    var detect1 = detect0; /*&& ptDataTmp.detectCount >= 1*/
-    var detect2 = (elm.pga - pgaMin >= threshold03 || elm.shindo >= threshold04 || elm.UpCount > 2) && ptDataTmp.detectCount >= 2; /* || elm.detectCount > 1*/
+    threshold02 = 0.17 * pgaAvr + 0.028;
+    if (elm.Region == "東京都" || elm.Region == "千葉県" || elm.Region == "埼玉県" || elm.Region == "神奈川県") {
+      threshold02 *= 2;
+      MargeRange = 10;
+      threshold01 = 5;
+    } else {
+      MargeRange = 30;
+      threshold01 = 3;
+    }
+    threshold03 = threshold02 * 2;
 
-    elm.detect = detect1 || detect2;
+    var detect0 = elm.pga - pgaAvr >= threshold02 || elm.shindo >= threshold04;
+    var detect1 = detect0 && ptDataTmp.detectCount >= 1;
+    var detect2 = elm.pga - pgaAvr >= threshold03 && ptDataTmp.UpCount >= 1; /*|| elm.shindo >= threshold04*/ /* || elm.detectCount > 1*/
+
+    elm.detect = detect1;
     elm.detect2 = detect1 && detect2;
     if (detect0) {
       ptDataTmp.detectCount++;
     } else {
       ptDataTmp.detectCount = 0;
     }
+    if (!detect1) {
+      ptDataTmp.SUMTmp.slice(0, historyCount - 1);
+      ptDataTmp.SUMTmp.push(elm.pga);
+    }
+    if (elm.pga - ptDataTmp.oneBeforePGA > 0) {
+      ptDataTmp.UpCount++;
+    } else if (elm.pga - ptDataTmp.oneBeforePGA < 0) {
+      ptDataTmp.UpCount = 0;
+    }
+    if (!detect1) {
+      //ptDataTmp.Event = null;
+      EQDetect_List.forEach(function (elm2) {
+        elm2.Codes = elm2.Codes.filter(function (elm3) {
+          return elm3.Code !== elm.Code;
+        });
+      });
+    }
+    ptDataTmp.oneBeforePGA = elm.pga;
   });
   if (!EEWNow) {
-    data.forEach(function (elm, index) {
+    data.forEach(function (elm) {
       if (elm.detect) {
         var EQD_ItemTmp = EQDetect_List.find(function (elm2) {
           if (geosailing(elm.Location.Latitude, elm.Location.Longitude, elm2.lat, elm2.lng) - elm2.Radius <= MargeRange) {
@@ -513,6 +513,7 @@ function kmoniControl(data, date) {
               return geosailing(elm.Location.Latitude, elm.Location.Longitude, elm3.Location.Latitude, elm3.Location.Longitude) <= MargeRange;
             });
             if (CodesTmp) {
+              var ptDataTmp = pointsData[elm.Code];
               var already = EQDetect_List.findIndex(function (elm3) {
                 return elm3.Codes.find(function (elm4) {
                   return elm4.Name == elm.Name;
@@ -520,17 +521,21 @@ function kmoniControl(data, date) {
               });
 
               if (already == -1) {
-                return addPoint(elm, elm2);
+                elm2.Codes.push(elm);
+                ptDataTmp.Event = elm2.id;
+                if (elm2.detect2) elm2.detect2Count++;
+                var radiusTmp = geosailing(elm.Location.Latitude, elm.Location.Longitude, elm2.lat, elm2.lng);
+                if (elm2.Radius < radiusTmp) elm2.Radius = radiusTmp;
+                return true;
               }
             }
           }
         });
         if (EQD_ItemTmp) {
           EQD_ItemTmp.last_Detect = new Date();
-
           if (EQD_ItemTmp.Codes.length >= threshold01) {
             if (!EQD_ItemTmp.showed) {
-              soundPlay(path.join(__dirname, "audio/EQDetect.mp3"));
+              soundPlay("EQDetect");
               createWindow();
             }
             if (mainWindow) {
@@ -542,17 +547,11 @@ function kmoniControl(data, date) {
             EQD_ItemTmp.showed = true;
           }
         } else if (elm.detect2) {
-          EQDetect_List.push({ id: EQDetectID, lat: elm.Location.Latitude, lng: elm.Location.Longitude, Codes: [elm], Radius: 0, maxPGA: elm.pga, detectCount: 1, detect2Count: 1, UpCount: 0, Up: false, last_Detect: new Date(), origin_Time: new Date(), showed: false });
+          EQDetect_List.push({ id: EQDetectID, lat: elm.Location.Latitude, lng: elm.Location.Longitude, Codes: [elm], Radius: 0, maxPGA: elm.pga, detectCount: 1, detect2Count: 1, Up: false, last_Detect: new Date(), origin_Time: new Date(), showed: false });
           EQDetectID++;
 
           //新報
         }
-      } else {
-        EQDetect_List.forEach(function (elm2) {
-          elm2.Codes = elm2.Codes.filter(function (elm3) {
-            return elm3.Code !== elm.Code;
-          });
-        });
       }
     });
   }
@@ -565,8 +564,6 @@ function kmoniControl(data, date) {
   if (mainWindow) {
     mainWindow.webContents.send("message2", kmoniPointsDataTmp);
   }
-
-  kmoniDataHistory.push(data);
 }
 function SnetControl(data, date) {
   SnetPointsDataTmp = {
@@ -1467,10 +1464,10 @@ function EEWAlert(data, first, update) {
   if (!update) {
     if (first) {
       if (data.alertflg == "警報") {
-        soundPlay(path.join(__dirname, "audio/EEW1.mp3"));
+        soundPlay("EEW1");
         //    sound.play(path.join(__dirname, "audio/EEW1.mp3"));
       } else {
-        soundPlay(path.join(__dirname, "audio/EEW2.mp3"));
+        soundPlay("EEW2");
       }
       createWindow();
     }
@@ -2337,22 +2334,30 @@ async function yoyuSetY(func) {
 async function yoyuSetK(func) {
   var yoyuKOK = false;
   var loopCount = 0;
-  var reqTimeTmp;
+  var resTimeTmp;
   while (!yoyuKOK) {
     await new Promise((resolve) => {
       try {
         if (net.online) {
-          var reqTime = new Date();
+          var dataTmp = "";
           var request = net.request("http://www.kmoni.bosai.go.jp/webservice/server/pros/latest.json?_=" + Number(new Date()));
           request.on("response", (res) => {
-            res.on("end", function () {
-              if (reqTimeTmp !== reqTime && 0 < loopCount) {
-                yoyuKOK = true;
-                yoyuK = new Date() - reqTime + Yoyu;
-              }
-              reqTimeTmp = new Date(reqTime);
+            res.on("data", (chunk) => {
+              dataTmp += chunk;
             });
-            setTimeout(resolve, 10);
+            res.on("end", function () {
+              var json = jsonParse(dataTmp);
+              if (json) {
+                var resTime = new Date(json.latest_time);
+
+                if (resTimeTmp !== resTime && 0 < loopCount) {
+                  yoyuKOK = true;
+                  yoyuK = new Date() - resTime;
+                }
+                resTimeTmp = resTime;
+              }
+              resolve();
+            });
           });
 
           request.end();
@@ -2360,7 +2365,7 @@ async function yoyuSetK(func) {
       } catch (err) {}
     });
     if (loopCount > 25) {
-      yoyuK = 2500 + Yoyu;
+      yoyuK = 2500;
       break;
     }
 
@@ -2371,23 +2376,27 @@ async function yoyuSetK(func) {
 }
 async function yoyuSetL(func) {
   var yoyuLOK = false;
-  var loopCount2 = 0;
-  var reqTimeTmp2;
+  var loopCount = 0;
+  var resTimeTmp;
   while (!yoyuLOK) {
     await new Promise((resolve) => {
       try {
         if (net.online) {
-          var reqTime2 = new Date();
           var request = net.request("https://smi.lmoniexp.bosai.go.jp/webservice/server/pros/latest.json?_" + Number(new Date()));
           request.on("response", (res) => {
             res.on("end", function () {
-              if (reqTimeTmp2 !== reqTime2 && 0 < loopCount2) {
-                yoyuLOK = true;
-                yoyuL = new Date() - reqTime2 + Yoyu;
+              var json = jsonParse(dataTmp);
+              if (json) {
+                var resTime = new Date(json.latest_time);
+
+                if (resTimeTmp !== resTime && 0 < loopCount) {
+                  yoyuLOK = true;
+                  yoyuL = new Date() - resTime;
+                }
+                resTimeTmp = resTime;
               }
-              reqTimeTmp2 = new Date(reqTime2);
+              resolve();
             });
-            setTimeout(resolve, 10);
           });
 
           request.end();
@@ -2666,11 +2675,11 @@ function geosailing(a, b, c, d) {
   with (Math) return acos(sin(a * (i = PI / 180)) * sin(c * i) + cos(a * i) * cos(c * i) * cos(b * i - d * i)) * 6371.008;
 }
 
-function soundPlay(path) {
+function soundPlay(name) {
   if (kmoniWorker) {
     kmoniWorker.webContents.send("message2", {
       action: "soundPlay",
-      data: path,
+      data: name,
     });
   }
 }

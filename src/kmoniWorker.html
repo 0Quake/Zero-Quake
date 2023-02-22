@@ -34,6 +34,11 @@
         var Scontext = Scanvas.getContext("2d");
         var EScanvas = document.getElementById("EstShindoCanvas");
         var EScontext = EScanvas.getContext("2d");
+        var AudioElms = {
+            "EQDetect": new Audio("audio/EQDetect.mp3"),
+            "EEW1": new Audio("audio/EEW1.mp3"),
+            "EEW2": new Audio("audio/EEW2.mp3")
+        }
 
         window.electronAPI.messageSend((event, request) => {
 
@@ -76,7 +81,12 @@
                 uttr.volume = 1
                 speechSynthesis.speak(uttr)
             } else if (request.action == "soundPlay") {
-                new Audio(request.data).play()
+                var AudioElm = AudioElms[request.data]
+                if (AudioElm) {
+                    AudioElm.currentTime = 0;
+                    if (AudioElm.paused) AudioElm.play()
+                }
+                //new Audio(request.data).play()
             }
 
 
