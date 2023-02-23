@@ -280,7 +280,7 @@ app.whenReady().then(() => {
     }
   }, 1000);
 
-  //replay("2023/02/20 22:41:40");
+  //replay("2023/02/23 23:40:20");
   /*
   EEWcontrol({
     alertflg: "予報", //種別
@@ -462,9 +462,9 @@ function kmoniControl(data, date) {
     }
     if (!pgaAvr) var pgaAvr = 0.05;
 
-    threshold02 = 0.17 * pgaAvr + 0.028;
+    threshold02 = 0.17 * pgaAvr + 0.025;
     if (elm.Region == "東京都" || elm.Region == "千葉県" || elm.Region == "埼玉県" || elm.Region == "神奈川県") {
-      threshold02 *= 2;
+      threshold02 *= 3;
       MargeRange = 10;
       threshold01 = 5;
     } else {
