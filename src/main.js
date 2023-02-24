@@ -281,105 +281,26 @@ app.whenReady().then(() => {
   }, 1000);
 
   //replay("2023/02/23 23:40:20");
-  /*
-  EEWcontrol({
-    alertflg: "予報", //種別
-    report_id: "20230115203744", //地震ID
-    report_num: 1, //第n報
-    report_time: new Date() - Replay, //発表時刻
-    magunitude: 9, //マグニチュード
-    calcintensity: "5-", //最大深度
-    depth: 10, //深さ
-    is_cancel: false, //キャンセル
-    is_final: false, //最終報
-    is_training: true, //訓練報
-    latitude: 35.6, //緯度
-    longitude: 140.3, //経度
-    region_code: "", //震央地域コード
-    region_name: "存在しない地名", //震央地域
-    origin_time: new Date(new Date() - Replay - 2000), //発生時刻
-    isPlum: false,
-    userIntensity: "4",
-    arrivalTime: new Date() - Replay + 100000,
-    intensityAreas: null, //細分区分ごとの予想震度
-    warnZones: {
-      zone: null,
-      Pref: null,
-      Regions: null,
-    },
-  });*/
-
-  /*
-  EEWcontrol({
-    alertflg: "警報", //種別
-    report_id: "20991111111111", //地震ID
-    report_num: 1, //第n報
-    report_time: new Date() - Replay, //発表時刻
-    magunitude: 9, //マグニチュード
-    calcintensity: "5-", //最大深度
-    depth: 10, //深さ
-    is_cancel: false, //キャンセル
-    is_final: false, //最終報
-    is_training: true, //訓練報
-    latitude: 35.6, //緯度
-    longitude: 140.3, //経度
-    region_code: "", //震央地域コード
-    region_name: "存在しない地名", //震央地域
-    origin_time: new Date(new Date() - Replay - 2000), //発生時刻
-    isPlum: false,
-    userIntensity: "4",
-    intensityAreas: null, //細分区分ごとの予想震度
-    warnZones: {
-      zone: null,
-      Pref: null,
-      Regions: null,
-    },
-  });*/
-
-  /*
-  EEWcontrol({
-    report_time: new Date() - Replay, //発表時刻
-    region_code: "", //震央地域コード
-    region_name: "存在しない地名", //震央地域
-    latitude: 35.6, //緯度
-    longitude: 140.3, //経度
-    is_cancel: false, //キャンセル
-    depth: 10, //深さ
-    calcintensity: 7, //最大深度
-    is_final: false, //最終報
-    is_training: true, //訓練報
-    origin_time: new Date(new Date() - Replay - 2000), //発生時刻
-    magunitude: 9, //マグニチュード
-    report_num: 1, //第n報
-    report_id: "20991111111111", //地震ID
-    alertflg: "警報", //種別
-    condition: "",
-    source: "存在しない情報源",
-    intensityAreas: { 4: ["301", "331", "341"] },
-  });*/
-
-  /*
-  setTimeout(function () {
-    EEWcontrol({
-      report_time: new Date() - Replay, //発表時刻
-      region_code: "", //震央地域コード
-      region_name: "存在しない地名", //震央地域
-      latitude: 35.6, //緯度
-      longitude: 140.3, //経度
-      is_cancel: true, //キャンセル
-      depth: 10, //深さ
-      calcintensity: 7, //最大深度
-      is_final: false, //最終報
-      is_training: false, //訓練報
-      origin_time: new Date(new Date() - Replay - 2000), //発生時刻
-      magunitude: 9, //マグニチュード
-      report_num: 2, //第n報
-      report_id: "20991111111111", //地震ID
-      alertflg: "警報", //種別
-      condition: "",
-      source: "存在しない情報源",
-    });
-  }, 5000);*/
+  TsunamiInfoControl({
+    issue: { time: new Date() },
+    cancelled: false,
+    ValidDateTime: new Date(Number(new Date()) + 15000),
+    areas: [
+      { grade: "Warning", name: "伊勢・三河湾" },
+      { grade: "Warning", name: "三重県南部" },
+      { grade: "Warning", name: "淡路島南部" },
+      { grade: "Warning", name: "愛媛県宇和海沿岸" },
+      { grade: "Warning", name: "有明・八代海" },
+      { grade: "Warning", name: "長崎県西方" },
+      { grade: "Warning", name: "熊本県天草灘沿岸" },
+      { grade: "Warning", name: "大分県瀬戸内海沿岸" },
+      { grade: "Warning", name: "大分県豊後水道沿岸" },
+      { grade: "Warning", name: "宮崎県" },
+      { grade: "Warning", name: "鹿児島県東部" },
+      { grade: "Warning", name: "鹿児島県西部" },
+      { grade: "Warning", name: "種子島・屋久島地方" },
+    ],
+  });
 });
 
 // 全てのウィンドウが閉じたときの処理
@@ -465,7 +386,7 @@ function kmoniControl(data, date) {
     threshold02 = 0.17 * pgaAvr + 0.025;
     if (elm.Region == "東京都" || elm.Region == "千葉県" || elm.Region == "埼玉県" || elm.Region == "神奈川県") {
       threshold02 *= 3;
-      MargeRange = 10;
+      MargeRange = 15;
       threshold01 = 5;
     } else {
       MargeRange = 30;
@@ -1863,11 +1784,17 @@ function JMAEQInfoFetch(url) {
           };
           TsunamiInfoControl(tsunamiDataTmp);
         } else {
+          var ValidDateTimeElm = xml.querySelector("ValidDateTime");
+          var ValidDateTimeTmp;
+          if (ValidDateTimeElm) {
+            ValidDateTimeTmp = new Date(ValidDateTimeElm.textContent);
+          }
           var tsunamiDataTmp = {
             issue: { time: new Date(xml.querySelector("ReportDateTime").textContent) },
             areas: [],
             revocation: false,
             source: "jmaXML",
+            ValidDateTime: ValidDateTimeTmp,
           };
           if (xml.querySelector("Body Tsunami")) {
             if (xml.querySelector("Body Tsunami Forecast")) {
@@ -2119,6 +2046,7 @@ function eqInfoAlert(data, source, update) {
     }
   }
 }
+var RevocationTimer;
 
 function TsunamiInfoControl(data) {
   var newInfo = !tsunamiData || !tsunamiData.issue || tsunamiData.issue.time < data.issue.time;
@@ -2128,6 +2056,20 @@ function TsunamiInfoControl(data) {
     if (newInfo) {
       //アラート
       createWindow();
+    }
+
+    //情報の有効期限
+    if (data.ValidDateTime) {
+      clearTimeout(RevocationTimer);
+      RevocationTimer = setTimeout(function () {
+        TsunamiInfoControl({
+          issue: { time: tsunamiData.ValidDateTime },
+          revocation: true,
+          cancelled: false,
+          areas: [],
+        });
+        console.log("aaaaaaaa");
+      }, data.ValidDateTime - new Date());
     }
 
     if (mainWindow) {

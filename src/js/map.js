@@ -17,6 +17,7 @@ var tsunamiLayerAdded = false;
 
 var psWaveList = [];
 var tsunamiAlertNow = false;
+var RevocationTimer;
 
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "kmoniUpdate") {
@@ -52,7 +53,10 @@ window.electronAPI.messageSend((event, request) => {
 
     Tsunami_MajorWarning = Tsunami_Warning = Tsunami_Watch = Tsunami_Yoho = false;
 
-    if (request.data.data.cancelled) {
+    document.getElementById("tsunamiCancel").style.display = request.data.cancelled ? "block" : "none";
+    document.getElementById("tsunamiRevocation").style.display = request.data.revocation ? "block" : "none";
+
+    if (request.data.cancelled) {
       document.getElementById("tsunamiWrap").style.display = "none";
 
       document.body.classList.remove("TsunamiMode");
@@ -63,7 +67,7 @@ window.electronAPI.messageSend((event, request) => {
 
       document.body.classList.add("TsunamiMode");
       var alertNowTmp = false;
-      request.data.data.areas.forEach(function (elm) {
+      request.data.areas.forEach(function (elm) {
         var tsunamiItem = tsunamiElm.find(function (elm2) {
           return elm2.name == elm.name;
         });
@@ -127,21 +131,16 @@ window.electronAPI.messageSend((event, request) => {
         }
       });
 
-      if (request.data.data.revocation) {
+      if (request.data.revocation) {
         document.getElementById("tsunamiWrap").style.display = "none";
         document.body.classList.remove("TsunamiMode");
         map.removeLayer(tsunamiLayer);
         Tsunami_MajorWarning = Tsunami_Warning = Tsunami_Watch = false;
-        document.getElementById("tsunamiRevocation").style.display = "block";
       } else if (!alertNowTmp && tsunamiAlertNow) {
         document.getElementById("tsunamiWrap").style.display = "none";
         document.body.classList.remove("TsunamiMode");
         map.removeLayer(tsunamiLayer);
         Tsunami_MajorWarning = Tsunami_Warning = Tsunami_Watch = false;
-        document.getElementById("tsunamiCancel").style.display = "block";
-      } else {
-        document.getElementById("tsunamiRevocation").style.display = "none";
-        document.getElementById("tsunamiCancel").style.display = "none";
       }
       tsunamiAlertNow = alertNowTmp;
 
