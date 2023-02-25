@@ -275,6 +275,9 @@ div.marker-circle.marker_Int7p {
   height: 25px;
   margin: 5px;
 }
+.marker_Int {
+  box-shadow: 0 0 0 1px #fff, 0 0 0 2px #000;
+}
 .zoomLevel_1 .marker_Int,
 .zoomLevel_1 .marker_Int::before,
 .zoomLevel_2 .marker_Int,

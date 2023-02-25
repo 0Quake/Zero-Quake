@@ -280,7 +280,7 @@ app.whenReady().then(() => {
     }
   }, 1000);
 
-  //replay("2023/02/25 22:27:02");
+  replay("2023/02/25 22:27:50");
 });
 
 // 全てのウィンドウが閉じたときの処理
@@ -370,12 +370,11 @@ function kmoniControl(data, date) {
       threshold03 = 0.3 * pgaAvr + 0.1;
       if (elm.Region == "東京都" || elm.Region == "千葉県" || elm.Region == "埼玉県" || elm.Region == "神奈川県") {
         threshold02 *= 3;
-      } else {
       }
 
       var detect0 = elm.pga - pgaAvr >= threshold02 || elm.shindo >= threshold04;
-      var detect1 = detect0 && ptDataTmp.detectCount >= 1;
-      var detect2 = elm.pga - pgaAvr >= threshold03 && ptDataTmp.UpCount >= 2; /*|| elm.shindo >= threshold04*/ /* || elm.detectCount > 1*/
+      var detect1 = detect0;
+      var detect2 = (elm.pga - pgaAvr >= threshold03 && ptDataTmp.UpCount >= 1) || elm.shindo > 1.5; /*|| elm.shindo >= threshold04*/ /* || elm.detectCount > 1*/
 
       elm.detect = detect1;
       elm.detect2 = detect1 && detect2;
@@ -408,9 +407,9 @@ function kmoniControl(data, date) {
       if (elm.detect) {
         if (elm.Region == "東京都" || elm.Region == "千葉県" || elm.Region == "埼玉県" || elm.Region == "神奈川県") {
           threshold01 = 5;
-          MargeRange = 30;
+          MargeRange = 20;
         } else {
-          threshold01 = 5;
+          threshold01 = 4;
           MargeRange = 50;
         }
 
@@ -443,7 +442,11 @@ function kmoniControl(data, date) {
 
           if (EQD_ItemTmp.Codes.length >= threshold01) {
             if (!EQD_ItemTmp.showed) {
-              soundPlay("EQDetect");
+              if (EQD_ItemTmp.maxPGA > 5) {
+                soundPlay("EQDetectLv2");
+              } else {
+                soundPlay("EQDetectLv1");
+              }
               createWindow();
             }
             if (mainWindow) {
@@ -1364,9 +1367,7 @@ function EEWAlert(data, first, update) {
   });
   EEW_nowList.push(data);
 
-  if (update) {
-    speak("続報");
-  } else {
+  if (!update) {
     createWindow();
     if (first) {
       if (data.alertflg == "警報") {
@@ -1375,6 +1376,9 @@ function EEWAlert(data, first, update) {
       } else {
         soundPlay("EEW2");
       }
+      speak("緊急地震速報です。");
+    } else {
+      speak("続報");
     }
     if (mainWindow) {
       mainWindow.webContents.send("message2", {
@@ -1395,7 +1399,6 @@ function EEWAlert(data, first, update) {
         createWindow();
       });
     }
-    speak("緊急地震速報です。");
   }
 
   if (!EEW_history[data.source]) EEW_history[data.source] = [];
