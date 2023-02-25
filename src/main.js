@@ -1364,15 +1364,10 @@ function EEWAlert(data, first, update) {
   });
   EEW_nowList.push(data);
 
-  if (mainWindow) {
-    mainWindow.webContents.send("message2", {
-      action: "EEWAlertUpdate",
-      data: EEW_nowList,
-      update: Boolean(update),
-    });
-  }
-
-  if (!update) {
+  if (update) {
+    speak("続報");
+  } else {
+    createWindow();
     if (first) {
       if (data.alertflg == "警報") {
         soundPlay("EEW1");
@@ -1380,27 +1375,27 @@ function EEWAlert(data, first, update) {
       } else {
         soundPlay("EEW2");
       }
-      createWindow();
     }
-
-    var alertFlg = "";
-    if (data.alertflg) alertFlg = "（" + data.alertflg + "）";
-    var EEWNotification = new Notification({
-      title: "緊急地震速報" + alertFlg + "#" + data.report_num,
-      body: data.region_name + "\n推定震度：" + data.calcintensity + "  M" + data.magunitude + "  深さ：" + data.depth,
-      icon: path.join(__dirname, "img/icon.ico"),
-    });
-    EEWNotification.show();
-    EEWNotification.on("click", function () {
-      createWindow();
-    });
-
-    if (kmoniWorker) {
-      kmoniWorker.webContents.send("message2", {
-        action: "speak",
-        data: "緊急地震速報です。",
+    if (mainWindow) {
+      mainWindow.webContents.send("message2", {
+        action: "EEWAlertUpdate",
+        data: EEW_nowList,
+        update: Boolean(update),
+      });
+    } else {
+      var alertFlg = "";
+      if (data.alertflg) alertFlg = "（" + data.alertflg + "）";
+      var EEWNotification = new Notification({
+        title: "緊急地震速報" + alertFlg + "#" + data.report_num,
+        body: data.region_name + "\n推定震度：" + data.calcintensity + "  M" + data.magunitude + "  深さ：" + data.depth,
+        icon: path.join(__dirname, "img/icon.ico"),
+      });
+      EEWNotification.show();
+      EEWNotification.on("click", function () {
+        createWindow();
       });
     }
+    speak("緊急地震速報です。");
   }
 
   if (!EEW_history[data.source]) EEW_history[data.source] = [];
@@ -1410,6 +1405,14 @@ function EEWAlert(data, first, update) {
     })
   ) {
     EEW_history[data.source].push(data);
+  }
+}
+function speak(str) {
+  if (kmoniWorker) {
+    kmoniWorker.webContents.send("message2", {
+      action: "speak",
+      data: str,
+    });
   }
 }
 function EEWClear(source, code, reportnum, bypass) {
