@@ -849,7 +849,7 @@ function kmoniMapUpdate(dataTmp, type) {
 
         var IntTmp = shindoConvert(elm.shindo, 3);
         if (IntTmp) {
-          points[elm.Code].marker.setZIndexOffset(3000);
+          points[elm.Code].marker.setZIndexOffset(shindoConvert(elm.shindo, 5) * 1000);
           markerCircleElm.classList.add("marker_Int", "marker_Int" + IntTmp);
         } else {
           points[elm.Code].marker.setZIndexOffset(0);
