@@ -280,27 +280,7 @@ app.whenReady().then(() => {
     }
   }, 1000);
 
-  //replay("2023/02/23 23:40:20");
-  TsunamiInfoControl({
-    issue: { time: new Date() },
-    cancelled: false,
-    ValidDateTime: new Date(Number(new Date()) + 15000),
-    areas: [
-      { grade: "Warning", name: "伊勢・三河湾" },
-      { grade: "Warning", name: "三重県南部" },
-      { grade: "Warning", name: "淡路島南部" },
-      { grade: "Warning", name: "愛媛県宇和海沿岸" },
-      { grade: "Warning", name: "有明・八代海" },
-      { grade: "Warning", name: "長崎県西方" },
-      { grade: "Warning", name: "熊本県天草灘沿岸" },
-      { grade: "Warning", name: "大分県瀬戸内海沿岸" },
-      { grade: "Warning", name: "大分県豊後水道沿岸" },
-      { grade: "Warning", name: "宮崎県" },
-      { grade: "Warning", name: "鹿児島県東部" },
-      { grade: "Warning", name: "鹿児島県西部" },
-      { grade: "Warning", name: "種子島・屋久島地方" },
-    ],
-  });
+  replay("2023/02/25 22:27:02");
 });
 
 // 全てのウィンドウが閉じたときの処理
@@ -369,64 +349,71 @@ var pointsData = {};
 function kmoniControl(data, date) {
   kmoniActive = new Date();
 
-  data.forEach(function (elm) {
-    var ptDataTmp = pointsData[elm.Code];
-    if (!ptDataTmp) {
-      pointsData[elm.Code] = { detectCount: 0, detectCount2: 0, SUMTmp: [elm.pga], Event: null, oneBeforePGA: elm.pga };
-      ptDataTmp = pointsData[elm.Code];
-    }
-    if (ptDataTmp.SUMTmp.length > 0) {
-      var pgaAvr =
-        ptDataTmp.SUMTmp.reduce(function (acc, cur) {
-          return acc + cur;
-        }) / ptDataTmp.SUMTmp.length;
-    }
-    if (!pgaAvr) var pgaAvr = 0.05;
-
-    threshold02 = 0.17 * pgaAvr + 0.025;
-    if (elm.Region == "東京都" || elm.Region == "千葉県" || elm.Region == "埼玉県" || elm.Region == "神奈川県") {
-      threshold02 *= 3;
-      MargeRange = 15;
-      threshold01 = 5;
-    } else {
-      MargeRange = 30;
-      threshold01 = 3;
-    }
-    threshold03 = threshold02 * 2;
-
-    var detect0 = elm.pga - pgaAvr >= threshold02 || elm.shindo >= threshold04;
-    var detect1 = detect0 && ptDataTmp.detectCount >= 1;
-    var detect2 = elm.pga - pgaAvr >= threshold03 && ptDataTmp.UpCount >= 1; /*|| elm.shindo >= threshold04*/ /* || elm.detectCount > 1*/
-
-    elm.detect = detect1;
-    elm.detect2 = detect1 && detect2;
-    if (detect0) {
-      ptDataTmp.detectCount++;
-    } else {
-      ptDataTmp.detectCount = 0;
-    }
-    if (!detect1) {
-      ptDataTmp.SUMTmp.slice(0, historyCount - 1);
-      ptDataTmp.SUMTmp.push(elm.pga);
-    }
-    if (elm.pga - ptDataTmp.oneBeforePGA > 0) {
-      ptDataTmp.UpCount++;
-    } else if (elm.pga - ptDataTmp.oneBeforePGA < 0) {
-      ptDataTmp.UpCount = 0;
-    }
-    if (!detect1) {
-      //ptDataTmp.Event = null;
-      EQDetect_List.forEach(function (elm2) {
-        elm2.Codes = elm2.Codes.filter(function (elm3) {
-          return elm3.Code !== elm.Code;
-        });
-      });
-    }
-    ptDataTmp.oneBeforePGA = elm.pga;
-  });
   if (!EEWNow) {
     data.forEach(function (elm) {
+      var ptDataTmp = pointsData[elm.Code];
+      if (!ptDataTmp) {
+        pointsData[elm.Code] = { detectCount: 0, detectCount2: 0, SUMTmp: [elm.pga], Event: null, oneBeforePGA: elm.pga };
+        ptDataTmp = pointsData[elm.Code];
+      }
+      if (ptDataTmp.SUMTmp.length > 0) {
+        var pgaAvr =
+          ptDataTmp.SUMTmp.reduce(function (acc, cur) {
+            return acc + cur;
+          }) / ptDataTmp.SUMTmp.length;
+      }
+      if (!pgaAvr) {
+        var pgaAvr = 0.1;
+      }
+
+      threshold02 = 0.17 * pgaAvr + 0.04;
+      threshold03 = 0.3 * pgaAvr + 0.1;
+      if (elm.Region == "東京都" || elm.Region == "千葉県" || elm.Region == "埼玉県" || elm.Region == "神奈川県") {
+        threshold02 *= 3;
+      } else {
+      }
+
+      var detect0 = elm.pga - pgaAvr >= threshold02 || elm.shindo >= threshold04;
+      var detect1 = detect0 && ptDataTmp.detectCount >= 1;
+      var detect2 = elm.pga - pgaAvr >= threshold03 && ptDataTmp.UpCount >= 2; /*|| elm.shindo >= threshold04*/ /* || elm.detectCount > 1*/
+
+      elm.detect = detect1;
+      elm.detect2 = detect1 && detect2;
+      if (detect0) {
+        ptDataTmp.detectCount++;
+      } else {
+        ptDataTmp.detectCount = 0;
+      }
+      if (!detect2) {
+        ptDataTmp.SUMTmp.slice(0, historyCount - 1);
+        ptDataTmp.SUMTmp.push(elm.pga);
+      }
+      if (elm.pga - ptDataTmp.oneBeforePGA > 0) {
+        ptDataTmp.UpCount++;
+      } else if (elm.pga - ptDataTmp.oneBeforePGA < 0) {
+        ptDataTmp.UpCount = 0;
+      }
+      if (!detect1) {
+        //ptDataTmp.Event = null;
+        EQDetect_List.forEach(function (elm2) {
+          elm2.Codes = elm2.Codes.filter(function (elm3) {
+            return elm3.Code !== elm.Code;
+          });
+        });
+      }
+      ptDataTmp.oneBeforePGA = elm.pga;
+    });
+
+    data.forEach(function (elm) {
       if (elm.detect) {
+        if (elm.Region == "東京都" || elm.Region == "千葉県" || elm.Region == "埼玉県" || elm.Region == "神奈川県") {
+          threshold01 = 5;
+          MargeRange = 30;
+        } else {
+          threshold01 = 5;
+          MargeRange = 30;
+        }
+
         var EQD_ItemTmp = EQDetect_List.find(function (elm2) {
           if (geosailing(elm.Location.Latitude, elm.Location.Longitude, elm2.lat, elm2.lng) - elm2.Radius <= MargeRange) {
             var CodesTmp = elm2.Codes.find(function (elm3) {
@@ -453,6 +440,7 @@ function kmoniControl(data, date) {
         });
         if (EQD_ItemTmp) {
           EQD_ItemTmp.last_Detect = new Date();
+
           if (EQD_ItemTmp.Codes.length >= threshold01) {
             if (!EQD_ItemTmp.showed) {
               soundPlay("EQDetect");
@@ -2068,7 +2056,6 @@ function TsunamiInfoControl(data) {
           cancelled: false,
           areas: [],
         });
-        console.log("aaaaaaaa");
       }, data.ValidDateTime - new Date());
     }
 

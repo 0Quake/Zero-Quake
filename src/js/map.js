@@ -27,16 +27,20 @@ window.electronAPI.messageSend((event, request) => {
   } else if (request.action == "longWaveUpdate") {
     document.getElementById("LWaveWrap").style.display = "block";
     document.getElementById("maxKaikyu").textContent = request.data.avrrank;
-    return false;
-    //document.getElementById("region_name2").textContent = request.data.avrarea_list.join(" ");
-    request.data.avrarea_list.forEach(function (elm) {
-      var section = sections.find(function (elm2) {
-        return elm2.name == elm;
+    if (Number(request.data.avrrank) > 0) {
+      document.getElementById("region_name2").textContent = request.data.avrarea_list.join(" ");
+      return false;
+      request.data.avrarea_list.forEach(function (elm) {
+        var section = sections.find(function (elm2) {
+          return elm2.name == elm;
+        });
+        if (section) {
+          //section.item.setStyle({ fill: true, fillColor: "#FFF" });
+        }
       });
-      if (section) {
-        //section.item.setStyle({ fill: true, fillColor: "#FFF" });
-      }
-    });
+    } else {
+      document.getElementById("region_name2").textContent = "";
+    }
   } else if (request.action == "longWaveClear") {
     document.getElementById("LWaveWrap").style.display = "none";
   } else if (request.action == "EEWAlertUpdate") {
