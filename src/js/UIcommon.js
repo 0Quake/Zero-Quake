@@ -124,7 +124,7 @@ function shindoConvert(str, responseType) {
         return ConvTable[ShindoTmp];
         break;
       case 3:
-        var ConvTable = { "?": null, 0: null, 1: "1", 2: "2", 3: "3", 4: "4", "5-": "5-", "5+": "5p", "6-": "6-", "6+": "6p", 7: "7", "7+": "7p" };
+        var ConvTable = { "?": null, 0: null, 1: "1", 2: "2", 3: "3", 4: "4", "5-": "5m", "5+": "5p", "6-": "6m", "6+": "6p", 7: "7", "7+": "7p" };
         return ConvTable[ShindoTmp];
         break;
       case 4:
