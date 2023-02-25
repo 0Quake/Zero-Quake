@@ -280,7 +280,7 @@ app.whenReady().then(() => {
     }
   }, 1000);
 
-  replay("2023/02/25 22:27:02");
+  //replay("2023/02/25 22:27:02");
 });
 
 // 全てのウィンドウが閉じたときの処理
@@ -411,7 +411,7 @@ function kmoniControl(data, date) {
           MargeRange = 30;
         } else {
           threshold01 = 5;
-          MargeRange = 30;
+          MargeRange = 50;
         }
 
         var EQD_ItemTmp = EQDetect_List.find(function (elm2) {
@@ -710,7 +710,13 @@ function SnetRequest() {
         var json = jsonParse(dataTmp);
         //json.features[json.features.length - 1].attributes.msilstarttime;
         if (!json || !json.features || !Array.isArray(json.features)) return false;
-        var dateTime = json.features.sort((a, b) => b.attributes.msilstarttime - a.attributes.msilstarttime)[0].attributes.msilstarttime;
+        var dateTime = 0;
+        var NowDateTime = Number(new Date() - Replay);
+        json.features.forEach(function (elm) {
+          if (NowDateTime - dateTime > NowDateTime - elm.attributes.msilstarttime && NowDateTime >= elm.attributes.msilstarttime) {
+            dateTime = Number(elm.attributes.msilstarttime);
+          }
+        });
         if (msil_lastTime < dateTime) {
           var request = net.request("https://www.msil.go.jp/arcgis/rest/services/Msil/DisasterPrevImg1/ImageServer//exportImage?f=image&time=" + dateTime + "%2C" + dateTime + "&bbox=13409547.546603577%2C2713376.239114911%2C16907305.960932314%2C5966536.162931148&size=400%2C400");
           request.on("response", (res) => {
@@ -1193,14 +1199,8 @@ function EEWcontrol(data) {
   }*/
   var pastTime = new Date() - Replay - data.origin_time;
   if (pastTime > 300000 || pastTime < 0) return;
-  if (!EEW_history[data.source]) EEW_history[data.source] = [];
-  if (
-    !EEW_history[data.source].find(function (elm) {
-      return data.report_id == elm.report_id && data.report_num == elm.report_num;
-    })
-  ) {
-    EEW_history[data.source].push(data);
-  }
+  /*
+   */
 
   if (data.latitude && data.longitude) {
     data.distance = geosailing(data.latitude, data.longitude, config.home.latitude, config.home.longitude);
@@ -1214,133 +1214,136 @@ function EEWcontrol(data) {
     var EEWJSON = EQJSON.data.find(function (elm2) {
       return elm2.report_num == data.report_num;
     });
-
-    //最新の報かどうか
-    var saishin =
-      data.report_num >
-      Math.max.apply(
-        null,
-        EQJSON.data.map(function (o) {
-          return o.report_num;
-        })
-      );
-    var oneBefore =
-      data.report_num ==
-      Math.max.apply(
-        null,
-        EQJSON.data.map(function (o) {
-          return o.report_num;
-        })
-      );
-
-    if (!EEWJSON && saishin) {
-      //第２報以降
-
-      var EQJSON = EEW_Data.find(function (elm) {
-        return elm.EQ_id == data.report_id;
-      });
-
-      if (!data.arrivalTime) {
-        var oneBeforeData = EQJSON.data.filter(function (elm) {
-          return elm.arrivalTime;
-        });
-        var newEstID = Math.max.apply(
+    if (EEWJSON) {
+      var oneBefore =
+        data.report_num ==
+        Math.max.apply(
           null,
-          oneBeforeData.map(function (o) {
+          EQJSON.data.map(function (o) {
             return o.report_num;
           })
         );
 
-        oneBeforeData = oneBeforeData.find(function (elm) {
-          return elm.report_num == newEstID;
+      if (oneBefore) {
+        //既知／情報更新
+        var changed = false;
+        oneBeforeData = EQJSON.data.find(function (elm) {
+          return elm.report_num == data.report_num;
         });
-        if (oneBeforeData) {
-          data.arrivalTime = oneBeforeData.arrivalTime;
+        if (!oneBeforeData.alertflg && data.alertflg) {
+          oneBeforeData.alertflg = data.alertflg;
+          changed = true;
+        }
+        if (!oneBeforeData.magunitude && data.magunitude) {
+          oneBeforeData.magunitude = data.magunitude;
+          changed = true;
+        }
+        if (!oneBeforeData.calcintensity && data.calcintensity) {
+          oneBeforeData.calcintensity = data.calcintensity;
+          changed = true;
+        }
+        if (!oneBeforeData.depth && data.depth) {
+          oneBeforeData.depth = data.depth;
+          changed = true;
+        }
+        if (!oneBeforeData.is_cancel && data.is_cancel) {
+          oneBeforeData.is_cancel = data.is_cancel;
+          changed = true;
+        }
+        if (!oneBeforeData.is_final && data.is_final) {
+          oneBeforeData.is_final = data.is_final;
+          changed = true;
+        }
+        if (!oneBeforeData.is_training && data.is_training) {
+          oneBeforeData.is_training = data.is_training;
+          changed = true;
+        }
+        if (!oneBeforeData.latitude && data.latitude) {
+          oneBeforeData.latitude = data.latitude;
+          changed = true;
+        }
+        if (!oneBeforeData.longitude && data.longitude) {
+          oneBeforeData.longitude = data.longitude;
+          changed = true;
+        }
+        if (!oneBeforeData.region_code && data.region_code) {
+          oneBeforeData.region_code = data.region_code;
+          changed = true;
+        }
+        if (!oneBeforeData.region_name && data.region_name) {
+          oneBeforeData.region_name = data.region_name;
+          changed = true;
+        }
+        if (!oneBeforeData.origin_time && data.origin_time) {
+          oneBeforeData.origin_time = data.origin_time;
+          changed = true;
+        }
+        if (!oneBeforeData.isPlum && data.isPlum) {
+          oneBeforeData.isPlum = data.isPlum;
+          changed = true;
+        }
+        if (!oneBeforeData.intensityAreas && data.intensityAreas) {
+          oneBeforeData.intensityAreas = data.intensityAreas;
+          changed = true;
+        }
+        if (!oneBeforeData.warnZone && data.warnZone) {
+          oneBeforeData.warnZone = data.warnZone;
+          changed = true;
+        }
+        if (!oneBeforeData.userIntensity && data.userIntensity) {
+          oneBeforeData.userIntensity = data.userIntensity;
+          changed = true;
+        }
+        if (data.arrivalTime && !oneBeforeData.arrivalTime) {
+          oneBeforeData.arrivalTime = data.arrivalTime;
+          changed = true;
+        }
+
+        if (changed) {
+          EEWAlert(oneBeforeData, false, true);
         }
       }
+    } else {
+      //最新の報かどうか
+      var saishin =
+        data.report_num >
+        Math.max.apply(
+          null,
+          EQJSON.data.map(function (o) {
+            return o.report_num;
+          })
+        );
+      if (saishin) {
+        //第２報以降
 
-      EEWAlert(data, false);
-      EQJSON.data.push(data);
-      if (data.is_cancel) {
-        EQJSON.canceled = true;
-      }
-    } else if (EEWJSON && oneBefore) {
-      //既知／情報更新
-      var changed = false;
-      oneBeforeData = EQJSON.data.find(function (elm) {
-        return elm.report_num == data.report_num;
-      });
-      if (!oneBeforeData.alertflg && data.alertflg) {
-        oneBeforeData.alertflg = data.alertflg;
-        changed = true;
-      }
-      if (!oneBeforeData.magunitude && data.magunitude) {
-        oneBeforeData.magunitude = data.magunitude;
-        changed = true;
-      }
-      if (!oneBeforeData.calcintensity && data.calcintensity) {
-        oneBeforeData.calcintensity = data.calcintensity;
-        changed = true;
-      }
-      if (!oneBeforeData.depth && data.depth) {
-        oneBeforeData.depth = data.depth;
-        changed = true;
-      }
-      if (!oneBeforeData.is_cancel && data.is_cancel) {
-        oneBeforeData.is_cancel = data.is_cancel;
-        changed = true;
-      }
-      if (!oneBeforeData.is_final && data.is_final) {
-        oneBeforeData.is_final = data.is_final;
-        changed = true;
-      }
-      if (!oneBeforeData.is_training && data.is_training) {
-        oneBeforeData.is_training = data.is_training;
-        changed = true;
-      }
-      if (!oneBeforeData.latitude && data.latitude) {
-        oneBeforeData.latitude = data.latitude;
-        changed = true;
-      }
-      if (!oneBeforeData.longitude && data.longitude) {
-        oneBeforeData.longitude = data.longitude;
-        changed = true;
-      }
-      if (!oneBeforeData.region_code && data.region_code) {
-        oneBeforeData.region_code = data.region_code;
-        changed = true;
-      }
-      if (!oneBeforeData.region_name && data.region_name) {
-        oneBeforeData.region_name = data.region_name;
-        changed = true;
-      }
-      if (!oneBeforeData.origin_time && data.origin_time) {
-        oneBeforeData.origin_time = data.origin_time;
-        changed = true;
-      }
-      if (!oneBeforeData.isPlum && data.isPlum) {
-        oneBeforeData.isPlum = data.isPlum;
-        changed = true;
-      }
-      if (!oneBeforeData.intensityAreas && data.intensityAreas) {
-        oneBeforeData.intensityAreas = data.intensityAreas;
-        changed = true;
-      }
-      if (!oneBeforeData.warnZone && data.warnZone) {
-        oneBeforeData.warnZone = data.warnZone;
-        changed = true;
-      }
-      if (!oneBeforeData.userIntensity && data.userIntensity) {
-        oneBeforeData.userIntensity = data.userIntensity;
-        changed = true;
-      }
-      if (data.arrivalTime && !oneBeforeData.arrivalTime) {
-        oneBeforeData.arrivalTime = data.arrivalTime;
-        changed = true;
-      }
+        var EQJSON = EEW_Data.find(function (elm) {
+          return elm.EQ_id == data.report_id;
+        });
 
-      if (changed) {
-        EEWAlert(oneBeforeData, false, true);
+        if (!data.arrivalTime) {
+          var oneBeforeData = EQJSON.data.filter(function (elm) {
+            return elm.arrivalTime;
+          });
+          var newEstID = Math.max.apply(
+            null,
+            oneBeforeData.map(function (o) {
+              return o.report_num;
+            })
+          );
+
+          oneBeforeData = oneBeforeData.find(function (elm) {
+            return elm.report_num == newEstID;
+          });
+          if (oneBeforeData) {
+            data.arrivalTime = oneBeforeData.arrivalTime;
+          }
+        }
+
+        EEWAlert(data, false);
+        EQJSON.data.push(data);
+        if (data.is_cancel) {
+          EQJSON.canceled = true;
+        }
       }
     }
   } else {
@@ -1398,6 +1401,15 @@ function EEWAlert(data, first, update) {
         data: "緊急地震速報です。",
       });
     }
+  }
+
+  if (!EEW_history[data.source]) EEW_history[data.source] = [];
+  if (
+    !EEW_history[data.source].find(function (elm) {
+      return data.report_id == elm.report_id && data.report_num == elm.report_num;
+    })
+  ) {
+    EEW_history[data.source].push(data);
   }
 }
 function EEWClear(source, code, reportnum, bypass) {
