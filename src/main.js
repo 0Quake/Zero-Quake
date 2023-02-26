@@ -1474,7 +1474,9 @@ function EEWClear(source, code, reportnum, bypass) {
 //
 //地震情報
 var eqInfo = { jma: [], usgs: [] };
+var EQInfoFetchIndex = 0;
 function eqInfoUpdate(disableRepeat) {
+  EQInfoFetchIndex++;
   //気象庁JSONリクエスト～パース
   var request = net.request("https://www.jma.go.jp/bosai/quake/data/list.json");
   request.on("response", (res) => {
@@ -1635,6 +1637,7 @@ function EQI_narikakunList_Req(url, num, first) {
           }
         }
         narikakun_URLs = [];
+        narikakun_EIDs = [];
       }
     });
   });
@@ -1937,7 +1940,8 @@ function eqInfoControl(dataList, type) {
   switch (type) {
     case "jma":
       var eqInfoTmp = [];
-      dataList.forEach(function (data, index) {
+      var eqInfoUpdateTmp = [];
+      dataList.forEach(function (data) {
         var EQElm = eqInfo.jma.concat(eqInfoTmp).find(function (elm) {
           return elm.eventId == data.eventId;
         });
@@ -1954,13 +1958,17 @@ function eqInfoControl(dataList, type) {
           if (data.cancel && (!EQElm.cancel || newer)) EQElm.cancel = data.cancel;
 
           if (data.DetailURL && data.DetailURL[0] !== "" && !EQElm.DetailURL.includes(data.DetailURL[0])) EQElm.DetailURL.push(data.DetailURL[0]);
-          eqInfoAlert(EQElm, "jma", true);
+          eqInfoUpdateTmp.push(data);
         } else {
           eqInfoTmp.push(data);
         }
       });
-      eqInfoAlert(eqInfoTmp, "jma");
-      console.log(eqInfo.jma);
+      if (eqInfoTmp.length > 0) {
+        eqInfoAlert(eqInfoTmp, "jma");
+      }
+      if (eqInfoUpdateTmp.length > 0) {
+        eqInfoAlert(eqInfoUpdateTmp, "jma", true);
+      }
 
       break;
 
@@ -1977,9 +1985,10 @@ function eqInfoControl(dataList, type) {
 
 function eqInfoAlert(data, source, update) {
   if (source == "jma") {
-    if (update) {
-      EQInfoTmp = data;
-    } else {
+    if (!update) {
+      if (EQInfoFetchIndex > 1) {
+        soundPlay("EQInfo");
+      }
       eqInfo.jma = eqInfo.jma.concat(data);
     }
     eqInfo.jma = eqInfo.jma.sort(function (a, b) {
