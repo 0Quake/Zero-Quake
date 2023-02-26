@@ -1474,7 +1474,6 @@ function EEWClear(source, code, reportnum, bypass) {
 //
 //地震情報
 var eqInfo = { jma: [], usgs: [] };
-var jmaJsonEIDs = [];
 function eqInfoUpdate(disableRepeat) {
   //気象庁JSONリクエスト～パース
   var request = net.request("https://www.jma.go.jp/bosai/quake/data/list.json");
@@ -1490,13 +1489,28 @@ function eqInfoUpdate(disableRepeat) {
       json = json.filter(function (elm) {
         return elm.ttl == "震度速報" || elm.ttl == "震源に関する情報" || elm.ttl == "震源・震度情報" || elm.ttl == "遠地地震に関する情報" || elm.ttl == "顕著な地震の震源要素更新のお知らせ";
       });
+      json = json.sort(function (a, b) {
+        var r = 0;
+        if (a.at > b.at) {
+          r = -1;
+        } else if (a.at < b.at) {
+          r = 1;
+        }
+        return r;
+      });
+
+      var jmaJsonEIDs = [];
       for (let elm of json) {
         var eidTmp = elm.eid;
         if (!jmaJsonEIDs.includes(eidTmp)) {
           jmaJsonEIDs.push(eidTmp);
-
+          if (jmaJsonEIDs.length == 10) break;
+        }
+      }
+      json.forEach(function (elm) {
+        if (jmaJsonEIDs.includes(elm.eid)) {
           var maxi = elm.maxi;
-          if (!maxi) maxi = shindoConvert("?", 1);
+          if (!maxi || maxi == "") maxi = null;
           dataTmp2.push({
             eventId: elm.eid,
             category: elm.ttl,
@@ -1509,11 +1523,8 @@ function eqInfoUpdate(disableRepeat) {
             reportDateTime: new Date(elm.rdt),
             DetailURL: [String("https://www.jma.go.jp/bosai/quake/data/" + elm.json)],
           });
-
-          if (jmaJsonEIDs == 10) break;
         }
-      }
-      jmaJsonEIDs = [];
+      });
 
       eqInfoControl(dataTmp2, "jma");
     });
@@ -1522,7 +1533,7 @@ function eqInfoUpdate(disableRepeat) {
     NetworkError(error, "気象庁ホームページ");
   });
 
-  request.end();
+  //request.end();
 
   //気象庁XMLリクエスト～パース
   var request = net.request("https://www.data.jma.go.jp/developer/xml/feed/eqvol.xml");
@@ -1548,82 +1559,7 @@ function eqInfoUpdate(disableRepeat) {
     NetworkError(error, "気象庁防災情報XML");
   });
 
-  request.end();
-
-  /*
-  //NHKリクエスト～パース
-  var request = net.request("https://www3.nhk.or.jp/sokuho/jishin/data/JishinReport.xml");
-  request.on("response", (res) => {
-    var dataTmp = "";
-    res.on("data", (chunk) => {
-      dataTmp += iconv.decode(chunk, "shift_jis").toString();
-    });
-    res.on("end", function () {
-      const parser = new new JSDOM().window.DOMParser();
-      const xml = parser.parseFromString(dataTmp, "text/html");
-
-      var items = xml.getElementsByTagName("item");
-      if (!items) return;
-      var urls = [];
-
-      for (let i = 0; i < 10; i++) {
-        var url = items[i].getAttribute("url");
-
-        urls.push(url);
-
-        var request = net.request({ url: url, encoding: null });
-        request.on("response", (res) => {
-          var dataTmp2 = "";
-          res.on("data", (chunk) => {
-            dataTmp2 += iconv.decode(chunk, "shift_jis").toString();
-          });
-          res.on("end", function () {
-            const parser2 = new new JSDOM().window.DOMParser();
-            const xml2 = parser.parseFromString(dataTmp2, "text/html");
-
-            var eid = "20" + urls[i].split("data/")[1].split("_")[0].slice(-12);
-
-            var OriginTime;
-            var epiCenter;
-            var magnitude;
-            var maxI;
-            if (xml2.querySelector("Earthquake")) {
-              OriginTime = new Date(xml2.querySelector("Earthquake").getAttribute("Time"));
-              epiCenter = xml2.querySelector("Earthquake").getAttribute("Epicenter");
-              magnitude = xml2.querySelector("Earthquake").getAttribute("Magnitude");
-              maxI = xml2.querySelector("Earthquake").getAttribute("Intensity");
-            }
-
-            var OriginTime;
-            if (xml2.querySelector("OriginTime")) {
-              OriginTime = new Date(xml2.querySelector("OriginTime").textContent);
-            }
-            eqInfoControl(
-              [
-                {
-                  eventId: eid,
-                  category: "?",
-                  OriginTime: OriginTime,
-                  epiCenter: epiCenter,
-                  M: magnitude,
-                  maxI: maxI,
-                  reportDateTime: OriginTime,
-                  DetailURL: [urls[i]],
-                },
-              ],
-              "jma"
-            );
-          });
-        });
-        request.end();
-      }
-    });
-  });
-  request.on("error", (error) => {
-    NetworkError(error, "NHKホームページ");
-  });
-  request.end();
-  */
+  //request.end();
 
   EQI_narikakunList_Req("https://ntool.online/api/earthquakeList?year=" + new Date().getFullYear() + "&month=" + (new Date().getMonth() + 1), 10, true);
 
@@ -1788,6 +1724,7 @@ function JMAEQInfoFetch(url) {
         if (IntensityElm) {
           maxIntTmp = shindoConvert(IntensityElm.querySelector("Observation > MaxInt").textContent);
         }
+        if (maxIntTmp == "[objectHTMLUnknownElement]") maxIntTmp = null;
         eqInfoControl(
           [
             {
@@ -2005,26 +1942,25 @@ function eqInfoControl(dataList, type) {
           return elm.eventId == data.eventId;
         });
 
+        if (!data.maxI) data.maxI = null;
         if (EQElm) {
-          if (data.OriginTime && (!EQElm.OriginTime || EQElm.reportDateTime < data.reportDateTime)) EQElm.OriginTime = data.OriginTime;
-          if (data.epiCenter && (!EQElm.epiCenter || EQElm.reportDateTime < data.reportDateTime)) EQElm.epiCenter = data.epiCenter;
-          if (data.M && (!EQElm.M || EQElm.reportDateTime < data.reportDateTime)) EQElm.M = data.M;
-          if (data.maxI && data.maxI !== "[objectHTMLUnknownElement]" && (!EQElm.maxI || EQElm.reportDateTime < data.reportDateTime)) {
+          var newer = EQElm.reportDateTime < data.reportDateTime;
+          if (data.OriginTime && (!EQElm.OriginTime || newer)) EQElm.OriginTime = data.OriginTime;
+          if (data.epiCenter && (!EQElm.epiCenter || newer)) EQElm.epiCenter = data.epiCenter;
+          if (data.M && (!EQElm.M || newer)) EQElm.M = data.M;
+          if (data.maxI && (!EQElm.maxI || newer)) {
             EQElm.maxI = data.maxI;
           }
-          if (data.cancel && (!EQElm.cancel || EQElm.reportDateTime < data.reportDateTime)) EQElm.cancel = data.cancel;
+          if (data.cancel && (!EQElm.cancel || newer)) EQElm.cancel = data.cancel;
 
           if (data.DetailURL && data.DetailURL[0] !== "" && !EQElm.DetailURL.includes(data.DetailURL[0])) EQElm.DetailURL.push(data.DetailURL[0]);
           eqInfoAlert(EQElm, "jma", true);
         } else {
-          if (data.maxI == "[objectHTMLUnknownElement]") data.maxI = null;
           eqInfoTmp.push(data);
         }
-
-        if (index == dataList.length - 1) {
-          eqInfoAlert(eqInfoTmp, "jma");
-        }
       });
+      eqInfoAlert(eqInfoTmp, "jma");
+      console.log(eqInfo.jma);
 
       break;
 

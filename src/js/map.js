@@ -670,16 +670,21 @@ function init() {
     pane: "background",
   }).addTo(map);*/
 
-  map.on("zoom", function () {
+  map.on("zoomstart", function () {
     if (psWaveList.length > 0) {
       document.querySelectorAll(".PWave,.SWave").forEach(function (elm) {
         elm.style.transitionTimingFunction = "step-start";
       });
+    }
+  });
+  map.on("zoomend", function () {
+    if (psWaveList.length > 0) {
       psWaveList.forEach(function (elm) {
         psWaveCalc(elm.id);
       });
     }
-
+  });
+  map.on("zoom", function () {
     var currentZoom = map.getZoom();
     document.getElementById("mapcontainer").classList.remove("zoomLevel_1", "zoomLevel_2", "zoomLevel_3", "zoomLevel_4", "popup_show");
 
