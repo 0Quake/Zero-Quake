@@ -60,11 +60,12 @@ ipcMain.on("message", (_event, response) => {
   } else if (response.action == "settingWindowOpen") {
     if (!settingWindow) {
       settingWindow = new BrowserWindow({
+        minWidth: 600,
+        minHeight: 300,
         webPreferences: {
           preload: path.join(__dirname, "js/preload.js"),
           title: "設定 - Zero Quake",
           parent: mainWindow,
-          modal: true,
           center: true,
           backgroundColor: "#202227",
           icon: path.join(__dirname, "img/icon.ico"),
@@ -99,9 +100,11 @@ ipcMain.on("message", (_event, response) => {
       return;
     }
     tsunamiWindow = new BrowserWindow({
+      minWidth: 600,
+      minHeight: 300,
       webPreferences: {
         preload: path.join(__dirname, "js/preload.js"),
-        title: "Zero Quake",
+        title: "津波詳細情報 - Zero Quake",
         backgroundColor: "#202227",
         icon: path.join(__dirname, "img/icon.ico"),
       },
@@ -124,6 +127,8 @@ ipcMain.on("message", (_event, response) => {
     });
   } else if (response.action == "EQInfoWindowOpen") {
     var EQInfoWindow = new BrowserWindow({
+      minWidth: 600,
+      minHeight: 300,
       webPreferences: {
         preload: path.join(__dirname, "js/preload.js"),
         title: "地震詳細情報 - Zero Quake",
@@ -240,6 +245,8 @@ function kmonicreateWindow() {
     kmoniWorker.close();
   }
   kmoniWorker = new BrowserWindow({
+    minWidth: 600,
+    minHeight: 300,
     webPreferences: {
       preload: path.join(__dirname, "js/preload.js"),
     },
@@ -279,7 +286,7 @@ app.whenReady().then(() => {
       clearInterval(startInterval);
     }
   }, 1000);
-  replay("2023/02/26 18:51:00");
+  //  replay("2023/02/26 22:37:50");
 });
 
 // 全てのウィンドウが閉じたときの処理
