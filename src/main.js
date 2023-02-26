@@ -279,7 +279,7 @@ app.whenReady().then(() => {
       clearInterval(startInterval);
     }
   }, 1000);
-  replay("2023/02/26 13:49:30");
+  replay("2023/02/26 18:51:00");
 });
 
 // 全てのウィンドウが閉じたときの処理
@@ -442,13 +442,23 @@ function kmoniControl(data, date) {
 
           if (EQD_ItemTmp.Codes.length >= threshold01) {
             if (!EQD_ItemTmp.showed) {
-              if (EQD_ItemTmp.maxPGA > 5) {
+              if (EQD_ItemTmp.maxPGA > 1) {
                 soundPlay("EQDetectLv2");
               } else {
                 soundPlay("EQDetectLv1");
               }
               createWindow();
+            } else {
+              if (EQD_ItemTmp.maxPGA > 1) {
+                if (EQD_ItemTmp.Lv == 1) soundPlay("EQDetectLv2");
+              }
             }
+            if (EQD_ItemTmp.maxPGA > 1) {
+              EQD_ItemTmp.Lv = 2;
+            } else {
+              EQD_ItemTmp.Lv = 1;
+            }
+
             if (mainWindow) {
               mainWindow.webContents.send("message2", {
                 action: "EQDetect",
@@ -458,10 +468,22 @@ function kmoniControl(data, date) {
             EQD_ItemTmp.showed = true;
           }
         } else if (elm.detect2) {
-          EQDetect_List.push({ id: EQDetectID, lat: elm.Location.Latitude, lng: elm.Location.Longitude, Codes: [elm], Radius: 0, maxPGA: elm.pga, detectCount: 1, detect2Count: 1, Up: false, last_Detect: new Date(), origin_Time: new Date(), showed: false });
+          EQDetect_List.push({ id: EQDetectID, lat: elm.Location.Latitude, lng: elm.Location.Longitude, Codes: [elm], Radius: 0, maxPGA: elm.pga, detectCount: 1, detect2Count: 1, Up: false, Lv: 0, last_Detect: new Date(), origin_Time: new Date(), showed: false });
           EQDetectID++;
 
           //新報
+        }
+      }
+    });
+    //地震検知解除
+    EQDetect_List.forEach(function (elm, index) {
+      if (EEWNow || new Date() - elm.origin_Time > time00 || new Date() - elm.last_Detect > time01) {
+        EQDetect_List.splice(index, 1);
+        if (mainWindow) {
+          mainWindow.webContents.send("message2", {
+            action: "EQDetectFinish",
+            data: elm.id,
+          });
         }
       }
     });
@@ -857,19 +879,6 @@ function RegularExecution() {
   EEW_nowList.forEach(function (elm) {
     if (new Date() - Replay - new Date(dateEncode(3, Number(elm.origin_time), 1)) > 300000) {
       EEWClear(null, elm.report_id, null, true);
-    }
-  });
-
-  //地震検知解除
-  EQDetect_List.forEach(function (elm, index) {
-    if (EEWNow || new Date() - elm.origin_Time > time00 || new Date() - elm.last_Detect > time01) {
-      EQDetect_List.splice(index, 1);
-      if (mainWindow) {
-        mainWindow.webContents.send("message2", {
-          action: "EQDetectFinish",
-          data: elm.id,
-        });
-      }
     }
   });
 
