@@ -279,6 +279,7 @@ app.whenReady().then(() => {
       clearInterval(startInterval);
     }
   }, 1000);
+  replay("2023/02/26 13:49:30");
 });
 
 // 全てのウィンドウが閉じたときの処理
@@ -368,10 +369,11 @@ function kmoniControl(data, date) {
       threshold03 = 0.3 * pgaAvr + 0.1;
       if (elm.Region == "東京都" || elm.Region == "千葉県" || elm.Region == "埼玉県" || elm.Region == "神奈川県") {
         threshold02 *= 3;
+        threshold03 *= 2;
       }
 
       var detect0 = elm.pga - pgaAvr >= threshold02 || elm.shindo >= threshold04;
-      var detect1 = detect0;
+      var detect1 = detect0 && ptDataTmp.detectCount > 1;
       var detect2 = (elm.pga - pgaAvr >= threshold03 && ptDataTmp.UpCount >= 1) || elm.shindo > 1.5; /*|| elm.shindo >= threshold04*/ /* || elm.detectCount > 1*/
 
       elm.detect = detect1;
@@ -408,7 +410,7 @@ function kmoniControl(data, date) {
           MargeRange = 20;
         } else {
           threshold01 = 4;
-          MargeRange = 50;
+          MargeRange = 40;
         }
 
         var EQD_ItemTmp = EQDetect_List.find(function (elm2) {
@@ -996,6 +998,9 @@ function SNXLogRead(str) {
 
 var tsunamiData;
 var lwaveTmp;
+var kmoniLastReportTime = 0;
+var lmoniLastReportTime = 0;
+var YkmoniLastReportTime = 0;
 
 function EEWdetect(type, json, KorL) {
   if (!json) return;
@@ -1006,37 +1011,40 @@ function EEWdetect(type, json, KorL) {
     kmoniTimeUpdate(request_time, "YahooKmoni", "success", monitorVendor);
 
     if (json.hypoInfo) {
-      json.hypoInfo.items.forEach(function (elm) {
-        var EEWdata = {
-          alertflg: null, //種別
-          report_id: elm.reportId, //地震ID
-          report_num: Number(elm.reportNum), //第n報
-          report_time: new Date(json.realTimeData.dataTime), //発表時刻
-          magunitude: Number(elm.magnitude), //マグニチュード
-          calcintensity: shindoConvert(elm.calcintensity, 0), //最大深度
-          depth: Number(elm.depth.replace("km", "")), //深さ
-          is_cancel: Boolean2(elm.isCancel), //キャンセル
-          is_final: Boolean2(elm.isFinal), //最終報
-          is_training: Boolean2(elm.isTraining), //訓練報
-          latitude: latitudeConvert(elm.latitude), //緯度
-          longitude: latitudeConvert(elm.longitude), //経度
-          region_code: elm.regionCode, //震央地域コード
-          region_name: elm.regionName, //震央地域
-          origin_time: new Date(elm.originTime), //発生時刻
-          isPlum: false,
-          userIntensity: null,
-          arrivalTime: null,
-          intensityAreas: null, //細分区分ごとの予想震度
-          warnZones: {
-            zone: null,
-            Pref: null,
-            Regions: null,
-          },
-          source: "YahooKmoni",
-        };
+      elm = json.hypoInfo.items[0];
+      //複数同時取得できる場合→json.hypoInfo.items.forEach(function (elm) {
+      var EEWdata = {
+        alertflg: null, //種別
+        report_id: elm.reportId, //地震ID
+        report_num: Number(elm.reportNum), //第n報
+        report_time: new Date(json.realTimeData.dataTime), //発表時刻
+        magunitude: Number(elm.magnitude), //マグニチュード
+        calcintensity: shindoConvert(elm.calcintensity, 0), //最大深度
+        depth: Number(elm.depth.replace("km", "")), //深さ
+        is_cancel: Boolean2(elm.isCancel), //キャンセル
+        is_final: Boolean2(elm.isFinal), //最終報
+        is_training: Boolean2(elm.isTraining), //訓練報
+        latitude: latitudeConvert(elm.latitude), //緯度
+        longitude: latitudeConvert(elm.longitude), //経度
+        region_code: elm.regionCode, //震央地域コード
+        region_name: elm.regionName, //震央地域
+        origin_time: new Date(elm.originTime), //発生時刻
+        isPlum: false,
+        userIntensity: null,
+        arrivalTime: null,
+        intensityAreas: null, //細分区分ごとの予想震度
+        warnZones: {
+          zone: null,
+          Pref: null,
+          Regions: null,
+        },
+        source: "YahooKmoni",
+      };
 
-        EEWcontrol(EEWdata);
-      });
+      var YkmoniLastReportTimeTmp = new Date(elm.reportTime);
+      if (YkmoniLastReportTime < YkmoniLastReportTimeTmp) EEWcontrol(EEWdata);
+      YkmoniLastReportTime = YkmoniLastReportTimeTmp;
+      //複数同時取得できる場合→});
     }
   } else if (type == 2) {
     //kmoni/lmoni
@@ -1050,7 +1058,7 @@ function EEWdetect(type, json, KorL) {
 
     var sourceTmp;
     if (KorL == 1) sourceTmp = "kmoni";
-    else if (KorL == 2) sourceTmp = "Lmoni";
+    else sourceTmp = "Lmoni";
 
     kmoniTimeUpdate(request_time, sourceTmp, "success");
 
@@ -1085,9 +1093,15 @@ function EEWdetect(type, json, KorL) {
         source: sourceTmp,
       };
 
-      EEWcontrol(EEWdata);
-
-      sourceTmp;
+      if (KorL == 1) {
+        var kmoniLastReportTimeTmp = new Date(json.report_time);
+        if (kmoniLastReportTime < kmoniLastReportTimeTmp) EEWcontrol(EEWdata);
+        kmoniLastReportTime = kmoniLastReportTimeTmp;
+      } else {
+        var lmoniLastReportTimeTmp = new Date(json.report_time);
+        if (lmoniLastReportTime < lmoniLastReportTimeTmp) EEWcontrol(EEWdata);
+        lmoniLastReportTime = lmoniLastReportTimeTmp;
+      }
     }
 
     if (json.avrarea) {
@@ -1356,18 +1370,23 @@ function EEWcontrol(data) {
       data: [data],
     });
   }
+  //EEW履歴に追加
+  if (!EEW_history[data.source]) EEW_history[data.source] = [];
+  if (
+    !EEW_history[data.source].find(function (elm) {
+      return data.report_id == elm.report_id && data.report_num == elm.report_num;
+    })
+  ) {
+    EEW_history[data.source].push(data);
+  }
 }
 function EEWAlert(data, first, update) {
   EEWNow = true;
   EstShindoFetch = true;
-  EEW_nowList = EEW_nowList.filter(function (elm) {
-    return elm.report_id !== data.report_id;
-  });
-  EEW_nowList.push(data);
 
   if (!update) {
-    createWindow();
     if (first) {
+      createWindow();
       if (data.alertflg == "警報") {
         soundPlay("EEW1");
         //    sound.play(path.join(__dirname, "audio/EEW1.mp3"));
@@ -1382,7 +1401,7 @@ function EEWAlert(data, first, update) {
       mainWindow.webContents.send("message2", {
         action: "EEWAlertUpdate",
         data: EEW_nowList,
-        update: Boolean(update),
+        update: false,
       });
     } else {
       var alertFlg = "";
@@ -1397,16 +1416,24 @@ function EEWAlert(data, first, update) {
         createWindow();
       });
     }
+  } else {
+    if (mainWindow) {
+      mainWindow.webContents.send("message2", {
+        action: "EEWAlertUpdate",
+        data: EEW_nowList,
+        update: true,
+      });
+    }
+  }
+  if (data.alertflg == "警報") {
   }
 
-  if (!EEW_history[data.source]) EEW_history[data.source] = [];
-  if (
-    !EEW_history[data.source].find(function (elm) {
-      return data.report_id == elm.report_id && data.report_num == elm.report_num;
-    })
-  ) {
-    EEW_history[data.source].push(data);
-  }
+  //【現在のEEW】から同一地震、古い報を削除
+  EEW_nowList = EEW_nowList.filter(function (elm) {
+    return elm.report_id !== data.report_id;
+  });
+  //【現在のEEW】配列に追加
+  EEW_nowList.push(data);
 }
 function speak(str) {
   if (kmoniWorker) {
