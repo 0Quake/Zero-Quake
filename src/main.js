@@ -112,7 +112,6 @@ ipcMain.on("message", (_event, response) => {
       });
 
       //      settingWindow.setMenuBarVisibility(false);
-      // settingWindow.webContents.openDevTools();
 
       settingWindow.loadFile("src/settings.html");
     }
@@ -140,7 +139,6 @@ ipcMain.on("message", (_event, response) => {
       },
     });
     //mainWindow.setMenuBarVisibility(false);
-    // tsunamiWindow.webContents.openDevTools();
 
     tsunamiWindow.webContents.on("did-finish-load", () => {
       if (tsunamiWindow) {
@@ -1233,8 +1231,6 @@ function EEWcontrol(data) {
     }*/
   var pastTime = new Date() - Replay - data.origin_time;
   if (pastTime > 300000 || pastTime < 0) return;
-  /*
-   */
 
   if (data.latitude && data.longitude) {
     data.distance = geosailing(data.latitude, data.longitude, config.home.latitude, config.home.longitude);
@@ -2109,9 +2105,6 @@ function Window_notification(title, detail, type) {
 
 async function kmoniServerSelect() {
   await new Promise((resolve) => {
-    //Kmoni = Infinity;
-    //Lmoni = Infinity;
-
     TestStartTime = new Date();
     if (net.online) {
       var request = net.request("https://weather-kyoshin.east.edge.storage-yahoo.jp/RealTimeData/" + dateEncode(2, new Date() - yoyuY - Replay) + "/" + dateEncode(1, new Date() - yoyuY - Replay) + ".json");
@@ -2121,14 +2114,12 @@ async function kmoniServerSelect() {
         } else {
           YmoniE = new Date() - TestStartTime;
         }
-        //yoyuY = YmoniE + 1000;
 
-        if (YmoniE && YmoniW /*+ Kmoni + Lmoni< Infinity*/) {
+        if (YmoniE && YmoniW) {
           var minTime = Math.min(YmoniE, YmoniW, Kmoni, Lmoni);
 
           if (minTime == Infinity || minTime == YmoniE) {
             monitorVendor = "YE";
-            //document.getElementById("MS-YE").selected = true;
           } else if (minTime == Infinity || minTime == YmoniW) {
             monitorVendor = "YW";
           }
@@ -2145,13 +2136,11 @@ async function kmoniServerSelect() {
           } else {
             YmoniW = new Date() - TestStartTime;
           }
-          // yoyuY = YmoniW + 1000;
-          if (YmoniE && YmoniW /*+ Kmoni + Lmoni < Infinity*/) {
+          if (YmoniE && YmoniW) {
             var minTime = Math.min(YmoniE, YmoniW, Kmoni, Lmoni);
 
             if (minTime == Infinity || minTime == YmoniE) {
               monitorVendor = "YE";
-              //document.getElementById("MS-YE").selected = true;
             } else if (minTime == Infinity || minTime == YmoniW) {
               monitorVendor = "YW";
             }
@@ -2168,73 +2157,18 @@ async function kmoniServerSelect() {
   });
 }
 
-/*
-async function yoyuSetY() {
-  var yoyuRes;
-
-  //Yahoo
-  await (function () {
-    yoyuRes = yoyuSetYCore(500);
-  })();
-  if (yoyuRes) {
-    await new Promise(function () {
-      yoyuY -= 500;
-    })();
-    await yoyuSetYCore(50);
-  }
-  yoyuY += Yoyu;
-}
-async function yoyuSetYCore(delay) {
-  return new Promise(async function () {
-    yoyuYOK = false;
-    var loopCount = 0;
-    while (!yoyuYOK) {
-      loopCount++;
-      await new Promise((resolve) => {
-        try {
-          if (net.online) {
-            var urlTmp;
-            if (monitorVendor == "YW") urlTmp = "west";
-            else urlTmp = "east";
-            var request = net.request("https://weather-kyoshin." + urlTmp + ".edge.storage-yahoo.jp/RealTimeData/" + dateEncode(2, new Date() - yoyuY - Replay) + "/" + dateEncode(1, new Date() - yoyuY - Replay) + ".json");
-            request.on("response", (res) => {
-              if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
-                yoyuY += delay;
-                setTimeout(resolve, 50);
-              } else {
-                yoyuYOK = true;
-                setTimeout(resolve, 50);
-              }
-            });
-
-            request.end();
-          }
-        } catch (err) {}
-      });
-      if (loopCount > 10) {
-        yoyuY = 2500;
-        break;
-      }
-    }
-
-    return true;
-  });
-}*/
 async function yoyuSetY(func) {
   var yoyuYOK = false;
   var loopCount = 0;
-  var reqTimeTmp;
   var ReqTimeTmp2 = new Date();
   if (net.online) {
     while (!yoyuYOK) {
       await new Promise((resolve) => {
-        //        try {
         var urlTmp;
         if (monitorVendor == "YW") urlTmp = "west";
         else urlTmp = "east";
         var request = net.request("https://weather-kyoshin." + urlTmp + ".edge.storage-yahoo.jp/RealTimeData/" + dateEncode(2, ReqTimeTmp2 - Replay) + "/" + dateEncode(1, ReqTimeTmp2 - Replay) + ".json");
         request.on("response", (res) => {
-          //if (0 < loopCount) {
           if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
           } else {
             yoyuY = new Date() - ReqTimeTmp2 + Yoyu;
@@ -2243,7 +2177,6 @@ async function yoyuSetY(func) {
           resolve();
         });
         request.end();
-        //  } catch (err) {}
       });
       if (loopCount > 25) {
         yoyuY = 2500 + Yoyu;
@@ -2347,6 +2280,7 @@ function Boolean2(str) {
       return false;
       break;
     default:
+      return Boolean(str);
       break;
   }
 }
