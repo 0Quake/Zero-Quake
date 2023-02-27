@@ -26,14 +26,46 @@ var config = store.get("config", {
 });
 const userHome = process.env[process.platform == "win32" ? "USERPROFILE" : "HOME"];
 
-let mainWindow;
-var settingWindow;
-var tsunamiWindow;
-let kmoniWorker;
+let mainWindow, settingWindow, tsunamiWindow, kmoniWorker;
 var kmoniActive = false;
 
 var kmoniTimeTmp = [];
 var EstShindoFetch = false;
+var EEW_Data = []; //地震速報リスト
+var EEW_nowList = []; //現在発報中リスト
+var EEW_history = []; //起動中に発生したリスト
+
+var Yoyu = 250;
+var yoyuY = (yoyuK = yoyuL = 2500);
+var Replay = 0;
+var EEWNow = false;
+
+var errorCountk = (errorCountl = errorCountyw = errorCountye = 0);
+
+var EQDetect_List = [];
+var EQDetectID = 0;
+
+var pointsData = {};
+
+var YmoniE, YmoniW;
+var P2P_ConnectData;
+var notifications = [];
+var notification_id = 0;
+var Kmoni = (Lmoni = 20000);
+var TestStartTime;
+var monitorVendor = "YE";
+var jmaXML_Fetched = (nakn_Fetched = []);
+var narikakun_URLs = (narikakun_EIDs = narikakun_EIDs = []);
+var eqInfo = { jma: [], usgs: [] };
+var EQInfoFetchIndex = 0;
+var tsunamiData;
+var lwaveTmp;
+var kmoniLastReportTime = (lmoniLastReportTime = YkmoniLastReportTime = 0);
+var kmoniTimeout, lmoniTimeout, ymoniTimeout;
+var started = false;
+var msil_lastTime = 0;
+var kmoniEid;
+var kmoniPointsDataTmp, SnetPointsDataTmp;
 
 //多重起動防止
 const gotTheLock = app.requestSingleInstanceLock();
@@ -41,8 +73,6 @@ if (!gotTheLock) {
   app.quit();
 }
 
-var kmoniPointsDataTmp;
-var SnetPointsDataTmp;
 ipcMain.on("message", (_event, response) => {
   if (response.action == "kmoniReturn") {
     kmoniControl(response.data, response.date);
@@ -322,26 +352,6 @@ electron.app.on("ready", () => {
   });
 });
 
-var EEW_Data = []; //地震速報リスト
-var EEW_nowList = []; //現在発報中リスト
-var EEW_history = []; //起動中に発生したリスト
-
-var Yoyu = 250;
-var yoyuY = 2500;
-var yoyuK = 2500;
-var yoyuL = 2500;
-var yoyuYOK = false;
-var Replay = 0;
-var EEWNow = false;
-
-var errorCountk = 0;
-var errorCountl = 0;
-var errorCountyw = 0;
-var errorCountye = 0;
-
-var EQDetect_List = [];
-var EQDetectID = 0;
-
 var historyCount = 10; //比較する件数
 var threshold01 = 3; //検出とする観測点数
 var threshold02 = 0.06; //1次フラグ条件のPGA増加量[gal]
@@ -350,8 +360,6 @@ var threshold04 = 1; //1次フラグ条件の震度
 var MargeRange = 40; //地震の同定範囲[km]
 var time00 = 300000; //最初の検出~解除
 var time01 = 10000; //最後の検出~解除
-
-var pointsData = {};
 
 function kmoniControl(data, date) {
   kmoniActive = new Date();
@@ -537,8 +545,6 @@ function estShindoControl(response) {
     });
   }
 }
-
-var kmoniEid;
 
 function kmoniRequest() {
   if (net.online) {
@@ -733,7 +739,6 @@ function ymoniRequest() {
   if (ymoniTimeout) clearTimeout(ymoniTimeout);
   ymoniTimeout = setTimeout(ymoniRequest, 1000);
 }
-var msil_lastTime = 0;
 
 function SnetRequest() {
   if (net.online) {
@@ -852,11 +857,6 @@ function P2P_WS() {
 
   client.connect("wss://api.p2pquake.net/v2/ws");
 }
-
-var kmoniTimeout;
-var lmoniTimeout;
-var ymoniTimeout;
-var started = false;
 
 function start() {
   started = true;
@@ -1019,12 +1019,6 @@ function SNXLogRead(str) {
     });
   }
 }
-
-var tsunamiData;
-var lwaveTmp;
-var kmoniLastReportTime = 0;
-var lmoniLastReportTime = 0;
-var YkmoniLastReportTime = 0;
 
 function EEWdetect(type, json, KorL) {
   if (!json) return;
@@ -1501,8 +1495,6 @@ function EEWClear(source, code, reportnum, bypass) {
 //
 //
 //地震情報
-var eqInfo = { jma: [], usgs: [] };
-var EQInfoFetchIndex = 0;
 
 function eqInfoUpdate(disableRepeat) {
   EQInfoFetchIndex++;
@@ -1631,11 +1623,6 @@ function eqInfoUpdate(disableRepeat) {
   if (!disableRepeat) setTimeout(eqInfoUpdate, 10000);
 }
 
-var narikakun_URLs = [];
-var narikakun_EIDs = [];
-
-var narikakun_EIDs = [];
-
 function EQI_narikakunList_Req(url, num, first) {
   var request = net.request(url);
   request.on("response", (res) => {
@@ -1718,9 +1705,6 @@ function EQI_narikakun_Req(url) {
   });
   request.end();
 }
-
-var jmaXML_Fetched = [];
-var nakn_Fetched = [];
 
 function JMAEQInfoFetch(url) {
   if (!url) return;
@@ -2100,18 +2084,10 @@ function TsunamiInfoControl(data) {
 //
 //
 //支援関数
-var Ymoni = 20000;
-var Kmoni = 20000;
-var Lmoni = 20000;
-var TestStartTime;
-var monitorVendor = "YE";
 
 function NetworkError(error, type) {
   Window_notification(type + "との通信でエラーが発生しました。", "エラーコードは以下の通りです。\n" + String(error), "error");
 }
-
-var notifications = [];
-var notification_id = 0;
 
 function Window_notification(title, detail, type) {
   notifications.push({
@@ -2131,8 +2107,6 @@ function Window_notification(title, detail, type) {
   }
 }
 
-var YmoniE;
-var YmoniW;
 async function kmoniServerSelect() {
   await new Promise((resolve) => {
     //Kmoni = Infinity;
@@ -2376,8 +2350,6 @@ function Boolean2(str) {
       break;
   }
 }
-
-var P2P_ConnectData;
 
 function kmoniTimeUpdate(Updatetime, type, condition, vendor) {
   var sendData = {
