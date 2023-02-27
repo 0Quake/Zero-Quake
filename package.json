@@ -21,7 +21,7 @@
     }
   },
   "main": "src/main.js",
-  "author": "Acialnat",
+  "author": "benidate",
   "license": "GPL-2.0",
   "dependencies": {
     "electron-store": "^8.1.0",
@@ -36,10 +36,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Acialnat/Zero-Quake.git"
+    "url": "git+https://github.com/0Quake/Zero-Quake.git"
   },
   "bugs": {
-    "url": "https://github.com/Acialnat/Zero-Quake/issues"
+    "url": "https://github.com/0Quake/Zero-Quake/issues"
   },
-  "homepage": "https://github.com/Acialnat/Zero-Quake#readme"
+  "homepage": "https://github.com/0Quake/Zero-Quake#readme"
 }

@@ -338,10 +338,12 @@ function Mapinit() {
     } else {
       document.getElementById("mapcontainer").classList.add("zoomLevel_4");
     }
-    if (currentZoom >= 7) {
-      basemap.setStyle({ stroke: true });
-    } else {
-      basemap.setStyle({ stroke: false });
+    if (basemap) {
+      if (currentZoom >= 7) {
+        basemap.setStyle({ stroke: true });
+      } else {
+        basemap.setStyle({ stroke: false });
+      }
     }
   });
 

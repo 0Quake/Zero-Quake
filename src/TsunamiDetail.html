@@ -54,10 +54,11 @@
     #WatchInfo,
     #YohoInfo,
     table thead {
+      display: none;
       text-align: center;
       position: -webkit-sticky;
       position: sticky;
-      top: 120px;
+      top: 90px;
       z-index: 1;
       background: #222;
       height: 50px;
@@ -150,6 +151,8 @@
 
     #revocation,
     #DTWrap {
+      font-size: 20px;
+      padding: 20px;
       display: none;
     }
 
@@ -231,7 +234,7 @@
 
   <h1 id="title">津波情報</h1>
   <div id="tableWrap">
-    <div id="revocation">津波情報は取り消されました。</div>
+    <div id="revocation">津波情報は解除されました。</div>
     <div id="DTWrap">発表日時：<span id="dateTime">不明</span></div>
 
     <table>
@@ -270,6 +273,7 @@
 
   <script>
     var data
+    var RevocationTimer
 
     window.electronAPI.messageSend((event, request) => {
 
@@ -281,20 +285,30 @@
         document.getElementById("revocation").style.display = "none"
         document.getElementById("no-data").style.display = "none"
 
-        console.log(request.data)
-        document.getElementById("dateTime").innerText = dateEncode(3, new Date(request.data.data.issue.time))
-        if (request.data.data.revocation) {
+        document.getElementById("dateTime").innerText = dateEncode(3, new Date(request.data.issue.time))
+        if (request.data.revocation) {
           document.getElementById("revocation").style.display = "block"
-        } else if (!request.data.data || request.data.data.areas.length == 0) {
+        } else if (!request.data || request.data.areas.length == 0) {
           document.getElementById("no-data").style.display = "table-row"
           document.getElementById("dateTime").style.display = "none"
-
         }
         document.querySelectorAll(".add-content").forEach(function (elm) {
           elm.remove()
         })
-        request.data.data.areas.reverse()
-        request.data.data.areas.forEach(elm => {
+
+        //情報の有効期限
+        if (request.data.ValidDateTime) {
+          clearTimeout(RevocationTimer)
+          console.log(request.data.ValidDateTime, new Date())
+          RevocationTimer = setTimeout(function () {
+            document.getElementById("revocation").style.display = "block"
+            document.querySelectorAll(".add-content").forEach(function (elm) {
+              elm.remove()
+            })
+          }, request.data.ValidDateTime - new Date())
+        }
+        request.data.areas.reverse()
+        request.data.areas.forEach(elm => {
           if (!elm.canceled) {
             var condition = ""
             var arrivalTime = "不明"
