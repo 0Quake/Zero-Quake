@@ -314,7 +314,7 @@ app.whenReady().then(() => {
       clearInterval(startInterval);
     }
   }, 1000);
-  replay("2023/02/28 00:46:00");
+  //replay("2023/02/28 20:10:00");
 });
 
 // 全てのウィンドウが閉じたときの処理
@@ -527,7 +527,7 @@ function estShindoControl(response) {
   var EidTmp;
   if (kmoniEid) {
     EidTmp = kmoniEid;
-  } else if (!EidTmp) {
+  } else if (!EidTmp && EEW_nowList.length > 0) {
     EidTmp = EEW_nowList[0].report_id;
   } else {
     return false;
