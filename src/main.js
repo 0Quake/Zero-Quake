@@ -1,10 +1,8 @@
 const electron = require("electron");
-const { app, BrowserWindow, ipcMain, net, Notification, dialog } = electron;
+const { app, BrowserWindow, ipcMain, net, Notification } = electron;
 const path = require("path");
-const jsdom = require("jsdom");
-const { JSDOM } = jsdom;
+const { JSDOM } = require("jsdom");
 let fs = require("fs");
-
 const Store = require("electron-store");
 const store = new Store();
 var config = store.get("config", {
@@ -28,9 +26,8 @@ const userHome = process.env[process.platform == "win32" ? "USERPROFILE" : "HOME
 
 let mainWindow, settingWindow, tsunamiWindow, kmoniWorker;
 var kmoniActive = false;
-
-var kmoniTimeTmp = [];
 var EstShindoFetch = false;
+var kmoniTimeTmp = [];
 var EEW_Data = []; //地震速報リスト
 var EEW_nowList = []; //現在発報中リスト
 var EEW_history = []; //起動中に発生したリスト
@@ -68,6 +65,7 @@ var kmoniEid;
 var kmoniPointsDataTmp, SnetPointsDataTmp;
 var intColorConv = { "0xFFFFFFFF": "0", "0xFFF2F2FF": "1", "0xFF00AAFF": "2", "0xFF0041FF": "3", "0xFFFAE696": "4", "0xFFFFE600": "5-", "0xFFFF9900": "5+", "0xFFFF2800": "6-", "0xFFA50021": "6+", "0xFFB40068": "7" };
 let tray;
+var RevocationTimer;
 
 //多重起動防止
 const gotTheLock = app.requestSingleInstanceLock();
@@ -77,7 +75,7 @@ if (!gotTheLock) {
 app.whenReady().then(() => {
   kmonicreateWindow();
   createWindow();
-  points = JSON.parse(fs.readFileSync(path.join(__dirname, "Resource/Knet_Points.json"), "utf8"));
+  points = jsonParse(fs.readFileSync(path.join(__dirname, "Resource/Knet_Points.json"), "utf8"));
 
   (async function () {
     await kmoniServerSelect();
@@ -99,15 +97,17 @@ app.whenReady().then(() => {
       clearInterval(startInterval);
     }
   }, 1000);
-  replay("2023/03/02 20:18:00");
+  //replay("2023/03/02 20:18:00");
 });
 // 全てのウィンドウが閉じたとき
 app.on("window-all-closed", () => {});
 
+//アプリのロード完了イベント
 electron.app.on("ready", () => {
   // Mac のみ Dock は非表示
   if (process.platform === "darwin") electron.app.dock.hide();
 
+  //タスクトレイアイコン
   tray = new electron.Tray(`${__dirname}/img/icon.${process.platform === "win32" ? "ico" : "png"}`);
   tray.setContextMenu(
     electron.Menu.buildFromTemplate([
@@ -131,48 +131,20 @@ electron.app.on("ready", () => {
   });
 });
 
+//レンダラープロセスからのメッセージ
 ipcMain.on("message", (_event, response) => {
   if (response.action == "kmoniReturn") {
     kmoniControl(response.data, response.date);
   } else if (response.action == "SnetReturn") {
     SnetControl(response.data, response.date);
-  } else if (response.action == "tsunamiReqest") {
-    if (tsunamiData) {
-      mainWindow.webContents.send("message2", {
-        action: "tsunamiUpdate",
-        data: tsunamiData,
-      });
-    }
   } else if (response.action == "kmoniEstShindoReturn") {
     estShindoControl(response);
   } else if (response.action == "settingWindowOpen") {
-    if (!settingWindow) {
-      settingWindow = new BrowserWindow({
-        minWidth: 600,
-        minHeight: 300,
-        webPreferences: {
-          preload: path.join(__dirname, "js/preload.js"),
-          title: "設定 - Zero Quake",
-          parent: mainWindow,
-          center: true,
-          backgroundColor: "#202227",
-          icon: path.join(__dirname, "img/icon.ico"),
-        },
-      });
-      settingWindow.webContents.on("did-finish-load", () => {
-        settingWindow.webContents.send("message2", {
-          action: "setting",
-          data: { config: config, softVersion: process.env.npm_package_version },
-        });
-      });
-      settingWindow.on("close", () => {
-        settingWindow = null;
-      });
-
-      //      settingWindow.setMenuBarVisibility(false);
-
-      settingWindow.loadFile("src/settings.html");
-    }
+    settingcreateWindow();
+  } else if (response.action == "TsunamiWindowOpen") {
+    tsunamicreateWindow();
+  } else if (response.action == "EQInfoWindowOpen") {
+    EQInfocreateWindow(response);
   } else if (response.action == "settingReturn") {
     config = response.data;
     store.set("config", config);
@@ -181,64 +153,13 @@ ipcMain.on("message", (_event, response) => {
       action: "setting",
       data: { config: config, softVersion: process.env.npm_package_version },
     });
-  } else if (response.action == "TsunamiWindowOpen") {
-    if (tsunamiWindow) {
-      tsunamiWindow.focus();
-      return;
+  } else if (response.action == "tsunamiReqest") {
+    if (tsunamiData) {
+      mainWindow.webContents.send("message2", {
+        action: "tsunamiUpdate",
+        data: tsunamiData,
+      });
     }
-    tsunamiWindow = new BrowserWindow({
-      minWidth: 600,
-      minHeight: 300,
-      webPreferences: {
-        preload: path.join(__dirname, "js/preload.js"),
-        title: "津波詳細情報 - Zero Quake",
-        backgroundColor: "#202227",
-        icon: path.join(__dirname, "img/icon.ico"),
-      },
-    });
-    //mainWindow.setMenuBarVisibility(false);
-
-    tsunamiWindow.webContents.on("did-finish-load", () => {
-      if (tsunamiWindow) {
-        tsunamiWindow.webContents.send("message2", {
-          action: "tsunamiUpdate",
-          data: tsunamiData,
-        });
-      }
-    });
-    tsunamiWindow.loadFile("src/TsunamiDetail.html");
-
-    tsunamiWindow.on("close", () => {
-      tsunamiWindow = null;
-    });
-  } else if (response.action == "EQInfoWindowOpen") {
-    var EQInfoWindow = new BrowserWindow({
-      minWidth: 600,
-      minHeight: 300,
-      webPreferences: {
-        preload: path.join(__dirname, "js/preload.js"),
-        title: "地震詳細情報 - Zero Quake",
-        backgroundColor: "#202227",
-        icon: path.join(__dirname, "img/icon.ico"),
-      },
-    });
-    //mainWindow.setMenuBarVisibility(false);
-
-    EQInfoWindow.webContents.on("did-finish-load", () => {
-      EQInfoWindow.webContents.send("message2", {
-        action: "setting",
-        data: config,
-      });
-      EQInfoWindow.webContents.send("message2", {
-        action: "metaData",
-        eid: response.eid,
-        urls: response.urls,
-      });
-    });
-
-    EQInfoWindow.loadFile(response.url);
-
-    //EQInfoWindow.on("close", () => {});
   } else if (response.action == "mapLoaded") {
     if (kmoniPointsDataTmp) {
       mainWindow.webContents.send("message2", kmoniPointsDataTmp);
@@ -252,6 +173,7 @@ ipcMain.on("message", (_event, response) => {
   }
 });
 
+//メインウィンドウ表示処理
 function createWindow() {
   if (mainWindow) {
     if (mainWindow.isMinimized()) mainWindow.restore();
@@ -307,10 +229,12 @@ function createWindow() {
       });
     }
     EQDetect_List.forEach(function (elm) {
-      mainWindow.webContents.send("message2", {
-        action: "EQDetect",
-        data: elm,
-      });
+      if (elm.Codes.length >= threshold01) {
+        mainWindow.webContents.send("message2", {
+          action: "EQDetect",
+          data: elm,
+        });
+      }
     });
 
     if (P2P_ConnectData) {
@@ -331,7 +255,7 @@ function createWindow() {
     mainWindow = null;
   });
 }
-
+//ワーカーウィンドウ表示処理
 function kmonicreateWindow() {
   if (kmoniWorker) {
     kmoniWorker.close();
@@ -352,7 +276,105 @@ function kmonicreateWindow() {
   kmoniWorker.loadFile("src/kmoniWorker.html");
   kmoniActive = new Date();
 }
+//ワーカーウィンドウ表示処理
+function settingcreateWindow() {
+  if (settingWindow) {
+    if (settingWindow.isMinimized()) settingWindow.restore();
+    if (!settingWindow.isFocused()) settingWindow.focus();
+    return false;
+  }
 
+  settingWindow = new BrowserWindow({
+    minWidth: 600,
+    minHeight: 300,
+    webPreferences: {
+      preload: path.join(__dirname, "js/preload.js"),
+      title: "設定 - Zero Quake",
+      parent: mainWindow,
+      center: true,
+      backgroundColor: "#202227",
+      icon: path.join(__dirname, "img/icon.ico"),
+    },
+  });
+  settingWindow.webContents.on("did-finish-load", () => {
+    settingWindow.webContents.send("message2", {
+      action: "setting",
+      data: { config: config, softVersion: process.env.npm_package_version },
+    });
+  });
+  settingWindow.on("close", () => {
+    settingWindow = null;
+  });
+
+  //      settingWindow.setMenuBarVisibility(false);
+
+  settingWindow.loadFile("src/settings.html");
+}
+//津波情報ウィンドウ表示処理
+function tsunamicreateWindow() {
+  if (tsunamiWindow) {
+    if (tsunamiWindow.isMinimized()) tsunamiWindow.restore();
+    if (!tsunamiWindow.isFocused()) tsunamiWindow.focus();
+    return false;
+  }
+  tsunamiWindow = new BrowserWindow({
+    minWidth: 600,
+    minHeight: 300,
+    webPreferences: {
+      preload: path.join(__dirname, "js/preload.js"),
+      title: "津波詳細情報 - Zero Quake",
+      backgroundColor: "#202227",
+      icon: path.join(__dirname, "img/icon.ico"),
+    },
+  });
+  //mainWindow.setMenuBarVisibility(false);
+
+  tsunamiWindow.webContents.on("did-finish-load", () => {
+    if (tsunamiWindow) {
+      tsunamiWindow.webContents.send("message2", {
+        action: "tsunamiUpdate",
+        data: tsunamiData,
+      });
+    }
+  });
+  tsunamiWindow.loadFile("src/TsunamiDetail.html");
+
+  tsunamiWindow.on("close", () => {
+    tsunamiWindow = null;
+  });
+}
+//地震情報ウィンドウ表示処理
+function EQInfocreateWindow(response) {
+  var EQInfoWindow = new BrowserWindow({
+    minWidth: 600,
+    minHeight: 300,
+    webPreferences: {
+      preload: path.join(__dirname, "js/preload.js"),
+      title: "地震詳細情報 - Zero Quake",
+      backgroundColor: "#202227",
+      icon: path.join(__dirname, "img/icon.ico"),
+    },
+  });
+  //mainWindow.setMenuBarVisibility(false);
+
+  EQInfoWindow.webContents.on("did-finish-load", () => {
+    EQInfoWindow.webContents.send("message2", {
+      action: "setting",
+      data: config,
+    });
+    EQInfoWindow.webContents.send("message2", {
+      action: "metaData",
+      eid: response.eid,
+      urls: response.urls,
+    });
+  });
+
+  EQInfoWindow.loadFile(response.url);
+
+  //EQInfoWindow.on("close", () => {});
+}
+
+//開始処理
 function start() {
   started = true;
   //↓接続処理
@@ -380,6 +402,7 @@ function start() {
   //地震情報
   eqInfoUpdate();
 
+  //定期実行発火
   RegularExecution();
 }
 
@@ -392,6 +415,7 @@ var MargeRange = 40; //地震の同定範囲[km]
 var time00 = 300000; //最初の検出~解除[ms](優先)
 var time01 = 10000; //最後の検出~解除[ms]
 
+//強震モニタリアルタイム揺れ情報処理（地震検知など）
 function kmoniControl(data, date) {
   kmoniActive = new Date();
 
@@ -544,6 +568,7 @@ function kmoniControl(data, date) {
   }
 }
 
+//海しるリアルタイム揺れ情報処理
 function SnetControl(data, date) {
   SnetPointsDataTmp = {
     action: "SnetUpdate",
@@ -556,6 +581,7 @@ function SnetControl(data, date) {
   }
 }
 
+//強震モニタ予想震度処理
 function estShindoControl(response) {
   var EidTmp;
   if (kmoniEid) {
@@ -911,7 +937,7 @@ function RegularExecution() {
   setTimeout(RegularExecution, 1000);
 }
 
-//SNX監視
+//SNX変更監視→SNXLogReadへ
 function SNXWatch() {
   for (let i = 1; i <= 10; i++) {
     filenameTmp = "SignalNowX_" + String(i).padStart(2, "0") + ".csl";
@@ -925,6 +951,7 @@ function SNXWatch() {
   }
 }
 
+//SNXログ読み取り→EEWcontrolへ
 function SNXLogRead(str) {
   var pathTmp = path.join(userHome, "/AppData/Roaming/StrategyCorporation/SignalNowX/" + str);
   if (fs.existsSync(pathTmp)) {
@@ -1026,6 +1053,216 @@ function SNXLogRead(str) {
   }
 }
 
+//Yahoo強震モニタのサーバーを選択
+async function kmoniServerSelect() {
+  await new Promise((resolve) => {
+    TestStartTime = new Date();
+    if (net.online) {
+      var request = net.request("https://weather-kyoshin.east.edge.storage-yahoo.jp/RealTimeData/" + dateEncode(2, new Date() - yoyuY - Replay) + "/" + dateEncode(1, new Date() - yoyuY - Replay) + ".json");
+      request.on("response", (res) => {
+        if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
+          YmoniE = 25000;
+        } else {
+          YmoniE = new Date() - TestStartTime;
+        }
+
+        if (YmoniE && YmoniW) {
+          var minTime = Math.min(YmoniE, YmoniW, Kmoni, Lmoni);
+
+          if (minTime == Infinity || minTime == YmoniE) {
+            monitorVendor = "YE";
+          } else if (minTime == Infinity || minTime == YmoniW) {
+            monitorVendor = "YW";
+          }
+          resolve();
+        }
+      });
+
+      request.end();
+      var request = net.request("https://weather-kyoshin.west.edge.storage-yahoo.jp/RealTimeData/" + dateEncode(2, new Date() - yoyuY - Replay) + "/" + dateEncode(1, new Date() - yoyuY - Replay) + ".json");
+      request.on("response", (res) => {
+        res.on("end", function () {
+          if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
+            YmoniW = 2500;
+          } else {
+            YmoniW = new Date() - TestStartTime;
+          }
+          if (YmoniE && YmoniW) {
+            var minTime = Math.min(YmoniE, YmoniW, Kmoni, Lmoni);
+
+            if (minTime == Infinity || minTime == YmoniE) {
+              monitorVendor = "YE";
+            } else if (minTime == Infinity || minTime == YmoniW) {
+              monitorVendor = "YW";
+            }
+            resolve();
+          }
+        });
+      });
+      request.on("error", (error) => {
+        NetworkError(error, "Yahoo強震モニタ(West)");
+      });
+
+      request.end();
+    }
+  });
+}
+
+//Yahoo強震モニタの取得オフセット設定
+async function yoyuSetY(func) {
+  var yoyuYOK = false;
+  var loopCount = 0;
+  var ReqTimeTmp2 = new Date();
+  if (net.online) {
+    while (!yoyuYOK) {
+      await new Promise((resolve) => {
+        var urlTmp;
+        if (monitorVendor == "YW") urlTmp = "west";
+        else urlTmp = "east";
+        var request = net.request("https://weather-kyoshin." + urlTmp + ".edge.storage-yahoo.jp/RealTimeData/" + dateEncode(2, ReqTimeTmp2 - Replay) + "/" + dateEncode(1, ReqTimeTmp2 - Replay) + ".json");
+        request.on("response", (res) => {
+          if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
+          } else {
+            yoyuY = new Date() - ReqTimeTmp2 + Yoyu;
+            yoyuYOK = true;
+          }
+          resolve();
+        });
+        request.end();
+      });
+      if (loopCount > 25) {
+        yoyuY = 2500 + Yoyu;
+        break;
+      }
+      loopCount++;
+    }
+  }
+  return func();
+}
+
+//強震モニタの取得オフセット設定
+async function yoyuSetK(func) {
+  var yoyuKOK = false;
+  var loopCount = 0;
+  var resTimeTmp;
+  while (!yoyuKOK) {
+    await new Promise((resolve) => {
+      try {
+        if (net.online) {
+          var dataTmp = "";
+          var request = net.request("http://www.kmoni.bosai.go.jp/webservice/server/pros/latest.json?_=" + Number(new Date()));
+          request.on("response", (res) => {
+            res.on("data", (chunk) => {
+              dataTmp += chunk;
+            });
+            res.on("end", function () {
+              var json = jsonParse(dataTmp);
+              if (json) {
+                var resTime = new Date(json.latest_time);
+
+                if (resTimeTmp !== resTime && 0 < loopCount) {
+                  yoyuKOK = true;
+                  yoyuK = new Date() - resTime;
+                }
+                resTimeTmp = resTime;
+              }
+              resolve();
+            });
+          });
+
+          request.end();
+        }
+      } catch (err) {}
+    });
+    if (loopCount > 25) {
+      yoyuK = 2500;
+      break;
+    }
+
+    loopCount++;
+  }
+  func();
+  return true;
+}
+
+//長周期地震動モニタの取得オフセット設定
+async function yoyuSetL(func) {
+  var yoyuLOK = false;
+  var loopCount = 0;
+  var resTimeTmp;
+  while (!yoyuLOK) {
+    await new Promise((resolve) => {
+      try {
+        if (net.online) {
+          var request = net.request("https://smi.lmoniexp.bosai.go.jp/webservice/server/pros/latest.json?_" + Number(new Date()));
+          request.on("response", (res) => {
+            res.on("end", function () {
+              var json = jsonParse(dataTmp);
+              if (json) {
+                var resTime = new Date(json.latest_time);
+
+                if (resTimeTmp !== resTime && 0 < loopCount) {
+                  yoyuLOK = true;
+                  yoyuL = new Date() - resTime;
+                }
+                resTimeTmp = resTime;
+              }
+              resolve();
+            });
+          });
+
+          request.end();
+        }
+      } catch (err) {}
+    });
+    if (loopCount2 > 25) {
+      yoyuL = 2500 + Yoyu;
+      break;
+    }
+
+    loopCount2++;
+  }
+
+  func();
+  return true;
+}
+
+//情報最終更新時刻を更新
+function kmoniTimeUpdate(Updatetime, type, condition, vendor) {
+  var sendData = {
+    action: "kmoniTimeUpdate",
+    Updatetime: Updatetime,
+    LocalTime: new Date(),
+    vendor: vendor,
+    type: type,
+    condition: condition,
+  };
+  if (mainWindow) {
+    mainWindow.webContents.send("message2", sendData);
+  }
+
+  if (type == "P2P_EEW") {
+    P2P_ConnectData = sendData;
+  }
+  kmoniTimeTmpElm = kmoniTimeTmp.find(function (elm) {
+    return elm.type == type;
+  });
+  if (kmoniTimeTmpElm) {
+    kmoniTimeTmpElm = {
+      type: type,
+      Updatetime: Updatetime,
+      LocalTime: new Date(),
+    };
+  } else {
+    kmoniTimeTmp.push({
+      type: type,
+      Updatetime: Updatetime,
+      LocalTime: new Date(),
+    });
+  }
+}
+
+//情報フォーマット変更・新報検知→EEWcontrol
 function EEWdetect(type, json, KorL) {
   if (!json) return;
   if (type == 1) {
@@ -1048,8 +1285,8 @@ function EEWdetect(type, json, KorL) {
         is_cancel: Boolean2(elm.isCancel), //キャンセル
         is_final: Boolean2(elm.isFinal), //最終報
         is_training: Boolean2(elm.isTraining), //訓練報
-        latitude: latitudeConvert(elm.latitude), //緯度
-        longitude: latitudeConvert(elm.longitude), //経度
+        latitude: LatLngConvert(elm.latitude), //緯度
+        longitude: LatLngConvert(elm.longitude), //経度
         region_code: elm.regionCode, //震央地域コード
         region_name: elm.regionName, //震央地域
         origin_time: new Date(elm.originTime), //発生時刻
@@ -1227,6 +1464,7 @@ function EEWdetect(type, json, KorL) {
   }
 }
 
+//EEW情報マージ→EEWAlert
 function EEWcontrol(data) {
   /*
       if (!data.origin_time) {
@@ -1404,6 +1642,33 @@ function EEWcontrol(data) {
   }
 }
 
+//EEW解除処理
+function EEWClear(source, code, reportnum, bypass) {
+  if (EEWNow || bypass) {
+    if (!bypass && EEW_history[source]) {
+      var EEW_detected = EEW_history[source].find(function (elm) {
+        return code == elm.report_id;
+      });
+    }
+    if (EEW_detected || bypass) {
+      EEW_nowList = EEW_nowList.filter(function (elm) {
+        return elm.report_id !== code;
+      });
+      if (mainWindow) {
+        mainWindow.webContents.send("message2", {
+          action: "EEWAlertUpdate",
+          data: EEW_nowList,
+        });
+      }
+
+      if (EEW_nowList.length == 0) {
+        EEWNow = false;
+      }
+    }
+  }
+}
+
+//EEW通知（音声・画面表示等）
 function EEWAlert(data, first, update) {
   EEWNow = true;
   EstShindoFetch = true;
@@ -1460,242 +1725,21 @@ function EEWAlert(data, first, update) {
   EEW_nowList.push(data);
 }
 
-function EEWClear(source, code, reportnum, bypass) {
-  if (EEWNow || bypass) {
-    if (!bypass && EEW_history[source]) {
-      var EEW_detected = EEW_history[source].find(function (elm) {
-        return code == elm.report_id;
-      });
-    }
-    if (EEW_detected || bypass) {
-      EEW_nowList = EEW_nowList.filter(function (elm) {
-        return elm.report_id !== code;
-      });
-      if (mainWindow) {
-        mainWindow.webContents.send("message2", {
-          action: "EEWAlertUpdate",
-          data: EEW_nowList,
-        });
-      }
+//🔴地震情報🔴
 
-      if (EEW_nowList.length == 0) {
-        EEWNow = false;
-      }
-    }
-  }
-}
-
-async function kmoniServerSelect() {
-  await new Promise((resolve) => {
-    TestStartTime = new Date();
-    if (net.online) {
-      var request = net.request("https://weather-kyoshin.east.edge.storage-yahoo.jp/RealTimeData/" + dateEncode(2, new Date() - yoyuY - Replay) + "/" + dateEncode(1, new Date() - yoyuY - Replay) + ".json");
-      request.on("response", (res) => {
-        if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
-          YmoniE = 25000;
-        } else {
-          YmoniE = new Date() - TestStartTime;
-        }
-
-        if (YmoniE && YmoniW) {
-          var minTime = Math.min(YmoniE, YmoniW, Kmoni, Lmoni);
-
-          if (minTime == Infinity || minTime == YmoniE) {
-            monitorVendor = "YE";
-          } else if (minTime == Infinity || minTime == YmoniW) {
-            monitorVendor = "YW";
-          }
-          resolve();
-        }
-      });
-
-      request.end();
-      var request = net.request("https://weather-kyoshin.west.edge.storage-yahoo.jp/RealTimeData/" + dateEncode(2, new Date() - yoyuY - Replay) + "/" + dateEncode(1, new Date() - yoyuY - Replay) + ".json");
-      request.on("response", (res) => {
-        res.on("end", function () {
-          if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
-            YmoniW = 2500;
-          } else {
-            YmoniW = new Date() - TestStartTime;
-          }
-          if (YmoniE && YmoniW) {
-            var minTime = Math.min(YmoniE, YmoniW, Kmoni, Lmoni);
-
-            if (minTime == Infinity || minTime == YmoniE) {
-              monitorVendor = "YE";
-            } else if (minTime == Infinity || minTime == YmoniW) {
-              monitorVendor = "YW";
-            }
-            resolve();
-          }
-        });
-      });
-      request.on("error", (error) => {
-        NetworkError(error, "Yahoo強震モニタ(West)");
-      });
-
-      request.end();
-    }
-  });
-}
-
-async function yoyuSetY(func) {
-  var yoyuYOK = false;
-  var loopCount = 0;
-  var ReqTimeTmp2 = new Date();
-  if (net.online) {
-    while (!yoyuYOK) {
-      await new Promise((resolve) => {
-        var urlTmp;
-        if (monitorVendor == "YW") urlTmp = "west";
-        else urlTmp = "east";
-        var request = net.request("https://weather-kyoshin." + urlTmp + ".edge.storage-yahoo.jp/RealTimeData/" + dateEncode(2, ReqTimeTmp2 - Replay) + "/" + dateEncode(1, ReqTimeTmp2 - Replay) + ".json");
-        request.on("response", (res) => {
-          if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
-          } else {
-            yoyuY = new Date() - ReqTimeTmp2 + Yoyu;
-            yoyuYOK = true;
-          }
-          resolve();
-        });
-        request.end();
-      });
-      if (loopCount > 25) {
-        yoyuY = 2500 + Yoyu;
-        break;
-      }
-      loopCount++;
-    }
-  }
-  return func();
-}
-async function yoyuSetK(func) {
-  var yoyuKOK = false;
-  var loopCount = 0;
-  var resTimeTmp;
-  while (!yoyuKOK) {
-    await new Promise((resolve) => {
-      try {
-        if (net.online) {
-          var dataTmp = "";
-          var request = net.request("http://www.kmoni.bosai.go.jp/webservice/server/pros/latest.json?_=" + Number(new Date()));
-          request.on("response", (res) => {
-            res.on("data", (chunk) => {
-              dataTmp += chunk;
-            });
-            res.on("end", function () {
-              var json = jsonParse(dataTmp);
-              if (json) {
-                var resTime = new Date(json.latest_time);
-
-                if (resTimeTmp !== resTime && 0 < loopCount) {
-                  yoyuKOK = true;
-                  yoyuK = new Date() - resTime;
-                }
-                resTimeTmp = resTime;
-              }
-              resolve();
-            });
-          });
-
-          request.end();
-        }
-      } catch (err) {}
-    });
-    if (loopCount > 25) {
-      yoyuK = 2500;
-      break;
-    }
-
-    loopCount++;
-  }
-  func();
-  return true;
-}
-async function yoyuSetL(func) {
-  var yoyuLOK = false;
-  var loopCount = 0;
-  var resTimeTmp;
-  while (!yoyuLOK) {
-    await new Promise((resolve) => {
-      try {
-        if (net.online) {
-          var request = net.request("https://smi.lmoniexp.bosai.go.jp/webservice/server/pros/latest.json?_" + Number(new Date()));
-          request.on("response", (res) => {
-            res.on("end", function () {
-              var json = jsonParse(dataTmp);
-              if (json) {
-                var resTime = new Date(json.latest_time);
-
-                if (resTimeTmp !== resTime && 0 < loopCount) {
-                  yoyuLOK = true;
-                  yoyuL = new Date() - resTime;
-                }
-                resTimeTmp = resTime;
-              }
-              resolve();
-            });
-          });
-
-          request.end();
-        }
-      } catch (err) {}
-    });
-    if (loopCount2 > 25) {
-      yoyuL = 2500 + Yoyu;
-      break;
-    }
-
-    loopCount2++;
-  }
-
-  func();
-  return true;
-}
-
-function kmoniTimeUpdate(Updatetime, type, condition, vendor) {
-  var sendData = {
-    action: "kmoniTimeUpdate",
-    Updatetime: Updatetime,
-    LocalTime: new Date(),
-    vendor: vendor,
-    type: type,
-    condition: condition,
-  };
-  if (mainWindow) {
-    mainWindow.webContents.send("message2", sendData);
-  }
-
-  if (type == "P2P_EEW") {
-    P2P_ConnectData = sendData;
-  }
-  kmoniTimeTmpElm = kmoniTimeTmp.find(function (elm) {
-    return elm.type == type;
-  });
-  if (kmoniTimeTmpElm) {
-    kmoniTimeTmpElm = {
-      type: type,
-      Updatetime: Updatetime,
-      LocalTime: new Date(),
-    };
-  } else {
-    kmoniTimeTmp.push({
-      type: type,
-      Updatetime: Updatetime,
-      LocalTime: new Date(),
-    });
-  }
-}
-
-//
-//
-//
-//
-//地震情報
-
+//地震情報更新処理
 function eqInfoUpdate(disableRepeat) {
   EQInfoFetchIndex++;
-  //気象庁JSONリクエスト～パース
+  EQI_JMA_Req();
+  EQI_JMAXMLList_Req();
+  EQI_narikakunList_Req("https://ntool.online/api/earthquakeList?year=" + new Date().getFullYear() + "&month=" + (new Date().getMonth() + 1), 10, true);
+  EQI_USGS_Req();
+
+  if (!disableRepeat) setTimeout(eqInfoUpdate, 10000);
+}
+
+//気象庁JSON 取得・フォーマット変更→eqInfoControl
+function EQI_JMA_Req() {
   var request = net.request("https://www.jma.go.jp/bosai/quake/data/list.json");
   request.on("response", (res) => {
     var dataTmp = "";
@@ -1752,10 +1796,11 @@ function eqInfoUpdate(disableRepeat) {
   request.on("error", (error) => {
     NetworkError(error, "気象庁ホームページ");
   });
+  request.end();
+}
 
-  //request.end();
-
-  //気象庁XMLリクエスト～パース
+//気象庁XMLリスト取得→EQI_JMAXML_Req
+function EQI_JMAXMLList_Req() {
   var request = net.request("https://www.data.jma.go.jp/developer/xml/feed/eqvol.xml");
   request.on("response", (res) => {
     var dataTmp = "";
@@ -1771,7 +1816,7 @@ function eqInfoUpdate(disableRepeat) {
         var urlElm = elm.querySelector("id");
         if (urlElm) url = urlElm.textContent;
         if (!url) return;
-        JMAEQInfoFetch(url);
+        EQI_JMAXML_Req(url);
       });
     });
   });
@@ -1779,131 +1824,11 @@ function eqInfoUpdate(disableRepeat) {
     NetworkError(error, "気象庁防災情報XML");
   });
 
-  //request.end();
-
-  EQI_narikakunList_Req("https://ntool.online/api/earthquakeList?year=" + new Date().getFullYear() + "&month=" + (new Date().getMonth() + 1), 10, true);
-
-  //USGSリクエスト～パース
-  var request = net.request("https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&limit=10");
-  request.on("response", (res) => {
-    var dataTmp = "";
-    res.on("data", (chunk) => {
-      dataTmp += chunk;
-    });
-    res.on("end", function () {
-      var json = jsonParse(dataTmp);
-      if (!json) return false;
-      var dataTmp2 = [];
-      json.features.forEach(function (elm) {
-        dataTmp2.push({
-          eventId: elm.id,
-          category: null,
-          OriginTime: new Date(elm.properties.time),
-          epiCenter: elm.properties.place,
-          M: elm.properties.mag,
-          maxI: null,
-          DetailURL: [elm.properties.url],
-        });
-      });
-
-      eqInfoControl(dataTmp2, "usgs");
-
-      //eqInfoDraw(dataTmp2, document.getElementById("USGS_EqInfo"), false, "USGS");
-    });
-  });
-  request.on("error", (error) => {
-    NetworkError(error, "USGS");
-  });
-
-  request.end();
-
-  if (!disableRepeat) setTimeout(eqInfoUpdate, 10000);
-}
-
-function EQI_narikakunList_Req(url, num, first) {
-  var request = net.request(url);
-  request.on("response", (res) => {
-    var dataTmp = "";
-    res.on("data", (chunk) => {
-      dataTmp += chunk;
-    });
-    res.on("end", function () {
-      var json = jsonParse(dataTmp);
-      if (!json || !json.lists) return false;
-      narikakun_URLs = narikakun_URLs.concat(json.lists.reverse());
-
-      if (narikakun_URLs.length < 10 && first) {
-        var yearTmp = new Date().getFullYear();
-        var monthTmp = new Date().getMonth();
-        if (monthTmp == 0) {
-          yearTmp = new Date().getFullYear() - 1;
-          monthTmp = 1;
-        }
-        EQI_narikakunList_Req("https://ntool.online/api/earthquakeList?year=" + yearTmp + "&month=" + monthTmp, 10 - json.lists.length, false);
-      } else {
-        for (let elm of narikakun_URLs) {
-          var eidTmp = elm.split("_")[2];
-          if (nakn_Fetched.indexOf(url) === -1) {
-            nakn_Fetched.push(elm);
-            EQI_narikakun_Req(elm);
-          }
-          if (!narikakun_EIDs.includes(eidTmp)) {
-            narikakun_EIDs.push(eidTmp);
-            if (narikakun_EIDs.length == 10) break;
-          }
-        }
-        narikakun_URLs = [];
-        narikakun_EIDs = [];
-      }
-    });
-  });
-  request.on("error", (error) => {
-    NetworkError(error, "narikakun 地震情報API");
-  });
   request.end();
 }
 
-function EQI_narikakun_Req(url) {
-  var request = net.request(url);
-  request.on("response", (res) => {
-    var dataTmp = "";
-    res.on("data", (chunk) => {
-      dataTmp += chunk;
-    });
-    res.on("end", function () {
-      var json = jsonParse(dataTmp);
-
-      if (!json) return;
-
-      var originTimeTmp = json.Body.Earthquake ? new Date(json.Body.Earthquake.OriginTime) : null;
-      var epiCenterTmp = json.Body.Earthquake ? json.Body.Earthquake.Hypocenter.Name : null;
-      var MagnitudeTmp = json.Body.Earthquake ? json.Body.Earthquake.Magnitude : null;
-      var MaxITmp = json.Body.Intensity ? json.Body.Intensity.Observation.MaxInt : null;
-      var cancel = json.Head.InfoType == "取消";
-
-      var dataTmp2 = [
-        {
-          eventId: json.Head.EventID,
-          category: json.Head.Title,
-          OriginTime: originTimeTmp,
-          epiCenter: epiCenterTmp,
-          M: MagnitudeTmp,
-          maxI: MaxITmp,
-          cancel: cancel,
-          reportDateTime: new Date(json.Head.ReportDateTime),
-          DetailURL: [url],
-        },
-      ];
-      eqInfoControl(dataTmp2, "jma");
-    });
-  });
-  request.on("error", (error) => {
-    NetworkError(error, "narikakun 地震情報API");
-  });
-  request.end();
-}
-
-function JMAEQInfoFetch(url) {
+//気象庁XML 取得・フォーマット変更→eqInfoControl
+function EQI_JMAXML_Req(url) {
   if (!url) return;
   if (jmaXML_Fetched.includes(url)) return;
   jmaXML_Fetched.push(url);
@@ -2149,6 +2074,128 @@ function JMAEQInfoFetch(url) {
   request.end();
 }
 
+//USGS 取得・フォーマット変更→eqInfoControl
+function EQI_USGS_Req() {
+  var request = net.request("https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&limit=10");
+  request.on("response", (res) => {
+    var dataTmp = "";
+    res.on("data", (chunk) => {
+      dataTmp += chunk;
+    });
+    res.on("end", function () {
+      var json = jsonParse(dataTmp);
+      if (!json) return false;
+      var dataTmp2 = [];
+      json.features.forEach(function (elm) {
+        dataTmp2.push({
+          eventId: elm.id,
+          category: null,
+          OriginTime: new Date(elm.properties.time),
+          epiCenter: elm.properties.place,
+          M: elm.properties.mag,
+          maxI: null,
+          DetailURL: [elm.properties.url],
+        });
+      });
+
+      eqInfoControl(dataTmp2, "usgs");
+
+      //eqInfoDraw(dataTmp2, document.getElementById("USGS_EqInfo"), false, "USGS");
+    });
+  });
+  request.on("error", (error) => {
+    NetworkError(error, "USGS");
+  });
+
+  request.end();
+}
+
+//narikakun地震情報API リスト取得→EQI_narikakun_Req
+function EQI_narikakunList_Req(url, num, first) {
+  var request = net.request(url);
+  request.on("response", (res) => {
+    var dataTmp = "";
+    res.on("data", (chunk) => {
+      dataTmp += chunk;
+    });
+    res.on("end", function () {
+      var json = jsonParse(dataTmp);
+      if (!json || !json.lists) return false;
+      narikakun_URLs = narikakun_URLs.concat(json.lists.reverse());
+
+      if (narikakun_URLs.length < 10 && first) {
+        var yearTmp = new Date().getFullYear();
+        var monthTmp = new Date().getMonth();
+        if (monthTmp == 0) {
+          yearTmp = new Date().getFullYear() - 1;
+          monthTmp = 1;
+        }
+        EQI_narikakunList_Req("https://ntool.online/api/earthquakeList?year=" + yearTmp + "&month=" + monthTmp, 10 - json.lists.length, false);
+      } else {
+        for (let elm of narikakun_URLs) {
+          var eidTmp = elm.split("_")[2];
+          if (nakn_Fetched.indexOf(url) === -1) {
+            nakn_Fetched.push(elm);
+            EQI_narikakun_Req(elm);
+          }
+          if (!narikakun_EIDs.includes(eidTmp)) {
+            narikakun_EIDs.push(eidTmp);
+            if (narikakun_EIDs.length == 10) break;
+          }
+        }
+        narikakun_URLs = [];
+        narikakun_EIDs = [];
+      }
+    });
+  });
+  request.on("error", (error) => {
+    NetworkError(error, "narikakun 地震情報API");
+  });
+  request.end();
+}
+
+//narikakun地震情報API 取得・フォーマット変更→eqInfoControl
+function EQI_narikakun_Req(url) {
+  var request = net.request(url);
+  request.on("response", (res) => {
+    var dataTmp = "";
+    res.on("data", (chunk) => {
+      dataTmp += chunk;
+    });
+    res.on("end", function () {
+      var json = jsonParse(dataTmp);
+
+      if (!json) return;
+
+      var originTimeTmp = json.Body.Earthquake ? new Date(json.Body.Earthquake.OriginTime) : null;
+      var epiCenterTmp = json.Body.Earthquake ? json.Body.Earthquake.Hypocenter.Name : null;
+      var MagnitudeTmp = json.Body.Earthquake ? json.Body.Earthquake.Magnitude : null;
+      var MaxITmp = json.Body.Intensity ? json.Body.Intensity.Observation.MaxInt : null;
+      var cancel = json.Head.InfoType == "取消";
+
+      var dataTmp2 = [
+        {
+          eventId: json.Head.EventID,
+          category: json.Head.Title,
+          OriginTime: originTimeTmp,
+          epiCenter: epiCenterTmp,
+          M: MagnitudeTmp,
+          maxI: MaxITmp,
+          cancel: cancel,
+          reportDateTime: new Date(json.Head.ReportDateTime),
+          DetailURL: [url],
+        },
+      ];
+      eqInfoControl(dataTmp2, "jma");
+    });
+  });
+  request.on("error", (error) => {
+    NetworkError(error, "narikakun 地震情報API");
+  });
+  request.end();
+}
+
+//地震情報マージ→eqInfoAlert
 function eqInfoControl(dataList, type) {
   switch (type) {
     case "jma":
@@ -2196,6 +2243,7 @@ function eqInfoControl(dataList, type) {
   }
 }
 
+//地震情報通知（音声・画面表示等）
 function eqInfoAlert(data, source, update) {
   if (source == "jma") {
     if (!update) {
@@ -2235,8 +2283,8 @@ function eqInfoAlert(data, source, update) {
     }
   }
 }
-var RevocationTimer;
 
+//🔴津波情報🔴
 function TsunamiInfoControl(data) {
   var newInfo = !tsunamiData || !tsunamiData.issue || tsunamiData.issue.time < data.issue.time;
   if (newInfo) {
@@ -2277,10 +2325,9 @@ function TsunamiInfoControl(data) {
   }
 }
 
-//
-//
-//
-//支援関数
+//🔴支援関数🔴
+
+//音声合成
 function speak(str) {
   if (kmoniWorker) {
     kmoniWorker.webContents.send("message2", {
@@ -2289,11 +2336,21 @@ function speak(str) {
     });
   }
 }
+//音声再生(kmoniWorker連携)
+function soundPlay(name) {
+  if (kmoniWorker) {
+    kmoniWorker.webContents.send("message2", {
+      action: "soundPlay",
+      data: name,
+    });
+  }
+}
 
+//ネットワークエラー処理
 function NetworkError(error, type) {
   Window_notification(type + "との通信でエラーが発生しました。", "エラーコードは以下の通りです。\n" + String(error), "error");
 }
-
+//メインウィンドウ内通知
 function Window_notification(title, detail, type) {
   notifications.push({
     id: notification_id,
@@ -2312,6 +2369,7 @@ function Window_notification(title, detail, type) {
   }
 }
 
+//真偽地判定（拡張）
 function Boolean2(str) {
   switch (str) {
     case "true":
@@ -2325,19 +2383,19 @@ function Boolean2(str) {
       break;
   }
 }
-
-function replay(ReplayDate) {
-  if (ReplayDate) {
-    Replay = new Date() - new Date(ReplayDate);
-    mainWindow.webContents.send("message2", {
-      action: "Replay",
-      data: new Date(ReplayDate),
-    });
-  } else {
-    Replay = 0;
+//JSONパース（拡張）
+function jsonParse(str) {
+  var json;
+  str = String(str);
+  try {
+    json = JSON.parse(str);
+  } catch (error) {
+    json = null;
   }
+  return json;
 }
 
+//日時フォーマット
 function dateEncode(type, dateTmp) {
   dateTmp = new Date(dateTmp);
   if (type == 1) {
@@ -2382,18 +2440,7 @@ function dateEncode(type, dateTmp) {
     return type;
   }
 }
-
-function jsonParse(str) {
-  var json;
-  str = String(str);
-  try {
-    json = JSON.parse(str);
-  } catch (error) {
-    json = null;
-  }
-  return json;
-}
-
+//震度の形式変換
 function shindoConvert(str, responseType) {
   var ShindoTmp;
   if (!str) {
@@ -2519,8 +2566,8 @@ function shindoConvert(str, responseType) {
     return str;
   }
 }
-
-function latitudeConvert(data) {
+//緯度・経度のフォーマット統一
+function LatLngConvert(data) {
   if (!isNaN(data)) {
     return Number(data);
   } else if (data.match(/N/)) {
@@ -2536,15 +2583,19 @@ function latitudeConvert(data) {
   }
 }
 
+//２地点の緯度経度から距離（km）を算出
 function geosailing(a, b, c, d) {
   with (Math) return acos(sin(a * (i = PI / 180)) * sin(c * i) + cos(a * i) * cos(c * i) * cos(b * i - d * i)) * 6371.008;
 }
-
-function soundPlay(name) {
-  if (kmoniWorker) {
-    kmoniWorker.webContents.send("message2", {
-      action: "soundPlay",
-      data: name,
+//リプレイ
+function replay(ReplayDate) {
+  if (ReplayDate) {
+    Replay = new Date() - new Date(ReplayDate);
+    mainWindow.webContents.send("message2", {
+      action: "Replay",
+      data: new Date(ReplayDate),
     });
+  } else {
+    Replay = 0;
   }
 }

@@ -684,6 +684,9 @@ td {
   font-size: 14px;
   color: #ccc;
 }
+#Internet_UT {
+  display: none;
+}
 .timeItem {
   margin: 15px 0;
 }

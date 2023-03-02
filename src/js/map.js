@@ -18,7 +18,18 @@ var tsunamiLayerAdded = false;
 var psWaveList = [];
 var tsunamiAlertNow = false;
 var RevocationTimer;
-
+var overlayTmp = 0;
+var epicenterIcon;
+var tsunamiElm = [];
+var inited = false;
+var windowLoaded = false;
+var TimeTable_JMA2001;
+var EQDetectCanvas;
+var PointsCanvas;
+var mapLayer;
+var hinanjoLayer;
+var kmoniMapData;
+var SnetMapData;
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "kmoniUpdate") {
     kmoniMapUpdate(request.data, "knet");
@@ -46,176 +57,21 @@ window.electronAPI.messageSend((event, request) => {
   } else if (request.action == "EEWAlertUpdate") {
     psWaveEntry();
   } else if (request.action == "tsunamiUpdate") {
-    if (gjmapT) {
-      if (!tsunamiLayerAdded) tsunamiLayer.addLayer(gjmapT);
-      tsunamiLayerAdded = true;
-
-      gjmapT.setStyle({
-        stroke: false,
-      });
-    }
-
-    Tsunami_MajorWarning = Tsunami_Warning = Tsunami_Watch = Tsunami_Yoho = false;
-
-    document.getElementById("tsunamiCancel").style.display = request.data.cancelled ? "block" : "none";
-    document.getElementById("tsunamiRevocation").style.display = request.data.revocation ? "block" : "none";
-
-    if (request.data.cancelled) {
-      document.getElementById("tsunamiWrap").style.display = "none";
-
-      document.body.classList.remove("TsunamiMode");
-    } else {
-      map.addLayer(tsunamiLayer);
-
-      document.getElementById("tsunamiWrap").style.display = "block";
-
-      document.body.classList.add("TsunamiMode");
-      var alertNowTmp = false;
-      request.data.areas.forEach(function (elm) {
-        var tsunamiItem = tsunamiElm.find(function (elm2) {
-          return elm2.name == elm.name;
-        });
-
-        if (elm.cancelled) {
-          if (tsunamiItem) {
-            tsunamiItem.item
-              .setStyle({
-                stroke: false,
-                className: "tsunamiElm",
-              })
-              .setPopupContent("<h3>津波予報区</h3>" + tsunamiItem.feature.properties.name);
-          }
-        } else {
-          alertNowTmp = true;
-          var gradeJa;
-          switch (elm.grade) {
-            case "MajorWarning":
-              Tsunami_MajorWarning = true;
-              gradeJa = "大津波警報";
-              break;
-            case "Warning":
-              Tsunami_Warning = true;
-              gradeJa = "津波警報";
-              break;
-            case "Watch":
-              Tsunami_Watch = true;
-              gradeJa = "津波注意報";
-              break;
-            case "Yoho":
-              Tsunami_Yoho = true;
-              gradeJa = "津波予報";
-              break;
-            default:
-              break;
-          }
-
-          if (tsunamiItem && tsunamiItem.item) {
-            var firstWave = "";
-            var maxWave = "";
-            var firstCondition = "";
-            if (elm.firstHeight) {
-              firstWave = "<div>第１波 予想到達時刻:" + dateEncode(5, elm.firstHeight) + "</div>";
-            }
-            if (elm.maxHeight) {
-              maxWave = "<div>予想される津波の高さ:" + elm.maxHeight + "</div>";
-            } else if (elm.grade == "Yoho") {
-              maxWave = "<div>予想される津波の高さ:若干の海面変動</div>";
-            }
-            if (elm.firstHeightCondition) {
-              firstCondition = "<div>" + elm.firstHeightCondition + "</div>";
-            }
-            tsunamiItem.item
-              .setStyle({
-                stroke: true,
-                color: tsunamiColorConv(elm.grade),
-                weight: 5,
-              })
-              .setPopupContent("<h3 style='border-bottom:solid 2px " + tsunamiColorConv(elm.grade) + "'>" + gradeJa + " 発令中</h3><p>津波予報区:" + tsunamiItem.feature.properties.name + "</p>" + firstWave + maxWave + firstCondition);
-          }
-        }
-      });
-
-      if (request.data.revocation) {
-        document.getElementById("tsunamiWrap").style.display = "none";
-        document.body.classList.remove("TsunamiMode");
-        map.removeLayer(tsunamiLayer);
-        Tsunami_MajorWarning = Tsunami_Warning = Tsunami_Watch = false;
-      } else if (!alertNowTmp && tsunamiAlertNow) {
-        document.getElementById("tsunamiWrap").style.display = "none";
-        document.body.classList.remove("TsunamiMode");
-        map.removeLayer(tsunamiLayer);
-        Tsunami_MajorWarning = Tsunami_Warning = Tsunami_Watch = false;
-      }
-      tsunamiAlertNow = alertNowTmp;
-
-      document.getElementById("tsunami_MajorWarning").style.display = Tsunami_MajorWarning ? "block" : "none";
-      document.getElementById("tsunami_Warning").style.display = Tsunami_Warning ? "block" : "none";
-      document.getElementById("tsunami_Watch").style.display = Tsunami_Watch ? "block" : "none";
-      document.getElementById("tsunami_Yoho").style.display = Tsunami_Yoho ? "block" : "none";
-
-      if (Tsunami_MajorWarning) {
-        document.getElementById("tsunamiTitle").style.borderColor = tsunamiColorConv("MajorWarning");
-      } else if (Tsunami_Warning) {
-        document.getElementById("tsunamiTitle").style.borderColor = tsunamiColorConv("Warning");
-      } else if (Tsunami_Watch) {
-        document.getElementById("tsunamiTitle").style.borderColor = tsunamiColorConv("Watch");
-      } else if (Tsunami_Yoho) {
-        document.getElementById("tsunamiTitle").style.borderColor = tsunamiColorConv("Yoho");
-      }
-    }
+    tsunamiDataUpdate(request.data);
   } else if (request.action == "setting") {
     init();
   } else if (request.action == "EstShindoUpdate") {
-    if (sections.length == 0) return;
-    sections.forEach(function (elm) {
-      elm.item.setStyle({ fillColor: "#333" });
-    });
-
-    request.data.forEach(function (elm) {
-      var section = sections.find(function (elm3) {
-        return elm3.name == elm.Section;
-      });
-
-      if (section && section.item) {
-        var colorTmp = shindoConvert(elm.estShindo, 2)[0];
-        section.item.setStyle({ fill: true, fillColor: colorTmp });
-      }
-    });
+    EstShindoUpdate(request.data);
   }
 
   document.getElementById("splash").style.display = "none";
 });
 
-function latitudeConvert(data) {
-  if (!isNaN(data)) {
-    return Number(data);
-  } else if (data.match(/N/)) {
-    return Number(data.replace("N", ""));
-  } else if (data.match(/S/)) {
-    return 0 - Number(data.replace("S", ""));
-  } else if (data.match(/E/)) {
-    return Number(data.replace("E", ""));
-  } else if (data.match(/W/)) {
-    return 0 - Number(data.replace("W", ""));
-  } else {
-    return data;
-  }
-}
-var overlayTmp = 0;
-var epicenterIcon;
-var tsunamiElm = [];
-var inited = false;
-var windowLoaded = false;
-var TimeTable_JMA2001;
-
 window.addEventListener("load", function () {
   windowLoaded = true;
 });
-var EQDetectCanvas;
-var PointsCanvas;
-var mapLayer;
-var hinanjoLayer;
 
+//マップ初期化など
 function init() {
   if (inited || !config || !windowLoaded) return;
   inited = true;
@@ -700,12 +556,12 @@ function init() {
       psWaveEntry();
     });
 }
-function addPointMarker(elm) {
-  //var popup_content = "<h3 class='PointName'>" + elm.Name + "<span>" + elm.Code + "</span></h3><h4 class='detecting'>地震検知中</h4><table><tr><td>震度</td><td class='PointInt'></td></tr><tr><td>PGA</td><td class='PointPGA'></td></tr></table>";
 
+//観測点マーカー追加
+function addPointMarker(elm) {
   var codeEscaped = elm.Code.replace(".", "_");
   var kmoniPointMarker = L.divIcon({
-    html: "<div class='marker-circle'></div>" /*<div class='PointPopup'>" + popup_content + "</div>"*/,
+    html: "<div class='marker-circle'></div>",
     className: "kmoniPointMarker KmoniPoint_" + codeEscaped,
     iconSize: [35, 35],
     iconAnchor: [17.5, 17.5],
@@ -722,8 +578,7 @@ function addPointMarker(elm) {
   }
   return elm;
 }
-var kmoniMapData;
-var SnetMapData;
+//観測点情報更新
 function kmoniMapUpdate(dataTmp, type) {
   if (!dataTmp) return;
   if (type == "knet") {
@@ -824,6 +679,27 @@ function kmoniMapUpdate(dataTmp, type) {
   });
 }
 
+//予想震度更新
+function EstShindoUpdate(data) {
+  if (sections.length == 0) return;
+  sections.forEach(function (elm) {
+    elm.item.setStyle({ fillColor: "#333" });
+  });
+
+  data.forEach(function (elm) {
+    var section = sections.find(function (elm3) {
+      return elm3.name == elm.Section;
+    });
+
+    if (section && section.item) {
+      var colorTmp = shindoConvert(elm.estShindo, 2)[0];
+      section.item.setStyle({ fill: true, fillColor: colorTmp });
+    }
+  });
+}
+
+//🔴予報円🔴
+//予報円追加
 function psWaveEntry() {
   now_EEW.forEach(function (elm) {
     if (!elm.is_cancel && elm.arrivalTime) {
@@ -886,6 +762,7 @@ function psWaveEntry() {
     return stillEEW;
   });
 }
+//予報円半径計算
 function psWaveCalc(eid) {
   var pswaveFind = psWaveList.find(function (elm2) {
     return elm2.id == eid;
@@ -990,6 +867,7 @@ function psWaveCalc(eid) {
     }
   }
 }
+//予報円描画
 function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArrived, SArriveTime, nowDistance) {
   if (!pRadius || (!sRadius && !SnotArrived)) return;
   var EQElm = psWaveList.find(function (elm) {
@@ -1122,6 +1000,129 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
   }
 }
 
+//🔴津波情報🔴
+//津波情報更新
+function tsunamiDataUpdate(data) {
+  if (gjmapT) {
+    if (!tsunamiLayerAdded) tsunamiLayer.addLayer(gjmapT);
+    tsunamiLayerAdded = true;
+
+    gjmapT.setStyle({
+      stroke: false,
+    });
+  }
+
+  Tsunami_MajorWarning = Tsunami_Warning = Tsunami_Watch = Tsunami_Yoho = false;
+
+  document.getElementById("tsunamiCancel").style.display = data.cancelled ? "block" : "none";
+  document.getElementById("tsunamiRevocation").style.display = data.revocation ? "block" : "none";
+
+  if (data.cancelled) {
+    document.getElementById("tsunamiWrap").style.display = "none";
+
+    document.body.classList.remove("TsunamiMode");
+  } else {
+    map.addLayer(tsunamiLayer);
+
+    document.getElementById("tsunamiWrap").style.display = "block";
+
+    document.body.classList.add("TsunamiMode");
+    var alertNowTmp = false;
+    data.areas.forEach(function (elm) {
+      var tsunamiItem = tsunamiElm.find(function (elm2) {
+        return elm2.name == elm.name;
+      });
+
+      if (elm.cancelled) {
+        if (tsunamiItem) {
+          tsunamiItem.item
+            .setStyle({
+              stroke: false,
+              className: "tsunamiElm",
+            })
+            .setPopupContent("<h3>津波予報区</h3>" + tsunamiItem.feature.properties.name);
+        }
+      } else {
+        alertNowTmp = true;
+        var gradeJa;
+        switch (elm.grade) {
+          case "MajorWarning":
+            Tsunami_MajorWarning = true;
+            gradeJa = "大津波警報";
+            break;
+          case "Warning":
+            Tsunami_Warning = true;
+            gradeJa = "津波警報";
+            break;
+          case "Watch":
+            Tsunami_Watch = true;
+            gradeJa = "津波注意報";
+            break;
+          case "Yoho":
+            Tsunami_Yoho = true;
+            gradeJa = "津波予報";
+            break;
+          default:
+            break;
+        }
+
+        if (tsunamiItem && tsunamiItem.item) {
+          var firstWave = "";
+          var maxWave = "";
+          var firstCondition = "";
+          if (elm.firstHeight) {
+            firstWave = "<div>第１波 予想到達時刻:" + dateEncode(5, elm.firstHeight) + "</div>";
+          }
+          if (elm.maxHeight) {
+            maxWave = "<div>予想される津波の高さ:" + elm.maxHeight + "</div>";
+          } else if (elm.grade == "Yoho") {
+            maxWave = "<div>予想される津波の高さ:若干の海面変動</div>";
+          }
+          if (elm.firstHeightCondition) {
+            firstCondition = "<div>" + elm.firstHeightCondition + "</div>";
+          }
+          tsunamiItem.item
+            .setStyle({
+              stroke: true,
+              color: tsunamiColorConv(elm.grade),
+              weight: 5,
+            })
+            .setPopupContent("<h3 style='border-bottom:solid 2px " + tsunamiColorConv(elm.grade) + "'>" + gradeJa + " 発令中</h3><p>津波予報区:" + tsunamiItem.feature.properties.name + "</p>" + firstWave + maxWave + firstCondition);
+        }
+      }
+    });
+
+    if (data.revocation) {
+      document.getElementById("tsunamiWrap").style.display = "none";
+      document.body.classList.remove("TsunamiMode");
+      map.removeLayer(tsunamiLayer);
+      Tsunami_MajorWarning = Tsunami_Warning = Tsunami_Watch = false;
+    } else if (!alertNowTmp && tsunamiAlertNow) {
+      document.getElementById("tsunamiWrap").style.display = "none";
+      document.body.classList.remove("TsunamiMode");
+      map.removeLayer(tsunamiLayer);
+      Tsunami_MajorWarning = Tsunami_Warning = Tsunami_Watch = false;
+    }
+    tsunamiAlertNow = alertNowTmp;
+
+    document.getElementById("tsunami_MajorWarning").style.display = Tsunami_MajorWarning ? "block" : "none";
+    document.getElementById("tsunami_Warning").style.display = Tsunami_Warning ? "block" : "none";
+    document.getElementById("tsunami_Watch").style.display = Tsunami_Watch ? "block" : "none";
+    document.getElementById("tsunami_Yoho").style.display = Tsunami_Yoho ? "block" : "none";
+
+    if (Tsunami_MajorWarning) {
+      document.getElementById("tsunamiTitle").style.borderColor = tsunamiColorConv("MajorWarning");
+    } else if (Tsunami_Warning) {
+      document.getElementById("tsunamiTitle").style.borderColor = tsunamiColorConv("Warning");
+    } else if (Tsunami_Watch) {
+      document.getElementById("tsunamiTitle").style.borderColor = tsunamiColorConv("Watch");
+    } else if (Tsunami_Yoho) {
+      document.getElementById("tsunamiTitle").style.borderColor = tsunamiColorConv("Yoho");
+    }
+  }
+}
+
+//津波情報色変換
 function tsunamiColorConv(str) {
   switch (str) {
     case "MajorWarning":
@@ -1142,17 +1143,12 @@ function tsunamiColorConv(str) {
   }
 }
 
-const linear = (x, y) => {
+//線形補完
+function linear(x, y) {
   return (x0) => {
     const index = x.reduce((pre, current, i) => (current <= x0 ? i : pre), 0); //数値が何番目の配列の間かを探す
     const i = index === x.length - 1 ? x.length - 2 : index; //配列の最後の値より大きい場合は、外挿のために、最後から2番目をindexにする
 
     return ((y[i + 1] - y[i]) / (x[i + 1] - x[i])) * (x0 - x[i]) + y[i]; //線形補間の関数を返す
   };
-};
-
-function forEach2(array, func) {
-  for (let i = 0; i < array.length; i++) {
-    func(array[i], i);
-  }
 }

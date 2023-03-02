@@ -1,6 +1,7 @@
 const root = document.querySelector(":root");
 const rootStyle = getComputedStyle(root);
 
+//タブUI
 document.querySelectorAll(".tabmenu").forEach(function (elm) {
   elm.addEventListener("mousedown", function () {
     //var containsTmp = !elm.classList.contains("active_tabmenu");
@@ -17,6 +18,8 @@ document.querySelectorAll(".tabmenu").forEach(function (elm) {
     //}
   });
 });
+
+//震度フォーマット
 function shindoConvert(str, responseType) {
   var ShindoTmp;
   if (!str) {
@@ -141,6 +144,7 @@ function shindoConvert(str, responseType) {
   return ConvTable[ShindoTmp];
 }
 
+//日時フォーマット
 function dateEncode(type, dateTmp, inputtype) {
   if (inputtype == 1) {
     var str = String(dateTmp);
@@ -212,8 +216,26 @@ function dateEncode(type, dateTmp, inputtype) {
   }
 }
 
+//子要素一括削除
 function removeChild(element) {
   while (element.firstChild) {
     element.removeChild(element.firstChild);
+  }
+}
+
+//緯度経度フォーマット
+function latitudeConvert(data) {
+  if (!isNaN(data)) {
+    return Number(data);
+  } else if (data.match(/N/)) {
+    return Number(data.replace("N", ""));
+  } else if (data.match(/S/)) {
+    return 0 - Number(data.replace("S", ""));
+  } else if (data.match(/E/)) {
+    return Number(data.replace("E", ""));
+  } else if (data.match(/W/)) {
+    return 0 - Number(data.replace("W", ""));
+  } else {
+    return data;
   }
 }

@@ -1,0 +1,205 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: #222;
+  color: #fff;
+  text-align: center;
+}
+
+table th,
+table tr,
+table td {
+  position: relative;
+  border: none;
+  border-collapse: separate;
+}
+
+.ListItem_detail * {
+  font-size: 14px;
+  line-height: 1.2em;
+  padding: 10px;
+  color: #ccc;
+}
+
+table {
+  min-width: 500px;
+  display: inline-table;
+  text-align: left;
+}
+
+#MajorWarningInfo,
+#WarningInfo,
+#WatchInfo,
+#YohoInfo,
+table thead {
+  display: none;
+  text-align: center;
+  position: -webkit-sticky;
+  position: sticky;
+  top: 90px;
+  z-index: 1;
+  background: #222;
+  height: 50px;
+  font-size: 20px;
+}
+
+table thead {
+  font-size: 16px;
+}
+
+#MajorWarningInfo th,
+#WarningInfo th,
+#WatchInfo th,
+#YohoInfo th,
+table thead th {
+  height: 50px;
+}
+
+.ListIcon_MajorWarning,
+.ListIcon_Warning,
+.ListIcon_Watch,
+.ListIcon_Yoho {
+  display: inline-block;
+  color: #000;
+  border-radius: 50%;
+  height: 25px;
+  width: 25px;
+  font-size: 16px;
+  text-align: center;
+  line-height: 25px;
+  vertical-align: middle;
+  font-size: 16px;
+}
+
+table thead {
+  top: 70px;
+}
+
+table td {
+  padding: 9px 10px;
+  font-size: 18px;
+}
+
+table tr:nth-child(2n) {
+  background: #444;
+}
+
+#MajorWarningInfo::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  outline: solid 2px var(--TsunamiMajorWarningColor);
+}
+
+#WarningInfo::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  outline: solid 2px var(--TsunamiWarningColor);
+}
+
+#WatchInfo::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  outline: solid 2px var(--TsunamiWatchColor);
+}
+
+#YohoInfo::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  outline: solid 2px var(--TsunamiYohoColor);
+}
+
+#revocation,
+#DTWrap {
+  font-size: 20px;
+  padding: 20px;
+  display: none;
+}
+
+.ListIcon_MajorWarning {
+  background: var(--TsunamiMajorWarningColor);
+}
+
+.ListIcon_Warning {
+  background: var(--TsunamiWarningColor);
+}
+
+.ListIcon_Watch {
+  background: var(--TsunamiWatchColor);
+}
+
+.ListIcon_Yoho {
+  background: var(--TsunamiYohoColor);
+}
+
+h1#title {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  margin: 0;
+  line-height: 70px;
+  z-index: 1000;
+  background: #333;
+  border-bottom: solid 1px #666;
+}
+
+#tableWrap {
+  margin-top: 70px;
+}
+
+#no-data {
+  background: #444;
+  text-align: center;
+  height: 50px;
+}
+
+.disabled-cell {
+  text-align: center;
+  font-size: 16px;
+  color: #999;
+}
+
+.disabled-wrap {
+  display: block;
+  text-align: center;
+  font-size: 16px;
+  color: #999;
+}
+
+.TxtIcon {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ccc;
+  color: #000;
+  font-size: 12px;
+  line-height: 16px;
+  text-align: center;
+  padding: 0;
+  margin-right: 3px;
+  overflow: hidden;
+  vertical-align: middle;
+}

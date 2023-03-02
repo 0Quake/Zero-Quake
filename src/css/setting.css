@@ -1,0 +1,110 @@
+body {
+  overflow: hidden;
+}
+
+#tab1_wrap {
+  display: flex;
+  height: 100%;
+  overflow: hidden;
+}
+
+.EEWMode #tab1_wrap,
+.TsunamiMode #tab1_wrap {
+  height: 100%;
+}
+
+#tab1_bar {
+  min-width: 250px;
+  width: auto;
+  height: 100%;
+  writing-mode: unset;
+  text-orientation: unset;
+}
+
+.tabmenu {
+  display: block;
+  padding: 0.5em;
+}
+
+.active_tabmenu {
+  border-left: solid 2px rgb(203, 27, 27);
+  background: rgba(255, 0, 0, 0.2);
+  color: #fff;
+}
+
+.active_tabmenu:hover {
+  color: #fff;
+}
+
+#softName {
+  font-size: 25px;
+  line-height: 50px;
+  text-align: center;
+}
+
+#softName img {
+  height: 50px;
+  width: 50px;
+  vertical-align: middle;
+  margin: 0 10px;
+}
+
+div .tabcontent {
+  height: 100%;
+  overflow: auto;
+  padding: 20px 20px 60px 20px !important;
+}
+
+#BtnWrap {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  height: 40px;
+  line-height: 40px;
+  background: #444;
+  border-top: solid 1px #666;
+  text-align: right;
+  font-size: 0;
+}
+
+#BtnWrap button {
+  height: 30px;
+  margin: 5px;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  background: rgb(108, 30, 30);
+  color: #fff;
+  transition: 200ms;
+}
+
+#BtnWrap button:hover {
+  background: rgb(83, 0, 0);
+}
+
+#mapcontainer {
+  width: 100%;
+  height: 300px;
+  background: rgb(39, 32, 32);
+}
+
+.ActiveSaibun {
+  fill: rgb(167, 40, 40);
+}
+
+#smallWrap {
+  text-align: center;
+}
+
+h3 {
+  margin: 2em 0 0.5em 0.5em;
+}
+
+h4 {
+  margin: 0.5em 0 0 1.5em;
+}
+
+.contentWrap {
+  margin: 0 0 0 2.5em;
+}

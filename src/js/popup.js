@@ -3,7 +3,6 @@ var EEWDetectionTimeout;
 var Replay = 0;
 var ICT_JST = 0;
 var config;
-//var AreaForecastLocalE;
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "EEWAlertUpdate") {
     EEWAlertUpdate(request.data);
@@ -15,13 +14,6 @@ window.electronAPI.messageSend((event, request) => {
     kmoniTimeUpdate(request.Updatetime, request.LocalTime, "msilImg", "success");
   } else if (request.action == "MSSelect") {
     document.getElementById(request.str).selected = true;
-
-    /*} else if (request.action == "EEW_Detection") {
-    document.getElementById("EEWDetection").style.display = "block";
-    clearTimeout(EEWDetectionTimeout);
-    EEWDetectionTimeout = setTimeout(function () {
-      document.getElementById("EEWDetection").style.display = "none";
-    }, 300000);*/
   } else if (request.action == "PSWaveUpdate") {
     epiCenterUpdate(request.data.report_id, request.data.latitude, request.data.longitude);
   } else if (request.action == "PSWaveClear") {
@@ -41,7 +33,18 @@ window.electronAPI.messageSend((event, request) => {
   }
   return true;
 });
-window.addEventListener("load", function () {
+
+window.addEventListener("load", (e) => {
+  //オフライン警告表示・非表示
+  if (navigator.onLine) {
+    kmoniTimeUpdate(new Date(), new Date(), "Internet", "success");
+  } else {
+    document.getElementById("offline").showModal();
+    document.getElementById("offline2").style.display = "block";
+    kmoniTimeUpdate(new Date(), new Date(), "Internet", "Error");
+  }
+
+  //強震モニタお知らせ取得
   fetch("http://www.kmoni.bosai.go.jp/webservice/maintenance/message.json?_=" + Number(new Date()))
     .then(function (res) {
       return res.json();
@@ -49,30 +52,29 @@ window.addEventListener("load", function () {
     .then(function (json) {
       document.getElementById("kmoni_Message").innerHTML = json.message;
     });
+
+  //ローカル時刻
   setInterval(function () {
     document.getElementById("PC_TIME").textContent = dateEncode(3, new Date());
   }, 200);
 });
-
+//オフライン警告非表示
 window.addEventListener("online", (e) => {
   document.getElementById("offline").close();
   document.getElementById("offline2").style.display = "none";
+  kmoniTimeUpdate(new Date(), new Date(), "Internet", "success");
 });
-
+//オフライン警告表示
 window.addEventListener("offline", (e) => {
   document.getElementById("offline").showModal();
   document.getElementById("offline2").style.display = "block";
-});
-window.addEventListener("load", (e) => {
-  if (!navigator.onLine) {
-    document.getElementById("offline").showModal();
-    document.getElementById("offline2").style.display = "block";
-  }
+  kmoniTimeUpdate(new Date(), new Date(), "Internet", "Error");
 });
 
+//🔴緊急地震速報🔴
 var template = document.getElementById("EEWTemplate");
 var epiCenter = [];
-
+//EEW追加・更新
 function EEWAlertUpdate(data) {
   data.forEach((elm) => {
     var same = now_EEW.find(function (elm2) {
@@ -253,7 +255,7 @@ function EEWAlertUpdate(data) {
     document.body.classList.add("EEWMode");
   }
 }
-
+//震源更新
 function epiCenterUpdate(eid, latitude, longitude) {
   eid = Number(eid);
 
@@ -300,6 +302,7 @@ function epiCenterUpdate(eid, latitude, longitude) {
     });
   }
 }
+//震源クリア
 function epiCenterClear(eid) {
   eid = Number(eid);
   if (map) {
@@ -312,20 +315,13 @@ function epiCenterClear(eid) {
     }
   }
 }
-/*地震情報*/
-//
-//
-//
-//
-//
-//
-//
 
+//🔴地震情報🔴
 var eqInfo = [];
-
 var template2 = document.getElementById("EQListTemplate");
 var template2_2 = document.getElementById("EQListTemplate2");
 var EQListWrap;
+var EQDetectItem = [];
 function eqInfoDraw(data, source) {
   var EQTemplate;
   if (source == "jma") {
@@ -375,7 +371,7 @@ function eqInfoDraw(data, source) {
   });
 }
 
-var EQDetectItem = [];
+//🔴地震検知🔴
 function EQDetect(data) {
   var EQD_Item = EQDetectItem.find(function (elm) {
     return elm.id == data.id;
@@ -406,7 +402,7 @@ function EQDetect(data) {
     });
   }
 }
-
+//地震検知情報更新
 function EQDetectFinish(id) {
   EQDetectItem.forEach(function (elmA, index) {
     if (elmA.id == id) {
@@ -416,82 +412,11 @@ function EQDetectFinish(id) {
   });
 }
 
-//
-//
-//
-//UI
-
-document.getElementById("TsunamiDetail").addEventListener("click", function () {
-  window.electronAPI.messageReturn({
-    action: "TsunamiWindowOpen",
-  });
-});
-
-document.getElementById("EQInfoSelect").addEventListener("change", function () {
-  document.querySelectorAll(".activeEQInfo").forEach(function (elm) {
-    elm.classList.remove("activeEQInfo");
-  });
-  document.getElementById(this.value).classList.add("activeEQInfo");
-});
-
+//🔴UI🔴
 var updateTimeTmp = 0;
-function kmoniTimeUpdate(updateTime, LocalTime, type, condition, vendor) {
-  //if (prepareing) return;
-
-  /*
-  Updatetime: new Date(data.time),
-  LocalTime: new Date(),
-  type: "P2P_EEW",
-*/
-  if (Math.floor(updateTimeTmp / 1000) < Math.floor(updateTime / 1000)) {
-    updateTimeTmp = updateTime;
-    document.getElementById("all_UpdateTime").textContent = dateEncode(3, updateTime);
-  }
-
-  if (vendor) {
-    document.getElementById("ymoniVendor").textContent = vendor == "YE" ? "East" : "West";
-  }
-  document.getElementById(type + "_UT").textContent = dateEncode(3, updateTime);
-  var iconElm = document.getElementById(type + "_ICN");
-
-  if (condition == "success") {
-    iconElm.classList.add("SuccessAnm");
-    iconElm.classList.add("Success");
-    iconElm.classList.remove("Error");
-  } else if (condition == "Error") {
-    iconElm.classList.remove("Success");
-    iconElm.classList.add("Error");
-  } else if (condition == "Disconnect") {
-    iconElm.classList.remove("Success");
-    iconElm.classList.remove("Error");
-  }
-
-  iconElm.addEventListener("animationend", function () {
-    this.classList.remove("SuccessAnm");
-  });
-}
-
 var updateTimeDialog = document.getElementById("UpdateTime_detail");
-document.getElementById("UpdateTimeWrap").addEventListener("click", function () {
-  updateTimeDialog.showModal();
-});
-document.getElementById("UpdateTimeClose").addEventListener("click", function () {
-  updateTimeDialog.close();
-});
-document.getElementById("setting").addEventListener("click", function () {
-  window.electronAPI.messageReturn({
-    action: "settingWindowOpen",
-  });
-});
 
-//
-//
-//
-//汎用関数 map.js共用
-
-var notifications = [];
-var templateN = document.getElementById("notificationTemplate");
-
+//通知更新
 function Show_notification(data) {
   document.getElementById("notification_Area").classList.remove("no_notification");
   notifications = notifications.concat(data);
@@ -528,22 +453,79 @@ function Show_notification(data) {
     document.getElementById("notification_wrap").appendChild(clone);
   });
 }
+
+//津波情報ウィンドウ表示
+document.getElementById("TsunamiDetail").addEventListener("click", function () {
+  window.electronAPI.messageReturn({
+    action: "TsunamiWindowOpen",
+  });
+});
+//設定ウィンドウ表示
+document.getElementById("setting").addEventListener("click", function () {
+  window.electronAPI.messageReturn({
+    action: "settingWindowOpen",
+  });
+});
+
+//地震情報[JMA/USGS]選択
+document.getElementById("EQInfoSelect").addEventListener("change", function () {
+  document.querySelectorAll(".activeEQInfo").forEach(function (elm) {
+    elm.classList.remove("activeEQInfo");
+  });
+  document.getElementById(this.value).classList.add("activeEQInfo");
+});
+
+//情報更新時刻更新
+function kmoniTimeUpdate(updateTime, LocalTime, type, condition, vendor) {
+  //if (prepareing) return;
+
+  /*
+  Updatetime: new Date(data.time),
+  LocalTime: new Date(),
+  type: "P2P_EEW",
+*/
+  if (Math.floor(updateTimeTmp / 1000) < Math.floor(updateTime / 1000)) {
+    updateTimeTmp = updateTime;
+    document.getElementById("all_UpdateTime").textContent = dateEncode(3, updateTime);
+  }
+
+  if (vendor) {
+    document.getElementById("ymoniVendor").textContent = vendor == "YE" ? "East" : "West";
+  }
+  document.getElementById(type + "_UT").textContent = dateEncode(3, updateTime);
+  var iconElm = document.getElementById(type + "_ICN");
+
+  if (condition == "success") {
+    iconElm.classList.add("SuccessAnm");
+    iconElm.classList.add("Success");
+    iconElm.classList.remove("Error");
+  } else if (condition == "Error") {
+    iconElm.classList.remove("Success");
+    iconElm.classList.add("Error");
+  } else if (condition == "Disconnect") {
+    iconElm.classList.remove("Success");
+    iconElm.classList.remove("Error");
+  }
+
+  iconElm.addEventListener("animationend", function () {
+    this.classList.remove("SuccessAnm");
+  });
+}
+
+//接続状況ダイアログ表示
+document.getElementById("UpdateTimeWrap").addEventListener("click", function () {
+  updateTimeDialog.showModal();
+});
+//接続状況ダイアログ非表示
+document.getElementById("UpdateTimeClose").addEventListener("click", function () {
+  updateTimeDialog.close();
+});
+
+//🔴汎用関数 map.js共用🔴
+
+var notifications = [];
+var templateN = document.getElementById("notificationTemplate");
+
 document.getElementById("notification_more").addEventListener("click", function () {
   document.getElementById("notification_Area").classList.toggle("open");
 });
-
-function latitudeConvert(data) {
-  if (!isNaN(data)) {
-    return Number(data);
-  } else if (data.match(/N/)) {
-    return Number(data.replace("N", ""));
-  } else if (data.match(/S/)) {
-    return 0 - Number(data.replace("S", ""));
-  } else if (data.match(/E/)) {
-    return Number(data.replace("E", ""));
-  } else if (data.match(/W/)) {
-    return 0 - Number(data.replace("W", ""));
-  } else {
-    return data;
-  }
-}
