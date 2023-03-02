@@ -99,7 +99,7 @@ app.whenReady().then(() => {
       clearInterval(startInterval);
     }
   }, 1000);
-  //replay("2023/02/28 00:46:00");
+  replay("2023/03/02 20:18:00");
 });
 // 全てのウィンドウが閉じたとき
 app.on("window-all-closed", () => {});
@@ -435,7 +435,7 @@ function kmoniControl(data, date) {
       } else if (elm.pga - ptDataTmp.oneBeforePGA < 0) {
         ptDataTmp.UpCount = 0;
       }
-      if (!detect1 && ptDataTmp.Event) {
+      if (!detect1 && ptDataTmp.Event !== null) {
         ptDataTmp.Event = null;
         EQDetect_List.forEach(function (elm2) {
           //if (elm2.id == ptDataTmp.Event) {
@@ -459,7 +459,7 @@ function kmoniControl(data, date) {
         }
 
         var EQD_ItemTmp = EQDetect_List.find(function (elm2) {
-          if (geosailing(elm.Location.Latitude, elm.Location.Longitude, elm2.lat, elm2.lng) - elm2.Radius <= MargeRange) {
+          if (geosailing(elm.Location.Latitude, elm.Location.Longitude, elm2.lat, elm2.lng) - elm2.Radius <= Math.max(elm2.Radius * 0.2, MargeRange)) {
             var CodesTmp = elm2.Codes.find(function (elm3) {
               return geosailing(elm.Location.Latitude, elm.Location.Longitude, elm3.Location.Latitude, elm3.Location.Longitude) <= MargeRange;
             });
@@ -500,6 +500,11 @@ function kmoniControl(data, date) {
 
             EQD_ItemTmp.showed = true;
             if (mainWindow) {
+              console.log(
+                EQD_ItemTmp.Codes.map(function (elm) {
+                  return elm.Code;
+                })
+              );
               mainWindow.webContents.send("message2", {
                 action: "EQDetect",
                 data: EQD_ItemTmp,
