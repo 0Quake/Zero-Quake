@@ -306,6 +306,12 @@ function createWindow() {
         data: notifications,
       });
     }
+    EQDetect_List.forEach(function (elm) {
+      mainWindow.webContents.send("message2", {
+        action: "EQDetect",
+        data: elm,
+      });
+    });
 
     if (P2P_ConnectData) {
       mainWindow.webContents.send("message2", P2P_ConnectData);
@@ -500,11 +506,6 @@ function kmoniControl(data, date) {
 
             EQD_ItemTmp.showed = true;
             if (mainWindow) {
-              console.log(
-                EQD_ItemTmp.Codes.map(function (elm) {
-                  return elm.Code;
-                })
-              );
               mainWindow.webContents.send("message2", {
                 action: "EQDetect",
                 data: EQD_ItemTmp,
