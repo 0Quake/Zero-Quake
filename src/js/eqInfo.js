@@ -40,7 +40,6 @@ fetch("https://files.nakn.jp/earthquake/code/PointSeismicIntensityLocation.json"
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "metaData") {
     eid = request.eid;
-    eid = 20230225222754;
     jmaURL = request.urls.filter(function (elm) {
       return elm.indexOf("www.jma.go.jp") != -1;
     });
