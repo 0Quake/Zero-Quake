@@ -133,8 +133,8 @@ function init() {
     attribution: "国土地理院",
   });
   var tile3 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg", {
-    minZoom: 9,
-    minNativeZoom: 9,
+    minZoom: 0,
+    minNativeZoom: 2,
     maxNativeZoom: 18,
     maxZoom: 21,
     attribution: "国土地理院",
@@ -561,7 +561,7 @@ function init() {
 function addPointMarker(elm) {
   var codeEscaped = elm.Code.replace(".", "_");
   var kmoniPointMarker = L.divIcon({
-    html: "<div class='marker-circle'></div>",
+    html: "<div class='marker-circle marker-circle-" + elm.Type + "'></div>",
     className: "kmoniPointMarker KmoniPoint_" + codeEscaped,
     iconSize: [35, 35],
     iconAnchor: [17.5, 17.5],
@@ -669,8 +669,9 @@ function kmoniMapUpdate(dataTmp, type) {
         markerCircleElm.style.background = "rgba(128,128,128,0.5)";
         markerCircleElm.classList.remove("strongDetectingMarker");
         markerCircleElm.classList.remove("detectingMarker");
+        var PNameTmp = elm.Name ? elm.Name : "";
 
-        var popup_content = "<h3 class='PointName' style='border-bottom:solid 2px rgba(128,128,128,0.5)'>" + elm.Name + "<span>" + elm.Code + "</span></h3><h4 class='detecting' style='display:none'>地震検知中</h4><table><tr><td>震度</td><td class='PointInt'>?</td></tr><tr><td>PGA</td><td class='PointPGA'>?</td></tr></table>";
+        var popup_content = "<h3 class='PointName' style='border-bottom:solid 2px rgba(128,128,128,0.5)'>" + PNameTmp + "<span>" + elm.Code + "</span></h3><h4 class='detecting' style='display:none'>地震検知中</h4><table><tr><td>震度</td><td class='PointInt'>?</td></tr><tr><td>PGA</td><td class='PointPGA'>?</td></tr></table>";
         points[elm.Code].marker.setPopupContent(popup_content);
       }
     }

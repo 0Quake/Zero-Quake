@@ -115,7 +115,7 @@ td {
 .ShindoItem1::before,
 .ShindoItem2::before,
 .ShindoItem3::before {
-  background-image: url(./img/expand_more.svg);
+  background-image: url(../img/expand_more.svg);
   background-size: cover;
 }
 

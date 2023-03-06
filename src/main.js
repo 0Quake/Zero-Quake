@@ -97,7 +97,7 @@ app.whenReady().then(() => {
       clearInterval(startInterval);
     }
   }, 1000);
-  //replay("2023/03/02 20:18:00");
+  //replay("2023/03/05 17:12:50");
 });
 // 全てのウィンドウが閉じたとき
 app.on("window-all-closed", () => {});
@@ -485,11 +485,11 @@ function kmoniControl(data, date) {
           MargeRange = 20;
         } else {
           threshold01 = 4;
-          MargeRange = 40;
+          MargeRange = 35;
         }
 
         var EQD_ItemTmp = EQDetect_List.find(function (elm2) {
-          if (geosailing(elm.Location.Latitude, elm.Location.Longitude, elm2.lat, elm2.lng) - elm2.Radius <= Math.max(elm2.Radius * 0.2, MargeRange)) {
+          if (geosailing(elm.Location.Latitude, elm.Location.Longitude, elm2.lat, elm2.lng) - elm2.Radius <= Math.max(0, MargeRange)) {
             var CodesTmp = elm2.Codes.find(function (elm3) {
               return geosailing(elm.Location.Latitude, elm.Location.Longitude, elm3.Location.Latitude, elm3.Location.Longitude) <= MargeRange;
             });

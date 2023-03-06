@@ -383,7 +383,7 @@ function EQDetect(data) {
   } else {
     //var EQmarker = L.marker([data.lat, data.lng]).addTo(map);
     var EQmarker = L.circle([data.lat, data.lng], {
-      radius: data.Radius * 1000,
+      radius: data.Radius * 1000 + 5000,
       color: "#ffffff",
       fill: false,
       // fillColor: "#ffffff",

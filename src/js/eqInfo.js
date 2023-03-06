@@ -40,6 +40,7 @@ fetch("https://files.nakn.jp/earthquake/code/PointSeismicIntensityLocation.json"
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "metaData") {
     eid = request.eid;
+    eid = 20230225222754;
     jmaURL = request.urls.filter(function (elm) {
       return elm.indexOf("www.jma.go.jp") != -1;
     });
@@ -114,8 +115,8 @@ function Mapinit() {
     attribution: "国土地理院",
   });
   var tile3 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg", {
-    minZoom: 9,
-    minNativeZoom: 9,
+    minZoom: 0,
+    minNativeZoom: 2,
     maxNativeZoom: 18,
     maxZoom: 21,
     attribution: "国土地理院",
@@ -358,6 +359,34 @@ function Mapinit() {
   });
 
   L.marker([config.home.latitude, config.home.longitude], { keyboard: false, icon: homeIcon }).addTo(map).bindPopup(config.home.name);
+
+  estimated_intensity_mapReq();
+}
+
+//推計震度分布リスト取得→描画
+function estimated_intensity_mapReq() {
+  fetch("https://www.jma.go.jp/bosai/estimated_intensity_map/data/list.json")
+    .then(function (res) {
+      return res.json();
+    })
+    .then(function (json) {
+      ItemTmp = json.find(function (elm) {
+        return elm.url.split("_")[0] == String(eid).substring(0, 12);
+      });
+      if (!ItemTmp) return false;
+      idTmp = ItemTmp.url;
+      ItemTmp.mesh_num.forEach(function (elm) {
+        latTmp = Number(elm.substring(0, 2)) / 1.5;
+        lngTmp = Number(elm.substring(2, 4)) + 100;
+        lat2Tmp = latTmp + 2 / 3;
+        lng2Tmp = lngTmp + 1;
+
+        L.imageOverlay("https://www.jma.go.jp/bosai/estimated_intensity_map/data/" + idTmp + "/" + elm + ".png", [
+          [latTmp, lngTmp],
+          [lat2Tmp, lng2Tmp],
+        ]).addTo(map);
+      });
+    });
 }
 
 //気象庁リスト取得→jma_Fetch

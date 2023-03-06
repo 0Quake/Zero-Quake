@@ -137,6 +137,9 @@ img.leaflet-control {
   border-radius: 50%;
   z-index: 220;
 }
+.marker-circle-S-net {
+  border-radius: 20%;
+}
 .zoomLevel_1 .detectingMarker,
 .zoomLevel_2 .detectingMarker {
   outline: solid 2px rgb(203, 99, 43);
