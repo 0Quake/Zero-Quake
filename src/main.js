@@ -97,7 +97,7 @@ app.whenReady().then(() => {
       clearInterval(startInterval);
     }
   }, 1000);
-  //replay("2023/03/05 17:12:50");
+  //replay("2023/03/08 22:48:50");
 });
 // 全てのウィンドウが閉じたとき
 app.on("window-all-closed", () => {});
@@ -420,7 +420,9 @@ function kmoniControl(data, date) {
   kmoniActive = new Date();
 
   if (!EEWNow) {
-    data.forEach(function (elm) {
+    console.time("a");
+    for (const elm of data) {
+      //data.forEach(function (elm) {
       var ptDataTmp = pointsData[elm.Code];
       var isCity = elm.Region == "東京都" || elm.Region == "千葉県" || elm.Region == "埼玉県" || elm.Region == "神奈川県";
       if (!ptDataTmp) {
@@ -433,19 +435,17 @@ function kmoniControl(data, date) {
             return acc + cur;
           }) / ptDataTmp.SUMTmp.length;
       }
-      if (!pgaAvr) {
-        var pgaAvr = 0.1;
-      }
+      if (!pgaAvr) var pgaAvr = 0.1;
 
       threshold02 = 0.17 * pgaAvr + 0.04;
       threshold03 = 0.3 * pgaAvr + 0.1;
       if (ptDataTmp.isCity) {
-        threshold02 *= 3;
+        //threshold02 *= 3;
         threshold03 *= 2;
       }
 
       var detect0 = elm.pga - pgaAvr >= threshold02 || elm.shindo >= threshold04;
-      var detect1 = detect0 && ptDataTmp.detectCount > 1;
+      var detect1 = detect0 && ptDataTmp.detectCount > 0;
       var detect2 = (elm.pga - pgaAvr >= threshold03 && ptDataTmp.UpCount >= 1) || elm.shindo > 1.5; /*|| elm.shindo >= threshold04*/ /* || elm.detectCount > 1*/
 
       elm.detect = detect1;
@@ -467,17 +467,22 @@ function kmoniControl(data, date) {
       }
       if (!detect1 && ptDataTmp.Event !== null) {
         ptDataTmp.Event = null;
-        EQDetect_List.forEach(function (elm2) {
+        for (const elm2 of EQDetect_List) {
           //if (elm2.id == ptDataTmp.Event) {
           elm2.Codes = elm2.Codes.filter(function (elm3) {
             return elm3.Code !== elm.Code;
           });
           // }
-        });
+        }
       }
       ptDataTmp.oneBeforePGA = elm.pga;
-    });
-    data.forEach(function (elm) {
+      //});
+    }
+
+    console.timeEnd("a");
+    console.time("b");
+    for (const elm of data) {
+      //data.forEach(function (elm) {
       if (elm.detect) {
         var ptDataTmp = pointsData[elm.Code];
         if (ptDataTmp.isCity) {
@@ -489,23 +494,26 @@ function kmoniControl(data, date) {
         }
 
         var EQD_ItemTmp = EQDetect_List.find(function (elm2) {
-          if (geosailing(elm.Location.Latitude, elm.Location.Longitude, elm2.lat, elm2.lng) - elm2.Radius <= Math.max(0, MargeRange)) {
-            var CodesTmp = elm2.Codes.find(function (elm3) {
-              return geosailing(elm.Location.Latitude, elm.Location.Longitude, elm3.Location.Latitude, elm3.Location.Longitude) <= MargeRange;
-            });
-            if (CodesTmp) {
-              var already = ptDataTmp.Event;
+          return geosailing(elm.Location.Latitude, elm.Location.Longitude, elm2.lat, elm2.lng) - elm2.Radius <= Math.max(0, MargeRange);
+        });
+        if (EQD_ItemTmp) {
+          var CodesTmp = EQD_ItemTmp.Codes.find(function (elm3) {
+            return geosailing(elm.Location.Latitude, elm.Location.Longitude, elm3.Location.Latitude, elm3.Location.Longitude) <= MargeRange;
+          });
 
-              if (!already) {
-                elm2.Codes.push(elm);
-                ptDataTmp.Event = elm2.id;
-                var radiusTmp = geosailing(elm.Location.Latitude, elm.Location.Longitude, elm2.lat, elm2.lng);
-                if (elm2.Radius < radiusTmp) elm2.Radius = radiusTmp;
-                return true;
-              }
+          if (CodesTmp) {
+            var already = ptDataTmp.Event;
+
+            if (!already) {
+              EQD_ItemTmp.Codes.push(elm);
+              ptDataTmp.Event = EQD_ItemTmp.id;
+              var radiusTmp = geosailing(elm.Location.Latitude, elm.Location.Longitude, EQD_ItemTmp.lat, EQD_ItemTmp.lng);
+              if (EQD_ItemTmp.Radius < radiusTmp) EQD_ItemTmp.Radius = radiusTmp;
+              return true;
             }
           }
-        });
+        }
+
         if (EQD_ItemTmp) {
           EQD_ItemTmp.last_Detect = new Date();
 
@@ -543,9 +551,11 @@ function kmoniControl(data, date) {
           //新報
         }
       }
-    });
+      //});
+    }
+    console.timeEnd("b");
     //地震検知解除
-    EQDetect_List.forEach(function (elm, index) {
+    for (const elm of EQDetect_List) {
       if (EEWNow || new Date() - elm.origin_Time > time00 || new Date() - elm.last_Detect > time01) {
         EQDetect_List.splice(index, 1);
         if (mainWindow) {
@@ -555,7 +565,7 @@ function kmoniControl(data, date) {
           });
         }
       }
-    });
+    }
   }
   kmoniPointsDataTmp = {
     action: "kmoniUpdate",
