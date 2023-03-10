@@ -74,7 +74,7 @@ function Mapinit() {
     zoom: 4,
     minZoom: 3.5,
     maxZoom: 21,
-    zoomAnimation: false,
+    zoomAnimation: true,
     zoomSnap: 0.1,
     zoomDelta: 0.5,
     preferCanvas: false,

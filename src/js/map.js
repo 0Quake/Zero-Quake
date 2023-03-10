@@ -66,6 +66,13 @@ window.electronAPI.messageSend((event, request) => {
 
 window.addEventListener("load", function () {
   windowLoaded = true;
+  setInterval(function () {
+    if (psWaveList.length > 0) {
+      for (elm of psWaveList) {
+        psWaveCalc(elm.id);
+      }
+    }
+  }, 50);
 });
 
 //マップ初期化など
@@ -174,7 +181,7 @@ function init() {
     minZoom: 0,
     maxZoom: 21,
 
-    attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">国土地理院</a>',
+    attribution: "国土地理院",
   });
   var overlay3 = L.tileLayer("https://disaportaldata.gsi.go.jp/raster/04_tsunami_newlegend_data/{z}/{x}/{y}.png", {
     minNativeZoom: 7,
@@ -869,13 +876,6 @@ function psWaveCalc(eid) {
     }
   }
 }
-setInterval(function () {
-  if (psWaveList.length > 0) {
-    for (elm of psWaveList) {
-      psWaveCalc(elm.id);
-    }
-  }
-}, 50);
 //予報円描画
 function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArrived, SArriveTime, nowDistance) {
   if (!pRadius || (!sRadius && !SnotArrived)) return;
