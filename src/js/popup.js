@@ -271,6 +271,7 @@ function epiCenterUpdate(eid, latitude, longitude) {
       var ESMarker = L.marker([latitude, longitude], {
         icon: epicenterIcon,
         pane: "overlayPane",
+        renderer: overlayCanvas,
       }).addTo(map);
 
       epiCenter.push({ eid: eid, markerElm: ESMarker, latitude: latitude, longitude: longitude });

@@ -399,7 +399,7 @@ div.marker-circle.marker_Int7p {
 
 .PWave,
 .SWave {
-  transition: linear 1s;
+  /*transition: linear 1s;*/
   pointer-events: none;
 }
 .PWave {
@@ -420,5 +420,5 @@ div.marker-circle.marker_Int7p {
   stroke: var(--SwaveColor);
 }
 .SWaveProgress .SWprogressValue {
-  transition: linear 1s;
+  /*transition: linear 1s;*/
 }

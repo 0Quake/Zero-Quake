@@ -24,12 +24,9 @@ var tsunamiElm = [];
 var inited = false;
 var windowLoaded = false;
 var TimeTable_JMA2001;
-var EQDetectCanvas;
-var PointsCanvas;
-var mapLayer;
-var hinanjoLayer;
-var kmoniMapData;
-var SnetMapData;
+var EQDetectCanvas, PointsCanvas, PSWaveCanvas, overlayCanvas;
+var mapLayer, hinanjoLayer;
+var kmoniMapData, SnetMapData;
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "kmoniUpdate") {
     kmoniMapUpdate(request.data, "knet");
@@ -108,6 +105,8 @@ function init() {
   EQDetectCanvas = L.canvas({ pane: "EQDetectPane" });
   PointsCanvas = L.canvas({ pane: "PointsPane" });
   HinanjoCanvas = L.canvas({ pane: "HinanjoPane" });
+  PSWaveCanvas = L.canvas({ pane: "PSWavePane" });
+  overlayCanvas = L.canvas({ pane: "overlayCanvas" });
 
   //L.control.scale({ imperial: false }).addTo(map);←縮尺
 
@@ -473,6 +472,7 @@ function init() {
     pane: "background",
   }).addTo(map);*/
 
+  /*
   map.on("zoomstart", function () {
     if (psWaveList.length > 0) {
       document.querySelectorAll(".PWave,.SWave").forEach(function (elm) {
@@ -480,13 +480,14 @@ function init() {
       });
     }
   });
+  */ /*
   map.on("zoomend", function () {
     if (psWaveList.length > 0) {
       psWaveList.forEach(function (elm) {
         psWaveCalc(elm.id);
       });
     }
-  });
+  });*/
   map.on("zoom", function () {
     var currentZoom = map.getZoom();
     document.getElementById("mapcontainer").classList.remove("zoomLevel_1", "zoomLevel_2", "zoomLevel_3", "zoomLevel_4", "popup_show");
@@ -775,9 +776,9 @@ function psWaveCalc(eid) {
       return elm.id == eid;
     });
 
-    var distance = Math.floor((new Date() - Replay - pswaveFind.data.originTime) / 1000);
+    var distance = (new Date() - Replay - pswaveFind.data.originTime) / 1000;
 
-    if (EQElm) distance += 1;
+    //if (EQElm) distance += 1;
 
     var PRadius = 0;
     var SRadius = 0;
@@ -868,6 +869,13 @@ function psWaveCalc(eid) {
     }
   }
 }
+setInterval(function () {
+  if (psWaveList.length > 0) {
+    for (elm of psWaveList) {
+      psWaveCalc(elm.id);
+    }
+  }
+}, 50);
 //予報円描画
 function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArrived, SArriveTime, nowDistance) {
   if (!pRadius || (!sRadius && !SnotArrived)) return;
@@ -884,13 +892,11 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
     if (EQElm.PCircleElm) {
       //EQElm.markerElm.setLatLng([data.latitude, data.longitude]);
 
-      setTimeout(function () {
-        document.querySelector(".PWave_" + report_id).style.transitionTimingFunction = "linear";
-        document.querySelector(".SWave_" + report_id).style.transitionTimingFunction = "linear";
+      //document.querySelector(".PWave_" + report_id).style.transitionTimingFunction = "linear";
+      //document.querySelector(".SWave_" + report_id).style.transitionTimingFunction = "linear";
 
-        EQElm.PCircleElm.setRadius(pRadius).setLatLng([latitude, longitude]);
-        EQElm.SCircleElm.setRadius(sRadius).setLatLng([latitude, longitude]).setStyle({ stroke: !SnotArrived });
-      }, 10);
+      EQElm.PCircleElm.setRadius(pRadius).setLatLng([latitude, longitude]);
+      EQElm.SCircleElm.setRadius(sRadius).setLatLng([latitude, longitude]).setStyle({ stroke: !SnotArrived });
 
       /*
     var overflow1 = map.getBounds()._northEast.lat < EQElm.PCircleElm.getBounds()._northEast.lat;
@@ -909,14 +915,13 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
         stroke: true,
         fill: false,
         weight: 2,
-        className: "PWave PWave_" + report_id,
+        //className: "PWave PWave_" + report_id,
         pane: "PSWavePane",
+        renderer: PSWaveCanvas,
         interactive: false,
       }).addTo(map);
 
-      document.querySelector(".PWave_" + report_id).addEventListener("transitionend", function () {
-        psWaveCalc(report_id, true);
-      });
+      //document.querySelector(".PWave_" + report_id).addEventListener("transitionend", function () {});
 
       var SCElm = L.circle([latitude, longitude], {
         radius: sRadius,
@@ -926,8 +931,9 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
         fillColor: "#F00",
         fillOpacity: 0.15,
         weight: 2,
-        className: "SWave SWave_" + report_id,
+        //className: "SWave SWave_" + report_id,
         pane: "PSWavePane",
+        renderer: PSWaveCanvas,
         interactive: false,
       }).addTo(map);
 
