@@ -3,6 +3,7 @@ var pointList;
 var data_time = document.getElementById("data_time");
 var data_maxI = document.getElementById("data_maxI");
 var data_M = document.getElementById("data_M");
+var data_MT = document.getElementById("data_MT");
 var data_depth = document.getElementById("data_depth");
 var data_center = document.getElementById("data_center");
 var data_comment = document.getElementById("data_comment");
@@ -648,6 +649,7 @@ function jmaXMLFetch(url) {
         originTimeTmp = new Date(EarthquakeElm.querySelector("OriginTime").textContent);
         epiCenterTmp = EarthquakeElm.querySelector("Name").textContent;
         magnitudeTmp = Number(EarthquakeElm.getElementsByTagName("jmx_eb:Magnitude")[0].textContent);
+        magnitudeTypeTmp = EarthquakeElm.getElementsByTagName("jmx_eb:Magnitude")[0].getAttribute("type");
         LatLngDepth = xml.querySelector("Body Earthquake Hypocenter").getElementsByTagName("jmx_eb:Coordinate")[0].textContent.replaceAll("+", "｜+").replaceAll("-", "｜-").replaceAll("/", "").split("｜");
         var LatTmp = Number(LatLngDepth[1]);
         var LngTmp = Number(LatLngDepth[2]);
@@ -670,6 +672,7 @@ function jmaXMLFetch(url) {
         originTime: originTimeTmp,
         maxI: maxIntTmp,
         mag: magnitudeTmp,
+        magType: magnitudeTypeTmp,
         lat: LatTmp,
         lng: LngTmp,
         depth: DepthTmp,
@@ -936,12 +939,15 @@ function EQInfoControl(data) {
   if (data.originTime && (mostNew || !EQInfo.originTime)) EQInfo.originTime = data.originTime;
   if (data.maxI && (mostNew || !EQInfo.maxI)) EQInfo.maxI = data.maxI;
   if (data.mag && (mostNew || !EQInfo.mag)) EQInfo.mag = data.mag;
+  if (data.mag && mostNew) data_MT.innerText = "M";
   if ((data.depth || data.depth === 0) && (mostNew || !EQInfo.depth)) EQInfo.depth = data.depth;
   if (data.epiCenter && (mostNew || !EQInfo.epiCenter)) EQInfo.epiCenter = data.epiCenter;
 
   if (EQInfo.originTime) data_time.innerText = dateEncode(3, EQInfo.originTime);
   if (EQInfo.maxI) data_maxI.innerText = EQInfo.maxI;
   if (EQInfo.mag) data_M.innerText = EQInfo.mag;
+  if (data.magType) data_MT.innerText = data.magType;
+
   if (EQInfo.depth) {
     data_depth.innerText = Math.round(EQInfo.depth) + "km";
   } else if (EQInfo.depth == 0) {

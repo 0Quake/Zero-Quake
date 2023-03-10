@@ -2296,6 +2296,8 @@ function eqInfoAlert(data, source, update) {
 function TsunamiInfoControl(data) {
   var newInfo = !tsunamiData || !tsunamiData.issue || tsunamiData.issue.time < data.issue.time;
   if (newInfo) {
+    soundPlay("TsunamiInfo");
+
     tsunamiData = data;
 
     if (newInfo) {
