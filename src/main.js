@@ -420,7 +420,6 @@ function kmoniControl(data, date) {
   kmoniActive = new Date();
 
   if (!EEWNow) {
-    console.time("a");
     for (const elm of data) {
       //data.forEach(function (elm) {
       var ptDataTmp = pointsData[elm.Code];
@@ -479,8 +478,6 @@ function kmoniControl(data, date) {
       //});
     }
 
-    console.timeEnd("a");
-    console.time("b");
     for (const elm of data) {
       //data.forEach(function (elm) {
       if (elm.detect) {
@@ -553,8 +550,8 @@ function kmoniControl(data, date) {
       }
       //});
     }
-    console.timeEnd("b");
     //地震検知解除
+    var index = 0;
     for (const elm of EQDetect_List) {
       if (EEWNow || new Date() - elm.origin_Time > time00 || new Date() - elm.last_Detect > time01) {
         EQDetect_List.splice(index, 1);
@@ -565,6 +562,7 @@ function kmoniControl(data, date) {
           });
         }
       }
+      index++;
     }
   }
   kmoniPointsDataTmp = {
