@@ -29,6 +29,8 @@ var jmaXMLURLHis = [];
 var narikakunURLHis = [];
 var mapLevel = 0; //マップの状況　0:なし/1:NHK/2:JMAXML/3:完全/
 var EQInfo = { originTime: null, maxI: null, mag: null, lat: null, lng: null, depth: null, epiCenter: null, comment: null };
+var shindo_lastUpDate = 0;
+var EQData_lastUpDate = 0;
 
 fetch("https://files.nakn.jp/earthquake/code/PointSeismicIntensityLocation.json")
   .then(function (res) {
@@ -74,8 +76,6 @@ function init() {
 }
 //地図初期化
 function Mapinit() {
-  console.log("aaaaaaa");
-
   map = L.map("mapcontainer", {
     maxBounds: [
       [90, -180],
@@ -428,11 +428,6 @@ function jma_B_ListReq() {
         if (elm.url.substring(0, 12) == eid) {
           var urlTmp = "https://www.jma.go.jp/bosai/estimated_intensity_map/data/" + elm.url + "/{x}{y}.png";
           jmaURL.push(urlTmp);
-
-          L.tileLayer(urlTmp, {
-            attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>',
-            variant: "toner-lite",
-          }).addTo(map_102);
         }
       });
 
@@ -512,114 +507,26 @@ function jma_Fetch(url) {
         comment: commentText,
         cancel: cancelTmp,
       });
-      if (json.Body.Intensity && json.Body.Intensity.Observation.Pref && mapLevel < 3) {
+
+      var newestshindo = shindo_lastUpDate < new Date();
+      if (newestshindo) shindo_lastUpDate = new Date();
+
+      if (json.Body.Intensity && json.Body.Intensity.Observation.Pref && newestshindo) {
         mapLevel = 3;
         removeChild(document.getElementById("Shindo"));
         document.getElementById("ShindoWrap").style.display = "inline-block";
         map_drawed = true;
         json.Body.Intensity.Observation.Pref.forEach(function (elm) {
-          var newDiv = document.createElement("div");
-          var color1 = shindoConvert(elm.MaxInt, 2);
-          newDiv.innerHTML = "<span style='background:" + color1[0] + ";color:" + color1[1] + ";'>" + elm.MaxInt + "</span>" + elm.Name;
-          newDiv.classList.add("ShindoItem", "ShindoItem1");
-          document.getElementById("Shindo").appendChild(newDiv);
-          newDiv.addEventListener("click", function () {
-            this.classList.toggle("has-open");
-            this.nextElementSibling.classList.toggle("open");
-          });
-
-          var newDiv = document.createElement("div");
-          newDiv.innerHTML = "<div></div>";
-          newDiv.classList.add("WrapLevel1", "close");
-          document.getElementById("Shindo").appendChild(newDiv);
-
+          add_Pref_info(elm.Name, elm.MaxInt);
           if (elm.Area) {
             elm.Area.forEach(function (elm2) {
-              var wrap = document.querySelectorAll(".WrapLevel1");
-
-              var newDiv = document.createElement("div");
-              var color2 = shindoConvert(elm2.MaxInt, 2);
-              newDiv.innerHTML = "<span style='background:" + color2[0] + ";color:" + color2[1] + ";'>" + elm2.MaxInt + "</span>" + elm2.Name;
-              newDiv.classList.add("ShindoItem", "ShindoItem2");
-              wrap[wrap.length - 1].appendChild(newDiv);
-              newDiv.addEventListener("click", function () {
-                this.classList.toggle("has-open");
-                this.nextElementSibling.classList.toggle("open");
-              });
-
-              var newDiv = document.createElement("div");
-              newDiv.innerHTML = "<div></div>";
-              newDiv.classList.add("WrapLevel2", "close");
-              wrap[wrap.length - 1].appendChild(newDiv);
-
-              console.log(areaLocation[String(elm2.Name)]);
-              var pointLocation = areaLocation[String(elm2.Name)];
-              if (pointLocation) {
-                var color4 = shindoConvert(elm2.MaxInt, 2);
-
-                var divIcon = L.divIcon({
-                  html: '<div style="background:' + color4[0] + ";color:" + color4[1] + '">' + elm2.MaxInt + "</div>",
-                  className: "MaxShindoIcon",
-                  iconSize: [22, 22],
-                });
-
-                L.marker(pointLocation, { icon: divIcon, pane: "shadowPane" }).addTo(map);
-              }
-
-              gjmap.setStyle({
-                fill: false,
-              });
-              var sectionTmp = sections.find(function (elmA) {
-                return elmA.name == elm2.Name;
-              });
-              if (sectionTmp) {
-                sectionTmp.item
-                  .setStyle({
-                    fill: true,
-                    fillColor: color2[0],
-                    fillOpacity: 1,
-                  })
-                  .setPopupContent("<h3>細分区分：" + sectionTmp.name + "</h3>最大震度" + elm2.MaxInt);
-              }
+              add_Area_info(elm2.Name, elm2.MaxInt);
               if (elm2.City) {
                 elm2.City.forEach(function (elm3) {
-                  var wrap2 = document.querySelectorAll(".WrapLevel2");
-
-                  var newDiv = document.createElement("div");
-                  var color3 = shindoConvert(elm3.MaxInt, 2);
-                  newDiv.innerHTML = "<span style='background:" + color3[0] + ";color:" + color3[1] + ";'>" + elm3.MaxInt + "</span>" + elm3.Name;
-                  newDiv.classList.add("ShindoItem", "ShindoItem3");
-                  wrap2[wrap2.length - 1].appendChild(newDiv);
-                  newDiv.addEventListener("click", function () {
-                    this.classList.toggle("has-open");
-                    this.nextElementSibling.classList.toggle("open");
-                  });
-
-                  var newDiv = document.createElement("div");
-                  newDiv.innerHTML = "<div></div>";
-                  newDiv.classList.add("WrapLevel3", "close");
-                  wrap2[wrap2.length - 1].appendChild(newDiv);
-
+                  add_City_info(elm3.Name, elm3.MaxInt);
                   if (elm3.IntensityStation) {
                     elm3.IntensityStation.forEach(function (elm4) {
-                      var wrap3 = document.querySelectorAll(".WrapLevel3");
-
-                      var newDiv = document.createElement("div");
-                      var color4 = shindoConvert(elm4.Int, 2);
-                      newDiv.innerHTML = "<span style='background:" + color4[0] + ";color:" + color4[1] + ";'>" + elm4.Int + "</span>" + elm4.Name.replace("＊", "");
-                      newDiv.classList.add("ShindoItem", "ShindoItem4");
-
-                      var divIcon = L.divIcon({
-                        html: '<div style="background:' + color4[0] + ";color:" + color4[1] + '">' + elm4.Int + "</div>",
-                        className: "ShindoIcon",
-                        iconSize: [16, 16],
-                      });
-
-                      L.marker([elm4.latlon.lat, elm4.latlon.lon], { icon: divIcon, pane: "shadowPane" })
-                        .addTo(map)
-                        .bindPopup("<h3>観測点：" + elm4.Name.replace("＊", "") + "</h3>震度" + elm4.Int);
-
-                      wrap3[wrap3.length - 1].appendChild(newDiv);
+                      add_IntensityStation_info(elm4.latlon.lat, elm4.latlon.lon, elm4.Name, elm4.Int);
                     });
                   }
                 });
@@ -691,98 +598,27 @@ function jmaXMLFetch(url) {
         cancel: cancelTmp,
       });
 
-      if (xml.querySelector("Body Intensity") && xml.querySelector("Body Intensity Observation Pref") && mapLevel < 3) {
+      var newestshindo = shindo_lastUpDate < new Date();
+      if (newestshindo) shindo_lastUpDate = new Date();
+      if (xml.querySelector("Body Intensity") && xml.querySelector("Body Intensity Observation Pref") && newestshindo) {
         mapLevel = 3;
         removeChild(document.getElementById("Shindo"));
         document.getElementById("ShindoWrap").style.display = "inline-block";
         map_drawed = true;
 
         xml.querySelectorAll("Body Intensity Observation Pref").forEach(function (elm) {
-          var newDiv = document.createElement("div");
-          var color1 = shindoConvert(elm.querySelector("MaxInt").textContent, 3);
-          newDiv.innerHTML = "<span style='background:" + color1[0] + ";color:" + color1[1] + ";'>" + elm.querySelector("MaxInt").textContent + "</span>" + elm.querySelector("Name").textContent;
-          newDiv.classList.add("ShindoItem", "ShindoItem1");
-          document.getElementById("Shindo").appendChild(newDiv);
-          newDiv.addEventListener("click", function () {
-            this.classList.toggle("has-open");
-            this.nextElementSibling.classList.toggle("open");
-          });
-
-          var newDiv = document.createElement("div");
-          newDiv.innerHTML = "<div></div>";
-          newDiv.classList.add("WrapLevel1", "close");
-          document.getElementById("Shindo").appendChild(newDiv);
-
+          add_Pref_info(elm.querySelector("Name").textContent, elm.querySelector("MaxInt").textContent);
           if (elm.querySelectorAll("Area")) {
             elm.querySelectorAll("Area").forEach(function (elm2) {
-              var wrap = document.querySelectorAll(".WrapLevel1");
-
-              var newDiv = document.createElement("div");
-              var color2 = shindoConvert(elm2.querySelector("MaxInt").textContent, 3);
-              newDiv.innerHTML = "<span style='background:" + color2[0] + ";color:" + color2[1] + ";'>" + elm2.querySelector("MaxInt").textContent + "</span>" + elm2.querySelector("Name").textContent;
-              newDiv.classList.add("ShindoItem", "ShindoItem2");
-              wrap[wrap.length - 1].appendChild(newDiv);
-              newDiv.addEventListener("click", function () {
-                this.classList.toggle("has-open");
-                this.nextElementSibling.classList.toggle("open");
-              });
-
-              var newDiv = document.createElement("div");
-              newDiv.innerHTML = "<div></div>";
-              newDiv.classList.add("WrapLevel2", "close");
-              wrap[wrap.length - 1].appendChild(newDiv);
-
-              var sectionTmp = sections.find(function (elmA) {
-                return elmA.name == elm2.querySelector("Name").textContent;
-              });
-              if (sectionTmp) {
-                sectionTmp.item
-                  .setStyle({
-                    fill: true,
-                    fillColor: color2[0],
-                    className: "FilledPath",
-                  })
-                  .setPopupContent("<h3>細分区分：" + sectionTmp.name + "</h3>最大震度" + elm2.querySelector("MaxInt").textContent);
-              }
+              add_Area_info(elm2.querySelector("Name").textContent, elm2.querySelector("MaxInt").textContent);
               if (elm2.querySelectorAll("City")) {
                 elm2.querySelectorAll("City").forEach(function (elm3) {
-                  var wrap2 = document.querySelectorAll(".WrapLevel2");
-
-                  var newDiv = document.createElement("div");
-                  var color3 = shindoConvert(elm3.querySelector("MaxInt").textContent, 3);
-                  newDiv.innerHTML = "<span style='background:" + color3[0] + ";color:" + color3[1] + ";'>" + elm3.querySelector("MaxInt").textContent + "</span>" + elm3.querySelector("Name").textContent;
-                  newDiv.classList.add("ShindoItem", "ShindoItem3");
-                  wrap2[wrap2.length - 1].appendChild(newDiv);
-                  newDiv.addEventListener("click", function () {
-                    this.classList.toggle("has-open");
-                    this.nextElementSibling.classList.toggle("open");
-                  });
-
-                  var newDiv = document.createElement("div");
-                  newDiv.innerHTML = "<div></div>";
-                  newDiv.classList.add("WrapLevel3", "close");
-                  wrap2[wrap2.length - 1].appendChild(newDiv);
+                  add_City_info(elm3.querySelector("Name").textContent, elm3.querySelector("MaxInt").textContent);
 
                   if (elm3.querySelectorAll("IntensityStation")) {
                     elm3.querySelectorAll("IntensityStation").forEach(function (elm4) {
-                      var wrap3 = document.querySelectorAll(".WrapLevel3");
-
-                      var newDiv = document.createElement("div");
-                      var color4 = shindoConvert(elm4.querySelector("Int").textContent, 3);
-                      newDiv.innerHTML = "<span style='background:" + color4[0] + ";color:" + color4[1] + ";'>" + elm4.querySelector("Int").textContent + "</span>" + elm4.querySelector("Name").textContent.replace("＊", "");
-                      newDiv.classList.add("ShindoItem", "ShindoItem4");
-
-                      var divIcon = L.divIcon({
-                        html: '<div style="background:' + color4[0] + ";color:" + color4[1] + '">' + elm4.querySelector("Int").textContent + "</div>",
-                        className: "ShindoIcon",
-                        iconSize: [16, 16],
-                      });
-
-                      L.marker([pointList[elm4.querySelector("Code").textContent].location[0], pointList[elm4.querySelector("Code").textContent].location[1]], { icon: divIcon, pane: "shadowPane" })
-                        .addTo(map)
-                        .bindPopup("<h3>観測点：" + elm4.querySelector("Name").textContent + "</h3>震度" + elm4.querySelector("Int").textContent);
-
-                      wrap3[wrap3.length - 1].appendChild(newDiv);
+                      var latlng = pointList[elm4.querySelector("Code").textContent].location;
+                      add_IntensityStation_info(latlng[0], latlng[1], elm4.querySelector("Name").textContent, elm4.querySelector("Int").textContent);
                     });
                   }
                 });
@@ -827,103 +663,29 @@ function narikakun_Fetch(url) {
           cancel: cancelTmp,
         });
 
-        if (json.Body.Intensity && json.Body.Intensity.Observation.Pref && mapLevel < 3) {
+        var newestshindo = shindo_lastUpDate < new Date();
+        if (newestshindo) shindo_lastUpDate = new Date();
+
+        if (json.Body.Intensity && json.Body.Intensity.Observation.Pref && newestshindo) {
           mapLevel = 3;
           removeChild(document.getElementById("Shindo"));
           document.getElementById("ShindoWrap").style.display = "inline-block";
 
           map_drawed = true;
-          json.Body.Intensity.Observation.Pref.forEach(function (elm) {
-            var newDiv = document.createElement("div");
-            var color1 = shindoConvert(elm.MaxInt, 2);
-            newDiv.innerHTML = "<span style='background:" + color1[0] + ";color:" + color1[1] + ";'>" + elm.MaxInt + "</span>" + elm.Name;
-            newDiv.classList.add("ShindoItem", "ShindoItem1");
-            document.getElementById("Shindo").appendChild(newDiv);
-            newDiv.addEventListener("click", function () {
-              this.classList.toggle("has-open");
-              this.nextElementSibling.classList.toggle("open");
-            });
+          console.log(json.Body.Intensity.Observation.Pref);
 
-            var newDiv = document.createElement("div");
-            newDiv.innerHTML = "<div></div>";
-            newDiv.classList.add("WrapLevel1", "close");
-            document.getElementById("Shindo").appendChild(newDiv);
+          json.Body.Intensity.Observation.Pref.forEach(function (elm) {
+            add_Pref_info(elm.Name, elm.MaxInt);
 
             if (elm.Area) {
               elm.Area.forEach(function (elm2) {
-                var wrap = document.querySelectorAll(".WrapLevel1");
-
-                var newDiv = document.createElement("div");
-                var color2 = shindoConvert(elm2.MaxInt, 2);
-                newDiv.innerHTML = "<span style='background:" + color2[0] + ";color:" + color2[1] + ";'>" + elm2.MaxInt + "</span>" + elm2.Name;
-                newDiv.classList.add("ShindoItem", "ShindoItem2");
-                wrap[wrap.length - 1].appendChild(newDiv);
-                newDiv.addEventListener("click", function () {
-                  this.classList.toggle("has-open");
-                  this.nextElementSibling.classList.toggle("open");
-                });
-
-                var newDiv = document.createElement("div");
-                newDiv.innerHTML = "<div></div>";
-                newDiv.classList.add("WrapLevel2", "close");
-                wrap[wrap.length - 1].appendChild(newDiv);
-
-                gjmap.setStyle({
-                  fill: false,
-                });
-
-                var sectionTmp = sections.find(function (elmA) {
-                  return elmA.name == elm2.Name;
-                }).item;
-                if (sectionTmp) {
-                  sectionTmp
-                    .setStyle({
-                      fill: true,
-                      fillColor: color2[0],
-                      fillOpacity: 1,
-                    })
-                    .setPopupContent("<h3>細分区分：" + sectionTmp.name + "</h3>最大震度" + elm2.MaxInt);
-                }
-
+                add_Area_info(elm2.Name, elm2.MaxInt);
                 if (elm2.City) {
                   elm2.City.forEach(function (elm3) {
-                    var wrap2 = document.querySelectorAll(".WrapLevel2");
-
-                    var newDiv = document.createElement("div");
-                    var color3 = shindoConvert(elm3.MaxInt, 2);
-                    newDiv.innerHTML = "<span style='background:" + color3[0] + ";color:" + color3[1] + ";'>" + elm3.MaxInt + "</span>" + elm3.Name;
-                    newDiv.classList.add("ShindoItem", "ShindoItem3");
-                    wrap2[wrap2.length - 1].appendChild(newDiv);
-                    newDiv.addEventListener("click", function () {
-                      this.classList.toggle("has-open");
-                      this.nextElementSibling.classList.toggle("open");
-                    });
-
-                    var newDiv = document.createElement("div");
-                    newDiv.innerHTML = "<div></div>";
-                    newDiv.classList.add("WrapLevel3", "close");
-                    wrap2[wrap2.length - 1].appendChild(newDiv);
-
+                    add_City_info(elm3.Name, elm3.MaxInt);
                     if (elm3.IntensityStation) {
                       elm3.IntensityStation.forEach(function (elm4) {
-                        var wrap3 = document.querySelectorAll(".WrapLevel3");
-
-                        var newDiv = document.createElement("div");
-                        var color4 = shindoConvert(elm4.Int, 2);
-                        newDiv.innerHTML = "<span style='background:" + color4[0] + ";color:" + color4[1] + ";'>" + elm4.Int + "</span>" + elm4.Name.replace("＊", "");
-                        newDiv.classList.add("ShindoItem", "ShindoItem4");
-
-                        var divIcon = L.divIcon({
-                          html: '<div style="background:' + color4[0] + ";color:" + color4[1] + '">' + elm4.Int + "</div>",
-                          className: "ShindoIcon",
-                          iconSize: [16, 16],
-                        });
-
-                        L.marker([pointList[elm4.Code].location[0], pointList[elm4.Code].location[1]], { icon: divIcon, pane: "shadowPane" })
-                          .addTo(map)
-                          .bindPopup("<h3>観測点：" + elm4.Name.replace("＊", "") + "</h3>震度" + elm4.Int);
-
-                        wrap3[wrap3.length - 1].appendChild(newDiv);
+                        add_IntensityStation_info(pointList[elm4.Code].location[0], pointList[elm4.Code].location[1], elm4.Name, elm4.Int);
                       });
                     }
                   });
@@ -934,6 +696,113 @@ function narikakun_Fetch(url) {
         }
       }
     });
+}
+
+//都道府県ごとの情報描画（リスト）
+function add_Pref_info(name, maxInt) {
+  var newDiv = document.createElement("div");
+  var color1 = shindoConvert(maxInt, 2);
+  newDiv.innerHTML = "<span style='background:" + color1[0] + ";color:" + color1[1] + ";'>" + maxInt + "</span>" + name;
+  newDiv.classList.add("ShindoItem", "ShindoItem1");
+  document.getElementById("Shindo").appendChild(newDiv);
+  newDiv.addEventListener("click", function () {
+    this.classList.toggle("has-open");
+    this.nextElementSibling.classList.toggle("open");
+  });
+
+  var newDiv = document.createElement("div");
+  newDiv.innerHTML = "<div></div>";
+  newDiv.classList.add("WrapLevel1", "close");
+  document.getElementById("Shindo").appendChild(newDiv);
+}
+//都道府県ごとの情報描画（リスト・地図塗りつぶし・地図プロット）
+function add_Area_info(name, maxInt) {
+  var wrap = document.querySelectorAll(".WrapLevel1");
+
+  var newDiv = document.createElement("div");
+  var color = shindoConvert(maxInt, 2);
+  newDiv.innerHTML = "<span style='background:" + color[0] + ";color:" + color[1] + ";'>" + maxInt + "</span>" + name;
+  newDiv.classList.add("ShindoItem", "ShindoItem2");
+  wrap[wrap.length - 1].appendChild(newDiv);
+  newDiv.addEventListener("click", function () {
+    this.classList.toggle("has-open");
+    this.nextElementSibling.classList.toggle("open");
+  });
+
+  var newDiv = document.createElement("div");
+  newDiv.innerHTML = "<div></div>";
+  newDiv.classList.add("WrapLevel2", "close");
+  wrap[wrap.length - 1].appendChild(newDiv);
+
+  var pointLocation = areaLocation[name];
+  if (pointLocation) {
+    var divIcon = L.divIcon({
+      html: '<div style="background:' + color[0] + ";color:" + color[1] + '">' + maxInt + "</div>",
+      className: "MaxShindoIcon",
+      iconSize: [22, 22],
+    });
+
+    L.marker(pointLocation, { icon: divIcon, pane: "shadowPane" }).addTo(map);
+  }
+
+  gjmap.setStyle({
+    fill: false,
+  });
+
+  var sectionTmp = sections.find(function (elmA) {
+    return elmA.name == name;
+  });
+  if (sectionTmp) {
+    sectionTmp.item
+      .setStyle({
+        fill: true,
+        fillColor: color[0],
+        className: "FilledPath",
+      })
+      .setPopupContent("<h3>細分区分：" + name + "</h3>最大震度" + maxInt);
+  }
+}
+//町ごとの情報描画（リスト）
+function add_City_info(name, maxInt) {
+  var wrap2 = document.querySelectorAll(".WrapLevel2");
+
+  var newDiv = document.createElement("div");
+  var color3 = shindoConvert(maxInt, 2);
+  newDiv.innerHTML = "<span style='background:" + color3[0] + ";color:" + color3[1] + ";'>" + maxInt + "</span>" + name;
+  newDiv.classList.add("ShindoItem", "ShindoItem3");
+  wrap2[wrap2.length - 1].appendChild(newDiv);
+  newDiv.addEventListener("click", function () {
+    this.classList.toggle("has-open");
+    this.nextElementSibling.classList.toggle("open");
+  });
+
+  var newDiv = document.createElement("div");
+  newDiv.innerHTML = "<div></div>";
+  newDiv.classList.add("WrapLevel3", "close");
+  wrap2[wrap2.length - 1].appendChild(newDiv);
+}
+//観測点ごとの情報描画（リスト・地図プロット）
+function add_IntensityStation_info(lat, lng, name, int) {
+  name = name.replace("＊", "");
+
+  var wrap3 = document.querySelectorAll(".WrapLevel3");
+
+  var newDiv = document.createElement("div");
+  var color4 = shindoConvert(int, 2);
+  newDiv.innerHTML = "<span style='background:" + color4[0] + ";color:" + color4[1] + ";'>" + int + "</span>" + name;
+  newDiv.classList.add("ShindoItem", "ShindoItem4");
+
+  var divIcon = L.divIcon({
+    html: '<div style="background:' + color4[0] + ";color:" + color4[1] + '">' + int + "</div>",
+    className: "ShindoIcon",
+    iconSize: [23, 23],
+  });
+
+  L.marker([lat, lng], { icon: divIcon, pane: "shadowPane" })
+    .addTo(map)
+    .bindPopup("<h3>観測点：" + name + "</h3>震度" + int);
+
+  wrap3[wrap3.length - 1].appendChild(newDiv);
 }
 
 //地震情報マージ
