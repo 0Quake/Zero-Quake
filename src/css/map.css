@@ -419,6 +419,3 @@ div.marker-circle.marker_Int7p {
   transform: rotate(270deg);
   stroke: var(--SwaveColor);
 }
-.SWaveProgress .SWprogressValue {
-  /*transition: linear 1s;*/
-}

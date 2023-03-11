@@ -149,25 +149,14 @@ td {
   padding-left: 15px;
 }
 
-.ShindoIcon div {
-  display: block;
-  opacity: 0;
-  width: 16px;
-  height: 16px;
-  border: solid 1px #000;
-  outline: solid 2px #fff;
-  line-height: 16px;
-  text-align: center;
-  border-radius: 50%;
-  transition: opacity 200ms;
-  font-size: 12px;
+.ShindoIcon {
+  width: 23px;
+  height: 23px;
+  padding: 3.5px;
 }
-
-.zoomLevel_3 .ShindoIcon div,
-.zoomLevel_4 .ShindoIcon div {
-  opacity: 1;
+.zoomLevel_4 .ShindoIcon {
+  padding: 0;
 }
-
 .zoomLevel_4 .ShindoIcon div {
   width: 23px;
   height: 23px;
@@ -175,9 +164,20 @@ td {
   font-size: 18px;
 }
 
+.ShindoIcon div {
+  display: block;
+  width: 16px;
+  height: 16px;
+  border: solid 1px #000;
+  outline: solid 2px #fff;
+  line-height: 16px;
+  text-align: center;
+  border-radius: 50%;
+  font-size: 12px;
+}
+
 .MaxShindoIcon div {
   display: block;
-  opacity: 0;
   width: 22px;
   height: 22px;
   border: solid 1px #000;
@@ -186,17 +186,32 @@ td {
   line-height: 22px;
   border-radius: 2px;
   text-align: center;
-  transition: opacity 200ms;
+}
+.ShindoIcon,
+.MaxShindoIcon {
+  transition: opacity 300ms;
 }
 
-.zoomLevel_1 .MaxShindoIcon div,
-.zoomLevel_2 .MaxShindoIcon div {
+.zoomLevel_2 .leaflet-marker-icon.MaxShindoIcon {
   opacity: 1;
+  pointer-events: auto !important;
+}
+.zoomLevel_1 .leaflet-marker-icon.ShindoIcon,
+.zoomLevel_2 .leaflet-marker-icon.ShindoIcon {
+  opacity: 0;
+  pointer-events: none !important;
 }
 
-.zoomLevel_3 .MaxShindoIcon div,
-.zoomLevel_4 .MaxShindoIcon div {
+.zoomLevel_1 .leaflet-marker-icon.MaxShindoIcon,
+.zoomLevel_3 .leaflet-marker-icon.MaxShindoIcon,
+.zoomLevel_4 .leaflet-marker-icon.MaxShindoIcon {
   opacity: 0;
+  pointer-events: none !important;
+}
+.zoomLevel_3 .leaflet-marker-icon.ShindoIcon,
+.zoomLevel_4 .leaflet-marker-icon.ShindoIcon {
+  opacity: 1;
+  pointer-events: auto !important;
 }
 
 #ShindoSample {
