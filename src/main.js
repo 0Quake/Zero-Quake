@@ -97,7 +97,7 @@ app.whenReady().then(() => {
       clearInterval(startInterval);
     }
   }, 1000);
-  replay("2023/02/25 22:27:30");
+  //replay("2023/03/11 05:11:50");
 });
 // 全てのウィンドウが閉じたとき
 app.on("window-all-closed", () => {});

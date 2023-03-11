@@ -52,11 +52,6 @@ window.addEventListener("load", (e) => {
     .then(function (json) {
       document.getElementById("kmoni_Message").innerHTML = json.message;
     });
-
-  //ローカル時刻
-  setInterval(function () {
-    document.getElementById("PC_TIME").textContent = dateEncode(3, new Date());
-  }, 200);
 });
 //オフライン警告非表示
 window.addEventListener("online", (e) => {

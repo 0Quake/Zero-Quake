@@ -67,12 +67,14 @@ window.electronAPI.messageSend((event, request) => {
 window.addEventListener("load", function () {
   windowLoaded = true;
   setInterval(function () {
-    if (psWaveList.length > 0) {
-      for (elm of psWaveList) {
-        psWaveCalc(elm.id);
+    if (now_EEW.length > 0) {
+      for (elm of now_EEW) {
+        psWaveCalc(elm.report_id);
       }
     }
-  }, 50);
+    //時計（ローカル時刻）更新
+    document.getElementById("PC_TIME").textContent = dateEncode(3, new Date());
+  }, 100);
 });
 
 //マップ初期化など
