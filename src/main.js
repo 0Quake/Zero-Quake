@@ -97,6 +97,7 @@ app.whenReady().then(() => {
       clearInterval(startInterval);
     }
   }, 1000);
+  replay("2023/03/12 22:42:30");
   //replay("2023/03/11 05:11:50");
 });
 // 全てのウィンドウが閉じたとき
@@ -506,7 +507,7 @@ function kmoniControl(data, date) {
               ptDataTmp.Event = EQD_ItemTmp.id;
               var radiusTmp = geosailing(elm.Location.Latitude, elm.Location.Longitude, EQD_ItemTmp.lat, EQD_ItemTmp.lng);
               if (EQD_ItemTmp.Radius < radiusTmp) EQD_ItemTmp.Radius = radiusTmp;
-              return true;
+              continue;
             }
           }
         }

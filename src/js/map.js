@@ -29,6 +29,7 @@ var mapLayer, hinanjoLayer;
 var kmoniMapData, SnetMapData;
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "kmoniUpdate") {
+    console.log("aaaa");
     kmoniMapUpdate(request.data, "knet");
   } else if (request.action == "SnetUpdate") {
     kmoniMapUpdate(request.data, "snet");
