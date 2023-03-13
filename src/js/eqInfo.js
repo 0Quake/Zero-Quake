@@ -31,6 +31,7 @@ var mapLevel = 0; //マップの状況　0:なし/1:NHK/2:JMAXML/3:完全/
 var EQInfo = { originTime: null, maxI: null, mag: null, lat: null, lng: null, depth: null, epiCenter: null, comment: null };
 var shindo_lastUpDate = 0;
 var EQData_lastUpDate = 0;
+var layerControl;
 
 fetch("https://files.nakn.jp/earthquake/code/PointSeismicIntensityLocation.json")
   .then(function (res) {
@@ -259,7 +260,7 @@ function Mapinit() {
 
       gjmap = L.geoJSON({ type: "FeatureCollection", features: [] });
       mapLayer.addLayer(gjmap);
-      L.control
+      layerControl = L.control
         .layers(
           {
             オフライン地図: gjmap,
@@ -302,6 +303,8 @@ function Mapinit() {
     } else if (eventLayer.name === "地理院 土砂災害警戒区域（地すべり） ハザードマップ" || eventLayer.name === "地理院 土砂災害警戒区域（急傾斜地の崩壊） ハザードマップ") {
       legend2.addTo(map);
       overlayTmp.push(eventLayer.name);
+    } else if (eventLayer.name === "推計震度分布図") {
+      estimated_intensity_map_legend.addTo(map);
     }
   });
   map.on("overlayremove", function (eventLayer) {
@@ -311,6 +314,8 @@ function Mapinit() {
       overlayTmp = overlayTmp.filter(function (elm) {
         return elm !== eventLayer.name;
       });
+    } else if (eventLayer.name === "推計震度分布図") {
+      map.removeControl(estimated_intensity_map_legend);
     }
     if (overlayTmp.length == 0) {
       overlayActive = false;
@@ -374,7 +379,7 @@ function Mapinit() {
 
   estimated_intensity_mapReq();
 }
-
+var estimated_intensity_map_legend;
 //推計震度分布リスト取得→描画
 function estimated_intensity_mapReq() {
   fetch("https://www.jma.go.jp/bosai/estimated_intensity_map/data/list.json")
@@ -385,19 +390,43 @@ function estimated_intensity_mapReq() {
       ItemTmp = json.find(function (elm) {
         return elm.url.split("_")[0] == String(eid).substring(0, 12);
       });
-      if (!ItemTmp) return false;
-      idTmp = ItemTmp.url;
-      ItemTmp.mesh_num.forEach(function (elm) {
-        latTmp = Number(elm.substring(0, 2)) / 1.5;
-        lngTmp = Number(elm.substring(2, 4)) + 100;
-        lat2Tmp = latTmp + 2 / 3;
-        lng2Tmp = lngTmp + 1;
+      if (ItemTmp) {
+        estimated_intensity_map_legend = L.control({ position: "bottomright" });
+        estimated_intensity_map_legend.onAdd = function (map) {
+          var img = L.DomUtil.create("img");
+          img.src = "./img/estimated_intensity_map_scale.svg";
+          return img;
+        };
 
-        L.imageOverlay("https://www.jma.go.jp/bosai/estimated_intensity_map/data/" + idTmp + "/" + elm + ".png", [
-          [latTmp, lngTmp],
-          [lat2Tmp, lng2Tmp],
-        ]).addTo(map);
-      });
+        idTmp = ItemTmp.url;
+        var estimated_intensity_map_layer = L.layerGroup();
+
+        ItemTmp.mesh_num.forEach(function (elm) {
+          latTmp = Number(elm.substring(0, 2)) / 1.5;
+          lngTmp = Number(elm.substring(2, 4)) + 100;
+          lat2Tmp = latTmp + 2 / 3;
+          lng2Tmp = lngTmp + 1;
+
+          estimated_intensity_map_layer.addLayer(
+            L.imageOverlay("https://www.jma.go.jp/bosai/estimated_intensity_map/data/" + idTmp + "/" + elm + ".png", [
+              [latTmp, lngTmp],
+              [lat2Tmp, lng2Tmp],
+            ])
+          );
+        });
+        L.control
+          .layers(
+            {},
+            {
+              推計震度分布図: estimated_intensity_map_layer,
+            },
+            {
+              position: "topright",
+              collapsed: false,
+            }
+          )
+          .addTo(map);
+      }
     });
 }
 
@@ -824,7 +853,7 @@ function EQInfoControl(data) {
   if ((data.depth || data.depth === 0) && (mostNew || !EQInfo.depth)) EQInfo.depth = data.depth;
   if (data.epiCenter && (mostNew || !EQInfo.epiCenter)) EQInfo.epiCenter = data.epiCenter;
 
-  if (EQInfo.originTime) data_time.innerText = dateEncode(3, EQInfo.originTime);
+  if (EQInfo.originTime) data_time.innerText = dateEncode(4, EQInfo.originTime);
   if (EQInfo.maxI) data_maxI.innerText = EQInfo.maxI;
   if (EQInfo.mag) data_M.innerText = EQInfo.mag;
   if (data.magType) data_MT.innerText = data.magType;

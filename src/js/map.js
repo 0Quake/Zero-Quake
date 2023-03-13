@@ -609,7 +609,7 @@ function kmoniMapUpdate(dataTmp, type) {
       });
     //removeChild(document.getElementById("pointList"));
     var htmlTmp = "";
-    for (let a = 0; a < 10; a++) {
+    for (let a = 0; a < config.Info.RealTimeShake.List.ItemCount; a++) {
       var shindoElm = shindoList[a];
       if (shindoElm.shindo) {
         var shindoColor = shindoConvert(shindoElm.shindo, 2);
