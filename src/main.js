@@ -97,7 +97,7 @@ app.whenReady().then(() => {
       clearInterval(startInterval);
     }
   }, 1000);
-  replay("2023/03/12 22:42:30");
+  //replay("2023/03/13 19:03:30");
   //replay("2023/03/11 05:11:50");
 });
 // 全てのウィンドウが閉じたとき
@@ -421,9 +421,10 @@ function kmoniControl(data, date) {
   kmoniActive = new Date();
 
   if (!EEWNow) {
+    var ptDataTmp;
     for (const elm of data) {
       //data.forEach(function (elm) {
-      var ptDataTmp = pointsData[elm.Code];
+      ptDataTmp = pointsData[elm.Code];
       var isCity = elm.Region == "東京都" || elm.Region == "千葉県" || elm.Region == "埼玉県" || elm.Region == "神奈川県";
       if (!ptDataTmp) {
         pointsData[elm.Code] = { detectCount: 0, SUMTmp: [], Event: null, oneBeforePGA: elm.pga, isCity: isCity };
@@ -621,7 +622,6 @@ function kmoniRequest() {
     request.on("response", (res) => {
       var dataTmp = "";
       if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
-        yoyuK += 100;
         errorCountk++;
         if (errorCountk > 3) {
           kmoniServerSelect();
@@ -707,7 +707,6 @@ function lmoniRequest() {
     request.on("response", (res) => {
       var dataTmp = "";
       if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
-        yoyuL += 100;
         errorCountl++;
         if (errorCountl > 3) {
           kmoniServerSelect();
@@ -745,7 +744,6 @@ function ymoniRequest() {
       request.on("response", (res) => {
         var dataTmp = "";
         if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
-          yoyuY += 100;
           errorCountye++;
           if (errorCountye > 3) {
             kmoniServerSelect();
@@ -777,7 +775,6 @@ function ymoniRequest() {
       request.on("response", (res) => {
         var dataTmp = "";
         if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
-          yoyuY += 100;
           errorCountyw++;
           if (errorCountyw > 3) {
             kmoniServerSelect();

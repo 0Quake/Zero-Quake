@@ -248,7 +248,7 @@ function Mapinit() {
         onEachFeature: function onEachFeature(feature, layer) {
           if (feature.properties && feature.properties.name) {
             sections.push({ name: feature.properties.name, item: layer });
-            layer.bindPopup("<h3>地震情報/細分区域</h3>" + feature.properties.name);
+            //layer.bindPopup("<h3>地震情報/細分区域</h3>" + feature.properties.name);
           }
           if (config.home.Saibun == feature.properties.name) {
             layer.setStyle({ color: "#fff", weight: 2 });
@@ -368,7 +368,9 @@ function Mapinit() {
     iconAnchor: [15, 30],
   });
 
-  L.marker([config.home.latitude, config.home.longitude], { keyboard: false, icon: homeIcon }).addTo(map).bindPopup(config.home.name);
+  L.marker([config.home.latitude, config.home.longitude], { keyboard: false, icon: homeIcon })
+    .addTo(map)
+    .bindPopup("<h3>登録地点</h3><div>" + config.home.name + "</div>");
 
   estimated_intensity_mapReq();
 }
@@ -672,7 +674,6 @@ function narikakun_Fetch(url) {
           document.getElementById("ShindoWrap").style.display = "inline-block";
 
           map_drawed = true;
-          console.log(json.Body.Intensity.Observation.Pref);
 
           json.Body.Intensity.Observation.Pref.forEach(function (elm) {
             add_Pref_info(elm.Name, elm.MaxInt);
@@ -741,8 +742,9 @@ function add_Area_info(name, maxInt) {
       className: "MaxShindoIcon",
       iconSize: [22, 22],
     });
-
-    L.marker(pointLocation, { icon: divIcon, pane: "shadowPane" }).addTo(map);
+    L.marker(pointLocation, { icon: divIcon, pane: "shadowPane" })
+      .bindPopup("<h3>細分区域</h3><div>" + name + "</div><div>震度" + maxInt + "</div>")
+      .addTo(map);
   }
 
   gjmap.setStyle({
@@ -800,7 +802,7 @@ function add_IntensityStation_info(lat, lng, name, int) {
 
   L.marker([lat, lng], { icon: divIcon, pane: "shadowPane" })
     .addTo(map)
-    .bindPopup("<h3>観測点：" + name + "</h3>震度" + int);
+    .bindPopup("<h3>観測点</h3><div>" + name + "</div><div>震度" + int + "</div>");
 
   wrap3[wrap3.length - 1].appendChild(newDiv);
 }
@@ -849,7 +851,7 @@ function EQInfoControl(data) {
         pane: "markerPane",
       })
         .addTo(map)
-        .bindPopup("震央：" + EQInfo.epiCenter);
+        .bindPopup("<h3>震央</h3><div>" + EQInfo.epiCenter + "</div>");
     } else {
       markerElm.setLatLng([data.lat, data.lng]);
     }
