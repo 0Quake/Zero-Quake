@@ -523,7 +523,7 @@ function jma_Fetch(url) {
 
       if (json.Body.Comments) {
         var commentText = "";
-        if (json.Body.Comments.ForecastComment.Text) commentText += json.Body.Comments.ForecastComment.Text;
+        if (json.Body.Comments.ForecastComment && json.Body.Comments.ForecastComment.Text) commentText += json.Body.Comments.ForecastComment.Text;
         if (json.Body.Comments.FreeFormComment) commentText += json.Body.Comments.FreeFormComment;
       }
       EQInfoControl({
@@ -617,6 +617,7 @@ function jmaXMLFetch(url) {
       }
 
       EQInfoControl({
+        reportTime: new Date(xml.querySelector("Head ReportDateTime").textContent),
         originTime: originTimeTmp,
         maxI: maxIntTmp,
         mag: magnitudeTmp,
@@ -852,9 +853,16 @@ function EQInfoControl(data) {
   if (data.mag && mostNew) data_MT.innerText = "M";
   if ((data.depth || data.depth === 0) && (mostNew || !EQInfo.depth)) EQInfo.depth = data.depth;
   if (data.epiCenter && (mostNew || !EQInfo.epiCenter)) EQInfo.epiCenter = data.epiCenter;
+  if (data.comment) {
+    if (!EQInfo.comment) EQInfo.comment = [];
+    var commentTmp = "<li><time>" + dateEncode(4, data.reportTime) + "</time>" + data.comment + "</li>";
+    if (!EQInfo.comment.includes(commentTmp)) {
+      EQInfo.comment.push(commentTmp);
+    }
+  }
 
   if (EQInfo.originTime) data_time.innerText = dateEncode(4, EQInfo.originTime);
-  if (EQInfo.maxI) data_maxI.innerText = EQInfo.maxI;
+  if (EQInfo.maxI) data_maxI.innerText = shindoConvert(EQInfo.maxI, 1);
   if (EQInfo.mag) data_M.innerText = EQInfo.mag;
   if (data.magType) data_MT.innerText = data.magType;
 
@@ -865,6 +873,8 @@ function EQInfoControl(data) {
   }
 
   if (EQInfo.epiCenter) data_center.innerText = EQInfo.epiCenter;
+
+  if (EQInfo.comment) data_comment.innerHTML = EQInfo.comment.join("\n");
 
   if (data.lat && data.lng) {
     if (!markerElm) {

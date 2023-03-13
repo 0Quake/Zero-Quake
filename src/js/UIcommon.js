@@ -109,7 +109,7 @@ function shindoConvert(str, responseType) {
   var ConvTable;
   switch (responseType) {
     case 1:
-      var ConvTable = { "?": "不明", 0: "0", 1: "1", 2: "2", 3: "3", 4: "4", "5-": "5弱", "5+": "5強", "6-": "6弱", "6+": "6強", 7: "7", "7+": "7以上" };
+      var ConvTable = { "?": "不明", 0: "0", 1: "1", 2: "2", 3: "3", 4: "4", "5-": "5弱", "5+": "5強", "6-": "6弱", "6+": "6強", 7: "7", "7+": "7相当以上" };
       break;
     case 2:
       var ConvTable = {

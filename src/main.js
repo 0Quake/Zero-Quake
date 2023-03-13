@@ -7,27 +7,44 @@ const Store = require("electron-store");
 const store = new Store();
 console.log(store.path);
 var config = store.get("config", {
-  setting1: true,
-  home: {
-    name: "自宅",
-    latitude: 35.68,
-    longitude: 139.767,
-    Saibun: "東京都２３区",
-  },
-  Info: {
-    EEW: {},
-    EQInfo: {
-      ItemCount: 5,
+  config: {
+    setting1: true,
+    home: {
+      name: "自宅",
+      latitude: 35.68,
+      longitude: 139.767,
+      Saibun: "東京都２３区",
     },
-    TsunamiInfo: {},
-  },
-  InfoSource: {},
-  lmoniTimeout: 1000,
-  lmoniTimeout: 1000,
-  ymoniTimeout: 1000,
-  notice: {
-    voice: {
-      EEW: "緊急地震速報です。強い揺れに警戒してください。",
+    Info: {
+      EEW: {},
+      EQInfo: {
+        ItemCount: 15,
+      },
+      TsunamiInfo: {},
+      RealTimeShake: {
+        List: { ItemCount: 10 },
+      },
+    },
+    Source: {
+      kmoni: {
+        kmoni: {
+          Interval: 1000,
+        },
+        lmoni: {
+          Interval: 1000,
+        },
+        ymoni: {
+          Interval: 1000,
+        },
+      },
+      msil: {
+        Interval: 10000,
+      },
+    },
+    notice: {
+      voice: {
+        EEW: "緊急地震速報です。強い揺れに警戒してください。",
+      },
     },
   },
 });

@@ -112,38 +112,39 @@
     <div id="tableWrap">
 
 
-      <table id="EQInfo">
-        <caption class="h2">地震情報</caption>
-        <tr>
-          <th>発生時刻</th>
-          <td id="data_time">不明</td>
-        </tr>
-        <tr>
-          <th>最大震度</th>
-          <td id="data_maxI">不明</td>
-        </tr>
-        <tr>
-          <th>マグニチュード</th>
-          <td><span id="data_MT">M</span> <span id="data_M">不明</span></td>
-        </tr>
-        <tr>
-          <th>深さ</th>
-          <td id="data_depth">不明</td>
-        </tr>
-        <tr>
-          <th>震源</th>
-          <td id="data_center">不明</td>
-        </tr>
-        <tr>
-          <td id="data_comment" colspan="2">付加文なし</td>
-        </tr>
-      </table>
+      <div id="leftSide">
+        <table id="EQInfo">
+          <caption class="h2">地震情報</caption>
+          <tr>
+            <th>発生時刻</th>
+            <td id="data_time">不明</td>
+          </tr>
+          <tr>
+            <th>最大震度</th>
+            <td id="data_maxI">不明</td>
+          </tr>
+          <tr>
+            <th>マグニチュード</th>
+            <td><span id="data_MT">M</span> <span id="data_M">不明</span></td>
+          </tr>
+          <tr>
+            <th>深さ</th>
+            <td id="data_depth">不明</td>
+          </tr>
+          <tr>
+            <th>震源</th>
+            <td id="data_center">不明</td>
+          </tr>
+        </table>
+        <h2>付加文</h2>
+        <ul id="data_comment">なし</ul>
+      </div>
 
       <div id="ShindoWrap">
         <h2>
-          <button id="AllOpen">すべて展開</button>
+          <button id="AllOpen" class="material-icons-round" title="すべて展開">unfold_more</button>
           各地の震度
-          <button id="AllClose">すべて折り畳み</button>
+          <button id="AllClose" class="material-icons-round" title="すべて折り畳み">unfold_less</button>
         </h2>
         <div id="Shindo">
         </div>
