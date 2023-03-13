@@ -1,3 +1,27 @@
+/* fallback */
+@font-face {
+  font-family: "Material Icons Round";
+  font-style: normal;
+  font-weight: 400;
+  src: url(../font/MaterialIconsRound.woff2) format("woff2");
+}
+
+.material-icons-round {
+  font-family: "Material Icons Round";
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: "liga";
+  -webkit-font-smoothing: antialiased;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -12,7 +36,7 @@ body {
 
 #mapcontainer {
   width: 100%;
-  height: 50vh;
+  height: 80vh;
   background: #202227;
   border-bottom: solid 2px #999;
   position: fixed;
@@ -24,7 +48,7 @@ main {
   position: absolute;
   left: 0;
   right: 0;
-  top: 50vh;
+  top: 80vh;
   background: #222;
   display: block;
   border-top: solid 1px #666;
@@ -38,6 +62,7 @@ h2,
   margin: 0.1em 0.5em;
   text-align: center;
   font-weight: bold;
+  font-family: "M PLUS 1p";
 }
 
 #yahooLink,
@@ -64,10 +89,16 @@ td {
   text-align: left;
 }
 
-#EQInfo {
+#leftSide {
   vertical-align: top;
   display: inline-table;
   width: calc(50% - 10px);
+}
+#EQInfo {
+  width: 100%;
+}
+#EQInfo th {
+  background: #333;
 }
 
 #ShindoWrap {
@@ -133,6 +164,7 @@ td {
   text-align: center;
   border-radius: 4px;
   margin-right: 10px;
+  font-family: "M PLUS 1p";
 }
 
 .close {
@@ -174,6 +206,7 @@ td {
   text-align: center;
   border-radius: 50%;
   font-size: 12px;
+  font-family: "M PLUS 1p";
 }
 
 .MaxShindoIcon div {
@@ -186,15 +219,23 @@ td {
   line-height: 22px;
   border-radius: 2px;
   text-align: center;
+  font-family: "M PLUS 1p";
 }
 .ShindoIcon,
 .MaxShindoIcon {
   transition: opacity 300ms;
 }
-
+.zoomLevel_1 .leaflet-marker-icon.MaxShindoIcon,
 .zoomLevel_2 .leaflet-marker-icon.MaxShindoIcon {
   opacity: 1;
   pointer-events: auto !important;
+}
+.zoomLevel_1 .leaflet-marker-icon.MaxShindoIcon div {
+  width: 15px;
+  height: 15px;
+  line-height: 15px;
+  font-size: 10px;
+  margin: 3.5px;
 }
 .zoomLevel_1 .leaflet-marker-icon.ShindoIcon,
 .zoomLevel_2 .leaflet-marker-icon.ShindoIcon {
@@ -202,7 +243,6 @@ td {
   pointer-events: none !important;
 }
 
-.zoomLevel_1 .leaflet-marker-icon.MaxShindoIcon,
 .zoomLevel_3 .leaflet-marker-icon.MaxShindoIcon,
 .zoomLevel_4 .leaflet-marker-icon.MaxShindoIcon {
   opacity: 0;
@@ -232,6 +272,7 @@ td {
   text-align: center;
   font-size: 16px;
   margin: 3px;
+  font-family: "M PLUS 1p";
 }
 
 #canceled {
@@ -257,10 +298,6 @@ td {
 
 .zoomLevel_3 .GJMap {
   fill-opacity: 0.5;
-}
-
-#btnWrap1 {
-  text-align: center;
 }
 
 #ShindoSample0 {
@@ -311,4 +348,29 @@ td {
 #ShindoSample7 {
   background: var(--IntTheme_7_BgColor);
   color: var(--IntTheme_7_color);
+}
+#AllOpen,
+#AllClose {
+  width: 25px;
+  height: 25px;
+  border-radius: 12.5px;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  vertical-align: middle;
+  line-height: 25px;
+  padding: 0;
+  font-size: 18px;
+}
+#data_comment {
+  margin: 10px;
+}
+#data_comment li {
+  margin-top: 5px;
+}
+#data_comment li time {
+  font-size: 14px;
+  margin-right: 5px;
+  color: #ccc;
+  font-family: ui-monospace, sans-serif;
 }

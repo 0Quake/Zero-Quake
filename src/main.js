@@ -5,20 +5,46 @@ const { JSDOM } = require("jsdom");
 let fs = require("fs");
 const Store = require("electron-store");
 const store = new Store();
+console.log(store.path);
 var config = store.get("config", {
-    setting1: true,
-    home: {
-        name: "自宅",
-        latitude: 35.68,
-        longitude: 139.767,
-        Saibun: "東京都２３区",
-    },
-    lmoniTimeout: 1000,
-    lmoniTimeout: 1000,
-    ymoniTimeout: 1000,
-    notice: {
-        voice: {
-            EEW: "緊急地震速報です。強い揺れに警戒してください。",
+    config: {
+        setting1: true,
+        home: {
+            name: "自宅",
+            latitude: 35.68,
+            longitude: 139.767,
+            Saibun: "東京都２３区",
+        },
+        Info: {
+            EEW: {},
+            EQInfo: {
+                ItemCount: 15,
+            },
+            TsunamiInfo: {},
+            RealTimeShake: {
+                List: { ItemCount: 10 },
+            },
+        },
+        Source: {
+            kmoni: {
+                kmoni: {
+                    Interval: 1000,
+                },
+                lmoni: {
+                    Interval: 1000,
+                },
+                ymoni: {
+                    Interval: 1000,
+                },
+            },
+            msil: {
+                Interval: 10000,
+            },
+        },
+        notice: {
+            voice: {
+                EEW: "緊急地震速報です。強い揺れに警戒してください。",
+            },
         },
     },
 });
@@ -74,13 +100,11 @@ if (!gotTheLock) {
 }
 app.whenReady().then(() => {
     kmonicreateWindow();
-    createWindow();
     points = jsonParse(fs.readFileSync(path.join(__dirname, "Resource/Knet_Points.json"), "utf8"));
+    kmoniServerSelect();
+    start();
 
-    (async function() {
-        await kmoniServerSelect();
-        await start();
-    })();
+    createWindow();
 
     // アプリケーションがアクティブになった時
     app.on("activate", () => {
@@ -90,14 +114,15 @@ app.whenReady().then(() => {
         }
     });
 
-    var startInterval = setInterval(function() {
-        if (!started) {
-            start();
-        } else {
-            clearInterval(startInterval);
-        }
-    }, 1000);
-    replay("2023/03/12 22:42:30");
+    /*
+    var startInterval = setInterval(function () {
+      if (!started) {
+        start();
+      } else {
+        clearInterval(startInterval);
+      }
+    }, 1000);*/
+    //replay("2023/03/13 23:30:20");
     //replay("2023/03/11 05:11:50");
 });
 // 全てのウィンドウが閉じたとき
@@ -219,7 +244,7 @@ function createWindow() {
         mainWindow.webContents.send("message2", {
             action: "EQInfo",
             source: "jma",
-            data: eqInfo.jma.slice(0, 10),
+            data: eqInfo.jma.slice(0, config.Info.EQInfo.ItemCount),
         });
 
         if (notifications.length > 0) {
@@ -420,9 +445,10 @@ function kmoniControl(data, date) {
     kmoniActive = new Date();
 
     if (!EEWNow) {
+        var ptDataTmp;
         for (const elm of data) {
             //data.forEach(function (elm) {
-            var ptDataTmp = pointsData[elm.Code];
+            ptDataTmp = pointsData[elm.Code];
             var isCity = elm.Region == "東京都" || elm.Region == "千葉県" || elm.Region == "埼玉県" || elm.Region == "神奈川県";
             if (!ptDataTmp) {
                 pointsData[elm.Code] = { detectCount: 0, SUMTmp: [], Event: null, oneBeforePGA: elm.pga, isCity: isCity };
@@ -436,7 +462,7 @@ function kmoniControl(data, date) {
             }
             if (!pgaAvr) var pgaAvr = 0.1;
 
-            threshold02 = 0.17 * pgaAvr + 0.04;
+            threshold02 = 0.25 * pgaAvr + 0.04;
             threshold03 = 0.3 * pgaAvr + 0.1;
             if (ptDataTmp.isCity) {
                 //threshold02 *= 3;
@@ -620,7 +646,6 @@ function kmoniRequest() {
         request.on("response", (res) => {
             var dataTmp = "";
             if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
-                yoyuK += 100;
                 errorCountk++;
                 if (errorCountk > 3) {
                     kmoniServerSelect();
@@ -696,7 +721,7 @@ function kmoniRequest() {
         }
     }
     if (kmoniTimeout) clearTimeout(kmoniTimeout);
-    kmoniTimeout = setTimeout(kmoniRequest, 1000);
+    kmoniTimeout = setTimeout(kmoniRequest, config.Source.kmoni.kmoni.Interval);
 }
 
 //長周期地震動モニタへのHTTPリクエスト
@@ -706,7 +731,6 @@ function lmoniRequest() {
         request.on("response", (res) => {
             var dataTmp = "";
             if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
-                yoyuL += 100;
                 errorCountl++;
                 if (errorCountl > 3) {
                     kmoniServerSelect();
@@ -733,7 +757,7 @@ function lmoniRequest() {
         request.end();
     }
     if (lmoniTimeout) clearTimeout(lmoniTimeout);
-    lmoniTimeout = setTimeout(lmoniRequest, 1000);
+    lmoniTimeout = setTimeout(lmoniRequest, config.Source.kmoni.lmoni.Interval);
 }
 
 //Yahoo強震モニタへのHTTPリクエスト処理
@@ -744,7 +768,6 @@ function ymoniRequest() {
             request.on("response", (res) => {
                 var dataTmp = "";
                 if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
-                    yoyuY += 100;
                     errorCountye++;
                     if (errorCountye > 3) {
                         kmoniServerSelect();
@@ -776,7 +799,6 @@ function ymoniRequest() {
             request.on("response", (res) => {
                 var dataTmp = "";
                 if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
-                    yoyuY += 100;
                     errorCountyw++;
                     if (errorCountyw > 3) {
                         kmoniServerSelect();
@@ -805,7 +827,7 @@ function ymoniRequest() {
     }
 
     if (ymoniTimeout) clearTimeout(ymoniTimeout);
-    ymoniTimeout = setTimeout(ymoniRequest, 1000);
+    ymoniTimeout = setTimeout(ymoniRequest, config.Source.kmoni.ymoni.Interval);
 }
 
 //海しるへのHTTPリクエスト処理
@@ -865,7 +887,7 @@ function SnetRequest() {
     }
     setTimeout(function() {
         SnetRequest();
-    }, 10000);
+    }, config.Source.msil.Interval);
 }
 
 //P2P地震情報API WebSocket接続・受信処理
@@ -1772,7 +1794,7 @@ function EQI_JMA_Req() {
                 var eidTmp = elm.eid;
                 if (!jmaJsonEIDs.includes(eidTmp)) {
                     jmaJsonEIDs.push(eidTmp);
-                    if (jmaJsonEIDs.length == 10) break;
+                    if (jmaJsonEIDs.length == config.Info.EQInfo.ItemCount) break;
                 }
             }
             json.forEach(function(elm) {
@@ -2078,7 +2100,7 @@ function EQI_JMAXML_Req(url) {
 
 //USGS 取得・フォーマット変更→eqInfoControl
 function EQI_USGS_Req() {
-    var request = net.request("https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&limit=10");
+    var request = net.request("https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&limit=" + config.Info.EQInfo.ItemCount);
     request.on("response", (res) => {
         var dataTmp = "";
         res.on("data", (chunk) => {
@@ -2125,14 +2147,14 @@ function EQI_narikakunList_Req(url, num, first) {
             if (!json || !json.lists) return false;
             narikakun_URLs = narikakun_URLs.concat(json.lists.reverse());
 
-            if (narikakun_URLs.length < 10 && first) {
+            if (narikakun_URLs.length < config.Info.EQInfo.ItemCount && first) {
                 var yearTmp = new Date().getFullYear();
                 var monthTmp = new Date().getMonth();
                 if (monthTmp == 0) {
                     yearTmp = new Date().getFullYear() - 1;
                     monthTmp = 1;
                 }
-                EQI_narikakunList_Req("https://ntool.online/api/earthquakeList?year=" + yearTmp + "&month=" + monthTmp, 10 - json.lists.length, false);
+                EQI_narikakunList_Req("https://ntool.online/api/earthquakeList?year=" + yearTmp + "&month=" + monthTmp, config.Info.EQInfo.ItemCount - json.lists.length, false);
             } else {
                 for (let elm of narikakun_URLs) {
                     var eidTmp = elm.split("_")[2];
@@ -2142,7 +2164,7 @@ function EQI_narikakunList_Req(url, num, first) {
                     }
                     if (!narikakun_EIDs.includes(eidTmp)) {
                         narikakun_EIDs.push(eidTmp);
-                        if (narikakun_EIDs.length == 10) break;
+                        if (narikakun_EIDs.length == config.Info.EQInfo.ItemCount) break;
                     }
                 }
                 narikakun_URLs = [];
@@ -2265,7 +2287,7 @@ function eqInfoAlert(data, source, update) {
             mainWindow.webContents.send("message2", {
                 action: "EQInfo",
                 source: source,
-                data: eqInfo.jma.slice(0, 10),
+                data: eqInfo.jma.slice(0, config.Info.EQInfo.ItemCount),
             });
         }
     } else if (source == "usgs") {
@@ -2278,7 +2300,7 @@ function eqInfoAlert(data, source, update) {
             mainWindow.webContents.send("message2", {
                 action: "EQInfo",
                 source: source,
-                data: eqInfo.usgs.slice(0, 10),
+                data: eqInfo.usgs.slice(0, config.Info.EQInfo.ItemCount),
             });
         }
     }

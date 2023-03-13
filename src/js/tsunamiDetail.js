@@ -27,7 +27,6 @@ function tsunamiUpdate(dataTmp) {
   //情報の有効期限
   if (dataTmp.ValidDateTime) {
     clearTimeout(RevocationTimer);
-    console.log(dataTmp.ValidDateTime, new Date());
     RevocationTimer = setTimeout(function () {
       document.getElementById("revocation").style.display = "block";
       document.querySelectorAll(".add-content").forEach(function (elm) {

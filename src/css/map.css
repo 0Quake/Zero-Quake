@@ -34,9 +34,9 @@ a.leaflet-control-zoom-out:hover {
   background-image: url(../img/layers.svg);
 }
 .leaflet-control-layers {
-  border-radius: 50%;
+  border-radius: 2000px;
 }
-.leaflet-control-layers:hover {
+.leaflet-control-layers.leaflet-control-layers-expanded {
   border-radius: 5px;
 }
 
