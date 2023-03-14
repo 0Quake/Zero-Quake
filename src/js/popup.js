@@ -272,6 +272,7 @@ function epiCenterUpdate(eid, latitude, longitude) {
         icon: epicenterIcon,
         pane: "overlayPane",
         renderer: overlayCanvas,
+        interactive: false,
       })
         .addTo(map)
         .bindTooltip(String(EEWIDTmp), { permanent: true, direction: "top", className: "epiCenterTooltip", offset: [0, -10] });

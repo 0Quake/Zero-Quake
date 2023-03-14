@@ -8,9 +8,7 @@ var tsunamiLayer;
 var gjmap; //オフライン地図
 var gjmapT; //津波用geojson
 var sections = [];
-var basemap;
-var worldmap;
-var prefecturesMap;
+var basemap, worldmap, prefecturesMap, plateMap;
 var offlineMapActive = true;
 var overlayActive = false;
 var tsunamiLayerAdded = false;
@@ -29,7 +27,6 @@ var mapLayer, hinanjoLayer;
 var kmoniMapData, SnetMapData;
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "kmoniUpdate") {
-    console.log("aaaa");
     kmoniMapUpdate(request.data, "knet");
   } else if (request.action == "SnetUpdate") {
     kmoniMapUpdate(request.data, "snet");
@@ -319,6 +316,44 @@ function init() {
       });
 
       mapLayer.addLayer(prefecturesMap);
+    });
+
+  fetch("./Resource/plate.json")
+    .then(function (res) {
+      return res.json();
+    })
+    .then(function (json) {
+      plateMap = L.geoJSON(json, {
+        style: {
+          color: "#C88",
+          opacity: 0.3,
+          fill: false,
+          weight: 1,
+          interactive: false,
+          attribution: "",
+          renderer: jsonMAP2Canvas,
+        },
+      });
+
+      mapLayer.addLayer(plateMap);
+    });
+  fetch("./Resource/Snet_LINE.json")
+    .then(function (res) {
+      return res.json();
+    })
+    .then(function (json) {
+      plateMap = L.geoJSON(json, {
+        style: {
+          color: "#666",
+          fill: false,
+          weight: 1,
+          interactive: false,
+          attribution: "",
+          renderer: jsonMAP2Canvas,
+        },
+      });
+
+      mapLayer.addLayer(plateMap);
     });
 
   fetch("./Resource/basemap.json")
@@ -714,7 +749,6 @@ function EstShindoUpdate(data) {
 //🔴予報円🔴
 //予報円追加
 function psWaveEntry() {
-  console.log("a");
   now_EEW.forEach(function (elm) {
     if (!elm.is_cancel && elm.arrivalTime) {
       var countDownElm = document.getElementById("EEW-" + elm.report_id);
@@ -831,8 +865,8 @@ function psWaveCalc(eid) {
       TimeElmTmpS = [Sfind, Sfind];
     } else {
       var loopI = 0;
-      var result;
-      var result2;
+      var result = [Infinity, 0];
+      var result2 = [Infinity, 0];
       TimeTableTmp.forEach((a) => {
         var b = Math.abs(a.S - distance);
         if (result[0] >= b || loopI == 0) {
@@ -971,7 +1005,7 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
   }
 
   var EEWPanelElm = document.getElementById("EEW-" + report_id);
-  if (EQElm2.distance && EEWPanelElm) {
+  if (EQElm2 && EQElm2.distance && EEWPanelElm) {
     EEWPanelElm.querySelector(".PWave_value").setAttribute("stroke-dashoffset", 125.66 - 125.66 * Math.min(pRadius / 1000 / EQElm2.distance, 1));
     EEWPanelElm.querySelector(".SWave_value").setAttribute("stroke-dashoffset", 125.66 - 125.66 * Math.min(sRadius / 1000 / EQElm2.distance, 1));
 
