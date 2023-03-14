@@ -99,6 +99,7 @@ function init() {
     worldCopyJump: true,
     inertia: false,
     maxBoundsViscosity: 1,
+    enableHighAccuracy: true,
   });
 
   map.createPane("tsunamiPane").style.zIndex = 201;
@@ -894,24 +895,8 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
   longitude = latitudeConvert(longitude);
   if (EQElm) {
     if (EQElm.PCircleElm) {
-      //EQElm.markerElm.setLatLng([data.latitude, data.longitude]);
-
-      //document.querySelector(".PWave_" + report_id).style.transitionTimingFunction = "linear";
-      //document.querySelector(".SWave_" + report_id).style.transitionTimingFunction = "linear";
-
       EQElm.PCircleElm.setRadius(pRadius).setLatLng([latitude, longitude]);
       EQElm.SCircleElm.setRadius(sRadius).setLatLng([latitude, longitude]).setStyle({ stroke: !SnotArrived });
-
-      /*
-    var overflow1 = map.getBounds()._northEast.lat < EQElm.PCircleElm.getBounds()._northEast.lat;
-    var overflow2 = map.getBounds()._northEast.lng < EQElm.PCircleElm.getBounds()._northEast.lng;
-    var overflow3 = map.getBounds()._southWest.lat > EQElm.PCircleElm.getBounds()._southWest.lat;
-    var overflow4 = map.getBounds()._southWest.lng > EQElm.PCircleElm.getBounds()._southWest.lng;
-    if (overflow1 || overflow2 || overflow3 || overflow4) {
-      map.fitBounds(EQElm.PCircleElm.getBounds());
-    }*/
-
-      //EQElm.data = { latitude: latitude, longitude: longitude, pRadius: pRadius, sRadius: sRadius };
     } else {
       var PCElm = L.circle([latitude, longitude], {
         radius: pRadius,
@@ -919,13 +904,10 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
         stroke: true,
         fill: false,
         weight: 2,
-        //className: "PWave PWave_" + report_id,
         pane: "PSWavePane",
         renderer: PSWaveCanvas,
         interactive: false,
       }).addTo(map);
-
-      //document.querySelector(".PWave_" + report_id).addEventListener("transitionend", function () {});
 
       var SCElm = L.circle([latitude, longitude], {
         radius: sRadius,
@@ -935,7 +917,6 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
         fillColor: "#F00",
         fillOpacity: 0.15,
         weight: 2,
-        //className: "SWave SWave_" + report_id,
         pane: "PSWavePane",
         renderer: PSWaveCanvas,
         interactive: false,

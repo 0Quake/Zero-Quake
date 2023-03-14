@@ -14,10 +14,6 @@ window.electronAPI.messageSend((event, request) => {
     kmoniTimeUpdate(request.Updatetime, request.LocalTime, "msilImg", "success");
   } else if (request.action == "MSSelect") {
     document.getElementById(request.str).selected = true;
-  } else if (request.action == "PSWaveUpdate") {
-    epiCenterUpdate(request.data.report_id, request.data.latitude, request.data.longitude);
-  } else if (request.action == "PSWaveClear") {
-    epiCenterClear(request.data);
   } else if (request.action == "setting") {
     config = request.data;
   } else if (request.action == "Replay") {
@@ -69,6 +65,7 @@ window.addEventListener("offline", (e) => {
 //🔴緊急地震速報🔴
 var template = document.getElementById("EEWTemplate");
 var epiCenter = [];
+var EEW_LocalIDs = [];
 //EEW追加・更新
 function EEWAlertUpdate(data) {
   data.forEach((elm) => {
@@ -92,6 +89,10 @@ function EEWAlertUpdate(data) {
         clone.querySelector(".EEWWrap").classList.add("yohou");
       }
 
+      EEWID++;
+      EEW_LocalIDs[elm.report_id] = EEWID;
+
+      clone.querySelector(".EEWLocalID").textContent = EEWID;
       clone.querySelector(".report_num").textContent = elm.report_num;
       clone.querySelector(".calcintensity").textContent = elm.calcintensity ? elm.calcintensity : "?";
       clone.querySelector(".calcintensity").style.background = shindoConvert(elm.calcintensity, 2)[0];
@@ -240,9 +241,9 @@ function EEWAlertUpdate(data) {
       document.getElementById("EEW-" + elm.report_id).remove();
       // }, 1000);
     }
-
     return stillEQ;
   });
+  if (now_EEW.length == 0) EEWID = 0;
 
   if (data.length == 0) {
     document.body.classList.remove("EEWMode");
@@ -250,6 +251,8 @@ function EEWAlertUpdate(data) {
     document.body.classList.add("EEWMode");
   }
 }
+
+var EEWID = 0;
 //震源更新
 function epiCenterUpdate(eid, latitude, longitude) {
   eid = Number(eid);
@@ -263,13 +266,21 @@ function epiCenterUpdate(eid, latitude, longitude) {
       epicenterElm.latitude = latitude;
       epicenterElm.longitude = longitude;
     } else {
+      EEWIDTmp = EEW_LocalIDs[eid];
+
       var ESMarker = L.marker([latitude, longitude], {
         icon: epicenterIcon,
         pane: "overlayPane",
         renderer: overlayCanvas,
-      }).addTo(map);
+      })
+        .addTo(map)
+        .bindTooltip(String(EEWIDTmp), { permanent: true, direction: "top", className: "epiCenterTooltip", offset: [0, -10] });
 
-      epiCenter.push({ eid: eid, markerElm: ESMarker, latitude: latitude, longitude: longitude });
+      epiCenter.push({ eid: eid, markerElm: ESMarker, latitude: latitude, longitude: longitude, EEWID: Number(EEWIDTmp) });
+      displayTmp = epiCenter.length > 1 ? "inline-block" : "none";
+      document.querySelectorAll(".epiCenterTooltip,.EEWLocalID").forEach(function (elm3) {
+        elm3.style.display = displayTmp;
+      });
     }
   }
 
@@ -277,12 +288,6 @@ function epiCenterUpdate(eid, latitude, longitude) {
     return elm.id == eid;
   });
   if (EQElm) {
-    /*
-    document.getElementById("mapcontainer").classList.remove("transitionActive");
-    setTimeout(function () {
-      document.getElementById("mapcontainer").classList.add("transitionActive");
-    }, 10);
-*/
     if (EQElm.PCircleElm) EQElm.PCircleElm.setLatLng([latitude, longitude]);
     if (EQElm.SCircleElm) EQElm.SCircleElm.setLatLng([latitude, longitude]);
     if (EQElm.SIElm) EQElm.SIElm.setLatLng([latitude, longitude]);
