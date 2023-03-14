@@ -121,8 +121,8 @@ app.whenReady().then(() => {
         clearInterval(startInterval);
       }
     }, 1000);*/
-  //replay("2023/03/13 23:30:20");
-  //replay("2023/03/11 05:11:50");
+  //replay("2023/03/15 0:30:50");
+  //replay("2023/03/11 05:12:30");
 });
 // 全てのウィンドウが閉じたとき
 app.on("window-all-closed", () => {});
@@ -271,6 +271,12 @@ function createWindow() {
     }
     if (SnetPointsDataTmp) {
       mainWindow.webContents.send("message2", SnetPointsDataTmp);
+    }
+    if (Replay !== 0) {
+      mainWindow.webContents.send("message2", {
+        action: "Replay",
+        data: Replay,
+      });
     }
   });
 
@@ -462,7 +468,7 @@ function kmoniControl(data, date) {
       }
       if (!pgaAvr) var pgaAvr = 0.1;
 
-      threshold02 = 0.3 * pgaAvr + 0.04;
+      threshold02 = 0.3 * pgaAvr + 0.03;
       threshold03 = 0.45 * pgaAvr + 0.1;
       if (ptDataTmp.isCity) {
         //threshold02 *= 3;
@@ -2625,7 +2631,7 @@ function replay(ReplayDate) {
     Replay = new Date() - new Date(ReplayDate);
     mainWindow.webContents.send("message2", {
       action: "Replay",
-      data: new Date(ReplayDate),
+      data: Replay,
     });
   } else {
     Replay = 0;

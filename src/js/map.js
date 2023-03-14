@@ -713,6 +713,7 @@ function EstShindoUpdate(data) {
 //🔴予報円🔴
 //予報円追加
 function psWaveEntry() {
+  console.log("a");
   now_EEW.forEach(function (elm) {
     if (!elm.is_cancel && elm.arrivalTime) {
       var countDownElm = document.getElementById("EEW-" + elm.report_id);
@@ -989,23 +990,25 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
   }
 
   var EEWPanelElm = document.getElementById("EEW-" + report_id);
-  if (EQElm2.distance && EQElm2.arrivalTime && EEWPanelElm) {
+  if (EQElm2.distance && EEWPanelElm) {
     EEWPanelElm.querySelector(".PWave_value").setAttribute("stroke-dashoffset", 125.66 - 125.66 * Math.min(pRadius / 1000 / EQElm2.distance, 1));
     EEWPanelElm.querySelector(".SWave_value").setAttribute("stroke-dashoffset", 125.66 - 125.66 * Math.min(sRadius / 1000 / EQElm2.distance, 1));
-    var countDownElm = EEWPanelElm.querySelector(".countDown");
 
-    var countDown = (EQElm2.arrivalTime - (new Date() - Replay)) / 1000;
-    if (countDown > 0) {
-      var countDown_min = Math.floor(countDown / 60);
-      var countDown_sec = Math.floor(countDown % 60);
+    if (EQElm2.arrivalTime) {
+      var countDownElm = EEWPanelElm.querySelector(".countDown");
+      var countDown = (EQElm2.arrivalTime - (new Date() - Replay)) / 1000;
+      if (countDown > 0) {
+        var countDown_min = Math.floor(countDown / 60);
+        var countDown_sec = Math.floor(countDown % 60);
 
-      if (countDown_min == 0) {
-        countDownElm.textContent = countDown_sec;
+        if (countDown_min == 0) {
+          countDownElm.textContent = countDown_sec;
+        } else {
+          countDownElm.textContent = countDown_min + ":" + String(countDown_sec).padStart(2, "0");
+        }
       } else {
-        countDownElm.textContent = countDown_min + ":" + String(countDown_sec).padStart(2, "0");
+        countDownElm.textContent = "0";
       }
-    } else {
-      countDownElm.textContent = "0";
     }
   }
 }

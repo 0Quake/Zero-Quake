@@ -21,7 +21,7 @@ window.electronAPI.messageSend((event, request) => {
   } else if (request.action == "setting") {
     config = request.data;
   } else if (request.action == "Replay") {
-    Replay = new Date() - new Date(request.data);
+    Replay = request.data;
   } else if (request.action == "EQInfo") {
     eqInfoDraw(request.data, request.source);
   } else if (request.action == "notification_Update") {

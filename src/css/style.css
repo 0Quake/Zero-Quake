@@ -335,10 +335,6 @@ h2 {
   text-align: center;
   line-height: 40px;
 }
-.PWave_value,
-.SWave_value {
-  transition: 1s;
-}
 .PWave_value {
   stroke: var(--PwaveColor);
 }
