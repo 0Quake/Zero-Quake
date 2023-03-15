@@ -242,7 +242,7 @@ function init() {
                 renderer: HinanjoCanvas,
               });
             },
-          }).bindPopup("指定緊急避難場所（地震）");
+          }).bindPopup({ content: "指定緊急避難場所（地震）", keepInView: false, autoPan: false });
           hinanjoLayer.addLayer(event.tile.geojson);
         })
         .catch(function () {});
@@ -264,7 +264,7 @@ function init() {
                 renderer: HinanjoCanvas,
               });
             },
-          }).bindPopup("指定緊急避難場所（津波）");
+          }).bindPopup({ content: "指定緊急避難場所（津波）", keepInView: false, autoPan: false });
           hinanjoLayer.addLayer(event.tile.geojson2);
         })
         .catch(function () {});
@@ -475,7 +475,7 @@ function init() {
               feature: feature,
             });
 
-            layer.bindPopup("<h3>津波予報区</h3>" + feature.properties.name);
+            layer.bindPopup({ content: "<h3>津波予報区</h3>" + feature.properties.name, keepInView: false, autoPan: false });
           }
         },
       });
@@ -589,7 +589,7 @@ function init() {
     iconAnchor: [15, 15],
   });
 
-  markerElm = L.marker([config.home.latitude, config.home.longitude], { keyboard: false, icon: homeIcon }).addTo(map).bindPopup(config.home.name);
+  markerElm = L.marker([config.home.latitude, config.home.longitude], { keyboard: false, icon: homeIcon }).addTo(map).bindPopup({ content: config.home.name, keepInView: false, autoPan: false });
 
   fetch("./Resource/TimeTable_JMA2001.json")
     .then(function (res) {
@@ -618,7 +618,7 @@ function addPointMarker(elm) {
       //renderer: PointsCanvas,
       keyboard: false,
     })
-      .bindPopup("", { offset: [0, -20], className: "PointPopup" })
+      .bindPopup("", { offset: [0, -20], className: "PointPopup", keepInView: false, autoPan: false })
       .addTo(map);
   }
   return elm;
