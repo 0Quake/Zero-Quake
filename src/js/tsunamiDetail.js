@@ -1,4 +1,3 @@
-var data;
 var RevocationTimer;
 
 window.electronAPI.messageSend((event, request) => {

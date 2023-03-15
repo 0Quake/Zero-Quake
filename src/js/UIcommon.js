@@ -1,6 +1,3 @@
-const root = document.querySelector(":root");
-const rootStyle = getComputedStyle(root);
-
 //タブUI
 document.querySelectorAll(".tabmenu").forEach(function (elm) {
   elm.addEventListener("mousedown", function () {
@@ -20,20 +17,20 @@ document.querySelectorAll(".tabmenu").forEach(function (elm) {
 });
 
 //震度フォーマット
+//eslint-disable-next-line
 function shindoConvert(str, responseType) {
   var ShindoTmp;
   if (!str) {
     ShindoTmp = "?";
   } else if (isNaN(str)) {
-    ShindoTmp = String(str);
-    ShindoTmp = ShindoTmp.replace(/[０-９]/g, function (s) {
+    str = String(str);
+    str = str.replace(/[０-９]/g, function (s) {
       return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
     });
-    ShindoTmp = ShindoTmp.replaceAll("＋", "+").replaceAll("－", "-").replaceAll("強", "+").replaceAll("弱", "-");
-    ShindoTmp = ShindoTmp.replace(/\s+/g, "");
+    str = str.replaceAll("＋", "+").replaceAll("－", "-").replaceAll("強", "+").replaceAll("弱", "-");
+    str = str.replace(/\s+/g, "");
     switch (str) {
       case "-1":
-      case "不明":
         ShindoTmp = "?";
         break;
       case "1":
@@ -103,48 +100,50 @@ function shindoConvert(str, responseType) {
       ShindoTmp = "?";
     }
   }
-  if (!["?", "0", "1", "2", "3", "4", "5-", "5+", "6-", "6+", "7", "7+"].includes(ShindoTmp)) {
-    ShindoTmp = "?";
+  if (["?", "0", "1", "2", "3", "4", "5-", "5+", "6-", "6+", "7", "7+"].includes(ShindoTmp)) {
+    var ConvTable;
+    switch (responseType) {
+      case 1:
+        ConvTable = { "?": "不明", 0: "0", 1: "1", 2: "2", 3: "3", 4: "4", "5-": "5弱", "5+": "5強", "6-": "6弱", "6+": "6強", 7: "7", "7+": "7以上" };
+        break;
+      case 2:
+        ConvTable = {
+          "?": ["#BFBFBF", "#444"],
+          0: ["#BFBFBF", "#444"],
+          1: ["#79A8B3", "#444"],
+          2: ["#3685E0", "#FFF"],
+          3: ["#4DB051", "#FFF"],
+          4: ["#BFB837", "#333"],
+          "5-": ["#F09629", "#000"],
+          "5+": ["#F5713D", "#000"],
+          "6-": ["#E60000", "#FFF"],
+          "6+": ["#8A0A0A", "#FFF"],
+          7: ["#C400DE", "#FFF"],
+          "7+": ["#C400DE", "#FFF"],
+        };
+        break;
+      case 3:
+        ConvTable = { "?": null, 0: null, 1: "1", 2: "2", 3: "3", 4: "4", "5-": "5-", "5+": "5p", "6-": "6-", "6+": "6p", 7: "7", "7+": "7p" };
+        break;
+      case 4:
+        ConvTable = { "?": null, 0: 0, 1: 1, 2: 2, 3: 3, 4: 4, "5-": 4.5, "5+": 5, "6-": 5.5, "6+": 6, 7: 7, "7+": 7.5 };
+        break;
+      case 5:
+        ConvTable = { "?": 0, 0: 1, 1: 2, 2: 3, 3: 4, 4: 5, "5-": 6, "5+": 7, "6-": 8, "6+": 9, 7: 10, "7+": 11 };
+        break;
+      case 0:
+      default:
+        ConvTable = { "?": "?", 0: "0", 1: "1", 2: "2", 3: "3", 4: "4", "5-": "5-", "5+": "5+", "6-": "6-", "6+": "6+", 7: "7", "7+": "7+" };
+        break;
+    }
+    return ConvTable[ShindoTmp];
+  } else {
+    return str;
   }
-  var ConvTable;
-  switch (responseType) {
-    case 1:
-      var ConvTable = { "?": "不明", 0: "0", 1: "1", 2: "2", 3: "3", 4: "4", "5-": "5弱", "5+": "5強", "6-": "6弱", "6+": "6強", 7: "7", "7+": "7相当以上" };
-      break;
-    case 2:
-      var ConvTable = {
-        "?": [rootStyle.getPropertyValue("--IntTheme_Q_BgColor"), rootStyle.getPropertyValue("--IntTheme_Q_color")],
-        0: [rootStyle.getPropertyValue("--IntTheme_0_BgColor"), rootStyle.getPropertyValue("--IntTheme_0_color")],
-        1: [rootStyle.getPropertyValue("--IntTheme_1_BgColor"), rootStyle.getPropertyValue("--IntTheme_1_color")],
-        2: [rootStyle.getPropertyValue("--IntTheme_2_BgColor"), rootStyle.getPropertyValue("--IntTheme_2_color")],
-        3: [rootStyle.getPropertyValue("--IntTheme_3_BgColor"), rootStyle.getPropertyValue("--IntTheme_3_color")],
-        4: [rootStyle.getPropertyValue("--IntTheme_4_BgColor"), rootStyle.getPropertyValue("--IntTheme_4_color")],
-        "5-": [rootStyle.getPropertyValue("--IntTheme_5m_BgColor"), rootStyle.getPropertyValue("--IntTheme_5m_color")],
-        "5+": [rootStyle.getPropertyValue("--IntTheme_5p_BgColor"), rootStyle.getPropertyValue("--IntTheme_5p_color")],
-        "6-": [rootStyle.getPropertyValue("--IntTheme_6m_BgColor"), rootStyle.getPropertyValue("--IntTheme_6m_color")],
-        "6+": [rootStyle.getPropertyValue("--IntTheme_6p_BgColor"), rootStyle.getPropertyValue("--IntTheme_6p_color")],
-        7: [rootStyle.getPropertyValue("--IntTheme_7_BgColor"), rootStyle.getPropertyValue("--IntTheme_7_color")],
-        "7+": [rootStyle.getPropertyValue("--IntTheme_7p_BgColor"), rootStyle.getPropertyValue("--IntTheme_7p_color")],
-      };
-      break;
-    case 3:
-      var ConvTable = { "?": null, 0: null, 1: "1", 2: "2", 3: "3", 4: "4", "5-": "5m", "5+": "5p", "6-": "6m", "6+": "6p", 7: "7", "7+": "7p" };
-      break;
-    case 4:
-      var ConvTable = { "?": null, 0: 0, 1: 1, 2: 2, 3: 3, 4: 4, "5-": 4.5, "5+": 5, "6-": 5.5, "6+": 6, 7: 7, "7+": 7.5 };
-      break;
-    case 5:
-      var ConvTable = { "?": 0, 0: 1, 1: 2, 2: 3, 3: 4, 4: 5, "5-": 6, "5+": 7, "6-": 8, "6+": 9, 7: 10, "7+": 11 };
-      break;
-    case 0:
-    default:
-      return ShindoTmp;
-      break;
-  }
-  return ConvTable[ShindoTmp];
 }
 
 //日時フォーマット
+//eslint-disable-next-line
 function dateEncode(type, dateTmp, inputtype) {
   if (inputtype == 1) {
     var str = String(dateTmp);
@@ -217,6 +216,7 @@ function dateEncode(type, dateTmp, inputtype) {
 }
 
 //子要素一括削除
+//eslint-disable-next-line
 function removeChild(element) {
   while (element.firstChild) {
     element.removeChild(element.firstChild);
@@ -224,7 +224,9 @@ function removeChild(element) {
 }
 
 //緯度経度フォーマット
+//eslint-disable-next-line
 function latitudeConvert(data) {
+  // eslint-disable-line
   if (!isNaN(data)) {
     return Number(data);
   } else if (data.match(/N/)) {

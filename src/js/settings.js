@@ -54,106 +54,6 @@ function init() {
     pane: "jsonMAPPane",
   });
 
-  var tile1 = L.tileLayer("https://www.data.jma.go.jp/svd/eqdb/data/shindo/map/{z}/{x}/{y}.png", {
-    minZoom: 0,
-    minNativeZoom: 0,
-    maxNativeZoom: 11,
-    maxZoom: 21,
-    attribution: 'Map data <a href="https://www.data.jma.go.jp/svd/eqdb/data/shindo/" target="_blank">&copy; 気象庁</a>',
-  });
-  var tile2 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png", {
-    minZoom: 0,
-    minNativeZoom: 2,
-    maxNativeZoom: 18,
-    maxZoom: 21,
-    attribution: 'Map data <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">&copy;国土地理院</a>',
-  }); //最初に表示させるタイルに addTo() をつける
-  var tile3 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg", {
-    minZoom: 9,
-    minNativeZoom: 9,
-    maxNativeZoom: 18,
-    maxZoom: 21,
-    attribution: 'Map data <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">&copy;国土地理院</a>',
-  });
-  var tile4 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/blank/{z}/{x}/{y}.png", {
-    minZoom: 0,
-    minNativeZoom: 5,
-    maxNativeZoom: 14,
-    maxZoom: 21,
-    attribution: 'Map data <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">&copy;国土地理院</a>',
-  });
-  var tile5 = L.tileLayer("http://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    minZoom: 0,
-    minNativeZoom: 0,
-    maxNativeZoom: 19,
-    maxZoom: 21,
-    attribution: 'Map data <a href="https://www.openstreetmap.org/" target="_blank">&copy;OpenStreetMap contributors</a>',
-  });
-  var tile6 = L.tileLayer("https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}", {
-    minZoom: 0,
-    minNativeZoom: 0,
-    maxNativeZoom: 21,
-    maxZoom: 21,
-    attribution: 'Map data <a href="https://www.google.com/maps" target="_blank">&copy;google</a>',
-  });
-  var tile7 = L.tileLayer("https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}", {
-    minZoom: 0,
-    minNativeZoom: 0,
-    maxNativeZoom: 21,
-    maxZoom: 21,
-    attribution: 'Map data <a href="https://www.google.com/maps" target="_blank">&copy;google</a>',
-  });
-  var tile8 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png", {
-    minZoom: 0,
-    minNativeZoom: 0,
-    maxNativeZoom: 18,
-    maxZoom: 21,
-    attribution: 'Map data <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">&copy;国土地理院</a>',
-  });
-
-  var tile9 = L.tileLayer("https://www.jma.go.jp/tile/gsi/pale2/{z}/{x}/{y}.png", {
-    minZoom: 0,
-    minNativeZoom: 2,
-    maxNativeZoom: 11,
-    maxZoom: 21,
-    attribution: 'Map data <a href="https://www.jma.go.jp/bosai/map.html#5/28.835/168.548/&elem=int&contents=earthquake_map" target="_blank">&copy;気象庁</a>',
-  });
-
-  //
-  //
-  var overlay1 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/hillshademap/{z}/{x}/{y}.png", {
-    minZoom: 2,
-    maxZoom: 16,
-    attribution: 'Map data <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">&copy;国土地理院</a>',
-  });
-  var overlay2 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/vbmd_colorrel/{z}/{x}/{y}.png", {
-    minZoom: 11,
-    maxZoom: 18,
-    attribution: 'Map data <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">&copy;国土地理院</a>',
-  });
-  var overlay3 = L.tileLayer("https://disaportaldata.gsi.go.jp/raster/04_tsunami_newlegend_data/{z}/{x}/{y}.png", {
-    minZoom: 7,
-    maxZoom: 12,
-    attribution: 'Map data <a href="https://disaportal.gsi.go.jp/hazardmap/copyright/opendata.html#tsunami" target="_blank">&copy;国土地理院</a>',
-  });
-  var overlay4 = L.tileLayer("https://disaportaldata.gsi.go.jp/raster/05_kyukeishakeikaikuiki/{z}/{x}/{y}.png", {
-    minZoom: 7,
-    maxZoom: 12,
-    attribution: 'Map data <a href="https://disaportal.gsi.go.jp/hazardmap/copyright/opendata.html#dosekiryukeikaikuiki" target="_blank">&copy;国土地理院</a>',
-  });
-  var overlay5 = L.tileLayer("https://disaportaldata.gsi.go.jp/raster/05_jisuberikeikaikuiki/{z}/{x}/{y}.png", {
-    minZoom: 7,
-    maxZoom: 12,
-    attribution: 'Map data <a href="https://disaportal.gsi.go.jp/hazardmap/copyright/opendata.html#jisuberikeikaikuiki" target="_blank">&copy;国土地理院</a>',
-  });
-  var overlay6 = L.tileLayer("https://www.jma.go.jp/tile/jma/transparent-cities/{z}/{x}/{y}.png", {
-    minZoom: 0,
-    minNativeZoom: 2,
-    maxNativeZoom: 11,
-    maxZoom: 21,
-    attribution: 'Map data <a href="https://www.jma.go.jp/bosai/map.html#5/28.835/168.548/&elem=int&contents=earthquake_map" target="_blank">&copy;JMA</a>',
-  });
-
   map.createPane("pane300").style.zIndex = 300;
   var homeIcon = L.icon({
     iconUrl: "img/homePin.svg",
@@ -279,6 +179,7 @@ function init() {
   });
 }
 
+//eslint-disable-next-line
 function MapReDraw() {
   gjmap.setStyle({
     fillColor: "#333",

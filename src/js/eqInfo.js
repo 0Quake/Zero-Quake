@@ -9,13 +9,10 @@ var data_center = document.getElementById("data_center");
 var data_comment = document.getElementById("data_comment");
 var areaLocation;
 
-let url = new URL(window.location.href);
-let params = url.searchParams;
 var eid;
 var markerElm;
 var newInfoDateTime = 0;
 var sections = [];
-var map_drawed = false;
 var map;
 var jmaURL;
 var jmaXMLURL;
@@ -27,11 +24,8 @@ var offlineMapActive = true;
 var jmaURLHis = [];
 var jmaXMLURLHis = [];
 var narikakunURLHis = [];
-var mapLevel = 0; //マップの状況　0:なし/1:NHK/2:JMAXML/3:完全/
 var EQInfo = { originTime: null, maxI: null, mag: null, lat: null, lng: null, depth: null, epiCenter: null, comment: null };
 var shindo_lastUpDate = 0;
-var EQData_lastUpDate = 0;
-var layerControl;
 
 fetch("https://files.nakn.jp/earthquake/code/PointSeismicIntensityLocation.json")
   .then(function (res) {
@@ -69,9 +63,8 @@ fetch("./Resource/Section_CenterLocation.json")
 
 //開始処理
 function init() {
-  mapLevel = 0;
-
   jma_ListReq();
+  jma_B_ListReq();
   narikakun_ListReq(new Date().getFullYear(), new Date().getMonth() + 1);
   Mapinit();
 }
@@ -260,7 +253,7 @@ function Mapinit() {
 
       gjmap = L.geoJSON({ type: "FeatureCollection", features: [] });
       mapLayer.addLayer(gjmap);
-      layerControl = L.control
+      L.control
         .layers(
           {
             オフライン地図: gjmap,
@@ -336,7 +329,7 @@ function Mapinit() {
     document.getElementById("mapcontainer").classList.add("zoomLevel_4");
   }
   var legend2 = L.control({ position: "bottomright" });
-  legend2.onAdd = function (map) {
+  legend2.onAdd = function () {
     var img = L.DomUtil.create("img");
     img.src = "https://disaportal.gsi.go.jp/hazardmap/copyright/img/dosha_keikai.png";
     return img;
@@ -392,7 +385,7 @@ function estimated_intensity_mapReq() {
       });
       if (ItemTmp) {
         estimated_intensity_map_legend = L.control({ position: "bottomright" });
-        estimated_intensity_map_legend.onAdd = function (map) {
+        estimated_intensity_map_legend.onAdd = function () {
           var img = L.DomUtil.create("img");
           img.src = "./img/estimated_intensity_map_scale.svg";
           return img;
@@ -446,7 +439,7 @@ function jma_ListReq() {
 
       mapDraw();
     })
-    .catch(function (err) {});
+    .catch(function () {});
 }
 //気象庁XMLリスト取得→jmaXML_Fetch
 function jma_B_ListReq() {
@@ -464,7 +457,7 @@ function jma_B_ListReq() {
 
       mapDraw();
     })
-    .catch(function (err) {});
+    .catch(function () {});
 }
 //narikakun地震情報APIリスト取得→narikakun_Fetch
 function narikakun_ListReq(year, month, retry) {
@@ -495,7 +488,7 @@ function narikakun_ListReq(year, month, retry) {
       }
       mapDraw();
     })
-    .catch(function (err) {});
+    .catch(function () {});
 }
 
 //気象庁 取得・フォーマット変更→ EQInfoControl
@@ -543,10 +536,8 @@ function jma_Fetch(url) {
       if (newestshindo) shindo_lastUpDate = new Date();
 
       if (json.Body.Intensity && json.Body.Intensity.Observation.Pref && newestshindo) {
-        mapLevel = 3;
         removeChild(document.getElementById("Shindo"));
         document.getElementById("ShindoWrap").style.display = "inline-block";
-        map_drawed = true;
         json.Body.Intensity.Observation.Pref.forEach(function (elm) {
           add_Pref_info(elm.Name, elm.MaxInt);
           if (elm.Area) {
@@ -581,11 +572,9 @@ function jmaXMLFetch(url) {
       var cancelTmp = xml.querySelector("InfoType").textContent == "取消";
 
       var ReportTime = new Date(xml.querySelector("Head ReportDateTime").textContent);
-      var mostNew = false;
 
       if (!newInfoDateTime || newInfoDateTime <= ReportTime) {
         newInfoDateTime = ReportTime;
-        mostNew = true;
       }
       var EarthquakeElm = xml.querySelector("Body Earthquake");
 
@@ -633,10 +622,8 @@ function jmaXMLFetch(url) {
       var newestshindo = shindo_lastUpDate < new Date();
       if (newestshindo) shindo_lastUpDate = new Date();
       if (xml.querySelector("Body Intensity") && xml.querySelector("Body Intensity Observation Pref") && newestshindo) {
-        mapLevel = 3;
         removeChild(document.getElementById("Shindo"));
         document.getElementById("ShindoWrap").style.display = "inline-block";
-        map_drawed = true;
 
         xml.querySelectorAll("Body Intensity Observation Pref").forEach(function (elm) {
           add_Pref_info(elm.querySelector("Name").textContent, elm.querySelector("MaxInt").textContent);
@@ -699,11 +686,8 @@ function narikakun_Fetch(url) {
         if (newestshindo) shindo_lastUpDate = new Date();
 
         if (json.Body.Intensity && json.Body.Intensity.Observation.Pref && newestshindo) {
-          mapLevel = 3;
           removeChild(document.getElementById("Shindo"));
           document.getElementById("ShindoWrap").style.display = "inline-block";
-
-          map_drawed = true;
 
           json.Body.Intensity.Observation.Pref.forEach(function (elm) {
             add_Pref_info(elm.Name, elm.MaxInt);

@@ -58,11 +58,16 @@ var EEW_nowList = []; //現在発報中リスト
 var EEW_history = []; //起動中に発生したリスト
 
 var Yoyu = 250;
-var yoyuY = (yoyuK = yoyuL = 2500);
+var yoyuY = 2500,
+  yoyuK = 2500,
+  yoyuL = 2500;
 var Replay = 0;
 var EEWNow = false;
 
-var errorCountk = (errorCountl = errorCountyw = errorCountye = 0);
+var errorCountk = 0,
+  errorCountl = 0,
+  errorCountyw = 0,
+  errorCountye = 0;
 
 var EQDetect_List = [];
 var EQDetectID = 0;
@@ -73,25 +78,28 @@ var YmoniE, YmoniW;
 var P2P_ConnectData;
 var notifications = [];
 var notification_id = 0;
-var Kmoni = (Lmoni = 20000);
+var Kmoni = 20000,
+  Lmoni = 20000;
 var TestStartTime;
 var monitorVendor = "YE";
-var jmaXML_Fetched = (nakn_Fetched = []);
-var narikakun_URLs = (narikakun_EIDs = narikakun_EIDs = []);
+var jmaXML_Fetched = [],
+  nakn_Fetched = [];
+var narikakun_URLs = [],
+  narikakun_EIDs = [];
 var eqInfo = { jma: [], usgs: [] };
 var EQInfoFetchIndex = 0;
 var tsunamiData;
 var lwaveTmp;
-var kmoniLastReportTime = (lmoniLastReportTime = YkmoniLastReportTime = 0);
+var kmoniLastReportTime = 0,
+  lmoniLastReportTime = 0,
+  YkmoniLastReportTime = 0;
 var kmoniTimeout, lmoniTimeout, ymoniTimeout;
-var started = false;
 var msil_lastTime = 0;
 var kmoniEid;
 var kmoniPointsDataTmp, SnetPointsDataTmp;
 var intColorConv = { "0xFFFFFFFF": "0", "0xFFF2F2FF": "1", "0xFF00AAFF": "2", "0xFF0041FF": "3", "0xFFFAE696": "4", "0xFFFFE600": "5-", "0xFFFF9900": "5+", "0xFFFF2800": "6-", "0xFFA50021": "6+", "0xFFB40068": "7" };
 let tray;
 var RevocationTimer;
-
 //多重起動防止
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
@@ -99,7 +107,6 @@ if (!gotTheLock) {
 }
 app.whenReady().then(() => {
   kmonicreateWindow();
-  points = jsonParse(fs.readFileSync(path.join(__dirname, "Resource/Knet_Points.json"), "utf8"));
   kmoniServerSelect();
   start();
 
@@ -121,9 +128,9 @@ app.whenReady().then(() => {
         clearInterval(startInterval);
       }
     }, 1000);*/
-  //replay("2023/03/15 0:30:50");
   //replay("2023/03/11 05:12:30");
-  //replay("2023/03/11 05:13:30");
+  //replay("2023/03/11 05:12:30");//２か所同時
+  //replay("2020/06/15 02:28:38");//２か所同時
 });
 // 全てのウィンドウが閉じたとき
 app.on("window-all-closed", () => {});
@@ -408,7 +415,6 @@ function EQInfocreateWindow(response) {
 
 //開始処理
 function start() {
-  started = true;
   //↓接続処理
   P2P_WS();
   SNXWatch();
@@ -461,13 +467,14 @@ function kmoniControl(data, date) {
         pointsData[elm.Code] = { detectCount: 0, SUMTmp: [], Event: null, oneBeforePGA: elm.pga, isCity: isCity };
         ptDataTmp = pointsData[elm.Code];
       }
+      var pgaAvr;
       if (ptDataTmp.SUMTmp.length > 0) {
-        var pgaAvr =
+        pgaAvr =
           ptDataTmp.SUMTmp.reduce(function (acc, cur) {
             return acc + cur;
           }) / ptDataTmp.SUMTmp.length;
       }
-      if (!pgaAvr) var pgaAvr = 0.1;
+      if (!pgaAvr) pgaAvr = 0.1;
 
       threshold02 = 0.3 * pgaAvr + 0.03;
       threshold03 = 0.45 * pgaAvr + 0.1;
@@ -514,8 +521,8 @@ function kmoniControl(data, date) {
     for (const elm of data) {
       //data.forEach(function (elm) {
       if (elm.detect) {
-        var ptDataTmp = pointsData[elm.Code];
-        if (ptDataTmp.isCity) {
+        var ptDataTmp2 = pointsData[elm.Code];
+        if (ptDataTmp2.isCity) {
           threshold01 = 5;
           MargeRange = 20;
         } else {
@@ -532,11 +539,11 @@ function kmoniControl(data, date) {
           });
 
           if (CodesTmp) {
-            var already = ptDataTmp.Event;
+            var already = ptDataTmp2.Event;
 
             if (!already) {
               EQD_ItemTmp.Codes.push(elm);
-              ptDataTmp.Event = EQD_ItemTmp.id;
+              ptDataTmp2.Event = EQD_ItemTmp.id;
               var radiusTmp = geosailing(elm.Location.Latitude, elm.Location.Longitude, EQD_ItemTmp.lat, EQD_ItemTmp.lng);
               if (EQD_ItemTmp.Radius < radiusTmp) EQD_ItemTmp.Radius = radiusTmp;
               continue;
@@ -902,12 +909,12 @@ function P2P_WS() {
   var WebSocketClient = require("websocket").client;
   var client = new WebSocketClient();
 
-  client.on("connectFailed", function (error) {
+  client.on("connectFailed", function () {
     kmoniTimeUpdate(new Date(), "P2P_EEW", "Error");
   });
 
   client.on("connect", function (connection) {
-    connection.on("error", function (error) {
+    connection.on("error", function () {
       kmoniTimeUpdate(new Date(), "P2P_EEW", "Error");
     });
     connection.on("close", function () {
@@ -977,7 +984,7 @@ function RegularExecution() {
 //SNX変更監視→SNXLogReadへ
 function SNXWatch() {
   for (let i = 1; i <= 10; i++) {
-    filenameTmp = "SignalNowX_" + String(i).padStart(2, "0") + ".csl";
+    var filenameTmp = "SignalNowX_" + String(i).padStart(2, "0") + ".csl";
     var pathTmp = path.join(userHome, "/AppData/Roaming/StrategyCorporation/SignalNowX/" + filenameTmp);
     if (fs.existsSync(pathTmp)) {
       fs.watch(pathTmp, function (eventType, filename) {
@@ -1158,8 +1165,7 @@ async function yoyuSetY(func) {
         else urlTmp = "east";
         var request = net.request("https://weather-kyoshin." + urlTmp + ".edge.storage-yahoo.jp/RealTimeData/" + dateEncode(2, ReqTimeTmp2 - Replay) + "/" + dateEncode(1, ReqTimeTmp2 - Replay) + ".json");
         request.on("response", (res) => {
-          if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
-          } else {
+          if (!(300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200)) {
             yoyuY = new Date() - ReqTimeTmp2 + Yoyu;
             yoyuYOK = true;
           }
@@ -1209,7 +1215,9 @@ async function yoyuSetK(func) {
 
           request.end();
         }
-      } catch (err) {}
+      } catch (err) {
+        return;
+      }
     });
     if (loopCount > 25) {
       yoyuK = 2500;
@@ -1231,33 +1239,37 @@ async function yoyuSetL(func) {
     await new Promise((resolve) => {
       try {
         if (net.online) {
+          var dataTmp = "";
           var request = net.request("https://smi.lmoniexp.bosai.go.jp/webservice/server/pros/latest.json?_" + Number(new Date()));
           request.on("response", (res) => {
+            res.on("data", (chunk) => {
+              dataTmp += chunk;
+            });
             res.on("end", function () {
-              var json = jsonParse(dataTmp);
-              if (json) {
-                var resTime = new Date(json.latest_time);
+              var json = JSON.parse(dataTmp);
+              var resTime = new Date(json.latest_time);
 
-                if (resTimeTmp !== resTime && 0 < loopCount) {
-                  yoyuLOK = true;
-                  yoyuL = new Date() - resTime;
-                }
-                resTimeTmp = resTime;
+              if (resTimeTmp !== resTime && 0 < loopCount) {
+                yoyuLOK = true;
+                yoyuL = new Date() - resTime;
               }
+              resTimeTmp = resTime;
               resolve();
             });
           });
 
           request.end();
         }
-      } catch (err) {}
+      } catch (err) {
+        return;
+      }
     });
-    if (loopCount2 > 25) {
+    if (loopCount > 25) {
       yoyuL = 2500 + Yoyu;
       break;
     }
 
-    loopCount2++;
+    loopCount++;
   }
 
   func();
@@ -1281,7 +1293,7 @@ function kmoniTimeUpdate(Updatetime, type, condition, vendor) {
   if (type == "P2P_EEW") {
     P2P_ConnectData = sendData;
   }
-  kmoniTimeTmpElm = kmoniTimeTmp.find(function (elm) {
+  var kmoniTimeTmpElm = kmoniTimeTmp.find(function (elm) {
     return elm.type == type;
   });
   if (kmoniTimeTmpElm) {
@@ -1309,6 +1321,7 @@ function EEWdetect(type, json, KorL) {
     kmoniTimeUpdate(request_time, "YahooKmoni", "success", monitorVendor);
 
     if (json.hypoInfo) {
+      var elm;
       elm = json.hypoInfo.items[0];
       //複数同時取得できる場合→json.hypoInfo.items.forEach(function (elm) {
       var EEWdata = {
@@ -1361,36 +1374,6 @@ function EEWdetect(type, json, KorL) {
     kmoniTimeUpdate(request_time, sourceTmp, "success");
 
     if (json.result.message == "") {
-      var origin_timeTmp = new Date(json.origin_time.slice(0, 4), json.origin_time.slice(4, 6) - 1, json.origin_time.slice(6, 8), json.origin_time.slice(8, 10), json.origin_time.slice(10, 12), json.origin_time.slice(12, 14));
-
-      var EEWdata = {
-        alertflg: json.alertflg, //種別
-        report_id: json.report_id, //地震ID
-        report_num: Number(json.report_num), //第n報
-        report_time: new Date(json.report_time), //発表時刻
-        magunitude: Number(json.magunitude), //マグニチュード
-        calcintensity: shindoConvert(json.calcintensity, 0), //最大深度
-        depth: Number(json.depth.replace("km", "")), //深さ
-        is_cancel: Boolean2(json.is_cancel), //キャンセル
-        is_final: Boolean2(json.is_final), //最終報
-        is_training: Boolean2(json.is_training), //訓練報
-        latitude: Number(json.latitude), //緯度
-        longitude: Number(json.longitude), //経度
-        region_code: json.region_code, //震央地域コード
-        region_name: json.region_name, //震央地域
-        origin_time: origin_timeTmp, //発生時刻
-        isPlum: false,
-        userIntensity: null,
-        arrivalTime: null,
-        intensityAreas: null, //細分区分ごとの予想震度
-        warnZones: {
-          zone: null,
-          Pref: null,
-          Regions: null,
-        },
-        source: sourceTmp,
-      };
-
       if (KorL == 1) {
         var kmoniLastReportTimeTmp = new Date(json.report_time);
         if (kmoniLastReportTime < kmoniLastReportTimeTmp) EEWcontrol(EEWdata);
@@ -1431,8 +1414,6 @@ function EEWdetect(type, json, KorL) {
     if (KorL == 2) lwaveTmp = json.avrarea;
   } else if (type == 3) {
     //P2P
-    const reception_time = new Date(json.time); //monthは0オリジン
-
     var maxIntTmp = Math.floor(
       Math.max.apply(
         null,
@@ -1448,13 +1429,15 @@ function EEWdetect(type, json, KorL) {
     var magnitudeTmp;
     var region_nameTmp;
     var origin_timeTmp;
+    var conditionTmp = false;
     if (json.earthquake) {
-      if (latitudeTmp !== 200) latitudeTmp = json.earthquake.hypocenter.latitude;
-      if (longitudeTmp !== 200) longitudeTmp = json.earthquake.hypocenter.longitude;
-      if (depthTmp !== -1) depthTmp = json.earthquake.hypocenter.depth;
-      if (magnitudeTmp !== -1) magnitudeTmp = json.earthquake.hypocenter.magnitude;
+      latitudeTmp = json.earthquake.hypocenter.latitude;
+      longitudeTmp = json.earthquake.hypocenter.longitude;
+      depthTmp = json.earthquake.hypocenter.depth;
+      magnitudeTmp = json.earthquake.hypocenter.magnitude;
       region_nameTmp = json.earthquake.hypocenter.name;
       origin_timeTmp = new Date(json.earthquake.originTime);
+      conditionTmp = json.earthquake.condition == "仮定震源要素";
     }
     var EEWdata = {
       alertflg: "警報", //種別
@@ -1472,7 +1455,7 @@ function EEWdetect(type, json, KorL) {
       region_code: "", //震央地域コード
       region_name: region_nameTmp, //震央地域
       origin_time: origin_timeTmp, //発生時刻
-      isPlum: conditionTmp == "仮定震源要素", //🔴PLUM法かどうか
+      isPlum: conditionTmp, //🔴PLUM法かどうか
       userIntensity: null,
       arrivalTime: null,
       intensityAreas: null, //細分区分ごとの予想震度
@@ -1489,7 +1472,7 @@ function EEWdetect(type, json, KorL) {
       areaTmp.push({
         pref: elm.pref, //府県予報区
         name: elm.name, //地域名（細分区域名）
-        scaleFrom: shindoConvert(lm.scaleFrom), //最大予測震度の下限
+        scaleFrom: shindoConvert(elm.scaleFrom), //最大予測震度の下限
         scaleTo: shindoConvert(elm.scaleTo), //最大予測震度の上限
         kindCode: elm.kindCode, //警報コード( 10 (緊急地震速報（警報） 主要動について、未到達と予測), 11 (緊急地震速報（警報） 主要動について、既に到達と予測), 19 (緊急地震速報（警報） 主要動の到達予想なし（PLUM法による予想）) )
         arrivalTime: new Date(elm.arrivalTime), //主要動の到達予測時刻
@@ -1751,8 +1734,6 @@ function EEWAlert(data, first, update) {
       });
     }
   }
-  if (data.alertflg == "警報") {
-  }
 
   //【現在のEEW】から同一地震、古い報を削除
   EEW_nowList = EEW_nowList.filter(function (elm) {
@@ -1921,21 +1902,20 @@ function EQI_JMAXML_Req(url) {
         );
       } else if (title == "津波情報a" || /大津波警報|津波警報|津波注意報|津波予報/.test(title)) {
         //津波予報
-
+        var tsunamiDataTmp;
         if (cancel) {
-          var tsunamiDataTmp = {
+          tsunamiDataTmp = {
             issue: { time: new Date(xml.querySelector("ReportDateTime").textContent) },
             areas: [],
             revocation: true,
           };
-          TsunamiInfoControl(tsunamiDataTmp);
         } else {
           var ValidDateTimeElm = xml.querySelector("ValidDateTime");
           var ValidDateTimeTmp;
           if (ValidDateTimeElm) {
             ValidDateTimeTmp = new Date(ValidDateTimeElm.textContent);
           }
-          var tsunamiDataTmp = {
+          tsunamiDataTmp = {
             issue: { time: new Date(xml.querySelector("ReportDateTime").textContent) },
             areas: [],
             revocation: false,
@@ -2008,7 +1988,6 @@ function EQI_JMAXML_Req(url) {
                       Condition: ConditionTmp,
                     });
                   });
-                  HighTideDateTime = new Date(elm.querySelector("HighTideDateTime").textContent);
                 }
 
                 tsunamiDataTmp.areas.push({
@@ -2034,6 +2013,7 @@ function EQI_JMAXML_Req(url) {
                     var firstHeightInitialTmp;
                     var maxheightTime;
                     var maxHeightCondition;
+                    var oMaxHeightTmp;
                     nameTmp = elm2.querySelector("Name").textContent;
                     if (elm2.querySelector("FirstHeight")) {
                       if (elm2.querySelector("FirstHeight ArrivalTime")) ArrivalTimeTmp = new Date(elm2.querySelector("FirstHeight ArrivalTime").textContent);
@@ -2098,9 +2078,8 @@ function EQI_JMAXML_Req(url) {
               });
             }
           }
-
-          TsunamiInfoControl(tsunamiDataTmp);
         }
+        TsunamiInfoControl(tsunamiDataTmp);
       }
     });
   });
@@ -2413,13 +2392,10 @@ function Boolean2(str) {
   switch (str) {
     case "true":
       return true;
-      break;
     case "false":
       return false;
-      break;
     default:
       return Boolean(str);
-      break;
   }
 }
 //JSONパース（拡張）
@@ -2563,13 +2539,13 @@ function shindoConvert(str, responseType) {
     }
   }
   if (["?", "0", "1", "2", "3", "4", "5-", "5+", "6-", "6+", "7", "7+"].includes(ShindoTmp)) {
+    var ConvTable;
     switch (responseType) {
       case 1:
-        var ConvTable = { "?": "不明", 0: "0", 1: "1", 2: "2", 3: "3", 4: "4", "5-": "5弱", "5+": "5強", "6-": "6弱", "6+": "6強", 7: "7", "7+": "7以上" };
-        return ConvTable[ShindoTmp];
+        ConvTable = { "?": "不明", 0: "0", 1: "1", 2: "2", 3: "3", 4: "4", "5-": "5弱", "5+": "5強", "6-": "6弱", "6+": "6強", 7: "7", "7+": "7以上" };
         break;
       case 2:
-        var ConvTable = {
+        ConvTable = {
           "?": ["#BFBFBF", "#444"],
           0: ["#BFBFBF", "#444"],
           1: ["#79A8B3", "#444"],
@@ -2583,24 +2559,21 @@ function shindoConvert(str, responseType) {
           7: ["#C400DE", "#FFF"],
           "7+": ["#C400DE", "#FFF"],
         };
-        return ConvTable[ShindoTmp];
-
         break;
       case 3:
-        var ConvTable = { "?": null, 0: null, 1: "1", 2: "2", 3: "3", 4: "4", "5-": "5-", "5+": "5p", "6-": "6-", "6+": "6p", 7: "7", "7+": "7p" };
-        return ConvTable[ShindoTmp];
+        ConvTable = { "?": null, 0: null, 1: "1", 2: "2", 3: "3", 4: "4", "5-": "5-", "5+": "5p", "6-": "6-", "6+": "6p", 7: "7", "7+": "7p" };
         break;
 
       case 4:
-        var ConvTable = { "?": null, 0: 0, 1: 1, 2: 2, 3: 3, 4: 4, "5-": 4.5, "5+": 5, "6-": 5.5, "6+": 6, 7: 7, "7+": 7.5 };
-        return ConvTable[ShindoTmp];
+        ConvTable = { "?": null, 0: 0, 1: 1, 2: 2, 3: 3, 4: 4, "5-": 4.5, "5+": 5, "6-": 5.5, "6+": 6, 7: 7, "7+": 7.5 };
         break;
 
       case 0:
       default:
-        return ShindoTmp;
+        ConvTable = { "?": "?", 0: "0", 1: "1", 2: "2", 3: "3", 4: "4", "5-": "5-", "5+": "5+", "6-": "6-", "6+": "6+", 7: "7", "7+": "7+" };
         break;
     }
+    return ConvTable[ShindoTmp];
   } else {
     return str;
   }
@@ -2623,10 +2596,12 @@ function LatLngConvert(data) {
 }
 
 //２地点の緯度経度から距離（km）を算出
-function geosailing(a, b, c, d) {
-  with (Math) return acos(sin(a * (i = PI / 180)) * sin(c * i) + cos(a * i) * cos(c * i) * cos(b * i - d * i)) * 6371.008;
+function geosailing(latA, lngA, latB, lngB) {
+  return Math.acos(Math.sin(Math.atan(Math.tan(latA * (Math.PI / 180)))) * Math.sin(Math.atan(Math.tan(latB * (Math.PI / 180)))) + Math.cos(Math.atan(Math.tan(latA * (Math.PI / 180)))) * Math.cos(Math.atan(Math.tan(latB * (Math.PI / 180)))) * Math.cos(lngA * (Math.PI / 180) - lngB * (Math.PI / 180))) * 6371.008;
 }
+
 //リプレイ
+/* eslint-disable */
 function replay(ReplayDate) {
   if (ReplayDate) {
     Replay = new Date() - new Date(ReplayDate);
@@ -2638,3 +2613,4 @@ function replay(ReplayDate) {
     Replay = 0;
   }
 }
+/* eslint-enable */

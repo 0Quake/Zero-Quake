@@ -4,7 +4,8 @@
   "version": "0.5.0",
   "description": "地震に関する情報を即座に受信できるアプリケーションです。PLUM法含む緊急地震速報に加え、津波情報や地震情報の受信に対応しています。",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "lint": "eslint src"
   },
   "build": {
     "win": {
@@ -32,7 +33,8 @@
   },
   "devDependencies": {
     "electron": "^23.0.0",
-    "electron-builder": "^23.6.0"
+    "electron-builder": "^23.6.0",
+    "eslint": "^8.36.0"
   },
   "repository": {
     "type": "git",

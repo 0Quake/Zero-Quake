@@ -1,8 +1,9 @@
 var now_EEW = [];
-var EEWDetectionTimeout;
+/* eslint-disable */
 var Replay = 0;
-var ICT_JST = 0;
 var config;
+/* eslint-enable */
+
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "EEWAlertUpdate") {
     EEWAlertUpdate(request.data);
@@ -30,7 +31,7 @@ window.electronAPI.messageSend((event, request) => {
   return true;
 });
 
-window.addEventListener("load", (e) => {
+window.addEventListener("load", () => {
   //オフライン警告表示・非表示
   if (navigator.onLine) {
     kmoniTimeUpdate(new Date(), new Date(), "Internet", "success");
@@ -50,13 +51,13 @@ window.addEventListener("load", (e) => {
     });
 });
 //オフライン警告非表示
-window.addEventListener("online", (e) => {
+window.addEventListener("online", () => {
   document.getElementById("offline").close();
   document.getElementById("offline2").style.display = "none";
   kmoniTimeUpdate(new Date(), new Date(), "Internet", "success");
 });
 //オフライン警告表示
-window.addEventListener("offline", (e) => {
+window.addEventListener("offline", () => {
   document.getElementById("offline").showModal();
   document.getElementById("offline2").style.display = "block";
   kmoniTimeUpdate(new Date(), new Date(), "Internet", "Error");
@@ -80,7 +81,7 @@ function EEWAlertUpdate(data) {
       //新しい地震、新しい報
       var clone = template.content.cloneNode(true);
 
-      alertflgTmp = "(" + elm.alertflg + ")";
+      var alertflgTmp = "(" + elm.alertflg + ")";
       if (elm.alertflg) clone.querySelector(".alertflg").textContent = alertflgTmp;
 
       if (elm.alertflg == "警報") {
@@ -106,7 +107,7 @@ function EEWAlertUpdate(data) {
       clone.querySelector(".depth").textContent = elm.depth ? elm.depth : "不明";
       clone.querySelector(".traning").style.display = elm.is_training ? "block" : "none";
 
-      clone.querySelector(".userIntensity").textContent = Boolean(elm.userIntensity) ? elm.userIntensity : "?";
+      clone.querySelector(".userIntensity").textContent = elm.userIntensity ? elm.userIntensity : "?";
       clone.querySelector(".userDataWrap").style.background = shindoConvert(elm.userIntensity, 2)[0];
       clone.querySelector(".userDataWrap").style.color = shindoConvert(elm.userIntensity, 2)[1];
 
@@ -266,7 +267,7 @@ function epiCenterUpdate(eid, latitude, longitude) {
       epicenterElm.latitude = latitude;
       epicenterElm.longitude = longitude;
     } else {
-      EEWIDTmp = EEW_LocalIDs[eid];
+      var EEWIDTmp = EEW_LocalIDs[eid];
 
       var ESMarker = L.marker([latitude, longitude], {
         icon: epicenterIcon,
@@ -319,7 +320,6 @@ function epiCenterClear(eid) {
 }
 
 //🔴地震情報🔴
-var eqInfo = [];
 var template2 = document.getElementById("EQListTemplate");
 var template2_2 = document.getElementById("EQListTemplate2");
 var EQListWrap;
@@ -327,7 +327,6 @@ var EQDetectItem = [];
 function eqInfoDraw(data, source) {
   var EQTemplate;
   if (source == "jma") {
-    eqInfo = data;
     EQTemplate = template2;
     EQListWrap = document.getElementById("JMA_EqInfo");
   } else if (source == "usgs") {
@@ -427,7 +426,7 @@ function Show_notification(data) {
   if (notifyNum > 9) notifyNum = "9+";
   document.getElementById("plus_badge").textContent = notifyNum;
 
-  notificationsTmp = notifications.reverse();
+  var notificationsTmp = notifications.reverse();
   removeChild(document.getElementById("notification_wrap"));
   notificationsTmp.forEach(function (elm) {
     var clone = templateN.content.cloneNode(true);

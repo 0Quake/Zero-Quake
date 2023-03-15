@@ -1,8 +1,6 @@
 var map;
 var previous_points = [];
-var previous_Spoints = [];
 var points = {};
-var Spoints = [];
 var Tsunami_MajorWarning, Tsunami_Warning, Tsunami_Watch, Tsunami_Yoho;
 var tsunamiLayer;
 var gjmap; //オフライン地図
@@ -15,14 +13,13 @@ var tsunamiLayerAdded = false;
 
 var psWaveList = [];
 var tsunamiAlertNow = false;
-var RevocationTimer;
 var overlayTmp = 0;
-var epicenterIcon;
+var epicenterIcon; // eslint-disable-line
 var tsunamiElm = [];
 var inited = false;
 var windowLoaded = false;
 var TimeTable_JMA2001;
-var EQDetectCanvas, PointsCanvas, PSWaveCanvas, overlayCanvas;
+var EQDetectCanvas, PointsCanvas, PSWaveCanvas, overlayCanvas; // eslint-disable-line
 var mapLayer, hinanjoLayer;
 var kmoniMapData, SnetMapData;
 window.electronAPI.messageSend((event, request) => {
@@ -36,6 +33,7 @@ window.electronAPI.messageSend((event, request) => {
     if (Number(request.data.avrrank) > 0) {
       document.getElementById("region_name2").textContent = request.data.avrarea_list.join(" ");
       return false;
+      /*
       request.data.avrarea_list.forEach(function (elm) {
         var section = sections.find(function (elm2) {
           return elm2.name == elm;
@@ -43,7 +41,7 @@ window.electronAPI.messageSend((event, request) => {
         if (section) {
           //section.item.setStyle({ fill: true, fillColor: "#FFF" });
         }
-      });
+      });*/
     } else {
       document.getElementById("region_name2").textContent = "";
     }
@@ -247,7 +245,7 @@ function init() {
           }).bindPopup("指定緊急避難場所（地震）");
           hinanjoLayer.addLayer(event.tile.geojson);
         })
-        .catch(function (err) {});
+        .catch(function () {});
       var url = "https://cyberjapandata.gsi.go.jp/xyz/skhb05/10/" + tileX + "/" + tileY + ".geojson";
 
       fetch(url)
@@ -269,7 +267,7 @@ function init() {
           }).bindPopup("指定緊急避難場所（津波）");
           hinanjoLayer.addLayer(event.tile.geojson2);
         })
-        .catch(function (err) {});
+        .catch(function () {});
       //     this._map.removeLayer(event.tile.geojson);
     })
     .on("tileunload", function (event) {
@@ -488,20 +486,20 @@ function init() {
     });
 
   var legend = L.control({ position: "bottomright" });
-  legend.onAdd = function (map) {
+  legend.onAdd = function () {
     var img = L.DomUtil.create("img");
     img.src = "./img/nied_acmap_s_w_scale.svg";
     return img;
   };
   legend.addTo(map);
   var legend = L.control({ position: "bottomright" });
-  legend.onAdd = function (map) {
+  legend.onAdd = function () {
     var img = L.DomUtil.create("img");
     img.src = "https://disaportal.gsi.go.jp/hazardmap/copyright/img/tsunami_newlegend.png";
     return img;
   };
   var legend2 = L.control({ position: "bottomright" });
-  legend2.onAdd = function (map) {
+  legend2.onAdd = function () {
     var img = L.DomUtil.create("img");
     img.src = "https://disaportal.gsi.go.jp/hazardmap/copyright/img/dosha_keikai.png";
     return img;
@@ -818,9 +816,9 @@ function psWaveCalc(eid) {
   if (pswaveFind) {
     var TimeTableTmp = pswaveFind.TimeTable;
     var SWmin;
-    var EQElm = psWaveList.find(function (elm) {
+    /*var EQElm = psWaveList.find(function (elm) {
       return elm.id == eid;
-    });
+    });*/
 
     var distance = (new Date() - Replay - pswaveFind.data.originTime) / 1000;
 
@@ -1152,31 +1150,33 @@ function tsunamiDataUpdate(data) {
 
 //津波情報色変換
 function tsunamiColorConv(str) {
+  var color;
   switch (str) {
     case "MajorWarning":
-      return "rgb(200,0,255)";
+      color = "rgb(200,0,255)";
       break;
     case "Warning":
-      return "rgb(255,40,0)";
+      color = "rgb(255,40,0)";
       break;
     case "Watch":
-      return "rgb(250,245,0)";
+      color = "rgb(250,245,0)";
       break;
     case "Yoho":
-      return "rgb(66, 158, 255)";
+      color = "rgb(66, 158, 255)";
       break;
     default:
-      return "#FFF";
+      color = "#FFF";
       break;
   }
+  return color;
 }
 
 //線形補完
 function linear(x, y) {
   return (x0) => {
-    const index = x.reduce((pre, current, i) => (current <= x0 ? i : pre), 0); //数値が何番目の配列の間かを探す
-    const i = index === x.length - 1 ? x.length - 2 : index; //配列の最後の値より大きい場合は、外挿のために、最後から2番目をindexにする
+    const index = x.reduce((pre, current, i) => (current <= x0 ? i : pre), 0);
+    const i = index === x.length - 1 ? x.length - 2 : index;
 
-    return ((y[i + 1] - y[i]) / (x[i + 1] - x[i])) * (x0 - x[i]) + y[i]; //線形補間の関数を返す
+    return ((y[i + 1] - y[i]) / (x[i + 1] - x[i])) * (x0 - x[i]) + y[i];
   };
 }
