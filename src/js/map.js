@@ -485,6 +485,24 @@ function init() {
         action: "tsunamiReqest",
       });
     });
+  fetch("./Resource/lake.json")
+    .then(function (res) {
+      return res.json();
+    })
+    .then(function (json) {
+      L.geoJSON(json, {
+        style: {
+          stroke: false,
+          color: "#0449b8",
+          weight: 1,
+          fill: true,
+          fillColor: "#78acff",
+          fillOpacity: 0.5,
+          attribution: "国土地理院",
+          renderer: jsonMAP1Canvas,
+        },
+      }).addTo(map);
+    });
 
   var legend = L.control({ position: "bottomright" });
   legend.onAdd = function () {
