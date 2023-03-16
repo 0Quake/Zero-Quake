@@ -343,12 +343,10 @@ function eqInfoDraw(data, source) {
     clone.querySelector(".EQI_magnitude").textContent = "M" + (elm.M ? elm.M : "不明");
 
     if (source == "jma") {
-      var maxITmp = shindoConvert(elm.maxI, 0);
-      var shindoColor = shindoConvert(elm.maxI, 2);
-      if (!elm.maxI) {
-        maxITmp = "?";
-        shindoColor = ["auto", "auto"];
-      }
+      var maxITmp = elm.maxI;
+      if (maxITmp == "不明") maxITmp = "?";
+      maxITmp = shindoConvert(maxITmp, 0);
+      var shindoColor = shindoConvert(maxITmp, 2);
 
       clone.querySelector(".EQI_maxI").textContent = maxITmp;
       clone.querySelector(".EQI_maxI").style.background = shindoColor[0];

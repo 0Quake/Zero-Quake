@@ -128,7 +128,7 @@ app.whenReady().then(() => {
         clearInterval(startInterval);
       }
     }, 1000);*/
-  //replay("2023/03/11 05:12:30");
+  //replay("2023/03/16 13:58:50");
   //replay("2023/03/11 05:12:30");//２か所同時
   //replay("2020/06/15 02:28:38");//２か所同時
 });
@@ -2469,6 +2469,7 @@ function shindoConvert(str, responseType) {
     str = str.replace(/\s+/g, "");
     switch (str) {
       case "-1":
+      case "?":
         ShindoTmp = "?";
         break;
       case "1":
@@ -2542,7 +2543,7 @@ function shindoConvert(str, responseType) {
     var ConvTable;
     switch (responseType) {
       case 1:
-        ConvTable = { "?": "不明", 0: "0", 1: "1", 2: "2", 3: "3", 4: "4", "5-": "5弱", "5+": "5強", "6-": "6弱", "6+": "6強", 7: "7", "7+": "7以上" };
+        ConvTable = { "?": "?", 0: "0", 1: "1", 2: "2", 3: "3", 4: "4", "5-": "5弱", "5+": "5強", "6-": "6弱", "6+": "6強", 7: "7", "7+": "7以上" };
         break;
       case 2:
         ConvTable = {
@@ -2563,11 +2564,12 @@ function shindoConvert(str, responseType) {
       case 3:
         ConvTable = { "?": null, 0: null, 1: "1", 2: "2", 3: "3", 4: "4", "5-": "5-", "5+": "5p", "6-": "6-", "6+": "6p", 7: "7", "7+": "7p" };
         break;
-
       case 4:
         ConvTable = { "?": null, 0: 0, 1: 1, 2: 2, 3: 3, 4: 4, "5-": 4.5, "5+": 5, "6-": 5.5, "6+": 6, 7: 7, "7+": 7.5 };
         break;
-
+      case 5:
+        ConvTable = { "?": 0, 0: 1, 1: 2, 2: 3, 3: 4, 4: 5, "5-": 6, "5+": 7, "6-": 8, "6+": 9, 7: 10, "7+": 11 };
+        break;
       case 0:
       default:
         ConvTable = { "?": "?", 0: "0", 1: "1", 2: "2", 3: "3", 4: "4", "5-": "5-", "5+": "5+", "6-": "6-", "6+": "6+", 7: "7", "7+": "7+" };

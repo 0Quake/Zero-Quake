@@ -31,6 +31,7 @@ function shindoConvert(str, responseType) {
     str = str.replace(/\s+/g, "");
     switch (str) {
       case "-1":
+      case "?":
         ShindoTmp = "?";
         break;
       case "1":
@@ -104,7 +105,7 @@ function shindoConvert(str, responseType) {
     var ConvTable;
     switch (responseType) {
       case 1:
-        ConvTable = { "?": "不明", 0: "0", 1: "1", 2: "2", 3: "3", 4: "4", "5-": "5弱", "5+": "5強", "6-": "6弱", "6+": "6強", 7: "7", "7+": "7以上" };
+        ConvTable = { "?": "?", 0: "0", 1: "1", 2: "2", 3: "3", 4: "4", "5-": "5弱", "5+": "5強", "6-": "6弱", "6+": "6強", 7: "7", "7+": "7以上" };
         break;
       case 2:
         ConvTable = {
