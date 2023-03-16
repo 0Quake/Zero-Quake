@@ -128,7 +128,6 @@ app.whenReady().then(() => {
         clearInterval(startInterval);
       }
     }, 1000);*/
-  replay("2023/03/16 14:59:50");
   //replay("2023/03/11 05:12:30");//２か所同時
   //replay("2020/06/15 02:28:38");//２か所同時
 });
@@ -459,8 +458,8 @@ function kmoniControl(data, date) {
 
   if (!EEWNow) {
     var ptDataTmp;
+
     for (const elm of data) {
-      //data.forEach(function (elm) {
       ptDataTmp = pointsData[elm.Code];
       if (!ptDataTmp) {
         var isCity = elm.Region == "東京都" || elm.Region == "千葉県" || elm.Region == "埼玉県" || elm.Region == "神奈川県";
@@ -474,17 +473,16 @@ function kmoniControl(data, date) {
         }) / ptDataTmp.SUMTmp.length;
       if (!pgaAvr) pgaAvr = 0.03;
 
-      threshold02 = 0.4 * pgaAvr + 0.02;
-      threshold03 = 0.5 * pgaAvr + 0.1;
+      threshold02 = 0.4 * pgaAvr + 0.03;
+      threshold03 = 0.5 * pgaAvr + 0.14;
       if (ptDataTmp.isCity) {
-        //threshold02 *= 3;
-        threshold02 *= 1.5;
+        threshold02 *= 2;
         threshold03 *= 2;
       }
 
       var detect0 = elm.pga - pgaAvr >= threshold02 || elm.shindo >= threshold04;
       var detect1 = detect0 && ptDataTmp.detectCount > 0;
-      var detect2 = detect1 && (elm.pga - pgaAvr >= threshold03 /*&& ptDataTmp.UpCount >= 1*/ || elm.shindo > 1.5); /*|| elm.shindo >= threshold04*/ /* || elm.detectCount > 1*/
+      var detect2 = detect1 && ((elm.pga - pgaAvr >= threshold03 && ptDataTmp.UpCount >= 1) || elm.shindo > 1.5); /*|| elm.shindo >= threshold04*/ /* || elm.detectCount > 1*/
 
       elm.detect = detect1;
       elm.detect2 = detect2;
@@ -494,27 +492,25 @@ function kmoniControl(data, date) {
       } else {
         ptDataTmp.detectCount = 0;
       }
-      if (!detect1) {
+      var oneBeforePGADifference = elm.pga - ptDataTmp.SUMTmp[ptDataTmp.SUMTmp.length - 1];
+      if (oneBeforePGADifference > 0) {
+        ptDataTmp.UpCount++;
+      } else if (oneBeforePGADifference < 0) {
+        ptDataTmp.UpCount = 0;
+      }
+      if (!detect2) {
         ptDataTmp.SUMTmp.slice(0, historyCount - 1);
         ptDataTmp.SUMTmp.push(elm.pga);
       }
-      if (elm.pga - ptDataTmp.oneBeforePGA > 0) {
-        ptDataTmp.UpCount++;
-      } else if (elm.pga - ptDataTmp.oneBeforePGA < 0) {
-        ptDataTmp.UpCount = 0;
-      }
-      if (!detect1 && ptDataTmp.Event !== null) {
+
+      if (!detect1 && ptDataTmp.Event) {
         ptDataTmp.Event = null;
         for (const elm2 of EQDetect_List) {
-          //if (elm2.id == ptDataTmp.Event) {
           elm2.Codes = elm2.Codes.filter(function (elm3) {
             return elm3.Code !== elm.Code;
           });
-          // }
         }
       }
-      ptDataTmp.oneBeforePGA = elm.pga;
-      //});
     }
 
     for (const elm of data) {

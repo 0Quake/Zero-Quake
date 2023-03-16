@@ -3,7 +3,7 @@ const rootStyle = getComputedStyle(root);
 
 //タブUI
 document.querySelectorAll(".tabmenu").forEach(function (elm) {
-  elm.addEventListener("mousedown", function () {
+  elm.addEventListener("click", function () {
     //var containsTmp = !elm.classList.contains("active_tabmenu");
 
     document.querySelectorAll(".active_tabmenu").forEach(function (elm2) {
@@ -15,6 +15,23 @@ document.querySelectorAll(".tabmenu").forEach(function (elm) {
     //if (containsTmp) {
     elm.classList.add("active_tabmenu");
     document.getElementById(elm.dataset.contentid).classList.add("active_tabcontent");
+    //}
+  });
+});
+document.querySelectorAll(".tabgroup").forEach(function (elm) {
+  elm.addEventListener("click", function () {
+    //var containsTmp = !elm.classList.contains("active_tabmenu");
+
+    document.querySelectorAll(".active_tabgroup").forEach(function (elm2) {
+      elm2.classList.remove("active_tabgroup");
+    });
+    document.querySelectorAll(".active_tabgroupContent").forEach(function (elm2) {
+      elm2.classList.remove("active_tabgroupContent");
+    });
+    //if (containsTmp) {
+    elm.classList.add("active_tabgroup");
+    document.getElementById(elm.dataset.contentid).classList.add("active_tabgroupContent");
+    document.getElementById(elm.dataset.contentid).querySelector(".tabmenu").click();
     //}
   });
 });

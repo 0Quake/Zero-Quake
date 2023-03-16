@@ -21,15 +21,27 @@ body {
   text-orientation: unset;
 }
 
-.tabmenu {
+.tabmenu,
+.tabgroup {
   display: block;
   padding: 0.5em;
 }
-
+.tabgroup {
+  padding: 0.2em 0.5em;
+}
 .active_tabmenu {
   border-left: solid 2px rgb(203, 27, 27);
   background: rgba(255, 0, 0, 0.2);
   color: #fff;
+}
+
+.tabgroup::before {
+  content: "expand_more";
+  font-family: "Material Icons Round";
+}
+.active_tabgroup::before {
+  content: "expand_less";
+  font-family: "Material Icons Round";
 }
 
 .active_tabmenu:hover {
