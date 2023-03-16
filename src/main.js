@@ -459,7 +459,6 @@ function kmoniControl(data, date) {
   if (!EEWNow) {
     var ptDataTmp;
 
-    console.time("a");
     var detect0;
     var detect1;
     var detect2;
@@ -521,7 +520,6 @@ function kmoniControl(data, date) {
         }
       }
     }
-    console.timeEnd("a");
 
     for (const elm of data) {
       if (elm.detect) {
