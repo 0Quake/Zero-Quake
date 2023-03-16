@@ -128,7 +128,7 @@ app.whenReady().then(() => {
         clearInterval(startInterval);
       }
     }, 1000);*/
-  //replay("2023/03/11 05:12:30");//２か所同時
+  replay("2023/03/11 05:12:30"); //２か所同時
   //replay("2020/06/15 02:28:38");//２か所同時
 });
 // 全てのウィンドウが閉じたとき
@@ -1384,6 +1384,33 @@ function EEWdetect(type, json, KorL) {
     kmoniTimeUpdate(request_time, sourceTmp, "success");
 
     if (json.result.message == "") {
+      var EEWdata = {
+        alertflg: json.alertflg, //種別
+        report_id: json.report_id, //地震ID
+        report_num: Number(json.report_num), //第n報
+        report_time: new Date(json.report_time), //発表時刻
+        magunitude: Number(json.magunitude), //マグニチュード
+        calcintensity: shindoConvert(json.calcintensity, 0), //最大深度
+        depth: Number(json.depth.replace("km", "")), //深さ
+        is_cancel: Boolean2(json.is_cancel), //キャンセル
+        is_final: Boolean2(json.is_final), //最終報
+        is_training: Boolean2(json.is_training), //訓練報
+        latitude: Number(json.latitude), //緯度
+        longitude: Number(json.longitude), //経度
+        region_code: json.region_code, //震央地域コード
+        region_name: json.region_name, //震央地域
+        origin_time: origin_timeTmp, //発生時刻
+        isPlum: false,
+        userIntensity: null,
+        arrivalTime: null,
+        intensityAreas: null, //細分区分ごとの予想震度
+        warnZones: {
+          zone: null,
+          Pref: null,
+          Regions: null,
+        },
+        source: sourceTmp,
+      };
       if (KorL == 1) {
         var kmoniLastReportTimeTmp = new Date(json.report_time);
         if (kmoniLastReportTime < kmoniLastReportTimeTmp) EEWcontrol(EEWdata);
@@ -1496,15 +1523,15 @@ function EEWdetect(type, json, KorL) {
 
 //EEW情報マージ→EEWAlert
 function EEWcontrol(data) {
-  /*
-        if (!data.origin_time) {
-          var eqj = EEW_Data.find(function (elm) {
-            return elm.EQ_id == data.report_id;
-          });
-          if (eqj) {
-            data.origin_time = eqj.data[eqj.data.length - 1].origin_time;
-          }
-        }*/
+  if (!data) return;
+  if (!data.origin_time) {
+    var eqj = EEW_Data.find(function (elm) {
+      return elm.EQ_id == data.report_id;
+    });
+    if (eqj) {
+      data.origin_time = eqj.data[eqj.data.length - 1].origin_time;
+    }
+  }
   var pastTime = new Date() - Replay - data.origin_time;
   if (pastTime > 300000 || pastTime < 0) return;
 
