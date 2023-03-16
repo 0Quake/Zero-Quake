@@ -61,7 +61,8 @@
 
 - 国内：気象庁 予報区等 GIS データ [© 気象庁](https://www.data.jma.go.jp/developer/gis.html)
 - 国外：© ne_110m_admin_0_countries [© Natural Earth ](https://www.naturalearthdata.com/downloads/110m-cultural-vectors/)
-  ([mapshaper](https://mapshaper.org/)で単純化)
+- 湖沼：© 国土数値情報 [© 国土交通省 ](https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-W09-v2_2.html)
+  ([mapshaper.org](https://mapshaper.org/)で単純化して使用)
 
 #### タイル地図
 
@@ -80,6 +81,13 @@
 「地理院 土砂災害警戒区域（急傾斜地の崩壊） ハザードマップ」[© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)  
 「地理院 土砂災害警戒区域（地すべり） ハザードマップ」[© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)  
 「気象庁　境界線」[© 気象庁](https://www.jma.go.jp/bosai/map.html#contents%3Dearthquake_map)
+
+#### その他
+
+プレート境界 [テキサス大学](http://www-udc.ig.utexas.edu/external/plates/data.htm)
+S-net ケーブルの経路 [防災科学技術研究所](https://www.seafloor.bosai.go.jp/st_info_map/)
+
+([mapshaper.org](https://mapshaper.org/)で単純化して使用)
 
 ## 参考資料
 
