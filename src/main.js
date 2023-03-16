@@ -460,6 +460,11 @@ function kmoniControl(data, date) {
     var ptDataTmp;
 
     console.time("a");
+    var detect0;
+    var detect1;
+    var detect2;
+    var pgaAvr;
+    var oneBeforePGADifference;
     for (const elm of data) {
       if (elm.Point && !elm.IsSuspended) {
         ptDataTmp = pointsData[elm.Code];
@@ -469,7 +474,7 @@ function kmoniControl(data, date) {
           ptDataTmp = pointsData[elm.Code];
         }
 
-        var pgaAvr =
+        pgaAvr =
           ptDataTmp.SUMTmp.reduce(function (acc, cur) {
             return acc + cur;
           }) / ptDataTmp.SUMTmp.length;
@@ -482,9 +487,9 @@ function kmoniControl(data, date) {
           threshold03 *= 2;
         }
 
-        var detect0 = elm.pga - pgaAvr >= threshold02 || elm.shindo >= threshold04;
-        var detect1 = detect0 && ptDataTmp.detectCount > 0;
-        var detect2 = detect1 && ((elm.pga - pgaAvr >= threshold03 && ptDataTmp.UpCount >= 1) || elm.shindo > 1.5); /*|| elm.shindo >= threshold04*/ /* || elm.detectCount > 1*/
+        detect0 = elm.pga - pgaAvr >= threshold02 || elm.shindo >= threshold04;
+        detect1 = detect0 && ptDataTmp.detectCount > 0;
+        detect2 = detect1 && ((elm.pga - pgaAvr >= threshold03 && ptDataTmp.UpCount >= 1) || elm.shindo > 1.5); /*|| elm.shindo >= threshold04*/ /* || elm.detectCount > 1*/
 
         elm.detect = detect1;
         elm.detect2 = detect2;
@@ -494,30 +499,30 @@ function kmoniControl(data, date) {
         } else {
           ptDataTmp.detectCount = 0;
         }
-        var oneBeforePGADifference = elm.pga - ptDataTmp.SUMTmp[ptDataTmp.SUMTmp.length - 1];
+        if (!detect2) {
+          ptDataTmp.SUMTmp = ptDataTmp.SUMTmp.slice(0, historyCount - 1);
+          ptDataTmp.SUMTmp.push(elm.pga);
+
+          if (!detect1 && ptDataTmp.Event) {
+            ptDataTmp.Event = null;
+            for (const elm2 of EQDetect_List) {
+              elm2.Codes = elm2.Codes.filter(function (elm3) {
+                return elm3.Code !== elm.Code;
+              });
+            }
+          }
+        }
+
+        oneBeforePGADifference = elm.pga - ptDataTmp.SUMTmp[ptDataTmp.SUMTmp.length - 1];
         if (oneBeforePGADifference > 0) {
           ptDataTmp.UpCount++;
         } else if (oneBeforePGADifference < 0) {
           ptDataTmp.UpCount = 0;
         }
-        if (!detect2) {
-          ptDataTmp.SUMTmp = ptDataTmp.SUMTmp.slice(0, historyCount - 1);
-          ptDataTmp.SUMTmp.push(elm.pga);
-        }
-
-        if (!detect1 && ptDataTmp.Event) {
-          ptDataTmp.Event = null;
-          for (const elm2 of EQDetect_List) {
-            elm2.Codes = elm2.Codes.filter(function (elm3) {
-              return elm3.Code !== elm.Code;
-            });
-          }
-        }
       }
     }
     console.timeEnd("a");
 
-    console.time("b");
     for (const elm of data) {
       if (elm.detect) {
         var ptDataTmp2 = pointsData[elm.Code];
@@ -588,7 +593,6 @@ function kmoniControl(data, date) {
         }
       }
     }
-    console.timeEnd("b");
 
     //地震検知解除
     var index = 0;
