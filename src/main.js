@@ -246,6 +246,9 @@ function createWindow() {
         action: "EEWAlertUpdate",
         data: EEW_nowList,
       });
+      if (estShindoTmp) {
+        mainWindow.webContents.send("message2", estShindoTmp);
+      }
     }
 
     mainWindow.webContents.send("message2", {
@@ -639,6 +642,7 @@ function SnetControl(data, date) {
   }
 }
 
+var estShindoTmp;
 //強震モニタ予想震度処理
 function estShindoControl(response) {
   var EidTmp;
@@ -650,14 +654,15 @@ function estShindoControl(response) {
     return false;
   }
   if (response.nodata) EstShindoFetch = false;
+  estShindoTmp = {
+    action: "EstShindoUpdate",
+    data: response.data,
+    date: response.date,
+    eid: EidTmp,
+    nodata: response.nodata,
+  };
   if (mainWindow) {
-    mainWindow.webContents.send("message2", {
-      action: "EstShindoUpdate",
-      data: response.data,
-      date: response.date,
-      eid: EidTmp,
-      nodata: response.nodata,
-    });
+    mainWindow.webContents.send("message2", estShindoTmp);
   }
 }
 
@@ -1717,6 +1722,8 @@ function EEWClear(source, code, reportnum, bypass) {
           data: EEW_nowList,
         });
       }
+
+      if (estShindoTmp.eid == code) estShindoTmp = null;
 
       if (EEW_nowList.length == 0) {
         EEWNow = false;

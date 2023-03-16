@@ -410,6 +410,7 @@ function init() {
         )
         .addTo(map);
       document.getElementById("splash").style.display = "none";
+      if (estShindoTmp) EstShindoUpdate(estShindoTmp);
     });
   map.on("baselayerchange", function (layer) {
     offlineMapActive = layer.name == "オフライン地図";
@@ -725,8 +726,10 @@ function kmoniMapUpdate(dataTmp, type) {
   });
 }
 
+var estShindoTmp;
 //予想震度更新
 function EstShindoUpdate(data) {
+  estShindoTmp = data;
   if (sections.length == 0) return;
   sections.forEach(function (elm) {
     elm.item.setStyle({ fillColor: "#333" });
