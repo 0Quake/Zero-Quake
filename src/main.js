@@ -1,5 +1,5 @@
 const electron = require("electron");
-const { app, BrowserWindow, ipcMain, net, Notification } = electron;
+const { app, BrowserWindow, ipcMain, net, Notification, shell } = electron;
 const path = require("path");
 const { JSDOM } = require("jsdom");
 let fs = require("fs");
@@ -223,7 +223,7 @@ function createWindow() {
     },
   });
   mainWindow.maximize();
-  //mainWindow.setMenuBarVisibility(false);
+  mainWindow.setMenuBarVisibility(false);
 
   mainWindow.webContents.on("did-finish-load", () => {
     kmoniTimeTmp.forEach(function (elm) {
@@ -344,9 +344,17 @@ function settingcreateWindow() {
     settingWindow = null;
   });
 
-  //      settingWindow.setMenuBarVisibility(false);
+  settingWindow.setMenuBarVisibility(false);
 
   settingWindow.loadFile("src/settings.html");
+  const handleUrlOpen = (e, url) => {
+    if (url.match(/^http/)) {
+      e.preventDefault();
+      shell.openExternal(url);
+    }
+  };
+  settingWindow.webContents.on("will-navigate", handleUrlOpen);
+  settingWindow.webContents.on("new-window", handleUrlOpen);
 }
 //津波情報ウィンドウ表示処理
 function tsunamicreateWindow() {
@@ -365,7 +373,7 @@ function tsunamicreateWindow() {
       icon: path.join(__dirname, "img/icon.ico"),
     },
   });
-  //mainWindow.setMenuBarVisibility(false);
+  tsunamiWindow.setMenuBarVisibility(false);
 
   tsunamiWindow.webContents.on("did-finish-load", () => {
     if (tsunamiWindow) {
@@ -393,7 +401,7 @@ function EQInfocreateWindow(response) {
       icon: path.join(__dirname, "img/icon.ico"),
     },
   });
-  //mainWindow.setMenuBarVisibility(false);
+  EQInfoWindow.setMenuBarVisibility(false);
 
   EQInfoWindow.webContents.on("did-finish-load", () => {
     EQInfoWindow.webContents.send("message2", {
