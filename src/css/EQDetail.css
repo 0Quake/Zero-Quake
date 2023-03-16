@@ -59,7 +59,7 @@ h2,
   font-size: 22px;
   line-height: 50px;
   padding: 0;
-  margin: 0.1em 0.5em;
+  margin: 1em 0.5em 0.1em 0.5em;
   text-align: center;
   font-weight: bold;
   font-family: "M PLUS 1p";
@@ -75,8 +75,11 @@ table,
 tr,
 th,
 td {
-  border: solid 1px #666;
   border-collapse: collapse;
+  border: none;
+}
+tr {
+  border-bottom: solid 1px #666;
 }
 
 tr,
@@ -84,26 +87,27 @@ td {
   font-size: 18px;
   padding: 0.2em 0.5em;
 }
+th {
+  padding-right: 1em;
+  text-align: right;
+}
 
 td {
   text-align: left;
 }
-
-#leftSide {
+#tableWrap {
+  display: flex;
+}
+#leftSide,
+#ShindoWrap {
   vertical-align: top;
   display: inline-table;
-  width: calc(50% - 10px);
-}
-#EQInfo {
   width: 100%;
-}
-#EQInfo th {
-  background: #333;
+  padding: 10px;
 }
 
-#ShindoWrap {
-  display: inline-block;
-  width: calc(50% - 10px);
+#EQInfo {
+  width: 100%;
 }
 
 #ShindoWrap {

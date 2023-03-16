@@ -1,3 +1,6 @@
+const root = document.querySelector(":root");
+const rootStyle = getComputedStyle(root);
+
 //タブUI
 document.querySelectorAll(".tabmenu").forEach(function (elm) {
   elm.addEventListener("mousedown", function () {
@@ -109,18 +112,18 @@ function shindoConvert(str, responseType) {
         break;
       case 2:
         ConvTable = {
-          "?": ["#BFBFBF", "#444"],
-          0: ["#BFBFBF", "#444"],
-          1: ["#79A8B3", "#444"],
-          2: ["#3685E0", "#FFF"],
-          3: ["#4DB051", "#FFF"],
-          4: ["#BFB837", "#333"],
-          "5-": ["#F09629", "#000"],
-          "5+": ["#F5713D", "#000"],
-          "6-": ["#E60000", "#FFF"],
-          "6+": ["#8A0A0A", "#FFF"],
-          7: ["#C400DE", "#FFF"],
-          "7+": ["#C400DE", "#FFF"],
+          "?": [rootStyle.getPropertyValue("--IntTheme_Q_BgColor"), rootStyle.getPropertyValue("--IntTheme_Q_color")],
+          0: [rootStyle.getPropertyValue("--IntTheme_0_BgColor"), rootStyle.getPropertyValue("--IntTheme_0_color")],
+          1: [rootStyle.getPropertyValue("--IntTheme_1_BgColor"), rootStyle.getPropertyValue("--IntTheme_1_color")],
+          2: [rootStyle.getPropertyValue("--IntTheme_2_BgColor"), rootStyle.getPropertyValue("--IntTheme_2_color")],
+          3: [rootStyle.getPropertyValue("--IntTheme_3_BgColor"), rootStyle.getPropertyValue("--IntTheme_3_color")],
+          4: [rootStyle.getPropertyValue("--IntTheme_4_BgColor"), rootStyle.getPropertyValue("--IntTheme_4_color")],
+          "5-": [rootStyle.getPropertyValue("--IntTheme_5m_BgColor"), rootStyle.getPropertyValue("--IntTheme_5m_color")],
+          "5+": [rootStyle.getPropertyValue("--IntTheme_5p_BgColor"), rootStyle.getPropertyValue("--IntTheme_5p_color")],
+          "6-": [rootStyle.getPropertyValue("--IntTheme_6m_BgColor"), rootStyle.getPropertyValue("--IntTheme_6m_color")],
+          "6+": [rootStyle.getPropertyValue("--IntTheme_6p_BgColor"), rootStyle.getPropertyValue("--IntTheme_6p_color")],
+          7: [rootStyle.getPropertyValue("--IntTheme_7_BgColor"), rootStyle.getPropertyValue("--IntTheme_7_color")],
+          "7+": [rootStyle.getPropertyValue("--IntTheme_7p_BgColor"), rootStyle.getPropertyValue("--IntTheme_7p_color")],
         };
         break;
       case 3:

@@ -537,6 +537,7 @@ function jma_Fetch(url) {
 
       if (json.Body.Intensity && json.Body.Intensity.Observation.Pref && newestshindo) {
         removeChild(document.getElementById("Shindo"));
+
         document.getElementById("ShindoWrap").style.display = "inline-block";
         json.Body.Intensity.Observation.Pref.forEach(function (elm) {
           add_Pref_info(elm.Name, elm.MaxInt);
@@ -602,7 +603,7 @@ function jmaXMLFetch(url) {
       if (xml.querySelector("Body Comments")) {
         var commentText = "";
         if (xml.querySelector("Body Comments ForecastComment")) commentText += xml.querySelector("Body Comments ForecastComment Text").textContent;
-        if (xml.querySelector("Body Comments FreeFormComment")) commentText += xml.querySelector("Body Comments FreeFormComment Text").textContent;
+        if (xml.querySelector("Body Comments FreeFormComment")) commentText += xml.querySelector("Body Comments FreeFormComment").textContent;
       }
 
       EQInfoControl({
@@ -622,8 +623,8 @@ function jmaXMLFetch(url) {
       var newestshindo = shindo_lastUpDate < new Date();
       if (newestshindo) shindo_lastUpDate = new Date();
       if (xml.querySelector("Body Intensity") && xml.querySelector("Body Intensity Observation Pref") && newestshindo) {
-        removeChild(document.getElementById("Shindo"));
         document.getElementById("ShindoWrap").style.display = "inline-block";
+        removeChild(document.getElementById("Shindo"));
 
         xml.querySelectorAll("Body Intensity Observation Pref").forEach(function (elm) {
           add_Pref_info(elm.querySelector("Name").textContent, elm.querySelector("MaxInt").textContent);
@@ -685,9 +686,9 @@ function narikakun_Fetch(url) {
         var newestshindo = shindo_lastUpDate < new Date();
         if (newestshindo) shindo_lastUpDate = new Date();
 
-        if (json.Body.Intensity && json.Body.Intensity.Observation.Pref && newestshindo) {
-          removeChild(document.getElementById("Shindo"));
+        if (json.Body.Intensity && json.Body.Intensity.Observation.Pref && json.Body.Intensity.Observation.Pref.length > 0 && newestshindo) {
           document.getElementById("ShindoWrap").style.display = "inline-block";
+          removeChild(document.getElementById("Shindo"));
 
           json.Body.Intensity.Observation.Pref.forEach(function (elm) {
             add_Pref_info(elm.Name, elm.MaxInt);
@@ -847,6 +848,7 @@ function EQInfoControl(data) {
 
   if (EQInfo.originTime) data_time.innerText = dateEncode(4, EQInfo.originTime);
   if (EQInfo.maxI) data_maxI.innerText = shindoConvert(EQInfo.maxI, 1);
+  if (EQInfo.maxI) data_maxI.style.borderBottom = "solid 1px " + shindoConvert(EQInfo.maxI, 2)[0];
   if (EQInfo.mag) data_M.innerText = EQInfo.mag;
   if (data.magType) data_MT.innerText = data.magType;
 
