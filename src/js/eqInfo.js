@@ -50,6 +50,7 @@ window.electronAPI.messageSend((event, request) => {
     init();
   } else if (request.action == "setting") {
     config = request.data;
+    document.getElementById("areaName").textContent = config.home.name;
   }
 });
 
@@ -532,8 +533,8 @@ function jma_Fetch(url) {
         cancel: cancelTmp,
       });
 
-      var newestshindo = shindo_lastUpDate < new Date();
-      if (newestshindo) shindo_lastUpDate = new Date();
+      var newestshindo = shindo_lastUpDate < new Date(json.Head.ReportDateTime);
+      if (newestshindo) shindo_lastUpDate = new Date(json.Head.ReportDateTime);
 
       if (json.Body.Intensity && json.Body.Intensity.Observation.Pref && newestshindo) {
         removeChild(document.getElementById("Shindo"));
@@ -620,8 +621,8 @@ function jmaXMLFetch(url) {
         cancel: cancelTmp,
       });
 
-      var newestshindo = shindo_lastUpDate < new Date();
-      if (newestshindo) shindo_lastUpDate = new Date();
+      var newestshindo = shindo_lastUpDate < new Date(xml.querySelector("Head ReportDateTime").textContent);
+      if (newestshindo) shindo_lastUpDate = new Date(xml.querySelector("Head ReportDateTime").textContent);
       if (xml.querySelector("Body Intensity") && xml.querySelector("Body Intensity Observation Pref") && newestshindo) {
         document.getElementById("ShindoWrap").style.display = "inline-block";
         removeChild(document.getElementById("Shindo"));
@@ -683,8 +684,8 @@ function narikakun_Fetch(url) {
           cancel: cancelTmp,
         });
 
-        var newestshindo = shindo_lastUpDate < new Date();
-        if (newestshindo) shindo_lastUpDate = new Date();
+        var newestshindo = shindo_lastUpDate < new Date(json.Head.ReportDateTime);
+        if (newestshindo) shindo_lastUpDate = new Date(json.Head.ReportDateTime);
 
         if (json.Body.Intensity && json.Body.Intensity.Observation.Pref && json.Body.Intensity.Observation.Pref.length > 0 && newestshindo) {
           document.getElementById("ShindoWrap").style.display = "inline-block";
@@ -731,7 +732,7 @@ function add_Pref_info(name, maxInt) {
   newDiv.classList.add("WrapLevel1", "close");
   document.getElementById("Shindo").appendChild(newDiv);
 }
-//都道府県ごとの情報描画（リスト・地図塗りつぶし・地図プロット）
+//細分区域ごとの情報描画（リスト・地図塗りつぶし・地図プロット）
 function add_Area_info(name, maxInt) {
   var wrap = document.querySelectorAll(".WrapLevel1");
 
@@ -745,10 +746,20 @@ function add_Area_info(name, maxInt) {
     this.nextElementSibling.classList.toggle("open");
   });
 
-  var newDiv = document.createElement("div");
-  newDiv.innerHTML = "<div></div>";
-  newDiv.classList.add("WrapLevel2", "close");
-  wrap[wrap.length - 1].appendChild(newDiv);
+  var newDiv2 = document.createElement("div");
+  newDiv2.innerHTML = "<div></div>";
+  newDiv2.classList.add("WrapLevel2", "close");
+  wrap[wrap.length - 1].appendChild(newDiv2);
+
+  if (name == config.home.Saibun) {
+    var newDiv3 = document.createElement("div");
+    newDiv3.innerHTML = "<span style='background:" + color[0] + ";color:" + color[1] + ";'>" + maxInt + "</span>" + name;
+    newDiv3.classList.add("ShindoItem", "ShindoItem2");
+
+    removeChild(document.getElementById("homeShindo"));
+    document.getElementById("homeShindoWrap").style.display = "block";
+    document.getElementById("homeShindo").appendChild(newDiv3);
+  }
 
   var pointLocation = areaLocation[name];
   if (pointLocation) {
@@ -848,7 +859,7 @@ function EQInfoControl(data) {
 
   if (EQInfo.originTime) data_time.innerText = dateEncode(4, EQInfo.originTime);
   if (EQInfo.maxI) data_maxI.innerText = shindoConvert(EQInfo.maxI, 1);
-  if (EQInfo.maxI) data_maxI.style.borderBottom = "solid 1px " + shindoConvert(EQInfo.maxI, 2)[0];
+  if (EQInfo.maxI) data_maxI.style.borderBottom = "solid 2px " + shindoConvert(EQInfo.maxI, 2)[0];
   if (EQInfo.mag) data_M.innerText = EQInfo.mag;
   if (data.magType) data_MT.innerText = data.magType;
 

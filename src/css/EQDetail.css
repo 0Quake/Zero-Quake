@@ -356,3 +356,15 @@ td {
   color: #ccc;
   font-family: ui-monospace, sans-serif;
 }
+#homeShindoWrap {
+  display: none;
+}
+#homeShindo .ShindoItem {
+  cursor: default;
+}
+#homeShindo .ShindoItem:hover {
+  background: #333;
+}
+#homeShindo .ShindoItem::before {
+  display: none;
+}
