@@ -281,6 +281,46 @@ function Mapinit() {
         .addTo(map);
       document.getElementById("splash").style.display = "none";
     });
+
+  fetch("./Resource/plate.json")
+    .then(function (res) {
+      return res.json();
+    })
+    .then(function (json) {
+      plateMap = L.geoJSON(json, {
+        style: {
+          color: "#C88",
+          opacity: 0.3,
+          fill: false,
+          weight: 1,
+          interactive: false,
+          attribution: "",
+          renderer: jsonMAP2Canvas,
+        },
+      });
+
+      mapLayer.addLayer(plateMap);
+    });
+
+  fetch("./Resource/lake.json")
+    .then(function (res) {
+      return res.json();
+    })
+    .then(function (json) {
+      L.geoJSON(json, {
+        style: {
+          stroke: false,
+          color: "#0449b8",
+          weight: 1,
+          fill: true,
+          fillColor: "#78acff",
+          fillOpacity: 0.5,
+          attribution: "国土地理院",
+          renderer: jsonMAP1Canvas,
+        },
+      }).addTo(map);
+    });
+
   map.on("baselayerchange", function (layer) {
     offlineMapActive = layer.name == "オフライン地図";
 
