@@ -459,62 +459,66 @@ function kmoniControl(data, date) {
   if (!EEWNow) {
     var ptDataTmp;
 
+    console.time("a");
     for (const elm of data) {
-      ptDataTmp = pointsData[elm.Code];
-      if (!ptDataTmp) {
-        var isCity = elm.Region == "東京都" || elm.Region == "千葉県" || elm.Region == "埼玉県" || elm.Region == "神奈川県";
-        pointsData[elm.Code] = { detectCount: 0, SUMTmp: [elm.pga], Event: null, oneBeforePGA: elm.pga, isCity: isCity };
+      if (elm.Point && !elm.IsSuspended) {
         ptDataTmp = pointsData[elm.Code];
-      }
+        if (!ptDataTmp) {
+          var isCity = elm.Region == "東京都" || elm.Region == "千葉県" || elm.Region == "埼玉県" || elm.Region == "神奈川県";
+          pointsData[elm.Code] = { detectCount: 0, SUMTmp: [elm.pga], Event: null, oneBeforePGA: elm.pga, isCity: isCity };
+          ptDataTmp = pointsData[elm.Code];
+        }
 
-      var pgaAvr =
-        ptDataTmp.SUMTmp.reduce(function (acc, cur) {
-          return acc + cur;
-        }) / ptDataTmp.SUMTmp.length;
-      if (!pgaAvr) pgaAvr = 0.03;
+        var pgaAvr =
+          ptDataTmp.SUMTmp.reduce(function (acc, cur) {
+            return acc + cur;
+          }) / ptDataTmp.SUMTmp.length;
+        if (!pgaAvr) pgaAvr = 0.03;
 
-      threshold02 = 0.4 * pgaAvr + 0.03;
-      threshold03 = 0.5 * pgaAvr + 0.14;
-      if (ptDataTmp.isCity) {
-        threshold02 *= 2;
-        threshold03 *= 2;
-      }
+        threshold02 = 0.4 * pgaAvr + 0.03;
+        threshold03 = 0.5 * pgaAvr + 0.14;
+        if (ptDataTmp.isCity) {
+          threshold02 *= 2;
+          threshold03 *= 2;
+        }
 
-      var detect0 = elm.pga - pgaAvr >= threshold02 || elm.shindo >= threshold04;
-      var detect1 = detect0 && ptDataTmp.detectCount > 0;
-      var detect2 = detect1 && ((elm.pga - pgaAvr >= threshold03 && ptDataTmp.UpCount >= 1) || elm.shindo > 1.5); /*|| elm.shindo >= threshold04*/ /* || elm.detectCount > 1*/
+        var detect0 = elm.pga - pgaAvr >= threshold02 || elm.shindo >= threshold04;
+        var detect1 = detect0 && ptDataTmp.detectCount > 0;
+        var detect2 = detect1 && ((elm.pga - pgaAvr >= threshold03 && ptDataTmp.UpCount >= 1) || elm.shindo > 1.5); /*|| elm.shindo >= threshold04*/ /* || elm.detectCount > 1*/
 
-      elm.detect = detect1;
-      elm.detect2 = detect2;
+        elm.detect = detect1;
+        elm.detect2 = detect2;
 
-      if (detect0) {
-        ptDataTmp.detectCount++;
-      } else {
-        ptDataTmp.detectCount = 0;
-      }
-      var oneBeforePGADifference = elm.pga - ptDataTmp.SUMTmp[ptDataTmp.SUMTmp.length - 1];
-      if (oneBeforePGADifference > 0) {
-        ptDataTmp.UpCount++;
-      } else if (oneBeforePGADifference < 0) {
-        ptDataTmp.UpCount = 0;
-      }
-      if (!detect2) {
-        ptDataTmp.SUMTmp.slice(0, historyCount - 1);
-        ptDataTmp.SUMTmp.push(elm.pga);
-      }
+        if (detect0) {
+          ptDataTmp.detectCount++;
+        } else {
+          ptDataTmp.detectCount = 0;
+        }
+        var oneBeforePGADifference = elm.pga - ptDataTmp.SUMTmp[ptDataTmp.SUMTmp.length - 1];
+        if (oneBeforePGADifference > 0) {
+          ptDataTmp.UpCount++;
+        } else if (oneBeforePGADifference < 0) {
+          ptDataTmp.UpCount = 0;
+        }
+        if (!detect2) {
+          ptDataTmp.SUMTmp = ptDataTmp.SUMTmp.slice(0, historyCount - 1);
+          ptDataTmp.SUMTmp.push(elm.pga);
+        }
 
-      if (!detect1 && ptDataTmp.Event) {
-        ptDataTmp.Event = null;
-        for (const elm2 of EQDetect_List) {
-          elm2.Codes = elm2.Codes.filter(function (elm3) {
-            return elm3.Code !== elm.Code;
-          });
+        if (!detect1 && ptDataTmp.Event) {
+          ptDataTmp.Event = null;
+          for (const elm2 of EQDetect_List) {
+            elm2.Codes = elm2.Codes.filter(function (elm3) {
+              return elm3.Code !== elm.Code;
+            });
+          }
         }
       }
     }
+    console.timeEnd("a");
 
+    console.time("b");
     for (const elm of data) {
-      //data.forEach(function (elm) {
       if (elm.detect) {
         var ptDataTmp2 = pointsData[elm.Code];
         if (ptDataTmp2.isCity) {
@@ -583,8 +587,9 @@ function kmoniControl(data, date) {
           //新報
         }
       }
-      //});
     }
+    console.timeEnd("b");
+
     //地震検知解除
     var index = 0;
     for (const elm of EQDetect_List) {
