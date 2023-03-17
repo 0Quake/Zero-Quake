@@ -2369,9 +2369,7 @@ function eqInfoControl(dataList, type, EEW) {
               return elm.eventId == data.eventId;
             });
             if (EQElm2 !== -1) {
-              console.log(eqInfo.jma[EQElm2]);
               eqInfo.jma[EQElm2] = EQElm;
-              console.log(eqInfo.jma[EQElm2]);
             }
           }
         } else {
@@ -2417,7 +2415,6 @@ function eqInfoAlert(data, source, update) {
       }
       return r;
     });
-    //if (update) console.log(eqInfo.jma);
 
     if (mainWindow) {
       mainWindow.webContents.send("message2", {

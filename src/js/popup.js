@@ -6,8 +6,6 @@ var config;
 
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "EEWAlertUpdate") {
-    console.log(request.data);
-
     EEWAlertUpdate(request.data);
   } else if (request.action == "kmoniTimeUpdate") {
     kmoniTimeUpdate(request.Updatetime, request.LocalTime, request.type, request.condition, request.vendor);
