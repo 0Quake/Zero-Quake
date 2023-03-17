@@ -6,6 +6,8 @@ var config;
 
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "EEWAlertUpdate") {
+    console.log(request.data);
+
     EEWAlertUpdate(request.data);
   } else if (request.action == "kmoniTimeUpdate") {
     kmoniTimeUpdate(request.Updatetime, request.LocalTime, request.type, request.condition, request.vendor);
@@ -69,7 +71,6 @@ var epiCenter = [];
 var EEW_LocalIDs = [];
 //EEW追加・更新
 function EEWAlertUpdate(data) {
-  console.log(data);
   data.forEach((elm) => {
     var same = now_EEW.find(function (elm2) {
       return elm.report_id == elm2.report_id && elm.report_num == elm2.report_num;
@@ -353,6 +354,7 @@ function eqInfoDraw(data, source) {
       clone.querySelector(".EQI_maxI").style.background = shindoColor[0];
       clone.querySelector(".EQI_maxI").style.color = shindoColor[1];
       clone.querySelector(".canceled").style.display = elm.cancel ? "flex" : "none";
+      clone.querySelector(".EEWNotes").style.display = elm.category == "EEW" ? "block" : "none";
 
       clone.querySelector(".EQDetailButton").addEventListener("click", function () {
         window.electronAPI.messageReturn({

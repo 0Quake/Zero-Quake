@@ -38,15 +38,18 @@ fetch("https://files.nakn.jp/earthquake/code/PointSeismicIntensityLocation.json"
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "metaData") {
     eid = request.eid;
-    jmaURL = request.urls.filter(function (elm) {
-      return elm.indexOf("www.jma.go.jp") != -1;
-    });
-    jmaXMLURL = request.urls.filter(function (elm) {
-      return elm.indexOf("www.data.jma.go.jp") != -1;
-    });
-    narikakunURL = request.urls.filter(function (elm) {
-      return elm.indexOf("dev.narikakun.net") != -1;
-    });
+    console.log(request.urls);
+    if (request.urls && Array.isArray(request.urls)) {
+      jmaURL = request.urls.filter(function (elm) {
+        return String(elm).indexOf("www.jma.go.jp") != -1;
+      });
+      jmaXMLURL = request.urls.filter(function (elm) {
+        return String(elm).indexOf("www.data.jma.go.jp") != -1;
+      });
+      narikakunURL = request.urls.filter(function (elm) {
+        return String(elm).indexOf("dev.narikakun.net") != -1;
+      });
+    }
     init();
   } else if (request.action == "setting") {
     config = request.data;

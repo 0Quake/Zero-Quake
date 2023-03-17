@@ -581,6 +581,7 @@ td {
 .EQItem {
   position: relative;
   display: flex;
+  flex-wrap: wrap;
   align-content: center;
   align-items: flex-start;
   padding: 5px;
@@ -599,6 +600,15 @@ td {
   float: left;
   margin: 10px 5px 10px 0;
   font-family: "M PLUS 1p";
+}
+.EEWNotes {
+  display: none;
+  width: 100%;
+  font-size: 14px;
+  text-align: center;
+  background: #111;
+  border: solid 1px #f00;
+  border-radius: 3px;
 }
 .EQItemOverlay {
   position: absolute;

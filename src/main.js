@@ -288,6 +288,26 @@ function createWindow() {
         data: Replay,
       });
     }
+
+    EEWcontrol({
+      report_time: new Date(), //発表時刻
+      region_code: "", //震央地域コード
+      region_name: "存在しない地名", //震央地域
+      latitude: 35.6, //緯度
+      longitude: 140.3, //経度
+      is_cancel: false, //キャンセル
+      depth: 10, //深さ
+      calcintensity: "6+", //最大深度
+      is_final: false, //最終報
+      is_training: false, //訓練報
+      origin_time: new Date(), //発生時刻
+      magunitude: 8.8, //マグニチュード
+      report_num: 1, //第n報
+      report_id: 20991111111111, //地震ID
+      alertflg: "警報", //種別
+      condition: "",
+      source: "存在しない情報源",
+    });
   });
 
   mainWindow.loadFile("src/index.html");
@@ -1779,6 +1799,23 @@ function EEWAlert(data, first, update) {
     }
   }
 
+  eqInfoControl(
+    [
+      {
+        eventId: data.report_id,
+        category: "EEW",
+        reportDateTime: data.report_time,
+        OriginTime: data.origin_time,
+        epiCenter: data.region_name,
+        M: data.magunitude,
+        maxI: data.calcintensity,
+        DetailURL: [],
+      },
+    ],
+    "jma",
+    true
+  );
+
   //【現在のEEW】から同一地震、古い報を削除
   EEW_nowList = EEW_nowList.filter(function (elm) {
     return elm.report_id !== data.report_id;
@@ -2256,7 +2293,7 @@ function EQI_narikakun_Req(url) {
 }
 
 //地震情報マージ→eqInfoAlert
-function eqInfoControl(dataList, type) {
+function eqInfoControl(dataList, type, EEW) {
   switch (type) {
     case "jma":
       var eqInfoTmp = [];
@@ -2269,16 +2306,61 @@ function eqInfoControl(dataList, type) {
         if (!data.maxI) data.maxI = null;
         if (EQElm) {
           var newer = EQElm.reportDateTime < data.reportDateTime;
-          if (data.OriginTime && (!EQElm.OriginTime || newer)) EQElm.OriginTime = data.OriginTime;
-          if (data.epiCenter && (!EQElm.epiCenter || newer)) EQElm.epiCenter = data.epiCenter;
-          if (data.M && (!EQElm.M || newer)) EQElm.M = data.M;
+          var changed = false;
+          if (!EEW && EQElm.category == "EEW") {
+            newer = true;
+            EQElm = {
+              eventId: EQElm.eventId,
+              category: null,
+              reportDateTime: null,
+              OriginTime: null,
+              epiCenter: null,
+              M: null,
+              maxI: null,
+              DetailURL: [],
+            };
+            changed = true;
+          }
+
+          if (data.OriginTime && (!EQElm.OriginTime || newer)) {
+            EQElm.OriginTime = data.OriginTime;
+            changed = true;
+          }
+          if (data.epiCenter && (!EQElm.epiCenter || newer)) {
+            EQElm.epiCenter = data.epiCenter;
+            changed = true;
+          }
+          if (data.M && (!EQElm.M || newer)) {
+            EQElm.M = data.M;
+            changed = true;
+          }
           if (data.maxI && (!EQElm.maxI || newer)) {
             EQElm.maxI = data.maxI;
+            changed = true;
           }
-          if (data.cancel && (!EQElm.cancel || newer)) EQElm.cancel = data.cancel;
 
-          if (data.DetailURL && data.DetailURL[0] !== "" && !EQElm.DetailURL.includes(data.DetailURL[0])) EQElm.DetailURL.push(data.DetailURL[0]);
-          eqInfoUpdateTmp.push(data);
+          if (data.cancel && (!EQElm.cancel || newer)) {
+            EQElm.cancel = data.cancel;
+            changed = true;
+          }
+
+          EQElm.category = data.category;
+
+          if (data.DetailURL && data.DetailURL[0] !== "" && !EQElm.DetailURL.includes(data.DetailURL[0])) {
+            EQElm.DetailURL.push(data.DetailURL[0]);
+            changed = true;
+          }
+          if (changed) {
+            eqInfoUpdateTmp.push(EQElm);
+            var EQElm2 = eqInfo.jma.findIndex(function (elm) {
+              return elm.eventId == data.eventId;
+            });
+            if (EQElm2 !== -1) {
+              console.log(eqInfo.jma[EQElm2]);
+              eqInfo.jma[EQElm2] = EQElm;
+              console.log(eqInfo.jma[EQElm2]);
+            }
+          }
         } else {
           eqInfoTmp.push(data);
         }
@@ -2312,6 +2394,7 @@ function eqInfoAlert(data, source, update) {
       }
       eqInfo.jma = eqInfo.jma.concat(data);
     }
+
     eqInfo.jma = eqInfo.jma.sort(function (a, b) {
       var r = 0;
       if (a.OriginTime > b.OriginTime) {
@@ -2321,6 +2404,8 @@ function eqInfoAlert(data, source, update) {
       }
       return r;
     });
+    //if (update) console.log(eqInfo.jma);
+
     if (mainWindow) {
       mainWindow.webContents.send("message2", {
         action: "EQInfo",
