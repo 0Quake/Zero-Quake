@@ -32,7 +32,7 @@
 
 - 気象庁ホームページ[© 気象庁](https://www.jma.go.jp/bosai/map.html?contents=earthquake_map)
 - 気象庁防災情報 XML[© 気象庁](https://xml.kishou.go.jp/xmlpull.html)
-- narikakun.net 地震情報 API[©[narikakun](https://dev.narikakun.net/doc/earthquake)
+- narikakun.net 地震情報 API©[narikakun](https://dev.narikakun.net/doc/earthquake)
 
 ### 地震情報(Earthquake Catalog)
 
@@ -66,28 +66,28 @@
 
 #### タイル地図
 
-「気象庁」© 気象庁
-「地理院 標準地図」[© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)  
-「地理院 淡色地図」[© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)  
-「地理院 写真」[© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)  
-「地理院 白地図」[© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)  
-「OpenStreetMap」[© OpenStreetMap contributors](https://www.openstreetmap.org/copyright/)
+- 「気象庁」© 気象庁
+- 「地理院 標準地図」[© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)
+- 「地理院 淡色地図」[© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)
+- 「地理院 写真」[© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)
+- 「地理院 白地図」[© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)
+- 「OpenStreetMap」[© OpenStreetMap contributors](https://www.openstreetmap.org/copyright/)
 
 #### オーバーレイ
 
-「地理院 陰影起伏図」[© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)  
-「地理院 火山基本図データ」[© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)  
-「地理院 津波浸水想定 ハザードマップ」[© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)  
-「地理院 土砂災害警戒区域（急傾斜地の崩壊） ハザードマップ」[© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)  
-「地理院 土砂災害警戒区域（地すべり） ハザードマップ」[© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)  
-「気象庁　境界線」[© 気象庁](https://www.jma.go.jp/bosai/map.html#contents%3Dearthquake_map)
+- 「地理院 陰影起伏図」[© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)
+- 「地理院 火山基本図データ」[© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)
+- 「地理院 津波浸水想定 ハザードマップ」[© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)
+- 「地理院 土砂災害警戒区域（急傾斜地の崩壊） ハザードマップ」[© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)
+- 「地理院 土砂災害警戒区域（地すべり） ハザードマップ」[© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)
+- 「気象庁　境界線」[© 気象庁](https://www.jma.go.jp/bosai/map.html#contents%3Dearthquake_map)
 
 #### その他
 
-プレート境界 [テキサス大学](http://www-udc.ig.utexas.edu/external/plates/data.htm)
-S-net ケーブルの経路 [防災科学技術研究所](https://www.seafloor.bosai.go.jp/st_info_map/)
+- プレート境界 [テキサス大学](http://www-udc.ig.utexas.edu/external/plates/data.htm)
+- S-net ケーブルの経路 [防災科学技術研究所](https://www.seafloor.bosai.go.jp/st_info_map/)
 
-([mapshaper.org](https://mapshaper.org/)で単純化して使用)
+- ([mapshaper.org](https://mapshaper.org/)で単純化して使用)
 
 ## 参考資料
 
