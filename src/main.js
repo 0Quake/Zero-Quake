@@ -1,5 +1,5 @@
 const electron = require("electron");
-const { app, BrowserWindow, ipcMain, net, Notification, shell } = electron;
+const { app, BrowserWindow, ipcMain, net, Notification, shell, dialog } = electron;
 const path = require("path");
 const { JSDOM } = require("jsdom");
 let fs = require("fs");
@@ -128,12 +128,45 @@ app.whenReady().then(() => {
         clearInterval(startInterval);
       }
     }, 1000);*/
-  //replay("2023/03/11 05:12:30"); //２か所同時
+  setTimeout(() => {
+    throw new Error("なにかとんでもないエラーが。。。");
+  }, 3000);
+  replay("2023/03/11 05:12:30"); //２か所同時
   //replay("2020/06/15 02:28:38");//２か所同時
 });
 // 全てのウィンドウが閉じたとき
 app.on("window-all-closed", () => {});
+var relaunchTimer;
+process.on("uncaughtException", function () {
+  const options = {
+    type: "error",
+    title: "エラー",
+    message: "予期しないエラーが発生しました",
+    detail: "動作を選択してください。\n10秒で自動的に再起動します。",
+    buttons: ["今すぐ再起動", "終了", "キャンセル"],
+  };
 
+  dialog.showMessageBox(options).then(function (result) {
+    switch (result.response) {
+      case 0:
+        app.relaunch();
+        app.exit(0);
+        break;
+      case 1:
+        app.quit();
+        break;
+      case 2:
+        clearTimeout(relaunchTimer);
+        break;
+      default:
+        break;
+    }
+  });
+  relaunchTimer = setTimeout(function () {
+    app.relaunch();
+    app.exit(0);
+  }, 10000);
+});
 //アプリのロード完了イベント
 electron.app.on("ready", () => {
   // Mac のみ Dock は非表示
@@ -288,26 +321,6 @@ function createWindow() {
         data: Replay,
       });
     }
-
-    EEWcontrol({
-      report_time: new Date(), //発表時刻
-      region_code: "", //震央地域コード
-      region_name: "存在しない地名", //震央地域
-      latitude: 35.6, //緯度
-      longitude: 140.3, //経度
-      is_cancel: false, //キャンセル
-      depth: 10, //深さ
-      calcintensity: "6+", //最大深度
-      is_final: false, //最終報
-      is_training: false, //訓練報
-      origin_time: new Date(), //発生時刻
-      magunitude: 8.8, //マグニチュード
-      report_num: 1, //第n報
-      report_id: 20991111111111, //地震ID
-      alertflg: "警報", //種別
-      condition: "",
-      source: "存在しない情報源",
-    });
   });
 
   mainWindow.loadFile("src/index.html");
