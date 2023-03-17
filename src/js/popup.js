@@ -69,6 +69,7 @@ var epiCenter = [];
 var EEW_LocalIDs = [];
 //EEW追加・更新
 function EEWAlertUpdate(data) {
+  console.log(data);
   data.forEach((elm) => {
     var same = now_EEW.find(function (elm2) {
       return elm.report_id == elm2.report_id && elm.report_num == elm2.report_num;
@@ -258,7 +259,7 @@ var EEWID = 0;
 function epiCenterUpdate(eid, latitude, longitude) {
   eid = Number(eid);
 
-  if (map) {
+  if (map && latitude && longitude) {
     var epicenterElm = epiCenter.find(function (elm2) {
       return elm2.eid == eid;
     });

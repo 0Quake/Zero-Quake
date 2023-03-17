@@ -1723,7 +1723,7 @@ function EEWClear(source, code, reportnum, bypass) {
         });
       }
 
-      if (estShindoTmp.eid == code) estShindoTmp = null;
+      if (estShindoTmp && estShindoTmp.eid == code) estShindoTmp = null;
 
       if (EEW_nowList.length == 0) {
         EEWNow = false;

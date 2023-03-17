@@ -660,19 +660,20 @@ function kmoniMapUpdate(dataTmp, type) {
       .sort(function (a, b) {
         return b.shindo - a.shindo;
       });
-    //removeChild(document.getElementById("pointList"));
-    var htmlTmp = "";
-    for (let a = 0; a < config.Info.RealTimeShake.List.ItemCount; a++) {
-      var shindoElm = shindoList[a];
-      if (shindoElm.shindo) {
-        var shindoColor = shindoConvert(shindoElm.shindo, 2);
-        var IntDetail = "";
-        if (a == 0) IntDetail = "<div class='intDetail'>" + Math.round(shindoElm.shindo * 10) / 10 + "</div>";
+    if (config) {
+      var htmlTmp = "";
+      for (let a = 0; a < config.Info.RealTimeShake.List.ItemCount; a++) {
+        var shindoElm = shindoList[a];
+        if (shindoElm.shindo) {
+          var shindoColor = shindoConvert(shindoElm.shindo, 2);
+          var IntDetail = "";
+          if (a == 0) IntDetail = "<div class='intDetail'>" + Math.round(shindoElm.shindo * 10) / 10 + "</div>";
 
-        htmlTmp += "<li><div class='int' style='color:" + shindoColor[1] + ";background:" + shindoColor[0] + "'>" + shindoConvert(shindoElm.shindo, 0) + IntDetail + "</div><div class='Pointname'>" + shindoElm.Region + " " + shindoElm.Name + "</div><div class='PGA'>PGA" + Math.round(shindoElm.pga * 100) / 100 + "</div></li>";
+          htmlTmp += "<li><div class='int' style='color:" + shindoColor[1] + ";background:" + shindoColor[0] + "'>" + shindoConvert(shindoElm.shindo, 0) + IntDetail + "</div><div class='Pointname'>" + shindoElm.Region + " " + shindoElm.Name + "</div><div class='PGA'>PGA" + Math.round(shindoElm.pga * 100) / 100 + "</div></li>";
+        }
       }
+      document.getElementById("pointList").innerHTML = htmlTmp;
     }
-    document.getElementById("pointList").innerHTML = htmlTmp;
   }
   //地図上マーカー
 
@@ -1024,6 +1025,7 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
   }
 
   var EEWPanelElm = document.getElementById("EEW-" + report_id);
+
   if (EQElm2 && EQElm2.distance && EEWPanelElm) {
     EEWPanelElm.querySelector(".PWave_value").setAttribute("stroke-dashoffset", 125.66 - 125.66 * Math.min(pRadius / 1000 / EQElm2.distance, 1));
     EEWPanelElm.querySelector(".SWave_value").setAttribute("stroke-dashoffset", 125.66 - 125.66 * Math.min(sRadius / 1000 / EQElm2.distance, 1));
