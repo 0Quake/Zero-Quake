@@ -94,7 +94,7 @@ function init() {
 
   if (EEWData) EQInfoControl(EEWData);
   jma_ListReq();
-  jma_B_ListReq();
+  //jma_B_ListReq();
   narikakun_ListReq(new Date().getFullYear(), new Date().getMonth() + 1);
 }
 //地図初期化
@@ -453,6 +453,7 @@ function estimated_intensity_mapReq() {
         return elm.url.split("_")[0] == String(eid).substring(0, 12);
       });
       if (ItemTmp) {
+        InfoType_add("type-6");
         estimated_intensity_map_legend = L.control({ position: "bottomright" });
         estimated_intensity_map_legend.onAdd = function () {
           var img = L.DomUtil.create("img");
@@ -510,24 +511,7 @@ function jma_ListReq() {
     })
     .catch(function () {});
 }
-//気象庁XMLリスト取得→jmaXML_Fetch
-function jma_B_ListReq() {
-  fetch("https://www.jma.go.jp/bosai/estimated_intensity_map/data/list.json")
-    .then(function (res) {
-      return res.json();
-    })
-    .then(function (data) {
-      data.forEach(function (elm) {
-        if (elm.url.substring(0, 12) == eid) {
-          var urlTmp = "https://www.jma.go.jp/bosai/estimated_intensity_map/data/" + elm.url + "/{x}{y}.png";
-          jmaURL.push(urlTmp);
-        }
-      });
 
-      mapDraw();
-    })
-    .catch(function () {});
-}
 //narikakun地震情報APIリスト取得→narikakun_Fetch
 function narikakun_ListReq(year, month, retry) {
   fetch("https://ntool.online/api/earthquakeList?year=" + year + "&month=" + month)
@@ -589,6 +573,7 @@ function jma_Fetch(url) {
         if (json.Body.Comments.FreeFormComment) commentText += json.Body.Comments.FreeFormComment;
       }
       EQInfoControl({
+        infoType: json.Head.Title,
         reportTime: json.Head.ReportDateTime,
         originTime: originTimeTmp,
         maxI: maxIntTmp,
@@ -601,10 +586,10 @@ function jma_Fetch(url) {
         cancel: cancelTmp,
       });
 
-      var newestshindo = shindo_lastUpDate < new Date(json.Head.ReportDateTime);
-      if (newestshindo) shindo_lastUpDate = new Date(json.Head.ReportDateTime);
-
-      if (json.Body.Intensity && json.Body.Intensity.Observation.Pref && newestshindo) {
+      if (json.Body.Intensity && json.Body.Intensity.Observation.Pref) {
+        var newestshindo = shindo_lastUpDate < new Date(json.Head.ReportDateTime);
+        if (newestshindo) shindo_lastUpDate = new Date(json.Head.ReportDateTime);
+        else return;
         removeChild(document.getElementById("Shindo"));
 
         document.getElementById("ShindoWrap").style.display = "inline-block";
@@ -676,6 +661,7 @@ function jmaXMLFetch(url) {
       }
 
       EQInfoControl({
+        infoType: xml.querySelector("Head Title").textContent,
         reportTime: new Date(xml.querySelector("Head ReportDateTime").textContent),
         originTime: originTimeTmp,
         maxI: maxIntTmp,
@@ -689,9 +675,10 @@ function jmaXMLFetch(url) {
         cancel: cancelTmp,
       });
 
-      var newestshindo = shindo_lastUpDate < new Date(xml.querySelector("Head ReportDateTime").textContent);
-      if (newestshindo) shindo_lastUpDate = new Date(xml.querySelector("Head ReportDateTime").textContent);
-      if (xml.querySelector("Body Intensity") && xml.querySelector("Body Intensity Observation Pref") && newestshindo) {
+      if (xml.querySelector("Body Intensity") && xml.querySelector("Body Intensity Observation Pref")) {
+        var newestshindo = shindo_lastUpDate < new Date(xml.querySelector("Head ReportDateTime").textContent);
+        if (newestshindo) shindo_lastUpDate = new Date(xml.querySelector("Head ReportDateTime").textContent);
+        else return;
         document.getElementById("ShindoWrap").style.display = "inline-block";
         removeChild(document.getElementById("Shindo"));
 
@@ -740,6 +727,7 @@ function narikakun_Fetch(url) {
         var cancelTmp = json.Head.InfoType == "取消";
 
         EQInfoControl({
+          infoType: json.Head.Title,
           reportTime: json.Head.ReportDateTime,
           originTime: originTimeTmp,
           maxI: maxIntTmp,
@@ -752,10 +740,11 @@ function narikakun_Fetch(url) {
           cancel: cancelTmp,
         });
 
-        var newestshindo = shindo_lastUpDate < new Date(json.Head.ReportDateTime);
-        if (newestshindo) shindo_lastUpDate = new Date(json.Head.ReportDateTime);
+        if (json.Body.Intensity && json.Body.Intensity.Observation.Pref && json.Body.Intensity.Observation.Pref.length > 0) {
+          var newestshindo = shindo_lastUpDate < new Date(json.Head.ReportDateTime);
+          if (newestshindo) shindo_lastUpDate = new Date(json.Head.ReportDateTime);
+          else return;
 
-        if (json.Body.Intensity && json.Body.Intensity.Observation.Pref && json.Body.Intensity.Observation.Pref.length > 0 && newestshindo) {
           document.getElementById("ShindoWrap").style.display = "inline-block";
           removeChild(document.getElementById("Shindo"));
 
@@ -903,11 +892,15 @@ function add_IntensityStation_info(lat, lng, name, int) {
 
 //地震情報マージ
 function EQInfoControl(data) {
+  if (data.infoType == "震源・震度情報") return;
   var mostNew = false;
 
   if (!newInfoDateTime || newInfoDateTime <= data.reportTime || (EQInfo.eew && !data.eew)) {
     newInfoDateTime = data.reportTime;
     mostNew = true;
+  }
+  if (data.eew) {
+    InfoType_add("type-1");
   }
   EQInfo.eew = data.eew;
   if (data.cancel) document.getElementById("canceled").style.display = "flex";
@@ -962,6 +955,26 @@ function EQInfoControl(data) {
     }
 
     map.setView([data.lat, data.lng], 6);
+  }
+
+  switch (data.infoType) {
+    case "震度速報":
+      InfoType_add("type-2");
+      break;
+    case "震源に関する情報":
+      InfoType_add("type-3");
+      break;
+    case "震源・震度情報":
+      InfoType_add("type-4-1");
+      break;
+    case "遠地地震に関する情報":
+      InfoType_add("type-4-2");
+      break;
+    case "顕著な地震の震源要素更新のお知らせ":
+      InfoType_add("type-5");
+      break;
+    default:
+      break;
   }
 
   //  {originTime:,maxI:,mag:,lat:,lng:,depth:,epiCenter:,comment:,}
@@ -1022,3 +1035,30 @@ document.getElementById("AllClose").addEventListener("click", function () {
     elm.classList.remove("open");
   });
 });
+
+function InfoType_add(type) {
+  document.getElementById(type).style.display = "inline-block";
+  switch (type) {
+    case "type-4-1":
+    case "type-4-2":
+      document.getElementById("type-2").classList.add("disabled");
+      document.getElementById("type-3").classList.add("disabled");
+      break;
+    case "type-5":
+      document.getElementById("type-3").classList.add("disabled");
+      break;
+
+    /* eslint-disable no-duplicate-case */
+    case "type-2":
+    case "type-3":
+    case "type-4-1":
+    case "type-4-2":
+    case "type-5":
+      /* eslint-enable */
+      document.getElementById("type-1").classList.add("disabled");
+      break;
+
+    default:
+      break;
+  }
+}

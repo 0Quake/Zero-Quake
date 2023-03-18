@@ -368,3 +368,28 @@ td {
 #homeShindo .ShindoItem::before {
   display: none;
 }
+#infoKind {
+  text-align: center;
+  font-size: 0;
+  white-space: nowrap;
+  max-width: 100vw;
+  overflow-x: auto;
+  background: #161616;
+}
+#infoKind div {
+  display: inline-block;
+  font-size: 15px;
+}
+#infoKind span {
+  display: none;
+  padding: 1px 3px;
+  border-radius: 2px;
+  background: #444;
+  border: solid 1px #555;
+  font-size: 13px;
+  margin: 2px;
+}
+#infoKind span.disabled {
+  background: #222;
+  color: #999;
+}
