@@ -118,8 +118,10 @@ app.whenReady().then(() => {
       createWindow();
     }
   });
-
-  replay("2023/03/18 20:08:10");
+  setTimeout(() => {
+    throw new Error("なにかとんでもないエラーが。。。");
+  }, 3000);
+  //replay("2023/03/18 20:08:10");
   //replay("2023/03/11 05:12:30"); //２か所同時
   //replay("2020/06/15 02:28:38");//２か所同時
 });
@@ -127,36 +129,73 @@ app.whenReady().then(() => {
 // 全てのウィンドウが閉じたとき
 app.on("window-all-closed", () => {});
 var relaunchTimer;
-process.on("uncaughtException", function () {
+process.on("uncaughtException", function (err) {
   const options = {
     type: "error",
     title: "エラー",
     message: "予期しないエラーが発生しました",
     detail: "動作を選択してください。\n10秒で自動的に再起動します。",
     buttons: ["今すぐ再起動", "終了", "キャンセル"],
+    noLink: true,
+  };
+  const options2 = {
+    type: "question",
+    title: "エラー情報の送信",
+    message: "エラー情報を送信しますか",
+    detail: "情報は今後のバグ改善に活用します。個人を特定できる情報を送信することはありません。\nご協力をお願いします。",
+    buttons: ["送信", "送信しない"],
+    noLink: true,
+  };
+  const options3 = {
+    type: "error",
+    title: "エラー",
+    message: "エラーログ送信に失敗しました。",
+    detail: "",
+    buttons: ["OK"],
   };
 
   dialog.showMessageBox(options).then(function (result) {
-    switch (result.response) {
-      case 0:
-        app.relaunch();
-        app.exit(0);
-        break;
-      case 1:
-        app.quit();
-        break;
-      case 2:
-        clearTimeout(relaunchTimer);
-        break;
-      default:
-        break;
-    }
+    clearTimeout(relaunchTimer);
+
+    dialog.showMessageBox(options2).then(function (result2) {
+      if (result2.response == 0) {
+        // リクエストの生成
+        let request = net.request({
+          url: "https://zeroquake.wwww.jp/crashReport/?errorMsg=" + encodeURI(err.stack) + "&soft_version=" + encodeURI(process.env.npm_package_version),
+        });
+        request.on("error", () => {
+          dialog.showMessageBox(options3);
+          errorResolve(result.response);
+        });
+        request.on("response", () => {
+          errorResolve(result.response);
+        });
+        // リクエストの送信
+        request.end();
+      }
+    });
   });
   relaunchTimer = setTimeout(function () {
     app.relaunch();
     app.exit(0);
   }, 10000);
 });
+function errorResolve(response) {
+  switch (response) {
+    case 0:
+      app.relaunch();
+      app.exit(0);
+      break;
+    case 1:
+      app.quit();
+      break;
+    case 2:
+      break;
+    default:
+      break;
+  }
+}
+
 //アプリのロード完了イベント
 electron.app.on("ready", () => {
   // Mac のみ Dock は非表示
