@@ -8,6 +8,9 @@ const store = new Store();
 var config = store.get("config", {
   config: {
     setting1: true,
+    system: {
+      crashReportAutoSend: false,
+    },
     home: {
       name: "自宅",
       latitude: 35.68,
@@ -126,60 +129,59 @@ app.whenReady().then(() => {
   //replay("2020/06/15 02:28:38");//２か所同時
 });
 
+const options = {
+  type: "error",
+  title: "エラー",
+  message: "予期しないエラーが発生しました",
+  detail: "動作を選択してください。\n10秒で自動的に再起動します。",
+  buttons: ["今すぐ再起動", "終了", "キャンセル"],
+  noLink: true,
+};
+const options2 = {
+  type: "question",
+  title: "エラー情報の送信",
+  message: "エラー情報を送信しますか",
+  detail: "情報は今後のバグ改善に活用します。個人を特定できる情報を送信することはありません。\nご協力をお願いします。",
+  buttons: ["送信", "送信しない"],
+  checkboxLabel: "選択を記憶",
+  noLink: true,
+};
+const options3 = {
+  type: "error",
+  title: "エラー",
+  message: "エラーログ送信に失敗しました。",
+  detail: "",
+  buttons: ["OK"],
+};
+
 // 全てのウィンドウが閉じたとき
 app.on("window-all-closed", () => {});
 var relaunchTimer;
+//エラー処理
 process.on("uncaughtException", function (err) {
-  const options = {
-    type: "error",
-    title: "エラー",
-    message: "予期しないエラーが発生しました",
-    detail: "動作を選択してください。\n10秒で自動的に再起動します。",
-    buttons: ["今すぐ再起動", "終了", "キャンセル"],
-    noLink: true,
-  };
-  const options2 = {
-    type: "question",
-    title: "エラー情報の送信",
-    message: "エラー情報を送信しますか",
-    detail: "情報は今後のバグ改善に活用します。個人を特定できる情報を送信することはありません。\nご協力をお願いします。",
-    buttons: ["送信", "送信しない"],
-    noLink: true,
-  };
-  const options3 = {
-    type: "error",
-    title: "エラー",
-    message: "エラーログ送信に失敗しました。",
-    detail: "",
-    buttons: ["OK"],
-  };
-
   dialog.showMessageBox(options).then(function (result) {
     clearTimeout(relaunchTimer);
 
-    dialog.showMessageBox(options2).then(function (result2) {
-      if (result2.response == 0) {
-        // リクエストの生成
-        let request = net.request({
-          url: "https://zeroquake.wwww.jp/crashReport/?errorMsg=" + encodeURI(err.stack) + "&soft_version=" + encodeURI(process.env.npm_package_version),
-        });
-        request.on("error", () => {
-          dialog.showMessageBox(options3);
-          errorResolve(result.response);
-        });
-        request.on("response", () => {
-          errorResolve(result.response);
-        });
-        // リクエストの送信
-        request.end();
-      }
-    });
+    if (config.system.crashReportAutoSend) {
+      crashReportSend(err.stack, result);
+    } else {
+      dialog.showMessageBox(options2).then(function (result2) {
+        if (result2.checkboxChecked) {
+          config.system.crashReportAutoSend = result2.response == 0;
+          store.set("config", config);
+        }
+        if (result2.response == 0) {
+          crashReportSend(err.stack, result);
+        }
+      });
+    }
   });
   relaunchTimer = setTimeout(function () {
     app.relaunch();
     app.exit(0);
   }, 10000);
 });
+//エラー処理 本体
 function errorResolve(response) {
   switch (response) {
     case 0:
@@ -194,6 +196,21 @@ function errorResolve(response) {
     default:
       break;
   }
+}
+//クラッシュレポートの送信
+function crashReportSend(errMsg, result) {
+  let request = net.request({
+    url: "https://zeroquake.wwww.jp/crashReport/?errorMsg=" + encodeURI(errMsg) + "&soft_version=" + encodeURI(process.env.npm_package_version),
+  });
+  request.on("error", () => {
+    dialog.showMessageBox(options3);
+    errorResolve(result.response);
+  });
+  request.on("response", () => {
+    errorResolve(result.response);
+  });
+  // リクエストの送信
+  request.end();
 }
 
 //アプリのロード完了イベント
