@@ -26,6 +26,8 @@ var jmaXMLURLHis = [];
 var narikakunURLHis = [];
 var EQInfo = { originTime: null, maxI: null, mag: null, lat: null, lng: null, depth: null, epiCenter: null, comment: null };
 var shindo_lastUpDate = 0;
+var mapLayer;
+var basemap;
 
 fetch("https://files.nakn.jp/earthquake/code/PointSeismicIntensityLocation.json")
   .then(function (res) {
@@ -35,10 +37,10 @@ fetch("https://files.nakn.jp/earthquake/code/PointSeismicIntensityLocation.json"
     pointList = data;
   });
 
+var EEWData;
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "metaData") {
     eid = request.eid;
-    console.log(request.urls);
     if (request.urls && Array.isArray(request.urls)) {
       jmaURL = request.urls.filter(function (elm) {
         return String(elm).indexOf("www.jma.go.jp") != -1;
@@ -49,6 +51,27 @@ window.electronAPI.messageSend((event, request) => {
       narikakunURL = request.urls.filter(function (elm) {
         return String(elm).indexOf("dev.narikakun.net") != -1;
       });
+    }
+    if (request.eew) {
+      if (request.eew.canceled) {
+        //EEWキャンセル
+      } else {
+        var eewItem = request.eew.data[request.eew.data.length - 1];
+
+        EEWData = {
+          reportTime: eewItem.report_time,
+          originTime: eewItem.origin_time,
+          maxI: eewItem.calcintensity,
+          mag: eewItem.magunitude,
+          lat: eewItem.latitude,
+          lng: eewItem.longitude,
+          depth: eewItem.depth,
+          epiCenter: eewItem.region_name,
+          comment: "",
+          cancel: false,
+          eew: true,
+        };
+      }
     }
     init();
   } else if (request.action == "setting") {
@@ -67,10 +90,12 @@ fetch("./Resource/Section_CenterLocation.json")
 
 //開始処理
 function init() {
+  Mapinit();
+
+  if (EEWData) EQInfoControl(EEWData);
   jma_ListReq();
   jma_B_ListReq();
   narikakun_ListReq(new Date().getFullYear(), new Date().getMonth() + 1);
-  Mapinit();
 }
 //地図初期化
 function Mapinit() {
@@ -880,10 +905,11 @@ function add_IntensityStation_info(lat, lng, name, int) {
 function EQInfoControl(data) {
   var mostNew = false;
 
-  if (!newInfoDateTime || newInfoDateTime <= data.reportTime) {
+  if (!newInfoDateTime || newInfoDateTime <= data.reportTime || (EQInfo.eew && !data.eew)) {
     newInfoDateTime = data.reportTime;
     mostNew = true;
   }
+  EQInfo.eew = data.eew;
   if (data.cancel) document.getElementById("canceled").style.display = "flex";
 
   if (data.originTime && (mostNew || !EQInfo.originTime)) EQInfo.originTime = data.originTime;

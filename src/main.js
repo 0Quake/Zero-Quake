@@ -121,9 +121,6 @@ app.whenReady().then(() => {
       createWindow();
     }
   });
-  setTimeout(() => {
-    throw new Error("なにかとんでもないエラーが。。。");
-  }, 3000);
   //replay("2023/03/18 20:08:10");
   //replay("2023/03/11 05:12:30"); //２か所同時
   //replay("2020/06/15 02:28:38");//２か所同時
@@ -490,10 +487,15 @@ function EQInfocreateWindow(response) {
       action: "setting",
       data: config,
     });
+    var EEWDataItem = EEW_Data.find(function (elm) {
+      return elm.EQ_id == response.eid;
+    });
+
     EQInfoWindow.webContents.send("message2", {
       action: "metaData",
       eid: response.eid,
       urls: response.urls,
+      eew: EEWDataItem,
     });
   });
 
