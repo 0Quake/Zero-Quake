@@ -500,6 +500,14 @@ function EQInfocreateWindow(response) {
   });
 
   EQInfoWindow.loadFile(response.url);
+  const handleUrlOpen = (e, url) => {
+    if (url.match(/^http/)) {
+      e.preventDefault();
+      shell.openExternal(url);
+    }
+  };
+  settingWindow.webContents.on("will-navigate", handleUrlOpen);
+  settingWindow.webContents.on("new-window", handleUrlOpen);
 
   //EQInfoWindow.on("close", () => {});
 }
