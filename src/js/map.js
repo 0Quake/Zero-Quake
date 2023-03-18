@@ -496,7 +496,7 @@ function init() {
           color: "#0449b8",
           weight: 1,
           fill: true,
-          fillColor: "#78acff",
+          fillColor: "#325385",
           fillOpacity: 0.5,
           attribution: "国土地理院",
           renderer: jsonMAP1Canvas,
