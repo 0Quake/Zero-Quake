@@ -32,7 +32,7 @@ window.electronAPI.messageSend((event, request) => {
     document.getElementById("maxKaikyu").textContent = request.data.avrrank;
     if (Number(request.data.avrrank) > 0) {
       document.getElementById("region_name2").textContent = request.data.avrarea_list.join(" ");
-      return false;
+      document.getElementById("region_name2Wrap").style.display = "block";
       /*
       request.data.avrarea_list.forEach(function (elm) {
         var section = sections.find(function (elm2) {
@@ -43,7 +43,7 @@ window.electronAPI.messageSend((event, request) => {
         }
       });*/
     } else {
-      document.getElementById("region_name2").textContent = "";
+      document.getElementById("region_name2Wrap").style.display = "none";
     }
   } else if (request.action == "longWaveClear") {
     document.getElementById("LWaveWrap").style.display = "none";
@@ -647,20 +647,15 @@ function kmoniMapUpdate(dataTmp, type) {
   if (!dataTmp) return;
   if (type == "knet") {
     kmoniMapData = dataTmp;
-  } else if (type == "snet") {
-    SnetMapData = dataTmp;
-  }
-
-  if (type == "knet") {
-    //リアルタイム震度タブ
-    var shindoList = dataTmp
-      .filter(function (elm) {
-        return elm.shindo;
-      })
-      .sort(function (a, b) {
-        return b.shindo - a.shindo;
-      });
-    if (config) {
+    if (config && document.getElementById("tab1_content2").classList.contains("active_tabcontent")) {
+      //リアルタイム震度タブ
+      var shindoList = dataTmp
+        .filter(function (elm) {
+          return elm.shindo;
+        })
+        .sort(function (a, b) {
+          return b.shindo - a.shindo;
+        });
       var htmlTmp = "";
       for (let a = 0; a < config.Info.RealTimeShake.List.ItemCount; a++) {
         var shindoElm = shindoList[a];
@@ -674,75 +669,83 @@ function kmoniMapUpdate(dataTmp, type) {
       }
       document.getElementById("pointList").innerHTML = htmlTmp;
     }
+  } else if (type == "snet") {
+    SnetMapData = dataTmp;
   }
+
   //地図上マーカー
+  var codeEscaped;
+  var markerElement;
+  var popup_content;
+  var marker_add;
+  var changed;
+  for (elm of dataTmp) {
+    if (elm.Point && !elm.IsSuspended) {
+      codeEscaped = elm.Code.replace(".", "_");
+      markerElement = document.querySelector(".KmoniPoint_" + codeEscaped);
 
-  dataTmp.forEach(function (elm, index) {
-    var codeEscaped = elm.Code.replace(".", "_");
-    if (elm.Point && elm.data && !elm.IsSuspended) {
-      var changed;
-      var marker_add = false;
+      if (elm.data) {
+        changed = false;
+        marker_add = false;
 
-      var markerElement = document.querySelector(".KmoniPoint_" + codeEscaped);
-      if (!markerElement) {
-        marker_add = true;
-        points[elm.Code] = addPointMarker(elm);
-        markerElement = document.querySelector(".KmoniPoint_" + codeEscaped);
-      }
-
-      if (previous_points.length == 0) {
-        changed = true;
-      } else {
-        var pga0 = previous_points[elm.Code].pga;
-        changed = pga0 && pga0 !== elm.pga;
-      }
-
-      if (changed || marker_add) {
-        var markerCircleElm = markerElement.querySelector(".marker-circle");
-        markerCircleElm.style.background = "rgb(" + elm.rgb.join(",") + ")";
-
-        //markerElement.style.display = "block";
-        var PNameTmp = elm.Name ? elm.Name : "";
-        var detecting = elm.detect || elm.detect2 ? "block" : "none";
-        var shindoStr = Math.round(elm.shindo * 10) / 10;
-        var pgaStr = Math.round(elm.pga * 100) / 100;
-        var connectStr = "";
-        if (elm.Type == "S-net") connectStr = "_";
-        var popup_content = "<h3 class='PointName' style='border-bottom:solid 2px rgb(" + elm.rgb.join(",") + ")'>" + PNameTmp + "<span>" + elm.Type + connectStr + elm.Code + "</span></h3><h4 class='detecting' style='display:" + detecting + "'>地震検知中</h4><table><tr><td>震度</td><td class='PointInt'>" + shindoStr + "</td></tr><tr><td>PGA</td><td class='PointPGA'>" + pgaStr + "</td></tr></table>";
-        points[elm.Code].marker.setPopupContent(popup_content);
-
-        markerCircleElm.classList.remove("strongDetectingMarker", "detectingMarker", "marker_Int", "marker_Int1", "marker_Int2", "marker_Int3", "marker_Int4", "marker_Int5m", "marker_Int5p", "marker_Int6m", "marker_Int6p", "marker_Int7", "marker_Int7p");
-
-        if (elm.detect2) {
-          markerCircleElm.classList.add("strongDetectingMarker");
-        } else if (elm.detect) {
-          markerCircleElm.classList.add("detectingMarker");
+        if (!markerElement) {
+          marker_add = true;
+          points[elm.Code] = addPointMarker(elm);
+          markerElement = document.querySelector(".KmoniPoint_" + codeEscaped);
         }
 
-        var IntTmp = shindoConvert(elm.shindo, 3);
-        if (IntTmp) {
-          points[elm.Code].marker.setZIndexOffset(shindoConvert(elm.shindo, 5) * 1000);
-          markerCircleElm.classList.add("marker_Int", "marker_Int" + IntTmp);
+        if (previous_points.length == 0) {
+          changed = true;
         } else {
-          points[elm.Code].marker.setZIndexOffset(0);
+          var pga0 = previous_points[elm.Code].pga;
+          changed = pga0 && pga0 !== elm.pga;
+        }
+
+        if (changed || marker_add) {
+          var markerCircleElm = markerElement.querySelector(".marker-circle");
+          markerCircleElm.style.background = "rgb(" + elm.rgb.join(",") + ")";
+
+          //markerElement.style.display = "block";
+          var PNameTmp = elm.Name ? elm.Name : "";
+          var detecting = elm.detect || elm.detect2 ? "block" : "none";
+          var shindoStr = Math.round(elm.shindo * 10) / 10;
+          var pgaStr = Math.round(elm.pga * 100) / 100;
+          var connectStr = "";
+          if (elm.Type == "S-net") connectStr = "_";
+          popup_content = "<h3 class='PointName' style='border-bottom:solid 2px rgb(" + elm.rgb.join(",") + ")'>" + PNameTmp + "<span>" + elm.Type + connectStr + elm.Code + "</span></h3><h4 class='detecting' style='display:" + detecting + "'>地震検知中</h4><table><tr><td>震度</td><td class='PointInt'>" + shindoStr + "</td></tr><tr><td>PGA</td><td class='PointPGA'>" + pgaStr + "</td></tr></table>";
+          points[elm.Code].marker.setPopupContent(popup_content);
+
+          markerCircleElm.classList.remove("strongDetectingMarker", "detectingMarker", "marker_Int", "marker_Int1", "marker_Int2", "marker_Int3", "marker_Int4", "marker_Int5m", "marker_Int5p", "marker_Int6m", "marker_Int6p", "marker_Int7", "marker_Int7p");
+
+          if (elm.detect2) {
+            markerCircleElm.classList.add("strongDetectingMarker");
+          } else if (elm.detect) {
+            markerCircleElm.classList.add("detectingMarker");
+          }
+
+          var IntTmp = shindoConvert(elm.shindo, 3);
+          if (IntTmp) {
+            points[elm.Code].marker.setZIndexOffset(shindoConvert(elm.shindo, 5) * 1000);
+            markerCircleElm.classList.add("marker_Int", "marker_Int" + IntTmp);
+          } else {
+            points[elm.Code].marker.setZIndexOffset(0);
+          }
+        }
+      } else {
+        if (markerElement) {
+          var markerCircleElm = markerElement.querySelector(".marker-circle");
+          markerCircleElm.style.background = "rgba(128,128,128,0.5)";
+          markerCircleElm.classList.remove("strongDetectingMarker");
+          markerCircleElm.classList.remove("detectingMarker");
+          var PNameTmp = elm.Name ? elm.Name : "";
+
+          popup_content = "<h3 class='PointName' style='border-bottom:solid 2px rgba(128,128,128,0.5)'>" + PNameTmp + "<span>" + elm.Code + "</span></h3><h4 class='detecting' style='display:none'>地震検知中</h4><table><tr><td>震度</td><td class='PointInt'>?</td></tr><tr><td>PGA</td><td class='PointPGA'>?</td></tr></table>";
+          points[elm.Code].marker.setPopupContent(popup_content);
         }
       }
-    } else {
-      var markerElement = document.querySelector(".KmoniPoint_" + codeEscaped);
-      if (markerElement) {
-        var markerCircleElm = markerElement.querySelector(".marker-circle");
-        markerCircleElm.style.background = "rgba(128,128,128,0.5)";
-        markerCircleElm.classList.remove("strongDetectingMarker");
-        markerCircleElm.classList.remove("detectingMarker");
-        var PNameTmp = elm.Name ? elm.Name : "";
-
-        var popup_content = "<h3 class='PointName' style='border-bottom:solid 2px rgba(128,128,128,0.5)'>" + PNameTmp + "<span>" + elm.Code + "</span></h3><h4 class='detecting' style='display:none'>地震検知中</h4><table><tr><td>震度</td><td class='PointInt'>?</td></tr><tr><td>PGA</td><td class='PointPGA'>?</td></tr></table>";
-        points[elm.Code].marker.setPopupContent(popup_content);
-      }
+      previous_points[elm.Code] = elm;
     }
-
-    if (index == points.length - 1) previous_points = dataTmp;
-  });
+  }
 }
 
 var estShindoTmp;

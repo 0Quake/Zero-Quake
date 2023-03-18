@@ -112,7 +112,6 @@ app.whenReady().then(() => {
 
   createWindow();
 
-  // アプリケーションがアクティブになった時
   app.on("activate", () => {
     // メインウィンドウが消えている場合は再度メインウィンドウを作成する
     if (BrowserWindow.getAllWindows().length === 0) {
@@ -120,17 +119,11 @@ app.whenReady().then(() => {
     }
   });
 
-  /*
-    var startInterval = setInterval(function () {
-      if (!started) {
-        start();
-      } else {
-        clearInterval(startInterval);
-      }
-    }, 1000);*/
+  replay("2023/03/18 20:08:10");
   //replay("2023/03/11 05:12:30"); //２か所同時
   //replay("2020/06/15 02:28:38");//２か所同時
 });
+
 // 全てのウィンドウが閉じたとき
 app.on("window-all-closed", () => {});
 var relaunchTimer;
@@ -520,8 +513,8 @@ function kmoniControl(data, date) {
           }) / ptDataTmp.SUMTmp.length;
         if (!pgaAvr) pgaAvr = 0.03;
 
-        threshold02 = 0.4 * pgaAvr + 0.03;
-        threshold03 = 0.5 * pgaAvr + 0.14;
+        threshold02 = 0.4 * pgaAvr + 0.025;
+        threshold03 = 0.5 * pgaAvr + 0.1;
         if (ptDataTmp.isCity) {
           threshold02 *= 2;
           threshold03 *= 2;
@@ -554,7 +547,7 @@ function kmoniControl(data, date) {
         }
 
         oneBeforePGADifference = elm.pga - ptDataTmp.SUMTmp[ptDataTmp.SUMTmp.length - 1];
-        if (oneBeforePGADifference > 0) {
+        if (oneBeforePGADifference >= 0) {
           ptDataTmp.UpCount++;
         } else if (oneBeforePGADifference < 0) {
           ptDataTmp.UpCount = 0;
@@ -1819,6 +1812,7 @@ function EEWAlert(data, first, update) {
         epiCenter: data.region_name,
         M: data.magunitude,
         maxI: data.calcintensity,
+        cancel: data.is_cancel,
         DetailURL: [],
       },
     ],
@@ -2317,7 +2311,9 @@ function eqInfoControl(dataList, type, EEW) {
         if (EQElm) {
           var newer = EQElm.reportDateTime < data.reportDateTime;
           var changed = false;
+          if (EEW && EQElm.category !== "EEW") return; //EEW以外の情報が入っているとき、EEWによる情報を破棄
           if (!EEW && EQElm.category == "EEW") {
+            //EEWによらない情報が入ったら、EEWによる情報をクリアー
             newer = true;
             EQElm = {
               eventId: EQElm.eventId,
@@ -2349,11 +2345,13 @@ function eqInfoControl(dataList, type, EEW) {
             changed = true;
           }
 
-          if (data.cancel && (!EQElm.cancel || newer)) {
-            EQElm.cancel = data.cancel;
-            changed = true;
+          if (data.cancel && (!EEW || EQElm.category == "EEW")) {
+            //EEWによるキャンセル報の場合、EEWによる情報以外取り消さない
+            if (data.cancel && (!EQElm.cancel || newer)) {
+              EQElm.cancel = data.cancel;
+              changed = true;
+            }
           }
-
           EQElm.category = data.category;
 
           if (data.DetailURL && data.DetailURL[0] !== "" && !EQElm.DetailURL.includes(data.DetailURL[0])) {
