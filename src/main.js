@@ -207,12 +207,20 @@ function crashReportSend(errMsg, result) {
   let request = net.request({
     url: "https://zeroquake.wwww.jp/crashReport/?errorMsg=" + encodeURI(errMsg) + "&soft_version=" + encodeURI(process.env.npm_package_version),
   });
+
   request.on("error", () => {
-    dialog.showMessageBox(options3);
-    errorResolve(result.response);
+    dialog.showMessageBox(options3).then(function () {
+      errorResolve(result.response);
+    });
   });
-  request.on("response", () => {
-    errorResolve(result.response);
+  request.on("response", (res) => {
+    if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
+      dialog.showMessageBox(options3).then(function () {
+        errorResolve(result.response);
+      });
+    } else {
+      errorResolve(result.response);
+    }
   });
   // リクエストの送信
   request.end();
@@ -692,7 +700,7 @@ function kmoniControl(data, date) {
             }
           }
         } else if (elm.detect2) {
-          EQDetect_List.push({ id: EQDetectID, lat: elm.Location.Latitude, lng: elm.Location.Longitude, Codes: [elm], Radius: 0, maxPGA: elm.pga, detectCount: 1, Up: false, Lv: 0, last_Detect: new Date(), origin_Time: new Date(), showed: false });
+          EQDetect_List.push({ id: EQDetectID, lat: elm.Location.Latitude, lng: elm.Location.Longitude, Codes: [elm], Radius: 0, maxPGA: elm.pga, maxInt: elm.shindo, detectCount: 1, Up: false, Lv: 0, last_Detect: new Date(), origin_Time: new Date(), showed: false });
           EQDetectID++;
 
           //新報
