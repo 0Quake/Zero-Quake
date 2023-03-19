@@ -78,10 +78,6 @@ function init() {
   if (inited || !config || !windowLoaded) return;
   inited = true;
   map = L.map("mapcontainer", {
-    maxBounds: [
-      [90, -180],
-      [-90, 180],
-    ],
     center: [32.99125, 138.46],
     zoom: 4,
     minZoom: 3.5,

@@ -100,10 +100,6 @@ function init() {
 //地図初期化rootS
 function Mapinit() {
   map = L.map("mapcontainer", {
-    maxBounds: [
-      [90, -180],
-      [-90, 180],
-    ],
     center: [32.99125, 138.46],
     zoom: 4,
     minZoom: 3.5,
@@ -1028,7 +1024,6 @@ function add_IntensityStation_info(lat, lng, name, int) {
 
 //地震情報マージ
 function EQInfoControl(data) {
-  if (data.infoType == "震源・震度情報") return;
   var mostNew = false;
 
   if (!newInfoDateTime || newInfoDateTime <= data.reportTime || (EQInfo.eew && !data.eew)) {
