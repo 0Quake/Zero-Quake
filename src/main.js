@@ -522,8 +522,8 @@ function EQInfocreateWindow(response) {
       shell.openExternal(url);
     }
   };
-  settingWindow.webContents.on("will-navigate", handleUrlOpen);
-  settingWindow.webContents.on("new-window", handleUrlOpen);
+  EQInfoWindow.webContents.on("will-navigate", handleUrlOpen);
+  EQInfoWindow.webContents.on("new-window", handleUrlOpen);
 
   //EQInfoWindow.on("close", () => {});
 }
