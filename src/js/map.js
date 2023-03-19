@@ -730,7 +730,16 @@ function kmoniMapUpdate(dataTmp, type) {
 }
 
 //強震モニタリストの描画
+var pointListLoading = document.getElementById("pointListLoading");
+var pointList = document.getElementById("pointList");
+
 function kmoniListDraw(dataTmp) {
+  if (!dataTmp) {
+    pointListLoading.style.display = "block";
+    pointList.innerHTML = "";
+    return false;
+  }
+  pointListLoading.style.display = "none";
   var shindoList = dataTmp
     .filter(function (elm) {
       return elm.shindo;
@@ -749,7 +758,7 @@ function kmoniListDraw(dataTmp) {
       htmlTmp += "<li><div class='int' style='color:" + shindoColor[1] + ";background:" + shindoColor[0] + "'>" + shindoConvert(shindoElm.shindo, 0) + IntDetail + "</div><div class='Pointname'>" + shindoElm.Region + " " + shindoElm.Name + "</div><div class='PGA'>PGA" + Math.round(shindoElm.pga * 100) / 100 + "</div></li>";
     }
   }
-  document.getElementById("pointList").innerHTML = htmlTmp;
+  pointList.innerHTML = htmlTmp;
 }
 
 //タブ有効化時 即時に描画
