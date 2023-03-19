@@ -393,3 +393,9 @@ td {
   background: #222;
   color: #999;
 }
+#estimated_intensity_map_canvas {
+  display: none;
+}
+.estimated_intensity_map_img {
+  image-rendering: pixelated;
+}

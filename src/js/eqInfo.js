@@ -40,7 +40,7 @@ fetch("https://files.nakn.jp/earthquake/code/PointSeismicIntensityLocation.json"
 var EEWData;
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "metaData") {
-    eid = request.eid;
+    eid = 20230225222754; //request.eid;
     if (request.urls && Array.isArray(request.urls)) {
       jmaURL = request.urls.filter(function (elm) {
         return String(elm).indexOf("www.jma.go.jp") != -1;
@@ -97,7 +97,7 @@ function init() {
   //jma_B_ListReq();
   narikakun_ListReq(new Date().getFullYear(), new Date().getMonth() + 1);
 }
-//地図初期化
+//地図初期化rootS
 function Mapinit() {
   map = L.map("mapcontainer", {
     maxBounds: [
@@ -442,6 +442,24 @@ function Mapinit() {
   estimated_intensity_mapReq();
 }
 var estimated_intensity_map_legend;
+var estimated_intensity_map_canvas = document.getElementById("estimated_intensity_map_canvas");
+const ctx = estimated_intensity_map_canvas.getContext("2d");
+var rootElm = document.querySelector(":root");
+var rStyle = getComputedStyle(rootElm);
+
+shindo4C = rStyle.getPropertyValue("--IntTheme_4_BgColor").match(/\d+/g);
+shindo4C = { r: Number(shindo4C[0]), g: Number(shindo4C[1]), b: Number(shindo4C[2]) };
+shindo5mC = rStyle.getPropertyValue("--IntTheme_5m_BgColor").match(/\d+/g);
+shindo5mC = { r: Number(shindo5mC[0]), g: Number(shindo5mC[1]), b: Number(shindo5mC[2]) };
+shindo5pC = rStyle.getPropertyValue("--IntTheme_5p_BgColor").match(/\d+/g);
+shindo5pC = { r: Number(shindo5pC[0]), g: Number(shindo5pC[1]), b: Number(shindo5pC[2]) };
+shindo6mC = rStyle.getPropertyValue("--IntTheme_6m_BgColor").match(/\d+/g);
+shindo6mC = { r: Number(shindo6mC[0]), g: Number(shindo6mC[1]), b: Number(shindo6mC[2]) };
+shindo6pC = rStyle.getPropertyValue("--IntTheme_6p_BgColor").match(/\d+/g);
+shindo6pC = { r: Number(shindo6pC[0]), g: Number(shindo6pC[1]), b: Number(shindo6pC[2]) };
+shindo7C = rStyle.getPropertyValue("--IntTheme_7_BgColor").match(/\d+/g);
+shindo7C = { r: Number(shindo7C[0]), g: Number(shindo7C[1]), b: Number(shindo7C[2]) };
+
 //推計震度分布リスト取得→描画
 function estimated_intensity_mapReq() {
   fetch("https://www.jma.go.jp/bosai/estimated_intensity_map/data/list.json")
@@ -456,26 +474,144 @@ function estimated_intensity_mapReq() {
         InfoType_add("type-6");
         estimated_intensity_map_legend = L.control({ position: "bottomright" });
         estimated_intensity_map_legend.onAdd = function () {
-          var img = L.DomUtil.create("img");
-          img.src = "./img/estimated_intensity_map_scale.svg";
-          return img;
+          var div = L.DomUtil.create("div");
+          div.classList.add("legend");
+          div.innerHTML = "<img src='./img/estimated_intensity_map_scale.svg'>";
+          return div;
         };
 
         idTmp = ItemTmp.url;
         var estimated_intensity_map_layer = L.layerGroup();
 
         ItemTmp.mesh_num.forEach(function (elm) {
-          latTmp = Number(elm.substring(0, 2)) / 1.5;
-          lngTmp = Number(elm.substring(2, 4)) + 100;
-          lat2Tmp = latTmp + 2 / 3;
-          lng2Tmp = lngTmp + 1;
+          var latTmp = Number(elm.substring(0, 2)) / 1.5;
+          var lngTmp = Number(elm.substring(2, 4)) + 100;
+          var lat2Tmp = latTmp + 2 / 3;
+          var lng2Tmp = lngTmp + 1;
 
-          estimated_intensity_map_layer.addLayer(
-            L.imageOverlay("https://www.jma.go.jp/bosai/estimated_intensity_map/data/" + idTmp + "/" + elm + ".png", [
-              [latTmp, lngTmp],
-              [lat2Tmp, lng2Tmp],
-            ])
-          );
+          let mapImg = new Image();
+          mapImg.src = "https://www.jma.go.jp/bosai/estimated_intensity_map/data/" + idTmp + "/" + elm + ".png"; // 画像のURLを指定
+          mapImg.onload = () => {
+            estimated_intensity_map_canvas.width = mapImg.width;
+            estimated_intensity_map_canvas.height = mapImg.height;
+            ctx.clearRect(0, 0, estimated_intensity_map_canvas.width, estimated_intensity_map_canvas.height);
+            ctx.drawImage(mapImg, 0, 0);
+
+            //色の変換
+            /*
+            const imageData = ctx.getImageData(0, 0, estimated_intensity_map_canvas.width, estimated_intensity_map_canvas.height);
+            const data = imageData.data;
+            function difference(a, b) {
+              return Math.abs(a - b);
+            }
+            var len = Number(data.length);
+            var r;
+            var g;
+            var b;
+            for (var i = 0; i < len; i += 4) {
+              if (data[i + 3] > 127) {
+                data[i + 3] = 255;
+                r = data[i];
+                g = data[i + 1];
+                b = data[i + 2];
+
+                if (difference(r, 250) < 20 && difference(g, 230) < 20 && difference(b, 150) < 20) {
+                  int = "4";
+                } else if (difference(r, 255) < 20 && difference(g, 230) < 20 && difference(b, 0) < 20) {
+                  int = "5-";
+                } else if (difference(r, 255) < 20 && difference(g, 153) < 20 && difference(b, 0) < 20) {
+                  int = "5+";
+                } else if (difference(r, 255) < 20 && difference(g, 40) < 20 && difference(b, 0) < 20) {
+                  int = "6-";
+                } else if (difference(r, 165) < 20 && difference(g, 0) < 20 && difference(b, 33) < 20) {
+                  int = "6+";
+                } else if (difference(r, 180) < 20 && difference(g, 0) < 20 && difference(b, 104) < 20) {
+                  int = "7";
+                } else {
+                  var s4d = difference(r, 250) * difference(g, 230) * difference(b, 150);
+                  var s5md = difference(r, 255) * difference(g, 230) * difference(b, 0);
+                  var s5pd = difference(r, 255) * difference(g, 153) * difference(b, 0);
+                  var s6md = difference(r, 255) * difference(g, 40) * difference(b, 0);
+                  var s6pd = difference(r, 165) * difference(g, 0) * difference(b, 33);
+                  var s7d = difference(r, 180) * difference(g, 0) * difference(b, 104);
+                  var smin = Math.min(s4d, s5md, s5pd, s6md, s6pd, s7d);
+                  if (smin == s4d) {
+                    data[i] = shindo4C.r;
+                    data[i + 1] = shindo4C.g;
+                    data[i + 2] = shindo4C.b;
+                  } else if (smin == s5md) {
+                    data[i] = shindo5mC.r;
+                    data[i + 1] = shindo5mC.g;
+                    data[i + 2] = shindo5mC.b;
+                  } else if (smin == s5pd) {
+                    data[i] = shindo5pC.r;
+                    data[i + 1] = shindo5pC.g;
+                    data[i + 2] = shindo5pC.b;
+                  } else if (smin == s6md) {
+                    data[i] = shindo6mC.r;
+                    data[i + 1] = shindo6mC.g;
+                    data[i + 2] = shindo6mC.b;
+                  } else if (smin == s6pd) {
+                    data[i] = shindo6pC.r;
+                    data[i + 1] = shindo6pC.g;
+                    data[i + 2] = shindo6pC.b;
+                  } else if (smin == s7d) {
+                    data[i] = shindo7C.r;
+                    data[i + 1] = shindo7C.g;
+                    data[i + 2] = shindo7C.b;
+                  }
+                }
+                if (int == "4") {
+                  data[i] = shindo4C.r;
+                  data[i + 1] = shindo4C.g;
+                  data[i + 2] = shindo4C.b;
+                } else if (int == "5-") {
+                  data[i] = shindo5mC.r;
+                  data[i + 1] = shindo5mC.g;
+                  data[i + 2] = shindo5mC.b;
+                } else if (int == "5+") {
+                  data[i] = shindo5pC.r;
+                  data[i + 1] = shindo5pC.g;
+                  data[i + 2] = shindo5pC.b;
+                } else if (int == "6-") {
+                  data[i] = shindo6mC.r;
+                  data[i + 1] = shindo6mC.g;
+                  data[i + 2] = shindo6mC.b;
+                } else if (int == "6+") {
+                  data[i] = shindo6pC.r;
+                  data[i + 1] = shindo6pC.g;
+                  data[i + 2] = shindo6pC.b;
+                } else if (int == "7") {
+                  data[i] = shindo7C.r;
+                  data[i + 1] = shindo7C.g;
+                  data[i + 2] = shindo7C.b;
+                }
+              } else {
+                data[i + 3] = 0;
+              }
+            }
+
+            // ImageDataオブジェクトに、変更済みのRGBAデータ（変数data）を代入する
+            imageData.data = data;
+
+            // canvasに変更済みのImageDataオブジェクトを描画する
+            ctx.clearRect(0, 0, estimated_intensity_map_canvas.width, estimated_intensity_map_canvas.height);
+
+            ctx.putImageData(imageData, 0, 0);
+            */
+
+            var dataURL = estimated_intensity_map_canvas.toDataURL("image/png");
+            estimated_intensity_map_layer.addLayer(
+              L.imageOverlay(
+                dataURL,
+                [
+                  [latTmp, lngTmp],
+                  [lat2Tmp, lng2Tmp],
+                ],
+                { className: "estimated_intensity_map_img" }
+              )
+            );
+          };
         });
         L.control
           .layers(

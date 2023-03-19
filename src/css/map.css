@@ -331,6 +331,7 @@ div.marker-circle.marker_Int7p {
   margin: 5px;
   padding: 3px 8px;
   font-size: 12px;
+  border: solid 1px #999 !important;
 }
 .leaflet-container .leaflet-control-attribution.leaflet-control a {
   display: none;
@@ -448,4 +449,14 @@ div.marker-circle.marker_Int7p {
   border-radius: 3px;
   font-family: "BIZ UDPGothic";
   font-weight: normal;
+}
+.legend {
+  max-height: 40vh;
+  background: #444;
+  border-radius: 5px;
+  border: solid 1px #999;
+  overflow: hidden;
+}
+.legend img {
+  max-height: 40vh;
 }

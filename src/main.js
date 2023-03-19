@@ -121,7 +121,7 @@ app.whenReady().then(() => {
       createWindow();
     }
   });
-  //replay("2023/03/18 20:08:10");
+  replay("2023/03/19 15:06:35");
   //replay("2023/03/11 05:12:30"); //２か所同時
   //replay("2020/06/15 02:28:38");//２か所同時
 });
@@ -588,7 +588,7 @@ function kmoniControl(data, date) {
 
         detect0 = elm.pga - pgaAvr >= threshold02 || elm.shindo >= threshold04;
         detect1 = detect0 && ptDataTmp.detectCount > 0;
-        detect2 = detect1 && ((elm.pga - pgaAvr >= threshold03 && ptDataTmp.UpCount >= 1) || elm.shindo > 1.5); /*|| elm.shindo >= threshold04*/ /* || elm.detectCount > 1*/
+        detect2 = detect1 && (elm.pga - pgaAvr >= threshold03 || elm.shindo > 1.5); /*|| elm.shindo >= threshold04*/ /* || elm.detectCount > 1*/
 
         elm.detect = detect1;
         elm.detect2 = detect2;

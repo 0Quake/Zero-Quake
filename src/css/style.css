@@ -40,31 +40,31 @@
 }
 
 :root {
-  --IntTheme_Q_BgColor: #bfbfbf;
-  --IntTheme_0_BgColor: #505666;
-  --IntTheme_1_BgColor: #86a8c6;
-  --IntTheme_2_BgColor: #3878c1;
-  --IntTheme_3_BgColor: #50ba54;
-  --IntTheme_4_BgColor: #ccd14a;
-  --IntTheme_5m_BgColor: #e79615;
-  --IntTheme_5p_BgColor: #ff5b16;
-  --IntTheme_6m_BgColor: #ed0000;
-  --IntTheme_6p_BgColor: #800909;
-  --IntTheme_7_BgColor: #c400de;
-  --IntTheme_7p_BgColor: #c400de;
+  --IntTheme_Q_BgColor: rgb(191, 191, 191);
+  --IntTheme_0_BgColor: rgb(80, 86, 102);
+  --IntTheme_1_BgColor: rgb(134, 168, 198);
+  --IntTheme_2_BgColor: rgb(56, 120, 193);
+  --IntTheme_3_BgColor: rgb(80, 186, 84);
+  --IntTheme_4_BgColor: rgb(204, 209, 74);
+  --IntTheme_5m_BgColor: rgb(231, 150, 21);
+  --IntTheme_5p_BgColor: rgb(255, 91, 22);
+  --IntTheme_6m_BgColor: rgb(237, 0, 0);
+  --IntTheme_6p_BgColor: rgb(128, 9, 9);
+  --IntTheme_7_BgColor: rgb(196, 0, 222);
+  --IntTheme_7p_BgColor: rgb(196, 0, 222);
 
-  --IntTheme_Q_color: #444;
-  --IntTheme_0_color: #ccc;
-  --IntTheme_1_color: #333;
-  --IntTheme_2_color: #fff;
-  --IntTheme_3_color: #222;
-  --IntTheme_4_color: #222;
-  --IntTheme_5m_color: #000;
-  --IntTheme_5p_color: #000;
-  --IntTheme_6m_color: #fff;
-  --IntTheme_6p_color: #fff;
-  --IntTheme_7_color: #fff;
-  --IntTheme_7p_color: #fff;
+  --IntTheme_Q_color: rgb(68, 68, 68);
+  --IntTheme_0_color: rgb(204, 204, 204);
+  --IntTheme_1_color: rgb(51, 51, 51);
+  --IntTheme_2_color: rgb(255, 255, 255);
+  --IntTheme_3_color: rgb(34, 34, 34);
+  --IntTheme_4_color: rgb(34, 34, 34);
+  --IntTheme_5m_color: rgb(0, 0, 0);
+  --IntTheme_5p_color: rgb(0, 0, 0);
+  --IntTheme_6m_color: rgb(255, 255, 255);
+  --IntTheme_6p_color: rgb(255, 255, 255);
+  --IntTheme_7_color: rgb(255, 255, 255);
+  --IntTheme_7p_color: rgb(255, 255, 255);
 }
 
 html,

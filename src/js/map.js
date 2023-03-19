@@ -6,7 +6,7 @@ var tsunamiLayer;
 var gjmap; //オフライン地図
 var gjmapT; //津波用geojson
 var sections = [];
-var basemap, worldmap, prefecturesMap, plateMap;
+var basemap, worldmap, prefecturesMap, plateMap, legend, legend2;
 var offlineMapActive = true;
 var overlayActive = false;
 var tsunamiLayerAdded = false;
@@ -177,7 +177,7 @@ function init() {
   var overlay2 = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/vbmd_colorrel/{z}/{x}/{y}.png", {
     minNativeZoom: 11,
     maxNativeZoom: 18,
-    minZoom: 0,
+    minZoom: 7,
     maxZoom: 21,
 
     attribution: "国土地理院",
@@ -185,7 +185,7 @@ function init() {
   var overlay3 = L.tileLayer("https://disaportaldata.gsi.go.jp/raster/04_tsunami_newlegend_data/{z}/{x}/{y}.png", {
     minNativeZoom: 7,
     maxNativeZoom: 12,
-    minZoom: 0,
+    minZoom: 7,
     maxZoom: 21,
 
     attribution: "国土地理院",
@@ -193,7 +193,7 @@ function init() {
   var overlay4 = L.tileLayer("https://disaportaldata.gsi.go.jp/raster/05_kyukeishakeikaikuiki/{z}/{x}/{y}.png", {
     minNativeZoom: 7,
     maxNativeZoom: 12,
-    minZoom: 0,
+    minZoom: 7,
     maxZoom: 21,
 
     attribution: "国土地理院",
@@ -201,7 +201,7 @@ function init() {
   var overlay5 = L.tileLayer("https://disaportaldata.gsi.go.jp/raster/05_jisuberikeikaikuiki/{z}/{x}/{y}.png", {
     minNativeZoom: 7,
     maxNativeZoom: 12,
-    minZoom: 0,
+    minZoom: 7,
     maxZoom: 21,
 
     attribution: "国土地理院",
@@ -216,7 +216,7 @@ function init() {
   var overlay7 = L.tileLayer("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVQI12NgYAAAAAMAASDVlMcAAAAASUVORK5CYII=", {
     minNativeZoom: 10,
     maxNativeZoom: 10,
-    minZoom: 11,
+    minZoom: 10,
     maxZoom: 21,
     attribution: "国土地理院",
   })
@@ -402,7 +402,7 @@ function init() {
             "土砂災害警戒区域（急傾斜地の崩壊） ハザードマップ": overlay4,
             "土砂災害警戒区域（地すべり） ハザードマップ": overlay5,
             境界線: overlay6,
-            避難所: overlay7,
+            指定緊急避難場所: overlay7,
           },
           {
             position: "topleft",
@@ -427,22 +427,22 @@ function init() {
     basemap.setStyle({ fill: offlineMapActive && !overlayActive });
     worldmap.setStyle({ fill: offlineMapActive && !overlayActive });
 
-    if (eventLayer.name === "地理院 津波浸水想定 ハザードマップ") {
+    if (eventLayer.name === "津波浸水想定 ハザードマップ") {
       legend.addTo(map);
-    } else if (eventLayer.name === "避難所") {
+    } else if (eventLayer.name === "指定緊急避難場所") {
       hinanjoLayer.addTo(map);
-    } else if (eventLayer.name === "地理院 土砂災害警戒区域（地すべり） ハザードマップ" || eventLayer.name === "地理院 土砂災害警戒区域（急傾斜地の崩壊） ハザードマップ") {
+    } else if (eventLayer.name === "土砂災害警戒区域（地すべり） ハザードマップ" || eventLayer.name === "土砂災害警戒区域（急傾斜地の崩壊） ハザードマップ") {
       legend2.addTo(map);
     }
   });
   map.on("overlayremove", function (eventLayer) {
     overlayTmp -= 1;
 
-    if (eventLayer.name === "地理院 津波浸水想定 ハザードマップ") {
+    if (eventLayer.name === "津波浸水想定 ハザードマップ") {
       map.removeControl(legend);
-    } else if (eventLayer.name === "避難所") {
+    } else if (eventLayer.name === "指定緊急避難場所") {
       map.removeLayer(hinanjoLayer);
-    } else if (eventLayer.name === "地理院 土砂災害警戒区域（地すべり） ハザードマップ" || eventLayer.name === "地理院 土砂災害警戒区域（急傾斜地の崩壊） ハザードマップ") {
+    } else if (eventLayer.name === "土砂災害警戒区域（地すべり） ハザードマップ" || eventLayer.name === "土砂災害警戒区域（急傾斜地の崩壊） ハザードマップ") {
       map.removeControl(legend2);
     }
     if (overlayTmp == 0) {
@@ -504,24 +504,27 @@ function init() {
       }).addTo(map);
     });
 
-  var legend = L.control({ position: "bottomright" });
-  legend.onAdd = function () {
-    var img = L.DomUtil.create("img");
-    img.src = "./img/nied_acmap_s_w_scale.svg";
-    return img;
+  var legend0 = L.control({ position: "bottomright" });
+  legend0.onAdd = function () {
+    var div = L.DomUtil.create("div");
+    div.classList.add("legend");
+    div.innerHTML = "<img src='./img/nied_acmap_s_w_scale.svg'>";
+    return div;
   };
-  legend.addTo(map);
-  var legend = L.control({ position: "bottomright" });
+  legend0.addTo(map);
+  legend = L.control({ position: "bottomright" });
   legend.onAdd = function () {
-    var img = L.DomUtil.create("img");
-    img.src = "https://disaportal.gsi.go.jp/hazardmap/copyright/img/tsunami_newlegend.png";
-    return img;
+    var div = L.DomUtil.create("div");
+    div.classList.add("legend");
+    div.innerHTML = "<img src='https://disaportal.gsi.go.jp/hazardmap/copyright/img/tsunami_newlegend.png'>";
+    return div;
   };
-  var legend2 = L.control({ position: "bottomright" });
+  legend2 = L.control({ position: "bottomright" });
   legend2.onAdd = function () {
-    var img = L.DomUtil.create("img");
-    img.src = "https://disaportal.gsi.go.jp/hazardmap/copyright/img/dosha_keikai.png";
-    return img;
+    var div = L.DomUtil.create("div");
+    div.classList.add("legend");
+    div.innerHTML = "<img src='https://disaportal.gsi.go.jp/hazardmap/copyright/img/dosha_keikai.png'>";
+    return div;
   };
   /*
   map.createPane("background");
