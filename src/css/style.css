@@ -347,6 +347,7 @@ h2 {
   font-size: 40px;
   text-align: center;
   line-height: 60px;
+  font-family: "M PLUS 1p";
 }
 .userIntensity {
   width: 40px;
@@ -356,6 +357,7 @@ h2 {
   font-size: 30px;
   text-align: center;
   line-height: 40px;
+  font-family: "M PLUS 1p";
 }
 .PWave_value {
   stroke: var(--PwaveColor);

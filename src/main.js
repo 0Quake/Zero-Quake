@@ -755,6 +755,7 @@ function SnetControl(data, date) {
 }
 
 var estShindoTmp;
+var estShindoTmp;
 //強震モニタ予想震度処理
 function estShindoControl(response) {
   if (kmoniEid) {
@@ -783,14 +784,14 @@ function estShindoControl(response) {
   });
 
   if (home_estShindo) {
-    var estShindoTmp = shindoConvert(home_estShindo.estShindo, 0);
+    var SectionEstShindoTmp = shindoConvert(home_estShindo.estShindo, 0);
   } else {
-    var estShindoTmp = "0";
+    var SectionEstShindoTmp = "0";
   }
   EEWcontrol({
     report_id: EidTmp,
     report_num: RNumTmp,
-    userIntensity: estShindoTmp,
+    userIntensity: SectionEstShindoTmp,
     source: "kmoniImg",
   });
 }
