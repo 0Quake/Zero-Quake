@@ -648,25 +648,7 @@ function kmoniMapUpdate(dataTmp, type) {
     kmoniMapData = dataTmp;
     if (config && document.getElementById("tab1_content2").classList.contains("active_tabcontent")) {
       //リアルタイム震度タブ
-      var shindoList = dataTmp
-        .filter(function (elm) {
-          return elm.shindo;
-        })
-        .sort(function (a, b) {
-          return b.shindo - a.shindo;
-        });
-      var htmlTmp = "";
-      for (let a = 0; a < config.Info.RealTimeShake.List.ItemCount; a++) {
-        var shindoElm = shindoList[a];
-        if (shindoElm.shindo) {
-          var shindoColor = shindoConvert(shindoElm.shindo, 2);
-          var IntDetail = "";
-          if (a == 0) IntDetail = "<div class='intDetail'>" + Math.round(shindoElm.shindo * 10) / 10 + "</div>";
-
-          htmlTmp += "<li><div class='int' style='color:" + shindoColor[1] + ";background:" + shindoColor[0] + "'>" + shindoConvert(shindoElm.shindo, 0) + IntDetail + "</div><div class='Pointname'>" + shindoElm.Region + " " + shindoElm.Name + "</div><div class='PGA'>PGA" + Math.round(shindoElm.pga * 100) / 100 + "</div></li>";
-        }
-      }
-      document.getElementById("pointList").innerHTML = htmlTmp;
+      kmoniListDraw(dataTmp);
     }
   } else if (type == "snet") {
     SnetMapData = dataTmp;
@@ -746,6 +728,34 @@ function kmoniMapUpdate(dataTmp, type) {
     }
   }
 }
+
+//強震モニタリストの描画
+function kmoniListDraw(dataTmp) {
+  var shindoList = dataTmp
+    .filter(function (elm) {
+      return elm.shindo;
+    })
+    .sort(function (a, b) {
+      return b.shindo - a.shindo;
+    });
+  var htmlTmp = "";
+  for (let a = 0; a < config.Info.RealTimeShake.List.ItemCount; a++) {
+    var shindoElm = shindoList[a];
+    if (shindoElm.shindo) {
+      var shindoColor = shindoConvert(shindoElm.shindo, 2);
+      var IntDetail = "";
+      if (a == 0) IntDetail = "<div class='intDetail'>" + Math.round(shindoElm.shindo * 10) / 10 + "</div>";
+
+      htmlTmp += "<li><div class='int' style='color:" + shindoColor[1] + ";background:" + shindoColor[0] + "'>" + shindoConvert(shindoElm.shindo, 0) + IntDetail + "</div><div class='Pointname'>" + shindoElm.Region + " " + shindoElm.Name + "</div><div class='PGA'>PGA" + Math.round(shindoElm.pga * 100) / 100 + "</div></li>";
+    }
+  }
+  document.getElementById("pointList").innerHTML = htmlTmp;
+}
+
+//タブ有効化時 即時に描画
+document.getElementById("tab1_menu2").addEventListener("click", function () {
+  kmoniListDraw(kmoniMapData);
+});
 
 var estShindoTmp;
 //予想震度更新

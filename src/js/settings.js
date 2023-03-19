@@ -10,7 +10,7 @@ window.electronAPI.messageSend((event, request) => {
     document.getElementById("longitude").value = setting.home.longitude;
     document.getElementById("EEW_Voice").value = setting.notice.voice.EEW;
     var SaibunElm = Array.from(document.querySelectorAll("#saibun option")).find(function (elm) {
-      return elm.innerText == setting.home.Saibun;
+      return elm.innerText == setting.home.Section;
     });
     if (SaibunElm) SaibunElm.selected = true;
 
@@ -23,7 +23,7 @@ document.getElementById("apply").addEventListener("click", function () {
   setting.setting1 = document.getElementById("setting1").checked;
   setting.home.latitude = document.getElementById("latitude").value;
   setting.home.longitude = document.getElementById("longitude").value;
-  setting.home.Saibun = document.getElementById("saibun").value;
+  setting.home.Section = document.getElementById("saibun").value;
   setting.notice.voice.EEW = document.getElementById("EEW_Voice").value;
 
   window.electronAPI.messageReturn({
@@ -91,7 +91,7 @@ function init() {
             var saibunElm = document.createElement("option");
             saibunElm.innerText = feature.properties.name;
 
-            if (setting && setting.home.Saibun == feature.properties.name) {
+            if (setting && setting.home.Section == feature.properties.name) {
               saibunElm.selected = true;
               layer.setStyle({
                 fillColor: "#FFF",

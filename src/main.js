@@ -15,7 +15,7 @@ var config = store.get("config", {
       name: "自宅",
       latitude: 35.68,
       longitude: 139.767,
-      Saibun: "東京都２３区",
+      Section: "東京都２３区",
     },
     Info: {
       EEW: {},
@@ -98,7 +98,7 @@ var kmoniLastReportTime = 0,
   YkmoniLastReportTime = 0;
 var kmoniTimeout, lmoniTimeout, ymoniTimeout;
 var msil_lastTime = 0;
-var kmoniEid;
+var kmoniEid, kmoniRNum;
 var kmoniPointsDataTmp, SnetPointsDataTmp;
 var intColorConv = { "0xFFFFFFFF": "0", "0xFFF2F2FF": "1", "0xFF00AAFF": "2", "0xFF0041FF": "3", "0xFFFAE696": "4", "0xFFFFE600": "5-", "0xFFFF9900": "5+", "0xFFFF2800": "6-", "0xFFA50021": "6+", "0xFFB40068": "7" };
 let tray;
@@ -113,8 +113,8 @@ app.whenReady().then(() => {
   kmoniServerSelect();
   createWindow();
 
-  //replay("2023/03/19 15:06:35");
-  //replay("2023/03/11 05:12:30"); //２か所同時
+  //replay("2023/3/15 6:06");
+  replay("2023/03/11 05:12:30"); //２か所同時
   //replay("2020/06/15 02:28:38");//２か所同時
 
   app.on("activate", () => {
@@ -159,8 +159,8 @@ var errorMsgBox = false;
 //エラー処理
 process.on("uncaughtException", function (err) {
   if (!errorMsgBox) {
-    dialog.showMessageBox(options).then(function (result) {
-      errorMsgBox = true;
+    errorMsgBox = true;
+    dialog.showMessageBox(mainWindow, options).then(function (result) {
       clearTimeout(relaunchTimer);
 
       if (config.system.crashReportAutoSend == "yes") {
@@ -169,13 +169,14 @@ process.on("uncaughtException", function (err) {
       } else if (config.system.crashReportAutoSend == "no") {
         errorMsgBox = false;
       } else {
-        dialog.showMessageBox(options2).then(function (result2) {
+        dialog.showMessageBox(mainWindow, options2).then(function (result2) {
           if (result2.checkboxChecked) {
             config.system.crashReportAutoSend = result2.response == 0 ? "yes" : "no";
             store.set("config", config);
           }
           if (result2.response == 0) {
             crashReportSend(err.stack, result);
+            errorMsgBox = false;
           }
         });
       }
@@ -209,13 +210,13 @@ function crashReportSend(errMsg, result) {
   });
 
   request.on("error", () => {
-    dialog.showMessageBox(options3).then(function () {
+    dialog.showMessageBox(mainWindow, options3).then(function () {
       errorResolve(result.response);
     });
   });
   request.on("response", (res) => {
     if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
-      dialog.showMessageBox(options3).then(function () {
+      dialog.showMessageBox(mainWindow, options3).then(function () {
         errorResolve(result.response);
       });
     } else {
@@ -756,11 +757,12 @@ function SnetControl(data, date) {
 var estShindoTmp;
 //強震モニタ予想震度処理
 function estShindoControl(response) {
-  var EidTmp;
   if (kmoniEid) {
-    EidTmp = kmoniEid;
+    var EidTmp = kmoniEid;
+    var RNumTmp = kmoniRNum;
   } else if (!EidTmp && EEW_nowList.length > 0) {
-    EidTmp = EEW_nowList[0].report_id;
+    var EidTmp = EEW_nowList[0].report_id;
+    var RNumTmp = 1;
   } else {
     return false;
   }
@@ -775,6 +777,22 @@ function estShindoControl(response) {
   if (mainWindow) {
     mainWindow.webContents.send("message2", estShindoTmp);
   }
+
+  var home_estShindo = response.data.find(function (elm) {
+    return elm.Section == config.home.Section;
+  });
+
+  if (home_estShindo) {
+    var estShindoTmp = shindoConvert(home_estShindo.estShindo, 0);
+  } else {
+    var estShindoTmp = "0";
+  }
+  EEWcontrol({
+    report_id: EidTmp,
+    report_num: RNumTmp,
+    userIntensity: estShindoTmp,
+    source: "kmoniImg",
+  });
 }
 
 //強震モニタへのHTTPリクエスト
@@ -802,6 +820,7 @@ function kmoniRequest() {
           var json = jsonParse(dataTmp);
           if (json) {
             kmoniEid = json.report_id;
+            kmoniRNum = json.report_num;
             EEWdetect(2, json, 1);
           }
         });
@@ -1639,15 +1658,19 @@ function EEWdetect(type, json, KorL) {
 //EEW情報マージ→EEWAlert
 function EEWcontrol(data) {
   if (!data) return;
-  if (!data.origin_time) {
+  if (data.origin_time) {
+    var origin_timeTmp = data.origin_time;
+  } else {
     var eqj = EEW_Data.find(function (elm) {
       return elm.EQ_id == data.report_id;
     });
     if (eqj) {
-      data.origin_time = eqj.data[eqj.data.length - 1].origin_time;
+      origin_timeTmp = eqj.data[eqj.data.length - 1].origin_time;
+    } else {
+      origin_timeTmp = new Date() - Replay;
     }
   }
-  var pastTime = new Date() - Replay - data.origin_time;
+  var pastTime = new Date() - Replay - origin_timeTmp;
   if (pastTime > 300000 || pastTime < 0) return;
 
   if (data.latitude && data.longitude) {

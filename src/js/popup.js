@@ -149,6 +149,10 @@ function EEWAlertUpdate(data) {
         EQMenu.querySelector(".magunitude").textContent = elm.magunitude ? elm.magunitude : "不明";
         EQMenu.querySelector(".depth").textContent = elm.depth ? elm.depth : "不明";
 
+        EQMenu.querySelector(".userIntensity").textContent = elm.userIntensity ? elm.userIntensity : "?";
+        EQMenu.querySelector(".userDataWrap").style.background = shindoConvert(elm.userIntensity, 2)[0];
+        EQMenu.querySelector(".userDataWrap").style.color = shindoConvert(elm.userIntensity, 2)[1];
+
         EQMenu.querySelector(".distance").textContent = elm.distance ? Math.round(elm.distance) + "km" : "";
       }
     }
