@@ -477,14 +477,7 @@ document.getElementById("EQInfoSelect").addEventListener("change", function () {
 
 //情報更新時刻更新
 function kmoniTimeUpdate(updateTime, LocalTime, type, condition, vendor) {
-  //if (prepareing) return;
-
-  /*
-  Updatetime: new Date(data.time),
-  LocalTime: new Date(),
-  type: "P2P_EEW",
-*/
-  if (Math.floor(updateTimeTmp / 1000) < Math.floor(updateTime / 1000)) {
+  if (updateTimeTmp < updateTime) {
     updateTimeTmp = updateTime;
     document.getElementById("all_UpdateTime").textContent = dateEncode(3, updateTime);
   }

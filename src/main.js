@@ -111,9 +111,11 @@ if (!gotTheLock) {
 app.whenReady().then(() => {
   kmonicreateWindow();
   kmoniServerSelect();
-  start();
-
   createWindow();
+
+  //replay("2023/03/19 15:06:35");
+  //replay("2023/03/11 05:12:30"); //２か所同時
+  //replay("2020/06/15 02:28:38");//２か所同時
 
   app.on("activate", () => {
     // メインウィンドウが消えている場合は再度メインウィンドウを作成する
@@ -121,9 +123,8 @@ app.whenReady().then(() => {
       createWindow();
     }
   });
-  replay("2023/03/19 15:06:35");
-  //replay("2023/03/11 05:12:30"); //２か所同時
-  //replay("2020/06/15 02:28:38");//２か所同時
+
+  start();
 });
 
 const options = {
@@ -154,29 +155,36 @@ const options3 = {
 // 全てのウィンドウが閉じたとき
 app.on("window-all-closed", () => {});
 var relaunchTimer;
+var errorMsgBox = false;
 //エラー処理
 process.on("uncaughtException", function (err) {
-  dialog.showMessageBox(options).then(function (result) {
-    clearTimeout(relaunchTimer);
+  if (!errorMsgBox) {
+    dialog.showMessageBox(options).then(function (result) {
+      errorMsgBox = true;
+      clearTimeout(relaunchTimer);
 
-    if (config.system.crashReportAutoSend) {
-      crashReportSend(err.stack, result);
-    } else {
-      dialog.showMessageBox(options2).then(function (result2) {
-        if (result2.checkboxChecked) {
-          config.system.crashReportAutoSend = result2.response == 0;
-          store.set("config", config);
-        }
-        if (result2.response == 0) {
-          crashReportSend(err.stack, result);
-        }
-      });
-    }
-  });
-  relaunchTimer = setTimeout(function () {
-    app.relaunch();
-    app.exit(0);
-  }, 10000);
+      if (config.system.crashReportAutoSend == "yes") {
+        crashReportSend(err.stack, result);
+        errorMsgBox = false;
+      } else if (config.system.crashReportAutoSend == "no") {
+        errorMsgBox = false;
+      } else {
+        dialog.showMessageBox(options2).then(function (result2) {
+          if (result2.checkboxChecked) {
+            config.system.crashReportAutoSend = result2.response == 0 ? "yes" : "no";
+            store.set("config", config);
+          }
+          if (result2.response == 0) {
+            crashReportSend(err.stack, result);
+          }
+        });
+      }
+    });
+    relaunchTimer = setTimeout(function () {
+      app.relaunch();
+      app.exit(0);
+    }, 10000);
+  }
 });
 //エラー処理 本体
 function errorResolve(response) {
@@ -580,7 +588,7 @@ function kmoniControl(data, date) {
         if (!pgaAvr) pgaAvr = 0.03;
 
         threshold02 = 0.4 * pgaAvr + 0.025;
-        threshold03 = 0.5 * pgaAvr + 0.1;
+        threshold03 = 0.6 * pgaAvr + 0.13;
         if (ptDataTmp.isCity) {
           threshold02 *= 2;
           threshold03 *= 2;
@@ -695,7 +703,13 @@ function kmoniControl(data, date) {
     //地震検知解除
     var index = 0;
     for (const elm of EQDetect_List) {
-      if (EEWNow || new Date() - elm.origin_Time > time00 || new Date() - elm.last_Detect > time01) {
+      if (ptDataTmp2.isCity) {
+        threshold01 = 5;
+      } else {
+        threshold01 = 4;
+      }
+
+      if (EEWNow || new Date() - elm.origin_Time > time00 || new Date() - elm.last_Detect > time01 || elm.Codes.length < threshold01) {
         EQDetect_List.splice(index, 1);
         if (mainWindow) {
           mainWindow.webContents.send("message2", {
@@ -1014,15 +1028,15 @@ function P2P_WS() {
   var client = new WebSocketClient();
 
   client.on("connectFailed", function () {
-    kmoniTimeUpdate(new Date(), "P2P_EEW", "Error");
+    kmoniTimeUpdate(new Date() - Replay, "P2P_EEW", "Error");
   });
 
   client.on("connect", function (connection) {
     connection.on("error", function () {
-      kmoniTimeUpdate(new Date(), "P2P_EEW", "Error");
+      kmoniTimeUpdate(new Date() - Replay, "P2P_EEW", "Error");
     });
     connection.on("close", function () {
-      kmoniTimeUpdate(new Date(), "P2P_EEW", "Disconnect");
+      kmoniTimeUpdate(new Date() - Replay, "P2P_EEW", "Disconnect");
       P2P_WS();
     });
     connection.on("message", function (message) {
@@ -1053,16 +1067,15 @@ function P2P_WS() {
             //緊急地震速報（警報）
             EEWdetect(3, data);
             break;
-
           default:
-            break;
+            return false;
         }
         if (data.time) {
           kmoniTimeUpdate(new Date(data.time), "P2P_EEW", "success");
         }
       }
     });
-    kmoniTimeUpdate(new Date(), "P2P_EEW", "success");
+    kmoniTimeUpdate(new Date() - Replay, "P2P_EEW", "success");
   });
 
   client.connect("wss://api.p2pquake.net/v2/ws");
@@ -2807,10 +2820,12 @@ function geosailing(latA, lngA, latB, lngB) {
 function replay(ReplayDate) {
   if (ReplayDate) {
     Replay = new Date() - new Date(ReplayDate);
-    mainWindow.webContents.send("message2", {
-      action: "Replay",
-      data: Replay,
-    });
+    if (mainWindow) {
+      mainWindow.webContents.send("message2", {
+        action: "Replay",
+        data: Replay,
+      });
+    }
   } else {
     Replay = 0;
   }
