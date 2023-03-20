@@ -113,8 +113,8 @@ app.whenReady().then(() => {
   kmoniServerSelect();
   createWindow();
 
-  //replay("2023/3/15 6:06");
-  replay("2023/03/11 05:12:30"); //２か所同時
+  replay("2023/3/21 2:55:05");
+  //replay("2023/03/11 05:12:30"); //２か所同時
   //replay("2020/06/15 02:28:38");//２か所同時
 
   app.on("activate", () => {
@@ -605,7 +605,7 @@ function kmoniControl(data, date) {
 
         detect0 = elm.pga - pgaAvr >= threshold02 || elm.shindo >= threshold04;
         detect1 = detect0 && ptDataTmp.detectCount > 0;
-        detect2 = detect1 && (elm.pga - pgaAvr >= threshold03 || elm.shindo > 1.5); /*|| elm.shindo >= threshold04*/ /* || elm.detectCount > 1*/
+        detect2 = detect1 && (elm.pga - pgaAvr >= threshold03 || elm.shindo > 1.5) && ptDataTmp.detectCount > 1; /*|| elm.shindo >= threshold04*/ /* || elm.detectCount > 1*/
 
         elm.detect = detect1;
         elm.detect2 = detect2;
@@ -640,13 +640,13 @@ function kmoniControl(data, date) {
 
     for (const elm of data) {
       if (elm.detect) {
-        var ptDataTmp2 = pointsData[elm.Code];
-        if (ptDataTmp2.isCity) {
+        var ptDataTmp = pointsData[elm.Code];
+        if (ptDataTmp.isCity) {
           threshold01 = 5;
           MargeRange = 20;
         } else {
           threshold01 = 4;
-          MargeRange = 30;
+          MargeRange = 40;
         }
 
         var EQD_ItemTmp = EQDetect_List.find(function (elm2) {
@@ -658,11 +658,11 @@ function kmoniControl(data, date) {
           });
 
           if (CodesTmp) {
-            var already = ptDataTmp2.Event;
+            var already = ptDataTmp.Event;
 
             if (!already) {
               EQD_ItemTmp.Codes.push(elm);
-              ptDataTmp2.Event = EQD_ItemTmp.id;
+              ptDataTmp.Event = EQD_ItemTmp.id;
               var radiusTmp = geosailing(elm.Location.Latitude, elm.Location.Longitude, EQD_ItemTmp.lat, EQD_ItemTmp.lng);
               if (EQD_ItemTmp.Radius < radiusTmp) EQD_ItemTmp.Radius = radiusTmp;
               continue;
@@ -712,13 +712,7 @@ function kmoniControl(data, date) {
     //地震検知解除
     var index = 0;
     for (const elm of EQDetect_List) {
-      if (ptDataTmp2.isCity) {
-        threshold01 = 5;
-      } else {
-        threshold01 = 4;
-      }
-
-      if (EEWNow || new Date() - elm.origin_Time > time00 || new Date() - elm.last_Detect > time01 || elm.Codes.length < threshold01) {
+      if (EEWNow || new Date() - elm.origin_Time > time00 || new Date() - elm.last_Detect > time01) {
         EQDetect_List.splice(index, 1);
         if (mainWindow) {
           mainWindow.webContents.send("message2", {
