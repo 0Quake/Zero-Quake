@@ -22,6 +22,7 @@ var TimeTable_JMA2001;
 var EQDetectCanvas, PointsCanvas, PSWaveCanvas, overlayCanvas; // eslint-disable-line
 var mapLayer, hinanjoLayer;
 var kmoniMapData, SnetMapData;
+var layerControl;
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "kmoniUpdate") {
     kmoniMapUpdate(request.data, "knet");
@@ -115,6 +116,166 @@ function init() {
   mapLayer = new L.LayerGroup();
   mapLayer.id = "mapLayer";
   mapLayer.addTo(map);
+
+  fetch("./Resource/basemap.json")
+    .then(function (res) {
+      return res.json();
+    })
+    .then(function (json) {
+      basemap = L.geoJSON(json, {
+        style: {
+          stroke: false,
+          color: "#666",
+          fill: true,
+          fillColor: "#333",
+          fillOpacity: 1,
+          weight: 1,
+          pane: "jsonMAPPane",
+          //interactive: false,
+          attribution: "JMA",
+          renderer: jsonMAP1Canvas,
+        },
+        onEachFeature: function onEachFeature(feature, layer) {
+          if (feature.properties && feature.properties.name) {
+            sections.push({ name: feature.properties.name, item: layer });
+            // layer.bindPopup("<h3>地震情報/細分区域</h3>" + feature.properties.name);
+          }
+        },
+      });
+      layerControl.addBaseLayer(basemap, "オフライン地図");
+      mapLayer.addLayer(basemap);
+
+      document.getElementById("splash").style.display = "none";
+      if (estShindoTmp) EstShindoUpdate(estShindoTmp);
+    });
+
+  fetch("./Resource/World.json")
+    .then(function (res) {
+      return res.json();
+    })
+    .then(function (json) {
+      worldmap = L.geoJSON(json, {
+        style: {
+          color: "#444",
+          fill: true,
+          fillColor: "#333",
+          fillOpacity: 1,
+          weight: 1,
+          pane: "jsonMAPPane",
+          interactive: false,
+          attribution: "Natural Earth",
+          renderer: jsonMAP1Canvas,
+        },
+      });
+
+      mapLayer.addLayer(worldmap);
+    });
+
+  fetch("./Resource/prefectures.json")
+    .then(function (res) {
+      return res.json();
+    })
+    .then(function (json) {
+      prefecturesMap = L.geoJSON(json, {
+        style: {
+          color: "#999",
+          fill: false,
+          weight: 1,
+          interactive: false,
+          attribution: "JMA",
+          renderer: jsonMAP2Canvas,
+        },
+      });
+
+      mapLayer.addLayer(prefecturesMap);
+    });
+  fetch("./Resource/tsunami.json")
+    .then(function (res) {
+      return res.json();
+    })
+    .then(function (json) {
+      gjmapT = L.geoJSON(json, {
+        style: {
+          stroke: false,
+          fill: false,
+          pane: "tsunamiPane",
+          className: "tsunamiElm",
+          attribution: "JMA",
+          interactive: true,
+        },
+        onEachFeature: function onEachFeature(feature, layer) {
+          if (feature.properties && feature.properties.name) {
+            tsunamiElm.push({
+              name: feature.properties.name,
+              item: layer,
+              feature: feature,
+            });
+
+            layer.bindPopup({ content: "<h3>津波予報区</h3>" + feature.properties.name, keepInView: false, autoPan: false });
+          }
+        },
+      });
+
+      window.electronAPI.messageReturn({
+        action: "tsunamiReqest",
+      });
+    });
+  fetch("./Resource/lake.json")
+    .then(function (res) {
+      return res.json();
+    })
+    .then(function (json) {
+      L.geoJSON(json, {
+        style: {
+          stroke: false,
+          color: "#0449b8",
+          weight: 1,
+          fill: true,
+          fillColor: "#325385",
+          fillOpacity: 0.5,
+          attribution: "国土地理院",
+          renderer: jsonMAP1Canvas,
+        },
+      }).addTo(map);
+    });
+
+  fetch("./Resource/plate.json")
+    .then(function (res) {
+      return res.json();
+    })
+    .then(function (json) {
+      plateMap = L.geoJSON(json, {
+        style: {
+          color: "#C88",
+          opacity: 0.3,
+          fill: false,
+          weight: 1,
+          interactive: false,
+          attribution: "",
+          renderer: jsonMAP2Canvas,
+        },
+      });
+
+      mapLayer.addLayer(plateMap);
+    });
+  fetch("./Resource/Snet_LINE.json")
+    .then(function (res) {
+      return res.json();
+    })
+    .then(function (json) {
+      plateMap = L.geoJSON(json, {
+        style: {
+          color: "#666",
+          fill: false,
+          weight: 1,
+          interactive: false,
+          attribution: "",
+          renderer: jsonMAP2Canvas,
+        },
+      });
+
+      mapLayer.addLayer(plateMap);
+    });
 
   hinanjoLayer = new L.LayerGroup();
   hinanjoLayer.id = "hinanjoLayer";
@@ -271,143 +432,32 @@ function init() {
       if (event.tile.geojson2 && this._map) this._map.removeLayer(event.tile.geojson2);
     });
 
-  fetch("./Resource/World.json")
-    .then(function (res) {
-      return res.json();
-    })
-    .then(function (json) {
-      worldmap = L.geoJSON(json, {
-        style: {
-          color: "#444",
-          fill: true,
-          fillColor: "#333",
-          fillOpacity: 1,
-          weight: 1,
-          pane: "jsonMAPPane",
-          interactive: false,
-          attribution: "Natural Earth",
-          renderer: jsonMAP1Canvas,
-        },
-      });
+  layerControl = L.control
+    .layers(
+      {
+        気象庁: tile1,
+        "地理院 標準地図": tile8,
 
-      mapLayer.addLayer(worldmap);
-    });
+        "地理院 淡色地図": tile2,
+        衛星写真: tile3,
+        白地図: tile4,
+        OpenStreetMap: tile5,
+      },
+      {
+        陰影起伏図: overlay1,
+        火山基本図データ: overlay2,
+        "津波浸水想定 ハザードマップ": overlay3,
+        "土砂災害警戒区域（急傾斜地の崩壊） ハザードマップ": overlay4,
+        "土砂災害警戒区域（地すべり） ハザードマップ": overlay5,
+        境界線: overlay6,
+        指定緊急避難場所: overlay7,
+      },
+      {
+        position: "topleft",
+      }
+    )
+    .addTo(map);
 
-  fetch("./Resource/prefectures.json")
-    .then(function (res) {
-      return res.json();
-    })
-    .then(function (json) {
-      prefecturesMap = L.geoJSON(json, {
-        style: {
-          color: "#999",
-          fill: false,
-          weight: 1,
-          interactive: false,
-          attribution: "JMA",
-          renderer: jsonMAP2Canvas,
-        },
-      });
-
-      mapLayer.addLayer(prefecturesMap);
-    });
-
-  fetch("./Resource/plate.json")
-    .then(function (res) {
-      return res.json();
-    })
-    .then(function (json) {
-      plateMap = L.geoJSON(json, {
-        style: {
-          color: "#C88",
-          opacity: 0.3,
-          fill: false,
-          weight: 1,
-          interactive: false,
-          attribution: "",
-          renderer: jsonMAP2Canvas,
-        },
-      });
-
-      mapLayer.addLayer(plateMap);
-    });
-  fetch("./Resource/Snet_LINE.json")
-    .then(function (res) {
-      return res.json();
-    })
-    .then(function (json) {
-      plateMap = L.geoJSON(json, {
-        style: {
-          color: "#666",
-          fill: false,
-          weight: 1,
-          interactive: false,
-          attribution: "",
-          renderer: jsonMAP2Canvas,
-        },
-      });
-
-      mapLayer.addLayer(plateMap);
-    });
-
-  fetch("./Resource/basemap.json")
-    .then(function (res) {
-      return res.json();
-    })
-    .then(function (json) {
-      basemap = L.geoJSON(json, {
-        style: {
-          stroke: false,
-          color: "#666",
-          fill: true,
-          fillColor: "#333",
-          fillOpacity: 1,
-          weight: 1,
-          pane: "jsonMAPPane",
-          //interactive: false,
-          attribution: "JMA",
-          renderer: jsonMAP1Canvas,
-        },
-        onEachFeature: function onEachFeature(feature, layer) {
-          if (feature.properties && feature.properties.name) {
-            sections.push({ name: feature.properties.name, item: layer });
-            // layer.bindPopup("<h3>地震情報/細分区域</h3>" + feature.properties.name);
-          }
-        },
-      });
-      mapLayer.addLayer(basemap);
-
-      gjmap = L.geoJSON({ type: "FeatureCollection", features: [] });
-      mapLayer.addLayer(gjmap);
-      L.control
-        .layers(
-          {
-            オフライン地図: gjmap,
-            気象庁: tile1,
-            "地理院 標準地図": tile8,
-
-            "地理院 淡色地図": tile2,
-            衛星写真: tile3,
-            白地図: tile4,
-            OpenStreetMap: tile5,
-          },
-          {
-            陰影起伏図: overlay1,
-            火山基本図データ: overlay2,
-            "津波浸水想定 ハザードマップ": overlay3,
-            "土砂災害警戒区域（急傾斜地の崩壊） ハザードマップ": overlay4,
-            "土砂災害警戒区域（地すべり） ハザードマップ": overlay5,
-            境界線: overlay6,
-            指定緊急避難場所: overlay7,
-          },
-          {
-            position: "topleft",
-          }
-        )
-        .addTo(map);
-      document.getElementById("splash").style.display = "none";
-      if (estShindoTmp) EstShindoUpdate(estShindoTmp);
-    });
   map.on("baselayerchange", function (layer) {
     offlineMapActive = layer.name == "オフライン地図";
 
@@ -449,56 +499,6 @@ function init() {
   });
 
   tsunamiLayer = L.featureGroup();
-
-  fetch("./Resource/tsunami.json")
-    .then(function (res) {
-      return res.json();
-    })
-    .then(function (json) {
-      gjmapT = L.geoJSON(json, {
-        style: {
-          stroke: false,
-          fill: false,
-          pane: "tsunamiPane",
-          className: "tsunamiElm",
-          attribution: "JMA",
-          interactive: true,
-        },
-        onEachFeature: function onEachFeature(feature, layer) {
-          if (feature.properties && feature.properties.name) {
-            tsunamiElm.push({
-              name: feature.properties.name,
-              item: layer,
-              feature: feature,
-            });
-
-            layer.bindPopup({ content: "<h3>津波予報区</h3>" + feature.properties.name, keepInView: false, autoPan: false });
-          }
-        },
-      });
-
-      window.electronAPI.messageReturn({
-        action: "tsunamiReqest",
-      });
-    });
-  fetch("./Resource/lake.json")
-    .then(function (res) {
-      return res.json();
-    })
-    .then(function (json) {
-      L.geoJSON(json, {
-        style: {
-          stroke: false,
-          color: "#0449b8",
-          weight: 1,
-          fill: true,
-          fillColor: "#325385",
-          fillOpacity: 0.5,
-          attribution: "国土地理院",
-          renderer: jsonMAP1Canvas,
-        },
-      }).addTo(map);
-    });
 
   var legend0 = L.control({ position: "bottomright" });
   legend0.onAdd = function () {
@@ -576,6 +576,8 @@ function init() {
   });
 
   map.on("load", function () {
+    gjmap = L.geoJSON({ type: "FeatureCollection", features: [] }).addLayer(gjmap);
+
     if (kmoniMapData) kmoniMapUpdate(kmoniMapData);
     if (SnetMapData) kmoniMapUpdate(SnetMapData);
   });
