@@ -3,6 +3,8 @@ var sections = [];
 var markerElm;
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "setting") {
+    document.getElementById("splash").style.display = "none";
+
     setting = request.data.config;
     document.getElementById("softVersion").innerText = request.data.softVersion;
 

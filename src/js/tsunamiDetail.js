@@ -3,6 +3,7 @@ var RevocationTimer;
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "tsunamiUpdate") {
     tsunamiUpdate(request.data);
+    document.getElementById("splash").style.display = "none";
   }
 });
 
