@@ -98,9 +98,13 @@ main {
   background: #202227;
   color: #fff;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   z-index: 9999999;
+}
+#loading-wrap {
+  margin: 50px 0 0 0;
 }
 
 #alertFrame {
@@ -424,6 +428,12 @@ td {
   text-orientation: sideways;
   background: #222;
   padding: 0 0 40px 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  white-space: nowrap;
+}
+#tab1_bar::-webkit-scrollbar {
+  display: none;
 }
 
 #setting {
@@ -992,5 +1002,30 @@ button:hover {
   }
   100% {
     box-shadow: 0 0 0 0px rgb(16, 243, 0);
+  }
+}
+
+.loading-ring {
+  animation: rotate 1.5s infinite ease-in-out, rotate2 3s infinite linear;
+  transform-origin: center center;
+}
+@keyframes rotate {
+  0% {
+    stroke-dashoffset: 157;
+  }
+  50% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: -157;
+  }
+}
+
+@keyframes rotate2 {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
   }
 }

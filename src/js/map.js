@@ -1013,7 +1013,7 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
           SWprogressValue.setAttribute("stroke-dashoffset", Number(157 - 157 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect))));
         } else {
           var SIcon = L.divIcon({
-            html: '<svg width="50" height="50"><circle cx="25" cy="25" r="23.5" fill="none" stroke-width="5px" stroke="#777"/><circle id="SWprogressValue_' + report_id + '" class="SWprogressValue" cx="25" cy="25" r="23.5" fill="none" stroke-width="5px" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="' + Number(157 - 157 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect))) + '"/></path></svg>',
+            html: '<svg width="50" height="50"><circle cx="25" cy="25" r="23.5" fill="none" stroke-width="5px" stroke="#777"/><circle id="SWprogressValue_' + report_id + '" class="SWprogressValue" cx="25" cy="25" r="23.5" fill="none" stroke-width="5px" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="' + Number(157 - 157 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect))) + '"/></svg>',
             className: "SWaveProgress",
             iconSize: [50, 50],
             iconAnchor: [25, 25],
@@ -1028,7 +1028,7 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
 
       EQElm.firstDetect = nowDistance;
       var SIcon = L.divIcon({
-        html: '<svg width="50" height="50"><circle cx="25" cy="25" r="23.5" fill="none" stroke-width="5px" stroke="#777"/><circle id="SWprogressValue_' + report_id + '" class="SWprogressValue" cx="25" cy="25" r="23.5" fill="none" stroke-width="5px" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="' + Number(157 - 157 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect))) + '"/></path></svg>',
+        html: '<svg width="50" height="50"><circle cx="25" cy="25" r="23.5" fill="none" stroke-width="5px" stroke="#777"/><circle id="SWprogressValue_' + report_id + '" class="SWprogressValue" cx="25" cy="25" r="23.5" fill="none" stroke-width="5px" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="' + Number(157 - 157 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect))) + '"/></svg>',
         className: "SWaveProgress",
         iconSize: [50, 50],
         iconAnchor: [25, 25],

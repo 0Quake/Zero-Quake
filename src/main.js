@@ -1,5 +1,5 @@
 const electron = require("electron");
-const { app, BrowserWindow, ipcMain, net, Notification, shell, dialog } = electron;
+const { app, BrowserWindow, ipcMain, net, Notification, shell, dialog, Menu } = electron;
 const path = require("path");
 const { JSDOM } = require("jsdom");
 let fs = require("fs");
@@ -108,12 +108,13 @@ const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
   app.quit();
 }
+
+Menu.setApplicationMenu(false);
 app.whenReady().then(() => {
   kmonicreateWindow();
   kmoniServerSelect();
   createWindow();
 
-  replay("2023/3/21 2:55:05");
   //replay("2023/03/11 05:12:30"); //２か所同時
   //replay("2020/06/15 02:28:38");//２か所同時
 
@@ -316,7 +317,6 @@ function createWindow() {
     },
   });
   mainWindow.maximize();
-  mainWindow.setMenuBarVisibility(false);
 
   mainWindow.webContents.on("did-finish-load", () => {
     kmoniTimeTmp.forEach(function (elm) {
@@ -440,8 +440,6 @@ function settingcreateWindow() {
     settingWindow = null;
   });
 
-  settingWindow.setMenuBarVisibility(false);
-
   settingWindow.loadFile("src/settings.html");
   const handleUrlOpen = (e, url) => {
     if (url.match(/^http/)) {
@@ -469,7 +467,6 @@ function tsunamicreateWindow() {
       icon: path.join(__dirname, "img/icon.ico"),
     },
   });
-  tsunamiWindow.setMenuBarVisibility(false);
 
   tsunamiWindow.webContents.on("did-finish-load", () => {
     if (tsunamiWindow) {
@@ -497,7 +494,6 @@ function EQInfocreateWindow(response) {
       icon: path.join(__dirname, "img/icon.ico"),
     },
   });
-  EQInfoWindow.setMenuBarVisibility(false);
 
   EQInfoWindow.webContents.on("did-finish-load", () => {
     EQInfoWindow.webContents.send("message2", {
@@ -605,7 +601,7 @@ function kmoniControl(data, date) {
 
         detect0 = elm.pga - pgaAvr >= threshold02 || elm.shindo >= threshold04;
         detect1 = detect0 && ptDataTmp.detectCount > 0;
-        detect2 = detect1 && (elm.pga - pgaAvr >= threshold03 || elm.shindo > 1.5) && ptDataTmp.detectCount > 1; /*|| elm.shindo >= threshold04*/ /* || elm.detectCount > 1*/
+        detect2 = detect1 && (elm.pga - pgaAvr >= threshold03 || elm.shindo > 1.5) && ptDataTmp.UpCount > 0 && ptDataTmp.detectCount > 1; /*|| elm.shindo >= threshold04*/ /* || elm.detectCount > 1*/
 
         elm.detect = detect1;
         elm.detect2 = detect2;
@@ -1870,7 +1866,6 @@ function EEWAlert(data, first, update) {
       createWindow();
       if (data.alertflg == "警報") {
         soundPlay("EEW1");
-        //    sound.play(path.join(__dirname, "audio/EEW1.mp3"));
       } else {
         soundPlay("EEW2");
       }
