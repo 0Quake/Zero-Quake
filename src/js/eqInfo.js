@@ -8,7 +8,7 @@ var data_depth = document.getElementById("data_depth");
 var data_center = document.getElementById("data_center");
 var data_comment = document.getElementById("data_comment");
 var areaLocation;
-
+var layerControl;
 var eid;
 var markerElm;
 var newInfoDateTime = 0;
@@ -207,6 +207,31 @@ function Mapinit() {
   map.createPane("pane300").style.zIndex = 300;
   map.createPane("jsonMAPPane").style.zIndex = 210;
 
+  layerControl = L.control
+    .layers(
+      {
+        気象庁: tile1,
+        "地理院 標準地図": tile8,
+
+        "地理院 淡色地図": tile2,
+        衛星写真: tile3,
+        白地図: tile4,
+        OpenStreetMap: tile5,
+      },
+      {
+        陰影起伏図: overlay1,
+        火山基本図データ: overlay2,
+        "津波浸水想定 ハザードマップ": overlay3,
+        "土砂災害警戒区域（急傾斜地の崩壊） ハザードマップ": overlay4,
+        "土砂災害警戒区域（地すべり） ハザードマップ": overlay5,
+        境界線: overlay6,
+      },
+      {
+        position: "topleft",
+      }
+    )
+    .addTo(map);
+
   fetch("./Resource/World.json")
     .then(function (res) {
       return res.json();
@@ -273,36 +298,8 @@ function Mapinit() {
             layer.setStyle({ color: "#fff", weight: 2 });
           }
         },
-      });
-      mapLayer.addLayer(basemap);
-
-      gjmap = L.geoJSON({ type: "FeatureCollection", features: [] });
-      mapLayer.addLayer(gjmap);
-      L.control
-        .layers(
-          {
-            オフライン地図: gjmap,
-            気象庁: tile1,
-            "地理院 標準地図": tile8,
-
-            "地理院 淡色地図": tile2,
-            衛星写真: tile3,
-            白地図: tile4,
-            OpenStreetMap: tile5,
-          },
-          {
-            陰影起伏図: overlay1,
-            火山基本図データ: overlay2,
-            "津波浸水想定 ハザードマップ": overlay3,
-            "土砂災害警戒区域（急傾斜地の崩壊） ハザードマップ": overlay4,
-            "土砂災害警戒区域（地すべり） ハザードマップ": overlay5,
-            境界線: overlay6,
-          },
-          {
-            position: "topleft",
-          }
-        )
-        .addTo(map);
+      }).addTo(map);
+      layerControl.addBaseLayer(basemap, "オフライン地図");
       document.getElementById("splash").style.display = "none";
     });
 
@@ -961,10 +958,6 @@ function add_Area_info(name, maxInt) {
       .bindPopup("<h3>細分区域</h3><div>" + name + "</div><div>震度" + maxInt + "</div>")
       .addTo(map);
   }
-
-  gjmap.setStyle({
-    fill: false,
-  });
 
   var sectionTmp = sections.find(function (elmA) {
     return elmA.name == name;

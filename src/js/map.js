@@ -3,7 +3,6 @@ var previous_points = [];
 var points = {};
 var Tsunami_MajorWarning, Tsunami_Warning, Tsunami_Watch, Tsunami_Yoho;
 var tsunamiLayer;
-var gjmap; //オフライン地図
 var gjmapT; //津波用geojson
 var sections = [];
 var basemap, worldmap, prefecturesMap, plateMap, legend, legend2;
@@ -576,8 +575,6 @@ function init() {
   });
 
   map.on("load", function () {
-    gjmap = L.geoJSON({ type: "FeatureCollection", features: [] }).addLayer(gjmap);
-
     if (kmoniMapData) kmoniMapUpdate(kmoniMapData);
     if (SnetMapData) kmoniMapUpdate(SnetMapData);
   });
