@@ -7,47 +7,45 @@ let fs = require("fs");
 const Store = require("electron-store");
 const store = new Store();
 var config = store.get("config", {
-  config: {
-    setting1: true,
-    system: {
-      crashReportAutoSend: false,
+  setting1: true,
+  system: {
+    crashReportAutoSend: false,
+  },
+  home: {
+    name: "自宅",
+    latitude: 35.68,
+    longitude: 139.767,
+    Section: "東京都２３区",
+  },
+  Info: {
+    EEW: {},
+    EQInfo: {
+      ItemCount: 15,
     },
-    home: {
-      name: "自宅",
-      latitude: 35.68,
-      longitude: 139.767,
-      Section: "東京都２３区",
+    TsunamiInfo: {},
+    RealTimeShake: {
+      List: { ItemCount: 10 },
     },
-    Info: {
-      EEW: {},
-      EQInfo: {
-        ItemCount: 15,
-      },
-      TsunamiInfo: {},
-      RealTimeShake: {
-        List: { ItemCount: 10 },
-      },
-    },
-    Source: {
+  },
+  Source: {
+    kmoni: {
       kmoni: {
-        kmoni: {
-          Interval: 1000,
-        },
-        lmoni: {
-          Interval: 1000,
-        },
-        ymoni: {
-          Interval: 1000,
-        },
+        Interval: 1000,
       },
-      msil: {
-        Interval: 10000,
+      lmoni: {
+        Interval: 1000,
+      },
+      ymoni: {
+        Interval: 1000,
       },
     },
-    notice: {
-      voice: {
-        EEW: "緊急地震速報です。強い揺れに警戒してください。",
-      },
+    msil: {
+      Interval: 10000,
+    },
+  },
+  notice: {
+    voice: {
+      EEW: "緊急地震速報です。強い揺れに警戒してください。",
     },
   },
 });
@@ -123,7 +121,7 @@ app.whenReady().then(() => {
   start();
 });
 
-const options = {
+let options = {
   type: "error",
   title: "エラー",
   message: "予期しないエラーが発生しました",
@@ -156,9 +154,16 @@ var errorMsgBox = false;
 process.on("uncaughtException", function (err) {
   if (!errorMsgBox) {
     errorMsgBox = true;
-    dialog.showMessageBox(mainWindow, options).then(function (result) {
-      clearTimeout(relaunchTimer);
+    options = {
+      type: "error",
+      title: "エラー",
+      message: "予期しないエラーが発生しました。",
+      detail: "動作を選択してください。\n10秒で自動的に再起動します。\nエラーコードは以下の通りです。\n" + err.stack,
+      buttons: ["今すぐ再起動", "終了", "キャンセル"],
+      noLink: true,
+    };
 
+    dialog.showMessageBox(mainWindow, options).then(function (result) {
       if (config.system.crashReportAutoSend == "yes") {
         crashReportSend(err.stack, result);
         errorMsgBox = false;
@@ -181,6 +186,7 @@ process.on("uncaughtException", function (err) {
       app.relaunch();
       app.exit(0);
     }, 10000);
+    clearTimeout(relaunchTimer);
   }
 });
 //エラー処理 本体
