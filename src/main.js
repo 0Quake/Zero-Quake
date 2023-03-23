@@ -310,8 +310,10 @@ function createWindow() {
       backgroundColor: "#202227",
       icon: path.join(__dirname, "img/icon.ico"),
     },
+    show: false,
   });
   mainWindow.maximize();
+  mainWindow.once("ready-to-show", () => mainWindow.show());
 
   mainWindow.webContents.on("did-finish-load", () => {
     kmoniTimeTmp.forEach(function (elm) {
@@ -563,9 +565,41 @@ const worker = new workerThreads.Worker(path.join(__dirname, "js/EQDetectWorker.
 });
 worker.on("message", (message) => {
   switch (message.action) {
+    case "EQDetectAdd":
+      var EQD_ItemTmp = message.data;
+
+      if (EQD_ItemTmp.maxPGA > 1) {
+        var LvTmp = 2;
+      } else {
+        var LvTmp = 1;
+      }
+
+      if (EQD_ItemTmp.showed) {
+        if (LvTmp == 2) {
+          if (EQD_ItemTmp.Lv == 1) soundPlay("EQDetectLv2");
+        }
+      } else {
+        if (LvTmp == 2) {
+          soundPlay("EQDetectLv2");
+        } else {
+          soundPlay("EQDetectLv1");
+        }
+        createWindow();
+      }
+      EQD_ItemTmp.Lv = LvTmp;
+      if (mainWindow) {
+        mainWindow.webContents.send("message2", message.data);
+      }
+
+      break;
     case "sendDataToMainWindow":
       if (mainWindow) {
         mainWindow.webContents.send("message2", message.data);
+      }
+      break;
+    case "sendDataToKmoniWorker":
+      if (kmoniWorker) {
+        kmoniWorker.webContents.send("message2", message.data);
       }
       break;
     case "EQDetect_List_Update":
@@ -596,7 +630,7 @@ function kmoniControl(data, date) {
   kmoniActive = new Date();
 
   if (!EEWNow) {
-    worker.postMessage({ data: data, date: date });
+    worker.postMessage({ action: "EEWDetect", data: data, date: date });
   }
 }
 
@@ -1720,6 +1754,7 @@ function EEWClear(source, code, reportnum, bypass) {
 
       if (EEW_nowList.length == 0) {
         EEWNow = false;
+        worker.postMessage({ action: "EEWNow", data: EEWNow });
       }
     }
   }
@@ -1728,6 +1763,8 @@ function EEWClear(source, code, reportnum, bypass) {
 //EEW通知（音声・画面表示等）
 function EEWAlert(data, first, update) {
   EEWNow = true;
+  worker.postMessage({ action: "EEWNow", data: EEWNow });
+
   EstShindoFetch = true;
 
   if (!update) {
@@ -2721,6 +2758,6 @@ function replay(ReplayDate) {
   }
 }
 /* eslint-enable */
-//replay("2023/03/22 16:37:30");
+//replay("2023/03/23 15:49:30");
 //replay("2023/03/11 05:12:30"); //２か所同時
 //replay("2020/06/15 02:28:38");//２か所同時
