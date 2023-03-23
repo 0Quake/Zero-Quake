@@ -1,12 +1,12 @@
 const workerThreads = require("worker_threads");
 
-var EEWNow = false;
-var EQDetectID = 0;
-var EQDetect_List = [];
-var pointsData = {};
+var EEWNow = false; //EEW発令中かどうか
+var EQDetectID = 0; //独自の地震ID
+var EQDetect_List = []; //地震アイテムのリスト
+var pointsData = {}; //毎秒クリアされない、観測点のデータ
 
 var historyCount = 10; //比較する件数
-var threshold01 = 4; //検出とする観測点数
+var threshold01 = 5; //検出とする観測点数
 var threshold01C = 5; //検出とする観測点数【都会】
 var threshold02; //1次フラグ条件のPGA増加量[gal]
 var threshold03; //2次フラグ条件のPGA増加量[gal]
@@ -18,13 +18,14 @@ var time01 = 10000; //最後の検出~解除[ms]
 
 workerThreads.parentPort.on("message", (message) => {
   if (message.action == "EEWDetect") {
-    EQDetect(message.data);
+    //観測点ごとのデータを毎秒受信
+    EQDetect(message.data, message.date);
   } else if (message.action == "EEWNow") {
     EEWNow = message.data;
   }
 });
 
-function EQDetect(data) {
+function EQDetect(data, date) {
   var ptDataTmp;
 
   var detect0;
@@ -51,8 +52,8 @@ function EQDetect(data) {
       if (!pgaAvr) pgaAvr = 0.03; //平均が求められなければ0.03を代入
 
       //平均PGAから閾値を決定
-      threshold02 = 0.2 * pgaAvr + 0.023;
-      threshold03 = 0.2 * pgaAvr + 0.01;
+      threshold02 = 0.4 * pgaAvr + 0.023;
+      threshold03 = 0.5 * pgaAvr + 0.15;
       if (ptDataTmp.isCity) {
         //都会では閾値を大きく
         threshold02 *= 2;
@@ -139,10 +140,7 @@ function EQDetect(data) {
           //情報をmainプロセスへ送信
           workerThreads.parentPort.postMessage({
             action: "EQDetectAdd",
-            data: {
-              action: "EQDetect",
-              data: EQD_ItemTmp,
-            },
+            data: EQD_ItemTmp,
           });
           EQD_ItemTmp.showed = true; //新地震アイテムかどうかの判別用
         }
@@ -180,10 +178,11 @@ function EQDetect(data) {
   workerThreads.parentPort.postMessage({
     action: "PointsData_Update",
     data: data,
-    date: message.date,
+    date: date,
   });
 }
 
+//緯度・経度から2地点間の距離を産出
 function geosailing(latA, lngA, latB, lngB) {
   return Math.acos(Math.sin(Math.atan(Math.tan(latA * (Math.PI / 180)))) * Math.sin(Math.atan(Math.tan(latB * (Math.PI / 180)))) + Math.cos(Math.atan(Math.tan(latA * (Math.PI / 180)))) * Math.cos(Math.atan(Math.tan(latB * (Math.PI / 180)))) * Math.cos(lngA * (Math.PI / 180) - lngB * (Math.PI / 180))) * 6371.008;
 }

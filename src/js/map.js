@@ -460,8 +460,8 @@ function init() {
   map.on("baselayerchange", function (layer) {
     offlineMapActive = layer.name == "オフライン地図";
 
-    basemap.setStyle({ fill: offlineMapActive && !overlayActive });
-    worldmap.setStyle({ fill: offlineMapActive && !overlayActive });
+    if (basemap) basemap.setStyle({ fill: offlineMapActive && !overlayActive });
+    if (worldmap) worldmap.setStyle({ fill: offlineMapActive && !overlayActive });
   });
   map.on("locationerror", function (e) {
     e.preventDefault();

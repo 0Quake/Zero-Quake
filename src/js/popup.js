@@ -387,7 +387,7 @@ function EQDetect(data) {
     EQD_Item.marker.setRadius(data.Radius * 1000);
   } else {
     var clone = EQDetectTemplate.content.cloneNode(true);
-    clone.setAttribute("id", "EQDItem_" + data.id);
+    clone.querySelector(".EQDetect_Wrap").setAttribute("id", "EQDItem_" + data.id);
     document.getElementById("EQDetect-Panel").appendChild(clone);
     //var EQmarker = L.marker([data.lat, data.lng]).addTo(map);
     var EQmarker = L.circle([data.lat, data.lng], {
@@ -418,7 +418,8 @@ function EQDetectFinish(id) {
       EQDetectItem.splice(index, 1);
     }
   });
-  document.getElementById("EQDItem_" + data.id).remove();
+  var eqdItem = document.getElementById("EQDItem_" + id);
+  if (eqdItem) eqdItem.remove();
 }
 
 //🔴UI🔴
