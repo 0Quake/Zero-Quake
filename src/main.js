@@ -50,7 +50,6 @@ var config = store.get("config", {
   },
 });
 const userHome = process.env[process.platform == "win32" ? "USERPROFILE" : "HOME"];
-
 let mainWindow, settingWindow, tsunamiWindow, kmoniWorker;
 var kmoniActive = false;
 var EstShindoFetch = false;
@@ -99,6 +98,8 @@ var kmoniPointsDataTmp, SnetPointsDataTmp;
 var intColorConv = { "0xFFFFFFFF": "0", "0xFFF2F2FF": "1", "0xFF00AAFF": "2", "0xFF0041FF": "3", "0xFFFAE696": "4", "0xFFFFE600": "5-", "0xFFFF9900": "5+", "0xFFFF2800": "6-", "0xFFA50021": "6+", "0xFFB40068": "7" };
 let tray;
 var RevocationTimer;
+var thresholds;
+
 //多重起動防止
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
@@ -152,7 +153,7 @@ var relaunchTimer;
 var errorMsgBox = false;
 //エラー処理
 process.on("uncaughtException", function (err) {
-  if (!errorMsgBox) {
+  if (!errorMsgBox && app.isReady()) {
     errorMsgBox = true;
     options = {
       type: "error",
@@ -359,8 +360,15 @@ function createWindow() {
         data: notifications,
       });
     }
+    var threshold01Tmp;
     EQDetect_List.forEach(function (elm) {
-      if (elm.Codes.length >= threshold01) {
+      if (elm.isCity) {
+        threshold01Tmp = thresholds.threshold01C;
+      } else {
+        threshold01Tmp = thresholds.threshold01;
+      }
+
+      if (elm.Codes.length >= threshold01Tmp) {
         mainWindow.webContents.send("message2", {
           action: "EQDetect",
           data: elm,
@@ -613,6 +621,9 @@ worker.on("message", (message) => {
       break;
     case "EQDetect_List_Update":
       EQDetect_List = message.data;
+      break;
+    case "thresholds":
+      thresholds = message.data;
       break;
     case "PointsData_Update":
       kmoniPointsDataTmp = {
@@ -2767,6 +2778,6 @@ function replay(ReplayDate) {
   }
 }
 /* eslint-enable */
-//replay("2023/03/23 20:29:10");
+//replay("2023/03/23 23:35:10");
 //replay("2023/03/11 05:12:30"); //２か所同時
 //replay("2020/06/15 02:28:38");//２か所同時
