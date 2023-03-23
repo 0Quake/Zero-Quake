@@ -568,7 +568,7 @@ worker.on("message", (message) => {
     case "EQDetectAdd":
       var EQD_ItemTmp = message.data;
 
-      if (EQD_ItemTmp.maxPGA > 1) {
+      if (EQD_ItemTmp.maxPGA > 0.5) {
         var LvTmp = 2;
       } else {
         var LvTmp = 1;
@@ -2761,6 +2761,6 @@ function replay(ReplayDate) {
   }
 }
 /* eslint-enable */
-//replay("2023/03/23 18:47:45");
+replay("2023/03/23 20:29:10");
 //replay("2023/03/11 05:12:30"); //２か所同時
 //replay("2020/06/15 02:28:38");//２か所同時

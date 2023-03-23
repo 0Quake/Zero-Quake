@@ -10,7 +10,7 @@ var threshold01 = 5; //検出とする観測点数
 var threshold01C = 5; //検出とする観測点数【都会】
 var threshold02; //1次フラグ条件のPGA増加量[gal]
 var threshold03; //2次フラグ条件のPGA増加量[gal]
-var threshold04 = 1; //1次フラグ条件の震度
+var threshold04 = 1.5; //1次フラグ条件の震度
 var MargeRange = 20; //地震の同定範囲[km]
 var MargeRangeC = 35; //地震の同定範囲[km]【都会】
 var time00 = 300000; //最初の検出~解除[ms](優先)
@@ -62,7 +62,7 @@ function EQDetect(data, date) {
 
       detect0 = elm.pga - pgaAvr >= threshold02 || elm.shindo >= threshold04; //PGA増加量・震度絶対値で評価
       detect1 = detect0 && ptDataTmp.detectCount > 0; //detect1に加え、detectCountを加えて評価
-      detect2 = detect1 && (elm.pga - pgaAvr >= threshold03 || elm.shindo > 1.5);
+      detect2 = detect1 && (elm.pga - pgaAvr >= threshold03 || elm.shindo > threshold04);
 
       elm.detect = detect1;
       elm.detect2 = detect2;
