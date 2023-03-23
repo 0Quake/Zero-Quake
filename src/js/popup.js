@@ -381,14 +381,27 @@ function EQDetect(data) {
   var EQD_Item = EQDetectItem.find(function (elm) {
     return elm.id == data.id;
   });
+  var regions = [];
+  data.Codes.forEach(function (elm) {
+    if (!regions.includes(elm.Region)) regions.push(elm.Region);
+  });
+
   if (EQD_Item) {
     EQD_Item.lat = data.lat;
     EQD_Item.lng = data.lng;
     EQD_Item.marker.setRadius(data.Radius * 1000);
+    var EQDItem = document.getElementById("EQDItem_" + data.id);
+    EQDItem.classList.remove("lv1", "lv2");
+    EQDItem.classList.add("lv" + data.Lv);
+    EQDItem.querySelector(".EQD_Regions").innerText = regions.join(" ");
   } else {
     var clone = EQDetectTemplate.content.cloneNode(true);
-    clone.querySelector(".EQDetect_Wrap").setAttribute("id", "EQDItem_" + data.id);
+    var EQDItem = clone.querySelector(".EQDItem");
+    EQDItem.setAttribute("id", "EQDItem_" + data.id);
+    EQDItem.classList.add("lv" + data.Lv);
+    EQDItem.querySelector(".EQD_Regions").innerText = regions.join(" ");
     document.getElementById("EQDetect-Panel").appendChild(clone);
+
     //var EQmarker = L.marker([data.lat, data.lng]).addTo(map);
     var EQmarker = L.circle([data.lat, data.lng], {
       radius: data.Radius * 1000 + 5000,

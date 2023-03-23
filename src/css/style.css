@@ -261,13 +261,13 @@ h2 {
   display: flex;
 }
 
-.EEWWrap h2,
-#LWaveWrap h2,
-#tsunamiWrap h2 {
+.list-item h2 {
   font-size: 16px;
-  padding: 5px 0.5em;
+  padding: 3px 0.5em;
+  background: #333;
 }
-.EEWWrap h2 {
+.EEWWrap h2,
+.EQDItem h2 {
   float: none;
   background: rgb(39, 110, 50);
   color: #fff;
@@ -276,15 +276,25 @@ h2 {
   border-bottom: solid 2px #fff;
 }
 
-.EEWWrap.yohou h2 {
+.EEWWrap.yohou h2,
+.EQDItem.lv1 h2 {
   background: rgb(212, 214, 91);
   color: #000;
 }
-.EEWWrap.keihou h2 {
+.EEWWrap.keihou h2,
+.EQDItem.lv2 h2 {
   background: rgb(175, 54, 54);
   color: #fff;
 }
-
+.EQDItem.lv1 h2::after {
+  content: " 弱い検出";
+}
+.EQDItem.lv2 h2::after {
+  content: " 強い検出";
+}
+.EQD_Regions {
+  padding: 5px;
+}
 .detail_text {
   flex: 1;
   padding: 10px 5px;

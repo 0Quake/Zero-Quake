@@ -106,7 +106,7 @@ if (!gotTheLock) {
   app.quit();
 }
 
-Menu.setApplicationMenu(false);
+//Menu.setApplicationMenu(false);
 app.whenReady().then(() => {
   kmonicreateWindow();
   kmoniServerSelect();
@@ -2778,6 +2778,6 @@ function replay(ReplayDate) {
   }
 }
 /* eslint-enable */
-//replay("2023/03/23 23:35:10");
+replay("2023/03/24 0:21:50");
 //replay("2023/03/11 05:12:30"); //２か所同時
 //replay("2020/06/15 02:28:38");//２か所同時
