@@ -378,6 +378,7 @@ function eqInfoDraw(data, source) {
 //🔴地震検知🔴
 var EQDetectTemplate = document.getElementById("EQDetectTemplate");
 function EQDetect(data) {
+  console.log(data);
   var EQD_Item = EQDetectItem.find(function (elm) {
     return elm.id == data.id;
   });
@@ -400,7 +401,7 @@ function EQDetect(data) {
     EQDItem.setAttribute("id", "EQDItem_" + data.id);
     EQDItem.classList.add("lv" + data.Lv);
     EQDItem.querySelector(".EQD_Regions").innerText = regions.join(" ");
-    document.getElementById("EQDetect-Panel").appendChild(clone);
+    document.getElementById("EQDetect-Panel").prepend(clone);
 
     //var EQmarker = L.marker([data.lat, data.lng]).addTo(map);
     var EQmarker = L.circle([data.lat, data.lng], {

@@ -7,13 +7,13 @@ var pointsData = {}; //毎秒クリアされない、観測点のデータ
 
 var thresholds = {
   historyCount: 10, //比較する件数
-  threshold01: 4, //検出とする観測点数
+  threshold01: 5, //検出とする観測点数
   threshold01C: 5, //検出とする観測点数【都会】
   threshold02: null, //1次フラグ条件のPGA増加量[gal]
   threshold03: null, //2次フラグ条件のPGA増加量[gal]
   threshold04: 1.5, //1次フラグ条件の震度
-  MargeRange: 20, //地震の同定範囲[km]
-  MargeRangeC: 35, //地震の同定範囲[km]【都会】
+  MargeRange: 30, //地震の同定範囲[km]
+  MargeRangeC: 20, //地震の同定範囲[km]【都会】
   time00: 300000, //最初の検出~解除[ms](優先)
   time01: 10000, //最後の検出~解除[ms]
 };
@@ -47,7 +47,7 @@ function EQDetect(data, date) {
       if (!ptDataTmp) {
         //都会かどうか
         var isCity = elm.Region == "東京都" || elm.Region == "千葉県" || elm.Region == "埼玉県" || elm.Region == "神奈川県";
-        pointsData[elm.Code] = { detectCount: 0, SUMTmp: [elm.pga], Event: null, oneBeforePGA: elm.pga, isCity: isCity };
+        pointsData[elm.Code] = { detectCount: 0, SUMTmp: [elm.pga], Event: false, oneBeforePGA: elm.pga, isCity: isCity, UpCount: 0 };
         ptDataTmp = pointsData[elm.Code];
       }
 
@@ -59,8 +59,8 @@ function EQDetect(data, date) {
       if (!pgaAvr) pgaAvr = 0.03; //平均が求められなければ0.03を代入
 
       //平均PGAから閾値を決定
-      thresholds.threshold02 = 0.4 * pgaAvr + 0.023;
-      thresholds.threshold03 = 0.5 * pgaAvr + 0.15;
+      thresholds.threshold02 = 0.5 * pgaAvr + 0.025;
+      thresholds.threshold03 = 0.8 * pgaAvr + 0.2;
       if (ptDataTmp.isCity) {
         //都会では閾値を大きく
         thresholds.threshold02 *= 2;
@@ -69,7 +69,7 @@ function EQDetect(data, date) {
 
       detect0 = elm.pga - pgaAvr >= thresholds.threshold02 || elm.shindo >= thresholds.threshold04; //PGA増加量・震度絶対値で評価
       detect1 = detect0 && ptDataTmp.detectCount > 0; //detect1に加え、detectCountを加えて評価
-      detect2 = detect1 && (elm.pga - pgaAvr >= thresholds.threshold03 || elm.shindo > thresholds.threshold04);
+      detect2 = detect1 && (elm.pga - pgaAvr >= thresholds.threshold03 || elm.shindo > thresholds.threshold04) && ptDataTmp.UpCount > 0 && ptDataTmp.detectCount > 2;
 
       elm.detect = detect1;
       elm.detect2 = detect2;
@@ -81,20 +81,27 @@ function EQDetect(data, date) {
         ptDataTmp.detectCount = 0;
       }
 
-      if (!detect2) {
-        //PGA平均を求めるためのデータ追加
-        ptDataTmp.SUMTmp = ptDataTmp.SUMTmp.slice(0, thresholds.historyCount - 1);
-        ptDataTmp.SUMTmp.push(elm.pga);
+      //if (!detect2) {
+      //PGA平均を求めるためのデータ追加
+      ptDataTmp.SUMTmp = ptDataTmp.SUMTmp.slice(0, thresholds.historyCount - 1);
+      ptDataTmp.SUMTmp.push(elm.pga);
 
-        if (!detect1 && ptDataTmp.Event) {
-          //検出中ではない場合、地震アイテムから観測点データを削除
-          ptDataTmp.Event = null;
-          for (const elm2 of EQDetect_List) {
-            elm2.Codes = elm2.Codes.filter(function (elm3) {
-              return elm3.Code !== elm.Code;
-            });
-          }
+      if (!detect1 && ptDataTmp.Event) {
+        //検出中ではない場合、地震アイテムから観測点データを削除
+        ptDataTmp.Event = false;
+        for (const elm2 of EQDetect_List) {
+          elm2.Codes = elm2.Codes.filter(function (elm3) {
+            return elm3.Code !== elm.Code;
+          });
         }
+      }
+      //}
+
+      oneBeforePGADifference = elm.pga - ptDataTmp.SUMTmp[ptDataTmp.SUMTmp.length - 1];
+      if (oneBeforePGADifference >= 0) {
+        ptDataTmp.UpCount++;
+      } else {
+        ptDataTmp.UpCount = 0;
       }
     }
   }
@@ -108,9 +115,9 @@ function EQDetect(data, date) {
 
       //都会かどうかで閾値調整
       if (ptDataTmp.isCity) {
-        MargeRangeTmp = thresholds.MargeRange;
-      } else {
         MargeRangeTmp = thresholds.MargeRangeC;
+      } else {
+        MargeRangeTmp = thresholds.MargeRange;
       }
 
       //すでに自観測点が地震アイテムに属していないことを確認
@@ -128,7 +135,7 @@ function EQDetect(data, date) {
           if (CodesTmp) {
             //地震アイテムに自観測点を追加
             EQD_ItemTmp.Codes.push(elm);
-            ptDataTmp.Event = EQD_ItemTmp.id;
+            ptDataTmp.Event = true;
             //地震アイテムの「半径」を更新
             var radiusTmp = geosailing(elm.Location.Latitude, elm.Location.Longitude, EQD_ItemTmp.lat, EQD_ItemTmp.lng);
             if (EQD_ItemTmp.Radius < radiusTmp) EQD_ItemTmp.Radius = radiusTmp;
