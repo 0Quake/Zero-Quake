@@ -4,13 +4,19 @@
   "version": "0.5.2",
   "description": "地震に関する情報を即座に受信できるアプリケーションです。緊急地震速報に加え、津波情報や地震情報の受信に対応しています。",
   "scripts": {
-    "start": "electron .",
+    "start": "electron . --develop --debug-mode",
     "lint": "eslint src"
   },
   "build": {
     "win": {
       "icon": "src/img/icon.ico",
-      "target": "nsis"
+      "publish": {
+        "provider": "github",
+        "owner": "{USER_NAME}"
+      },
+      "target": {
+        "target": "nsis"
+      }
     },
     "nsis": {
       "artifactName": "${productName}_setup_${version}.${ext}",
@@ -26,6 +32,7 @@
   "license": "GPL-2.0",
   "dependencies": {
     "electron-store": "^8.1.0",
+    "electron-updater": "^5.3.0",
     "fs": "^0.0.1-security",
     "jsdom": "^21.1.0",
     "path": "^0.12.7",

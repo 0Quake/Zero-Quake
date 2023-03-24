@@ -79,3 +79,6 @@ dist/win-unpacked/resources/app-update.yml
 dist/win-unpacked/resources/app.asar
 dist/win-unpacked/resources/elevate.exe
 src/config/
+
+out/
+src/electron-builder.env

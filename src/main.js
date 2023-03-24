@@ -6,6 +6,7 @@ const { JSDOM } = require("jsdom");
 let fs = require("fs");
 const Store = require("electron-store");
 const store = new Store();
+const { autoUpdater } = require("electron-updater");
 var config = store.get("config", {
   setting1: true,
   system: {
@@ -109,10 +110,65 @@ if (!gotTheLock) {
 if (app.isPackaged) {
   Menu.setApplicationMenu(false);
 }
+
+function checkUpdate() {
+  autoUpdater.on("checking-for-update", () => {
+    dialog.showMessageBox({
+      type: "info",
+      title: "アプリケーション更新",
+      message: "確認中",
+      buttons: ["OK"],
+    });
+  });
+  autoUpdater.on("update-not-available", () => {
+    console.log("update-not-available");
+  });
+  /*
+  autoUpdater.on("update-available", () => {
+    console.log("update-not-available");
+    dialog.showMessageBox({
+      type: "info",
+      title: "アプリケーション更新",
+      message: "更新があります",
+      buttons: ["OK"],
+    });
+  });*/
+  autoUpdater.on("'error'", (error) => {
+    dialog.showMessageBox({
+      type: "info",
+      title: "アプリケーション更新",
+      message: "エラーです" + error.stack,
+      buttons: ["OK"],
+    });
+  });
+
+  autoUpdater.on("update-downloaded", () => {
+    const dialogOpts = {
+      type: "info",
+      title: "アプリケーション更新",
+      message: "更新が利用できます。インストールしますか？",
+      buttons: ["再起動して更新", "後で"],
+    };
+
+    dialog.showMessageBox(mainWin, dialogOpts).then((returnValue) => {
+      if (returnValue.response === 0) {
+        autoUpdater.quitAndInstall();
+      }
+    });
+  });
+
+  autoUpdater.on("error", (err) => {
+    console.error("There was a problem updating the application!");
+    console.error(err);
+  });
+  autoUpdater.checkForUpdates();
+}
+
 app.whenReady().then(() => {
   kmonicreateWindow();
   kmoniServerSelect();
   createWindow();
+  checkUpdate();
 
   app.on("activate", () => {
     // メインウィンドウが消えている場合は再度メインウィンドウを作成する
