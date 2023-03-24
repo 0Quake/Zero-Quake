@@ -122,8 +122,13 @@ function checkUpdate() {
   });
   autoUpdater.on("update-not-available", () => {
     console.log("update-not-available");
+    dialog.showMessageBox({
+      type: "info",
+      title: "アプリケーション更新",
+      message: "最新の状態です",
+      buttons: ["OK"],
+    });
   });
-  /*
   autoUpdater.on("update-available", () => {
     console.log("update-not-available");
     dialog.showMessageBox({
@@ -132,7 +137,7 @@ function checkUpdate() {
       message: "更新があります",
       buttons: ["OK"],
     });
-  });*/
+  });
   autoUpdater.on("'error'", (error) => {
     dialog.showMessageBox({
       type: "info",
