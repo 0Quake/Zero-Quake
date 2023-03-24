@@ -651,9 +651,7 @@ worker.on("error", (error) => {
 function kmoniControl(data, date) {
   kmoniActive = new Date();
 
-  if (!EEWNow) {
-    worker.postMessage({ action: "EEWDetect", data: data, date: date });
-  }
+  worker.postMessage({ action: "EEWDetect", data: data, date: date });
 }
 
 //海しるリアルタイム揺れ情報処理
@@ -2780,6 +2778,7 @@ function replay(ReplayDate) {
   }
 }
 /* eslint-enable */
+replay("2023/03/24 16:24:59");
 //replay("2023/03/24 13:5:00");
 //replay("2023/03/11 05:12:30"); //２か所同時
 //replay("2020/06/15 02:28:38");//２か所同時
