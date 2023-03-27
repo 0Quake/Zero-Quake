@@ -300,7 +300,6 @@ function Mapinit() {
         },
       }).addTo(map);
       layerControl.addBaseLayer(basemap, "オフライン地図");
-      document.getElementById("splash").style.display = "none";
     });
 
   fetch("./Resource/plate.json")
@@ -917,6 +916,8 @@ function add_Pref_info(name, maxInt) {
   newDiv.innerHTML = "<div></div>";
   newDiv.classList.add("WrapLevel1", "close");
   document.getElementById("Shindo").appendChild(newDiv);
+
+  document.getElementById("splash").style.display = "none";
 }
 //細分区域ごとの情報描画（リスト・地図塗りつぶし・地図プロット）
 function add_Area_info(name, maxInt) {
@@ -1102,6 +1103,7 @@ function EQInfoControl(data) {
   }
 
   //  {originTime:,maxI:,mag:,lat:,lng:,depth:,epiCenter:,comment:,}
+  document.getElementById("splash").style.display = "none";
 }
 
 //地図（再）描画

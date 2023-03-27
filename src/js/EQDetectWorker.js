@@ -57,11 +57,11 @@ function EQDetect(data, date) {
           ptDataTmp.SUMTmp.reduce(function (acc, cur) {
             return acc + cur;
           }) / ptDataTmp.SUMTmp.length;
-        if (!pgaAvr) pgaAvr = 0.03; //平均が求められなければ0.03を代入
+        if (!pgaAvr) pgaAvr = 0.1; //平均が求められなければ0.1を代入
 
         //平均PGAから閾値を決定
-        thresholds.threshold02 = 0.5 * pgaAvr + 0.025;
-        thresholds.threshold03 = 0.8 * pgaAvr + 0.2;
+        thresholds.threshold02 = 0.5 * pgaAvr + 0.085;
+        thresholds.threshold03 = 0.8 * pgaAvr + 0.3;
         if (ptDataTmp.isCity) {
           //都会では閾値を大きく
           thresholds.threshold02 *= 2;

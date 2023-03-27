@@ -103,7 +103,7 @@
                 if (rgb[0] + rgb[1] + rgb[2] !== 0) {
                     var hsv = RGB2HSV(rgb[0], rgb[1], rgb[2]);
                     var p = HSVtoP(hsv[0], hsv[1], hsv[2]);
-                    var shindo = (10 * p - 3);
+                    var shindo = (10 * p) - 3;
                     var pga = 10 ** (5 * p - 2);
 
                     elm.data = true
@@ -192,14 +192,29 @@
             return [imagedata.data[0], imagedata.data[1], imagedata.data[2]];
         }
         function RGB2HSV(r, g, b) {
-            var v = Math.max(r, g, b),
-                d = v - Math.min(r, g, b),
-                s = v ? d / v : 0,
-                a = [r, g, b, r, g],
-                i = a.indexOf(v),
-                h = s ? (((a[i + 1] - a[i + 2]) / d + i * 2 + 6) % 6) * 60 : 0;
-            v /= 255;
-            h /= 260;
+            var max = Math.max(r, g, b);
+            var min = Math.min(r, g, b);
+
+            var h = 0;
+            var s = 0;
+            var v = max
+
+
+            if (max != min) {
+                if (max == r) h = 60 * (g - b) / (max - min);
+                if (max == g) h = 60 * (b - r) / (max - min) + 120;
+                if (max == b) h = 60 * (r - g) / (max - min) + 240;
+
+                s = (max - min) / max;
+            }
+
+            if (h < 0) {
+                h = h + 360;
+            }
+
+            h = h / 360;
+            s = s;
+            v = v / 255;
             return [h, s, v];
         }
 
