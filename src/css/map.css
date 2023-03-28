@@ -343,18 +343,6 @@ div.marker-circle.marker_Int7p {
   content: " Map:";
   font-size: 12px;
 }
-.zoomLevel_1 .tsunamiElm {
-  stroke-width: 20px;
-}
-.zoomLevel_2 .tsunamiElm {
-  stroke-width: 25px;
-}
-.zoomLevel_3 .tsunamiElm {
-  stroke-width: 35px;
-}
-.zoomLevel_4 .tsunamiElm {
-  stroke-width: 45px;
-}
 #tsunamiSample {
   list-style: none;
   padding: 0;
@@ -371,7 +359,7 @@ div.marker-circle.marker_Int7p {
   margin: 0 5px;
 }
 
-.tsunamiElm {
+.leaflet-tsunami-pane canvas {
   animation: flash 2s step-end infinite;
 }
 

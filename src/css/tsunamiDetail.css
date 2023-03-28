@@ -37,15 +37,20 @@ table {
 #WatchInfo,
 #YohoInfo,
 table thead {
-  display: none;
   text-align: center;
   position: -webkit-sticky;
   position: sticky;
-  top: 90px;
+  top: 170px;
   z-index: 1;
   background: #222;
   height: 50px;
   font-size: 20px;
+}
+#MajorWarningInfo,
+#WarningInfo,
+#WatchInfo,
+#YohoInfo {
+  display: none;
 }
 
 table thead {

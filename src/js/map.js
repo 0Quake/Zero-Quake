@@ -18,7 +18,7 @@ var tsunamiElm = [];
 var inited = false;
 var windowLoaded = false;
 var TimeTable_JMA2001;
-var EQDetectCanvas, PointsCanvas, PSWaveCanvas, overlayCanvas; // eslint-disable-line
+var tsunamiCanvas, EQDetectCanvas, PointsCanvas, PSWaveCanvas, overlayCanvas; // eslint-disable-line
 var mapLayer, hinanjoLayer;
 var kmoniMapData, SnetMapData;
 var layerControl;
@@ -102,12 +102,13 @@ function init() {
   map.createPane("EQDetectPane").style.pointerEvents = "none";
   map.createPane("HinanjoPane").style.zIndex = 220;
 
+  tsunamiCanvas = L.canvas({ pane: "tsunamiPane" });
   var jsonMAP1Canvas = L.canvas({ pane: "jsonMAP1Pane" });
   var jsonMAP2Canvas = L.canvas({ pane: "jsonMAP2Pane" });
-  EQDetectCanvas = L.canvas({ pane: "EQDetectPane" });
   PointsCanvas = L.canvas({ pane: "PointsPane" });
-  HinanjoCanvas = L.canvas({ pane: "HinanjoPane" });
   PSWaveCanvas = L.canvas({ pane: "PSWavePane" });
+  EQDetectCanvas = L.canvas({ pane: "EQDetectPane" });
+  HinanjoCanvas = L.canvas({ pane: "HinanjoPane" });
   overlayCanvas = L.canvas({ pane: "overlayCanvas" });
 
   //L.control.scale({ imperial: false }).addTo(map);←縮尺
@@ -201,6 +202,7 @@ function init() {
           className: "tsunamiElm",
           attribution: "JMA",
           interactive: true,
+          renderer: tsunamiCanvas,
         },
         onEachFeature: function onEachFeature(feature, layer) {
           if (feature.properties && feature.properties.name) {
@@ -555,12 +557,16 @@ function init() {
 
     if (currentZoom < 5.5) {
       document.getElementById("mapcontainer").classList.add("zoomLevel_1");
+      gjmapT.setStyle({ weight: 20 });
     } else if (currentZoom < 7) {
       document.getElementById("mapcontainer").classList.add("zoomLevel_2");
+      gjmapT.setStyle({ weight: 25 });
     } else if (currentZoom < 8.5) {
       document.getElementById("mapcontainer").classList.add("zoomLevel_3");
+      gjmapT.setStyle({ weight: 35 });
     } else {
       document.getElementById("mapcontainer").classList.add("zoomLevel_4");
+      gjmapT.setStyle({ weight: 65 });
     }
     if (currentZoom > 11) {
       document.getElementById("mapcontainer").classList.add("popup_show");
@@ -1143,7 +1149,7 @@ function tsunamiDataUpdate(data) {
             firstWave = "<div>第１波 予想到達時刻:" + dateEncode(5, elm.firstHeight) + "</div>";
           }
           if (elm.maxHeight) {
-            maxWave = "<div>予想される津波の高さ:" + elm.maxHeight + "</div>";
+            maxWave = "<div>最大波 予想高さ:" + elm.maxHeight + "</div>";
           } else if (elm.grade == "Yoho") {
             maxWave = "<div>予想される津波の高さ:若干の海面変動</div>";
           }
@@ -1156,7 +1162,7 @@ function tsunamiDataUpdate(data) {
               color: tsunamiColorConv(elm.grade),
               weight: 5,
             })
-            .setPopupContent("<h3 style='border-bottom:solid 2px " + tsunamiColorConv(elm.grade) + "'>" + gradeJa + " 発令中</h3><p>津波予報区:" + tsunamiItem.feature.properties.name + "</p>" + firstWave + maxWave + firstCondition);
+            .setPopupContent("<h3 style='border-bottom:solid 2px " + tsunamiColorConv(elm.grade) + "'>" + tsunamiItem.feature.properties.name + "</h3><p> " + gradeJa + " 発令中</p>" + firstWave + maxWave + firstCondition);
         }
       }
     });

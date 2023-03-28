@@ -400,17 +400,6 @@ h2.traning {
   text-align: right;
 }
 
-@keyframes flash {
-  0%,
-  100% {
-    background: rgb(255, 240, 240);
-  }
-
-  50% {
-    background: rgb(255, 205, 205);
-  }
-}
-
 table,
 tr,
 th,

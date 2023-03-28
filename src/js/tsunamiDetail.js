@@ -39,6 +39,7 @@ function tsunamiUpdate(dataTmp) {
     if (!elm.canceled) {
       var condition = "";
       var arrivalTime = "不明";
+      var maxHeight = "不明";
       if (elm.firstHeight) {
         arrivalTime = dateEncode(5, elm.firstHeight);
         if (elm.firstHeightCondition) {
@@ -48,9 +49,8 @@ function tsunamiUpdate(dataTmp) {
         arrivalTime = elm.firstHeightCondition;
       }
 
-      var maxHeight = "不明";
       if (elm.maxHeight) {
-        maxHeight = "<span class='TxtIcon'>観</span>" + elm.maxHeight;
+        maxHeight = elm.maxHeight;
       }
       var IconTxt = "";
       switch (elm.grade) {
@@ -78,7 +78,17 @@ function tsunamiUpdate(dataTmp) {
       }
 
       var new_tr = document.createElement("tr");
-      new_tr.innerHTML = "<td><div class='ListIcon_" + elm.grade + "'>" + IconTxt + "</div></td><td>" + elm.name + "</td><td>" + arrivalTime + "</td><td>" + maxHeight + "</td><td class='disabled-cell'>-</td><td>" + condition + "</td>";
+      var ihtml = "";
+      ihtml += "<td><div class='ListIcon_" + elm.grade + "'>" + IconTxt + "</div></td>";
+      ihtml += "<td>" + elm.name + "</td>";
+      ihtml += "<td>" + arrivalTime + "</td>";
+      ihtml += "<td>" + maxHeight + "</td>";
+      ihtml += "<td class='disabled-cell'>-</td>";
+      ihtml += "<td class='disabled-cell'>-</td>";
+      ihtml += "<td class='disabled-cell'>-</td>";
+      ihtml += "<td></td>";
+      ihtml += "<td>" + condition + "</td>";
+      new_tr.innerHTML = ihtml;
       new_tr.classList.add("add-content");
       new_tr.classList.add("ListItem_" + elm.grade);
       document.getElementById(elm.grade + "Info").after(new_tr);
@@ -93,37 +103,47 @@ function tsunamiUpdate(dataTmp) {
           if (elm2.Conditions) {
             condition = elm2.Conditions;
           }
+
           if (elm2.HighTideDateTime) {
             HighTideDateTime = dateEncode(5, elm2.HighTideDateTime);
           }
+
           if (elm2.omaxHeight) {
-            omaxHeight = "<span class='TxtIcon'>予</span>" + elm2.omaxHeight;
+            omaxHeight = elm2.omaxHeight;
             if (elm2.firstHeightInitial) {
-              omaxHeight = "<span class='TxtIcon'>予</span>" + elm2.omaxHeight + " (" + elm2.firstHeightInitial + ")";
+              omaxHeight = elm2.omaxHeight + " (" + elm2.firstHeightInitial + ")";
             }
           } else {
             omaxHeight = maxHeightCondition;
           }
-
-          if (elm2.Condition == "第１波の到達を確認" || elm2.Condition == "津波到達中と推測") {
-            arrivalTime = elm2.Condition;
-          } else if (elm2.firstHeightCondition == "第１波識別不能") {
-            arrivalTime = elm2.firstHeightCondition;
-          } else if (elm2.ArrivedTime) {
-            arrivalTime = dateEncode(5, elm2.ArrivedTime);
-          } else if (elm2.ArrivalTime) {
-            arrivalTime = dateEncode(5, elm2.ArrivalTime);
+          if (elm2.maxHeightTime) {
+            maxHeightTime = dateEncode(5, elm2.maxHeightTime);
           }
-          /*
-                                firstHeightCondition: firstHeightConditionTmp,
-                                firstHeightInitial: firstHeightInitialTmp,
-                                maxHeightTime: maxheightTime,
-                                maxHeightCondition: maxHeightCondition,
-          */
+
+          if (elm2.ArrivedTime) {
+            arrivalTime = dateEncode(5, elm2.ArrivedTime);
+          } else if (elm2.Condition == "到達" || elm2.Condition == "到達中と推測") {
+            arrivalTime = elm2.Condition;
+          } else if (elm2.firstHeightCondition == "識別不能") {
+            arrivalTime = elm2.firstHeightCondition;
+          }
+          if (elm2.firstHeightInitial) arrivalTime += " (" + elm2.firstHeightInitial + ")";
 
           var new_tr2 = document.createElement("tr");
 
-          new_tr2.innerHTML = "<td></td><td>" + elm2.name + "</td><td>" + arrivalTime + "</td><td>" + omaxHeight + "</td><td>" + HighTideDateTime + "</td><td>" + condition + "</td>";
+          var ihtml = "";
+          ihtml += "<td></td>";
+          ihtml += "<td>" + elm2.name + "</td>";
+          ihtml += "<td class='disabled-cell'>-</td>";
+          ihtml += "<td class='disabled-cell'>-</td>";
+
+          ihtml += "<td>" + arrivalTime + "</td>";
+          ihtml += "<td>" + omaxHeight + "</td>";
+          ihtml += "<td>" + maxHeightTime + "</td>";
+          ihtml += "<td>" + HighTideDateTime + "</td>";
+          ihtml += "<td>" + condition + "</td>";
+          new_tr2.innerHTML = ihtml;
+
           new_tr2.classList.add("add-content");
           new_tr2.classList.add("ListItem_detail");
           new_tr.after(new_tr2);
