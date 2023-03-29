@@ -179,6 +179,7 @@ main {
 }
 
 #sideBar {
+  position: relative;
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -187,7 +188,9 @@ main {
   border-left: solid 1px #444;
   width: 350px;
 }
-
+#sideBar.open {
+  width: 0;
+}
 #sokuho-Panel {
   padding: 5px;
   min-height: 110px;

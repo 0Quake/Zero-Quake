@@ -11,7 +11,7 @@ var thresholds = {
   threshold01C: 5, //検出とする観測点数【都会】
   threshold02: null, //1次フラグ条件のPGA増加量[gal]
   threshold03: null, //2次フラグ条件のPGA増加量[gal]
-  threshold04: 2, //1次フラグ条件の震度
+  threshold04: 3, //1次フラグ条件の震度
   MargeRange: 30, //地震の同定範囲[km]
   MargeRangeC: 20, //地震の同定範囲[km]【都会】
   time00: 300000, //最初の検出~解除[ms](優先)
@@ -60,8 +60,8 @@ function EQDetect(data, date) {
         if (!pgaAvr) pgaAvr = 0.1; //平均が求められなければ0.1を代入
 
         //平均PGAから閾値を決定
-        thresholds.threshold02 = 0.5 * pgaAvr + 0.085;
-        thresholds.threshold03 = 0.8 * pgaAvr + 0.3;
+        thresholds.threshold02 = 0.7 * pgaAvr + 0.09;
+        thresholds.threshold03 = 0.8 * pgaAvr + 0.55;
         if (ptDataTmp.isCity) {
           //都会では閾値を大きく
           thresholds.threshold02 *= 2;

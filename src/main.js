@@ -645,7 +645,7 @@ worker.on("message", (message) => {
     case "EQDetectAdd":
       var EQD_ItemTmp = message.data;
 
-      if (EQD_ItemTmp.maxPGA > 0.5) {
+      if (EQD_ItemTmp.maxPGA > 1.3) {
         var LvTmp = 2;
       } else {
         var LvTmp = 1;
