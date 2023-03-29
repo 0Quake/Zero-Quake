@@ -443,6 +443,7 @@ var updateTimeDialog = document.getElementById("UpdateTime_detail");
 //サイドバー表示・非表示
 document.getElementById("SideBarToggle").addEventListener("click", function () {
   document.getElementById("sideBar").classList.toggle("close");
+  window.dispatchEvent(new Event("resize"));
 });
 
 //通知更新
