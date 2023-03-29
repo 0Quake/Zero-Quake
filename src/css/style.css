@@ -80,6 +80,7 @@ body {
   width: 100%;
   height: 100%;
   color-scheme: light dark;
+  overflow-x: hidden;
 }
 h1,
 h2,
@@ -183,14 +184,40 @@ main {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
   background: #444;
   border-left: solid 1px #444;
   width: 350px;
+  transition: width 0.5s;
 }
-#sideBar.open {
+#sideBar.close {
   width: 0;
 }
+#sideBar.close #tab1_wrap,
+#sideBar.close #sokuho-Panel {
+  transition: opacity 0.5s;
+  opacity: 0;
+}
+#SideBarToggle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -20px;
+  height: 60px;
+  width: 20px;
+  margin: auto;
+  border-radius: 10px 0 0 10px;
+  padding: 0;
+}
+#SideBarToggle::before {
+  display: inline-block;
+  content: "double_arrow";
+  font-family: "Material Icons Round";
+  font-size: 20px;
+}
+#sideBar.close #SideBarToggle::before {
+  transform: rotate(180deg);
+}
+
 #sokuho-Panel {
   padding: 5px;
   min-height: 110px;

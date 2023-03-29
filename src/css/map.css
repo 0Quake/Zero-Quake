@@ -447,3 +447,9 @@ div.marker-circle.marker_Int7p {
 .legend img {
   max-height: 40vh;
 }
+.leaflet-right {
+  padding: 0 20px 0 0;
+}
+.leaflet-right .leaflet-control {
+  margin: 5px;
+}

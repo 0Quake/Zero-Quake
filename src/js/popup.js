@@ -440,6 +440,11 @@ function EQDetectFinish(id) {
 var updateTimeTmp = 0;
 var updateTimeDialog = document.getElementById("UpdateTime_detail");
 
+//サイドバー表示・非表示
+document.getElementById("SideBarToggle").addEventListener("click", function () {
+  document.getElementById("sideBar").classList.toggle("close");
+});
+
 //通知更新
 function Show_notification(data) {
   document.getElementById("notification_Area").classList.remove("no_notification");
