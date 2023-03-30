@@ -101,15 +101,34 @@
 
             <div id="tab1_group2" class="tabgroup" data-contentid="tab1_group2_content">情報種別ごとの設定</div>
             <div id="tab1_group2_content" class="tabgroupContent">
+                <div id="tab1_menu4" class="tabmenu" data-contentid="tab1_content4">
+                    緊急地震速報
+                </div>
+                <div id="tab1_menu5" class="tabmenu" data-contentid="tab1_content5">
+                    地震情報
+                </div>
+                <div id="tab1_menu6" class="tabmenu" data-contentid="tab1_content6">
+                    津波情報
+                </div>
+                <div id="tab1_menu7" class="tabmenu" data-contentid="tab1_content7">
+                    リアルタイム揺れ情報
+                </div>
             </div>
 
             <div id="tab1_group3" class="tabgroup" data-contentid="tab1_group3_content">情報源ごとの設定</div>
             <div id="tab1_group3_content" class="tabgroupContent">
+                <div id="tab1_menu8" class="tabmenu" data-contentid="tab1_content8">
+                    強震モニタ等
+                </div>
+                <div id="tab1_menu9" class="tabmenu" data-contentid="tab1_content9">
+                    海しる
+                </div>
             </div>
 
             <div id="tab1_group4" class="tabgroup" data-contentid="tab1_group4_content">通知と音声</div>
             <div id="tab1_group4_content" class="tabgroupContent">
-                <div id="tab1_menu3" class="tabmenu" data-contentid="tab1_content3">通知</div>
+                <div id="tab1_menu3" class="tabmenu" data-contentid="tab1_content3">音声</div>
+                <div id="tab1_menu10" class="tabmenu" data-contentid="tab1_content10">プッシュ通知</div>
             </div>
 
             <div id="tab1_menu2" class="tabmenu" data-contentid="tab1_content2">
@@ -119,19 +138,21 @@
 
         <div id="tab1_content">
             <div id="tab1_content1" class="tabcontent active_tabcontent">
-                <label><input type="checkbox" id="setting1">項目名</label>
+                <h3><span>全般</span>現在地</h3>
+                <section>
+                    <label><input type="checkbox" id="setting1">項目名</label>
 
-                <h3>現在地</h3>
-                <label>緯度<input id="latitude" type="number" oninput="MapReDraw()"></label>
-                <label>緯度<input id="longitude" type="number" oninput="MapReDraw()"></label>
-                <label>細分区域<select id="saibun" onchange="MapReDraw()"></select></label>
-                <div id="mapcontainer"></div>
-
+                    <label>緯度<input id="latitude" type="number" oninput="MapReDraw()"></label>
+                    <label>緯度<input id="longitude" type="number" oninput="MapReDraw()"></label>
+                    <label>細分区域<select id="saibun" onchange="MapReDraw()"></select></label>
+                    <div id="mapcontainer"></div>
+                </section>
             </div>
             <div id="tab1_content3" class="tabcontent">
-                <h3>音声合成</h3>
-                <label>緊急地震速報<input id="EEW_Voice" type="text"></label>
-
+                <h3><span>通知と音声</span>通知音 / 音声合成</h3>
+                <section>
+                    <label>緊急地震速報<input id="EEW_Voice" type="text"></label>
+                </section>
             </div>
             <div id="tab1_content2" class="tabcontent">
 
@@ -281,7 +302,27 @@
                 </div>
 
             </div>
-
+            <div id="tab1_content4" class="tabcontent">
+                <h3><span>情報種別ごとの設定</span>緊急地震速報</h3>
+            </div>
+            <div id="tab1_content5" class="tabcontent">
+                <h3><span>情報種別ごとの設定</span>地震情報</h3>
+            </div>
+            <div id="tab1_content6" class="tabcontent">
+                <h3><span>情報種別ごとの設定</span>津波情報</h3>
+            </div>
+            <div id="tab1_content7" class="tabcontent">
+                <h3><span>情報種別ごとの設定</span>リアルタイム揺れ情報</h3>
+            </div>
+            <div id="tab1_content8" class="tabcontent">
+                <h3><span>情報源ごとの設定</span>強震モニタ / 長周期地震動モニタ / Yahoo! 強震モニタ</h3>
+            </div>
+            <div id="tab1_content9" class="tabcontent">
+                <h3><span>情報源ごとの設定</span>海しる</h3>
+            </div>
+            <div id="tab1_content10" class="tabcontent">
+                <h3><span>通知と音声</span>プッシュ通知</h3>
+            </div>
             <div id="BtnWrap">
                 <button id="cancel">キャンセル</button>
                 <button id="apply">OK</button>

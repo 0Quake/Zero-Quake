@@ -21,31 +21,65 @@ body {
   text-orientation: unset;
 }
 
-.tabmenu,
+.tabmenu {
+  display: block;
+  padding: 0.1em 0.5em 0.1em 20px;
+  background: #222;
+}
+.tabmenu:hover {
+  background: #333;
+}
+.active_tabmenu {
+  border-left: none;
+  background: #333;
+  color: #fff;
+}
+
+.active_tabmenu::before {
+  content: "chevron_right";
+  font-family: "Material Icons Round";
+}
+
 .tabgroup {
   display: block;
   padding: 0.5em;
+  margin-top: 10px;
+  color: #ccc;
+  border-radius: 8px;
 }
-.tabgroup {
-  padding: 0.2em 0.5em;
+.tabgroupContent {
+  position: relative;
+  padding: 0 3px 3px 3px;
+  border-radius: 0 0 8px 8px;
+  background: rgb(149, 46, 46);
 }
-.active_tabmenu {
-  border-left: solid 2px rgb(203, 27, 27);
-  background: rgba(255, 0, 0, 0.2);
-  color: #fff;
+.tabmenu:first-child {
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+.tabmenu:last-child {
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
 }
 
 .tabgroup::before {
   content: "expand_more";
   font-family: "Material Icons Round";
 }
+.active_tabgroup {
+  background: rgb(149, 46, 46);
+  color: #fff;
+  border-radius: 8px 8px 0 0;
+}
 .active_tabgroup::before {
   content: "expand_less";
   font-family: "Material Icons Round";
 }
-
-.active_tabmenu:hover {
-  color: #fff;
+.tabgroup:hover {
+  background: rgba(149, 46, 46, 0.3);
+}
+.active_tabgroup:hover {
+  background: rgb(149, 46, 46);
 }
 
 #softName {
@@ -110,7 +144,20 @@ div .tabcontent {
 }
 
 h3 {
-  margin: 2em 0 0.5em 0.5em;
+  margin: 0 0 30px 0;
+}
+h3 span {
+  font-size: 14px;
+  color: #ccc;
+}
+h3 span::after {
+  content: " > ";
+  font-size: 14px;
+  color: #ccc;
+}
+
+section {
+  padding: 0 0 0 20px;
 }
 
 h4 {
@@ -119,4 +166,7 @@ h4 {
 
 .contentWrap {
   margin: 0 0 0 2.5em;
+}
+#tab1_menu2 {
+  margin-top: 30px;
 }
