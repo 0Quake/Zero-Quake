@@ -97,6 +97,7 @@
             <div id="tab1_group1" class="tabgroup active_tabgroup" data-contentid="tab1_group1_content">全般</div>
             <div id="tab1_group1_content" class="tabgroupContent active_tabgroupContent">
                 <div id="tab1_menu1" class="tabmenu active_tabmenu" data-contentid="tab1_content1">現在地</div>
+                <div id="tab1_menu11" class="tabmenu" data-contentid="tab1_content11">システム設定</div>
             </div>
 
             <div id="tab1_group2" class="tabgroup" data-contentid="tab1_group2_content">情報種別ごとの設定</div>
@@ -140,8 +141,6 @@
             <div id="tab1_content1" class="tabcontent active_tabcontent">
                 <h3><span>全般</span>現在地</h3>
                 <section>
-                    <label><input type="checkbox" id="setting1">項目名</label>
-
                     <label>緯度<input id="latitude" type="number" oninput="MapReDraw()"></label>
                     <label>緯度<input id="longitude" type="number" oninput="MapReDraw()"></label>
                     <label>細分区域<select id="saibun" onchange="MapReDraw()"></select></label>
@@ -151,6 +150,7 @@
             <div id="tab1_content3" class="tabcontent">
                 <h3><span>通知と音声</span>通知音 / 音声合成</h3>
                 <section>
+                    <h4>音声合成</h4>
                     <label>緊急地震速報<input id="EEW_Voice" type="text"></label>
                 </section>
             </div>
@@ -307,12 +307,21 @@
             </div>
             <div id="tab1_content5" class="tabcontent">
                 <h3><span>情報種別ごとの設定</span>地震情報</h3>
+                <section>
+                    <h4>リスト</h4>
+                    <label>取得する件数<input type="number" id="EQInfo_ItemCount" min="1" max="50"></label>
+                </section>
             </div>
             <div id="tab1_content6" class="tabcontent">
                 <h3><span>情報種別ごとの設定</span>津波情報</h3>
             </div>
             <div id="tab1_content7" class="tabcontent">
                 <h3><span>情報種別ごとの設定</span>リアルタイム揺れ情報</h3>
+                <section>
+                    <h4>リスト</h4>
+                    <label>表示する件数<input type="number" id="RealTimeShake_ItemCount" min="1" max="50"></label>
+                </section>
+
             </div>
             <div id="tab1_content8" class="tabcontent">
                 <h3><span>情報源ごとの設定</span>強震モニタ / 長周期地震動モニタ / Yahoo! 強震モニタ</h3>
@@ -322,6 +331,12 @@
             </div>
             <div id="tab1_content10" class="tabcontent">
                 <h3><span>通知と音声</span>プッシュ通知</h3>
+            </div>
+            <div id="tab1_content11" class="tabcontent">
+                <h3><span>全般</span>システム設定</h3>
+                <section>
+                    <label><input type="checkbox" id="BugReportAutoSend">バグレポートを自動送信</label>
+                </section>
             </div>
             <div id="BtnWrap">
                 <button id="cancel">キャンセル</button>

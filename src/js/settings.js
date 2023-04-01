@@ -11,23 +11,27 @@ window.electronAPI.messageSend((event, request) => {
     document.getElementById("latitude").value = setting.home.latitude;
     document.getElementById("longitude").value = setting.home.longitude;
     document.getElementById("EEW_Voice").value = setting.notice.voice.EEW;
+    document.getElementById("EQInfo_ItemCount").value = setting.Info.EQInfo.ItemCount;
+    document.getElementById("RealTimeShake_ItemCount").value = setting.Info.RealTimeShake.List.ItemCount;
+
     var SaibunElm = Array.from(document.querySelectorAll("#saibun option")).find(function (elm) {
       return elm.innerText == setting.home.Section;
     });
     if (SaibunElm) SaibunElm.selected = true;
 
-    document.getElementById("setting1").checked = setting.setting1;
+    document.getElementById("BugReportAutoSend").checked = setting.system.crashReportAutoSend;
     init();
   }
 });
 
 document.getElementById("apply").addEventListener("click", function () {
-  setting.setting1 = document.getElementById("setting1").checked;
+  setting.system.crashReportAutoSend = document.getElementById("BugReportAutoSend").checked;
   setting.home.latitude = document.getElementById("latitude").value;
   setting.home.longitude = document.getElementById("longitude").value;
   setting.home.Section = document.getElementById("saibun").value;
   setting.notice.voice.EEW = document.getElementById("EEW_Voice").value;
-
+  setting.Info.EQInfo.ItemCount = Number(document.getElementById("EQInfo_ItemCount").value);
+  setting.Info.RealTimeShake.List.ItemCount = Number(document.getElementById("RealTimeShake_ItemCount").value);
   window.electronAPI.messageReturn({
     action: "settingReturn",
     data: setting,
