@@ -61,7 +61,7 @@ function EQDetect(data, date) {
 
         //平均PGAから閾値を決定
         thresholds.threshold02 = 0.7 * pgaAvr + 0.08;
-        thresholds.threshold03 = 0.8 * pgaAvr + 0.4;
+        thresholds.threshold03 = 0.8 * pgaAvr + 0.5;
         if (ptDataTmp.isCity) {
           //都会では閾値を大きく
           thresholds.threshold02 *= 2;
@@ -70,7 +70,7 @@ function EQDetect(data, date) {
 
         detect0 = elm.pga - pgaAvr >= thresholds.threshold02 || elm.shindo >= thresholds.threshold04; //PGA増加量・震度絶対値で評価
         detect1 = detect0 && ptDataTmp.detectCount > 0; //detect1に加え、detectCountを加えて評価
-        detect2 = (detect1 && elm.pga - pgaAvr >= thresholds.threshold03 && ptDataTmp.UpCount > 0) || elm.shindo > thresholds.threshold04;
+        detect2 = detect1 && ((elm.pga - pgaAvr >= thresholds.threshold03 && ptDataTmp.UpCount > 0) || elm.shindo > thresholds.threshold04);
 
         elm.detect = detect1;
         elm.detect2 = detect2;
