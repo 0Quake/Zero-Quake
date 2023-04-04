@@ -94,10 +94,24 @@
 
     <div id="alertFrame"></div>
     <main>
-        <nav id="menu"></nav>
 
         <div id="mapcontainer_Wrap">
             <div id="mapcontainer" class="GJMapActive"></div>
+            <nav id="menu">
+                <div>ベースマップ</div>
+                <label><input type="radio" name="mapSelect" value="" checked>なし</label>
+                <label><input type="radio" name="mapSelect" value="tile0">地理院地図 (標準)</label>
+                <label><input type="radio" name="mapSelect" value="tile1">地理院地図 (淡色)</label>
+                <label><input type="radio" name="mapSelect" value="tile2">地理院地図 (写真)</label>
+                <label><input type="radio" name="mapSelect" value="tile3">地理院地図 (白地図)</label>
+                <label><input type="radio" name="mapSelect" value="tile4">Open Street Map</label>
+                <div>オーバーレイ</div>
+                <label><input type="checkbox" name="overlaySelect" value="over0">陰影起伏図</label>
+                <label><input type="checkbox" name="overlaySelect" value="over1">火山基本図データ</label>
+                <label><input type="checkbox" name="overlaySelect" value="over2">津波浸水想定 ハザードマップ</label>
+                <label><input type="checkbox" name="overlaySelect" value="over3">土砂災害警戒区域(急傾斜地の崩壊) ハザードマップ</label>
+                <label><input type="checkbox" name="overlaySelect" value="over4">土砂災害警戒区域(地すべり) ハザードマップ</label>
+            </nav>
         </div>
         <div id="sideBar">
             <button id="SideBarToggle" aria-label="サイドバーを表示・非表示"></button>

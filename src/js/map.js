@@ -78,6 +78,45 @@ function psWaveAnm() {
   requestAnimationFrame(psWaveAnm);
 }
 
+var mapSelect = document.getElementsByName("mapSelect");
+var tilemapActive = falsea;
+mapSelect.forEach(function (elm) {
+  elm.addEventListener("change", function () {
+    for (let i = 0; i < mapSelect.length - 1; i++) {
+      map.setLayoutProperty("tile" + i, "visibility", "none");
+    }
+
+    if (this.value) {
+      tilemapActive = true;
+      map.setLayoutProperty(this.value, "visibility", "visible");
+    } else {
+      tilemapActive = false;
+    }
+    if (!tilemapActive && overlayCount == 0) {
+      map.setLayoutProperty("basemap_fill", "visibility", "visible");
+    } else {
+      map.setLayoutProperty("basemap_fill", "visibility", "none");
+    }
+  });
+});
+var overlayCount = 0;
+document.getElementsByName("overlaySelect").forEach(function (elm) {
+  elm.addEventListener("change", function () {
+    if (this.checked) {
+      overlayCount++;
+      map.setLayoutProperty(this.value, "visibility", "visible");
+    } else {
+      overlayCount--;
+      map.setLayoutProperty(this.value, "visibility", "none");
+    }
+    if (!tilemapActive && overlayCount == 0) {
+      map.setLayoutProperty("basemap_fill", "visibility", "visible");
+    } else {
+      map.setLayoutProperty("basemap_fill", "visibility", "none");
+    }
+  });
+});
+
 //マップ初期化など
 var inited = false;
 function init() {
@@ -129,10 +168,164 @@ function init() {
         plate: {
           type: "geojson",
           data: "./Resource/plate.json",
+        },
+        tile0: {
+          type: "raster",
+          tiles: ["https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png"],
+          tileSize: 256,
+          attribution: "国土地理院",
+        },
+        tile1: {
+          type: "raster",
+          tiles: ["https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png"],
+          tileSize: 256,
+          attribution: "国土地理院",
+        },
+        tile2: {
+          type: "raster",
+          tiles: ["https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg"],
+          tileSize: 256,
+          attribution: "国土地理院",
+        },
+        tile3: {
+          type: "raster",
+          tiles: ["https://cyberjapandata.gsi.go.jp/xyz/blank/{z}/{x}/{y}.png"],
+          tileSize: 256,
+          attribution: "国土地理院",
+        },
+        tile4: {
+          type: "raster",
+          tiles: ["http://tile.openstreetmap.org/{z}/{x}/{y}.png"],
+          tileSize: 256,
+          attribution: "OpenStreetMap contributors",
+        },
+        over0: {
+          type: "raster",
+          tiles: ["https://cyberjapandata.gsi.go.jp/xyz/hillshademap/{z}/{x}/{y}.png"],
+          tileSize: 256,
+          attribution: "国土地理院",
+        },
+        over1: {
+          type: "raster",
+          tiles: ["https://cyberjapandata.gsi.go.jp/xyz/vbmd_colorrel/{z}/{x}/{y}.png"],
+          tileSize: 256,
+          attribution: "国土地理院",
+        },
+        over2: {
+          type: "raster",
+          tiles: ["https://disaportaldata.gsi.go.jp/raster/04_tsunami_newlegend_data/{z}/{x}/{y}.png"],
+          tileSize: 256,
+          attribution: "国土地理院",
+        },
+        over3: {
+          type: "raster",
+          tiles: ["https://disaportaldata.gsi.go.jp/raster/05_kyukeishakeikaikuiki/{z}/{x}/{y}.png"],
+          tileSize: 256,
+          attribution: "国土地理院",
+        },
+        over4: {
+          type: "raster",
+          tiles: ["https://disaportaldata.gsi.go.jp/raster/05_jisuberikeikaikuiki/{z}/{x}/{y}.png"],
+          tileSize: 256,
+          attribution: "国土地理院",
+        },
+        over5: {
+          type: "raster",
+          tiles: ["https://www.jma.go.jp/tile/jma/transparent-cities/{z}/{x}/{y}.png"],
+          tileSize: 256,
           attribution: "気象庁",
         },
       },
       layers: [
+        {
+          id: "tile0",
+          type: "raster",
+          source: "tile0",
+          minzoom: 2,
+          maxzoom: 18,
+          layout: { visibility: "none" },
+        },
+        {
+          id: "tile1",
+          type: "raster",
+          source: "tile1",
+          minzoom: 2,
+          maxzoom: 18,
+          layout: { visibility: "none" },
+        },
+        {
+          id: "tile2",
+          type: "raster",
+          source: "tile2",
+          minzoom: 2,
+          maxzoom: 18,
+          layout: { visibility: "none" },
+        },
+        {
+          id: "tile3",
+          type: "raster",
+          source: "tile3",
+          minzoom: 5,
+          maxzoom: 14,
+          layout: { visibility: "none" },
+        },
+        {
+          id: "tile4",
+          type: "raster",
+          source: "tile4",
+          minzoom: 0,
+          maxzoom: 19,
+          layout: { visibility: "none" },
+        },
+        {
+          id: "over0",
+          type: "raster",
+          source: "over0",
+          minzoom: 2,
+          maxzoom: 16,
+          layout: { visibility: "none" },
+        },
+        {
+          id: "over1",
+          type: "raster",
+          source: "over1",
+          minzoom: 11,
+          maxzoom: 18,
+          layout: { visibility: "none" },
+        },
+        {
+          id: "over2",
+          type: "raster",
+          source: "over2",
+          minzoom: 7,
+          maxzoom: 12,
+          layout: { visibility: "none" },
+        },
+        {
+          id: "over3",
+          type: "raster",
+          source: "over3",
+          minzoom: 7,
+          maxzoom: 12,
+          layout: { visibility: "none" },
+        },
+        {
+          id: "over4",
+          type: "raster",
+          source: "over4",
+          minzoom: 7,
+          maxzoom: 11,
+          layout: { visibility: "none" },
+        },
+        {
+          id: "over5",
+          type: "raster",
+          source: "over5",
+          minzoom: 2,
+          maxzoom: 11,
+          layout: { visibility: "none" },
+        },
+
         {
           id: "tsunami_Yoho",
           type: "line",
@@ -334,7 +527,7 @@ function init() {
       ],
     },
   });
-  map.addControl(new maplibregl.NavigationControl(), "top-left");
+  map.addControl(new maplibregl.NavigationControl(), "top-right");
 
   var zoomLevelContinue = function () {
     var currentZoom = map.getZoom();

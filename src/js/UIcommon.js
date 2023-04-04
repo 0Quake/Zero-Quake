@@ -1,6 +1,5 @@
 const root = document.querySelector(":root");
 const rootStyle = getComputedStyle(root);
-var config;
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "setting") {
     config = request.data;
