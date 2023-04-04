@@ -267,22 +267,22 @@ function epiCenterUpdate(eid, latitude, longitude) {
       return elm2.eid == eid;
     });
     if (epicenterElm && epicenterElm.markerElm) {
-      epicenterElm.markerElm.setLatLng([latitude, longitude]);
+      epicenterElm.markerElm.setLngLat([longitude, latitude]);
+      epicenterElm.popupElm.setLngLat([longitude, latitude]);
       epicenterElm.latitude = latitude;
       epicenterElm.longitude = longitude;
     } else {
       var EEWIDTmp = EEW_LocalIDs[eid];
 
-      var ESMarker = L.marker([latitude, longitude], {
-        icon: epicenterIcon,
-        pane: "overlayPane",
-        renderer: overlayCanvas,
-        interactive: false,
-      })
-        .addTo(map)
-        .bindTooltip(String(EEWIDTmp), { permanent: true, direction: "top", className: "epiCenterTooltip", offset: [0, -10] });
+      const img = document.createElement("img");
+      img.src = "./img/epicenter.svg";
 
-      epiCenter.push({ eid: eid, markerElm: ESMarker, latitude: latitude, longitude: longitude, EEWID: Number(EEWIDTmp) });
+      img.classList.add("epicenterIcon");
+
+      var ESPopup = new maplibregl.Popup({ closeButton: false, closeOnClick: false, className: "epiCenterTooltip", offset: [0, -17] }).setText(EEWIDTmp).setLngLat([longitude, latitude]).addTo(map);
+      var ESMarker = new maplibregl.Marker(img).setLngLat([longitude, latitude]).addTo(map);
+
+      epiCenter.push({ eid: eid, markerElm: ESMarker, popupElm: ESPopup, latitude: latitude, longitude: longitude, EEWID: Number(EEWIDTmp) });
       displayTmp = epiCenter.length > 1 ? "inline-block" : "none";
       document.querySelectorAll(".epiCenterTooltip,.EEWLocalID").forEach(function (elm3) {
         elm3.style.display = displayTmp;
@@ -294,9 +294,21 @@ function epiCenterUpdate(eid, latitude, longitude) {
     return elm.id == eid;
   });
   if (EQElm) {
-    if (EQElm.PCircleElm) EQElm.PCircleElm.setLatLng([latitude, longitude]);
-    if (EQElm.SCircleElm) EQElm.SCircleElm.setLatLng([latitude, longitude]);
-    if (EQElm.SIElm) EQElm.SIElm.setLatLng([latitude, longitude]);
+    if (EQElm.PCircleElm) {
+      var pswaveFind = psWaveList.find(function (elm2) {
+        return elm2.id == eid;
+      });
+
+      pswaveFind.data.latitude = latitude;
+      pswaveFind.data.longitude = longitude;
+
+      /*
+      var pcircle = turf.circle(_center, pRadius / 1000, _options);
+      map.getSource("PCircle_" + eid).setData(pcircle);
+      var scircle = turf.circle(_center, sRadius / 1000, _options);
+      map.getSource("SCircle_" + eid).setData(scircle);*/
+    }
+    if (EQElm.SIElm) EQElm.SIElm.setLngLat([longitude, latitude]);
   }
   latitudeTmp = latitude;
   longitudeTmp = longitude;
@@ -317,8 +329,10 @@ function epiCenterClear(eid) {
       return elm2.eid == eid;
     });
     if (epicenterElm && epicenterElm.markerElm) {
-      map.removeLayer(epicenterElm.markerElm);
+      epicenterElm.markerElm.remove();
       epicenterElm.markerElm = null;
+      epicenterElm.popupElm.remove();
+      epicenterElm.popupElm = null;
     }
   }
 }
@@ -378,7 +392,6 @@ function eqInfoDraw(data, source) {
 //🔴地震検知🔴
 var EQDetectTemplate = document.getElementById("EQDetectTemplate");
 function EQDetect(data) {
-  console.log(data);
   var EQD_Item = EQDetectItem.find(function (elm) {
     return elm.id == data.id;
   });
@@ -390,7 +403,18 @@ function EQDetect(data) {
   if (EQD_Item) {
     EQD_Item.lat = data.lat;
     EQD_Item.lng = data.lng;
-    EQD_Item.marker.setRadius(data.Radius * 1000);
+    // EQD_Item.marker.setRadius(data.Radius * 1000);
+
+    let _center = turf.point([data.lng, data.lat]);
+    let _radius = data.Radius + 5;
+    let _options = {
+      steps: 80,
+      units: "kilometers",
+    };
+
+    let _circle = turf.circle(_center, _radius, _options);
+    map.getSource("EQDItem_" + data.id).setData(_circle);
+
     var EQDItem = document.getElementById("EQDItem_" + data.id);
     EQDItem.classList.remove("lv1", "lv2");
     EQDItem.classList.add("lv" + data.Lv);
@@ -403,24 +427,38 @@ function EQDetect(data) {
     EQDItem.querySelector(".EQD_Regions").innerText = regions.join(" ");
     document.getElementById("EQDetect-Panel").prepend(clone);
 
-    //var EQmarker = L.marker([data.lat, data.lng]).addTo(map);
-    var EQmarker = L.circle([data.lat, data.lng], {
-      radius: data.Radius * 1000 + 5000,
-      color: "#ffffff",
-      fill: false,
-      // fillColor: "#ffffff",
-      // fillOpacity: 0.5,
-      // className: "EQDetectCircle",
-      renderer: EQDetectCanvas,
-      interactive: false,
-    }).addTo(map);
-    map.setView([data.lat, data.lng], 9);
+    let _center = turf.point([data.lng, data.lat]);
+    let _radius = data.Radius + 5;
+    let _options = {
+      steps: 80,
+      units: "kilometers",
+    };
+
+    let _circle = turf.circle(_center, _radius, _options);
+    map.addSource("EQDItem_" + data.id, {
+      type: "geojson",
+      data: _circle,
+    });
+
+    map.addLayer({
+      id: "EQDItem_" + data.id,
+      type: "line",
+      source: "EQDItem_" + data.id,
+      paint: {
+        "line-color": "#FFF",
+        "line-width": 3,
+      },
+      minzoom: 0,
+      maxzoom: 22,
+    });
+
+    //map.setView([data.lat, data.lng], 9);
 
     EQDetectItem.push({
       id: data.id,
       lat: data.lat,
       lng: data.lng,
-      marker: EQmarker,
+      //marker: EQmarker,
     });
   }
 }
@@ -428,7 +466,8 @@ function EQDetect(data) {
 function EQDetectFinish(id) {
   EQDetectItem.forEach(function (elmA, index) {
     if (elmA.id == id) {
-      map.removeLayer(elmA.marker);
+      //map.removeLayer(elmA.marker);
+      map.setLayoutProperty("EQDItem_" + id, "visibility", "none");
       EQDetectItem.splice(index, 1);
     }
   });
@@ -443,6 +482,9 @@ var updateTimeDialog = document.getElementById("UpdateTime_detail");
 //サイドバー表示・非表示
 document.getElementById("SideBarToggle").addEventListener("click", function () {
   document.getElementById("sideBar").classList.toggle("close");
+  window.dispatchEvent(new Event("resize"));
+});
+document.getElementById("sideBar").addEventListener("transitionend", function () {
   window.dispatchEvent(new Event("resize"));
 });
 

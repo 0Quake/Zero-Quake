@@ -1,3 +1,4 @@
+@charset "utf-8";
 @font-face {
   font-family: "BIZ UDPGothic";
   font-style: normal;
@@ -102,7 +103,7 @@ main {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  z-index: 9999999;
+  z-index: 100000001;
 }
 #loading-wrap {
   margin: 50px 0 0 0;
@@ -639,7 +640,7 @@ td {
   font-size: 30px;
   border-radius: 4px;
   float: left;
-  margin: 10px 5px 10px 0;
+  margin: auto 5px auto 0;
   font-family: "M PLUS 1p";
 }
 .EEWNotes {

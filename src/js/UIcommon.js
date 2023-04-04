@@ -1,5 +1,11 @@
 const root = document.querySelector(":root");
 const rootStyle = getComputedStyle(root);
+var config;
+window.electronAPI.messageSend((event, request) => {
+  if (request.action == "setting") {
+    config = request.data;
+  }
+});
 
 //タブUI
 document.querySelectorAll(".tabmenu").forEach(function (elm) {
@@ -154,8 +160,7 @@ function shindoConvert(str, responseType) {
         break;
       case 0:
       default:
-        ConvTable = { "?": "?", 0: "0", 1: "1", 2: "2", 3: "3", 4: "4", "5-": "5-", "5+": "5+", "6-": "6-", "6+": "6+", 7: "7", "7+": "7+" };
-        break;
+        return ShindoTmp;
     }
     return ConvTable[ShindoTmp];
   } else {

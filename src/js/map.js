@@ -2,13 +2,11 @@ var map;
 var previous_points = [];
 var points = {};
 var Tsunami_MajorWarning, Tsunami_Warning, Tsunami_Watch, Tsunami_Yoho;
-var tsunamiLayer;
 var gjmapT; //津波用geojson
 var sections = [];
 var basemap, worldmap, prefecturesMap, plateMap, legend, legend2;
 var offlineMapActive = true;
 var overlayActive = false;
-var tsunamiLayerAdded = false;
 
 var psWaveList = [];
 var tsunamiAlertNow = false;
@@ -55,6 +53,8 @@ window.electronAPI.messageSend((event, request) => {
     init();
   } else if (request.action == "EstShindoUpdate") {
     EstShindoUpdate(request.data);
+  } else if (request.action == "Replay") {
+    psWaveEntry();
   }
 
   document.getElementById("splash").style.display = "none";
@@ -62,19 +62,316 @@ window.electronAPI.messageSend((event, request) => {
 
 window.addEventListener("load", function () {
   windowLoaded = true;
+  init();
+  psWaveAnm();
   setInterval(function () {
-    if (now_EEW.length > 0) {
-      for (elm of now_EEW) {
-        psWaveCalc(elm.report_id);
-      }
-    }
     //時計（ローカル時刻）更新
     document.getElementById("PC_TIME").textContent = dateEncode(3, new Date());
-  }, 100);
+  }, 500);
 });
+function psWaveAnm() {
+  if (now_EEW.length > 0) {
+    for (elm of now_EEW) {
+      psWaveCalc(elm.report_id);
+    }
+  }
+  requestAnimationFrame(psWaveAnm);
+}
 
 //マップ初期化など
+var inited = false;
 function init() {
+  if (!config || !windowLoaded || inited) return;
+  inited = true;
+  const root = document.querySelector(":root");
+  const rootStyle = getComputedStyle(root);
+
+  map = new maplibregl.Map({
+    container: "mapcontainer",
+    center: [138.46, 32.99125],
+    zoom: 4,
+    attributionControl: true,
+    style: {
+      version: 8,
+      sources: {
+        v: {
+          type: "vector",
+          tiles: ["https://cyberjapandata.gsi.go.jp/xyz/optimal_bvmap-v1/{z}/{x}/{y}.pbf"],
+          attribution: "国土地理院",
+          minzoom: 4,
+          maxzoom: 16,
+        },
+        basemap: {
+          type: "geojson",
+          data: "./Resource/basemap.json",
+          attribution: "気象庁",
+        },
+        worldmap: {
+          type: "geojson",
+          data: "./Resource/World.json",
+          attribution: "Natural Earth",
+        },
+        prefmap: {
+          type: "geojson",
+          data: "./Resource/prefectures.json",
+          attribution: "気象庁",
+        },
+        lake: {
+          type: "geojson",
+          data: "./Resource/lake.json",
+          attribution: "国土数値情報",
+        },
+        tsunami: {
+          type: "geojson",
+          data: "./Resource/tsunami.json",
+          attribution: "気象庁",
+        },
+        plate: {
+          type: "geojson",
+          data: "./Resource/plate.json",
+          attribution: "気象庁",
+        },
+      },
+      layers: [
+        {
+          id: "tsunami_Yoho",
+          type: "line",
+          source: "tsunami",
+          layout: {
+            "line-join": "round",
+            "line-cap": "round",
+          },
+          paint: {
+            "line-color": rootStyle.getPropertyValue("--TsunamiYohoColor"),
+            "line-width": 30,
+          },
+          minzoom: 0,
+          maxzoom: 22,
+          filter: ["==", "name", ""],
+        },
+
+        {
+          id: "tsunami_Watch",
+          type: "line",
+          source: "tsunami",
+          layout: {
+            "line-join": "round",
+            "line-cap": "round",
+          },
+          paint: {
+            "line-color": rootStyle.getPropertyValue("--TsunamiWatchColor"),
+            "line-width": 30,
+          },
+          minzoom: 0,
+          maxzoom: 22,
+          filter: ["==", "name", ""],
+        },
+        {
+          id: "tsunami_Warn",
+          type: "line",
+          source: "tsunami",
+          layout: {
+            "line-join": "round",
+            "line-cap": "round",
+          },
+          paint: {
+            "line-color": rootStyle.getPropertyValue("--TsunamiWarningColor"),
+            "line-width": 30,
+          },
+          minzoom: 0,
+          maxzoom: 22,
+          filter: ["==", "name", ""],
+        },
+
+        {
+          id: "tsunami_MajorWarn",
+          type: "line",
+          source: "tsunami",
+          layout: {
+            "line-join": "round",
+            "line-cap": "round",
+          },
+          paint: {
+            "line-color": rootStyle.getPropertyValue("--TsunamiMajorWarningColor"),
+            "line-width": 30,
+          },
+          minzoom: 0,
+          maxzoom: 22,
+          filter: ["==", "name", ""],
+        },
+
+        {
+          id: "basemap_fill",
+          type: "fill",
+          source: "basemap",
+          paint: {
+            "fill-color": "#333",
+            "fill-opacity": 1,
+          },
+          minzoom: 0,
+          maxzoom: 22,
+        },
+        {
+          id: "basemap_LINE",
+          type: "line",
+          source: "basemap",
+          paint: {
+            "line-color": "#666",
+            "line-width": 1,
+          },
+          minzoom: 6,
+          maxzoom: 22,
+        },
+        {
+          id: "prefmap_LINE",
+          type: "line",
+          source: "prefmap",
+          paint: {
+            "line-color": "#999",
+            "line-width": 1,
+          },
+          minzoom: 0,
+          maxzoom: 22,
+        },
+        {
+          id: "worldmap_fill",
+          type: "fill",
+          source: "worldmap",
+          paint: {
+            "fill-color": "#333",
+            "fill-opacity": 1,
+          },
+          minzoom: 0,
+          maxzoom: 22,
+        },
+        {
+          id: "worldmap_LINE",
+          type: "line",
+          source: "worldmap",
+          paint: {
+            "line-color": "#444",
+            "line-width": 1,
+          },
+          minzoom: 0,
+          maxzoom: 22,
+        },
+        {
+          id: "lake_fill",
+          type: "fill",
+          source: "lake",
+          paint: {
+            "fill-color": "#325385",
+            "fill-opacity": 0.5,
+          },
+          minzoom: 0,
+          maxzoom: 22,
+        },
+        {
+          id: "lake_LINE",
+          type: "line",
+          source: "lake",
+          paint: {
+            "line-color": "#325385",
+            "line-width": 1,
+          },
+          minzoom: 0,
+          maxzoom: 22,
+        },
+        { id: "Int0", type: "fill", source: "basemap", paint: { "fill-color": rootStyle.getPropertyValue("--IntTheme_0_BgColor") }, filter: ["==", "name", ""] },
+        { id: "Int1", type: "fill", source: "basemap", paint: { "fill-color": rootStyle.getPropertyValue("--IntTheme_1_BgColor") }, filter: ["==", "name", ""] },
+        { id: "Int2", type: "fill", source: "basemap", paint: { "fill-color": rootStyle.getPropertyValue("--IntTheme_2_BgColor") }, filter: ["==", "name", ""] },
+        { id: "Int3", type: "fill", source: "basemap", paint: { "fill-color": rootStyle.getPropertyValue("--IntTheme_3_BgColor") }, filter: ["==", "name", ""] },
+        { id: "Int4", type: "fill", source: "basemap", paint: { "fill-color": rootStyle.getPropertyValue("--IntTheme_4_BgColor") }, filter: ["==", "name", ""] },
+        { id: "Int5-", type: "fill", source: "basemap", paint: { "fill-color": rootStyle.getPropertyValue("--IntTheme_5m_BgColor") }, filter: ["==", "name", ""] },
+        { id: "Int5+", type: "fill", source: "basemap", paint: { "fill-color": rootStyle.getPropertyValue("--IntTheme_5p_BgColor") }, filter: ["==", "name", ""] },
+        { id: "Int6-", type: "fill", source: "basemap", paint: { "fill-color": rootStyle.getPropertyValue("--IntTheme_6m_BgColor") }, filter: ["==", "name", ""] },
+        { id: "Int6+", type: "fill", source: "basemap", paint: { "fill-color": rootStyle.getPropertyValue("--IntTheme_6p_BgColor") }, filter: ["==", "name", ""] },
+        { id: "Int7", type: "fill", source: "basemap", paint: { "fill-color": rootStyle.getPropertyValue("--IntTheme_7_BgColor") }, filter: ["==", "name", ""] },
+        { id: "Int7+", type: "fill", source: "basemap", paint: { "fill-color": rootStyle.getPropertyValue("--IntTheme_7p_BgColor") }, filter: ["==", "name", ""] },
+        {
+          id: "plate",
+          type: "line",
+          source: "plate",
+          layout: {
+            "line-join": "round",
+            "line-cap": "round",
+          },
+          paint: {
+            "line-color": "#C88",
+            "line-opacity": 0.4,
+            "line-width": 1,
+          },
+          minzoom: 0,
+          maxzoom: 22,
+        },
+        { id: "海岸線", type: "line", source: "v", "source-layer": "Cstline", filter: ["in", ["get", "vt_code"], ["literal", [5101, 5103]]], paint: { "line-color": "#999999", "line-offset": 0, "line-width": 1 } },
+        { id: "河川中心線人工水路地下", type: "line", source: "v", "source-layer": "RvrCL", filter: ["==", ["get", "vt_code"], 5322], paint: { "line-color": "rgba(50,83,132,0.5)", "line-width": 2 } },
+        { id: "河川中心線枯れ川部", type: "line", source: "v", "source-layer": "RvrCL", filter: ["==", ["get", "vt_code"], 5302], paint: { "line-color": "rgba(50,83,132,0.5)", "line-width": 2 } },
+        { id: "河川中心線", type: "line", source: "v", "source-layer": "RvrCL", filter: ["!", ["in", ["get", "vt_code"], ["literal", [5302, 5322]]]], paint: { "line-color": "rgba(50,83,132,0.5)", "line-width": 2 } },
+        { id: "海岸線堤防等に接する部分破線", type: "line", source: "v", "source-layer": "Cstline", filter: ["==", ["get", "vt_code"], 5103], layout: { "line-cap": "round" }, paint: { "line-color": "rgba(50,83,132,0.5)", "line-width": 2 } },
+        { id: "水涯線", type: "line", source: "v", "source-layer": "WL", paint: { "line-color": "rgba(50,83,132,0.5)", "line-width": 2 } },
+        { id: "水涯線堤防等に接する部分破線", type: "line", source: "v", "source-layer": "WL", filter: ["in", ["get", "vt_code"], ["literal", [5203, 5233]]], layout: { "line-cap": "round" }, paint: { "line-color": "rgba(50,83,132,0.5)", "line-width": 2 } },
+        { id: "水部表記線polygon", type: "fill", source: "v", "source-layer": "WRltLine", filter: ["==", ["geometry-type"], "Polygon"], paint: { "fill-color": "rgba(50,83,132,0.2)", "fill-outline-color": "rgba(50,83,132,0.5)" } },
+        { id: "行政区画界線国の所属界", maxzoom: 8, type: "line", source: "v", "source-layer": "AdmBdry", filter: ["==", ["get", "vt_code"], 1221], layout: { "line-cap": "square" }, paint: { "line-color": "#999", "line-width": 1 } },
+        { id: "道路中心線ZL4-10国道", maxzoom: 11, minzoom: 9, type: "line", source: "v", "source-layer": "RdCL", filter: ["in", ["get", "vt_rdctg"], ["literal", ["主要道路", "国道", "都道府県道", "市区町村道等"]]], layout: { "line-cap": "round", "line-join": "round", "line-sort-key": ["get", "vt_drworder"] }, paint: { "line-color": "#444", "line-width": 3 } },
+        { id: "道路中心線ZL4-10高速", maxzoom: 11, minzoom: 9, type: "line", source: "v", "source-layer": "RdCL", filter: ["==", ["get", "vt_rdctg"], "高速自動車国道等"], layout: { "line-cap": "round", "line-join": "round", "line-sort-key": ["get", "vt_drworder"] }, paint: { "line-color": "#444", "line-width": 3 } },
+        { id: "道路中心線色0", minzoom: 11, type: "line", source: "v", "source-layer": "RdCL", filter: ["step", ["zoom"], ["all", ["==", ["get", "vt_lvorder"], 0], ["!", ["in", ["get", "vt_code"], ["literal", [2703, 2713, 2723, 2733, 2724, 2734]]]]], 17, ["all", ["in", ["get", "vt_flag17"], ["literal", [1, 2]]], ["!", ["in", ["get", "vt_code"], ["literal", [2724, 2734]]]]]], layout: { "line-join": "round", "line-round-limit": 1.57, "line-sort-key": ["get", "vt_drworder"] }, paint: { "line-color": "#444", "line-width": 1.5 } },
+        { id: "鉄道中心線0", minzoom: 11, maxzoom: 17, type: "line", source: "v", "source-layer": "RailCL", filter: ["all", ["!", ["in", ["get", "vt_railstate"], ["literal", ["トンネル", "雪覆い", "地下", "橋・高架"]]]], ["==", ["get", "vt_lvorder"], 0]], paint: { "line-color": "#444", "line-width": 2.5, "line-dasharray": [1, 1] } },
+        { id: "鉄道中心線旗竿0", minzoom: 14, maxzoom: 17, type: "line", source: "v", "source-layer": "RailCL", filter: ["all", ["==", ["get", "vt_rtcode"], "JR"], ["!", ["in", ["get", "vt_railstate"], ["literal", ["トンネル", "雪覆い", "地下", "橋・高架"]]]], ["!=", ["get", "vt_sngldbl"], "駅部分"], ["==", ["get", "vt_lvorder"], 0]], paint: { "line-color": "#444", "line-width": 2.5, "line-dasharray": [1, 1] } },
+        { id: "道路中心線ククリ橋0", minzoom: 11, maxzoom: 17, type: "line", source: "v", "source-layer": "RdCL", filter: ["step", ["zoom"], ["all", ["==", ["get", "vt_lvorder"], 0], ["in", ["get", "vt_code"], ["literal", [2703, 2713]]], ["!", ["all", ["in", ["get", "vt_rdctg"], ["literal", ["市区町村道等", "その他", "不明"]]], ["==", ["get", "vt_rnkwidth"], "3m-5.5m未満"]]]], 14, ["all", ["==", ["get", "vt_lvorder"], 0], ["in", ["get", "vt_code"], ["literal", [2703, 2713]]]]], layout: { "line-join": "round", "line-round-limit": 1.57, "line-sort-key": ["get", "vt_drworder"] }, paint: { "line-color": "#444", "line-width": 1.5 } },
+        { id: "道路中心線色橋0", minzoom: 11, maxzoom: 17, type: "line", source: "v", "source-layer": "RdCL", filter: ["all", ["==", ["get", "vt_lvorder"], 0], ["in", ["get", "vt_code"], ["literal", [2703, 2713, 2723, 2733]]]], layout: { "line-join": "round", "line-round-limit": 1.57, "line-sort-key": ["get", "vt_drworder"] }, paint: { "line-color": "#444", "line-width": 1.5 } },
+        { id: "建築物0", type: "fill", source: "v", "source-layer": "BldA", filter: ["==", ["get", "vt_lvorder"], 0], paint: { "fill-color": "#3d3d3d" } },
+        { id: "鉄道中心線橋0", minzoom: 11, maxzoom: 17, type: "line", source: "v", "source-layer": "RailCL", filter: ["all", ["==", ["get", "vt_railstate"], "橋・高架"], ["==", ["get", "vt_lvorder"], 0]], paint: { "line-color": "#444", "line-width": 2.5, "line-dasharray": [1, 1] } },
+        { id: "鉄道中心線旗竿橋0", minzoom: 14, maxzoom: 17, type: "line", source: "v", "source-layer": "RailCL", filter: ["all", ["==", ["get", "vt_rtcode"], "JR"], ["in", ["get", "vt_railstate"], "橋・高架"], ["!=", ["get", "vt_sngldbl"], "駅部分"], ["==", ["get", "vt_lvorder"], 0]], paint: { "line-color": "#444", "line-width": 2.5, "line-dasharray": [1, 1] } },
+        { id: "道路中心線色1", minzoom: 11, maxzoom: 17, type: "line", source: "v", "source-layer": "RdCL", filter: ["all", ["==", ["get", "vt_lvorder"], 1], ["!", ["in", ["get", "vt_code"], ["literal", [2703, 2713, 2723, 2733, 2724, 2734]]]]], layout: { "line-join": "round", "line-round-limit": 1.57, "line-sort-key": ["get", "vt_drworder"] }, paint: { "line-color": "#444", "line-width": 4, "line-dasharray": [1, 1] } },
+        { id: "鉄道中心線1", minzoom: 11, maxzoom: 17, type: "line", source: "v", "source-layer": "RailCL", filter: ["all", ["!", ["in", ["get", "vt_railstate"], ["literal", ["トンネル", "雪覆い", "地下", "橋・高架"]]]], ["==", ["get", "vt_lvorder"], 1]], paint: { "line-color": "#444", "line-width": 2.5, "line-dasharray": [1, 1] } },
+        { id: "鉄道中心線旗竿1", minzoom: 14, maxzoom: 17, type: "line", source: "v", "source-layer": "RailCL", filter: ["all", ["==", ["get", "vt_rtcode"], "JR"], ["!", ["in", ["get", "vt_railstate"], ["literal", ["トンネル", "雪覆い", "地下", "橋・高架"]]]], ["!=", ["get", "vt_sngldbl"], "駅部分"], ["==", ["get", "vt_lvorder"], 1]], paint: { "line-color": "#444", "line-width": 2.5, "line-dasharray": [1, 1] } },
+        { id: "道路中心線ククリ橋1", minzoom: 11, maxzoom: 17, type: "line", source: "v", "source-layer": "RdCL", filter: ["step", ["zoom"], ["all", ["==", ["get", "vt_lvorder"], 1], ["in", ["get", "vt_code"], ["literal", [2703, 2713]]], ["!", ["all", ["in", ["get", "vt_rdctg"], ["literal", ["市区町村道等", "その他", "不明"]]], ["==", ["get", "vt_rnkwidth"], "3m-5.5m未満"]]]], 14, ["all", ["==", ["get", "vt_lvorder"], 1], ["in", ["get", "vt_code"], ["literal", [2703, 2713]]]]], layout: { "line-join": "round", "line-round-limit": 1.57, "line-sort-key": ["get", "vt_drworder"] }, paint: { "line-color": "#444", "line-width": 1.5 } },
+        { id: "道路中心線色橋1", minzoom: 11, maxzoom: 17, type: "line", source: "v", "source-layer": "RdCL", filter: ["all", ["==", ["get", "vt_lvorder"], 1], ["in", ["get", "vt_code"], ["literal", [2703, 2713, 2723, 2733]]]], layout: { "line-join": "round", "line-round-limit": 1.57, "line-sort-key": ["get", "vt_drworder"] }, paint: { "line-color": "#444", "line-width": 1.5 } },
+        { id: "道路縁", minzoom: 17, type: "line", source: "v", "source-layer": "RdEdg", layout: { "line-cap": "square", "line-sort-key": ["get", "vt_drworder"] }, paint: { "line-color": "#444", "line-width": 1.5 } },
+        { id: "行政区画界線25000市区町村界", type: "line", source: "v", "source-layer": "AdmBdry", filter: ["==", ["get", "vt_code"], 1212], layout: { "line-cap": "square" }, paint: { "line-color": "#666666", "line-width": 1 } },
+        { id: "行政区画界線25000都府県界及び北海道総合振興局・振興局界", type: "line", source: "v", "source-layer": "AdmBdry", filter: ["==", ["get", "vt_code"], 1211], layout: { "line-cap": "round" }, paint: { "line-color": "#999999", "line-width": 1 } },
+      ],
+    },
+  });
+  map.addControl(new maplibregl.NavigationControl(), "top-left");
+
+  var zoomLevelContinue = function () {
+    var currentZoom = map.getZoom();
+    document.getElementById("mapcontainer").classList.remove("zoomLevel_1", "zoomLevel_2", "zoomLevel_3", "zoomLevel_4", "popup_show");
+
+    if (currentZoom < 5.5) {
+      document.getElementById("mapcontainer").classList.add("zoomLevel_1");
+      //gjmapT.setStyle({ weight: 20 });
+    } else if (currentZoom < 7) {
+      document.getElementById("mapcontainer").classList.add("zoomLevel_2");
+      //gjmapT.setStyle({ weight: 25 });
+    } else if (currentZoom < 8.5) {
+      document.getElementById("mapcontainer").classList.add("zoomLevel_3");
+      //gjmapT.setStyle({ weight: 35 });
+    } else {
+      document.getElementById("mapcontainer").classList.add("zoomLevel_4");
+      //gjmapT.setStyle({ weight: 65 });
+    }
+    if (currentZoom > 11) {
+      document.getElementById("mapcontainer").classList.add("popup_show");
+    }
+  };
+  map.on("zoom", zoomLevelContinue);
+  map.on("load", zoomLevelContinue);
+  map.on("load", function () {
+    window.electronAPI.messageReturn({
+      action: "tsunamiReqest",
+    });
+  });
+
+  const img = document.createElement("img");
+  img.src = "./img/homePin.svg";
+  img.classList.add("homeIcon");
+
+  new maplibregl.Marker(img).setLngLat([config.home.longitude, config.home.latitude]).addTo(map);
+}
+function init2() {
   if (inited || !config || !windowLoaded) return;
   inited = true;
   map = L.map("mapcontainer", {
@@ -215,10 +512,6 @@ function init() {
             layer.bindPopup({ content: "<h3>津波予報区</h3>" + feature.properties.name, keepInView: false, autoPan: false });
           }
         },
-      });
-
-      window.electronAPI.messageReturn({
-        action: "tsunamiReqest",
       });
     });
   fetch("./Resource/lake.json")
@@ -613,37 +906,27 @@ function init() {
   });
 
   markerElm = L.marker([config.home.latitude, config.home.longitude], { keyboard: false, icon: homeIcon }).addTo(map).bindPopup({ content: config.home.name, keepInView: false, autoPan: false });
-
-  fetch("./Resource/TimeTable_JMA2001.json")
-    .then(function (res) {
-      return res.json();
-    })
-    .then(function (json) {
-      TimeTable_JMA2001 = json;
-
-      psWaveEntry();
-    });
 }
+fetch("./Resource/TimeTable_JMA2001.json")
+  .then(function (res) {
+    return res.json();
+  })
+  .then(function (json) {
+    TimeTable_JMA2001 = json;
+
+    psWaveEntry();
+  });
 
 //観測点マーカー追加
 function addPointMarker(elm) {
   var codeEscaped = elm.Code.replace(".", "_");
-  var kmoniPointMarker = L.divIcon({
-    html: "<div class='marker-circle marker-circle-" + elm.Type + "'></div>",
-    className: "kmoniPointMarker KmoniPoint_" + codeEscaped,
-    iconSize: [35, 35],
-    iconAnchor: [17.5, 17.5],
-  });
-  if (PointsCanvas) {
-    elm.marker = L.marker([elm.Location.Latitude, elm.Location.Longitude], {
-      icon: kmoniPointMarker,
-      pane: "PointsPane",
-      //renderer: PointsCanvas,
-      keyboard: false,
-    })
-      .bindPopup("", { offset: [0, -20], className: "PointPopup", keepInView: false, autoPan: false })
-      .addTo(map);
-  }
+
+  const el = document.createElement("div");
+  el.classList.add("kmoniPointMarker", "KmoniPoint_" + codeEscaped);
+  el.innerHTML = "<div class='marker-circle marker-circle-" + elm.Type + "'></div>";
+
+  elm.popup = new maplibregl.Popup({ offset: 10 });
+  elm.marker = new maplibregl.Marker(el).setLngLat([elm.Location.Longitude, elm.Location.Latitude]).setPopup(elm.popup).addTo(map);
   return elm;
 }
 //観測点情報更新
@@ -699,8 +982,7 @@ function kmoniMapUpdate(dataTmp, type) {
           var connectStr = "";
           if (elm.Type == "S-net") connectStr = "_";
           popup_content = "<h3 class='PointName' style='border-bottom:solid 2px rgb(" + elm.rgb.join(",") + ")'>" + PNameTmp + "<span>" + elm.Type + connectStr + elm.Code + "</span></h3><h4 class='detecting' style='display:" + detecting + "'>地震検知中</h4><table><tr><td>震度</td><td class='PointInt'>" + shindoStr + "</td></tr><tr><td>PGA</td><td class='PointPGA'>" + pgaStr + "</td></tr></table>";
-          points[elm.Code].marker.setPopupContent(popup_content);
-
+          points[elm.Code].popup.setHTML(popup_content);
           markerCircleElm.classList.remove("strongDetectingMarker", "detectingMarker", "marker_Int", "marker_Int1", "marker_Int2", "marker_Int3", "marker_Int4", "marker_Int5m", "marker_Int5p", "marker_Int6m", "marker_Int6p", "marker_Int7", "marker_Int7p");
 
           if (elm.detect2) {
@@ -711,10 +993,7 @@ function kmoniMapUpdate(dataTmp, type) {
 
           var IntTmp = shindoConvert(elm.shindo, 3);
           if (IntTmp) {
-            points[elm.Code].marker.setZIndexOffset(shindoConvert(elm.shindo, 5) * 1000);
             markerCircleElm.classList.add("marker_Int", "marker_Int" + IntTmp);
-          } else {
-            points[elm.Code].marker.setZIndexOffset(0);
           }
         }
       } else {
@@ -726,7 +1005,7 @@ function kmoniMapUpdate(dataTmp, type) {
           var PNameTmp = elm.Name ? elm.Name : "";
 
           popup_content = "<h3 class='PointName' style='border-bottom:solid 2px rgba(128,128,128,0.5)'>" + PNameTmp + "<span>" + elm.Code + "</span></h3><h4 class='detecting' style='display:none'>地震検知中</h4><table><tr><td>震度</td><td class='PointInt'>?</td></tr><tr><td>PGA</td><td class='PointPGA'>?</td></tr></table>";
-          points[elm.Code].marker.setPopupContent(popup_content);
+          points[elm.Code].popup.setHTML(popup_content);
         }
       }
       previous_points[elm.Code] = elm;
@@ -775,21 +1054,81 @@ var estShindoTmp;
 //予想震度更新
 function EstShindoUpdate(data) {
   estShindoTmp = data;
-  if (sections.length == 0) return;
-  sections.forEach(function (elm) {
-    elm.item.setStyle({ fillColor: "#333" });
-  });
+  map.setFilter("Int0", ["==", "name", ""]);
+  map.setFilter("Int1", ["==", "name", ""]);
+  map.setFilter("Int2", ["==", "name", ""]);
+  map.setFilter("Int3", ["==", "name", ""]);
+  map.setFilter("Int4", ["==", "name", ""]);
+  map.setFilter("Int5-", ["==", "name", ""]);
+  map.setFilter("Int5+", ["==", "name", ""]);
+  map.setFilter("Int6-", ["==", "name", ""]);
+  map.setFilter("Int6+", ["==", "name", ""]);
+  map.setFilter("Int7", ["==", "name", ""]);
+  map.setFilter("Int7+", ["==", "name", ""]);
+  var Int0T = ["any"];
+  var Int1T = ["any"];
+  var Int2T = ["any"];
+  var Int3T = ["any"];
+  var Int4T = ["any"];
+  var Int5mT = ["any"];
+  var Int5pT = ["any"];
+  var Int6mT = ["any"];
+  var Int6pT = ["any"];
+  var Int7T = ["any"];
+  var Int7pT = ["any"];
 
   data.forEach(function (elm) {
-    var section = sections.find(function (elm3) {
-      return elm3.name == elm.Section;
-    });
-
-    if (section && section.item) {
-      var colorTmp = shindoConvert(elm.estShindo, 2)[0];
-      section.item.setStyle({ fill: true, fillColor: colorTmp });
+    if (!elm.Section) return;
+    var shindo = String(shindoConvert(elm.estShindo, 0));
+    switch (shindo) {
+      case "0":
+        Int0T.push(["==", "name", elm.Section]);
+        break;
+      case "1":
+        Int1T.push(["==", "name", elm.Section]);
+        break;
+      case "2":
+        Int2T.push(["==", "name", elm.Section]);
+        break;
+      case "3":
+        Int3T.push(["==", "name", elm.Section]);
+        break;
+      case "4":
+        Int4T.push(["==", "name", elm.Section]);
+        break;
+      case "5-":
+        Int5mT.push(["==", "name", elm.Section]);
+        break;
+      case "5+":
+        Int5pT.push(["==", "name", elm.Section]);
+        break;
+      case "6-":
+        Int6mT.push(["==", "name", elm.Section]);
+        break;
+      case "6+":
+        Int6pT.push(["==", "name", elm.Section]);
+        break;
+      case "7":
+        Int7T.push(["==", "name", elm.Section]);
+        break;
+      case "7+":
+        Int7pT.push(["==", "name", elm.Section]);
+        break;
+      default:
+        break;
     }
   });
+  map.setFilter("Int0", Int0T);
+  map.setFilter("Int1", Int1T);
+  map.setFilter("Int2", Int2T);
+  map.setFilter("Int3", Int3T);
+  map.setFilter("Int4", Int4T);
+  map.setFilter("Int5-", Int5mT);
+  map.setFilter("Int5+", Int5pT);
+  map.setFilter("Int6-", Int6mT);
+  map.setFilter("Int6+", Int6pT);
+  map.setFilter("Int7", Int7T);
+  map.setFilter("Int7+", Int7pT);
 }
 
 //🔴予報円🔴
@@ -818,6 +1157,7 @@ function psWaveEntry() {
         }
       }
     }
+
     if (!elm.is_cancel && elm.origin_time && elm.depth && elm.latitude && elm.longitude) {
       var distance = Math.floor((new Date() - Replay - elm.origin_time) / 1000);
 
@@ -847,11 +1187,14 @@ function psWaveEntry() {
   //終わった地震の予報円削除
   psWaveList = psWaveList.filter(function (elm) {
     var stillEEW = now_EEW.find(function (elm2) {
-      return elm2.report_id;
+      return elm2.report_id == elm.id;
     });
     if (!stillEEW || stillEEW.is_cancel) {
-      if (elm.PCircleElm) map.removeLayer(elm.PCircleElm);
-      if (elm.SCircleElm) map.removeLayer(elm.SCircleElm);
+      if (elm.PCircleElm) {
+        map.setLayoutProperty("PCircle_" + elm.id, "visibility", "none");
+        map.setLayoutProperty("SCircle_" + elm.id, "visibility", "none");
+        map.setLayoutProperty("SCircle_" + elm.id + "_FILL", "visibility", "none");
+      }
     }
     return stillEEW;
   });
@@ -973,39 +1316,63 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
 
   latitude = latitudeConvert(latitude);
   longitude = latitudeConvert(longitude);
+
   if (EQElm) {
+    let _center = turf.point([longitude, latitude]);
+    let _options = {
+      steps: 80,
+      units: "kilometers",
+    };
+
     if (EQElm.PCircleElm) {
-      EQElm.PCircleElm.setRadius(pRadius).setLatLng([latitude, longitude]);
-      EQElm.SCircleElm.setRadius(sRadius).setLatLng([latitude, longitude]).setStyle({ stroke: !SnotArrived });
+      var pcircle = turf.circle(_center, pRadius / 1000, _options);
+      map.getSource("PCircle_" + report_id).setData(pcircle);
+
+      var scircle = turf.circle(_center, sRadius / 1000, _options);
+      map.getSource("SCircle_" + report_id).setData(scircle);
+      map.setPaintProperty("SCircle_" + report_id, "line-width", SnotArrived ? 0 : 2);
     } else {
-      var PCElm = L.circle([latitude, longitude], {
-        radius: pRadius,
-        color: "#3094ff",
-        stroke: true,
-        fill: false,
-        weight: 2,
-        pane: "PSWavePane",
-        renderer: PSWaveCanvas,
-        interactive: false,
-      }).addTo(map);
+      map.addSource("PCircle_" + report_id, {
+        type: "geojson",
+        data: turf.circle(_center, pRadius / 1000, _options),
+      });
 
-      var SCElm = L.circle([latitude, longitude], {
-        radius: sRadius,
-        color: "#ff3e30",
-        stroke: !SnotArrived,
-        fill: true,
-        fillColor: "#F00",
-        fillOpacity: 0.15,
-        weight: 2,
-        pane: "PSWavePane",
-        renderer: PSWaveCanvas,
-        interactive: false,
-      }).addTo(map);
+      map.addLayer({
+        id: "PCircle_" + report_id,
+        type: "line",
+        source: "PCircle_" + report_id,
+        paint: {
+          "line-color": config.color.psWave.PwaveColor,
+          "line-width": 2,
+        },
+      });
 
-      map.setView([latitude, longitude, 9]);
+      map.addSource("SCircle_" + report_id, {
+        type: "geojson",
+        data: turf.circle(_center, sRadius / 1000, _options),
+      });
 
-      EQElm.PCircleElm = PCElm;
-      EQElm.SCircleElm = SCElm;
+      map.addLayer({
+        id: "SCircle_" + report_id,
+        type: "line",
+        source: "SCircle_" + report_id,
+        paint: {
+          "line-color": config.color.psWave.SwaveColor,
+          "line-width": 2,
+        },
+      });
+      map.addLayer({
+        id: "SCircle_" + report_id + "_FILL",
+        type: "fill",
+        source: "SCircle_" + report_id,
+        paint: {
+          "fill-color": config.color.psWave.SwaveColor,
+          "fill-opacity": 0.15,
+        },
+      });
+
+      EQElm.PCircleElm = true;
+      EQElm.SCircleElm = true;
       EQElm = psWaveList[psWaveList.length - 1];
 
       psWaveCalc(report_id);
@@ -1015,36 +1382,21 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
       if (SnotArrived) {
         var SWprogressValue = document.getElementById("SWprogressValue_" + report_id);
         if (SWprogressValue) {
-          SWprogressValue.setAttribute("stroke-dashoffset", Number(157 - 157 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect))));
-        } else {
-          var SIcon = L.divIcon({
-            html: '<svg width="50" height="50"><circle cx="25" cy="25" r="23.5" fill="none" stroke-width="5px" stroke="#777"/><circle id="SWprogressValue_' + report_id + '" class="SWprogressValue" cx="25" cy="25" r="23.5" fill="none" stroke-width="5px" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="' + Number(157 - 157 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect))) + '"/></svg>',
-            className: "SWaveProgress",
-            iconSize: [50, 50],
-            iconAnchor: [25, 25],
-          });
-          EQElm.SIElm.setIcon(SIcon);
+          SWprogressValue.setAttribute("stroke-dashoffset", Number(138 - 138 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect))));
         }
       } else {
-        map.removeLayer(EQElm.SIElm);
+        EQElm.SIElm.remove();
       }
     } else if (SnotArrived) {
       var SIElm;
 
       EQElm.firstDetect = nowDistance;
-      var SIcon = L.divIcon({
-        html: '<svg width="50" height="50"><circle cx="25" cy="25" r="23.5" fill="none" stroke-width="5px" stroke="#777"/><circle id="SWprogressValue_' + report_id + '" class="SWprogressValue" cx="25" cy="25" r="23.5" fill="none" stroke-width="5px" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="' + Number(157 - 157 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect))) + '"/></svg>',
-        className: "SWaveProgress",
-        iconSize: [50, 50],
-        iconAnchor: [25, 25],
-      });
 
-      SIElm = L.marker([latitude, longitude], {
-        icon: SIcon,
-        pane: "PointsPane",
-        //renderer: PointsCanvas,
-        keyboard: false,
-      }).addTo(map);
+      const el = document.createElement("div");
+      el.classList.add("SWaveProgress");
+      el.innerHTML = '<svg width="50" height="50"><circle cx="25" cy="25" r="22" fill="none" stroke-width="5px" stroke="#777"/><circle id="SWprogressValue_' + report_id + '" class="SWprogressValue" cx="25" cy="25" r="22" fill="none" stroke-width="5px" stroke-linecap="round" stroke-dasharray="138" stroke-dashoffset="' + Number(138 - 138 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect))) + '"/></svg>';
+
+      SIElm = new maplibregl.Marker(el).setLngLat([longitude, latitude]).addTo(map);
 
       EQElm.SIElm = SIElm;
     }
@@ -1078,15 +1430,10 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
 //🔴津波情報🔴
 //津波情報更新
 function tsunamiDataUpdate(data) {
-  if (gjmapT) {
-    if (!tsunamiLayerAdded) tsunamiLayer.addLayer(gjmapT);
-    tsunamiLayerAdded = true;
-
-    gjmapT.setStyle({
-      stroke: false,
-    });
-  }
-
+  map.setFilter("tsunami_MajorWarn", ["==", "name", ""]);
+  map.setFilter("tsunami_Warn", ["==", "name", ""]);
+  map.setFilter("tsunami_Watch", ["==", "name", ""]);
+  map.setFilter("tsunami_Yoho", ["==", "name", ""]);
   Tsunami_MajorWarning = Tsunami_Warning = Tsunami_Watch = Tsunami_Yoho = false;
 
   document.getElementById("tsunamiCancel").style.display = data.cancelled ? "block" : "none";
@@ -1097,50 +1444,51 @@ function tsunamiDataUpdate(data) {
 
     document.body.classList.remove("TsunamiMode");
   } else {
-    map.addLayer(tsunamiLayer);
+    //    map.addLayer(tsunamiLayer);
 
     document.getElementById("tsunamiWrap").style.display = "block";
 
     document.body.classList.add("TsunamiMode");
     var alertNowTmp = false;
-    data.areas.forEach(function (elm) {
-      var tsunamiItem = tsunamiElm.find(function (elm2) {
-        return elm2.name == elm.name;
-      });
 
-      if (elm.cancelled) {
-        if (tsunamiItem) {
-          tsunamiItem.item
-            .setStyle({
-              stroke: false,
-              className: "tsunamiElm",
-            })
-            .setPopupContent("<h3>津波予報区</h3>" + tsunamiItem.feature.properties.name);
-        }
-      } else {
+    var MajorWarningList = ["any"];
+    var WarningList = ["any"];
+    var WatchList = ["any"];
+    var YohoList = ["any"];
+    data.areas.forEach(function (elm) {
+      /*var tsunamiItem = tsunamiElm.find(function (elm2) {
+        return elm2.name == elm.name;
+      });*/
+
+      if (!elm.cancelled) {
         alertNowTmp = true;
-        var gradeJa;
+        //var gradeJa;
         switch (elm.grade) {
           case "MajorWarning":
+            MajorWarningList.push(["==", "name", elm.name]);
             Tsunami_MajorWarning = true;
-            gradeJa = "大津波警報";
+            //gradeJa = "大津波警報";
             break;
           case "Warning":
+            WarningList.push(["==", "name", elm.name]);
             Tsunami_Warning = true;
-            gradeJa = "津波警報";
+            //gradeJa = "津波警報";
             break;
           case "Watch":
+            WatchList.push(["==", "name", elm.name]);
             Tsunami_Watch = true;
-            gradeJa = "津波注意報";
+            //gradeJa = "津波注意報";
             break;
           case "Yoho":
+            YohoList.push(["==", "name", elm.name]);
             Tsunami_Yoho = true;
-            gradeJa = "津波予報";
+            //gradeJa = "津波予報";
             break;
           default:
             break;
         }
 
+        /*
         if (tsunamiItem && tsunamiItem.item) {
           var firstWave = "";
           var maxWave = "";
@@ -1163,19 +1511,22 @@ function tsunamiDataUpdate(data) {
               weight: 5,
             })
             .setPopupContent("<h3 style='border-bottom:solid 2px " + tsunamiColorConv(elm.grade) + "'>" + tsunamiItem.feature.properties.name + "</h3><p> " + gradeJa + " 発令中</p>" + firstWave + maxWave + firstCondition);
-        }
+        }*/
       }
     });
+
+    map.setFilter("tsunami_MajorWarn", MajorWarningList);
+    map.setFilter("tsunami_Warn", WarningList);
+    map.setFilter("tsunami_Watch", WatchList);
+    map.setFilter("tsunami_Yoho", YohoList);
 
     if (data.revocation) {
       document.getElementById("tsunamiWrap").style.display = "none";
       document.body.classList.remove("TsunamiMode");
-      map.removeLayer(tsunamiLayer);
       Tsunami_MajorWarning = Tsunami_Warning = Tsunami_Watch = false;
     } else if (!alertNowTmp && tsunamiAlertNow) {
       document.getElementById("tsunamiWrap").style.display = "none";
       document.body.classList.remove("TsunamiMode");
-      map.removeLayer(tsunamiLayer);
       Tsunami_MajorWarning = Tsunami_Warning = Tsunami_Watch = false;
     }
     tsunamiAlertNow = alertNowTmp;

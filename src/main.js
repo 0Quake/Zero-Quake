@@ -1,3 +1,28 @@
+//リプレイ
+var Replay = 0;
+/* eslint-disable */
+function replay(ReplayDate) {
+  if (ReplayDate) {
+    Replay = new Date() - new Date(ReplayDate);
+    /*
+    if (mainWindow) {
+      mainWindow.webContents.send("message2", {
+        action: "Replay",
+        data: Replay,
+      });
+    }*/
+  } else {
+    Replay = 0;
+  }
+}
+/* eslint-enable */
+
+//replay("2023/4/5 0:36:50");
+//replay("2023/04/04 16:11:00"); //２か所同時
+//replay("2023/3/27 0:04:25");
+//replay("2023/03/11 05:12:30"); //２か所同時
+//replay("2020/06/15 02:28:38");//２か所同時
+
 const electron = require("electron");
 const workerThreads = require("worker_threads");
 const { app, BrowserWindow, ipcMain, net, Notification, shell, dialog, Menu } = electron;
@@ -49,6 +74,32 @@ var config = store.get("config", {
       EEW: "緊急地震速報です。強い揺れに警戒してください。",
     },
   },
+  color: {
+    psWave: {
+      PwaveColor: "rgb(48, 148, 255)",
+      SwaveColor: "rgb(255, 62, 48)",
+    },
+    Shindo: {
+      "?": { background: "rgb(191, 191, 191)", color: "rgb(68, 68, 68)" },
+      0: { background: "rgb(80, 86, 102)", color: "rgb(204, 204, 204)" },
+      1: { background: "rgb(134, 168, 198)", color: "rgb(51, 51, 51)" },
+      2: { background: "rgb(56, 120, 193)", color: "rgb(255, 255, 255)" },
+      3: { background: "rgb(80, 186, 84)", color: "rgb(34, 34, 34)" },
+      4: { background: "rgb(204, 209, 74)", color: "rgb(34, 34, 34)" },
+      "5m": { background: "rgb(231, 150, 21)", color: "rgb(0, 0, 0)" },
+      "5p": { background: "rgb(255, 91, 22)", color: "rgb(0, 0, 0)" },
+      "6m": { background: "rgb(237, 0, 0)", color: "rgb(255, 255, 255)" },
+      "6p": { background: "rgb(128, 9, 9)", color: "rgb(255, 255, 255)" },
+      7: { background: "rgb(196, 0, 222)", color: "rgb(255, 255, 255)" },
+      "7p": { background: "rgb(196, 0, 222)", color: "rgb(255, 255, 255)" },
+    },
+    Tsunami: {
+      TsunamiMajorWarningColor: "rgb(200, 0, 255)",
+      TsunamiWarningColor: "rgb(255, 40, 0)",
+      TsunamiWatchColor: "rgb(250, 245, 0)",
+      TsunamiYohoColor: "rgb(66, 158, 255)",
+    },
+  },
 });
 const userHome = process.env[process.platform == "win32" ? "USERPROFILE" : "HOME"];
 let mainWindow, settingWindow, tsunamiWindow, kmoniWorker;
@@ -63,7 +114,6 @@ var Yoyu = 250;
 var yoyuY = 2500,
   yoyuK = 2500,
   yoyuL = 2500;
-var Replay = 0;
 var EEWNow = false;
 
 var errorCountk = 0,
@@ -216,6 +266,7 @@ var relaunchTimer;
 var errorMsgBox = false;
 //エラー処理
 process.on("uncaughtException", function (err) {
+  Window_notification("予期しないエラーが発生しました。", "error");
   if (!errorMsgBox && app.isReady()) {
     errorMsgBox = true;
     options = {
@@ -380,12 +431,22 @@ function createWindow() {
       backgroundColor: "#202227",
       icon: path.join(__dirname, "img/icon.ico"),
     },
-    show: false,
   });
-  mainWindow.maximize();
-  mainWindow.once("ready-to-show", () => mainWindow.show());
+  if (Replay !== 0) {
+    mainWindow.webContents.send("message2", {
+      action: "Replay",
+      data: Replay,
+    });
+  }
 
   mainWindow.webContents.on("did-finish-load", () => {
+    if (Replay !== 0) {
+      mainWindow.webContents.send("message2", {
+        action: "Replay",
+        data: Replay,
+      });
+    }
+
     kmoniTimeTmp.forEach(function (elm) {
       mainWindow.webContents.send("message2", {
         action: "kmoniTimeUpdate",
@@ -439,13 +500,6 @@ function createWindow() {
       }
     });
 
-    if (Replay !== 0) {
-      mainWindow.webContents.send("message2", {
-        action: "Replay",
-        data: Replay,
-      });
-    }
-
     if (P2P_ConnectData) {
       mainWindow.webContents.send("message2", P2P_ConnectData);
     }
@@ -464,7 +518,7 @@ function createWindow() {
     }
   });
 
-  mainWindow.loadFile("src/index.html");
+  mainWindow.loadFile("src/index2.html");
 
   mainWindow.on("close", () => {
     mainWindow = null;
@@ -1478,13 +1532,21 @@ function EEWdetect(type, json, KorL) {
     }
   } else if (type == 2) {
     //kmoni/lmoni
-    const year = parseInt(json.request_time.substring(0, 4));
-    const month = parseInt(json.request_time.substring(4, 6));
-    const day = parseInt(json.request_time.substring(6, 8));
-    const hour = parseInt(json.request_time.substring(8, 10));
-    const min = parseInt(json.request_time.substring(10, 12));
-    const sec = parseInt(json.request_time.substring(12, 15));
-    const request_time = new Date(year, month - 1, day, hour, min, sec); //monthは0オリジン
+    var year = parseInt(json.request_time.substring(0, 4));
+    var month = parseInt(json.request_time.substring(4, 6));
+    var day = parseInt(json.request_time.substring(6, 8));
+    var hour = parseInt(json.request_time.substring(8, 10));
+    var min = parseInt(json.request_time.substring(10, 12));
+    var sec = parseInt(json.request_time.substring(12, 15));
+    var request_time = new Date(year, month - 1, day, hour, min, sec); //monthは0オリジン
+
+    var year = parseInt(json.origin_time.substring(0, 4));
+    var month = parseInt(json.origin_time.substring(4, 6));
+    var day = parseInt(json.origin_time.substring(6, 8));
+    var hour = parseInt(json.origin_time.substring(8, 10));
+    var min = parseInt(json.origin_time.substring(10, 12));
+    var sec = parseInt(json.origin_time.substring(12, 15));
+    var origin_timeTmp = new Date(year, month - 1, day, hour, min, sec); //monthは0オリジン
 
     var sourceTmp;
     if (KorL == 1) sourceTmp = "kmoni";
@@ -2016,9 +2078,12 @@ function EQI_JMAXMLList_Req() {
 
   request.end();
 }
+setTimeout(function () {
+  EQI_JMAXML_Req("https://example.com", true);
+}, 4000);
 
 //気象庁XML 取得・フォーマット変更→eqInfoControl
-function EQI_JMAXML_Req(url) {
+function EQI_JMAXML_Req(url, a) {
   if (!url) return;
   if (jmaXML_Fetched.includes(url)) return;
   jmaXML_Fetched.push(url);
@@ -2587,9 +2652,11 @@ function soundPlay(name) {
 
 //ネットワークエラー処理
 function NetworkError(error, type) {
-  Window_notification(type + "との通信でエラーが発生しました。", "エラーコードは以下の通りです。\n" + String(error), "error");
+  /*Window_notification(type + "との通信でエラーが発生しました。", "エラーコードは以下の通りです。\n" + String(error), "error");*/
+  return false;
 }
 //メインウィンドウ内通知
+
 function Window_notification(title, detail, type) {
   notifications.push({
     id: notification_id,
@@ -2822,24 +2889,3 @@ function LatLngConvert(data) {
 function geosailing(latA, lngA, latB, lngB) {
   return Math.acos(Math.sin(Math.atan(Math.tan(latA * (Math.PI / 180)))) * Math.sin(Math.atan(Math.tan(latB * (Math.PI / 180)))) + Math.cos(Math.atan(Math.tan(latA * (Math.PI / 180)))) * Math.cos(Math.atan(Math.tan(latB * (Math.PI / 180)))) * Math.cos(lngA * (Math.PI / 180) - lngB * (Math.PI / 180))) * 6371.008;
 }
-
-//リプレイ
-/* eslint-disable */
-function replay(ReplayDate) {
-  if (ReplayDate) {
-    Replay = new Date() - new Date(ReplayDate);
-    if (mainWindow) {
-      mainWindow.webContents.send("message2", {
-        action: "Replay",
-        data: Replay,
-      });
-    }
-  } else {
-    Replay = 0;
-  }
-}
-/* eslint-enable */
-replay("2023/04/02 13:14:00");
-//replay("2023/03/24 13:5:00");
-//replay("2023/03/11 05:12:30"); //２か所同時
-//replay("2020/06/15 02:28:38");//２か所同時

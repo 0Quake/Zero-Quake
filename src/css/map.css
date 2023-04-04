@@ -1,3 +1,18 @@
+:root {
+  --PwaveColor: rgb(48, 148, 255);
+  --SwaveColor: rgb(255, 62, 48);
+  --TsunamiMajorWarningColor: rgb(200, 0, 255);
+  --TsunamiWarningColor: rgb(255, 40, 0);
+  --TsunamiWatchColor: rgb(250, 245, 0);
+  --TsunamiYohoColor: rgb(66, 158, 255);
+}
+#mapcontainer_Wrap {
+  display: inline-block;
+  overflow: hidden;
+  width: 100%;
+  height: 100vh;
+}
+
 #mapcontainer {
   display: inline-block;
   width: 100%;
@@ -8,19 +23,39 @@
   outline: none;
   border: none;
 }
+#mapcontainer canvas {
+  outline: none;
+}
 .leaflet-zoom-anim .leaflet-zoom-animated {
   transition: transform 0.15s ease-out;
 }
 
-.leaflet-control-layers,
-.leaflet-control-zoom,
-a.leaflet-control-zoom-in,
-a.leaflet-control-zoom-out {
+.maplibregl-ctrl {
   background: #444;
   color: #fff;
   border: solid 1px #999 !important;
 }
-a.leaflet-control-zoom-in:hover,
+.maplibregl-ctrl-group button + button {
+  border-top: none;
+}
+.maplibregl-ctrl button .maplibregl-ctrl-icon {
+  display: none;
+}
+.maplibregl-ctrl button::before {
+  color: #eee;
+  font-family: "Material Icons Round";
+  font-size: 17px;
+}
+.maplibregl-ctrl button.maplibregl-ctrl-zoom-in::before {
+  content: "add";
+}
+.maplibregl-ctrl button.maplibregl-ctrl-zoom-out::before {
+  content: "remove";
+}
+.maplibregl-ctrl button.maplibregl-ctrl-compass::before {
+  content: "unfold_more";
+}
+rol-zoom-in:hover,
 a.leaflet-control-zoom-out:hover {
   background: #666;
 }
@@ -53,10 +88,20 @@ img.leaflet-control {
 .leaflet-jsonMAP2-pane {
   pointer-events: none;
 }
+.maplibregl-popup-anchor-bottom .maplibregl-popup-tip {
+  border-top-color: #888 !important;
+}
+.maplibregl-popup-anchor-top .maplibregl-popup-tip {
+  border-bottom-color: #888 !important;
+}
+.maplibregl-popup-anchor-left .maplibregl-popup-tip {
+  border-right-color: #888 !important;
+}
+.maplibregl-popup-anchor-right .maplibregl-popup-tip {
+  border-left-color: #888 !important;
+}
 
-.PointPopup,
-.leaflet-popup-content-wrapper,
-.leaflet-popup-tip {
+.maplibregl-popup-content {
   background: #222;
   color: #fff;
   font-size: 14px;
@@ -64,22 +109,22 @@ img.leaflet-control {
 
   border: solid 1px #888;
 }
-.leaflet-popup-content-wrapper {
+.maplibregl-popup-wrapper {
   border-radius: 3px;
   padding: 0;
 }
 .PointPopup,
-.leaflet-popup-content {
+.maplibregl-popup-content {
   margin: 0;
   min-width: 180px;
   text-align: center;
 }
 
-.leaflet-popup-content:has(h3) {
+.maplibregl-popup-content:has(h3) {
   padding: 35px 5px 5px 5px;
 }
 .PointPopup h3,
-.leaflet-popup-content h3 {
+.maplibregl-popup-content h3 {
   float: none;
   position: absolute;
   top: 0;
@@ -96,7 +141,11 @@ img.leaflet-control {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.leaflet-popup-content p {
+.maplibregl-popup-close-button {
+  height: 30px;
+  width: 30px;
+}
+.maplibregl-popup-content p {
   padding: 0.3em 0;
   margin: 0;
 }
@@ -109,28 +158,24 @@ img.leaflet-control {
   line-height: 30px;
 }
 
-.leaflet-popup-content table,
+.maplibregl-popup-content table,
 .PointPopup table {
   border-collapse: collapse;
   display: inline-table;
 }
-.leaflet-popup-content th,
-.leaflet-popup-content td,
+.maplibregl-popup-content th,
+.maplibregl-popup-content td,
 .PointPopup table th,
 .PointPopup table td {
   padding: 0.2em 0.8em;
 }
-.leaflet-popup-content td,
+.maplibregl-popup-content td,
 .PointPopup table td {
   text-align: left;
 }
-.kmoniPointMarker {
-  width: 25px;
-  height: 25px;
-}
 
 .marker-circle {
-  position: absolute;
+  position: relative;
   width: 10px;
   height: 10px;
   background: rgba(128, 128, 128, 0.2);
@@ -165,8 +210,12 @@ img.leaflet-control {
   text-align: center;
   font-size: 16px;
 }
+div.marker-circle {
+  z-index: 80;
+}
 div.marker-circle.marker_Int1 {
   background: var(--IntTheme_1_BgColor) !important;
+  z-index: 90;
 }
 .marker_Int1::before {
   content: "1";
@@ -174,6 +223,7 @@ div.marker-circle.marker_Int1 {
 }
 div.marker-circle.marker_Int2 {
   background: var(--IntTheme_2_BgColor) !important;
+  z-index: 91;
 }
 .marker_Int2::before {
   content: "2";
@@ -181,6 +231,7 @@ div.marker-circle.marker_Int2 {
 }
 div.marker-circle.marker_Int3 {
   background: var(--IntTheme_3_BgColor) !important;
+  z-index: 92;
 }
 .marker_Int3::before {
   content: "3";
@@ -188,6 +239,7 @@ div.marker-circle.marker_Int3 {
 }
 div.marker-circle.marker_Int4 {
   background: var(--IntTheme_4_BgColor) !important;
+  z-index: 93;
 }
 .marker_Int4::before {
   content: "4";
@@ -195,6 +247,7 @@ div.marker-circle.marker_Int4 {
 }
 div.marker-circle.marker_Int5m {
   background: var(--IntTheme_5m_BgColor) !important;
+  z-index: 94;
 }
 .marker_Int5m::before {
   content: "5-";
@@ -202,6 +255,7 @@ div.marker-circle.marker_Int5m {
 }
 div.marker-circle.marker_Int5p {
   background: var(--IntTheme_5p_BgColor) !important;
+  z-index: 95;
 }
 .marker_Int5p::before {
   content: "5+";
@@ -209,6 +263,7 @@ div.marker-circle.marker_Int5p {
 }
 div.marker-circle.marker_Int6m {
   background: var(--IntTheme_6m_BgColor) !important;
+  z-index: 96;
 }
 .marker_Int6m::before {
   content: "6-";
@@ -216,6 +271,7 @@ div.marker-circle.marker_Int6m {
 }
 div.marker-circle.marker_Int6p {
   background: var(--IntTheme_6p_BgColor) !important;
+  z-index: 97;
 }
 .marker_Int6p::before {
   content: "6+";
@@ -223,6 +279,7 @@ div.marker-circle.marker_Int6p {
 }
 div.marker-circle.marker_Int7 {
   background: var(--IntTheme_7_BgColor) !important;
+  z-index: 98;
 }
 .marker_Int7::before {
   content: "7";
@@ -230,6 +287,7 @@ div.marker-circle.marker_Int7 {
 }
 div.marker-circle.marker_Int7p {
   background: var(--IntTheme_7p_BgColor) !important;
+  z-index: 99;
 }
 .marker_Int7p::before {
   content: "7+";
@@ -261,22 +319,18 @@ div.marker-circle.marker_Int7p {
 .zoomLevel_1 .marker-circle {
   width: 3px;
   height: 3px;
-  margin: 16px;
 }
 .zoomLevel_2 .marker-circle {
   width: 8px;
   height: 8px;
-  margin: 13.5px;
 }
 .zoomLevel_3 .marker-circle {
   width: 15px;
   height: 15px;
-  margin: 10px;
 }
 .zoomLevel_4 .marker-circle {
   width: 25px;
   height: 25px;
-  margin: 5px;
 }
 .marker_Int {
   border: solid 1px #000;
@@ -324,24 +378,23 @@ div.marker-circle.marker_Int7p {
   z-index: unset;
 }
 
-.leaflet-container .leaflet-control-attribution.leaflet-control {
+.maplibregl-ctrl.maplibregl-ctrl-attrib {
   background: #444;
   color: #ccc;
   border-radius: 5px;
   margin: 5px;
   padding: 3px 8px;
-  font-size: 12px;
+  font-size: 11px;
 }
-.leaflet-container .leaflet-control-attribution.leaflet-control a {
-  display: none;
+.maplibregl-ctrl-attrib-inner {
+  display: block !important;
 }
-
-.leaflet-control-attribution.leaflet-control span {
-  font-size: 0;
+.maplibregl-ctrl-attrib-inner::before {
+  content: "Map: ";
+  font-size: 11px;
 }
-.leaflet-control-attribution.leaflet-control::before {
-  content: " Map:";
-  font-size: 12px;
+.maplibregl-ctrl-attrib-button {
+  display: none !important;
 }
 #tsunamiSample {
   list-style: none;
@@ -376,15 +429,6 @@ div.marker-circle.marker_Int7p {
   background: var(--TsunamiYohoColor);
 }
 
-:root {
-  --PwaveColor: rgb(48, 148, 255);
-  --SwaveColor: rgb(255, 62, 48);
-  --TsunamiMajorWarningColor: rgb(200, 0, 255);
-  --TsunamiWarningColor: rgb(255, 40, 0);
-  --TsunamiWatchColor: rgb(250, 245, 0);
-  --TsunamiYohoColor: rgb(66, 158, 255);
-}
-
 .PWave,
 .SWave {
   /*transition: linear 1s;*/
@@ -403,11 +447,29 @@ div.marker-circle.marker_Int7p {
 .Wave_progress .SWave_value {
   background: var(--SwaveColor);
 }
+.SWaveProgress {
+  width: 50px;
+  height: 50px;
+  padding: 0 !important;
+}
 .SWaveProgress svg {
+  width: 50px;
+  height: 50px;
   transform: rotate(270deg);
   stroke: var(--SwaveColor);
+  margin: 0;
 }
-
+.epicenterIcon {
+  width: 30px;
+  height: 30px;
+  z-index: 100;
+}
+.homeIcon {
+  width: 30px;
+  height: 30px;
+  z-index: 99;
+  top: -15px;
+}
 .epiCenterTooltip {
   display: none;
   background: #222;
@@ -419,7 +481,14 @@ div.marker-circle.marker_Int7p {
   padding: 0;
   text-align: center;
   border: none;
-  outline: solid 1px #999;
+  z-index: 100;
+}
+.epiCenterTooltip .maplibregl-popup-content {
+  padding: 0;
+  min-width: 0;
+}
+.epiCenterTooltip .maplibregl-popup-tip {
+  display: none;
 }
 .epiCenterTooltip::before {
   display: none;

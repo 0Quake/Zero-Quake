@@ -6,10 +6,11 @@
     <meta name="color-scheme" content="light dark">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="./js/leaflet/leaflet.css" />
-    <link rel="stylesheet" href="./css/map.css" />
-    <script src="./js/leaflet/leaflet.js"></script>
     <link rel="stylesheet" href="./css/style.css">
-
+    <script src='https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js'></script>
+    <link href='https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css' rel='stylesheet' />
+    <link rel="stylesheet" href="./css/map.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/6.5.0/turf.min.js" integrity="sha512-Q7HOppxoH0L2M7hreVoFCtUZimR2YaY0fBewIYzkCgmNtgOOZ5IgMNYxHgfps0qrO1ef5m7L1FeHrhXlq1I9HA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <title>Zero Quake</title>
 </head>
 
@@ -96,8 +97,11 @@
 
     <div id="alertFrame"></div>
     <main>
-        <div id="mapcontainer" class="GJMapActive"></div>
+        <nav id="menu"></nav>
 
+        <div id="mapcontainer_Wrap">
+            <div id="mapcontainer" class="GJMapActive"></div>
+        </div>
         <div id="sideBar">
             <button id="SideBarToggle" aria-label="サイドバーを表示・非表示"></button>
             <div id="sokuho-Panel">
