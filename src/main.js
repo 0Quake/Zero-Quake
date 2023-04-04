@@ -518,7 +518,7 @@ function createWindow() {
     }
   });
 
-  mainWindow.loadFile("src/index2.html");
+  mainWindow.loadFile("src/index.html");
 
   mainWindow.on("close", () => {
     mainWindow = null;

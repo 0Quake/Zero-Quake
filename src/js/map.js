@@ -357,6 +357,7 @@ function init() {
       document.getElementById("mapcontainer").classList.add("popup_show");
     }
   };
+  zoomLevelContinue();
   map.on("zoom", zoomLevelContinue);
   map.on("load", zoomLevelContinue);
   map.on("load", function () {
