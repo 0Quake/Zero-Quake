@@ -21,6 +21,7 @@
   background: #444;
   border: solid 1px #999;
   border-radius: 5px;
+  z-index: 100000000;
 }
 #menu label {
   display: block;
@@ -99,6 +100,12 @@ img.leaflet-control {
 .leaflet-jsonMAP1-pane,
 .leaflet-jsonMAP2-pane {
   pointer-events: none;
+}
+.mapboxgl-control-container * {
+  z-index: 100000000;
+}
+.maplibregl-popup {
+  z-index: 200;
 }
 .maplibregl-popup-anchor-bottom .maplibregl-popup-tip {
   border-top-color: #888 !important;
@@ -187,7 +194,6 @@ img.leaflet-control {
 }
 
 .marker-circle {
-  position: relative;
   width: 10px;
   height: 10px;
   background: rgba(128, 128, 128, 0.2);
@@ -314,6 +320,12 @@ div.marker-circle.marker_Int7p {
 }
 .PointName {
   border-bottom: solid 2px transparent;
+}
+.PointName span {
+  float: right;
+  font-size: 11px;
+  font-weight: normal;
+  color: #ccc;
 }
 .popupOpen .PointPopup {
   display: block;

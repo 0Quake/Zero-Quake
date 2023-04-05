@@ -79,7 +79,7 @@ function psWaveAnm() {
 }
 
 var mapSelect = document.getElementsByName("mapSelect");
-var tilemapActive = falsea;
+var tilemapActive = false;
 mapSelect.forEach(function (elm) {
   elm.addEventListener("change", function () {
     for (let i = 0; i < mapSelect.length - 1; i++) {
@@ -94,8 +94,10 @@ mapSelect.forEach(function (elm) {
     }
     if (!tilemapActive && overlayCount == 0) {
       map.setLayoutProperty("basemap_fill", "visibility", "visible");
+      map.setLayoutProperty("worldmap_fill", "visibility", "visible");
     } else {
       map.setLayoutProperty("basemap_fill", "visibility", "none");
+      map.setLayoutProperty("worldmap_fill", "visibility", "none");
     }
   });
 });
@@ -111,8 +113,10 @@ document.getElementsByName("overlaySelect").forEach(function (elm) {
     }
     if (!tilemapActive && overlayCount == 0) {
       map.setLayoutProperty("basemap_fill", "visibility", "visible");
+      map.setLayoutProperty("worldmap_fill", "visibility", "visible");
     } else {
       map.setLayoutProperty("basemap_fill", "visibility", "none");
+      map.setLayoutProperty("worldmap_fill", "visibility", "none");
     }
   });
 });
@@ -174,66 +178,88 @@ function init() {
           tiles: ["https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png"],
           tileSize: 256,
           attribution: "国土地理院",
+          minzoom: 2,
+          maxzoom: 18,
         },
         tile1: {
           type: "raster",
           tiles: ["https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png"],
           tileSize: 256,
           attribution: "国土地理院",
+          minzoom: 2,
+          maxzoom: 18,
         },
         tile2: {
           type: "raster",
           tiles: ["https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg"],
           tileSize: 256,
           attribution: "国土地理院",
+          minzoom: 2,
+          maxzoom: 18,
         },
         tile3: {
           type: "raster",
           tiles: ["https://cyberjapandata.gsi.go.jp/xyz/blank/{z}/{x}/{y}.png"],
           tileSize: 256,
           attribution: "国土地理院",
+          minzoom: 5,
+          maxzoom: 14,
         },
         tile4: {
           type: "raster",
           tiles: ["http://tile.openstreetmap.org/{z}/{x}/{y}.png"],
           tileSize: 256,
           attribution: "OpenStreetMap contributors",
+          minzoom: 0,
+          maxzoom: 19,
         },
         over0: {
           type: "raster",
           tiles: ["https://cyberjapandata.gsi.go.jp/xyz/hillshademap/{z}/{x}/{y}.png"],
           tileSize: 256,
           attribution: "国土地理院",
+          minzoom: 2,
+          maxzoom: 16,
         },
         over1: {
           type: "raster",
           tiles: ["https://cyberjapandata.gsi.go.jp/xyz/vbmd_colorrel/{z}/{x}/{y}.png"],
           tileSize: 256,
           attribution: "国土地理院",
+          minzoom: 11,
+          maxzoom: 18,
         },
         over2: {
           type: "raster",
           tiles: ["https://disaportaldata.gsi.go.jp/raster/04_tsunami_newlegend_data/{z}/{x}/{y}.png"],
           tileSize: 256,
           attribution: "国土地理院",
+          minzoom: 7,
+          maxzoom: 12,
         },
         over3: {
           type: "raster",
           tiles: ["https://disaportaldata.gsi.go.jp/raster/05_kyukeishakeikaikuiki/{z}/{x}/{y}.png"],
           tileSize: 256,
           attribution: "国土地理院",
+          minzoom: 7,
+          maxzoom: 12,
         },
         over4: {
           type: "raster",
           tiles: ["https://disaportaldata.gsi.go.jp/raster/05_jisuberikeikaikuiki/{z}/{x}/{y}.png"],
           tileSize: 256,
           attribution: "国土地理院",
+          minzoom: 7,
+          maxzoom: 11,
         },
         over5: {
           type: "raster",
           tiles: ["https://www.jma.go.jp/tile/jma/transparent-cities/{z}/{x}/{y}.png"],
           tileSize: 256,
           attribution: "気象庁",
+          minzoom: 2,
+          maxzoom: 11,
         },
       },
       layers: [
@@ -241,88 +267,66 @@ function init() {
           id: "tile0",
           type: "raster",
           source: "tile0",
-          minzoom: 2,
-          maxzoom: 18,
           layout: { visibility: "none" },
         },
         {
           id: "tile1",
           type: "raster",
           source: "tile1",
-          minzoom: 2,
-          maxzoom: 18,
           layout: { visibility: "none" },
         },
         {
           id: "tile2",
           type: "raster",
           source: "tile2",
-          minzoom: 2,
-          maxzoom: 18,
           layout: { visibility: "none" },
         },
         {
           id: "tile3",
           type: "raster",
           source: "tile3",
-          minzoom: 5,
-          maxzoom: 14,
           layout: { visibility: "none" },
         },
         {
           id: "tile4",
           type: "raster",
           source: "tile4",
-          minzoom: 0,
-          maxzoom: 19,
           layout: { visibility: "none" },
         },
         {
           id: "over0",
           type: "raster",
           source: "over0",
-          minzoom: 2,
-          maxzoom: 16,
           layout: { visibility: "none" },
         },
         {
           id: "over1",
           type: "raster",
           source: "over1",
-          minzoom: 11,
-          maxzoom: 18,
           layout: { visibility: "none" },
         },
         {
           id: "over2",
           type: "raster",
           source: "over2",
-          minzoom: 7,
-          maxzoom: 12,
           layout: { visibility: "none" },
         },
         {
           id: "over3",
           type: "raster",
           source: "over3",
-          minzoom: 7,
-          maxzoom: 12,
           layout: { visibility: "none" },
         },
         {
           id: "over4",
           type: "raster",
           source: "over4",
-          minzoom: 7,
-          maxzoom: 11,
           layout: { visibility: "none" },
         },
         {
           id: "over5",
           type: "raster",
           source: "over5",
-          minzoom: 2,
-          maxzoom: 11,
           layout: { visibility: "none" },
         },
 
@@ -498,30 +502,30 @@ function init() {
           maxzoom: 22,
         },
         { id: "海岸線", type: "line", source: "v", "source-layer": "Cstline", filter: ["in", ["get", "vt_code"], ["literal", [5101, 5103]]], paint: { "line-color": "#999999", "line-offset": 0, "line-width": 1 } },
-        { id: "河川中心線人工水路地下", type: "line", source: "v", "source-layer": "RvrCL", filter: ["==", ["get", "vt_code"], 5322], paint: { "line-color": "rgba(50,83,132,0.5)", "line-width": 2 } },
-        { id: "河川中心線枯れ川部", type: "line", source: "v", "source-layer": "RvrCL", filter: ["==", ["get", "vt_code"], 5302], paint: { "line-color": "rgba(50,83,132,0.5)", "line-width": 2 } },
-        { id: "河川中心線", type: "line", source: "v", "source-layer": "RvrCL", filter: ["!", ["in", ["get", "vt_code"], ["literal", [5302, 5322]]]], paint: { "line-color": "rgba(50,83,132,0.5)", "line-width": 2 } },
-        { id: "海岸線堤防等に接する部分破線", type: "line", source: "v", "source-layer": "Cstline", filter: ["==", ["get", "vt_code"], 5103], layout: { "line-cap": "round" }, paint: { "line-color": "rgba(50,83,132,0.5)", "line-width": 2 } },
-        { id: "水涯線", type: "line", source: "v", "source-layer": "WL", paint: { "line-color": "rgba(50,83,132,0.5)", "line-width": 2 } },
-        { id: "水涯線堤防等に接する部分破線", type: "line", source: "v", "source-layer": "WL", filter: ["in", ["get", "vt_code"], ["literal", [5203, 5233]]], layout: { "line-cap": "round" }, paint: { "line-color": "rgba(50,83,132,0.5)", "line-width": 2 } },
-        { id: "水部表記線polygon", type: "fill", source: "v", "source-layer": "WRltLine", filter: ["==", ["geometry-type"], "Polygon"], paint: { "fill-color": "rgba(50,83,132,0.2)", "fill-outline-color": "rgba(50,83,132,0.5)" } },
+        { id: "河川中心線人工水路地下", type: "line", source: "v", "source-layer": "RvrCL", filter: ["==", ["get", "vt_code"], 5322], paint: { "line-color": "rgba(36,104,203,0.25)", "line-width": 2 } },
+        { id: "河川中心線枯れ川部", type: "line", source: "v", "source-layer": "RvrCL", filter: ["==", ["get", "vt_code"], 5302], paint: { "line-color": "rgba(36,104,203,0.25)", "line-width": 2 } },
+        { id: "河川中心線", type: "line", source: "v", "source-layer": "RvrCL", filter: ["!", ["in", ["get", "vt_code"], ["literal", [5302, 5322]]]], paint: { "line-color": "rgba(36,104,203,0.25)", "line-width": 2 } },
+        { id: "海岸線堤防等に接する部分破線", type: "line", source: "v", "source-layer": "Cstline", filter: ["==", ["get", "vt_code"], 5103], layout: { "line-cap": "round" }, paint: { "line-color": "rgba(36,104,203,0.25)", "line-width": 2 } },
+        { id: "水涯線", type: "line", source: "v", "source-layer": "WL", paint: { "line-color": "rgba(36,104,203,0.25)", "line-width": 2 } },
+        { id: "水涯線堤防等に接する部分破線", type: "line", source: "v", "source-layer": "WL", filter: ["in", ["get", "vt_code"], ["literal", [5203, 5233]]], layout: { "line-cap": "round" }, paint: { "line-color": "rgba(36,104,203,0.25)", "line-width": 2 } },
+        { id: "水部表記線polygon", type: "fill", source: "v", "source-layer": "WRltLine", filter: ["==", ["geometry-type"], "Polygon"], paint: { "fill-color": "rgba(50,83,132,0.2)", "fill-outline-color": "rgba(36,104,203,0.25)" } },
         { id: "行政区画界線国の所属界", maxzoom: 8, type: "line", source: "v", "source-layer": "AdmBdry", filter: ["==", ["get", "vt_code"], 1221], layout: { "line-cap": "square" }, paint: { "line-color": "#999", "line-width": 1 } },
-        { id: "道路中心線ZL4-10国道", maxzoom: 11, minzoom: 9, type: "line", source: "v", "source-layer": "RdCL", filter: ["in", ["get", "vt_rdctg"], ["literal", ["主要道路", "国道", "都道府県道", "市区町村道等"]]], layout: { "line-cap": "round", "line-join": "round", "line-sort-key": ["get", "vt_drworder"] }, paint: { "line-color": "#444", "line-width": 3 } },
-        { id: "道路中心線ZL4-10高速", maxzoom: 11, minzoom: 9, type: "line", source: "v", "source-layer": "RdCL", filter: ["==", ["get", "vt_rdctg"], "高速自動車国道等"], layout: { "line-cap": "round", "line-join": "round", "line-sort-key": ["get", "vt_drworder"] }, paint: { "line-color": "#444", "line-width": 3 } },
-        { id: "道路中心線色0", minzoom: 11, type: "line", source: "v", "source-layer": "RdCL", filter: ["step", ["zoom"], ["all", ["==", ["get", "vt_lvorder"], 0], ["!", ["in", ["get", "vt_code"], ["literal", [2703, 2713, 2723, 2733, 2724, 2734]]]]], 17, ["all", ["in", ["get", "vt_flag17"], ["literal", [1, 2]]], ["!", ["in", ["get", "vt_code"], ["literal", [2724, 2734]]]]]], layout: { "line-join": "round", "line-round-limit": 1.57, "line-sort-key": ["get", "vt_drworder"] }, paint: { "line-color": "#444", "line-width": 1.5 } },
-        { id: "鉄道中心線0", minzoom: 11, maxzoom: 17, type: "line", source: "v", "source-layer": "RailCL", filter: ["all", ["!", ["in", ["get", "vt_railstate"], ["literal", ["トンネル", "雪覆い", "地下", "橋・高架"]]]], ["==", ["get", "vt_lvorder"], 0]], paint: { "line-color": "#444", "line-width": 2.5, "line-dasharray": [1, 1] } },
-        { id: "鉄道中心線旗竿0", minzoom: 14, maxzoom: 17, type: "line", source: "v", "source-layer": "RailCL", filter: ["all", ["==", ["get", "vt_rtcode"], "JR"], ["!", ["in", ["get", "vt_railstate"], ["literal", ["トンネル", "雪覆い", "地下", "橋・高架"]]]], ["!=", ["get", "vt_sngldbl"], "駅部分"], ["==", ["get", "vt_lvorder"], 0]], paint: { "line-color": "#444", "line-width": 2.5, "line-dasharray": [1, 1] } },
-        { id: "道路中心線ククリ橋0", minzoom: 11, maxzoom: 17, type: "line", source: "v", "source-layer": "RdCL", filter: ["step", ["zoom"], ["all", ["==", ["get", "vt_lvorder"], 0], ["in", ["get", "vt_code"], ["literal", [2703, 2713]]], ["!", ["all", ["in", ["get", "vt_rdctg"], ["literal", ["市区町村道等", "その他", "不明"]]], ["==", ["get", "vt_rnkwidth"], "3m-5.5m未満"]]]], 14, ["all", ["==", ["get", "vt_lvorder"], 0], ["in", ["get", "vt_code"], ["literal", [2703, 2713]]]]], layout: { "line-join": "round", "line-round-limit": 1.57, "line-sort-key": ["get", "vt_drworder"] }, paint: { "line-color": "#444", "line-width": 1.5 } },
-        { id: "道路中心線色橋0", minzoom: 11, maxzoom: 17, type: "line", source: "v", "source-layer": "RdCL", filter: ["all", ["==", ["get", "vt_lvorder"], 0], ["in", ["get", "vt_code"], ["literal", [2703, 2713, 2723, 2733]]]], layout: { "line-join": "round", "line-round-limit": 1.57, "line-sort-key": ["get", "vt_drworder"] }, paint: { "line-color": "#444", "line-width": 1.5 } },
-        { id: "建築物0", type: "fill", source: "v", "source-layer": "BldA", filter: ["==", ["get", "vt_lvorder"], 0], paint: { "fill-color": "#3d3d3d" } },
-        { id: "鉄道中心線橋0", minzoom: 11, maxzoom: 17, type: "line", source: "v", "source-layer": "RailCL", filter: ["all", ["==", ["get", "vt_railstate"], "橋・高架"], ["==", ["get", "vt_lvorder"], 0]], paint: { "line-color": "#444", "line-width": 2.5, "line-dasharray": [1, 1] } },
-        { id: "鉄道中心線旗竿橋0", minzoom: 14, maxzoom: 17, type: "line", source: "v", "source-layer": "RailCL", filter: ["all", ["==", ["get", "vt_rtcode"], "JR"], ["in", ["get", "vt_railstate"], "橋・高架"], ["!=", ["get", "vt_sngldbl"], "駅部分"], ["==", ["get", "vt_lvorder"], 0]], paint: { "line-color": "#444", "line-width": 2.5, "line-dasharray": [1, 1] } },
-        { id: "道路中心線色1", minzoom: 11, maxzoom: 17, type: "line", source: "v", "source-layer": "RdCL", filter: ["all", ["==", ["get", "vt_lvorder"], 1], ["!", ["in", ["get", "vt_code"], ["literal", [2703, 2713, 2723, 2733, 2724, 2734]]]]], layout: { "line-join": "round", "line-round-limit": 1.57, "line-sort-key": ["get", "vt_drworder"] }, paint: { "line-color": "#444", "line-width": 4, "line-dasharray": [1, 1] } },
-        { id: "鉄道中心線1", minzoom: 11, maxzoom: 17, type: "line", source: "v", "source-layer": "RailCL", filter: ["all", ["!", ["in", ["get", "vt_railstate"], ["literal", ["トンネル", "雪覆い", "地下", "橋・高架"]]]], ["==", ["get", "vt_lvorder"], 1]], paint: { "line-color": "#444", "line-width": 2.5, "line-dasharray": [1, 1] } },
-        { id: "鉄道中心線旗竿1", minzoom: 14, maxzoom: 17, type: "line", source: "v", "source-layer": "RailCL", filter: ["all", ["==", ["get", "vt_rtcode"], "JR"], ["!", ["in", ["get", "vt_railstate"], ["literal", ["トンネル", "雪覆い", "地下", "橋・高架"]]]], ["!=", ["get", "vt_sngldbl"], "駅部分"], ["==", ["get", "vt_lvorder"], 1]], paint: { "line-color": "#444", "line-width": 2.5, "line-dasharray": [1, 1] } },
-        { id: "道路中心線ククリ橋1", minzoom: 11, maxzoom: 17, type: "line", source: "v", "source-layer": "RdCL", filter: ["step", ["zoom"], ["all", ["==", ["get", "vt_lvorder"], 1], ["in", ["get", "vt_code"], ["literal", [2703, 2713]]], ["!", ["all", ["in", ["get", "vt_rdctg"], ["literal", ["市区町村道等", "その他", "不明"]]], ["==", ["get", "vt_rnkwidth"], "3m-5.5m未満"]]]], 14, ["all", ["==", ["get", "vt_lvorder"], 1], ["in", ["get", "vt_code"], ["literal", [2703, 2713]]]]], layout: { "line-join": "round", "line-round-limit": 1.57, "line-sort-key": ["get", "vt_drworder"] }, paint: { "line-color": "#444", "line-width": 1.5 } },
-        { id: "道路中心線色橋1", minzoom: 11, maxzoom: 17, type: "line", source: "v", "source-layer": "RdCL", filter: ["all", ["==", ["get", "vt_lvorder"], 1], ["in", ["get", "vt_code"], ["literal", [2703, 2713, 2723, 2733]]]], layout: { "line-join": "round", "line-round-limit": 1.57, "line-sort-key": ["get", "vt_drworder"] }, paint: { "line-color": "#444", "line-width": 1.5 } },
-        { id: "道路縁", minzoom: 17, type: "line", source: "v", "source-layer": "RdEdg", layout: { "line-cap": "square", "line-sort-key": ["get", "vt_drworder"] }, paint: { "line-color": "#444", "line-width": 1.5 } },
+        { id: "道路中心線ZL4-10国道", maxzoom: 11, minzoom: 9, type: "line", source: "v", "source-layer": "RdCL", filter: ["in", ["get", "vt_rdctg"], ["literal", ["主要道路", "国道", "都道府県道", "市区町村道等"]]], layout: { "line-cap": "round", "line-join": "round", "line-sort-key": ["get", "vt_drworder"] }, paint: { "line-color": "rgba(128,128,128,0.22)", "line-width": 3 } },
+        { id: "道路中心線ZL4-10高速", maxzoom: 11, minzoom: 9, type: "line", source: "v", "source-layer": "RdCL", filter: ["==", ["get", "vt_rdctg"], "高速自動車国道等"], layout: { "line-cap": "round", "line-join": "round", "line-sort-key": ["get", "vt_drworder"] }, paint: { "line-color": "rgba(128,128,128,0.22)", "line-width": 3 } },
+        { id: "道路中心線色0", minzoom: 11, type: "line", source: "v", "source-layer": "RdCL", filter: ["step", ["zoom"], ["all", ["==", ["get", "vt_lvorder"], 0], ["!", ["in", ["get", "vt_code"], ["literal", [2703, 2713, 2723, 2733, 2724, 2734]]]]], 17, ["all", ["in", ["get", "vt_flag17"], ["literal", [1, 2]]], ["!", ["in", ["get", "vt_code"], ["literal", [2724, 2734]]]]]], layout: { "line-join": "round", "line-round-limit": 1.57, "line-sort-key": ["get", "vt_drworder"] }, paint: { "line-color": "rgba(128,128,128,0.22)", "line-width": 1.5 } },
+        { id: "鉄道中心線0", minzoom: 11, maxzoom: 17, type: "line", source: "v", "source-layer": "RailCL", filter: ["all", ["!", ["in", ["get", "vt_railstate"], ["literal", ["トンネル", "雪覆い", "地下", "橋・高架"]]]], ["==", ["get", "vt_lvorder"], 0]], paint: { "line-color": "rgba(128,128,128,0.22)", "line-width": 2.5, "line-dasharray": [1, 1] } },
+        { id: "鉄道中心線旗竿0", minzoom: 14, maxzoom: 17, type: "line", source: "v", "source-layer": "RailCL", filter: ["all", ["==", ["get", "vt_rtcode"], "JR"], ["!", ["in", ["get", "vt_railstate"], ["literal", ["トンネル", "雪覆い", "地下", "橋・高架"]]]], ["!=", ["get", "vt_sngldbl"], "駅部分"], ["==", ["get", "vt_lvorder"], 0]], paint: { "line-color": "rgba(128,128,128,0.22)", "line-width": 2.5, "line-dasharray": [1, 1] } },
+        { id: "道路中心線ククリ橋0", minzoom: 11, maxzoom: 17, type: "line", source: "v", "source-layer": "RdCL", filter: ["step", ["zoom"], ["all", ["==", ["get", "vt_lvorder"], 0], ["in", ["get", "vt_code"], ["literal", [2703, 2713]]], ["!", ["all", ["in", ["get", "vt_rdctg"], ["literal", ["市区町村道等", "その他", "不明"]]], ["==", ["get", "vt_rnkwidth"], "3m-5.5m未満"]]]], 14, ["all", ["==", ["get", "vt_lvorder"], 0], ["in", ["get", "vt_code"], ["literal", [2703, 2713]]]]], layout: { "line-join": "round", "line-round-limit": 1.57, "line-sort-key": ["get", "vt_drworder"] }, paint: { "line-color": "rgba(128,128,128,0.22)", "line-width": 1.5 } },
+        { id: "道路中心線色橋0", minzoom: 11, maxzoom: 17, type: "line", source: "v", "source-layer": "RdCL", filter: ["all", ["==", ["get", "vt_lvorder"], 0], ["in", ["get", "vt_code"], ["literal", [2703, 2713, 2723, 2733]]]], layout: { "line-join": "round", "line-round-limit": 1.57, "line-sort-key": ["get", "vt_drworder"] }, paint: { "line-color": "rgba(128,128,128,0.22)", "line-width": 1.5 } },
+        { id: "建築物0", type: "fill", source: "v", "source-layer": "BldA", filter: ["==", ["get", "vt_lvorder"], 0], paint: { "fill-color": "rgba(127.5,127.5,127.5,0.15)" } },
+        { id: "鉄道中心線橋0", minzoom: 11, maxzoom: 17, type: "line", source: "v", "source-layer": "RailCL", filter: ["all", ["==", ["get", "vt_railstate"], "橋・高架"], ["==", ["get", "vt_lvorder"], 0]], paint: { "line-color": "rgba(128,128,128,0.22)", "line-width": 2.5, "line-dasharray": [1, 1] } },
+        { id: "鉄道中心線旗竿橋0", minzoom: 14, maxzoom: 17, type: "line", source: "v", "source-layer": "RailCL", filter: ["all", ["==", ["get", "vt_rtcode"], "JR"], ["in", ["get", "vt_railstate"], "橋・高架"], ["!=", ["get", "vt_sngldbl"], "駅部分"], ["==", ["get", "vt_lvorder"], 0]], paint: { "line-color": "rgba(128,128,128,0.22)", "line-width": 2.5, "line-dasharray": [1, 1] } },
+        { id: "道路中心線色1", minzoom: 11, maxzoom: 17, type: "line", source: "v", "source-layer": "RdCL", filter: ["all", ["==", ["get", "vt_lvorder"], 1], ["!", ["in", ["get", "vt_code"], ["literal", [2703, 2713, 2723, 2733, 2724, 2734]]]]], layout: { "line-join": "round", "line-round-limit": 1.57, "line-sort-key": ["get", "vt_drworder"] }, paint: { "line-color": "rgba(128,128,128,0.22)", "line-width": 4, "line-dasharray": [1, 1] } },
+        { id: "鉄道中心線1", minzoom: 11, maxzoom: 17, type: "line", source: "v", "source-layer": "RailCL", filter: ["all", ["!", ["in", ["get", "vt_railstate"], ["literal", ["トンネル", "雪覆い", "地下", "橋・高架"]]]], ["==", ["get", "vt_lvorder"], 1]], paint: { "line-color": "rgba(128,128,128,0.22)", "line-width": 2.5, "line-dasharray": [1, 1] } },
+        { id: "鉄道中心線旗竿1", minzoom: 14, maxzoom: 17, type: "line", source: "v", "source-layer": "RailCL", filter: ["all", ["==", ["get", "vt_rtcode"], "JR"], ["!", ["in", ["get", "vt_railstate"], ["literal", ["トンネル", "雪覆い", "地下", "橋・高架"]]]], ["!=", ["get", "vt_sngldbl"], "駅部分"], ["==", ["get", "vt_lvorder"], 1]], paint: { "line-color": "rgba(128,128,128,0.22)", "line-width": 2.5, "line-dasharray": [1, 1] } },
+        { id: "道路中心線ククリ橋1", minzoom: 11, maxzoom: 17, type: "line", source: "v", "source-layer": "RdCL", filter: ["step", ["zoom"], ["all", ["==", ["get", "vt_lvorder"], 1], ["in", ["get", "vt_code"], ["literal", [2703, 2713]]], ["!", ["all", ["in", ["get", "vt_rdctg"], ["literal", ["市区町村道等", "その他", "不明"]]], ["==", ["get", "vt_rnkwidth"], "3m-5.5m未満"]]]], 14, ["all", ["==", ["get", "vt_lvorder"], 1], ["in", ["get", "vt_code"], ["literal", [2703, 2713]]]]], layout: { "line-join": "round", "line-round-limit": 1.57, "line-sort-key": ["get", "vt_drworder"] }, paint: { "line-color": "rgba(128,128,128,0.22)", "line-width": 1.5 } },
+        { id: "道路中心線色橋1", minzoom: 11, maxzoom: 17, type: "line", source: "v", "source-layer": "RdCL", filter: ["all", ["==", ["get", "vt_lvorder"], 1], ["in", ["get", "vt_code"], ["literal", [2703, 2713, 2723, 2733]]]], layout: { "line-join": "round", "line-round-limit": 1.57, "line-sort-key": ["get", "vt_drworder"] }, paint: { "line-color": "rgba(128,128,128,0.22)", "line-width": 1.5 } },
+        { id: "道路縁", minzoom: 17, type: "line", source: "v", "source-layer": "RdEdg", layout: { "line-cap": "square", "line-sort-key": ["get", "vt_drworder"] }, paint: { "line-color": "rgba(128,128,128,0.22)", "line-width": 1.5 } },
         { id: "行政区画界線25000市区町村界", type: "line", source: "v", "source-layer": "AdmBdry", filter: ["==", ["get", "vt_code"], 1212], layout: { "line-cap": "square" }, paint: { "line-color": "#666666", "line-width": 1 } },
         { id: "行政区画界線25000都府県界及び北海道総合振興局・振興局界", type: "line", source: "v", "source-layer": "AdmBdry", filter: ["==", ["get", "vt_code"], 1211], layout: { "line-cap": "round" }, paint: { "line-color": "#999999", "line-width": 1 } },
       ],
@@ -1116,8 +1120,7 @@ function addPointMarker(elm) {
   var codeEscaped = elm.Code.replace(".", "_");
 
   const el = document.createElement("div");
-  el.classList.add("kmoniPointMarker", "KmoniPoint_" + codeEscaped);
-  el.innerHTML = "<div class='marker-circle marker-circle-" + elm.Type + "'></div>";
+  el.classList.add("marker-circle", "KmoniPoint_" + codeEscaped);
 
   elm.popup = new maplibregl.Popup({ offset: 10 });
   elm.marker = new maplibregl.Marker(el).setLngLat([elm.Location.Longitude, elm.Location.Latitude]).setPopup(elm.popup).addTo(map);
@@ -1135,13 +1138,16 @@ function kmoniMapUpdate(dataTmp, type) {
   } else if (type == "snet") {
     SnetMapData = dataTmp;
   }
-
   //地図上マーカー
   var codeEscaped;
   var markerElement;
   var popup_content;
-  var marker_add;
   var changed;
+  var prevData;
+  var detecting;
+  var shindoStr;
+  var pgaStr;
+  var markerCircleElm;
   for (elm of dataTmp) {
     if (elm.Point && !elm.IsSuspended) {
       codeEscaped = elm.Code.replace(".", "_");
@@ -1149,47 +1155,49 @@ function kmoniMapUpdate(dataTmp, type) {
 
       if (elm.data) {
         changed = false;
-        marker_add = false;
 
-        if (!markerElement) {
-          marker_add = true;
-          points[elm.Code] = addPointMarker(elm);
-          markerElement = document.querySelector(".KmoniPoint_" + codeEscaped);
-        }
-
-        if (previous_points.length == 0) {
-          changed = true;
+        prevData = previous_points[elm.Code];
+        if (prevData) {
+          changed = prevData.pga !== elm.pga;
         } else {
-          var pga0 = previous_points[elm.Code].pga;
-          changed = pga0 && pga0 !== elm.pga;
+          changed = true;
+          if (!markerElement) {
+            points[elm.Code] = addPointMarker(elm);
+            markerElement = document.querySelector(".KmoniPoint_" + codeEscaped);
+          }
         }
 
-        if (changed || marker_add) {
-          var markerCircleElm = markerElement.querySelector(".marker-circle");
+        if (changed) {
+          markerCircleElm = markerElement;
           markerCircleElm.style.background = "rgb(" + elm.rgb.join(",") + ")";
 
-          //markerElement.style.display = "block";
-          var PNameTmp = elm.Name ? elm.Name : "";
-          var detecting = elm.detect || elm.detect2 ? "block" : "none";
-          var shindoStr = Math.round(elm.shindo * 10) / 10;
-          var pgaStr = Math.round(elm.pga * 100) / 100;
-          var connectStr = "";
-          if (elm.Type == "S-net") connectStr = "_";
-          popup_content = "<h3 class='PointName' style='border-bottom:solid 2px rgb(" + elm.rgb.join(",") + ")'>" + PNameTmp + "<span>" + elm.Type + connectStr + elm.Code + "</span></h3><h4 class='detecting' style='display:" + detecting + "'>地震検知中</h4><table><tr><td>震度</td><td class='PointInt'>" + shindoStr + "</td></tr><tr><td>PGA</td><td class='PointPGA'>" + pgaStr + "</td></tr></table>";
+          detecting = elm.detect || elm.detect2 ? "block" : "none";
+          shindoStr = Math.round(elm.shindo * 10) / 10;
+          pgaStr = Math.round(elm.pga * 100) / 100;
+          if (elm.Type == "S-net") {
+            elm.Type += "_";
+            elm.Name = "";
+          }
+          popup_content = "<h3 class='PointName' style='border-bottom:solid 2px rgb(" + elm.rgb.join(",") + ")'>" + elm.Name + "<span>" + elm.Type + elm.Code + "</span></h3><h4 class='detecting' style='display:" + detecting + "'>地震検知中</h4><table><tr><td>震度</td><td class='PointInt'>" + shindoStr + "</td></tr><tr><td>PGA</td><td class='PointPGA'>" + pgaStr + "</td></tr></table>";
           points[elm.Code].popup.setHTML(popup_content);
-          markerCircleElm.classList.remove("strongDetectingMarker", "detectingMarker", "marker_Int", "marker_Int1", "marker_Int2", "marker_Int3", "marker_Int4", "marker_Int5m", "marker_Int5p", "marker_Int6m", "marker_Int6p", "marker_Int7", "marker_Int7p");
 
-          if (elm.detect2) {
-            markerCircleElm.classList.add("strongDetectingMarker");
-          } else if (elm.detect) {
+          if (elm.detect) {
             markerCircleElm.classList.add("detectingMarker");
+            if (elm.detect2) {
+              markerCircleElm.classList.add("strongDetectingMarker");
+            }
+          } else {
+            markerCircleElm.classList.remove("strongDetectingMarker", "detectingMarker");
           }
 
           var IntTmp = shindoConvert(elm.shindo, 3);
           if (IntTmp) {
             markerCircleElm.classList.add("marker_Int", "marker_Int" + IntTmp);
+          } else {
+            markerCircleElm.classList.remove("marker_Int", "marker_Int1", "marker_Int2", "marker_Int3", "marker_Int4", "marker_Int5m", "marker_Int5p", "marker_Int6m", "marker_Int6p", "marker_Int7", "marker_Int7p");
           }
         }
+        previous_points[elm.Code] = elm;
       } else {
         if (markerElement) {
           var markerCircleElm = markerElement.querySelector(".marker-circle");
@@ -1202,7 +1210,6 @@ function kmoniMapUpdate(dataTmp, type) {
           points[elm.Code].popup.setHTML(popup_content);
         }
       }
-      previous_points[elm.Code] = elm;
     }
   }
 }
