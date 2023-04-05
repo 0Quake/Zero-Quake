@@ -329,7 +329,6 @@ function init() {
           source: "over5",
           layout: { visibility: "none" },
         },
-
         {
           id: "tsunami_Yoho",
           type: "line",
@@ -537,13 +536,13 @@ function init() {
     var currentZoom = map.getZoom();
     document.getElementById("mapcontainer").classList.remove("zoomLevel_1", "zoomLevel_2", "zoomLevel_3", "zoomLevel_4", "popup_show");
 
-    if (currentZoom < 5.5) {
+    if (currentZoom < 4.5) {
       document.getElementById("mapcontainer").classList.add("zoomLevel_1");
       //gjmapT.setStyle({ weight: 20 });
-    } else if (currentZoom < 7) {
+    } else if (currentZoom < 6) {
       document.getElementById("mapcontainer").classList.add("zoomLevel_2");
       //gjmapT.setStyle({ weight: 25 });
-    } else if (currentZoom < 8.5) {
+    } else if (currentZoom < 8) {
       document.getElementById("mapcontainer").classList.add("zoomLevel_3");
       //gjmapT.setStyle({ weight: 35 });
     } else {
@@ -1121,7 +1120,7 @@ function addPointMarker(elm) {
 
   const el = document.createElement("div");
   el.classList.add("marker-circle", "KmoniPoint_" + codeEscaped);
-
+  if (elm.Type == "S-net") el.classList.add("marker-circle-S-net");
   elm.popup = new maplibregl.Popup({ offset: 10 });
   elm.marker = new maplibregl.Marker(el).setLngLat([elm.Location.Longitude, elm.Location.Latitude]).setPopup(elm.popup).addTo(map);
   return elm;

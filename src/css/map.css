@@ -222,11 +222,23 @@ img.leaflet-control {
 .zoomLevel_4 .strongDetectingMarker {
   outline: solid 3px rgb(203, 43, 43);
 }
+.marker_Int {
+  border: solid 1px #000;
+  outline: solid 2px #fff;
+  box-sizing: content-box;
+}
 .marker_Int::before {
   position: absolute;
   inset: 0;
   text-align: center;
   font-size: 16px;
+}
+.zoomLevel_1 .marker_Int::before {
+  display: none;
+}
+.zoomLevel_1 .marker_Int {
+  width: 150px;
+  height: 150px;
 }
 div.marker-circle {
   z-index: 80;
@@ -356,13 +368,7 @@ div.marker-circle.marker_Int7p {
   width: 25px;
   height: 25px;
 }
-.marker_Int {
-  border: solid 1px #000;
-  outline: solid 2px #fff;
-  box-sizing: content-box;
-}
 .zoomLevel_1 .marker_Int,
-.zoomLevel_1 .marker_Int::before,
 .zoomLevel_2 .marker_Int,
 .zoomLevel_2 .marker_Int::before {
   width: 20px;
@@ -370,6 +376,12 @@ div.marker-circle.marker_Int7p {
   line-height: 20px;
   font-size: 16px;
 }
+.zoomLevel_1 .marker_Int {
+  width: 7px;
+  height: 7px;
+  border: none;
+}
+
 .zoomLevel_3 .marker_Int,
 .zoomLevel_3 .marker_Int::before {
   width: 25px;
@@ -383,16 +395,6 @@ div.marker-circle.marker_Int7p {
   height: 35px;
   line-height: 35px;
   font-size: 18px;
-}
-.zoomLevel_1 .marker_Int,
-.zoomLevel_2 .marker_Int {
-  margin: 7.5px;
-}
-.zoomLevel_3 .marker_Int {
-  margin: 5px;
-}
-.zoomLevel_4 .marker_Int {
-  margin: 0;
 }
 
 .popup_show .PointPopup {

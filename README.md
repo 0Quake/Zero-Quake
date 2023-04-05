@@ -1,5 +1,8 @@
 # Zero-Quake
 
+![](https://img.shields.io/github/downloads/0quake/Zero-Quake/total)
+![](https://img.shields.io/github/package-json/v/0quake/Zero-Quake)
+
 ## 受信できる情報
 
 ### 気象庁

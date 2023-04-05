@@ -271,14 +271,15 @@ function epiCenterUpdate(eid, latitude, longitude) {
       epicenterElm.popupElm.setLngLat([longitude, latitude]);
       epicenterElm.latitude = latitude;
       epicenterElm.longitude = longitude;
+      map.panTo([longitude, latitude]);
     } else {
       var EEWIDTmp = EEW_LocalIDs[eid];
 
       const img = document.createElement("img");
       img.src = "./img/epicenter.svg";
-
       img.classList.add("epicenterIcon");
 
+      map.panTo([longitude, latitude]);
       var ESPopup = new maplibregl.Popup({ closeButton: false, closeOnClick: false, className: "epiCenterTooltip", offset: [0, -17] }).setText(EEWIDTmp).setLngLat([longitude, latitude]).addTo(map);
       var ESMarker = new maplibregl.Marker(img).setLngLat([longitude, latitude]).addTo(map);
 
@@ -412,6 +413,7 @@ function EQDetect(data) {
       units: "kilometers",
     };
 
+    map.panTo([data.lng, data.lat]);
     let _circle = turf.circle(_center, _radius, _options);
     map.getSource("EQDItem_" + data.id).setData(_circle);
 
@@ -427,6 +429,7 @@ function EQDetect(data) {
     EQDItem.querySelector(".EQD_Regions").innerText = regions.join(" ");
     document.getElementById("EQDetect-Panel").prepend(clone);
 
+    map.panTo([data.lng, data.lat]);
     let _center = turf.point([data.lng, data.lat]);
     let _radius = data.Radius + 5;
     let _options = {
