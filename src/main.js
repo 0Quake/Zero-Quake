@@ -425,6 +425,12 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     minWidth: 600,
     minHeight: 300,
+    titleBarStyle: "hidden",
+    titleBarOverlay: {
+      color: "#202020",
+      symbolColor: "#FFF",
+      height: 30,
+    },
     webPreferences: {
       preload: path.join(__dirname, "js/preload.js"),
       title: "Zero Quake",
@@ -432,6 +438,7 @@ function createWindow() {
       icon: path.join(__dirname, "img/icon.ico"),
     },
   });
+  mainWindow.webContents.backgroundThrottling = false;
   if (Replay !== 0) {
     mainWindow.webContents.send("message2", {
       action: "Replay",
@@ -2083,7 +2090,7 @@ setTimeout(function () {
 }, 4000);
 
 //気象庁XML 取得・フォーマット変更→eqInfoControl
-function EQI_JMAXML_Req(url, a) {
+function EQI_JMAXML_Req(url) {
   if (!url) return;
   if (jmaXML_Fetched.includes(url)) return;
   jmaXML_Fetched.push(url);
@@ -2651,7 +2658,7 @@ function soundPlay(name) {
 }
 
 //ネットワークエラー処理
-function NetworkError(error, type) {
+function NetworkError(/*error, type*/) {
   /*Window_notification(type + "との通信でエラーが発生しました。", "エラーコードは以下の通りです。\n" + String(error), "error");*/
   return false;
 }

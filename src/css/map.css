@@ -10,7 +10,7 @@
   display: inline-block;
   overflow: hidden;
   width: 100%;
-  height: 100vh;
+  height: 100%;
   flex: 1;
 }
 #menu {
@@ -547,4 +547,8 @@ div.marker-circle.marker_Int7p {
 }
 .leaflet-right .leaflet-control {
   margin: 5px;
+}
+.maplibregl-ctrl-bottom-right,
+.maplibregl-ctrl-bottom-left {
+  bottom: 30px;
 }

@@ -83,6 +83,27 @@ body {
   color-scheme: light dark;
   overflow-x: hidden;
 }
+
+#titleBar {
+  height: 30px;
+  width: 100%;
+  background: #202020;
+  -webkit-app-region: drag;
+  line-height: 30px;
+  font-size: 12px;
+  padding: 0 8px;
+}
+#titleBar img {
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  margin: 7.5px 8px 7.5px 0;
+  vertical-align: bottom;
+}
+.EEWMode #titleBar {
+  background: #400;
+  box-shadow: 0 25px 0 30px rgba(255, 0, 0, 0.5);
+}
 h1,
 h2,
 h3,
@@ -91,7 +112,13 @@ h5 {
   font-family: "M PLUS 1p", sans-serif;
 }
 main {
+  position: relative;
+  height: calc(100vh - 30px);
+}
+#mainContent {
+  position: relative;
   display: flex;
+  height: 100%;
 }
 
 #splash {
@@ -112,9 +139,9 @@ main {
 #alertFrame {
   display: none;
   position: fixed;
-  inset: 5px;
+  inset: 35px 5px 5px 5px;
   border-radius: 10px;
-  box-shadow: 0 0 0 100px rgba(255, 0, 0, 0.5);
+  box-shadow: 0 25px 0 30px rgba(255, 0, 0, 0.5);
   z-index: 9999999;
   pointer-events: none;
 }
@@ -182,7 +209,7 @@ main {
 
 #sideBar {
   position: relative;
-  height: 100vh;
+  height: 100%;
   display: flex;
   flex-direction: column;
   background: #444;

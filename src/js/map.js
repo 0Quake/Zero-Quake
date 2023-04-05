@@ -22,7 +22,7 @@ var kmoniMapData, SnetMapData;
 var layerControl;
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "kmoniUpdate") {
-    kmoniMapUpdate(request.data, "knet");
+    if (!background) kmoniMapUpdate(request.data, "knet");
   } else if (request.action == "SnetUpdate") {
     kmoniMapUpdate(request.data, "snet");
   } else if (request.action == "longWaveUpdate") {
@@ -66,7 +66,7 @@ window.addEventListener("load", function () {
   psWaveAnm();
   setInterval(function () {
     //時計（ローカル時刻）更新
-    document.getElementById("PC_TIME").textContent = dateEncode(3, new Date());
+    if (!background) document.getElementById("PC_TIME").textContent = dateEncode(3, new Date());
   }, 500);
 });
 function psWaveAnm() {
@@ -75,7 +75,11 @@ function psWaveAnm() {
       psWaveCalc(elm.report_id);
     }
   }
-  requestAnimationFrame(psWaveAnm);
+  if (background) {
+    setTimeout(psWaveAnm, 1000);
+  } else {
+    requestAnimationFrame(psWaveAnm);
+  }
 }
 
 var mapSelect = document.getElementsByName("mapSelect");
@@ -568,6 +572,7 @@ function init() {
 
   new maplibregl.Marker(img).setLngLat([config.home.longitude, config.home.latitude]).addTo(map);
 }
+/*
 function init2() {
   if (inited || !config || !windowLoaded) return;
   inited = true;
@@ -1013,34 +1018,7 @@ function init2() {
     div.innerHTML = "<img src='https://disaportal.gsi.go.jp/hazardmap/copyright/img/dosha_keikai.png'>";
     return div;
   };
-  /*
-  map.createPane("background");
-  var imageUrl = "./img/mapbase.png"; //size 5616 x 3744
-  var imageBounds = [
-    [90, 0],
-    [-90, 360],
-  ]; //初期表示範囲
 
-  L.imageOverlay(imageUrl, imageBounds, {
-    pane: "background",
-  }).addTo(map);*/
-
-  /*
-  map.on("zoomstart", function () {
-    if (psWaveList.length > 0) {
-      document.querySelectorAll(".PWave,.SWave").forEach(function (elm) {
-        elm.style.transitionTimingFunction = "step-start";
-      });
-    }
-  });
-  */ /*
-  map.on("zoomend", function () {
-    if (psWaveList.length > 0) {
-      psWaveList.forEach(function (elm) {
-        psWaveCalc(elm.id);
-      });
-    }
-  });*/
   map.on("zoom", function () {
     var currentZoom = map.getZoom();
     document.getElementById("mapcontainer").classList.remove("zoomLevel_1", "zoomLevel_2", "zoomLevel_3", "zoomLevel_4", "popup_show");
@@ -1103,7 +1081,7 @@ function init2() {
   });
 
   markerElm = L.marker([config.home.latitude, config.home.longitude], { keyboard: false, icon: homeIcon }).addTo(map).bindPopup({ content: config.home.name, keepInView: false, autoPan: false });
-}
+}*/
 fetch("./Resource/TimeTable_JMA2001.json")
   .then(function (res) {
     return res.json();
@@ -1146,7 +1124,6 @@ function kmoniMapUpdate(dataTmp, type) {
   var detecting;
   var shindoStr;
   var pgaStr;
-  var markerCircleElm;
   for (elm of dataTmp) {
     if (elm.Point && !elm.IsSuspended) {
       codeEscaped = elm.Code.replace(".", "_");
@@ -1167,8 +1144,7 @@ function kmoniMapUpdate(dataTmp, type) {
         }
 
         if (changed) {
-          markerCircleElm = markerElement;
-          markerCircleElm.style.background = "rgb(" + elm.rgb.join(",") + ")";
+          markerElement.style.background = "rgb(" + elm.rgb.join(",") + ")";
 
           detecting = elm.detect || elm.detect2 ? "block" : "none";
           shindoStr = Math.round(elm.shindo * 10) / 10;
@@ -1181,28 +1157,27 @@ function kmoniMapUpdate(dataTmp, type) {
           points[elm.Code].popup.setHTML(popup_content);
 
           if (elm.detect) {
-            markerCircleElm.classList.add("detectingMarker");
+            markerElement.classList.add("detectingMarker");
             if (elm.detect2) {
-              markerCircleElm.classList.add("strongDetectingMarker");
+              markerElement.classList.add("strongDetectingMarker");
             }
           } else {
-            markerCircleElm.classList.remove("strongDetectingMarker", "detectingMarker");
+            markerElement.classList.remove("strongDetectingMarker", "detectingMarker");
           }
 
           var IntTmp = shindoConvert(elm.shindo, 3);
           if (IntTmp) {
-            markerCircleElm.classList.add("marker_Int", "marker_Int" + IntTmp);
+            markerElement.classList.add("marker_Int", "marker_Int" + IntTmp);
           } else {
-            markerCircleElm.classList.remove("marker_Int", "marker_Int1", "marker_Int2", "marker_Int3", "marker_Int4", "marker_Int5m", "marker_Int5p", "marker_Int6m", "marker_Int6p", "marker_Int7", "marker_Int7p");
+            markerElement.classList.remove("marker_Int", "marker_Int1", "marker_Int2", "marker_Int3", "marker_Int4", "marker_Int5m", "marker_Int5p", "marker_Int6m", "marker_Int6p", "marker_Int7", "marker_Int7p");
           }
         }
         previous_points[elm.Code] = elm;
       } else {
         if (markerElement) {
-          var markerCircleElm = markerElement.querySelector(".marker-circle");
-          markerCircleElm.style.background = "rgba(128,128,128,0.5)";
-          markerCircleElm.classList.remove("strongDetectingMarker");
-          markerCircleElm.classList.remove("detectingMarker");
+          markerElement.style.background = "rgba(128,128,128,0.5)";
+          markerElement.classList.remove("strongDetectingMarker");
+          markerElement.classList.remove("detectingMarker");
           var PNameTmp = elm.Name ? elm.Name : "";
 
           popup_content = "<h3 class='PointName' style='border-bottom:solid 2px rgba(128,128,128,0.5)'>" + PNameTmp + "<span>" + elm.Code + "</span></h3><h4 class='detecting' style='display:none'>地震検知中</h4><table><tr><td>震度</td><td class='PointInt'>?</td></tr><tr><td>PGA</td><td class='PointPGA'>?</td></tr></table>";
@@ -1250,10 +1225,8 @@ document.getElementById("tab1_menu2").addEventListener("click", function () {
   kmoniListDraw(kmoniMapData);
 });
 
-var estShindoTmp;
 //予想震度更新
 function EstShindoUpdate(data) {
-  estShindoTmp = data;
   map.setFilter("Int0", ["==", "name", ""]);
   map.setFilter("Int1", ["==", "name", ""]);
   map.setFilter("Int2", ["==", "name", ""]);

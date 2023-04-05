@@ -1,8 +1,22 @@
 var now_EEW = [];
 /* eslint-disable */
 var Replay = 0;
-var config;
+var background = false;
 /* eslint-enable */
+document.addEventListener("visibilitychange", () => {
+  background = document.visibilityState == "visible";
+  if (document.visibilityState == "visible") {
+    background = false;
+  } else {
+    background = true;
+  }
+});
+window.addEventListener("focus", () => {
+  background = false;
+});
+window.addEventListener("blur", () => {
+  background = true;
+});
 
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "EEWAlertUpdate") {
