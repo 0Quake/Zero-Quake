@@ -23,8 +23,46 @@
   border-radius: 5px;
   z-index: 100000000;
 }
+#menu label input {
+  display: none;
+}
+#menu h3 {
+  font-size: 16px;
+  text-align: center;
+  margin: 0;
+  font-weight: unset;
+  font-family: inherit;
+}
 #menu label {
   display: block;
+  padding: 2px 5px;
+  margin: 3px 0;
+  font-size: 14px;
+  border-radius: 4px;
+}
+#menu label:hover {
+  outline: solid 2px rgb(149, 46, 46);
+}
+#menu label:has(input:checked) {
+  background: rgb(149, 46, 46);
+}
+#menu .check label::before {
+  content: "check_box_outline_blank";
+  font-family: "Material Icons Round";
+  vertical-align: bottom;
+  padding-right: 5px;
+}
+#menu .check label:has(input:checked)::before {
+  content: "check_box";
+}
+#menu .radio label::before {
+  content: "radio_button_unchecked";
+  font-family: "Material Icons Round";
+  vertical-align: bottom;
+  padding-right: 5px;
+}
+#menu .radio label:has(input:checked)::before {
+  content: "radio_button_checked";
 }
 
 #mapcontainer {

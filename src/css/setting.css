@@ -170,3 +170,64 @@ h4 {
 #tab1_menu2 {
   margin-top: 30px;
 }
+#flexContainer {
+  display: flex;
+  align-items: center;
+}
+#update-icon,
+#update-content,
+#update-button-wrap {
+  padding: 3px 10px;
+}
+#update-version {
+  font-size: 12px;
+}
+#update-wrap {
+  background: #222;
+  padding: 10px;
+  border-radius: 5px;
+  display: inline-block;
+  margin: 20px 0;
+}
+#update-wrap h3 {
+  margin: 0 0 15px 0;
+}
+#update-icon::before {
+  font-size: 40px;
+  font-family: "Material Icons Round";
+  text-align: center;
+  width: 100%;
+  vertical-align: bottom;
+}
+.U-error #update-icon::before {
+  content: "error";
+  color: rgb(207, 64, 64);
+}
+.U-available #update-icon::before {
+  content: "system_update_alt";
+  color: rgb(75, 160, 238);
+}
+.U-not_available #update-icon::before {
+  content: "check_circle";
+  color: rgb(64, 207, 93);
+}
+#update-check-date-wrap {
+  color: #ccc;
+  font-size: 12px;
+  margin-top: 10px;
+}
+#check_update {
+  height: 40px;
+}
+#check_update::before {
+  content: "autorenew";
+  font-family: "Material Icons Round";
+  vertical-align: bottom;
+}
+#update-detail-wrap {
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 400px;
+}

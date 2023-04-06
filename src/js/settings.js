@@ -21,7 +21,48 @@ window.electronAPI.messageSend((event, request) => {
 
     document.getElementById("BugReportAutoSend").checked = setting.system.crashReportAutoSend;
     init();
+  } else if (request.action == "Update_Data") {
+    UpdateDataDraw(request.data);
   }
+});
+
+var updateWrap = document.getElementById("update-wrap");
+var updateStatus = document.getElementById("update-status");
+var updateVersion = document.getElementById("update-version");
+var downloadLink = document.getElementById("downloadLink");
+var update_detail = document.getElementById("update-detail");
+function UpdateDataDraw(data) {
+  document.getElementById("update-check-date").innerText = dateEncode(3, data.check_date);
+  updateWrap.classList.remove("U-error", "U-available", "U-not_available");
+  downloadLink.style.display = "none";
+  update_detail.style.display = "none";
+
+  if (data.check_error) {
+    updateWrap.classList.add("U-error");
+    updateStatus.innerText = "更新の確認中にエラーが発生しました。";
+    updateVersion.innerText = "---";
+  } else {
+    if (data.update_available) {
+      updateWrap.classList.add("U-available");
+      updateStatus.innerText = "更新が利用可能です。";
+      downloadLink.setAttribute("href", data.dl_page);
+      updateVersion.innerText = "ver." + data.current_version + " > ver." + data.latest_version;
+      update_detail.innerText = "更新内容：" + data.update_detail.replace(/\r?\n/g, "");
+      downloadLink.style.display = "block";
+      update_detail.style.display = "inline";
+    } else {
+      updateWrap.classList.add("U-not_available");
+      updateStatus.innerText = "お使いのアプリケーションは最新の状態です。";
+      updateVersion.innerText = "ver." + data.current_version;
+    }
+  }
+}
+
+document.getElementById("check_update").addEventListener("click", function () {
+  updateStatus.innerText = "更新を確認中...";
+  window.electronAPI.messageReturn({
+    action: "checkForUpdate",
+  });
 });
 
 document.getElementById("apply").addEventListener("click", function () {
@@ -38,6 +79,7 @@ document.getElementById("apply").addEventListener("click", function () {
   });
   window.close();
 });
+
 document.getElementById("cancel").addEventListener("click", function () {
   window.close();
 });

@@ -281,19 +281,21 @@ function epiCenterUpdate(eid, latitude, longitude) {
       return elm2.eid == eid;
     });
     if (epicenterElm && epicenterElm.markerElm) {
+      //情報更新
       epicenterElm.markerElm.setLngLat([longitude, latitude]);
       epicenterElm.popupElm.setLngLat([longitude, latitude]);
       epicenterElm.latitude = latitude;
       epicenterElm.longitude = longitude;
-      map.panTo([longitude, latitude]);
     } else {
+      //初報
       var EEWIDTmp = EEW_LocalIDs[eid];
 
       const img = document.createElement("img");
       img.src = "./img/epicenter.svg";
       img.classList.add("epicenterIcon");
 
-      map.panTo([longitude, latitude]);
+      map.panTo([longitude, latitude], { animate: false });
+      map.zoomTo(8, { animate: false });
       var ESPopup = new maplibregl.Popup({ closeButton: false, closeOnClick: false, className: "epiCenterTooltip", offset: [0, -17] }).setText(EEWIDTmp).setLngLat([longitude, latitude]).addTo(map);
       var ESMarker = new maplibregl.Marker(img).setLngLat([longitude, latitude]).addTo(map);
 
@@ -316,12 +318,6 @@ function epiCenterUpdate(eid, latitude, longitude) {
 
       pswaveFind.data.latitude = latitude;
       pswaveFind.data.longitude = longitude;
-
-      /*
-      var pcircle = turf.circle(_center, pRadius / 1000, _options);
-      map.getSource("PCircle_" + eid).setData(pcircle);
-      var scircle = turf.circle(_center, sRadius / 1000, _options);
-      map.getSource("SCircle_" + eid).setData(scircle);*/
     }
     if (EQElm.SIElm) EQElm.SIElm.setLngLat([longitude, latitude]);
   }
@@ -416,6 +412,7 @@ function EQDetect(data) {
   });
 
   if (EQD_Item) {
+    //情報更新
     EQD_Item.lat = data.lat;
     EQD_Item.lng = data.lng;
     // EQD_Item.marker.setRadius(data.Radius * 1000);
@@ -427,7 +424,6 @@ function EQDetect(data) {
       units: "kilometers",
     };
 
-    map.panTo([data.lng, data.lat]);
     let _circle = turf.circle(_center, _radius, _options);
     map.getSource("EQDItem_" + data.id).setData(_circle);
 
@@ -436,6 +432,7 @@ function EQDetect(data) {
     EQDItem.classList.add("lv" + data.Lv);
     EQDItem.querySelector(".EQD_Regions").innerText = regions.join(" ");
   } else {
+    //初回検知
     var clone = EQDetectTemplate.content.cloneNode(true);
     var EQDItem = clone.querySelector(".EQDItem");
     EQDItem.setAttribute("id", "EQDItem_" + data.id);
@@ -443,7 +440,8 @@ function EQDetect(data) {
     EQDItem.querySelector(".EQD_Regions").innerText = regions.join(" ");
     document.getElementById("EQDetect-Panel").prepend(clone);
 
-    map.panTo([data.lng, data.lat]);
+    map.panTo([data.lng, data.lat], { animate: false });
+    map.zoomTo(8, { animate: false });
     let _center = turf.point([data.lng, data.lat]);
     let _radius = data.Radius + 5;
     let _options = {
@@ -469,13 +467,10 @@ function EQDetect(data) {
       maxzoom: 22,
     });
 
-    //map.setView([data.lat, data.lng], 9);
-
     EQDetectItem.push({
       id: data.id,
       lat: data.lat,
       lng: data.lng,
-      //marker: EQmarker,
     });
   }
 }
@@ -483,7 +478,6 @@ function EQDetect(data) {
 function EQDetectFinish(id) {
   EQDetectItem.forEach(function (elmA, index) {
     if (elmA.id == id) {
-      //map.removeLayer(elmA.marker);
       map.setLayoutProperty("EQDItem_" + id, "visibility", "none");
       EQDetectItem.splice(index, 1);
     }

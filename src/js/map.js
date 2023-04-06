@@ -2,24 +2,15 @@ var map;
 var previous_points = [];
 var points = {};
 var Tsunami_MajorWarning, Tsunami_Warning, Tsunami_Watch, Tsunami_Yoho;
-var gjmapT; //津波用geojson
-var sections = [];
-var basemap, worldmap, prefecturesMap, plateMap, legend, legend2;
-var offlineMapActive = true;
-var overlayActive = false;
 
 var psWaveList = [];
 var tsunamiAlertNow = false;
-var overlayTmp = 0;
 var epicenterIcon; // eslint-disable-line
-var tsunamiElm = [];
 var inited = false;
 var windowLoaded = false;
 var TimeTable_JMA2001;
 var tsunamiCanvas, EQDetectCanvas, PointsCanvas, PSWaveCanvas, overlayCanvas; // eslint-disable-line
-var mapLayer, hinanjoLayer;
-var kmoniMapData, SnetMapData;
-var layerControl;
+var kmoniMapData;
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "kmoniUpdate") {
     if (!background) kmoniMapUpdate(request.data, "knet");
@@ -127,6 +118,7 @@ document.getElementsByName("overlaySelect").forEach(function (elm) {
 
 //マップ初期化など
 var inited = false;
+
 function init() {
   if (!config || !windowLoaded || inited) return;
   inited = true;
@@ -264,6 +256,13 @@ function init() {
           attribution: "気象庁",
           minzoom: 2,
           maxzoom: 11,
+        },
+        hinanjo: {
+          type: "vector",
+          tiles: ["https://cyberjapandata.gsi.go.jp/xyz/skhb04/{z}/{x}/{y}.geojson"],
+          attribution: "国土地理院",
+          minzoom: 10,
+          maxzoom: 10,
         },
       },
       layers: [
@@ -422,6 +421,17 @@ function init() {
           minzoom: 6,
           maxzoom: 22,
         },
+        { id: "Int0", type: "fill", source: "basemap", paint: { "fill-color": rootStyle.getPropertyValue("--IntTheme_0_BgColor") }, filter: ["==", "name", ""] },
+        { id: "Int1", type: "fill", source: "basemap", paint: { "fill-color": rootStyle.getPropertyValue("--IntTheme_1_BgColor") }, filter: ["==", "name", ""] },
+        { id: "Int2", type: "fill", source: "basemap", paint: { "fill-color": rootStyle.getPropertyValue("--IntTheme_2_BgColor") }, filter: ["==", "name", ""] },
+        { id: "Int3", type: "fill", source: "basemap", paint: { "fill-color": rootStyle.getPropertyValue("--IntTheme_3_BgColor") }, filter: ["==", "name", ""] },
+        { id: "Int4", type: "fill", source: "basemap", paint: { "fill-color": rootStyle.getPropertyValue("--IntTheme_4_BgColor") }, filter: ["==", "name", ""] },
+        { id: "Int5-", type: "fill", source: "basemap", paint: { "fill-color": rootStyle.getPropertyValue("--IntTheme_5m_BgColor") }, filter: ["==", "name", ""] },
+        { id: "Int5+", type: "fill", source: "basemap", paint: { "fill-color": rootStyle.getPropertyValue("--IntTheme_5p_BgColor") }, filter: ["==", "name", ""] },
+        { id: "Int6-", type: "fill", source: "basemap", paint: { "fill-color": rootStyle.getPropertyValue("--IntTheme_6m_BgColor") }, filter: ["==", "name", ""] },
+        { id: "Int6+", type: "fill", source: "basemap", paint: { "fill-color": rootStyle.getPropertyValue("--IntTheme_6p_BgColor") }, filter: ["==", "name", ""] },
+        { id: "Int7", type: "fill", source: "basemap", paint: { "fill-color": rootStyle.getPropertyValue("--IntTheme_7_BgColor") }, filter: ["==", "name", ""] },
+        { id: "Int7+", type: "fill", source: "basemap", paint: { "fill-color": rootStyle.getPropertyValue("--IntTheme_7p_BgColor") }, filter: ["==", "name", ""] },
         {
           id: "prefmap_LINE",
           type: "line",
@@ -477,17 +487,6 @@ function init() {
           minzoom: 0,
           maxzoom: 22,
         },
-        { id: "Int0", type: "fill", source: "basemap", paint: { "fill-color": rootStyle.getPropertyValue("--IntTheme_0_BgColor") }, filter: ["==", "name", ""] },
-        { id: "Int1", type: "fill", source: "basemap", paint: { "fill-color": rootStyle.getPropertyValue("--IntTheme_1_BgColor") }, filter: ["==", "name", ""] },
-        { id: "Int2", type: "fill", source: "basemap", paint: { "fill-color": rootStyle.getPropertyValue("--IntTheme_2_BgColor") }, filter: ["==", "name", ""] },
-        { id: "Int3", type: "fill", source: "basemap", paint: { "fill-color": rootStyle.getPropertyValue("--IntTheme_3_BgColor") }, filter: ["==", "name", ""] },
-        { id: "Int4", type: "fill", source: "basemap", paint: { "fill-color": rootStyle.getPropertyValue("--IntTheme_4_BgColor") }, filter: ["==", "name", ""] },
-        { id: "Int5-", type: "fill", source: "basemap", paint: { "fill-color": rootStyle.getPropertyValue("--IntTheme_5m_BgColor") }, filter: ["==", "name", ""] },
-        { id: "Int5+", type: "fill", source: "basemap", paint: { "fill-color": rootStyle.getPropertyValue("--IntTheme_5p_BgColor") }, filter: ["==", "name", ""] },
-        { id: "Int6-", type: "fill", source: "basemap", paint: { "fill-color": rootStyle.getPropertyValue("--IntTheme_6m_BgColor") }, filter: ["==", "name", ""] },
-        { id: "Int6+", type: "fill", source: "basemap", paint: { "fill-color": rootStyle.getPropertyValue("--IntTheme_6p_BgColor") }, filter: ["==", "name", ""] },
-        { id: "Int7", type: "fill", source: "basemap", paint: { "fill-color": rootStyle.getPropertyValue("--IntTheme_7_BgColor") }, filter: ["==", "name", ""] },
-        { id: "Int7+", type: "fill", source: "basemap", paint: { "fill-color": rootStyle.getPropertyValue("--IntTheme_7p_BgColor") }, filter: ["==", "name", ""] },
         {
           id: "plate",
           type: "line",
@@ -533,6 +532,19 @@ function init() {
         { id: "行政区画界線25000都府県界及び北海道総合振興局・振興局界", type: "line", source: "v", "source-layer": "AdmBdry", filter: ["==", ["get", "vt_code"], 1211], layout: { "line-cap": "round" }, paint: { "line-color": "#999999", "line-width": 1 } },
       ],
     },
+  });
+
+  map.loadImage("https://docs.mapbox.com/mapbox-gl-js/assets/custom_marker.png", (error, image) => {
+    map.addImage("custom-marker", image);
+    map.addLayer({
+      id: "points",
+      type: "symbol",
+      source: "hinanjo",
+      "source-layer": "FeatureCollection",
+      layout: {
+        "icon-image": "custom-marker",
+      },
+    });
   });
   map.addControl(new maplibregl.NavigationControl(), "top-right");
 

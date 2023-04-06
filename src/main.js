@@ -16,8 +16,7 @@ function replay(ReplayDate) {
   }
 }
 /* eslint-enable */
-
-//replay("2023/4/5 20:56:00");
+//replay("2023/4/6 13:10:40");
 //replay("2023/04/04 16:11:00"); //２か所同時
 //replay("2023/3/27 0:04:25");
 //replay("2023/03/11 05:12:30"); //２か所同時
@@ -31,73 +30,112 @@ const { JSDOM } = require("jsdom");
 let fs = require("fs");
 const Store = require("electron-store");
 const store = new Store();
-const { autoUpdater } = require("electron-updater");
 var config = store.get("config", {
-  setting1: true,
-  system: {
-    crashReportAutoSend: false,
-  },
-  home: {
-    name: "自宅",
-    latitude: 35.68,
-    longitude: 139.767,
-    Section: "東京都２３区",
-  },
-  Info: {
-    EEW: {},
-    EQInfo: {
-      ItemCount: 15,
+  config: {
+    setting1: true,
+    system: {
+      crashReportAutoSend: "no",
     },
-    TsunamiInfo: {},
-    RealTimeShake: {
-      List: { ItemCount: 10 },
+    home: {
+      name: "自宅",
+      latitude: 35.68,
+      longitude: 139.767,
+      Section: "東京都２３区",
     },
-  },
-  Source: {
-    kmoni: {
+    Info: {
+      EEW: {},
+      EQInfo: {
+        ItemCount: 15,
+      },
+      TsunamiInfo: {},
+      RealTimeShake: {
+        List: {
+          ItemCount: 10,
+        },
+      },
+    },
+    Source: {
       kmoni: {
-        Interval: 1000,
+        kmoni: {
+          Interval: 1000,
+        },
+        lmoni: {
+          Interval: 1000,
+        },
+        ymoni: {
+          Interval: 1000,
+        },
       },
-      lmoni: {
-        Interval: 1000,
-      },
-      ymoni: {
-        Interval: 1000,
+      msil: {
+        Interval: 10000,
       },
     },
-    msil: {
-      Interval: 10000,
+    notice: {
+      voice: {
+        EEW: "緊急地震速報です。強い揺れに警戒してください。",
+      },
     },
-  },
-  notice: {
-    voice: {
-      EEW: "緊急地震速報です。強い揺れに警戒してください。",
-    },
-  },
-  color: {
-    psWave: {
-      PwaveColor: "rgb(48, 148, 255)",
-      SwaveColor: "rgb(255, 62, 48)",
-    },
-    Shindo: {
-      "?": { background: "rgb(191, 191, 191)", color: "rgb(68, 68, 68)" },
-      0: { background: "rgb(80, 86, 102)", color: "rgb(204, 204, 204)" },
-      1: { background: "rgb(134, 168, 198)", color: "rgb(51, 51, 51)" },
-      2: { background: "rgb(56, 120, 193)", color: "rgb(255, 255, 255)" },
-      3: { background: "rgb(80, 186, 84)", color: "rgb(34, 34, 34)" },
-      4: { background: "rgb(204, 209, 74)", color: "rgb(34, 34, 34)" },
-      "5m": { background: "rgb(231, 150, 21)", color: "rgb(0, 0, 0)" },
-      "5p": { background: "rgb(255, 91, 22)", color: "rgb(0, 0, 0)" },
-      "6m": { background: "rgb(237, 0, 0)", color: "rgb(255, 255, 255)" },
-      "6p": { background: "rgb(128, 9, 9)", color: "rgb(255, 255, 255)" },
-      7: { background: "rgb(196, 0, 222)", color: "rgb(255, 255, 255)" },
-      "7p": { background: "rgb(196, 0, 222)", color: "rgb(255, 255, 255)" },
-    },
-    Tsunami: {
-      TsunamiMajorWarningColor: "rgb(200, 0, 255)",
-      TsunamiWarningColor: "rgb(255, 40, 0)",
-      TsunamiWatchColor: "rgb(250, 245, 0)",
-      TsunamiYohoColor: "rgb(66, 158, 255)",
+    color: {
+      psWave: {
+        PwaveColor: "rgb(48, 148, 255)",
+        SwaveColor: "rgb(255, 62, 48)",
+      },
+      Shindo: {
+        0: {
+          background: "rgb(80, 86, 102)",
+          color: "rgb(204, 204, 204)",
+        },
+        1: {
+          background: "rgb(134, 168, 198)",
+          color: "rgb(51, 51, 51)",
+        },
+        2: {
+          background: "rgb(56, 120, 193)",
+          color: "rgb(255, 255, 255)",
+        },
+        3: {
+          background: "rgb(80, 186, 84)",
+          color: "rgb(34, 34, 34)",
+        },
+        4: {
+          background: "rgb(204, 209, 74)",
+          color: "rgb(34, 34, 34)",
+        },
+        7: {
+          background: "rgb(196, 0, 222)",
+          color: "rgb(255, 255, 255)",
+        },
+        "?": {
+          background: "rgb(191, 191, 191)",
+          color: "rgb(68, 68, 68)",
+        },
+        "5m": {
+          background: "rgb(231, 150, 21)",
+          color: "rgb(0, 0, 0)",
+        },
+        "5p": {
+          background: "rgb(255, 91, 22)",
+          color: "rgb(0, 0, 0)",
+        },
+        "6m": {
+          background: "rgb(237, 0, 0)",
+          color: "rgb(255, 255, 255)",
+        },
+        "6p": {
+          background: "rgb(128, 9, 9)",
+          color: "rgb(255, 255, 255)",
+        },
+        "7p": {
+          background: "rgb(196, 0, 222)",
+          color: "rgb(255, 255, 255)",
+        },
+      },
+      Tsunami: {
+        TsunamiMajorWarningColor: "rgb(200, 0, 255)",
+        TsunamiWarningColor: "rgb(255, 40, 0)",
+        TsunamiWatchColor: "rgb(250, 245, 0)",
+        TsunamiYohoColor: "rgb(66, 158, 255)",
+      },
     },
   },
 });
@@ -161,62 +199,72 @@ if (app.isPackaged) {
   Menu.setApplicationMenu(false);
 }
 
+var update_data;
 function checkUpdate() {
-  autoUpdater.on("checking-for-update", () => {
-    dialog.showMessageBox({
-      type: "info",
-      title: "アプリケーション更新",
-      message: "確認中",
-      buttons: ["OK"],
-    });
+  let request = net.request("https://api.github.com/repos/0quake/Zero-Quake/releases");
+
+  request.on("response", (res) => {
+    if (!300 <= res._responseHead.statusCode && !res._responseHead.statusCode < 200) {
+      var dataTmp = "";
+      res.on("data", (chunk) => {
+        dataTmp += chunk;
+      });
+      res.on("end", function () {
+        var json = jsonParse(dataTmp);
+        var latest_verTmp = String(json[0].tag_name.replace("v", ""));
+        var current_verTmp = process.env.npm_package_version;
+        var latest_v = latest_verTmp.split(".");
+        var current_v = current_verTmp.split(".");
+        var dl_page = json[0].html_url;
+        var update_detail = json[0].body;
+
+        var update_available = false;
+        if (latest_v[0] > current_v[0]) {
+          update_available = true;
+        } else if (latest_v[0] == current_v[0]) {
+          if (latest_v[1] > current_v[1]) {
+            update_available = true;
+          } else if (latest_v[1] == current_v[1]) {
+            if (latest_v[2] > current_v[2]) {
+              update_available = true;
+
+              var UpdateNotification = new Notification({
+                title: "ZeroQuakeで更新が利用可能です",
+                body: "v." + current_verTmp + " > v." + latest_verTmp + "更新内容：" + update_detail,
+                icon: path.join(__dirname, "img/icon.ico"),
+              });
+              UpdateNotification.show();
+              UpdateNotification.on("click", function () {
+                createWindow();
+              });
+            }
+          }
+        }
+
+        update_data = { check_error: false, check_date: new Date(), latest_version: latest_verTmp, current_version: current_verTmp, update_available: update_available, dl_page: dl_page, update_detail: update_detail };
+        if (settingWindow) {
+          settingWindow.webContents.send("message2", {
+            action: "Update_Data",
+            data: update_data,
+          });
+        }
+      });
+    }
   });
-  autoUpdater.on("update-not-available", () => {
-    console.log("update-not-available");
-    dialog.showMessageBox({
-      type: "info",
-      title: "アプリケーション更新",
-      message: "最新の状態です",
-      buttons: ["OK"],
-    });
-  });
-  autoUpdater.on("update-available", () => {
-    console.log("update-not-available");
-    dialog.showMessageBox({
-      type: "info",
-      title: "アプリケーション更新",
-      message: "更新があります",
-      buttons: ["OK"],
-    });
-  });
-  autoUpdater.on("'error'", (error) => {
-    dialog.showMessageBox({
-      type: "info",
-      title: "アプリケーション更新",
-      message: "エラーです" + error.stack,
-      buttons: ["OK"],
-    });
+  request.on("error", () => {
+    var current_verTmp = process.env.npm_package_version;
+
+    update_data = { check_error: true, check_date: new Date(), latest_version: null, current_version: current_verTmp, update_available: null, dl_page: null };
+    if (settingWindow) {
+      settingWindow.webContents.send("message2", {
+        action: "Update_Data",
+        data: update_data,
+      });
+    }
   });
 
-  autoUpdater.on("update-downloaded", () => {
-    const dialogOpts = {
-      type: "info",
-      title: "アプリケーション更新",
-      message: "更新が利用できます。インストールしますか？",
-      buttons: ["再起動して更新", "後で"],
-    };
-
-    dialog.showMessageBox(mainWin, dialogOpts).then((returnValue) => {
-      if (returnValue.response === 0) {
-        autoUpdater.quitAndInstall();
-      }
-    });
-  });
-
-  autoUpdater.on("error", (err) => {
-    console.error("There was a problem updating the application!");
-    console.error(err);
-  });
-  autoUpdater.checkForUpdates();
+  // リクエストの送信
+  request.end();
 }
 
 app.whenReady().then(() => {
@@ -224,6 +272,7 @@ app.whenReady().then(() => {
   kmoniServerSelect();
   createWindow();
   checkUpdate();
+  setInterval(checkUpdate, 1800000);
 
   app.on("activate", () => {
     // メインウィンドウが消えている場合は再度メインウィンドウを作成する
@@ -297,13 +346,14 @@ process.on("uncaughtException", function (err) {
         });
       }
     });
+    clearTimeout(relaunchTimer);
     relaunchTimer = setTimeout(function () {
       app.relaunch();
       app.exit(0);
     }, 10000);
-    clearTimeout(relaunchTimer);
   }
 });
+
 //エラー処理 本体
 function errorResolve(response) {
   switch (response) {
@@ -315,6 +365,7 @@ function errorResolve(response) {
       app.quit();
       break;
     case 2:
+      clearTimeout(relaunchTimer);
       break;
     default:
       break;
@@ -395,6 +446,8 @@ ipcMain.on("message", (_event, response) => {
       action: "setting",
       data: { config: config, softVersion: process.env.npm_package_version },
     });
+  } else if (response.action == "checkForUpdate") {
+    checkUpdate();
   } else if (response.action == "tsunamiReqest") {
     if (tsunamiData) {
       mainWindow.webContents.send("message2", {
@@ -577,6 +630,12 @@ function settingcreateWindow() {
       action: "setting",
       data: { config: config, softVersion: process.env.npm_package_version },
     });
+    if (update_data) {
+      settingWindow.webContents.send("message2", {
+        action: "Update_Data",
+        data: update_data,
+      });
+    }
   });
   settingWindow.on("close", () => {
     settingWindow = null;
@@ -1839,7 +1898,7 @@ function EEWcontrol(data) {
           var oneBeforeData = EQJSON.data.filter(function (elm) {
             return elm.arrivalTime;
           });
-          var newEstID = Math.max.apply(
+          var update_availableID = Math.max.apply(
             null,
             oneBeforeData.map(function (o) {
               return o.report_num;
@@ -1847,7 +1906,7 @@ function EEWcontrol(data) {
           );
 
           oneBeforeData = oneBeforeData.find(function (elm) {
-            return elm.report_num == newEstID;
+            return elm.report_num == update_availableID;
           });
           if (oneBeforeData) {
             data.arrivalTime = oneBeforeData.arrivalTime;
