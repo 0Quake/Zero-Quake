@@ -235,7 +235,7 @@ function checkUpdate() {
               });
               UpdateNotification.show();
               UpdateNotification.on("click", function () {
-                createWindow();
+                settingcreateWindow();
               });
             }
           }
@@ -402,6 +402,7 @@ electron.app.on("ready", () => {
 
   //タスクトレイアイコン
   tray = new electron.Tray(`${__dirname}/img/icon.${process.platform === "win32" ? "ico" : "png"}`);
+  tray.setToolTip("Zero Quake");
   tray.setContextMenu(
     electron.Menu.buildFromTemplate([
       {

@@ -11,12 +11,6 @@ document.addEventListener("visibilitychange", () => {
     background = true;
   }
 });
-window.addEventListener("focus", () => {
-  background = false;
-});
-window.addEventListener("blur", () => {
-  background = true;
-});
 
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "EEWAlertUpdate") {

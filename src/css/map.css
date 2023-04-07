@@ -174,7 +174,6 @@ img.leaflet-control {
 .maplibregl-popup-content {
   margin: 0;
   min-width: 180px;
-  text-align: center;
 }
 
 .maplibregl-popup-content:has(h3) {
@@ -384,10 +383,6 @@ div.marker-circle.marker_Int7p {
 .detecting {
   display: none;
   margin: 3px 0;
-}
-
-.PointPGA::after {
-  content: " gal";
 }
 
 .zoomLevel_1 .marker-circle {
