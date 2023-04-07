@@ -114,7 +114,7 @@ h5 {
 }
 main {
   position: relative;
-  height: calc(100vh - 30px);
+  height: 100vh;
 }
 #mainContent {
   position: relative;
@@ -140,9 +140,9 @@ main {
 #alertFrame {
   display: none;
   position: fixed;
-  inset: 35px 5px 5px 5px;
+  inset: 5px;
   border-radius: 10px;
-  box-shadow: 0 25px 0 30px rgba(255, 0, 0, 0.5);
+  box-shadow: 0 25px 0 0px rgba(255, 0, 0, 0.5);
   z-index: 9999999;
   pointer-events: none;
 }

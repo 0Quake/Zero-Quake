@@ -605,7 +605,3 @@ div.marker-circle.marker_Int7p {
 .leaflet-right .leaflet-control {
   margin: 5px;
 }
-.maplibregl-ctrl-bottom-right,
-.maplibregl-ctrl-bottom-left {
-  bottom: 30px;
-}

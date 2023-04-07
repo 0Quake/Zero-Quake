@@ -479,12 +479,6 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     minWidth: 600,
     minHeight: 300,
-    titleBarStyle: "hidden",
-    titleBarOverlay: {
-      color: "#202020",
-      symbolColor: "#FFF",
-      height: 30,
-    },
     webPreferences: {
       preload: path.join(__dirname, "js/preload.js"),
       title: "Zero Quake",
