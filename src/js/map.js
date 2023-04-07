@@ -74,6 +74,16 @@ function psWaveAnm() {
   }
 }
 
+document.getElementById("layerSwitch_toggle").addEventListener("click", function () {
+  document.getElementById("menu_wrap").classList.toggle("menu_show");
+});
+document.getElementById("menu_wrap").addEventListener("click", function () {
+  document.getElementById("menu_wrap").classList.remove("menu_show");
+});
+document.getElementById("menu").addEventListener("click", function () {
+  event.stopPropagation();
+});
+
 var mapSelect = document.getElementsByName("mapSelect");
 var tilemapActive = false;
 mapSelect.forEach(function (elm) {
@@ -1223,7 +1233,7 @@ function kmoniListDraw(dataTmp) {
       var IntDetail = "";
       if (a == 0) IntDetail = "<div class='intDetail'>" + Math.round(shindoElm.shindo * 10) / 10 + "</div>";
 
-      htmlTmp += "<li><div class='int' style='color:" + shindoColor[1] + ";background:" + shindoColor[0] + "'>" + shindoConvert(shindoElm.shindo, 0) + IntDetail + "</div><div class='Pointname'>" + shindoElm.Region + " " + shindoElm.Name + "</div><div class='PGA'>PGA" + Math.round(shindoElm.pga * 100) / 100 + "</div></li>";
+      htmlTmp += "<li><div class='int' style='color:" + shindoColor[1] + ";background:" + shindoColor[0] + "'>" + shindoConvert(shindoElm.shindo, 0) + IntDetail + "</div><div class='Pointname'>" + shindoElm.Region + " " + shindoElm.Name + "</div><div class='PGA'>" + Math.round(shindoElm.pga * 100) / 100 + "gal</div></li>";
     }
   }
   pointList.innerHTML = htmlTmp;

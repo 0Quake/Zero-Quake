@@ -506,15 +506,13 @@ td {
   border-radius: 3px;
   padding: 5px;
   vertical-align: middle;
-}
-#setting svg {
-  fill: #999;
+  font-family: "Material Icons Round";
+  font-size: 18px;
+  color: #999;
 }
 #setting:hover {
   background: #555;
-}
-#setting:hover svg {
-  fill: #fff;
+  color: #fff;
 }
 
 #tab1_content {
@@ -689,20 +687,18 @@ td {
   justify-content: right;
 }
 .EQItem:hover .EQItemOverlay {
-  display: flex;
+  display: block;
 }
 .EQItemOverlay button {
+  float: right;
   display: block;
-  position: relative;
   height: 100%;
   width: 100px;
   border-radius: 50% 0 0 50%;
   border: none;
   background-color: #444;
-  background-image: url(../img/IconDocument.svg);
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 50%;
+  font-family: "Material Icons Round";
+  font-size: 40px;
 }
 .EQItemOverlay button:hover {
   background-color: rgb(203, 27, 27);
@@ -847,10 +843,8 @@ td {
   height: 40px;
   width: 40px;
   float: right;
-  background-image: url(../img/close.svg);
-  background-size: 65%;
-  background-repeat: no-repeat;
-  background-position: center;
+  font-family: "Material Icons Round";
+  font-size: 20px;
 }
 dialog::backdrop {
   background: rgba(0, 0, 0, 0.4);
@@ -932,10 +926,15 @@ button:hover {
   border-radius: 15px;
   vertical-align: middle;
   text-align: center;
-  background-image: url(../img/notifications.svg);
-  background-size: contain;
-  background-position: center;
+  padding: 0;
 }
+#plus_badge::before {
+  content: "notifications";
+  font-size: 18px;
+  color: #7a0d0d;
+  font-family: "Material Icons Round";
+}
+
 .open #plus_badge {
   width: 30px;
   height: 30px;
@@ -947,12 +946,15 @@ button:hover {
   right: 5px;
   width: 23px;
   height: 23px;
-  background-color: #222;
-  background-image: url(../img/expand_more.svg);
-  background-size: contain;
-  background-position: center;
+  padding: 0;
+  background: #222;
   border-radius: 15px;
   vertical-align: middle;
+}
+#notification_more::before {
+  content: "expand_more";
+  font-family: "Material Icons Round";
+  font-size: 18px;
 }
 .open #notification_more {
   width: 30px;

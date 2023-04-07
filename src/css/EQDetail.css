@@ -120,22 +120,22 @@ td {
 .ShindoItem::before {
   content: "";
   display: inline-block;
+  font-size: 16px;
+  font-family: "Material Icons Round";
   width: 20px;
-  height: 20px;
   vertical-align: middle;
 }
 
 .ShindoItem1::before,
 .ShindoItem2::before,
 .ShindoItem3::before {
-  background-image: url(../img/expand_more.svg);
-  background-size: cover;
+  content: "expand_more";
 }
 
 .ShindoItem1.has-open::before,
 .ShindoItem2.has-open::before,
 .ShindoItem3.has-open::before {
-  transform: rotateZ(180deg);
+  content: "expand_less";
 }
 
 .ShindoItem span {

@@ -164,7 +164,7 @@ var EQDetect_List = [];
 var YmoniE, YmoniW;
 var P2P_ConnectData;
 var notifications = [];
-var notification_id = 0;
+//var notification_id = 0;
 var Kmoni = 20000,
   Lmoni = 20000;
 var TestStartTime;
@@ -315,7 +315,7 @@ var relaunchTimer;
 var errorMsgBox = false;
 //エラー処理
 process.on("uncaughtException", function (err) {
-  Window_notification("予期しないエラーが発生しました。", "error");
+  //Window_notification("予期しないエラーが発生しました。", "error");
   if (!errorMsgBox && app.isReady()) {
     errorMsgBox = true;
     options = {
@@ -2723,7 +2723,7 @@ function NetworkError(/*error, type*/) {
   return false;
 }
 //メインウィンドウ内通知
-
+/*
 function Window_notification(title, detail, type) {
   notifications.push({
     id: notification_id,
@@ -2740,7 +2740,7 @@ function Window_notification(title, detail, type) {
       data: notifications,
     });
   }
-}
+}*/
 
 //真偽地判定（拡張）
 function Boolean2(str) {

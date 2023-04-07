@@ -7,21 +7,45 @@
   --TsunamiYohoColor: rgb(66, 158, 255);
 }
 #mapcontainer_Wrap {
+  position: relative;
   display: inline-block;
   overflow: hidden;
   width: 100%;
   height: 100%;
   flex: 1;
 }
-#menu {
+#layerSwitch_toggle {
   position: absolute;
   top: 5px;
   left: 5px;
+  border-radius: 5px;
+  background: #444;
+  border: solid 1px #999;
+  font-family: "Material Icons Round";
+  font-size: 22px;
+  width: 45px;
+  height: 40px;
+  line-height: 40px;
+  padding: 0;
+  z-index: 100000000;
+}
+#menu {
   padding: 10px 5px;
   background: #444;
   border: solid 1px #999;
   border-radius: 5px;
+}
+#menu_wrap {
+  position: absolute;
+  inset: 0;
+  display: none;
   z-index: 100000000;
+  background: rgba(0, 0, 0, 0.5);
+}
+#menu_wrap.menu_show {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 #menu label input {
   display: none;

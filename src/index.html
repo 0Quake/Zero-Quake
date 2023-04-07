@@ -99,26 +99,41 @@
         <div id="mainContent">
             <div id="mapcontainer_Wrap">
                 <div id="mapcontainer" class="GJMapActive"></div>
-                <button>aa</button>
-                <nav id="menu">
-                    <h3>ベースマップ</h3>
-                    <div class="radio">
-                        <label><input type="radio" name="mapSelect" value="" checked>標準</label>
-                        <label><input type="radio" name="mapSelect" value="tile0">地理院地図 (標準)</label>
-                        <label><input type="radio" name="mapSelect" value="tile1">地理院地図 (淡色)</label>
-                        <label><input type="radio" name="mapSelect" value="tile2">地理院地図 (写真)</label>
-                        <label><input type="radio" name="mapSelect" value="tile3">地理院地図 (白地図)</label>
-                        <label><input type="radio" name="mapSelect" value="tile4">Open Street Map</label>
-                    </div>
-                    <h3>オーバーレイ</h3>
-                    <div class="check">
-                        <label><input type="checkbox" name="overlaySelect" value="over0">陰影起伏図</label>
-                        <label><input type="checkbox" name="overlaySelect" value="over1">火山基本図データ</label>
-                        <label><input type="checkbox" name="overlaySelect" value="over2">津波浸水想定 ハザードマップ</label>
-                        <label><input type="checkbox" name="overlaySelect" value="over3">土砂災害警戒区域(急傾斜地の崩壊) ハザードマップ</label>
-                        <label><input type="checkbox" name="overlaySelect" value="over4">土砂災害警戒区域(地すべり) ハザードマップ</label>
-                    </div>
-                </nav>
+                <div id="menu_wrap">
+                    <nav id="menu">
+                        <h3>ベースマップ</h3>
+                        <div class="radio">
+                            <label><input type="radio" name="mapSelect" value="" checked>標準</label>
+                            <label><input type="radio" name="mapSelect" value="tile0">地理院地図 (標準)</label>
+                            <label><input type="radio" name="mapSelect" value="tile1">地理院地図 (淡色)</label>
+                            <label><input type="radio" name="mapSelect" value="tile2">地理院地図 (写真)</label>
+                            <label><input type="radio" name="mapSelect" value="tile3">地理院地図 (白地図)</label>
+                            <label><input type="radio" name="mapSelect" value="tile4">Open Street Map</label>
+                        </div>
+                        <h3>オーバーレイ</h3>
+                        <div class="check">
+                            <label><input type="checkbox" name="overlaySelect" value="over0">陰影起伏図</label>
+                            <label><input type="checkbox" name="overlaySelect" value="over1">火山基本図データ</label>
+                            <label><input type="checkbox" name="overlaySelect" value="over2">津波浸水想定 ハザードマップ</label>
+                            <label><input type="checkbox" name="overlaySelect" value="over3">土砂災害警戒区域(急傾斜地の崩壊) ハザードマップ</label>
+                            <label><input type="checkbox" name="overlaySelect" value="over4">土砂災害警戒区域(地すべり) ハザードマップ</label>
+                        </div>
+                    </nav>
+                </div>
+                <button id="layerSwitch_toggle">layers</button>
+                <div id="notification_Area" class="no_notification">
+                    <h3>通知センター</h3>
+                    <button id="notification_more" aria-label="通知をもっとみる"></button>
+                    <div id="plus_badge"></div>
+                    <div id="notification_wrap">0</div>
+                    <template id="notificationTemplate">
+                        <div class="notification_item">
+                            <div class="notification_title"></div>
+                            <div class="notification_content"></div>
+                            <div class="notification_time"></div>
+                        </div>
+                    </template>
+                </div>
             </div>
             <div id="sideBar">
                 <button id="SideBarToggle" aria-label="サイドバーを表示・非表示"></button>
@@ -224,7 +239,7 @@
                                         <div class="EQI_magnitude"></div>
                                     </div>
                                     <div class="EQItemOverlay">
-                                        <button class="EQDetailButton"> </button>
+                                        <button class="EQDetailButton">description</button>
                                     </div>
                                     <div class="canceled">取り消されました。</div>
                                 </div>
@@ -237,7 +252,7 @@
                                         <div class="EQI_magnitude"></div>
                                     </div>
                                     <div class="EQItemOverlay">
-                                        <button class="EQDetailButton"> </button>
+                                        <button class="EQDetailButton">description</button>
                                     </div>
                                 </div>
                             </template>
@@ -259,7 +274,7 @@
                         <dialog id="UpdateTime_detail">
                             <div class="popup_menubar">
                                 <h2>接続状況</h2>
-                                <button id="UpdateTimeClose"></button>
+                                <button id="UpdateTimeClose">close</button>
                             </div>
                             <div id="UpdateTime_detail_content">
 
@@ -321,28 +336,13 @@
                     <div id="tab1_bar">
                         <div id="tab1_menu1" class="tabmenu active_tabmenu" data-contentid="tab1_content1">地震情報</div>
                         <div id="tab1_menu2" class="tabmenu" data-contentid="tab1_content2">リアルタイム震度</div>
-                        <button id="setting"> <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20">
-                                <path d="M11.583 18.333H8.417q-.334 0-.573-.218-.24-.219-.282-.553l-.229-1.854q-.208-.125-.458-.27-.25-.146-.458-.271l-1.729.729q-.313.125-.626.021-.312-.105-.479-.396l-1.562-2.729q-.167-.292-.094-.604.073-.313.323-.521l1.458-1.125V9.458L2.25 8.333q-.25-.208-.323-.521-.073-.312.094-.604l1.562-2.729q.167-.291.479-.396.313-.104.626.021l1.729.729q.208-.125.458-.27.25-.146.458-.271l.229-1.854q.042-.334.282-.553.239-.218.573-.218h3.166q.334 0 .573.218.24.219.282.553l.229 1.854q.208.125.458.271.25.145.458.27l1.729-.729q.313-.125.626-.021.312.105.479.396L18 7.208q.167.292.104.604-.062.313-.333.521l-1.459 1.125v1.084l1.459 1.125q.271.208.333.521.063.312-.104.604l-1.583 2.729q-.167.291-.479.396-.313.104-.626-.021l-1.729-.729q-.208.125-.458.271-.25.145-.458.27l-.229 1.854q-.042.334-.282.553-.239.218-.573.218ZM10 12.979q1.229 0 2.104-.875T12.979 10q0-1.229-.875-2.104T10 7.021q-1.229 0-2.104.875T7.021 10q0 1.229.875 2.104t2.104.875Z" />
-                            </svg> </button>
+                        <button id="setting">settings</button>
                     </div>
 
 
                 </div>
             </div>
 
-            <div id="notification_Area" class="no_notification">
-                <h3>通知センター</h3>
-                <button id="notification_more" aria-label="通知をもっとみる"></button>
-                <div id="plus_badge"></div>
-                <div id="notification_wrap">0</div>
-            </div>
-            <template id="notificationTemplate">
-                <div class="notification_item">
-                    <div class="notification_title"></div>
-                    <div class="notification_content"></div>
-                    <div class="notification_time"></div>
-                </div>
-            </template>
             <dialog id="offline">
                 <h2>現在オフラインです</h2>
                 <p>インターネットに接続されていないため、情報を取得することができません。</p>
