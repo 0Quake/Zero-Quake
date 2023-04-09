@@ -233,7 +233,7 @@ function checkUpdate() {
               });
               UpdateNotification.show();
               UpdateNotification.on("click", function () {
-                settingcreateWindow();
+                setting_createWindow();
               });
             }
           }
@@ -266,7 +266,7 @@ function checkUpdate() {
 }
 
 app.whenReady().then(() => {
-  kmonicreateWindow();
+  worker_createWindow();
   kmoniServerSelect();
   createWindow();
   checkUpdate();
@@ -432,11 +432,11 @@ ipcMain.on("message", (_event, response) => {
   } else if (response.action == "kmoniEstShindoReturn") {
     estShindoControl(response);
   } else if (response.action == "settingWindowOpen") {
-    settingcreateWindow();
+    setting_createWindow();
   } else if (response.action == "TsunamiWindowOpen") {
-    tsunamicreateWindow();
+    tsunami_createWindow();
   } else if (response.action == "EQInfoWindowOpen") {
-    EQInfocreateWindow(response);
+    EQInfo_createWindow(response);
   } else if (response.action == "settingReturn") {
     config = response.data;
     store.set("config", config);
@@ -485,7 +485,6 @@ function createWindow() {
     },
     backgroundColor: "#202227",
   });
-  mainWindow.webContents.backgroundThrottling = false;
   if (Replay !== 0) {
     mainWindow.webContents.send("message2", {
       action: "Replay",
@@ -579,7 +578,7 @@ function createWindow() {
   });
 }
 //ワーカーウィンドウ表示処理
-function kmonicreateWindow() {
+function worker_createWindow() {
   if (kmoniWorker) {
     kmoniWorker.close();
   }
@@ -600,7 +599,7 @@ function kmonicreateWindow() {
   kmoniActive = new Date();
 }
 //ワーカーウィンドウ表示処理
-function settingcreateWindow() {
+function setting_createWindow() {
   if (settingWindow) {
     if (settingWindow.isMinimized()) settingWindow.restore();
     if (!settingWindow.isFocused()) settingWindow.focus();
@@ -646,7 +645,7 @@ function settingcreateWindow() {
   settingWindow.webContents.on("new-window", handleUrlOpen);
 }
 //津波情報ウィンドウ表示処理
-function tsunamicreateWindow() {
+function tsunami_createWindow() {
   if (tsunamiWindow) {
     if (tsunamiWindow.isMinimized()) tsunamiWindow.restore();
     if (!tsunamiWindow.isFocused()) tsunamiWindow.focus();
@@ -678,7 +677,7 @@ function tsunamicreateWindow() {
   });
 }
 //地震情報ウィンドウ表示処理
-function EQInfocreateWindow(response) {
+function EQInfo_createWindow(response) {
   var EQInfoWindow = new BrowserWindow({
     minWidth: 600,
     minHeight: 300,
@@ -1208,7 +1207,7 @@ function RegularExecution() {
 
   //kmoniWorker監視
   if (new Date() - kmoniActive > 5000) {
-    kmonicreateWindow();
+    worker_createWindow();
   }
 
   setTimeout(RegularExecution, 1000);
