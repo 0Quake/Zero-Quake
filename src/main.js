@@ -31,111 +31,109 @@ let fs = require("fs");
 const Store = require("electron-store");
 const store = new Store();
 var config = store.get("config", {
-  config: {
-    setting1: true,
-    system: {
-      crashReportAutoSend: "no",
+  setting1: true,
+  system: {
+    crashReportAutoSend: "no",
+  },
+  home: {
+    name: "自宅",
+    latitude: 35.68,
+    longitude: 139.767,
+    Section: "東京都２３区",
+  },
+  Info: {
+    EEW: {},
+    EQInfo: {
+      ItemCount: 15,
     },
-    home: {
-      name: "自宅",
-      latitude: 35.68,
-      longitude: 139.767,
-      Section: "東京都２３区",
-    },
-    Info: {
-      EEW: {},
-      EQInfo: {
-        ItemCount: 15,
-      },
-      TsunamiInfo: {},
-      RealTimeShake: {
-        List: {
-          ItemCount: 10,
-        },
+    TsunamiInfo: {},
+    RealTimeShake: {
+      List: {
+        ItemCount: 10,
       },
     },
-    Source: {
+  },
+  Source: {
+    kmoni: {
       kmoni: {
-        kmoni: {
-          Interval: 1000,
-        },
-        lmoni: {
-          Interval: 1000,
-        },
-        ymoni: {
-          Interval: 1000,
-        },
+        Interval: 1000,
       },
-      msil: {
-        Interval: 10000,
+      lmoni: {
+        Interval: 1000,
+      },
+      ymoni: {
+        Interval: 1000,
       },
     },
-    notice: {
-      voice: {
-        EEW: "緊急地震速報です。強い揺れに警戒してください。",
+    msil: {
+      Interval: 10000,
+    },
+  },
+  notice: {
+    voice: {
+      EEW: "緊急地震速報です。強い揺れに警戒してください。",
+    },
+  },
+  color: {
+    psWave: {
+      PwaveColor: "rgb(48, 148, 255)",
+      SwaveColor: "rgb(255, 62, 48)",
+    },
+    Shindo: {
+      0: {
+        background: "rgb(80, 86, 102)",
+        color: "rgb(204, 204, 204)",
+      },
+      1: {
+        background: "rgb(134, 168, 198)",
+        color: "rgb(51, 51, 51)",
+      },
+      2: {
+        background: "rgb(56, 120, 193)",
+        color: "rgb(255, 255, 255)",
+      },
+      3: {
+        background: "rgb(80, 186, 84)",
+        color: "rgb(34, 34, 34)",
+      },
+      4: {
+        background: "rgb(204, 209, 74)",
+        color: "rgb(34, 34, 34)",
+      },
+      7: {
+        background: "rgb(196, 0, 222)",
+        color: "rgb(255, 255, 255)",
+      },
+      "?": {
+        background: "rgb(191, 191, 191)",
+        color: "rgb(68, 68, 68)",
+      },
+      "5m": {
+        background: "rgb(231, 150, 21)",
+        color: "rgb(0, 0, 0)",
+      },
+      "5p": {
+        background: "rgb(255, 91, 22)",
+        color: "rgb(0, 0, 0)",
+      },
+      "6m": {
+        background: "rgb(237, 0, 0)",
+        color: "rgb(255, 255, 255)",
+      },
+      "6p": {
+        background: "rgb(128, 9, 9)",
+        color: "rgb(255, 255, 255)",
+      },
+      "7p": {
+        background: "rgb(196, 0, 222)",
+        color: "rgb(255, 255, 255)",
       },
     },
-    color: {
-      psWave: {
-        PwaveColor: "rgb(48, 148, 255)",
-        SwaveColor: "rgb(255, 62, 48)",
-      },
-      Shindo: {
-        0: {
-          background: "rgb(80, 86, 102)",
-          color: "rgb(204, 204, 204)",
-        },
-        1: {
-          background: "rgb(134, 168, 198)",
-          color: "rgb(51, 51, 51)",
-        },
-        2: {
-          background: "rgb(56, 120, 193)",
-          color: "rgb(255, 255, 255)",
-        },
-        3: {
-          background: "rgb(80, 186, 84)",
-          color: "rgb(34, 34, 34)",
-        },
-        4: {
-          background: "rgb(204, 209, 74)",
-          color: "rgb(34, 34, 34)",
-        },
-        7: {
-          background: "rgb(196, 0, 222)",
-          color: "rgb(255, 255, 255)",
-        },
-        "?": {
-          background: "rgb(191, 191, 191)",
-          color: "rgb(68, 68, 68)",
-        },
-        "5m": {
-          background: "rgb(231, 150, 21)",
-          color: "rgb(0, 0, 0)",
-        },
-        "5p": {
-          background: "rgb(255, 91, 22)",
-          color: "rgb(0, 0, 0)",
-        },
-        "6m": {
-          background: "rgb(237, 0, 0)",
-          color: "rgb(255, 255, 255)",
-        },
-        "6p": {
-          background: "rgb(128, 9, 9)",
-          color: "rgb(255, 255, 255)",
-        },
-        "7p": {
-          background: "rgb(196, 0, 222)",
-          color: "rgb(255, 255, 255)",
-        },
-      },
-      Tsunami: {
-        TsunamiMajorWarningColor: "rgb(200, 0, 255)",
-        TsunamiWarningColor: "rgb(255, 40, 0)",
-        TsunamiWatchColor: "rgb(250, 245, 0)",
-        TsunamiYohoColor: "rgb(66, 158, 255)",
-      },
+    Tsunami: {
+      TsunamiMajorWarningColor: "rgb(200, 0, 255)",
+      TsunamiWarningColor: "rgb(255, 40, 0)",
+      TsunamiWatchColor: "rgb(250, 245, 0)",
+      TsunamiYohoColor: "rgb(66, 158, 255)",
     },
   },
 });

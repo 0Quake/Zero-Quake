@@ -97,7 +97,7 @@ function init() {
   //jma_B_ListReq();
   narikakun_ListReq(new Date().getFullYear(), new Date().getMonth() + 1);
 }
-//地図初期化rootS
+//地図初期化
 function Mapinit() {
   map = L.map("mapcontainer", {
     center: [32.99125, 138.46],
