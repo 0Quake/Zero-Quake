@@ -482,9 +482,10 @@ function createWindow() {
     webPreferences: {
       preload: path.join(__dirname, "js/preload.js"),
       title: "Zero Quake",
-      backgroundColor: "#202227",
       icon: path.join(__dirname, "img/icon.ico"),
+      backgroundThrottling: false,
     },
+    backgroundColor: "#202227",
   });
   mainWindow.webContents.backgroundThrottling = false;
   if (Replay !== 0) {
@@ -616,9 +617,9 @@ function settingcreateWindow() {
       title: "設定 - Zero Quake",
       parent: mainWindow,
       center: true,
-      backgroundColor: "#202227",
       icon: path.join(__dirname, "img/icon.ico"),
     },
+    backgroundColor: "#202227",
   });
   settingWindow.webContents.on("did-finish-load", () => {
     settingWindow.webContents.send("message2", {
@@ -659,9 +660,9 @@ function tsunamicreateWindow() {
     webPreferences: {
       preload: path.join(__dirname, "js/preload.js"),
       title: "津波詳細情報 - Zero Quake",
-      backgroundColor: "#202227",
       icon: path.join(__dirname, "img/icon.ico"),
     },
+    backgroundColor: "#202227",
   });
 
   tsunamiWindow.webContents.on("did-finish-load", () => {
@@ -686,9 +687,9 @@ function EQInfocreateWindow(response) {
     webPreferences: {
       preload: path.join(__dirname, "js/preload.js"),
       title: "地震詳細情報 - Zero Quake",
-      backgroundColor: "#202227",
       icon: path.join(__dirname, "img/icon.ico"),
     },
+    backgroundColor: "#202227",
   });
 
   EQInfoWindow.webContents.on("did-finish-load", () => {
@@ -1979,9 +1980,9 @@ function EEWAlert(data, first, update) {
       } else {
         soundPlay("EEW2");
       }
-      speak("緊急地震速報です。");
+      speak(config.notice.voice.EEW);
     } else {
-      speak("続報");
+      speak(config.notice.voice.EEWUpdate);
     }
     if (mainWindow) {
       mainWindow.webContents.send("message2", {

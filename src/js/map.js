@@ -107,20 +107,21 @@ mapSelect.forEach(function (elm) {
     }
   });
 });
-var overlayCount = 1;
+var overlayCount = 0;
 document.getElementsByName("overlaySelect").forEach(function (elm) {
   elm.addEventListener("change", function () {
     var visibility = this.checked ? "visible" : "none";
-    if (this.checked) {
-      overlayCount++;
-    } else {
-      overlayCount--;
-    }
     if (this.value == "gsi_vector") {
       ["海岸線", "河川中心線人工水路地下", "河川中心線枯れ川部", "河川中心線", "海岸線堤防等に接する部分破線", "水涯線", "水涯線堤防等に接する部分破線", "水部表記線polygon", "行政区画界線国の所属界", "道路中心線ZL4-10国道", "道路中心線ZL4-10高速", "道路中心線色0", "鉄道中心線0", "鉄道中心線旗竿0", "道路中心線ククリ橋0", "道路中心線色橋0", "建築物0", "鉄道中心線橋0", "鉄道中心線旗竿橋0", "道路中心線色1", "鉄道中心線1", "鉄道中心線旗竿1", "道路中心線ククリ橋1", "道路中心線色橋1", "道路縁", "行政区画界線25000市区町村界", "行政区画界線25000都府県界及び北海道総合振興局・振興局界", "注記シンボル付きソート順100以上", "注記シンボルなし縦ソート順100以上", "注記シンボルなし横ソート順100以上", "注記角度付き線", "注記シンボル付きソート順100未満", "注記シンボルなし縦ソート順100未満", "注記シンボルなし横ソート順100未満"].forEach(function (elm) {
         map.setLayoutProperty(elm, "visibility", visibility);
       });
     } else {
+      if (this.checked) {
+        overlayCount++;
+      } else {
+        overlayCount--;
+      }
+
       map.setLayoutProperty(this.value, "visibility", visibility);
     }
     if (!tilemapActive && overlayCount == 0) {

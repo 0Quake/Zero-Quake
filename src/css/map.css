@@ -50,12 +50,16 @@
 #menu label input {
   display: none;
 }
+#menu h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
 #menu h3 {
   font-size: 16px;
-  text-align: center;
   margin: 0;
   font-weight: unset;
   font-family: inherit;
+  margin: 10px 0 0 10px;
 }
 #menu label {
   display: block;
