@@ -139,9 +139,6 @@ var inited = false;
 function init() {
   if (!config || !windowLoaded || inited) return;
   inited = true;
-  const root = document.querySelector(":root");
-  const rootStyle = getComputedStyle(root);
-
   map = new maplibregl.Map({
     container: "mapcontainer",
     center: [138.46, 32.99125],
@@ -360,7 +357,7 @@ function init() {
             "line-cap": "round",
           },
           paint: {
-            "line-color": rootStyle.getPropertyValue("--TsunamiYohoColor"),
+            "line-color": config.color.Tsunami.TsunamiYohoColor,
             "line-width": 30,
           },
           minzoom: 0,
@@ -377,7 +374,7 @@ function init() {
             "line-cap": "round",
           },
           paint: {
-            "line-color": rootStyle.getPropertyValue("--TsunamiWatchColor"),
+            "line-color": config.color.Tsunami.TsunamiWatchColor,
             "line-width": 30,
           },
           minzoom: 0,
@@ -393,7 +390,7 @@ function init() {
             "line-cap": "round",
           },
           paint: {
-            "line-color": rootStyle.getPropertyValue("--TsunamiWarningColor"),
+            "line-color": config.color.Tsunami.TsunamiWarningColor,
             "line-width": 30,
           },
           minzoom: 0,
@@ -410,7 +407,7 @@ function init() {
             "line-cap": "round",
           },
           paint: {
-            "line-color": rootStyle.getPropertyValue("--TsunamiMajorWarningColor"),
+            "line-color": config.color.Tsunami.TsunamiMajorWarningColor,
             "line-width": 30,
           },
           minzoom: 0,
@@ -440,17 +437,17 @@ function init() {
           minzoom: 6,
           maxzoom: 22,
         },
-        { id: "Int0", type: "fill", source: "basemap", paint: { "fill-color": rootStyle.getPropertyValue("--IntTheme_0_BgColor") }, filter: ["==", "name", ""] },
-        { id: "Int1", type: "fill", source: "basemap", paint: { "fill-color": rootStyle.getPropertyValue("--IntTheme_1_BgColor") }, filter: ["==", "name", ""] },
-        { id: "Int2", type: "fill", source: "basemap", paint: { "fill-color": rootStyle.getPropertyValue("--IntTheme_2_BgColor") }, filter: ["==", "name", ""] },
-        { id: "Int3", type: "fill", source: "basemap", paint: { "fill-color": rootStyle.getPropertyValue("--IntTheme_3_BgColor") }, filter: ["==", "name", ""] },
-        { id: "Int4", type: "fill", source: "basemap", paint: { "fill-color": rootStyle.getPropertyValue("--IntTheme_4_BgColor") }, filter: ["==", "name", ""] },
-        { id: "Int5-", type: "fill", source: "basemap", paint: { "fill-color": rootStyle.getPropertyValue("--IntTheme_5m_BgColor") }, filter: ["==", "name", ""] },
-        { id: "Int5+", type: "fill", source: "basemap", paint: { "fill-color": rootStyle.getPropertyValue("--IntTheme_5p_BgColor") }, filter: ["==", "name", ""] },
-        { id: "Int6-", type: "fill", source: "basemap", paint: { "fill-color": rootStyle.getPropertyValue("--IntTheme_6m_BgColor") }, filter: ["==", "name", ""] },
-        { id: "Int6+", type: "fill", source: "basemap", paint: { "fill-color": rootStyle.getPropertyValue("--IntTheme_6p_BgColor") }, filter: ["==", "name", ""] },
-        { id: "Int7", type: "fill", source: "basemap", paint: { "fill-color": rootStyle.getPropertyValue("--IntTheme_7_BgColor") }, filter: ["==", "name", ""] },
-        { id: "Int7+", type: "fill", source: "basemap", paint: { "fill-color": rootStyle.getPropertyValue("--IntTheme_7p_BgColor") }, filter: ["==", "name", ""] },
+        { id: "Int0", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["0"].background }, filter: ["==", "name", ""] },
+        { id: "Int1", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["1"].background }, filter: ["==", "name", ""] },
+        { id: "Int2", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["2"].background }, filter: ["==", "name", ""] },
+        { id: "Int3", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["3"].background }, filter: ["==", "name", ""] },
+        { id: "Int4", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["4"].background }, filter: ["==", "name", ""] },
+        { id: "Int5-", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["5m"].background }, filter: ["==", "name", ""] },
+        { id: "Int5+", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["5p"].background }, filter: ["==", "name", ""] },
+        { id: "Int6-", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["6m"].background }, filter: ["==", "name", ""] },
+        { id: "Int6+", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["6p"].background }, filter: ["==", "name", ""] },
+        { id: "Int7", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["7"].background }, filter: ["==", "name", ""] },
+        { id: "Int7+", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["7p"].background }, filter: ["==", "name", ""] },
         {
           id: "prefmap_LINE",
           type: "line",
