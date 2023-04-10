@@ -33,7 +33,7 @@ const store = new Store();
 var config = store.get("config", {
   setting1: true,
   system: {
-    crashReportAutoSend: "no",
+    crashReportAutoSend: "yes",
   },
   home: {
     name: "自宅",
@@ -288,15 +288,6 @@ let options = {
   message: "予期しないエラーが発生しました",
   detail: "動作を選択してください。\n10秒で自動的に再起動します。",
   buttons: ["今すぐ再起動", "終了", "キャンセル"],
-  noLink: true,
-};
-const options2 = {
-  type: "question",
-  title: "エラー情報の送信",
-  message: "エラー情報を送信しますか",
-  detail: "情報は今後のバグ改善に活用します。個人を特定できる情報を送信することはありません。\nご協力をお願いします。",
-  buttons: ["送信", "送信しない"],
-  checkboxLabel: "選択を記憶",
   noLink: true,
 };
 const options3 = {
@@ -2547,6 +2538,7 @@ function eqInfoControl(dataList, type, EEW) {
             EQElm.epiCenter = data.epiCenter;
             changed = true;
           }
+          if (data.M == "Ｍ不明" || data.M == "NaN") data.M = null;
           if (data.M && (!EQElm.M || newer)) {
             EQElm.M = data.M;
             changed = true;

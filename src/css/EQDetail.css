@@ -30,6 +30,7 @@ main {
   background: #222;
   display: block;
   border-top: solid 1px #666;
+  height: fit-content;
 }
 
 h2,
