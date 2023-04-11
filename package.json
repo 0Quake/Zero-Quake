@@ -32,14 +32,13 @@
   "license": "GPL-2.0",
   "dependencies": {
     "electron-store": "^8.1.0",
-    "electron-updater": "^5.3.0",
     "fs": "^0.0.1-security",
     "jsdom": "^21.1.1",
     "path": "^0.12.7",
     "websocket": "^1.0.34"
   },
   "devDependencies": {
-    "electron": "^23.2.2",
+    "electron": "^24.0.0",
     "electron-builder": "^23.6.0",
     "eslint": "^8.38.0"
   },
