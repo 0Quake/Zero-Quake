@@ -1143,6 +1143,7 @@ var detecting;
 var shindoStr;
 var pgaStr;
 var pointData;
+var changed_bypass = false;
 function kmoniMapUpdate(dataTmp, type) {
   if (!dataTmp) return;
   if (type == "knet") {
@@ -1156,6 +1157,13 @@ function kmoniMapUpdate(dataTmp, type) {
   }
   //地図上マーカー
 
+  if (becomeForeground) {
+    becomeForeground = false;
+    changed_bypass = true;
+  } else if (now_EEW.length !== 0) {
+    changed_bypass = true;
+  }
+
   for (elm of dataTmp) {
     if (elm.Point && !elm.IsSuspended) {
       pointData = points[elm.Code];
@@ -1168,7 +1176,7 @@ function kmoniMapUpdate(dataTmp, type) {
           pointData = points[elm.Code] = addPointMarker(elm);
         }
 
-        if (elm.changed || now_EEW.length !== 0) {
+        if (elm.changed || changed_bypass) {
           markerElement = pointData.markerElm;
           markerElement.style.background = "rgb(" + elm.rgb.join(",") + ")";
 

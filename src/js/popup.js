@@ -2,6 +2,8 @@ var now_EEW = [];
 /* eslint-disable */
 var Replay = 0;
 var background = false;
+var background;
+var becomeForeground = false;
 /* eslint-enable */
 document.addEventListener("visibilitychange", () => {
   background = document.visibilityState == "visible";
@@ -9,6 +11,7 @@ document.addEventListener("visibilitychange", () => {
     background = false;
   } else {
     background = true;
+    becomeForeground = true;
   }
 });
 
