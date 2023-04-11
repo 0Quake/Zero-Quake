@@ -9,10 +9,9 @@
 
   <title>地震詳細情報 - Zero Quake</title>
 
-  <link rel="stylesheet" href="./js/leaflet/leaflet.css" />
-  <link rel="stylesheet" href="./css/map.css" />
   <link rel="stylesheet" href="./css/style.css" />
-  <script src="./js/leaflet/leaflet.js"></script>
+  <link rel='stylesheet' href='./js/maplibre/maplibre-gl.css'>
+  <link rel="stylesheet" href="./css/map.css" />
   <link rel="stylesheet" href="./css/EQDetail.css" />
 
 </head>
@@ -97,7 +96,34 @@
 
   <canvas id="estimated_intensity_map_canvas" width="800" height="800"></canvas>
 
-  <div id="mapcontainer" class="GJMapActive"></div>
+  <div id="mapcontainer_Wrap">
+    <div id="mapcontainer"></div>
+
+    <div id="menu_wrap">
+      <nav id="menu">
+        <h2>レイヤーの切り替え</h2>
+        <h3>ベースマップ</h3>
+        <div class="radio">
+          <label><input type="radio" name="mapSelect" value="" checked>標準</label>
+          <label><input type="radio" name="mapSelect" value="tile0">地理院地図 (標準)</label>
+          <label><input type="radio" name="mapSelect" value="tile1">地理院地図 (淡色)</label>
+          <label><input type="radio" name="mapSelect" value="tile2">地理院地図 (写真)</label>
+          <label><input type="radio" name="mapSelect" value="tile3">地理院地図 (白地図)</label>
+          <label><input type="radio" name="mapSelect" value="tile4">Open Street Map</label>
+        </div>
+        <h3>オーバーレイ</h3>
+        <div class="check">
+          <label><input type="checkbox" name="overlaySelect" value="gsi_vector" checked>詳細地図 (地名・道路等)</label>
+          <label><input type="checkbox" name="overlaySelect" value="over0">陰影起伏図</label>
+          <label><input type="checkbox" name="overlaySelect" value="over1">火山基本図データ</label>
+          <label><input type="checkbox" name="overlaySelect" value="over2">津波浸水想定 ハザードマップ</label>
+          <label><input type="checkbox" name="overlaySelect" value="over3">土砂災害警戒区域(急傾斜地の崩壊) ハザードマップ</label>
+          <label><input type="checkbox" name="overlaySelect" value="over4">土砂災害警戒区域(地すべり) ハザードマップ</label>
+        </div>
+      </nav>
+    </div>
+    <button id="layerSwitch_toggle">layers</button>
+  </div>
   <main>
 
     <div id="ShindoSample"><span>凡例：</span>
@@ -184,6 +210,7 @@
 
   <div id="canceled">情報がキャンセルされました</div>
 
+  <script src='./js/maplibre/maplibre-gl.js'></script>
   <script src="./js/UIcommon.js"></script>
   <script src="./js/EQDetail.js"></script>
 

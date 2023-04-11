@@ -566,18 +566,6 @@ function init() {
     },
   });
 
-  map.loadImage("https://docs.mapbox.com/mapbox-gl-js/assets/custom_marker.png", (error, image) => {
-    map.addImage("custom-marker", image);
-    map.addLayer({
-      id: "points",
-      type: "symbol",
-      source: "hinanjo",
-      "source-layer": "FeatureCollection",
-      layout: {
-        "icon-image": "custom-marker",
-      },
-    });
-  });
   map.addControl(new maplibregl.NavigationControl(), "top-right");
 
   var zoomLevelContinue = function () {
