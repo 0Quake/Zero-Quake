@@ -15,11 +15,15 @@
         "owner": "{USER_NAME}"
       },
       "target": {
-        "target": "nsis"
+        "target": "nsis",
+        "arch": [
+          "ia32",
+          "x64"
+        ]
       }
     },
     "nsis": {
-      "artifactName": "${productName}_setup_${version}.${ext}",
+      "artifactName": "ZeroQuake_Setup.${ext}",
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createStartMenuShortcut": true,

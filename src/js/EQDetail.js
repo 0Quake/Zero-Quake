@@ -556,6 +556,7 @@ function Mapinit() {
   img.classList.add("homeIcon");
 
   new maplibregl.Marker(img).setLngLat([config.home.longitude, config.home.latitude]).addTo(map);
+  estimated_intensity_mapReq();
 }
 document.getElementById("layerSwitch_toggle").addEventListener("click", function () {
   document.getElementById("menu_wrap").classList.toggle("menu_show");
@@ -953,8 +954,6 @@ function Mapinit2() {
   estimated_intensity_mapReq();
 }
 var estimated_intensity_map_legend;
-var estimated_intensity_map_canvas = document.getElementById("estimated_intensity_map_canvas");
-const ctx = estimated_intensity_map_canvas.getContext("2d");
 var rootElm = document.querySelector(":root");
 var rStyle = getComputedStyle(rootElm);
 
@@ -983,6 +982,8 @@ function estimated_intensity_mapReq() {
       });
       if (ItemTmp) {
         InfoType_add("type-6");
+
+        /*
         estimated_intensity_map_legend = L.control({ position: "bottomright" });
         estimated_intensity_map_legend.onAdd = function () {
           var div = L.DomUtil.create("div");
@@ -990,16 +991,36 @@ function estimated_intensity_mapReq() {
           div.innerHTML = "<img src='./img/estimated_intensity_map_scale.svg'>";
           return div;
         };
-
+*/
         idTmp = ItemTmp.url;
-        var estimated_intensity_map_layer = L.layerGroup();
+        // var estimated_intensity_map_layer = L.layerGroup();
 
-        ItemTmp.mesh_num.forEach(function (elm) {
+        ItemTmp.mesh_num.forEach(function (elm, index) {
           var latTmp = Number(elm.substring(0, 2)) / 1.5;
           var lngTmp = Number(elm.substring(2, 4)) + 100;
           var lat2Tmp = latTmp + 2 / 3;
           var lng2Tmp = lngTmp + 1;
 
+          map.addSource("estimated_intensity_map_" + index, {
+            type: "image",
+            url: "https://www.jma.go.jp/bosai/estimated_intensity_map/data/" + idTmp + "/" + elm + ".png",
+            coordinates: [
+              [lngTmp, lat2Tmp],
+              [lng2Tmp, lat2Tmp],
+              [lng2Tmp, latTmp],
+              [lngTmp, latTmp],
+            ],
+          });
+          map.addLayer({
+            id: "estimated_intensity_map_layer_" + index,
+            type: "raster",
+            source: "estimated_intensity_map_" + index,
+            paint: {
+              "raster-fade-duration": 0,
+            },
+          });
+
+          /*
           let mapImg = new Image();
           mapImg.src = "https://www.jma.go.jp/bosai/estimated_intensity_map/data/" + idTmp + "/" + elm + ".png"; // 画像のURLを指定
           mapImg.onload = () => {
@@ -1009,7 +1030,7 @@ function estimated_intensity_mapReq() {
             ctx.drawImage(mapImg, 0, 0);
 
             //色の変換
-            /*
+            
             const imageData = ctx.getImageData(0, 0, estimated_intensity_map_canvas.width, estimated_intensity_map_canvas.height);
             const data = imageData.data;
             function difference(a, b) {
@@ -1109,21 +1130,10 @@ function estimated_intensity_mapReq() {
             ctx.clearRect(0, 0, estimated_intensity_map_canvas.width, estimated_intensity_map_canvas.height);
 
             ctx.putImageData(imageData, 0, 0);
-            */
-
+            
             var dataURL = estimated_intensity_map_canvas.toDataURL("image/png");
-            estimated_intensity_map_layer.addLayer(
-              L.imageOverlay(
-                dataURL,
-                [
-                  [latTmp, lngTmp],
-                  [lat2Tmp, lng2Tmp],
-                ],
-                { className: "estimated_intensity_map_img" }
-              )
-            );
-          };
-        });
+          };*/
+        }); /*
         L.control
           .layers(
             {},
@@ -1135,7 +1145,7 @@ function estimated_intensity_mapReq() {
               collapsed: false,
             }
           )
-          .addTo(map);
+          .addTo(map);*/
       }
     });
 }
