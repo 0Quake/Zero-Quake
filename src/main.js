@@ -2129,9 +2129,6 @@ function EQI_JMAXMLList_Req() {
 
   request.end();
 }
-setTimeout(function () {
-  EQI_JMAXML_Req("https://example.com", true);
-}, 4000);
 
 //気象庁XML 取得・フォーマット変更→eqInfoControl
 function EQI_JMAXML_Req(url) {
