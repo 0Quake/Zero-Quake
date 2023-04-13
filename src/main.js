@@ -30,6 +30,7 @@ const path = require("path");
 const { JSDOM } = require("jsdom");
 let fs = require("fs");
 const Store = require("electron-store");
+var WebSocketClient = require("websocket").client;
 const store = new Store();
 var config = store.get("config", {
   setting1: true,
@@ -68,6 +69,9 @@ var config = store.get("config", {
     },
     msil: {
       Interval: 10000,
+    },
+    axis: {
+      AccessToken: null,
     },
   },
   notice: {
@@ -715,6 +719,7 @@ function EQInfo_createWindow(response) {
 function start() {
   //↓接続処理
   P2P_WS();
+  AXIS_WS();
   SNXWatch();
   //nakn_WS();
 
@@ -1130,21 +1135,23 @@ function SnetRequest() {
 }
 
 //P2P地震情報API WebSocket接続・受信処理
-function P2P_WS() {
-  var WebSocketClient = require("websocket").client;
-  var client = new WebSocketClient();
+var P2PWSclient;
 
-  client.on("connectFailed", function () {
+function P2P_WS() {
+  P2PWSclient = new WebSocketClient();
+
+  P2PWSclient.on("connectFailed", function () {
     kmoniTimeUpdate(new Date() - Replay, "P2P_EEW", "Error");
+    setTimeout(P2P_WS_Connect, 5000);
   });
 
-  client.on("connect", function (connection) {
+  P2PWSclient.on("connect", function (connection) {
     connection.on("error", function () {
       kmoniTimeUpdate(new Date() - Replay, "P2P_EEW", "Error");
     });
     connection.on("close", function () {
       kmoniTimeUpdate(new Date() - Replay, "P2P_EEW", "Disconnect");
-      P2P_WS();
+      setTimeout(P2P_WS_Connect, 5000);
     });
     connection.on("message", function (message) {
       if (message.type === "utf8") {
@@ -1185,7 +1192,53 @@ function P2P_WS() {
     kmoniTimeUpdate(new Date() - Replay, "P2P_EEW", "success");
   });
 
-  client.connect("wss://api.p2pquake.net/v2/ws");
+  P2P_WS_Connect();
+}
+
+function P2P_WS_Connect() {
+  if (P2PWSclient) P2PWSclient.connect("wss://api.p2pquake.net/v2/ws");
+}
+
+var AXISWSclient;
+const AXIS_headers = {
+  Authorization: `Bearer ${config.Source.axis.AccessToken}`,
+};
+function AXIS_WS() {
+  AXISWSclient = new WebSocketClient();
+
+  AXISWSclient.on("connectFailed", function () {
+    //kmoniTimeUpdate(new Date() - Replay, "axis", "Error");
+    setTimeout(AXIS_WS_Connect, 5000);
+  });
+
+  P2PWSclient.on("connect", function (connection) {
+    connection.on("error", function () {
+      //kmoniTimeUpdate(new Date() - Replay, "axis", "Error");
+    });
+    connection.on("close", function () {
+      //kmoniTimeUpdate(new Date() - Replay, "axis", "Disconnect");
+      setTimeout(AXIS_WS_Connect, 5000);
+    });
+    connection.on("message", function (message) {
+      if (message.type === "utf8") {
+        var data = JSON.parse(message.utf8Data);
+        if (data.Title && (data.Title == "緊急地震速報（予報）" || data.Title == "緊急地震速報（警報）")) {
+          //eew
+          EEWdetect(4, data);
+        } else if (data.channel == "jmx-seismology") {
+          //地震情報
+        }
+        //kmoniTimeUpdate(new Date() - Replay, "axis", "success");
+      }
+    });
+    //kmoniTimeUpdate(new Date() - Replay, "axis", "success");
+  });
+
+  AXIS_WS_Connect();
+}
+
+function AXIS_WS_Connect() {
+  if (AXISWSclient) AXISWSclient.connect("wss://api.p2pquake.net/v2/ws", null, null, AXIS_headers);
 }
 
 //定期実行
@@ -1672,6 +1725,52 @@ function EEWdetect(type, json, KorL) {
     }
     if (KorL == 2) lwaveTmp = json.avrarea;
   } else if (type == 3) {
+    //P2P
+
+    var alertflgTmp = json.Title == "緊急地震速報（予報）" ? "予報" : "警報";
+    var EEWdata = {
+      alertflg: alertflgTmp, //種別
+      report_id: json.EventID, //地震ID
+      report_num: json.Serial, //第n報
+      report_time: new Date(json.ReportDateTime), //発表時刻
+      magunitude: Number(json.Magnitude), //マグニチュード
+      calcintensity: shindoConvert(json.Intensity), //最大震度
+      depth: Number(json.Hypocenter.Depth.replace("km", "")), //深さ
+      is_cancel: json.Flag.is_cancel, //キャンセル
+      is_final: json.Flag.is_final, //最終報(P2P→不明)
+      is_training: json.Flag.is_training, //訓練報
+      latitude: json.Hypocenter.Coordinate[1], //緯度
+      longitude: json.Hypocenter.Coordinate[0], //経度
+      region_code: json.Hypocenter.Code, //震央地域コード
+      region_name: json.Hypocenter.Name, //震央地域
+      origin_time: new Date(json.OriginDateTime), //発生時刻
+      isPlum: null, //PLUM法かどうか
+      userIntensity: null,
+      arrivalTime: null,
+      intensityAreas: null, //細分区分ごとの予想震度
+      warnZones: {
+        zone: null,
+        Pref: null,
+        Regions: null,
+      },
+      source: "axis",
+    };
+
+    var areaTmp = [];
+    json.Forecast.forEach(function (elm) {
+      areaTmp.push({
+        pref: null, //府県予報区
+        name: elm.Name, //地域名（細分区域名）
+        scaleFrom: shindoConvert(elm.Intensity.From), //最大予測震度の下限
+        scaleTo: shindoConvert(elm.Intensity.To), //最大予測震度の上限
+        kindCode: null, //警報コード( 10 (緊急地震速報（警報） 主要動について、未到達と予測), 11 (緊急地震速報（警報） 主要動について、既に到達と予測), 19 (緊急地震速報（警報） 主要動の到達予想なし（PLUM法による予想）) )
+        arrivalTime: null, //主要動の到達予測時刻
+      });
+    });
+    EEWdata.intensityAreas = areaTmp;
+
+    EEWcontrol(EEWdata);
+  } else if (type == 4) {
     //P2P
     var maxIntTmp = Math.floor(
       Math.max.apply(
@@ -2795,7 +2894,7 @@ function dateEncode(type, dateTmp) {
 //震度の形式変換
 function shindoConvert(str, responseType) {
   var ShindoTmp;
-  if (!str) {
+  if (!str || str == "不明") {
     ShindoTmp = "?";
   } else if (isNaN(str)) {
     str = String(str);
