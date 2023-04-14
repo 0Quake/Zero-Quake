@@ -263,13 +263,29 @@
                                 <option value="JMA_EqInfo">気象庁</option>
                                 <option value="USGS_EqInfo">USGS</option>
                             </select>
-                            <div id="JMA_EqInfo" class="EQInfo activeEQInfo"><span>読み込み中</span></div>
-                            <div id="USGS_EqInfo" class="EQInfo"><span>読み込み中</span></div>
+                            <div id="JMA_EqInfo" class="EQInfo activeEQInfo">
+                                <div class="mini-loading-wrap">
+                                    <svg width="60" height="60">
+                                        <circle class="loading-ring" cx="30" cy="30" r="23.5" fill="none" stroke="#CCC" stroke-width="5px" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="156" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <div id="USGS_EqInfo" class="EQInfo">
+                                <div class="mini-loading-wrap">
+                                    <svg width="60" height="60">
+                                        <circle class="loading-ring" cx="30" cy="30" r="23.5" fill="none" stroke="#CCC" stroke-width="5px" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="156" />
+                                    </svg>
+                                </div>
+                            </div>
                         </div>
                         <div id="tab1_content2" class="tabcontent">
 
                             <div id="kmoniRealtime">
-                                <div id="pointListLoading">読み込み中</div>
+                                <div id="pointListLoading">
+                                    <svg width="60" height="60">
+                                        <circle class="loading-ring" cx="30" cy="30" r="23.5" fill="none" stroke="#CCC" stroke-width="5px" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="156" />
+                                    </svg>
+                                </div>
                                 <ul id="pointList"></ul>
                             </div>
                         </div>

@@ -1070,6 +1070,11 @@ button:hover {
   animation: rotate 1.5s infinite ease-in-out, rotate2 3s infinite linear;
   transform-origin: center center;
 }
+.mini-loading-wrap {
+  text-align: center;
+  margin: 10px 5px;
+}
+
 @keyframes rotate {
   0% {
     stroke-dashoffset: 157;

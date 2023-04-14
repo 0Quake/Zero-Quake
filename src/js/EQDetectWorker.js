@@ -41,74 +41,72 @@ function EQDetect(data, date) {
     var detect2;
     var pgaAvr;
     for (const elm of data) {
-      if (elm.Point && !elm.IsSuspended) {
-        //ポイントごとの処理
+      //ポイントごとの処理
 
+      ptDataTmp = pointsData[elm.Code];
+      if (!ptDataTmp) {
+        //都会かどうか
+        var isCity = elm.Region == "東京都" || elm.Region == "千葉県" || elm.Region == "埼玉県" || elm.Region == "神奈川県";
+        pointsData[elm.Code] = { detectCount: 0, SUMTmp: [elm.pga], Event: false, isCity: isCity, UpCount: 0 };
         ptDataTmp = pointsData[elm.Code];
-        if (!ptDataTmp) {
-          //都会かどうか
-          var isCity = elm.Region == "東京都" || elm.Region == "千葉県" || elm.Region == "埼玉県" || elm.Region == "神奈川県";
-          pointsData[elm.Code] = { detectCount: 0, SUMTmp: [elm.pga], Event: false, isCity: isCity, UpCount: 0 };
-          ptDataTmp = pointsData[elm.Code];
-        }
-
-        if (elm.data) {
-          //PGAの10回平均を求める
-          pgaAvr =
-            ptDataTmp.SUMTmp.reduce(function (acc, cur) {
-              return acc + cur;
-            }) / ptDataTmp.SUMTmp.length;
-          if (!pgaAvr) pgaAvr = 0.1; //平均が求められなければ0.1を代入
-
-          //平均PGAから閾値を決定
-          thresholds.threshold02 = 0.7 * pgaAvr + 0.08;
-          thresholds.threshold03 = 0.8 * pgaAvr + 0.5;
-          if (ptDataTmp.isCity) {
-            //都会では閾値を大きく
-            thresholds.threshold02 *= 2;
-            thresholds.threshold03 *= 2;
-          }
-
-          detect0 = elm.pga - pgaAvr >= thresholds.threshold02 || elm.shindo >= thresholds.threshold04; //PGA増加量・震度絶対値で評価
-          detect1 = detect0 && ptDataTmp.detectCount > 0; //detect1に加え、detectCountを加えて評価
-          detect2 = detect1 && ((elm.pga - pgaAvr >= thresholds.threshold03 && ptDataTmp.UpCount > 0) || elm.shindo > thresholds.threshold04);
-
-          elm.detect = detect1;
-          elm.detect2 = detect2;
-
-          //前回からの変化の有無（描画時の負荷軽減のため）
-          elm.changed = elm.pga != ptDataTmp.SUMTmp[ptDataTmp.SUMTmp.length - 1];
-
-          //連続上昇回数（変化なし含む）
-          if (elm.pga - ptDataTmp.SUMTmp[ptDataTmp.SUMTmp.length - 1] >= 0) {
-            ptDataTmp.UpCount++;
-          } else {
-            ptDataTmp.UpCount = 0;
-          }
-
-          //if (!detect2) {
-          //PGA平均を求めるためのデータ追加
-          ptDataTmp.SUMTmp = ptDataTmp.SUMTmp.slice(0, thresholds.historyCount - 1);
-          ptDataTmp.SUMTmp.push(elm.pga);
-        }
-        //連続検出回数（detect1は連続検出回数を指標に含むため、detect0で判定）
-        if (detect0) {
-          ptDataTmp.detectCount++;
-        } else {
-          ptDataTmp.detectCount = 0;
-        }
-
-        if (!detect1 && ptDataTmp.Event) {
-          //検出中ではない場合、地震アイテムから観測点データを削除
-          ptDataTmp.Event = false;
-          for (const elm2 of EQDetect_List) {
-            elm2.Codes = elm2.Codes.filter(function (elm3) {
-              return elm3.Code !== elm.Code;
-            });
-          }
-        }
-        //}
       }
+
+      if (elm.data) {
+        //PGAの10回平均を求める
+        pgaAvr =
+          ptDataTmp.SUMTmp.reduce(function (acc, cur) {
+            return acc + cur;
+          }) / ptDataTmp.SUMTmp.length;
+        if (!pgaAvr) pgaAvr = 0.1; //平均が求められなければ0.1を代入
+
+        //平均PGAから閾値を決定
+        thresholds.threshold02 = 0.7 * pgaAvr + 0.08;
+        thresholds.threshold03 = 0.8 * pgaAvr + 0.5;
+        if (ptDataTmp.isCity) {
+          //都会では閾値を大きく
+          thresholds.threshold02 *= 2;
+          thresholds.threshold03 *= 2;
+        }
+
+        detect0 = elm.pga - pgaAvr >= thresholds.threshold02 || elm.shindo >= thresholds.threshold04; //PGA増加量・震度絶対値で評価
+        detect1 = detect0 && ptDataTmp.detectCount > 0; //detect1に加え、detectCountを加えて評価
+        detect2 = detect1 && ((elm.pga - pgaAvr >= thresholds.threshold03 && ptDataTmp.UpCount > 0) || elm.shindo > thresholds.threshold04);
+
+        elm.detect = detect1;
+        elm.detect2 = detect2;
+
+        //前回からの変化の有無（描画時の負荷軽減のため）
+        elm.changed = elm.pga != ptDataTmp.SUMTmp[ptDataTmp.SUMTmp.length - 1];
+
+        //連続上昇回数（変化なし含む）
+        if (elm.pga - ptDataTmp.SUMTmp[ptDataTmp.SUMTmp.length - 1] >= 0) {
+          ptDataTmp.UpCount++;
+        } else {
+          ptDataTmp.UpCount = 0;
+        }
+
+        //if (!detect2) {
+        //PGA平均を求めるためのデータ追加
+        ptDataTmp.SUMTmp = ptDataTmp.SUMTmp.slice(0, thresholds.historyCount - 1);
+        ptDataTmp.SUMTmp.push(elm.pga);
+      }
+      //連続検出回数（detect1は連続検出回数を指標に含むため、detect0で判定）
+      if (detect0) {
+        ptDataTmp.detectCount++;
+      } else {
+        ptDataTmp.detectCount = 0;
+      }
+
+      if (!detect1 && ptDataTmp.Event) {
+        //検出中ではない場合、地震アイテムから観測点データを削除
+        ptDataTmp.Event = false;
+        for (const elm2 of EQDetect_List) {
+          elm2.Codes = elm2.Codes.filter(function (elm3) {
+            return elm3.Code !== elm.Code;
+          });
+        }
+      }
+      //}
     }
 
     var MargeRangeTmp;

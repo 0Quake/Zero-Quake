@@ -1160,12 +1160,12 @@ function kmoniMapUpdate(dataTmp, type) {
   if (becomeForeground) {
     becomeForeground = false;
     changed_bypass = true;
-  } else if (now_EEW.length !== 0) {
+  } else if (now_EEW.length !== 0 || Object.keys(points).length == 0) {
     changed_bypass = true;
   }
 
   for (elm of dataTmp) {
-    if (elm.Point && !elm.IsSuspended) {
+    if (elm.changed || changed_bypass) {
       pointData = points[elm.Code];
 
       if (elm.data) {
@@ -1176,49 +1176,46 @@ function kmoniMapUpdate(dataTmp, type) {
           pointData = points[elm.Code] = addPointMarker(elm);
         }
 
-        if (elm.changed || changed_bypass) {
-          markerElement = pointData.markerElm;
-          markerElement.style.background = "rgb(" + elm.rgb.join(",") + ")";
+        markerElement = pointData.markerElm;
+        markerElement.style.background = "rgb(" + elm.rgb.join(",") + ")";
 
-          if (elm.detect) {
-            markerElement.classList.add("detectingMarker");
-            if (elm.detect2) {
-              markerElement.classList.add("strongDetectingMarker");
-            }
-          } else {
-            markerElement.classList.remove("strongDetectingMarker", "detectingMarker");
+        if (elm.detect) {
+          markerElement.classList.add("detectingMarker");
+          if (elm.detect2) {
+            markerElement.classList.add("strongDetectingMarker");
           }
-
-          var IntTmp = shindoConvert(elm.shindo, 3);
-          if (IntTmp) {
-            markerElement.classList.add("marker_Int", "marker_Int" + IntTmp);
-          } else {
-            markerElement.classList.remove("marker_Int", "marker_Int1", "marker_Int2", "marker_Int3", "marker_Int4", "marker_Int5m", "marker_Int5p", "marker_Int6m", "marker_Int6p", "marker_Int7", "marker_Int7p");
-          }
-
-          detecting = elm.detect || elm.detect2 ? "block" : "none";
-          shindoStr = Math.round(elm.shindo * 10) / 10;
-          pgaStr = Math.round(elm.pga * 100) / 100;
-          if (elm.Type == "S-net") {
-            elm.Type += "_";
-            elm.Name = "";
-          }
-          popup_content = "<h3 class='PointName' style='border-bottom:solid 2px rgb(" + elm.rgb.join(",") + ")'>" + elm.Name + "<span>" + elm.Type + elm.Code + "</span></h3><h4 class='detecting' style='display:" + detecting + "'>地震検知中</h4><p>震度 " + shindoStr + "</p><p>PGA " + pgaStr + "gal</p>";
-          pointData.popup.setHTML(popup_content);
+        } else {
+          markerElement.classList.remove("strongDetectingMarker", "detectingMarker");
         }
+
+        var IntTmp = shindoConvert(elm.shindo, 3);
+        if (IntTmp) {
+          markerElement.classList.add("marker_Int", "marker_Int" + IntTmp);
+        } else {
+          markerElement.classList.remove("marker_Int", "marker_Int1", "marker_Int2", "marker_Int3", "marker_Int4", "marker_Int5m", "marker_Int5p", "marker_Int6m", "marker_Int6p", "marker_Int7", "marker_Int7p");
+        }
+
+        detecting = elm.detect || elm.detect2 ? "block" : "none";
+        shindoStr = Math.round(elm.shindo * 10) / 10;
+        pgaStr = Math.round(elm.pga * 100) / 100;
+        if (elm.Type == "S-net") {
+          elm.Type += "_";
+          elm.Name = "";
+        }
+        popup_content = "<h3 class='PointName' style='border-bottom:solid 2px rgb(" + elm.rgb.join(",") + ")'>" + elm.Name + "<span>" + elm.Type + elm.Code + "</span></h3><h4 class='detecting' style='display:" + detecting + "'>地震検知中</h4><p>震度 " + shindoStr + "</p><p>PGA " + pgaStr + "gal</p>";
+        pointData.popup.setHTML(popup_content);
+
         pointData.PrevPga = elm.pga;
         //previous_points[elm.Code] = elm;
-      } else {
-        if (pointData) {
-          markerElement = pointData.markerElm;
-          markerElement.style.background = "rgba(128,128,128,0.5)";
-          markerElement.classList.remove("strongDetectingMarker");
-          markerElement.classList.remove("detectingMarker");
-          var PNameTmp = elm.Name ? elm.Name : "";
+      } else if (pointData) {
+        markerElement = pointData.markerElm;
+        markerElement.style.background = "rgba(128,128,128,0.5)";
+        markerElement.classList.remove("strongDetectingMarker");
+        markerElement.classList.remove("detectingMarker");
+        var PNameTmp = elm.Name ? elm.Name : "";
 
-          popup_content = "<h3 class='PointName' style='border-bottom:solid 2px rgba(128,128,128,0.5)'>" + PNameTmp + "<span>" + elm.Code + "</span></h3><h4 class='detecting' style='display:none'>地震検知中</h4><p>震度 ?</p><p>PGA ?</p>";
-          pointData.popup.setHTML(popup_content);
-        }
+        popup_content = "<h3 class='PointName' style='border-bottom:solid 2px rgba(128,128,128,0.5)'>" + PNameTmp + "<span>" + elm.Code + "</span></h3><h4 class='detecting' style='display:none'>地震検知中</h4><p>震度 ?</p><p>PGA ?</p>";
+        pointData.popup.setHTML(popup_content);
       }
     }
   }
