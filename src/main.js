@@ -71,7 +71,8 @@ var config = store.get("config", {
       Interval: 10000,
     },
     axis: {
-      AccessToken: null,
+      GetData: false,
+      AccessToken: "",
     },
   },
   notice: {
@@ -1204,19 +1205,20 @@ const AXIS_headers = {
   Authorization: `Bearer ${config.Source.axis.AccessToken}`,
 };
 function AXIS_WS() {
+  if (!config.Source.axis.GetData) return;
   AXISWSclient = new WebSocketClient();
 
   AXISWSclient.on("connectFailed", function () {
-    //kmoniTimeUpdate(new Date() - Replay, "axis", "Error");
+    kmoniTimeUpdate(new Date() - Replay, "axis", "Error");
     setTimeout(AXIS_WS_Connect, 5000);
   });
 
   P2PWSclient.on("connect", function (connection) {
     connection.on("error", function () {
-      //kmoniTimeUpdate(new Date() - Replay, "axis", "Error");
+      kmoniTimeUpdate(new Date() - Replay, "axis", "Error");
     });
     connection.on("close", function () {
-      //kmoniTimeUpdate(new Date() - Replay, "axis", "Disconnect");
+      kmoniTimeUpdate(new Date() - Replay, "axis", "Disconnect");
       setTimeout(AXIS_WS_Connect, 5000);
     });
     connection.on("message", function (message) {
@@ -1228,10 +1230,10 @@ function AXIS_WS() {
         } else if (data.channel == "jmx-seismology") {
           //地震情報
         }
-        //kmoniTimeUpdate(new Date() - Replay, "axis", "success");
+        kmoniTimeUpdate(new Date() - Replay, "axis", "success");
       }
     });
-    //kmoniTimeUpdate(new Date() - Replay, "axis", "success");
+    kmoniTimeUpdate(new Date() - Replay, "axis", "success");
   });
 
   AXIS_WS_Connect();

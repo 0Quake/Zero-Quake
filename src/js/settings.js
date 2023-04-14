@@ -20,6 +20,10 @@ window.electronAPI.messageSend((event, request) => {
     if (SaibunElm) SaibunElm.selected = true;
 
     document.getElementById("BugReportAutoSend").checked = setting.system.crashReportAutoSend;
+
+    document.getElementById("Axis_GetData").checked = setting.Source.axis.GetData;
+    if (setting.Source.axis.AccessToken) document.getElementById("Axis_AccessToken").value = setting.Source.axis.AccessToken;
+
     init();
   } else if (request.action == "Update_Data") {
     UpdateDataDraw(request.data);
@@ -73,6 +77,8 @@ document.getElementById("apply").addEventListener("click", function () {
   setting.notice.voice.EEW = document.getElementById("EEW_Voice").value;
   setting.Info.EQInfo.ItemCount = Number(document.getElementById("EQInfo_ItemCount").value);
   setting.Info.RealTimeShake.List.ItemCount = Number(document.getElementById("RealTimeShake_ItemCount").value);
+  setting.Source.axis.GetData = document.getElementById("Axis_GetData").checked;
+  setting.Source.axis.AccessToken = document.getElementById("Axis_AccessToken").value;
   window.electronAPI.messageReturn({
     action: "settingReturn",
     data: setting,
