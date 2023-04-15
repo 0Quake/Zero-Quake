@@ -16,7 +16,7 @@ function replay(ReplayDate) {
   }
 }
 /* eslint-enable */
-//replay("2023/4/12 17:46:00");
+//replay("2023/4/15 0:59:30");
 //replay("2023/4/6 13:10:40");
 //replay("2023/04/04 16:11:00"); //２か所同時
 //replay("2023/3/27 0:04:25");
@@ -804,7 +804,7 @@ worker.on("message", (message) => {
         action: "kmoniUpdate",
         Updatetime: new Date(message.date),
         LocalTime: new Date(),
-        data: message.data,
+        data: message,
       };
       if (mainWindow) {
         mainWindow.webContents.send("message2", kmoniPointsDataTmp);

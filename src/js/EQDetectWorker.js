@@ -33,6 +33,8 @@ workerThreads.parentPort.on("message", (message) => {
 });
 
 function EQDetect(data, date) {
+  var changedData = [];
+
   if (!EEWNow) {
     var ptDataTmp;
 
@@ -107,6 +109,7 @@ function EQDetect(data, date) {
         }
       }
       //}
+      if (elm.changed) changedData.push(elm);
     }
 
     var MargeRangeTmp;
@@ -202,6 +205,7 @@ function EQDetect(data, date) {
     action: "PointsData_Update",
     data: data,
     date: date,
+    changedData: changedData,
   });
 }
 

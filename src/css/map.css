@@ -308,83 +308,83 @@ img.leaflet-control {
 div.marker-circle {
   z-index: 80;
 }
-div.marker-circle.marker_Int1 {
+div.marker-circle.marker_Int.marker_Int1 {
   background: var(--IntTheme_1_BgColor) !important;
   z-index: 90;
 }
-.marker_Int1::before {
+.marker_Int.marker_Int1::before {
   content: "1";
   color: var(--IntTheme_1_color);
 }
-div.marker-circle.marker_Int2 {
+div.marker-circle.marker_Int.marker_Int2 {
   background: var(--IntTheme_2_BgColor) !important;
   z-index: 91;
 }
-.marker_Int2::before {
+.marker_Int.marker_Int2::before {
   content: "2";
   color: var(--IntTheme_2_color);
 }
-div.marker-circle.marker_Int3 {
+div.marker-circle.marker_Int.marker_Int3 {
   background: var(--IntTheme_3_BgColor) !important;
   z-index: 92;
 }
-.marker_Int3::before {
+.marker_Int.marker_Int3::before {
   content: "3";
   color: var(--IntTheme_3_color);
 }
-div.marker-circle.marker_Int4 {
+div.marker-circle.marker_Int.marker_Int4 {
   background: var(--IntTheme_4_BgColor) !important;
   z-index: 93;
 }
-.marker_Int4::before {
+.marker_Int.marker_Int4::before {
   content: "4";
   color: var(--IntTheme_4_color);
 }
-div.marker-circle.marker_Int5m {
+div.marker-circle.marker_Int.marker_Int5m {
   background: var(--IntTheme_5m_BgColor) !important;
   z-index: 94;
 }
-.marker_Int5m::before {
+.marker_Int.marker_Int5m::before {
   content: "5-";
   color: var(--IntTheme_5-_color);
 }
-div.marker-circle.marker_Int5p {
+div.marker-circle.marker_Int.marker_Int5p {
   background: var(--IntTheme_5p_BgColor) !important;
   z-index: 95;
 }
-.marker_Int5p::before {
+.marker_Int.marker_Int5p::before {
   content: "5+";
   color: var(--IntTheme_5p_color);
 }
-div.marker-circle.marker_Int6m {
+div.marker-circle.marker_Int.marker_Int6m {
   background: var(--IntTheme_6m_BgColor) !important;
   z-index: 96;
 }
-.marker_Int6m::before {
+.marker_Int.marker_Int6m::before {
   content: "6-";
   color: var(--IntTheme_6-_color);
 }
-div.marker-circle.marker_Int6p {
+div.marker-circle.marker_Int.marker_Int6p {
   background: var(--IntTheme_6p_BgColor) !important;
   z-index: 97;
 }
-.marker_Int6p::before {
+.marker_Int.marker_Int6p::before {
   content: "6+";
   color: var(--IntTheme_6p_color);
 }
-div.marker-circle.marker_Int7 {
+div.marker-circle.marker_Int.marker_Int7 {
   background: var(--IntTheme_7_BgColor) !important;
   z-index: 98;
 }
-.marker_Int7::before {
+.marker_Int.marker_Int7::before {
   content: "7";
   color: var(--IntTheme_7_color);
 }
-div.marker-circle.marker_Int7p {
+div.marker-circle.marker_Int.marker_Int7p {
   background: var(--IntTheme_7p_BgColor) !important;
   z-index: 99;
 }
-.marker_Int7p::before {
+.marker_Int.marker_Int7p::before {
   content: "7+";
   color: var(--IntTheme_7p_color);
 }
