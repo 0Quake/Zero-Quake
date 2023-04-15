@@ -28,7 +28,7 @@ const workerThreads = require("worker_threads");
 const { app, BrowserWindow, ipcMain, net, Notification, shell, dialog, Menu } = electron;
 const path = require("path");
 const { JSDOM } = require("jsdom");
-let fs = require("fs");
+//let fs = require("fs");
 const Store = require("electron-store");
 var WebSocketClient = require("websocket").client;
 const store = new Store();
@@ -143,7 +143,7 @@ var config = store.get("config", {
     },
   },
 });
-const userHome = process.env[process.platform == "win32" ? "USERPROFILE" : "HOME"];
+//const userHome = process.env[process.platform == "win32" ? "USERPROFILE" : "HOME"];
 let mainWindow, settingWindow, tsunamiWindow, kmoniWorker;
 var kmoniActive = false;
 var EstShindoFetch = false;
@@ -188,7 +188,7 @@ var kmoniTimeout, lmoniTimeout, ymoniTimeout;
 var msil_lastTime = 0;
 var kmoniEid, kmoniRNum;
 var kmoniPointsDataTmp, SnetPointsDataTmp;
-var intColorConv = { "0xFFFFFFFF": "0", "0xFFF2F2FF": "1", "0xFF00AAFF": "2", "0xFF0041FF": "3", "0xFFFAE696": "4", "0xFFFFE600": "5-", "0xFFFF9900": "5+", "0xFFFF2800": "6-", "0xFFA50021": "6+", "0xFFB40068": "7" };
+//var intColorConv = { "0xFFFFFFFF": "0", "0xFFF2F2FF": "1", "0xFF00AAFF": "2", "0xFF0041FF": "3", "0xFFFAE696": "4", "0xFFFFE600": "5-", "0xFFFF9900": "5+", "0xFFFF2800": "6-", "0xFFA50021": "6+", "0xFFB40068": "7" };
 let tray;
 var RevocationTimer;
 var thresholds;
