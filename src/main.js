@@ -721,7 +721,7 @@ function start() {
   //↓接続処理
   P2P_WS();
   AXIS_WS();
-  SNXWatch();
+  //SNXWatch();
   //nakn_WS();
 
   SnetRequest();
@@ -1261,6 +1261,7 @@ function RegularExecution() {
 }
 
 //SNX変更監視→SNXLogReadへ
+/*
 function SNXWatch() {
   for (let i = 1; i <= 10; i++) {
     var filenameTmp = "SignalNowX_" + String(i).padStart(2, "0") + ".csl";
@@ -1374,7 +1375,7 @@ function SNXLogRead(str) {
       });
     });
   }
-}
+}*/
 
 //Yahoo強震モニタのサーバーを選択
 async function kmoniServerSelect() {
