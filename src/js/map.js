@@ -1152,7 +1152,6 @@ function kmoniMapUpdate(dataTmp, type) {
     }
   }
   //地図上マーカー
-
   if (becomeForeground) {
     becomeForeground = false;
     changed_bypass = true;
