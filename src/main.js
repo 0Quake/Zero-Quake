@@ -1240,6 +1240,22 @@ function AXIS_WS() {
           EEWdetect(4, data);
         } else if (data.channel == "jmx-seismology") {
           //地震情報
+          eqInfoControl(
+            [
+              {
+                eventId: data.message.Head.EventID,
+                category: data.message.Head.Title,
+                reportDateTime: data.message.Head.ReportDateTime,
+                OriginTime: data.message.Head.TargetDateTime,
+                epiCenter: data.message.Body.Earthquake.Hypocenter.Area.Name,
+                M: data.message.Body.Earthquake.Magnitude,
+                maxI: data.message.Body.Intensity.Observation.MaxInt,
+                cancel: null,
+                DetailURL: [],
+              },
+            ],
+            "jma"
+          );
         }
         kmoniTimeUpdate(new Date() - Replay, "axis", "success");
       }
