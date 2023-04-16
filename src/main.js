@@ -149,7 +149,6 @@ var config = store.get("config", {
     },
   },
 });
-//const userHome = process.env[process.platform == "win32" ? "USERPROFILE" : "HOME"];
 let mainWindow, settingWindow, tsunamiWindow, kmoniWorker;
 var kmoniActive = false;
 var EstShindoFetch = false;
@@ -194,7 +193,6 @@ var kmoniTimeout, lmoniTimeout, ymoniTimeout;
 var msil_lastTime = 0;
 var kmoniEid, kmoniRNum;
 var kmoniPointsDataTmp, SnetPointsDataTmp;
-//var intColorConv = { "0xFFFFFFFF": "0", "0xFFF2F2FF": "1", "0xFF00AAFF": "2", "0xFF0041FF": "3", "0xFFFAE696": "4", "0xFFFFE600": "5-", "0xFFFF9900": "5+", "0xFFFF2800": "6-", "0xFFA50021": "6+", "0xFFB40068": "7" };
 let tray;
 var RevocationTimer;
 var thresholds;
@@ -732,8 +730,6 @@ function start() {
   //↓接続処理
   P2P_WS();
   AXIS_WS();
-  //SNXWatch();
-  //nakn_WS();
 
   SnetRequest();
 
@@ -1286,123 +1282,6 @@ function RegularExecution() {
 
   setTimeout(RegularExecution, 1000);
 }
-
-//SNX変更監視→SNXLogReadへ
-/*
-function SNXWatch() {
-  for (let i = 1; i <= 10; i++) {
-    var filenameTmp = "SignalNowX_" + String(i).padStart(2, "0") + ".csl";
-    var pathTmp = path.join(userHome, "/AppData/Roaming/StrategyCorporation/SignalNowX/" + filenameTmp);
-    if (fs.existsSync(pathTmp)) {
-      fs.watch(pathTmp, function (eventType, filename) {
-        SNXLogRead(filename);
-      });
-    }
-    SNXLogRead(filenameTmp);
-  }
-}
-
-//SNXログ読み取り→EEWcontrolへ
-function SNXLogRead(str) {
-  var pathTmp = path.join(userHome, "/AppData/Roaming/StrategyCorporation/SignalNowX/" + str);
-  if (fs.existsSync(pathTmp)) {
-    fs.readFile(pathTmp, function (err, content) {
-      if (err) {
-        return;
-      }
-
-      var buffer = Buffer.from(content);
-      let logData = buffer.toString();
-
-      var SNXDataTmp = [];
-
-      let dataTmp = logData.split("MsgType=9");
-      dataTmp.forEach(function (elm) {
-        var eidTmp;
-        var reportnumTmp;
-        var origintimeTmp;
-        var reporttimeTmp;
-        var arrivaltimeTmp;
-        var intTmp;
-        elm.split("<BOM>").forEach(function (elm2) {
-          if (elm2.indexOf("対象EQ ID") != -1) {
-            eidTmp = elm2.split(" = ")[1].substring(2, 16);
-            reportnumTmp = elm2.split(" = ")[1].substring(17, 20);
-          } else if (elm2.indexOf("地震発生時刻(a)") != -1) {
-            origintimeTmp = elm2.split(" = ")[1].substring(0, 19);
-          } else if (elm2.indexOf("地震到達予測時刻(c)") != -1) {
-            arrivaltimeTmp = elm2.split(" = ")[1].substring(0, 19);
-          } else if (elm2.indexOf("現在時刻(d)") != -1) {
-            reporttimeTmp = elm2.split(" = ")[1].substring(0, 19);
-          } else if (elm2.indexOf("震度階級色") != -1) {
-            intTmp = intColorConv[elm2.split(" = ")[1].substring(0, 10)];
-          }
-        });
-
-        if (origintimeTmp && (eidTmp || reportnumTmp || intTmp)) {
-          SNXDataTmp.push({
-            alertflg: null,
-            report_id: eidTmp,
-            report_num: Number(reportnumTmp),
-            report_time: new Date(reporttimeTmp),
-            condition: null,
-            magunitude: null,
-            calcintensity: null,
-            depth: null,
-            is_cancel: null,
-            is_final: null,
-            is_training: null,
-            latitude: null,
-            longitude: null,
-            region_code: null,
-            region_name: null,
-            origin_time: new Date(origintimeTmp),
-            isPlum: null,
-            userIntensity: intTmp,
-            arrivalTime: new Date(arrivaltimeTmp),
-            intensityAreas: null, //細分区分ごとの予想震度
-            warnZones: {
-              zone: null,
-              Pref: null,
-              Regions: null,
-            },
-            source: "SignalNow X",
-          });
-        }
-      });
-
-      let dataTmp2 = logData.split("<BOM>");
-      var eidTmp;
-      dataTmp2.forEach(function (elm) {
-        if (elm.indexOf("[OnEq01Queued]() Objective EqId =") != -1) {
-          eidTmp = elm.split("[OnEq01Queued]() Objective EqId = ")[1].split('"')[0].replace("ND", "");
-        } else if (eidTmp && elm.indexOf("[CalculateEqEffect()]()") != -1) {
-          var item = elm.split("[CalculateEqEffect()]()")[1].split("|")[0].split(",");
-          if (item.length == 11) {
-            var latTmp = Number(item[0].split(": ")[1]);
-            var lngTmp = Number(item[1].split(": ")[1]);
-            var depthTmp = Number(item[2].split(": ")[1]);
-            var magTmp = Number(item[3].split(": ")[1]);
-
-            var SNXDataItem = SNXDataTmp.find(function (elm) {
-              return elm.report_id == eidTmp;
-            });
-            if (SNXDataItem) {
-              SNXDataItem.magunitude = magTmp;
-              SNXDataItem.latitude = latTmp;
-              SNXDataItem.longitude = lngTmp;
-              SNXDataItem.depth = depthTmp;
-            }
-          }
-        }
-      });
-
-      SNXDataTmp.forEach(function (elm) {
-        EEWcontrol(elm);
-      });
-    });
-  }
-}*/
 
 //Yahoo強震モニタのサーバーを選択
 async function kmoniServerSelect() {
