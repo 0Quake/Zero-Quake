@@ -99,8 +99,11 @@ div .tabcontent {
   height: 100%;
   overflow: auto;
   padding: 20px 20px 60px 20px !important;
+  max-width: 600px;
 }
-
+#tab1_content2 {
+  max-width: none;
+}
 #BtnWrap {
   position: absolute;
   left: 0;
@@ -118,15 +121,15 @@ div .tabcontent {
   height: 30px;
   margin: 5px;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   font-size: 16px;
-  background: rgb(108, 30, 30);
+  background: rgb(149, 46, 46);
   color: #fff;
   transition: 200ms;
 }
 
 #BtnWrap button:hover {
-  background: rgb(83, 0, 0);
+  background: rgb(181, 58, 58);
 }
 
 #mapcontainer {
@@ -235,4 +238,33 @@ h4 {
 label {
   display: block;
   padding: 0.2em 0;
+}
+#tab1_content2 h2 {
+  margin: 30px 0 15px 0;
+}
+#tab1_content2 h3 {
+  margin: 0 0 15px 10px;
+}
+
+label input[type="text"],
+label input[type="number"],
+label select {
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 4px;
+  border: solid 1px #888;
+  outline: none;
+}
+label input[type="text"]:focus,
+label input[type="number"]:focus,
+label select :focus {
+  border: solid 1px rgb(230 132 132);
+  outline: solid 1px rgb(230 132 132);
+}
+
+label input[type="text"],
+label input[type="number"],
+label input[type="range"],
+label select {
+  width: 100%;
 }

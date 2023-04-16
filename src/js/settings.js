@@ -11,6 +11,7 @@ window.electronAPI.messageSend((event, request) => {
     document.getElementById("latitude").value = setting.home.latitude;
     document.getElementById("longitude").value = setting.home.longitude;
     document.getElementById("EEW_Voice").value = setting.notice.voice.EEW;
+    document.getElementById("EEW2_Voice").value = setting.notice.voice.EEWUpdate;
     document.getElementById("EQInfo_ItemCount").value = setting.Info.EQInfo.ItemCount;
     document.getElementById("RealTimeShake_ItemCount").value = setting.Info.RealTimeShake.List.ItemCount;
 
@@ -85,6 +86,7 @@ document.getElementById("apply").addEventListener("click", function () {
   setting.home.longitude = document.getElementById("longitude").value;
   setting.home.Section = document.getElementById("saibun").value;
   setting.notice.voice.EEW = document.getElementById("EEW_Voice").value;
+  setting.notice.voice.EEWUpdate = document.getElementById("EEW2_Voice").value;
   setting.Info.EQInfo.ItemCount = Number(document.getElementById("EQInfo_ItemCount").value);
   setting.Info.RealTimeShake.List.ItemCount = Number(document.getElementById("RealTimeShake_ItemCount").value);
   setting.Source.axis.GetData = document.getElementById("Axis_GetData").checked;
