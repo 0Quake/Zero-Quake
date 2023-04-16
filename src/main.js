@@ -76,6 +76,12 @@ var config = store.get("config", {
     },
   },
   notice: {
+    voice_parameter: {
+      rate: 1,
+      pitch: 1,
+      volume: 1,
+      voice: "",
+    },
     voice: {
       EEW: "緊急地震速報です。強い揺れに警戒してください。",
     },
@@ -570,7 +576,7 @@ function createWindow() {
 
   mainWindow.loadFile("src/index.html");
 
-  mainWindow.on("close", () => {
+  mainWindow.on("closed", () => {
     mainWindow = null;
   });
 }
@@ -591,7 +597,12 @@ function worker_createWindow() {
   kmoniWorker.on("close", () => {
     kmoniWorker = null;
   });
-
+  kmoniWorker.webContents.on("did-finish-load", () => {
+    kmoniWorker.webContents.send("message2", {
+      action: "setting",
+      data: config,
+    });
+  });
   kmoniWorker.loadFile("src/kmoniWorker.html");
   kmoniActive = new Date();
 }
@@ -627,7 +638,7 @@ function setting_createWindow() {
       });
     }
   });
-  settingWindow.on("close", () => {
+  settingWindow.on("closed", () => {
     settingWindow = null;
   });
 
@@ -669,7 +680,7 @@ function tsunami_createWindow() {
   });
   tsunamiWindow.loadFile("src/TsunamiDetail.html");
 
-  tsunamiWindow.on("close", () => {
+  tsunamiWindow.on("closed", () => {
     tsunamiWindow = null;
   });
 }
@@ -713,7 +724,7 @@ function EQInfo_createWindow(response) {
   EQInfoWindow.webContents.on("will-navigate", handleUrlOpen);
   EQInfoWindow.webContents.on("new-window", handleUrlOpen);
 
-  //EQInfoWindow.on("close", () => {});
+  //EQInfoWindow.on("closed", () => {});
 }
 
 //開始処理
@@ -832,7 +843,7 @@ function SnetControl(data, date) {
     action: "SnetUpdate",
     Updatetime: new Date(date),
     LocalTime: new Date(),
-    data: data,
+    data: { data: data, changedData: data },
   };
   if (mainWindow) {
     mainWindow.webContents.send("message2", SnetPointsDataTmp);

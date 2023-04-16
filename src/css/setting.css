@@ -161,7 +161,8 @@ section {
 }
 
 h4 {
-  margin: 0.5em 0 0 1.5em;
+  margin: 1em 0 0.5em 0;
+  font-size: 18px;
 }
 
 .contentWrap {
@@ -230,4 +231,8 @@ h4 {
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 400px;
+}
+label {
+  display: block;
+  padding: 0.2em 0;
 }

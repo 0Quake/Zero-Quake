@@ -35,7 +35,7 @@
 
 - 気象庁ホームページ[© 気象庁](https://www.jma.go.jp/bosai/map.html?contents=earthquake_map)
 - 気象庁防災情報 XML[© 気象庁](https://xml.kishou.go.jp/xmlpull.html)
-- narikakun.net 地震情報 API©[narikakun](https://dev.narikakun.net/doc/earthquake)
+- narikakun.net 地震情報 API[© narikakun](https://dev.narikakun.net/doc/earthquake)
 
 ### 地震情報(Earthquake Catalog)
 
@@ -43,7 +43,7 @@
 
 ### 大津波警報／津波警報／津波注意報
 
-- P2P 地震情報 API[©@p2pquake_takuya](https://www.p2pquake.net/json_api_v2/)
+- P2P 地震情報 API[© @p2pquake_takuya](https://www.p2pquake.net/json_api_v2/)
 - 気象庁防災情報 XML[© 気象庁](https://xml.kishou.go.jp/xmlpull.html)
 
 ### 津波情報／津波予報
@@ -62,28 +62,27 @@
 
 #### 「オフラインマップ」
 
-- 国内：気象庁 予報区等 GIS データ [© 気象庁](https://www.data.jma.go.jp/developer/gis.html)
-- 国外：© ne_110m_admin_0_countries [© Natural Earth ](https://www.naturalearthdata.com/downloads/110m-cultural-vectors/)
-- 湖沼：© 国土数値情報 [© 国土交通省 ](https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-W09-v2_2.html)
-  ([mapshaper.org](https://mapshaper.org/)で単純化して使用)
+#### ベースマップ
 
-#### タイル地図
-
-- 「気象庁」© 気象庁
-- 「地理院 標準地図」[© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)
-- 「地理院 淡色地図」[© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)
-- 「地理院 写真」[© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)
-- 「地理院 白地図」[© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)
+- 「標準」
+  - 国内：気象庁 予報区等 GIS データ [© 気象庁](https://www.data.jma.go.jp/developer/gis.html)
+  - 国外：© ne_110m_admin_0_countries [© Natural Earth ](https://www.naturalearthdata.com/downloads/110m-cultural-vectors/)
+  - 湖沼：© 国土数値情報 [© 国土交通省 ](https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-W09-v2_2.html)
+    ([mapshaper.org](https://mapshaper.org/)で単純化して使用)
+- 「地理院地図(標準)」[© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)
+- 「地理院地図(淡色)」[© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)
+- 「地理院地図(写真)」[© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)
+- 「地理院地図(白地図)」[© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)
 - 「OpenStreetMap」[© OpenStreetMap contributors](https://www.openstreetmap.org/copyright/)
 
 #### オーバーレイ
 
+- 「詳細地図(地名・道路等)」[© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)
 - 「地理院 陰影起伏図」[© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)
 - 「地理院 火山基本図データ」[© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)
 - 「地理院 津波浸水想定 ハザードマップ」[© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)
 - 「地理院 土砂災害警戒区域（急傾斜地の崩壊） ハザードマップ」[© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)
 - 「地理院 土砂災害警戒区域（地すべり） ハザードマップ」[© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)
-- 「気象庁　境界線」[© 気象庁](https://www.jma.go.jp/bosai/map.html#contents%3Dearthquake_map)
 
 #### その他
 

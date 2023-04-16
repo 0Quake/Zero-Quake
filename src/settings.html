@@ -155,7 +155,18 @@
             <div id="tab1_content3" class="tabcontent">
                 <h3><span>通知と音声</span>通知音 / 音声合成</h3>
                 <section>
-                    <h4>音声合成</h4>
+                    <h4>音声の設定</h4>
+
+                    <label> 話速：<input id="TTSSpeedN" type="number" min="0.1" max="10" value="1" step="0.1" oninput="TTSspeedSet(this.value)"><input id="TTSSpeedR" type="range" min="0.1" max="10" value="1" step="0.1" oninput="TTSspeedSet(this.value)"></label>
+                    <label> 音高：<input id="TTSPitchN" type="number" min="0" max="2" value="1" step="0.05" oninput="TTSpitchSet(this.value)"><input id="TTSPitchR" type="range" min="0" max="2" value="1" step="0.05" oninput="TTSpitchSet(this.value)"></label>
+                    <label> 音量：<input id="TTSVolumeN" type="number" min="0" max="1" value="1" step="0.05" oninput="TTSvolumeSet(this.value)"><input id="TTSVolumeR" type="range" min="0" max="1" value="1" step="0.05" oninput="TTSvolumeSet(this.value)"></label>
+                    <label> 音声：<select id="TTSvoiceSelect">
+                            <option disabled selected>既定</option>
+                        </select></label>
+                    <button id="speak_test">テスト</button>
+
+                    <h4>発話内容</h4>
+
                     <label>緊急地震速報<input id="EEW_Voice" type="text"></label>
                 </section>
             </div>

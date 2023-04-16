@@ -14,6 +14,16 @@ window.electronAPI.messageSend((event, request) => {
     document.getElementById("EQInfo_ItemCount").value = setting.Info.EQInfo.ItemCount;
     document.getElementById("RealTimeShake_ItemCount").value = setting.Info.RealTimeShake.List.ItemCount;
 
+    TTSvolumeSet(setting.notice.voice_parameter.volume);
+    TTSpitchSet(setting.notice.voice_parameter.pitch);
+    TTSspeedSet(setting.notice.voice_parameter.rate);
+
+    document.querySelectorAll("#TTSvoiceSelect option").forEach(function (elm) {
+      if (elm.value == setting.notice.voice_parameter.voice) {
+        elm.setAttribute("selected", true);
+      }
+    });
+
     var SaibunElm = Array.from(document.querySelectorAll("#saibun option")).find(function (elm) {
       return elm.innerText == setting.home.Section;
     });
@@ -79,6 +89,12 @@ document.getElementById("apply").addEventListener("click", function () {
   setting.Info.RealTimeShake.List.ItemCount = Number(document.getElementById("RealTimeShake_ItemCount").value);
   setting.Source.axis.GetData = document.getElementById("Axis_GetData").checked;
   setting.Source.axis.AccessToken = document.getElementById("Axis_AccessToken").value;
+
+  setting.notice.voice_parameter.rate = TTSspeed;
+  setting.notice.voice_parameter.pitch = TTSpitch;
+  setting.notice.voice_parameter.volume = TTSvolume;
+  setting.notice.voice_parameter.voice = TTSVoiceSelect.value;
+
   window.electronAPI.messageReturn({
     action: "settingReturn",
     data: setting,
@@ -248,4 +264,59 @@ function MapReDraw() {
     .item.setStyle({
       fillColor: "#FFF",
     });
+}
+
+var TTSspeed = 1;
+var TTSpitch = 1;
+var TTSvolume = 1;
+var TTSVoiceSelect = document.getElementById("TTSvoiceSelect");
+var opts = "<option value=''>自動</option>";
+var voices;
+speechSynthesis.onvoiceschanged = () => {
+  voices = speechSynthesis.getVoices();
+  voices.forEach(function (elm) {
+    var selectedT = "";
+    if (setting && elm.name == setting.notice.voice_parameter.voice) {
+      selectedT = " selected";
+    }
+
+    opts += "<option" + selectedT + " value='" + elm.name + "'>" + elm.name + "</option>";
+  });
+  TTSVoiceSelect.innerHTML = opts;
+};
+document.getElementById("speak_test").addEventListener("click", function () {
+  speechSynthesis.cancel();
+
+  const uttr = new SpeechSynthesisUtterance();
+  uttr.text = "音声合成のテストです";
+
+  uttr.lang = "ja-JP";
+  if (TTSVoiceSelect.value) {
+    Svoice = voices.find(function (elm) {
+      return elm.name == TTSVoiceSelect.value;
+    });
+    uttr.voice = Svoice;
+  }
+  uttr.rate = TTSspeed;
+  uttr.pitch = TTSpitch;
+  uttr.volume = TTSvolume;
+  speechSynthesis.speak(uttr);
+});
+function TTSspeedSet(val) {
+  val = Number(val);
+  document.getElementById("TTSSpeedN").value = val;
+  document.getElementById("TTSSpeedR").value = val;
+  TTSspeed = val;
+}
+function TTSpitchSet(val) {
+  val = Number(val);
+  document.getElementById("TTSPitchN").value = val;
+  document.getElementById("TTSPitchR").value = val;
+  TTSpitch = val;
+}
+function TTSvolumeSet(val) {
+  val = Number(val);
+  document.getElementById("TTSVolumeN").value = val;
+  document.getElementById("TTSVolumeR").value = val;
+  TTSvolume = val;
 }

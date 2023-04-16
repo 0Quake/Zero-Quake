@@ -11,10 +11,13 @@
     <canvas id="SnetCanvas" width="400" height="400"></canvas>
     <canvas id="EstShindoCanvas" width="400" height="400"></canvas>
 
+    <script src="./js/UIcommon.js"></script>
     <script>
+        var config;
         var Allpoints;
         var points;
         var Spoints;
+        var Svoice
         fetch("./Resource/Knet_Points.json").then(function (res) {
             return res.json()
         }).then(function (json) {
@@ -79,9 +82,20 @@
                 const uttr = new SpeechSynthesisUtterance()
                 uttr.text = request.data
                 uttr.lang = "ja-JP"
-                uttr.rate = 1
-                uttr.pitch = 1
-                uttr.volume = 1
+
+                if (!Svoice) {
+                    if (config.notice.voice_parameter.voice) {
+                        Svoice = speechSynthesis.getVoices().find(function (elm) {
+                            return elm.name == config.notice.voice_parameter.voice;
+                        });
+                    }
+                }
+                uttr.voice = Svoice;
+
+                uttr.rate = config.notice.voice_parameter.rate;
+                uttr.pitch = config.notice.voice_parameter.pitch;
+                uttr.volume = config.notice.voice_parameter.volume;
+
                 speechSynthesis.speak(uttr)
             } else if (request.action == "soundPlay") {
                 var AudioElm = AudioElms[request.data]
@@ -89,7 +103,6 @@
                     AudioElm.currentTime = 0;
                     if (AudioElm.paused) AudioElm.play()
                 }
-                //new Audio(request.data).play()
             }
 
 
