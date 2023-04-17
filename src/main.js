@@ -1150,7 +1150,7 @@ function P2P_WS() {
 
   P2PWSclient.on("connectFailed", function () {
     kmoniTimeUpdate(new Date() - Replay, "P2P_EEW", "Error");
-    setTimeout(P2P_WS_Connect, 5000);
+    setTimeout(P2P_WS_TryConnect, 5000);
   });
 
   P2PWSclient.on("connect", function (connection) {
@@ -1159,7 +1159,7 @@ function P2P_WS() {
     });
     connection.on("close", function () {
       kmoniTimeUpdate(new Date() - Replay, "P2P_EEW", "Disconnect");
-      setTimeout(P2P_WS_Connect, 5000);
+      setTimeout(P2P_WS_TryConnect, 5000);
     });
     connection.on("message", function (message) {
       if (message.type === "utf8") {
@@ -1202,7 +1202,11 @@ function P2P_WS() {
 
   P2P_WS_Connect();
 }
-
+var P2PReconnectTimeout = 500;
+function P2P_WS_TryConnect() {
+  P2PReconnectTimeout *= 2;
+  setTimeout(P2P_WS_Connect, P2PReconnectTimeout);
+}
 function P2P_WS_Connect() {
   if (P2PWSclient) P2PWSclient.connect("wss://api.p2pquake.net/v2/ws");
 }
@@ -1217,7 +1221,7 @@ function AXIS_WS() {
 
   AXISWSclient.on("connectFailed", function () {
     kmoniTimeUpdate(new Date() - Replay, "axis", "Error");
-    setTimeout(AXIS_WS_Connect, 5000);
+    AXIS_WS_TryConnect();
   });
 
   P2PWSclient.on("connect", function (connection) {
@@ -1226,11 +1230,12 @@ function AXIS_WS() {
     });
     connection.on("close", function () {
       kmoniTimeUpdate(new Date() - Replay, "axis", "Disconnect");
-      setTimeout(AXIS_WS_Connect, 5000);
+      AXIS_WS_TryConnect();
     });
     connection.on("message", function (message) {
       if (message.type === "utf8") {
         var data = JSON.parse(message.utf8Data);
+        console.log(data);
         if (data.Title && (data.Title == "緊急地震速報（予報）" || data.Title == "緊急地震速報（警報）")) {
           //eew
           EEWdetect(4, data);
@@ -1261,7 +1266,11 @@ function AXIS_WS() {
 
   AXIS_WS_Connect();
 }
-
+var axisReconnectTimeout = 500;
+function AXIS_WS_TryConnect() {
+  axisReconnectTimeout *= 2;
+  setTimeout(AXIS_WS_Connect, axisReconnectTimeout);
+}
 function AXIS_WS_Connect() {
   if (AXISWSclient) AXISWSclient.connect("wss://api.p2pquake.net/v2/ws", null, null, AXIS_headers);
 }
