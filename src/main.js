@@ -280,7 +280,31 @@ app.whenReady().then(() => {
   kmoniServerSelect();
   createWindow();
   checkUpdate();
-  setInterval(checkUpdate, 1800000);
+  setInterval(function () {
+    checkUpdate();
+
+    var request = net.request(" https://axis.prioris.jp/api/token/refresh/?token=" + config.Source.axis.AccessToken);
+    request.on("response", (res) => {
+      var dataTmp = "";
+      res.on("data", (chunk) => {
+        dataTmp += chunk;
+      });
+      res.on("end", function () {
+        var json = jsonParse(dataTmp);
+        if (json.status == "generate a new token") {
+          //トークン更新
+        } else if (json.status == "contract has expired") {
+          //トークン期限切れ
+        }
+      });
+    });
+    request.on("error", (error) => {
+      NetworkError(error, "海しる");
+      kmoniTimeUpdate(new Date(), "Lmoni", "Error");
+    });
+
+    request.end();
+  }, 1800000);
 
   app.on("activate", () => {
     // メインウィンドウが消えている場合は再度メインウィンドウを作成する
