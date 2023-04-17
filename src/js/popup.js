@@ -33,7 +33,8 @@ window.electronAPI.messageSend((event, request) => {
   } else if (request.action == "EQInfo") {
     eqInfoDraw(request.data, request.source);
   } else if (request.action == "notification_Update") {
-    Show_notification(request.data);
+    show_errorMsg(request.data);
+    //Show_notification(request.data);
   } else if (request.action == "EQDetect") {
     EQDetect(request.data);
   } else if (request.action == "EQDetectFinish") {
@@ -591,6 +592,16 @@ document.getElementById("UpdateTimeWrap").addEventListener("click", function () 
 //接続状況ダイアログ非表示
 document.getElementById("UpdateTimeClose").addEventListener("click", function () {
   updateTimeDialog.close();
+});
+
+var errorMsgBox = document.getElementById("errorMsg");
+function show_errorMsg(data) {
+  errorMsgBox.style.display = "block";
+  errorMsgBox.className = data.type + "Msg";
+  document.getElementById("errorContent").innerText = data.message;
+}
+document.getElementById("errorMsg_close").addEventListener("click", function () {
+  errorMsgBox.style.display = "none";
 });
 
 //🔴汎用関数 map.js共用🔴

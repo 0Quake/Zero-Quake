@@ -274,16 +274,11 @@ function checkUpdate() {
   // リクエストの送信
   request.end();
 }
-
-app.whenReady().then(() => {
-  worker_createWindow();
-  kmoniServerSelect();
-  createWindow();
+function ScheduledExecution() {
   checkUpdate();
-  setInterval(function () {
-    checkUpdate();
 
-    var request = net.request(" https://axis.prioris.jp/api/token/refresh/?token=" + config.Source.axis.AccessToken);
+  if (config.Source.axis.GetData) {
+    var request = net.request("https://axis.prioris.jp/api/token/refresh/?token=" + config.Source.axis.AccessToken);
     request.on("response", (res) => {
       var dataTmp = "";
       res.on("data", (chunk) => {
@@ -293,18 +288,32 @@ app.whenReady().then(() => {
         var json = jsonParse(dataTmp);
         if (json.status == "generate a new token") {
           //トークン更新
+          if (json.token) {
+            config.Source.axis.AccessToken = String(json.token);
+            Window_notification("Axisのアクセストークンを更新しました。", "info");
+          }
         } else if (json.status == "contract has expired") {
           //トークン期限切れ
+          config.Source.axis.GetData = false;
+          store.set("config", config);
+          Window_notification("Axisのアクセストークンが期限切れのため、無効化しました。", "warn");
+        } else if (json.status == "invalid header authorization") {
+          config.Source.axis.GetData = false;
+          store.set("config", config);
+          Window_notification("Axisのアクセストークンが不正です。", "error");
         }
       });
     });
-    request.on("error", (error) => {
-      NetworkError(error, "海しる");
-      kmoniTimeUpdate(new Date(), "Lmoni", "Error");
-    });
 
     request.end();
-  }, 1800000);
+  }
+  setTimeout(ScheduledExecution, 1800000);
+}
+app.whenReady().then(() => {
+  worker_createWindow();
+  kmoniServerSelect();
+  createWindow();
+  ScheduledExecution();
 
   app.on("activate", () => {
     // メインウィンドウが消えている場合は再度メインウィンドウを作成する
@@ -374,6 +383,8 @@ process.on("uncaughtException", function (err) {
       app.relaunch();
       app.exit(0);
     }, 10000);
+
+    Window_notification("予期しないエラーが発生しました。", "error");
   }
 });
 
@@ -518,6 +529,10 @@ function createWindow() {
   }
 
   mainWindow.webContents.on("did-finish-load", () => {
+    if (notifyData) {
+      mainWindow.webContents.send("message2", notifyData);
+    }
+
     if (Replay !== 0) {
       mainWindow.webContents.send("message2", {
         action: "Replay",
@@ -2746,24 +2761,20 @@ function NetworkError(/*error, type*/) {
   return false;
 }
 //メインウィンドウ内通知
-/*
-function Window_notification(title, detail, type) {
-  notifications.push({
-    id: notification_id,
-    type: type,
-    title: title,
-    detail: detail,
-    time: new Date(),
-  });
-  notification_id++;
-
+var notifyData;
+function Window_notification(message, type) {
+  notifyData = {
+    action: "notification_Update",
+    data: {
+      type: type,
+      message: message,
+      time: new Date(),
+    },
+  };
   if (mainWindow) {
-    mainWindow.webContents.send("message2", {
-      action: "notification_Update",
-      data: notifications,
-    });
+    mainWindow.webContents.send("message2", notifyData);
   }
-}*/
+}
 
 //真偽地判定（拡張）
 function Boolean2(str) {
