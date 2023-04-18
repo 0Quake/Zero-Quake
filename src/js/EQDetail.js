@@ -543,6 +543,12 @@ function Mapinit() {
   zoomLevelContinue();
   map.on("zoom", zoomLevelContinue);
   map.on("load", zoomLevelContinue);
+  map.on("load", function(){
+    zoomLevelContinue()
+    mapFillReset()
+     mapFillDraw() 
+
+  });
 
   const img = document.createElement("img");
   img.src = "./img/homePin.svg";
