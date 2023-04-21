@@ -16,7 +16,7 @@ function replay(ReplayDate) {
   }
 }
 /* eslint-enable */
-//replay("2023/4/15 0:59:30");
+//replay("2023/4/19 19:23:10");
 //replay("2023/4/6 13:10:40");
 //replay("2023/04/04 16:11:00"); //２か所同時
 //replay("2023/3/27 0:04:25");
@@ -773,6 +773,7 @@ function start() {
   SnetRequest();
 
   kmoniRequest();
+  projectbsRequest();
   lmoniRequest();
   ymoniRequest();
   yoyuSetK(function () {
@@ -1181,6 +1182,64 @@ function SnetRequest() {
   }, config.Source.msil.Interval);
 }
 
+//projectbsへのHTTPリクエスト処理
+var projectbs_lastUpdate = 0;
+function projectbsRequest() {
+  if (net.online) {
+    var request = net.request("https://telegram.projectbs.cn/jmaeewjson?_=" + new Date());
+    request.on("response", (res) => {
+      var dataTmp = "";
+      res.on("data", (chunk) => {
+        dataTmp += chunk;
+      });
+      res.on("end", function () {
+        var json = jsonParse(dataTmp);
+        if (projectbs_lastUpdate < new Date(json.updated)) {
+          projectbs_lastUpdate = new Date(json.updated);
+          var EEWdata = {
+            alertflg: json.title == "緊急地震速報（予報）" ? "予報" : "警報", //種別
+            report_id: Number(json.eventId.substring(2, 16)), //地震ID
+            report_num: json.reportNum, //第n報
+            report_time: new Date(json.updated), //発表時刻
+            magnitude: json.magnitude, //マグニチュード
+            calcintensity: shindoConvert(json.maxIntensity, 0), //最大深度
+            depth: json.depth, //深さ
+            is_cancel: json.isCancel, //キャンセル
+            is_final: json.isFinal, //最終報
+            is_training: false, //訓練報
+            latitude: json.epicenterLat, //緯度
+            longitude: json.epicenterLng, //経度
+            region_code: null, //震央地域コード
+            region_name: json.epicenter, //震央地域
+            origin_time: new Date(json.time), //発生時刻
+            isPlum: json.isAssumption,
+            userIntensity: null,
+            arrivalTime: null,
+            intensityAreas: null, //細分区分ごとの予想震度
+            warnZones: {
+              zone: null,
+              Pref: null,
+              Regions: null,
+            },
+            source: "projectbs",
+          };
+          EEWcontrol(EEWdata);
+        }
+        kmoniTimeUpdate(new Date(), "projectbs", "success");
+      });
+    });
+    request.on("error", (error) => {
+      NetworkError(error, "projectbs");
+      kmoniTimeUpdate(new Date(), "projectbs", "Error");
+    });
+
+    request.end();
+  }
+  setTimeout(function () {
+    projectbsRequest();
+  }, 1000);
+}
+
 //P2P地震情報API WebSocket接続・受信処理
 var P2PWSclient;
 
@@ -1274,7 +1333,6 @@ function AXIS_WS() {
     connection.on("message", function (message) {
       if (message.type === "utf8") {
         var data = JSON.parse(message.utf8Data);
-        console.log(data);
         if (data.Title && (data.Title == "緊急地震速報（予報）" || data.Title == "緊急地震速報（警報）")) {
           //eew
           EEWdetect(4, data);
@@ -1557,38 +1615,41 @@ function EEWdetect(type, json, KorL) {
     if (json.hypoInfo) {
       var elm;
       elm = json.hypoInfo.items[0];
-      //複数同時取得できる場合→json.hypoInfo.items.forEach(function (elm) {
-      var EEWdata = {
-        alertflg: null, //種別
-        report_id: elm.reportId, //地震ID
-        report_num: Number(elm.reportNum), //第n報
-        report_time: new Date(json.realTimeData.dataTime), //発表時刻
-        magunitude: Number(elm.magnitude), //マグニチュード
-        calcintensity: shindoConvert(elm.calcintensity, 0), //最大深度
-        depth: Number(elm.depth.replace("km", "")), //深さ
-        is_cancel: Boolean2(elm.isCancel), //キャンセル
-        is_final: Boolean2(elm.isFinal), //最終報
-        is_training: Boolean2(elm.isTraining), //訓練報
-        latitude: LatLngConvert(elm.latitude), //緯度
-        longitude: LatLngConvert(elm.longitude), //経度
-        region_code: elm.regionCode, //震央地域コード
-        region_name: elm.regionName, //震央地域
-        origin_time: new Date(elm.originTime), //発生時刻
-        isPlum: false,
-        userIntensity: null,
-        arrivalTime: null,
-        intensityAreas: null, //細分区分ごとの予想震度
-        warnZones: {
-          zone: null,
-          Pref: null,
-          Regions: null,
-        },
-        source: "YahooKmoni",
-      };
 
       var YkmoniLastReportTimeTmp = new Date(elm.reportTime);
-      if (YkmoniLastReportTime < YkmoniLastReportTimeTmp) EEWcontrol(EEWdata);
-      YkmoniLastReportTime = YkmoniLastReportTimeTmp;
+      if (YkmoniLastReportTime < YkmoniLastReportTimeTmp) {
+        //複数同時取得できる場合→json.hypoInfo.items.forEach(function (elm) {
+        var EEWdata = {
+          alertflg: null, //種別
+          report_id: elm.reportId, //地震ID
+          report_num: Number(elm.reportNum), //第n報
+          report_time: new Date(json.realTimeData.dataTime), //発表時刻
+          magnitude: Number(elm.magnitude), //マグニチュード
+          calcintensity: shindoConvert(elm.calcintensity, 0), //最大深度
+          depth: Number(elm.depth.replace("km", "")), //深さ
+          is_cancel: Boolean2(elm.isCancel), //キャンセル
+          is_final: Boolean2(elm.isFinal), //最終報
+          is_training: Boolean2(elm.isTraining), //訓練報
+          latitude: LatLngConvert(elm.latitude), //緯度
+          longitude: LatLngConvert(elm.longitude), //経度
+          region_code: elm.regionCode, //震央地域コード
+          region_name: elm.regionName, //震央地域
+          origin_time: new Date(elm.originTime), //発生時刻
+          isPlum: false,
+          userIntensity: null,
+          arrivalTime: null,
+          intensityAreas: null, //細分区分ごとの予想震度
+          warnZones: {
+            zone: null,
+            Pref: null,
+            Regions: null,
+          },
+          source: "YahooKmoni",
+        };
+
+        EEWcontrol(EEWdata);
+        YkmoniLastReportTime = YkmoniLastReportTimeTmp;
+      }
       //複数同時取得できる場合→});
     }
   } else if (type == 2) {
@@ -1621,7 +1682,7 @@ function EEWdetect(type, json, KorL) {
         report_id: json.report_id, //地震ID
         report_num: Number(json.report_num), //第n報
         report_time: new Date(json.report_time), //発表時刻
-        magunitude: Number(json.magunitude), //マグニチュード
+        magnitude: Number(json.magnitude), //マグニチュード
         calcintensity: shindoConvert(json.calcintensity, 0), //最大深度
         depth: Number(json.depth.replace("km", "")), //深さ
         is_cancel: Boolean2(json.is_cancel), //キャンセル
@@ -1690,7 +1751,7 @@ function EEWdetect(type, json, KorL) {
       report_id: json.EventID, //地震ID
       report_num: json.Serial, //第n報
       report_time: new Date(json.ReportDateTime), //発表時刻
-      magunitude: Number(json.Magnitude), //マグニチュード
+      magnitude: Number(json.Magnitude), //マグニチュード
       calcintensity: shindoConvert(json.Intensity), //最大震度
       depth: Number(json.Hypocenter.Depth.replace("km", "")), //深さ
       is_cancel: json.Flag.is_cancel, //キャンセル
@@ -1759,7 +1820,7 @@ function EEWdetect(type, json, KorL) {
       report_id: json.issue.eventId, //地震ID
       report_num: Number(json.issue.serial), //第n報
       report_time: new Date(json.issue.time), //発表時刻
-      magunitude: magnitudeTmp, //マグニチュード
+      magnitude: magnitudeTmp, //マグニチュード
       calcintensity: shindoConvert(maxIntTmp), //最大震度
       depth: depthTmp, //深さ
       is_cancel: Boolean(json.canceled), //キャンセル
@@ -1849,8 +1910,8 @@ function EEWcontrol(data) {
           oneBeforeData.alertflg = data.alertflg;
           changed = true;
         }
-        if (!oneBeforeData.magunitude && data.magunitude) {
-          oneBeforeData.magunitude = data.magunitude;
+        if (!oneBeforeData.magnitude && data.magnitude) {
+          oneBeforeData.magnitude = data.magnitude;
           changed = true;
         }
         if (!oneBeforeData.calcintensity && data.calcintensity) {
@@ -2040,7 +2101,7 @@ function EEWAlert(data, first, update) {
       if (data.alertflg) alertFlg = "（" + data.alertflg + "）";
       var EEWNotification = new Notification({
         title: "緊急地震速報" + alertFlg + "#" + data.report_num,
-        body: data.region_name + "\n推定震度：" + data.calcintensity + "  M" + data.magunitude + "  深さ：" + data.depth,
+        body: data.region_name + "\n推定震度：" + data.calcintensity + "  M" + data.magnitude + "  深さ：" + data.depth,
         icon: path.join(__dirname, "img/icon.ico"),
       });
       EEWNotification.show();
@@ -2066,7 +2127,7 @@ function EEWAlert(data, first, update) {
         reportDateTime: data.report_time,
         OriginTime: data.origin_time,
         epiCenter: data.region_name,
-        M: data.magunitude,
+        M: data.magnitude,
         maxI: data.calcintensity,
         cancel: data.is_cancel,
         DetailURL: [],

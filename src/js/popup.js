@@ -115,7 +115,7 @@ function EEWAlertUpdate(data) {
       clone.querySelector(".canceled").style.display = elm.is_cancel ? "flex" : "none";
       clone.querySelector(".region_name").textContent = elm.region_name ? elm.region_name : "震源地域不明";
       clone.querySelector(".origin_time").textContent = dateEncode(3, elm.origin_time);
-      clone.querySelector(".magunitude").textContent = elm.magunitude ? elm.magunitude : "不明";
+      clone.querySelector(".magnitude").textContent = elm.magnitude ? elm.magnitude : "不明";
       clone.querySelector(".depth").textContent = elm.depth ? elm.depth : "不明";
       clone.querySelector(".traning").style.display = elm.is_training ? "block" : "none";
 
@@ -158,7 +158,7 @@ function EEWAlertUpdate(data) {
         EQMenu.querySelector(".canceled").style.display = elm.is_cancel ? "flex" : "none";
         EQMenu.querySelector(".region_name").textContent = elm.region_name ? elm.region_name : "震源地域不明";
         EQMenu.querySelector(".origin_time").textContent = dateEncode(3, elm.origin_time);
-        EQMenu.querySelector(".magunitude").textContent = elm.magunitude ? elm.magunitude : "不明";
+        EQMenu.querySelector(".magnitude").textContent = elm.magnitude ? elm.magnitude : "不明";
         EQMenu.querySelector(".depth").textContent = elm.depth ? elm.depth : "不明";
 
         EQMenu.querySelector(".userIntensity").textContent = elm.userIntensity ? elm.userIntensity : "?";

@@ -18,6 +18,26 @@
         var points;
         var Spoints;
         var Svoice
+        var Rate;
+        var Pitch
+        var Volume
+        window.electronAPI.messageSend((event, request) => {
+            if (request.action == "setting") {
+                config = request.data;
+                if (!Svoice) {
+                    if (config.notice.voice_parameter.voice) {
+                        Svoice = speechSynthesis.getVoices().find(function (elm) {
+                            return elm.name == config.notice.voice_parameter.voice;
+                        });
+                    }
+                }
+                Rate = config.notice.voice_parameter.rate;
+                Pitch = config.notice.voice_parameter.pitch;
+                Volume = config.notice.voice_parameter.volume
+            }
+        });
+
+
         fetch("./Resource/Knet_Points.json").then(function (res) {
             return res.json()
         }).then(function (json) {
@@ -90,11 +110,11 @@
                         });
                     }
                 }
-                uttr.voice = Svoice;
 
-                uttr.rate = config.notice.voice_parameter.rate;
-                uttr.pitch = config.notice.voice_parameter.pitch;
-                uttr.volume = config.notice.voice_parameter.volume;
+                uttr.voice = Svoice;
+                uttr.rate = Rate
+                uttr.pitch = Pitch;
+                uttr.volume = Volume;
 
                 speechSynthesis.speak(uttr)
             } else if (request.action == "soundPlay") {

@@ -29,13 +29,15 @@
   - 長周期地震動モニタ[© 防災科学技術研究所](lmoni.bosai.go.jp)
   - Yahoo 強震モニタ[© 防災科学技術研究所／Yahoo Japan](https://typhoon.yahoo.co.jp/weather/jp/earthquake/kyoshin/)
 - P2P 地震情報 API[©@p2pquake_takuya](https://www.p2pquake.net/json_api_v2/)
-- (SignalNow X 連携)
+- Axis[©Prioris](https://axis.prioris.jp/)
+- ProjectBS[©CrossRoad](https://projectbs.cn/)
 
 ### 地震情報(震度速報／震源に関する情報／震度・震源に関する情報／顕著な地震の震源要素更新のお知らせ)／推計震度分布
 
 - 気象庁ホームページ[© 気象庁](https://www.jma.go.jp/bosai/map.html?contents=earthquake_map)
 - 気象庁防災情報 XML[© 気象庁](https://xml.kishou.go.jp/xmlpull.html)
 - narikakun.net 地震情報 API[© narikakun](https://dev.narikakun.net/doc/earthquake)
+- Axis[©Prioris](https://axis.prioris.jp/)
 
 ### 地震情報(Earthquake Catalog)
 

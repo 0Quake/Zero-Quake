@@ -55,7 +55,7 @@ window.electronAPI.messageSend((event, request) => {
           reportTime: eewItem.report_time,
           originTime: eewItem.origin_time,
           maxI: eewItem.calcintensity,
-          mag: eewItem.magunitude,
+          mag: eewItem.magnitude,
           lat: eewItem.latitude,
           lng: eewItem.longitude,
           depth: eewItem.depth,
@@ -543,11 +543,10 @@ function Mapinit() {
   zoomLevelContinue();
   map.on("zoom", zoomLevelContinue);
   map.on("load", zoomLevelContinue);
-  map.on("load", function(){
-    zoomLevelContinue()
-    mapFillReset()
-     mapFillDraw() 
-
+  map.on("load", function () {
+    zoomLevelContinue();
+    mapFillReset();
+    mapFillDraw();
   });
 
   const img = document.createElement("img");
