@@ -123,6 +123,12 @@
                 <div id="tab1_menu12" class="tabmenu" data-contentid="tab1_content12">
                     Axis
                 </div>
+                <div id="tab1_menu13" class="tabmenu" data-contentid="tab1_content13">
+                    ProjectBS
+                </div>
+                <div id="tab1_menu14" class="tabmenu" data-contentid="tab1_content14">
+                    Wolfx
+                </div>
                 <div id="tab1_menu8" class="tabmenu" data-contentid="tab1_content8">
                     強震モニタ等
                 </div>
@@ -328,15 +334,39 @@
 
             </div>
             <div id="tab1_content8" class="tabcontent">
-                <h3><span>情報源ごとの設定</span>強震モニタ / 長周期地震動モニタ / Yahoo! 強震モニタ</h3>
+                <h3><span>情報源ごとの設定</span>強震モニタ等</h3>
+                <h4>強震モニタ</h4>
+                <label><input type="checkbox" id="kmoni_GetData">データを取得</label>
+                <label> 情報取得間隔（秒）<input id="kmoniInterval" type="number" min="1" max="300" value="1" step="1"></label>
+
+                <h4>長周期地震動モニタ</h4>
+                <label><input type="checkbox" id="lmoni_GetData">データを取得</label>
+                <label> 情報取得間隔（秒）<input id="lmoniInterval" type="number" min="1" max="300" value="1" step="1"></label>
+
+                <h4>Yahoo! 強震モニタ</h4>
+                <label><input type="checkbox" id="ymoni_GetData">データを取得</label>
+                <label> 情報取得間隔（秒）<input id="ymoniInterval" type="number" min="1" max="300" value="1" step="1"></label>
+
             </div>
             <div id="tab1_content9" class="tabcontent">
                 <h3><span>情報源ごとの設定</span>海しる</h3>
+                <label><input type="checkbox" id="msil_GetData">データを取得</label>
+                <label> 情報取得間隔（秒）<input id="msilInterval" type="number" min="5" max="300" value="10" step="1"></label>
             </div>
             <div id="tab1_content12" class="tabcontent">
                 <h3><span>情報源ごとの設定</span>Axis</h3>
                 <label><input type="checkbox" id="Axis_GetData">データを取得</label>
                 <label>アクセストークン<input type="text" id="Axis_AccessToken"></label>
+            </div>
+            <div id="tab1_content13" class="tabcontent">
+                <h3><span>情報源ごとの設定</span>ProjectBS</h3>
+                <label><input type="checkbox" id="ProjectBS_GetData">データを取得</label>
+                <label> 情報取得間隔（秒）<input id="ProjectBSInterval" type="number" min="1" max="300" value="1" step="1"></label>
+            </div>
+            <div id="tab1_content14" class="tabcontent">
+                <h3><span>情報源ごとの設定</span>Wolfx</h3>
+                <label><input type="checkbox" id="Wolfx_GetData">データを取得</label>
+                <label> 情報取得間隔（秒）<input id="WolfxInterval" type="number" min="1" max="300" value="1" step="1"></label>
             </div>
             <div id="tab1_content10" class="tabcontent">
                 <h3><span>通知と音声</span>プッシュ通知</h3>

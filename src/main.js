@@ -286,10 +286,12 @@ function ScheduledExecution() {
       });
       res.on("end", function () {
         var json = jsonParse(dataTmp);
+        console.log();
         if (json.status == "generate a new token") {
           //トークン更新
           if (json.token) {
             config.Source.axis.AccessToken = String(json.token);
+            store.set("config", config);
             Window_notification("Axisのアクセストークンを更新しました。", "info");
           }
         } else if (json.status == "contract has expired") {
@@ -931,7 +933,7 @@ function estShindoControl(response) {
 
 //強震モニタへのHTTPリクエスト
 function kmoniRequest() {
-  if (net.online) {
+  if (net.online && config.Source.kmoni.kmoni.GetData) {
     var ReqTime = new Date() - yoyuK - Replay;
 
     var request = net.request("http://www.kmoni.bosai.go.jp/webservice/hypo/eew/" + dateEncode(1, ReqTime) + ".json");
@@ -1019,7 +1021,7 @@ function kmoniRequest() {
 
 //長周期地震動モニタへのHTTPリクエスト
 function lmoniRequest() {
-  if (net.online) {
+  if (net.online && config.Source.kmoni.lmoni.GetData) {
     var request = net.request("https://www.lmoni.bosai.go.jp/monitor/webservice/hypo/eew/" + dateEncode(1, new Date() - yoyuL - Replay) + ".json");
     request.on("response", (res) => {
       var dataTmp = "";
@@ -1055,7 +1057,7 @@ function lmoniRequest() {
 
 //Yahoo強震モニタへのHTTPリクエスト処理
 function ymoniRequest() {
-  if (net.online) {
+  if (net.online && config.Source.kmoni.ymoni.GetData) {
     if (monitorVendor == "YE") {
       var request = net.request("https://weather-kyoshin.east.edge.storage-yahoo.jp/RealTimeData/" + dateEncode(2, new Date() - yoyuY - Replay) + "/" + dateEncode(1, new Date() - yoyuY - Replay) + ".json");
       request.on("response", (res) => {
@@ -1186,7 +1188,7 @@ function SnetRequest() {
 //projectbsへのHTTPリクエスト処理
 var projectbs_lastUpdate = 0;
 function projectbsRequest() {
-  if (net.online) {
+  if (config.Source.projectbs.GetData && net.online) {
     var request = net.request("https://telegram.projectbs.cn/jmaeewjson?_=" + new Date());
     request.on("response", (res) => {
       var dataTmp = "";
@@ -1234,13 +1236,13 @@ function projectbsRequest() {
   }
   setTimeout(function () {
     projectbsRequest();
-  }, 1000);
+  }, config.Source.projectbs.Interval);
 }
 
 //projectbsへのHTTPリクエスト処理
 var wolfx_lastUpdate = 0;
 function wolfxRequest() {
-  if (net.online) {
+  if (config.Source.wolfx.GetData && net.online) {
     var request = net.request("https://api.wolfx.jp/jma_eew.json?_=" + new Date());
     request.on("response", (res) => {
       var dataTmp = "";
@@ -1288,7 +1290,7 @@ function wolfxRequest() {
   }
   setTimeout(function () {
     wolfxRequest();
-  }, 1000);
+  }, config.Source.wolfx.Interval);
 }
 
 //P2P地震情報API WebSocket接続・受信処理

@@ -33,6 +33,18 @@ window.electronAPI.messageSend((event, request) => {
     document.getElementById("BugReportAutoSend").checked = setting.system.crashReportAutoSend;
 
     document.getElementById("Axis_GetData").checked = setting.Source.axis.GetData;
+    document.getElementById("Wolfx_GetData").checked = setting.Source.wolfx.GetData;
+    document.getElementById("ProjectBS_GetData").checked = setting.Source.projectbs.GetData;
+    document.getElementById("msil_GetData").checked = setting.Source.msil.GetData;
+    document.getElementById("kmoni_GetData").checked = setting.Source.kmoni.kmoni.GetData;
+    document.getElementById("lmoni_GetData").checked = setting.Source.kmoni.lmoni.GetData;
+    document.getElementById("ymoni_GetData").checked = setting.Source.kmoni.ymoni.GetData;
+    document.getElementById("ProjectBSInterval").value = setting.Source.projectbs.Interval / 1000;
+    document.getElementById("WolfxInterval").value = setting.Source.wolfx.Interval / 1000;
+    document.getElementById("kmoniInterval").value = setting.Source.kmoni.kmoni.Interval / 1000;
+    document.getElementById("lmoniInterval").value = setting.Source.kmoni.lmoni.Interval / 1000;
+    document.getElementById("ymoniInterval").value = setting.Source.kmoni.ymoni.Interval / 1000;
+    document.getElementById("msilInterval").value = setting.Source.msil.Interval / 1000;
     if (setting.Source.axis.AccessToken) document.getElementById("Axis_AccessToken").value = setting.Source.axis.AccessToken;
 
     init();
@@ -91,6 +103,18 @@ document.getElementById("apply").addEventListener("click", function () {
   setting.Info.RealTimeShake.List.ItemCount = Number(document.getElementById("RealTimeShake_ItemCount").value);
   setting.Source.axis.GetData = document.getElementById("Axis_GetData").checked;
   setting.Source.axis.AccessToken = document.getElementById("Axis_AccessToken").value;
+  setting.Source.wolfx.GetData = document.getElementById("Wolfx_GetData").checked;
+  setting.Source.projectbs.GetData = document.getElementById("ProjectBS_GetData").checked;
+  setting.Source.msil.GetData = document.getElementById("msil_GetData").checked;
+  setting.Source.kmoni.kmoni.GetData = document.getElementById("kmoni_GetData").checked;
+  setting.Source.kmoni.lmoni.GetData = document.getElementById("lmoni_GetData").checked;
+  setting.Source.kmoni.ymoni.GetData = document.getElementById("ymoni_GetData").checked;
+  setting.Source.projectbs.Interval = Number(document.getElementById("ProjectBSInterval").value) * 1000;
+  setting.Source.wolfx.Interval = Number(document.getElementById("WolfxInterval").value) * 1000;
+  setting.Source.kmoni.kmoni.Interval = Number(document.getElementById("kmoniInterval").value) * 1000;
+  setting.Source.kmoni.lmoni.Interval = Number(document.getElementById("lmoniInterval").value) * 1000;
+  setting.Source.kmoni.ymoni.Interval = Number(document.getElementById("ymoniInterval").value) * 1000;
+  setting.Source.msil.Interval = Number(document.getElementById("msilInterval").value) * 1000;
 
   setting.notice.voice_parameter.rate = TTSspeed;
   setting.notice.voice_parameter.pitch = TTSpitch;
