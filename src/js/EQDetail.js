@@ -545,7 +545,7 @@ function Mapinit() {
   map.on("load", zoomLevelContinue);
   map.on("load", function () {
     zoomLevelContinue();
-    mapFillReset();
+
     mapFillDraw();
   });
 
@@ -1094,30 +1094,10 @@ function narikakun_Fetch(url) {
       }
     });
 }
-var Int0T;
-var Int1T;
-var Int2T;
-var Int3T;
-var Int4T;
-var Int5mT;
-var Int5pT;
-var Int6mT;
-var Int6pT;
-var Int7T;
-var Int7pT;
+var Int0T = (Int1T = Int2T = Int3T = Int4T = Int5mT = Int5pT = Int6mT = Int6pT = Int7T = Int7pT = ["any"]);
 
 function mapFillReset() {
-  Int0T = ["any"];
-  Int1T = ["any"];
-  Int2T = ["any"];
-  Int3T = ["any"];
-  Int4T = ["any"];
-  Int5mT = ["any"];
-  Int5pT = ["any"];
-  Int6mT = ["any"];
-  Int6pT = ["any"];
-  Int7T = ["any"];
-  Int7pT = ["any"];
+  Int0T = Int1T = Int2T = Int3T = Int4T = Int5mT = Int5pT = Int6mT = Int6pT = Int7T = Int7pT = ["any"];
   map.setFilter("Int0", ["==", "name", ""]);
   map.setFilter("Int1", ["==", "name", ""]);
   map.setFilter("Int2", ["==", "name", ""]);
