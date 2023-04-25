@@ -1014,8 +1014,10 @@ function jmaXMLFetch(url) {
 
                   if (elm3.querySelectorAll("IntensityStation")) {
                     elm3.querySelectorAll("IntensityStation").forEach(function (elm4) {
-                      var latlng = pointList[elm4.querySelector("Code").textContent].location;
-                      add_IntensityStation_info(latlng[0], latlng[1], elm4.querySelector("Name").textContent, elm4.querySelector("Int").textContent);
+                      var pointT = pointList[elm4.querySelector("Code").textContent];
+                      if (pointT) {
+                        add_IntensityStation_info(pointT.location[0], pointT.location[1], elm4.querySelector("Name").textContent, elm4.querySelector("Int").textContent);
+                      }
                     });
                   }
                 });
@@ -1081,7 +1083,10 @@ function narikakun_Fetch(url) {
                     add_City_info(elm3.Name, elm3.MaxInt);
                     if (elm3.IntensityStation) {
                       elm3.IntensityStation.forEach(function (elm4) {
-                        add_IntensityStation_info(pointList[elm4.Code].location[0], pointList[elm4.Code].location[1], elm4.Name, elm4.Int);
+                        pointT = pointList[elm4.Code];
+                        if (pointT) {
+                          add_IntensityStation_info(pointT.location[0], pointT.location[1], elm4.Name, elm4.Int);
+                        }
                       });
                     }
                   });
@@ -1094,10 +1099,30 @@ function narikakun_Fetch(url) {
       }
     });
 }
-var Int0T = (Int1T = Int2T = Int3T = Int4T = Int5mT = Int5pT = Int6mT = Int6pT = Int7T = Int7pT = ["any"]);
+var Int0T = ["any"];
+var Int1T = ["any"];
+var Int2T = ["any"];
+var Int3T = ["any"];
+var Int4T = ["any"];
+var Int5mT = ["any"];
+var Int5pT = ["any"];
+var Int6mT = ["any"];
+var Int6pT = ["any"];
+var Int7T = ["any"];
+var Int7pT = ["any"];
 
 function mapFillReset() {
-  Int0T = Int1T = Int2T = Int3T = Int4T = Int5mT = Int5pT = Int6mT = Int6pT = Int7T = Int7pT = ["any"];
+  Int0T = ["any"];
+  Int1T = ["any"];
+  Int2T = ["any"];
+  Int3T = ["any"];
+  Int4T = ["any"];
+  Int5mT = ["any"];
+  Int5pT = ["any"];
+  Int6mT = ["any"];
+  Int6pT = ["any"];
+  Int7T = ["any"];
+  Int7pT = ["any"];
   map.setFilter("Int0", ["==", "name", ""]);
   map.setFilter("Int1", ["==", "name", ""]);
   map.setFilter("Int2", ["==", "name", ""]);
@@ -1179,7 +1204,7 @@ function add_Area_info(name, maxInt) {
     icon.classList.add("MaxShindoIcon");
     icon.innerHTML = '<div style="background:' + color[0] + ";color:" + color[1] + '">' + maxInt + "</div>";
 
-    var AreaPopup = new maplibregl.Popup({ closeButton: false, closeOnClick: false, offset: [0, -17] }).setHTML("<h3>細分区域</h3><div>" + name + "</div><div>震度" + maxInt + "</div>");
+    var AreaPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<h3>細分区域</h3><div>" + name + "</div><div>震度" + maxInt + "</div>");
     markerElm = new maplibregl.Marker(icon).setLngLat([pointLocation[1], pointLocation[0]]).setPopup(AreaPopup).addTo(map);
   }
 
@@ -1267,7 +1292,7 @@ function add_IntensityStation_info(lat, lng, name, int) {
   icon.classList.add("ShindoIcon");
   icon.innerHTML = '<div style="background:' + color4[0] + ";color:" + color4[1] + '">' + int + "</div>";
 
-  var PtPopup = new maplibregl.Popup({ closeButton: false, closeOnClick: false, offset: [0, -17] }).setHTML("<h3>観測点</h3><div>" + name + "</div><div>震度" + int + "</div>");
+  var PtPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<h3>観測点</h3><div>" + name + "</div><div>震度" + int + "</div>");
   markerElm = new maplibregl.Marker(icon).setLngLat([lng, lat]).setPopup(PtPopup).addTo(map);
 
   wrap3[wrap3.length - 1].appendChild(newDiv);
@@ -1325,7 +1350,7 @@ function EQInfoControl(data) {
 
       map.panTo([data.lng, data.lat], { animate: false });
       map.zoomTo(8, { animate: false });
-      var ESPopup = new maplibregl.Popup({ closeButton: false, closeOnClick: false, offset: [0, -17] }).setHTML("<h3>震央</h3><div>" + EQInfo.epiCenter + "</div>");
+      var ESPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<h3>震央</h3><div>" + EQInfo.epiCenter + "</div>");
       markerElm = new maplibregl.Marker(img).setLngLat([data.lng, data.lat]).setPopup(ESPopup).addTo(map);
     } else {
       markerElm.setLngLat([data.lng, data.lat]);

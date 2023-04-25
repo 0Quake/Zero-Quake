@@ -497,6 +497,7 @@ document.getElementById("sideBar").addEventListener("transitionend", function ()
 });
 
 //通知更新
+/*
 function Show_notification(data) {
   document.getElementById("notification_Area").classList.remove("no_notification");
   notifications = notifications.concat(data);
@@ -532,7 +533,7 @@ function Show_notification(data) {
 
     document.getElementById("notification_wrap").appendChild(clone);
   });
-}
+}*/
 
 //津波情報ウィンドウ表示
 document.getElementById("TsunamiDetail").addEventListener("click", function () {
@@ -566,12 +567,18 @@ function kmoniTimeUpdate(updateTime, LocalTime, type, condition, vendor) {
     document.getElementById("ymoniVendor").textContent = vendor == "YE" ? "East" : "West";
   }
   document.getElementById(type + "_UT").textContent = dateEncode(3, updateTime);
+
   var iconElm = document.getElementById(type + "_ICN");
 
   if (condition == "success") {
-    iconElm.classList.add("SuccessAnm");
     iconElm.classList.add("Success");
     iconElm.classList.remove("Error");
+    if (!background) {
+      iconElm.classList.add("SuccessAnm");
+      iconElm.addEventListener("animationend", function () {
+        this.classList.remove("SuccessAnm");
+      });
+    }
   } else if (condition == "Error") {
     iconElm.classList.remove("Success");
     iconElm.classList.add("Error");
@@ -579,10 +586,6 @@ function kmoniTimeUpdate(updateTime, LocalTime, type, condition, vendor) {
     iconElm.classList.remove("Success");
     iconElm.classList.remove("Error");
   }
-
-  iconElm.addEventListener("animationend", function () {
-    this.classList.remove("SuccessAnm");
-  });
 }
 
 //接続状況ダイアログ表示
@@ -605,10 +608,11 @@ document.getElementById("errorMsg_close").addEventListener("click", function () 
 });
 
 //🔴汎用関数 map.js共用🔴
-
+/*
 var notifications = [];
 var templateN = document.getElementById("notificationTemplate");
 
 document.getElementById("notification_more").addEventListener("click", function () {
   document.getElementById("notification_Area").classList.toggle("open");
 });
+*/
