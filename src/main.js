@@ -74,6 +74,14 @@ var config = store.get("config", {
       GetData: false,
       AccessToken: "",
     },
+    projectbs: {
+        GetData: false,
+        Interval: 1000
+    },
+    wolfx: {
+        GetData: false,
+        Interval: 1000
+    }
   },
   notice: {
     voice_parameter: {
