@@ -58,22 +58,34 @@ var config = store.get("config", {
   Source: {
     kmoni: {
       kmoni: {
+        GetData: true,
         Interval: 1000,
       },
       lmoni: {
+        GetData: true,
         Interval: 1000,
       },
       ymoni: {
+        GetData: true,
         Interval: 1000,
       },
     },
     msil: {
+      GetData: true,
       Interval: 10000,
     },
     axis: {
       GetData: false,
       AccessToken: "",
     },
+    projectbs: {
+      GetData: true,
+      Interval: 1000,
+    },wolfx: {
+      GetData: true,
+      Interval: 1000,
+    },
+
   },
   notice: {
     voice_parameter: {
