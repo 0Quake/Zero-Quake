@@ -519,34 +519,24 @@ ipcMain.on("message", (_event, response) => {
 
 //メインウィンドウ表示処理
 function createWindow() {
-  if (mainWindow) {
+  if (mainWindow && !mainWindow.isDestroyed()) {
     if (mainWindow.isMinimized()) mainWindow.restore();
     if (!mainWindow.isFocused()) mainWindow.focus();
-    return false;
-  }
-  mainWindow = new BrowserWindow({
-    minWidth: 600,
-    minHeight: 300,
-    webPreferences: {
-      preload: path.join(__dirname, "js/preload.js"),
-      title: "Zero Quake",
-      icon: path.join(__dirname, "img/icon.ico"),
-      backgroundThrottling: false,
-    },
-    backgroundColor: "#202227",
-  });
-  if (Replay !== 0) {
-    mainWindow.webContents.send("message2", {
-      action: "Replay",
-      data: Replay,
-    });
-  }
-
-  mainWindow.webContents.on("did-finish-load", () => {
-    if (notifyData) {
-      mainWindow.webContents.send("message2", notifyData);
+    if (!mainWindow.isVisible()) {
+      mainWindow.show();
     }
-
+  } else {
+    mainWindow = new BrowserWindow({
+      minWidth: 600,
+      minHeight: 300,
+      webPreferences: {
+        preload: path.join(__dirname, "js/preload.js"),
+        title: "Zero Quake",
+        icon: path.join(__dirname, "img/icon.ico"),
+        backgroundThrottling: false,
+      },
+      backgroundColor: "#202227",
+    });
     if (Replay !== 0) {
       mainWindow.webContents.send("message2", {
         action: "Replay",
@@ -554,82 +544,100 @@ function createWindow() {
       });
     }
 
-    kmoniTimeTmp.forEach(function (elm) {
-      mainWindow.webContents.send("message2", {
-        action: "kmoniTimeUpdate",
-        Updatetime: elm.Updatetime,
-        LocalTime: elm.LocalTime,
-        type: elm.type,
-        condition: "success",
-      });
-    });
-
-    mainWindow.webContents.send("message2", {
-      action: "setting",
-      data: config,
-    });
-
-    if (EEWNow) {
-      mainWindow.webContents.send("message2", {
-        action: "EEWAlertUpdate",
-        data: EEW_nowList,
-      });
-      if (estShindoTmp) {
-        mainWindow.webContents.send("message2", estShindoTmp);
-      }
-    }
-
-    mainWindow.webContents.send("message2", {
-      action: "EQInfo",
-      source: "jma",
-      data: eqInfo.jma.slice(0, config.Info.EQInfo.ItemCount),
-    });
-
-    if (notifications.length > 0) {
-      mainWindow.webContents.send("message2", {
-        action: "notification_Update",
-        data: notifications,
-      });
-    }
-    var threshold01Tmp;
-    EQDetect_List.forEach(function (elm) {
-      if (elm.isCity) {
-        threshold01Tmp = thresholds.threshold01C;
-      } else {
-        threshold01Tmp = thresholds.threshold01;
+    mainWindow.webContents.on("did-finish-load", () => {
+      if (notifyData) {
+        mainWindow.webContents.send("message2", notifyData);
       }
 
-      if (elm.Codes.length >= threshold01Tmp) {
+      if (Replay !== 0) {
         mainWindow.webContents.send("message2", {
-          action: "EQDetect",
-          data: elm,
+          action: "Replay",
+          data: Replay,
+        });
+      }
+
+      kmoniTimeTmp.forEach(function (elm) {
+        mainWindow.webContents.send("message2", {
+          action: "kmoniTimeUpdate",
+          Updatetime: elm.Updatetime,
+          LocalTime: elm.LocalTime,
+          type: elm.type,
+          condition: "success",
+        });
+      });
+
+      mainWindow.webContents.send("message2", {
+        action: "setting",
+        data: config,
+      });
+
+      if (EEWNow) {
+        mainWindow.webContents.send("message2", {
+          action: "EEWAlertUpdate",
+          data: EEW_nowList,
+        });
+        if (estShindoTmp) {
+          mainWindow.webContents.send("message2", estShindoTmp);
+        }
+      }
+
+      mainWindow.webContents.send("message2", {
+        action: "EQInfo",
+        source: "jma",
+        data: eqInfo.jma.slice(0, config.Info.EQInfo.ItemCount),
+      });
+
+      if (notifications.length > 0) {
+        mainWindow.webContents.send("message2", {
+          action: "notification_Update",
+          data: notifications,
+        });
+      }
+      var threshold01Tmp;
+      EQDetect_List.forEach(function (elm) {
+        if (elm.isCity) {
+          threshold01Tmp = thresholds.threshold01C;
+        } else {
+          threshold01Tmp = thresholds.threshold01;
+        }
+
+        if (elm.Codes.length >= threshold01Tmp) {
+          mainWindow.webContents.send("message2", {
+            action: "EQDetect",
+            data: elm,
+          });
+        }
+      });
+
+      if (P2P_ConnectData) {
+        mainWindow.webContents.send("message2", P2P_ConnectData);
+      }
+
+      if (kmoniPointsDataTmp) {
+        mainWindow.webContents.send("message2", kmoniPointsDataTmp);
+      }
+      if (SnetPointsDataTmp) {
+        mainWindow.webContents.send("message2", SnetPointsDataTmp);
+      }
+      if (Replay !== 0) {
+        mainWindow.webContents.send("message2", {
+          action: "Replay",
+          data: Replay,
         });
       }
     });
 
-    if (P2P_ConnectData) {
-      mainWindow.webContents.send("message2", P2P_ConnectData);
-    }
+    mainWindow.loadFile("src/index.html");
 
-    if (kmoniPointsDataTmp) {
-      mainWindow.webContents.send("message2", kmoniPointsDataTmp);
-    }
-    if (SnetPointsDataTmp) {
-      mainWindow.webContents.send("message2", SnetPointsDataTmp);
-    }
-    if (Replay !== 0) {
-      mainWindow.webContents.send("message2", {
-        action: "Replay",
-        data: Replay,
-      });
-    }
-  });
+    mainWindow.on("close", (event) => {
+      event.preventDefault();
+      mainWindow.hide();
+    });
 
-  mainWindow.loadFile("src/index.html");
-
-  mainWindow.on("closed", () => {
-    mainWindow = null;
-  });
+    mainWindow.on("closed", () => {
+      mainWindow = null;
+    });
+  }
 }
 //ワーカーウィンドウ表示処理
 function worker_createWindow() {
