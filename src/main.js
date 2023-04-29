@@ -58,16 +58,20 @@ var config = store.get("config", {
   Source: {
     kmoni: {
       kmoni: {
+        GetData: true,
         Interval: 1000,
       },
       lmoni: {
+        GetData: true,
         Interval: 1000,
       },
       ymoni: {
+        GetData: true,
         Interval: 1000,
       },
     },
     msil: {
+      GetData: true,
       Interval: 10000,
     },
     axis: {
@@ -75,13 +79,13 @@ var config = store.get("config", {
       AccessToken: "",
     },
     projectbs: {
-        GetData: false,
-        Interval: 1000
+      GetData: true,
+      Interval: 1000,
     },
     wolfx: {
-        GetData: false,
-        Interval: 1000
-    }
+      GetData: true,
+      Interval: 1000,
+    },
   },
   notice: {
     voice_parameter: {
@@ -1328,7 +1332,7 @@ function P2P_WS() {
             eqInfoUpdate(true);
             setTimeout(function () {
               eqInfoUpdate(true);
-            }, 1000);
+            }, 3000);
             //地震情報
             break;
           case 552:
@@ -1346,7 +1350,7 @@ function P2P_WS() {
             break;
           case 556:
             //緊急地震速報（警報）
-            EEWdetect(3, data);
+            EEWdetect(4, data);
             break;
           default:
             return false;
@@ -1396,7 +1400,7 @@ function AXIS_WS() {
         var data = JSON.parse(message.utf8Data);
         if (data.Title && (data.Title == "緊急地震速報（予報）" || data.Title == "緊急地震速報（警報）")) {
           //eew
-          EEWdetect(4, data);
+          EEWdetect(3, data);
         } else if (data.channel == "jmx-seismology") {
           //地震情報
           eqInfoControl(
@@ -1796,7 +1800,7 @@ function EEWdetect(type, json, KorL) {
     }
     if (KorL == 2) lwaveTmp = json.avrarea;
   } else if (type == 3) {
-    //P2P
+    //axis
 
     var alertflgTmp = json.Title == "緊急地震速報（予報）" ? "予報" : "警報";
     var EEWdata = {
