@@ -81,11 +81,11 @@ var config = store.get("config", {
     projectbs: {
       GetData: true,
       Interval: 1000,
-    },wolfx: {
+    },
+    wolfx: {
       GetData: true,
       Interval: 1000,
     },
-
   },
   notice: {
     voice_parameter: {
