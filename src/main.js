@@ -209,16 +209,18 @@ let tray;
 var RevocationTimer;
 var thresholds;
 
-//多重起動防止
-const gotTheLock = app.requestSingleInstanceLock();
-if (!gotTheLock) {
-  app.quit();
-}
-
 if (app.isPackaged) {
+  //メニューバー非表示
   Menu.setApplicationMenu(false);
+
+  //多重起動防止
+  const gotTheLock = app.requestSingleInstanceLock();
+  if (!gotTheLock) {
+    app.quit();
+  }
 }
 
+//アプリの更新を確認
 var update_data;
 function checkUpdate() {
   let request = net.request("https://api.github.com/repos/0quake/Zero-Quake/releases");
@@ -286,9 +288,12 @@ function checkUpdate() {
   // リクエストの送信
   request.end();
 }
+
+//定期実行
 function ScheduledExecution() {
   checkUpdate();
 
+  //axisのアクセストークン確認
   if (config.Source.axis.GetData) {
     var request = net.request("https://axis.prioris.jp/api/token/refresh/?token=" + config.Source.axis.AccessToken);
     request.on("response", (res) => {
@@ -323,10 +328,15 @@ function ScheduledExecution() {
   }
   setTimeout(ScheduledExecution, 1800000);
 }
+
+//準備完了イベント
 app.whenReady().then(() => {
+  //ウィンドウ作成
   worker_createWindow();
   kmoniServerSelect();
   createWindow();
+
+  //定期実行着火
   ScheduledExecution();
 
   app.on("activate", () => {
@@ -336,6 +346,7 @@ app.whenReady().then(() => {
     }
   });
 
+  //初期化処理
   start();
 });
 
@@ -354,12 +365,9 @@ const options3 = {
   detail: "",
   buttons: ["OK"],
 };
-
-// 全てのウィンドウが閉じたとき
-app.on("window-all-closed", () => {});
 var relaunchTimer;
 var errorMsgBox = false;
-//エラー処理
+//エラーイベント
 process.on("uncaughtException", function (err) {
   //Window_notification("予期しないエラーが発生しました。", "error");
   if (!errorMsgBox && app.isReady()) {
@@ -401,8 +409,7 @@ process.on("uncaughtException", function (err) {
     Window_notification("予期しないエラーが発生しました。", "error");
   }
 });
-
-//エラー処理 本体
+//エラー処理
 function errorResolve(response) {
   switch (response) {
     case 0:
@@ -442,6 +449,9 @@ function crashReportSend(errMsg, result) {
   // リクエストの送信
   request.end();
 }
+
+// 全てのウィンドウが閉じたとき
+app.on("window-all-closed", () => {});
 
 //アプリのロード完了イベント
 electron.app.on("ready", () => {
@@ -1382,6 +1392,7 @@ function P2P_WS_Connect() {
   if (P2PWSclient) P2PWSclient.connect("wss://api.p2pquake.net/v2/ws");
 }
 
+//AXIS WebSocket接続・受信処理
 var AXISWSclient;
 const AXIS_headers = {
   Authorization: `Bearer ${config.Source.axis.AccessToken}`,
