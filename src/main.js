@@ -469,6 +469,12 @@ electron.app.on("ready", () => {
         },
       },
       {
+        label: "設定画面標準",
+        click: () => {
+          setting_createWindow();
+        },
+      },
+      {
         type: "separator",
       },
       {
