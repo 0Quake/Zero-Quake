@@ -216,7 +216,7 @@ if (app.isPackaged) {
   //多重起動防止
   const gotTheLock = app.requestSingleInstanceLock();
   if (!gotTheLock) {
-    app.quit();
+    app.exit(0)
   }
 }
 
@@ -303,7 +303,6 @@ function ScheduledExecution() {
       });
       res.on("end", function () {
         var json = jsonParse(dataTmp);
-        console.log();
         if (json.status == "generate a new token") {
           //トークン更新
           if (json.token) {
@@ -417,7 +416,7 @@ function errorResolve(response) {
       app.exit(0);
       break;
     case 1:
-      app.quit();
+      app.exit(0)
       break;
     case 2:
       clearTimeout(relaunchTimer);
@@ -474,7 +473,9 @@ electron.app.on("ready", () => {
       },
       {
         label: "終了",
-        role: "quit",
+        click: () => {
+          app.exit(0);
+        },
       },
     ])
   );
