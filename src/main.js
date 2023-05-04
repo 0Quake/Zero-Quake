@@ -216,7 +216,7 @@ if (app.isPackaged) {
   //多重起動防止
   const gotTheLock = app.requestSingleInstanceLock();
   if (!gotTheLock) {
-    app.exit(0)
+    app.exit(0);
   }
 }
 
@@ -234,7 +234,8 @@ function checkUpdate() {
       res.on("end", function () {
         var json = jsonParse(dataTmp);
         var latest_verTmp = String(json[0].tag_name.replace("v", ""));
-        var current_verTmp = process.env.npm_package_version;
+        var p = require("../package.json");
+        var current_verTmp = p.version;
         var latest_v = latest_verTmp.split(".");
         var current_v = current_verTmp.split(".");
         var dl_page = json[0].html_url;
@@ -416,7 +417,7 @@ function errorResolve(response) {
       app.exit(0);
       break;
     case 1:
-      app.exit(0)
+      app.exit(0);
       break;
     case 2:
       clearTimeout(relaunchTimer);
