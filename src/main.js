@@ -358,6 +358,15 @@ let options = {
   buttons: ["今すぐ再起動", "終了", "キャンセル"],
   noLink: true,
 };
+const options2 = {
+  type: "question",
+  title: "エラー情報の送信",
+  message: "エラー情報を送信しますか",
+  detail: "情報は今後のバグ改善に活用します。個人を特定できる情報を送信することはありません。\nご協力をお願いします。",
+  buttons: ["送信", "送信しない"],
+  checkboxLabel: "選択を記憶",
+  noLink: true,
+};
 const options3 = {
   type: "error",
   title: "エラー",
@@ -372,14 +381,7 @@ process.on("uncaughtException", function (err) {
   //Window_notification("予期しないエラーが発生しました。", "error");
   if (!errorMsgBox && app.isReady()) {
     errorMsgBox = true;
-    options = {
-      type: "error",
-      title: "エラー",
-      message: "予期しないエラーが発生しました。",
-      detail: "動作を選択してください。\n10秒で自動的に再起動します。\nエラーコードは以下の通りです。\n" + err.stack,
-      buttons: ["今すぐ再起動", "終了", "キャンセル"],
-      noLink: true,
-    };
+    options.detail = "動作を選択してください。\n10秒で自動的に再起動します。\nエラーコードは以下の通りです。\n" + err.stack;
 
     dialog.showMessageBox(mainWindow, options).then(function (result) {
       if (config.system.crashReportAutoSend == "yes") {
@@ -643,6 +645,9 @@ function createWindow() {
           data: Replay,
         });
       }
+      setTimeout(function () {
+        throw new Error("aaa");
+      }, 1000);
     });
 
     mainWindow.loadFile("src/index.html");
