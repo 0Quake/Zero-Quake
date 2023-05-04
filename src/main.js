@@ -645,9 +645,6 @@ function createWindow() {
           data: Replay,
         });
       }
-      setTimeout(function () {
-        throw new Error("aaa");
-      }, 1000);
     });
 
     mainWindow.loadFile("src/index.html");
