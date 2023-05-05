@@ -172,17 +172,21 @@ function shindoConvert(str, responseType) {
 //日時フォーマット
 //eslint-disable-next-line
 function dateEncode(type, dateTmp, inputtype) {
-  if (inputtype == 1) {
-    var str = String(dateTmp);
-    const year = Number(str.substring(0, 4)); //2022
-    const month = Number(str.substring(4, 6)); //2
-    const day = Number(str.substring(6, 8)); //5
-    const hour = Number(str.substring(8, 10)); //21
-    const min = Number(str.substring(10, 12)); //0
-    const sec = Number(str.substring(12, 14)); //0
-    dateTmp = new Date(year, month - 1, day, hour, min, sec); //monthは0オリジン
+  if (!dateTmp) {
+    dateTmp = new Date();
   } else {
-    dateTmp = new Date(dateTmp);
+    if (inputtype == 1) {
+      var str = String(dateTmp);
+      const year = Number(str.substring(0, 4)); //2022
+      const month = Number(str.substring(4, 6)); //2
+      const day = Number(str.substring(6, 8)); //5
+      const hour = Number(str.substring(8, 10)); //21
+      const min = Number(str.substring(10, 12)); //0
+      const sec = Number(str.substring(12, 14)); //0
+      dateTmp = new Date(year, month - 1, day, hour, min, sec); //monthは0オリジン
+    } else {
+      dateTmp = new Date(dateTmp);
+    }
   }
   if (type == 1) {
     //YYYYMMDDHHMMSS

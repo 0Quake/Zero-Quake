@@ -118,6 +118,8 @@ function EEWAlertUpdate(data) {
       clone.querySelector(".magnitude").textContent = elm.magnitude ? elm.magnitude : "不明";
       clone.querySelector(".depth").textContent = elm.depth ? elm.depth : "不明";
       clone.querySelector(".traning").style.display = elm.is_training ? "block" : "none";
+      clone.querySelector(".EpicenterElement").style.display = !elm.isPlum ? "block" : "none";
+      clone.querySelector(".NoEpicenterElement").style.display = elm.isPlum ? "block" : "none";
 
       clone.querySelector(".userIntensity").textContent = elm.userIntensity ? elm.userIntensity : "?";
       clone.querySelector(".userDataWrap").style.background = shindoConvert(elm.userIntensity, 2)[0];

@@ -1291,8 +1291,8 @@ function wolfxRequest() {
       });
       res.on("end", function () {
         var json = jsonParse(dataTmp);
-        if (wolfx_lastUpdate < json.updated) {
-          wolfx_lastUpdate = json.updated;
+        if (wolfx_lastUpdate < new Date(json.AnnouncedTime)) {
+          wolfx_lastUpdate = json.AnnouncedTime;
           var EEWdata = {
             alertflg: json.isWarn ? "警報" : "予報", //種別
             report_id: Number(json.EventID), //地震ID
@@ -2940,7 +2940,8 @@ function jsonParse(str) {
 
 //日時フォーマット
 function dateEncode(type, dateTmp) {
-  dateTmp = new Date(dateTmp);
+  if (!dateTmp) dateTmp = new Date();
+  else dateTmp = new Date(dateTmp);
   if (type == 1) {
     //YYYYMMDDHHMMSS
     var YYYY = String(dateTmp.getFullYear());
