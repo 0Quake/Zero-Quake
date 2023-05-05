@@ -9,7 +9,7 @@ var data_center = document.getElementById("data_center");
 var data_comment = document.getElementById("data_comment");
 var areaLocation;
 var eid;
-var markerElm;
+var ESmarkerElm;
 var newInfoDateTime = 0;
 var map;
 var jmaURL;
@@ -1343,21 +1343,19 @@ function EQInfoControl(data) {
   if (EQInfo.comment) data_comment.innerHTML = EQInfo.comment.join("\n");
 
   if (data.lat && data.lng) {
-    if (!markerElm) {
+    if (!ESmarkerElm) {
       const img = document.createElement("img");
       img.src = "./img/epicenter.svg";
       img.classList.add("epicenterIcon");
 
-      map.panTo([data.lng, data.lat], { animate: false });
-      map.zoomTo(8, { animate: false });
       var ESPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<h3>震央</h3><div>" + EQInfo.epiCenter + "</div>");
-      markerElm = new maplibregl.Marker(img).setLngLat([data.lng, data.lat]).setPopup(ESPopup).addTo(map);
+      ESmarkerElm = new maplibregl.Marker(img).setLngLat([data.lng, data.lat]).setPopup(ESPopup).addTo(map);
     } else {
-      markerElm.setLngLat([data.lng, data.lat]);
+      ESmarkerElm.setLngLat([data.lng, data.lat]);
     }
 
     map.panTo([data.lng, data.lat], { animate: false });
-    map.zoomTo(6, { animate: false });
+    map.zoomTo(8, { animate: false });
   }
 
   switch (data.infoType) {
