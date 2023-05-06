@@ -116,13 +116,22 @@
           <label><input type="checkbox" name="overlaySelect" value="gsi_vector" checked>詳細地図 (地名・道路等)</label>
           <label><input type="checkbox" name="overlaySelect" value="over0">陰影起伏図</label>
           <label><input type="checkbox" name="overlaySelect" value="over1">火山基本図データ</label>
-          <label><input type="checkbox" name="overlaySelect" value="over2">津波浸水想定 ハザードマップ</label>
-          <label><input type="checkbox" name="overlaySelect" value="over3">土砂災害警戒区域(急傾斜地の崩壊) ハザードマップ</label>
-          <label><input type="checkbox" name="overlaySelect" value="over4">土砂災害警戒区域(地すべり) ハザードマップ</label>
+          <label><input type="checkbox" name="overlaySelect" value="over2" id="over2">津波浸水想定 ハザードマップ</label>
+          <label><input type="checkbox" name="overlaySelect" value="over3" id="over3">土砂災害警戒区域(急傾斜地の崩壊) ハザードマップ</label>
+          <label><input type="checkbox" name="overlaySelect" value="over4" id="over4">土砂災害警戒区域(地すべり) ハザードマップ</label>
         </div>
       </nav>
     </div>
     <button id="layerSwitch_toggle">layers</button>
+    <div id="legendWrap">
+      <div class="legend" id="legend2">
+        <img src="./img/dosha_scale.svg">
+      </div>
+      <div class="legend" id="legend1">
+        <img src="./img/tsunami_scale.svg">
+      </div>
+    </div>
+
   </div>
   <main>
 

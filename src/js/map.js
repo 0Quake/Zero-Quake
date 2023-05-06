@@ -133,6 +133,19 @@ document.getElementsByName("overlaySelect").forEach(function (elm) {
     }
   });
 });
+document.getElementById("over2").addEventListener("change", function () {
+  document.getElementById("legend1").style.display = this.checked ? "inline-block" : "none";
+});
+var over3_visiblity = false;
+var over4_visiblity = false;
+document.getElementById("over3").addEventListener("change", function () {
+  over3_visiblity = this.checked;
+  document.getElementById("legend2").style.display = over3_visiblity || over4_visiblity ? "inline-block" : "none";
+});
+document.getElementById("over4").addEventListener("change", function () {
+  over4_visiblity = this.checked;
+  document.getElementById("legend2").style.display = over3_visiblity || over4_visiblity ? "inline-block" : "none";
+});
 
 //マップ初期化など
 var inited = false;
