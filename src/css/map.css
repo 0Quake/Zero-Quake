@@ -105,9 +105,6 @@
 #mapcontainer canvas {
   outline: none;
 }
-.leaflet-zoom-anim .leaflet-zoom-animated {
-  transition: transform 0.15s ease-out;
-}
 
 .maplibregl-ctrl {
   background: #444;
@@ -134,39 +131,11 @@
 .maplibregl-ctrl button.maplibregl-ctrl-compass::before {
   content: "unfold_more";
 }
-rol-zoom-in:hover,
-a.leaflet-control-zoom-out:hover {
-  background: #666;
-}
-
-.leaflet-bar a.leaflet-disabled {
-  background: #444;
-  color: #666;
-}
-.leaflet-control-layers-toggle,
-.leaflet-retina .leaflet-control-layers-toggle {
-  background-image: url(../img/layers.svg);
-}
-.leaflet-control-layers {
-  border-radius: 2000px;
-}
-.leaflet-control-layers.leaflet-control-layers-expanded {
-  border-radius: 5px;
-}
 
 #kmoniCanvas {
   display: none;
 }
 
-img.leaflet-control {
-  max-height: 250px;
-  max-width: 100px;
-}
-
-.leaflet-jsonMAP1-pane,
-.leaflet-jsonMAP2-pane {
-  pointer-events: none;
-}
 .mapboxgl-control-container * {
   z-index: 100000000;
 }
@@ -461,9 +430,6 @@ div.marker-circle.marker_Int.marker_Int7p {
 .popup_show .PointPopup {
   display: block;
 }
-.leaflet-map-pane svg {
-  z-index: unset;
-}
 
 .maplibregl-ctrl.maplibregl-ctrl-attrib {
   background: #444;
@@ -498,10 +464,6 @@ div.marker-circle.marker_Int.marker_Int7p {
   width: 20px;
   vertical-align: middle;
   margin: 0 5px;
-}
-
-.leaflet-tsunami-pane canvas {
-  animation: flash 2s step-end infinite;
 }
 
 #tsunami_MajorWarning span {

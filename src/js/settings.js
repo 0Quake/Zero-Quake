@@ -1,5 +1,4 @@
 var setting;
-var sections = [];
 var markerElm;
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "setting") {
@@ -24,11 +23,6 @@ window.electronAPI.messageSend((event, request) => {
         elm.setAttribute("selected", true);
       }
     });
-
-    var SaibunElm = Array.from(document.querySelectorAll("#saibun option")).find(function (elm) {
-      return elm.innerText == setting.home.Section;
-    });
-    if (SaibunElm) SaibunElm.selected = true;
 
     document.getElementById("BugReportAutoSend").checked = setting.system.crashReportAutoSend;
 
@@ -133,6 +127,125 @@ document.getElementById("cancel").addEventListener("click", function () {
 });
 
 function init() {
+  map = new maplibregl.Map({
+    container: "mapcontainer",
+    center: [138.46, 32.99125],
+    zoom: 4,
+    attributionControl: true,
+    style: {
+      version: 8,
+      glyphs: "https://gsi-cyberjapan.github.io/optimal_bvmap/glyphs/{fontstack}/{range}.pbf",
+
+      sources: {
+        v: {
+          type: "vector",
+          tiles: ["https://cyberjapandata.gsi.go.jp/xyz/optimal_bvmap-v1/{z}/{x}/{y}.pbf"],
+          attribution: "国土地理院",
+          minzoom: 4,
+          maxzoom: 16,
+        },
+        basemap: {
+          type: "geojson",
+          data: "./Resource/basemap.json",
+          attribution: "気象庁",
+        },
+        worldmap: {
+          type: "geojson",
+          data: "./Resource/World.json",
+          attribution: "Natural Earth",
+        },
+        prefmap: {
+          type: "geojson",
+          data: "./Resource/prefectures.json",
+          attribution: "気象庁",
+        },
+      },
+      layers: [
+        {
+          id: "basemap_fill",
+          type: "fill",
+          source: "basemap",
+          paint: {
+            "fill-color": "#333",
+            "fill-opacity": 1,
+          },
+          minzoom: 0,
+          maxzoom: 22,
+        },
+        {
+          id: "basemap_LINE",
+          type: "line",
+          source: "basemap",
+          paint: {
+            "line-color": "#666",
+            "line-width": 1,
+          },
+          minzoom: 0,
+          maxzoom: 22,
+        },
+        {
+          id: "prefmap_LINE",
+          type: "line",
+          source: "prefmap",
+          paint: {
+            "line-color": "#999",
+            "line-width": 1,
+          },
+          minzoom: 0,
+          maxzoom: 22,
+        },
+        {
+          id: "worldmap_fill",
+          type: "fill",
+          source: "worldmap",
+          paint: {
+            "fill-color": "#333",
+            "fill-opacity": 1,
+          },
+          minzoom: 0,
+          maxzoom: 22,
+        },
+        {
+          id: "worldmap_LINE",
+          type: "line",
+          source: "worldmap",
+          paint: {
+            "line-color": "#444",
+            "line-width": 1,
+          },
+          minzoom: 0,
+          maxzoom: 22,
+        },
+      ],
+    },
+  });
+
+  map.addControl(new maplibregl.NavigationControl(), "top-right");
+
+  fetch("./Resource/Section_CenterLocation.json")
+    .then(function (res) {
+      return res.json();
+    })
+    .then(function (json) {
+      Object.keys(json).forEach(function (elm) {
+        var saibunElm = document.createElement("option");
+        saibunElm.innerText = elm;
+        document.getElementById("saibun").appendChild(saibunElm);
+        if (elm == setting.home.Section) saibunElm.selected = true;
+      });
+    });
+  map.on("click", "basemap_fill", (e) => {
+    document.getElementById("latitude").value = e.lngLat.lat;
+    document.getElementById("longitude").value = e.lngLat.lng;
+    markerElm.setLngLat(e.lngLat);
+
+    var optionElm = Array.from(document.querySelectorAll("#saibun option")).find(function (elm) {
+      return elm.innerText == e.features[0].properties.name;
+    });
+    if (optionElm) optionElm.selected = true;
+  });
+
+  /*
   map = L.map("mapcontainer", {
     maxBounds: [
       [90, 0],
@@ -141,138 +254,14 @@ function init() {
 
     zoomAnimation: true, //←オフにするとずれて不自然
     //preferCanvas: true,←かるくなる？
-  });
+  });*/
   //L.control.scale({ imperial: false }).addTo(map);←縮尺
 
-  map.setView([32.99125, 138.46], 4);
-  map.createPane("jsonMAPPane").style.zIndex = 210;
-  var jsonMAPCanvas = L.canvas({
-    pane: "jsonMAPPane",
-  });
+  const img = document.createElement("img");
+  img.src = "./img/homePin.svg";
+  img.classList.add("homeIcon");
 
-  map.createPane("pane300").style.zIndex = 300;
-  var homeIcon = L.icon({
-    iconUrl: "img/homePin.svg",
-    iconSize: [30, 30],
-    iconAnchor: [15, 30],
-  });
-
-  markerElm = L.marker([setting.home.latitude, setting.home.longitude], {
-    keyboard: false,
-    icon: homeIcon,
-  }).addTo(map);
-
-  fetch("./Resource/basemap.json")
-    .then(function (res) {
-      return res.json();
-    })
-    .then(function (json) {
-      gjmap = L.geoJSON(json, {
-        style: {
-          color: "#999",
-          fill: true,
-          fillColor: "#333",
-          fillOpacity: 1,
-          weight: 1,
-          pane: "tilePane",
-          attribution: 'Map data <a href="https://www.naturalearthdata.com/">&copy;Natural Earth</a> / <a href="https://www.data.jma.go.jp/developer/gis.html" target="_blank">&copy;JMA</a>',
-          renderer: L.svg(),
-        },
-        onEachFeature: function onEachFeature(feature, layer) {
-          if (feature.properties && feature.properties.name) {
-            sections.push({
-              name: feature.properties.name,
-              item: layer,
-            });
-            var saibunElm = document.createElement("option");
-            saibunElm.innerText = feature.properties.name;
-
-            if (setting && setting.home.Section == feature.properties.name) {
-              saibunElm.selected = true;
-              layer.setStyle({
-                fillColor: "#FFF",
-              });
-            }
-            document.getElementById("saibun").appendChild(saibunElm);
-
-            layer.on("click", function (e) {
-              gjmap.setStyle({
-                fillColor: "#333",
-              });
-              lat = e.latlng.lat;
-              lng = e.latlng.lng;
-              markerElm.setLatLng(e.latlng);
-
-              layer.setStyle({
-                fillColor: "#FFF",
-              });
-              document.getElementById("latitude").value = lat;
-              document.getElementById("longitude").value = lng;
-              var optionElm = Array.from(document.querySelectorAll("#saibun option")).find(function (elm) {
-                return elm.innerText == feature.properties.name;
-              });
-              optionElm.selected = true;
-            });
-          }
-        },
-      }).addTo(map);
-      fetch("./Resource/World.json")
-        .then(function (res) {
-          return res.json();
-        })
-        .then(function (json) {
-          worldmap = L.geoJSON(json, {
-            style: {
-              color: "#444",
-              fill: true,
-              fillColor: "#222",
-              fillOpacity: 1,
-              weight: 1,
-              pane: "jsonMAPPane",
-              interactive: false,
-              attribution: '<a href="https://www.naturalearthdata.com/">&copy;Natural Earth</a>',
-              renderer: jsonMAPCanvas,
-            },
-          });
-
-          worldmap.addTo(map);
-        });
-    });
-
-  var currentZoom = map.getZoom();
-  if (currentZoom < 6) {
-    document.getElementById("mapcontainer").classList.add("zoomLevel_1");
-  } else if (currentZoom < 8) {
-    document.getElementById("mapcontainer").classList.add("zoomLevel_2");
-  } else if (currentZoom < 9) {
-    document.getElementById("mapcontainer").classList.add("zoomLevel_3");
-  } else {
-    document.getElementById("mapcontainer").classList.add("zoomLevel_4");
-  }
-
-  map.on("zoom", function () {
-    var currentZoom = map.getZoom();
-    document.getElementById("mapcontainer").classList.remove("zoomLevel_1");
-    document.getElementById("mapcontainer").classList.remove("zoomLevel_2");
-    document.getElementById("mapcontainer").classList.remove("zoomLevel_3");
-    document.getElementById("mapcontainer").classList.remove("zoomLevel_4");
-
-    if (currentZoom < 6) {
-      document.getElementById("mapcontainer").classList.add("zoomLevel_1");
-    } else if (currentZoom < 8) {
-      document.getElementById("mapcontainer").classList.add("zoomLevel_2");
-    } else if (currentZoom < 9) {
-      document.getElementById("mapcontainer").classList.add("zoomLevel_3");
-    } else {
-      document.getElementById("mapcontainer").classList.add("zoomLevel_4");
-    }
-  });
-  map.on("click", function (e) {
-    lat = e.latlng.lat;
-    lng = e.latlng.lng;
-    document.getElementById("latitude").value = lat;
-    document.getElementById("longitude").value = lng;
-  });
+  markerElm = new maplibregl.Marker(img).setLngLat([setting.home.longitude, setting.home.latitude]).addTo(map);
 }
 
 //eslint-disable-next-line
@@ -282,14 +271,7 @@ function MapReDraw() {
   });
   lat = document.getElementById("latitude").value;
   lng = document.getElementById("longitude").value;
-  markerElm.setLatLng([lat, lng]);
-  sections
-    .find(function (elm) {
-      return elm.name == document.getElementById("saibun").value;
-    })
-    .item.setStyle({
-      fillColor: "#FFF",
-    });
+  markerElm.setLngLat([lng, lat]);
 }
 
 var TTSspeed = 1;

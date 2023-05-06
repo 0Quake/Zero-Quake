@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>設定 - Zero Quake</title>
     <link rel="stylesheet" href="./css/style.css">
-    <link rel="stylesheet" href="./js/leaflet/leaflet.css" />
+    <link rel='stylesheet' href='./js/maplibre/maplibre-gl.css'>
     <link rel="stylesheet" href="./css/map.css">
     <link rel="stylesheet" href="./css/setting.css">
     <meta name="color-scheme" content="dark">
@@ -156,6 +156,7 @@
                     <label>緯度<input id="longitude" type="number" oninput="MapReDraw()"></label>
                     <label>細分区域<select id="saibun" onchange="MapReDraw()"></select></label>
                     <div id="mapcontainer"></div>
+                    <div id="mapContainer"></div>
                 </section>
             </div>
             <div id="tab1_content3" class="tabcontent">
@@ -389,6 +390,8 @@
 
     <script src="./js/UIcommon.js"></script>
     <script src="./js/leaflet/leaflet.js"></script>
+    <script src='./js/maplibre/maplibre-gl.js'></script>
+
     <script src="./js/settings.js"></script>
 </body>
 
