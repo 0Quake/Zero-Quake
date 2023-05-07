@@ -1638,6 +1638,8 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
     EEWPanelElm.querySelector(".PWave_value").setAttribute("stroke-dashoffset", 125.66 - 125.66 * Math.min(pRadius / 1000 / EQElm2.distance, 1));
     EEWPanelElm.querySelector(".SWave_value").setAttribute("stroke-dashoffset", 125.66 - 125.66 * Math.min(sRadius / 1000 / EQElm2.distance, 1));
 
+    EEWPanelElm.querySelector(".arrived").textContent = sRadius / 1000 >= EQElm2.distance ? "到達" : "未到達";
+
     if (EQElm2.arrivalTime) {
       var countDownElm = EEWPanelElm.querySelector(".countDown");
       var countDown = (EQElm2.arrivalTime - (new Date() - Replay)) / 1000;
