@@ -368,11 +368,11 @@ function init() {
           source: "tsunami",
           layout: {
             "line-join": "round",
-            "line-cap": "round",
+            "line-cap": "butt",
           },
           paint: {
             "line-color": config.color.Tsunami.TsunamiYohoColor,
-            "line-width": 30,
+            "line-width": ["interpolate", ["linear"], ["zoom"], 2, 10, 5, 20, 10, 80, 18, 300],
           },
           minzoom: 0,
           maxzoom: 22,
@@ -385,11 +385,11 @@ function init() {
           source: "tsunami",
           layout: {
             "line-join": "round",
-            "line-cap": "round",
+            "line-cap": "butt",
           },
           paint: {
             "line-color": config.color.Tsunami.TsunamiWatchColor,
-            "line-width": 30,
+            "line-width": ["interpolate", ["linear"], ["zoom"], 2, 10, 5, 20, 10, 80, 18, 300],
           },
           minzoom: 0,
           maxzoom: 22,
@@ -401,11 +401,11 @@ function init() {
           source: "tsunami",
           layout: {
             "line-join": "round",
-            "line-cap": "round",
+            "line-cap": "butt",
           },
           paint: {
             "line-color": config.color.Tsunami.TsunamiWarningColor,
-            "line-width": 30,
+            "line-width": ["interpolate", ["linear"], ["zoom"], 2, 10, 5, 20, 10, 80, 18, 300],
           },
           minzoom: 0,
           maxzoom: 22,
@@ -418,11 +418,11 @@ function init() {
           source: "tsunami",
           layout: {
             "line-join": "round",
-            "line-cap": "round",
+            "line-cap": "butt",
           },
           paint: {
             "line-color": config.color.Tsunami.TsunamiMajorWarningColor,
-            "line-width": 30,
+            "line-width": ["interpolate", ["linear"], ["zoom"], 2, 10, 5, 20, 10, 80, 18, 300],
           },
           minzoom: 0,
           maxzoom: 22,
@@ -578,6 +578,19 @@ function init() {
       ],
     },
   });
+
+  setInterval(function () {
+    map.setLayoutProperty("tsunami_Yoho", "visibility", "none");
+    map.setLayoutProperty("tsunami_Watch", "visibility", "none");
+    map.setLayoutProperty("tsunami_Warn", "visibility", "none");
+    map.setLayoutProperty("tsunami_MajorWarn", "visibility", "none");
+    setTimeout(function () {
+      map.setLayoutProperty("tsunami_Yoho", "visibility", "visible");
+      map.setLayoutProperty("tsunami_Watch", "visibility", "visible");
+      map.setLayoutProperty("tsunami_Warn", "visibility", "visible");
+      map.setLayoutProperty("tsunami_MajorWarn", "visibility", "visible");
+    }, 300);
+  }, 2500);
 
   map.addControl(new maplibregl.NavigationControl(), "top-right");
 

@@ -1046,17 +1046,6 @@ button:hover {
   display: block;
 }
 
-@keyframes flash {
-  0% {
-    opacity: 1;
-  }
-  80% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
-}
 @keyframes SuccessAnm {
   0% {
     box-shadow: 0 0 0 0px rgb(16, 243, 0);

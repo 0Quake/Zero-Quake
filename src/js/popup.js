@@ -163,6 +163,9 @@ function EEWAlertUpdate(data) {
         EQMenu.querySelector(".magnitude").textContent = elm.magnitude ? elm.magnitude : "不明";
         EQMenu.querySelector(".depth").textContent = elm.depth ? elm.depth : "不明";
 
+        EQMenu.querySelector(".EpicenterElement").style.display = !elm.isPlum ? "block" : "none";
+        EQMenu.querySelector(".NoEpicenterElement").style.display = elm.isPlum ? "block" : "none";
+
         EQMenu.querySelector(".userIntensity").textContent = elm.userIntensity ? elm.userIntensity : "?";
         EQMenu.querySelector(".userDataWrap").style.background = shindoConvert(elm.userIntensity, 2)[0];
         EQMenu.querySelector(".userDataWrap").style.color = shindoConvert(elm.userIntensity, 2)[1];
