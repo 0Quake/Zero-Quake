@@ -2834,17 +2834,11 @@ function eqInfoAlert(data, source, update) {
 function TsunamiInfoControl(data) {
   var newInfo = !tsunamiData || !tsunamiData.issue || tsunamiData.issue.time < data.issue.time;
   if (newInfo) {
-    soundPlay("TsunamiInfo");
-
-    tsunamiData = data;
-
-    if (newInfo) {
-      //アラート
-      createWindow();
-    }
-
     //情報の有効期限
     if (data.ValidDateTime) {
+      if (data.ValidDateTime - new Date() < 0) {
+        return;
+      }
       clearTimeout(RevocationTimer);
       RevocationTimer = setTimeout(function () {
         TsunamiInfoControl({
@@ -2854,6 +2848,16 @@ function TsunamiInfoControl(data) {
           areas: [],
         });
       }, data.ValidDateTime - new Date());
+      console.log(data.ValidDateTime);
+    }
+
+    soundPlay("TsunamiInfo");
+
+    tsunamiData = data;
+
+    if (newInfo) {
+      //アラート
+      createWindow();
     }
 
     if (mainWindow) {
