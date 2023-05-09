@@ -266,6 +266,7 @@
   inset: 0;
   text-align: center;
   font-size: 16px;
+  font-family: "M PLUS 1p",sans-serif;
 }
 .zoomLevel_1 .marker_Int::before {
   display: none;
@@ -561,7 +562,7 @@ div.marker-circle.marker_Int.marker_Int7p {
   position: absolute;
   right: 0;
   bottom: 0;
-  padding: 40px 5px;
+  padding: 5px 25px 40px 5px;
   z-index: 100000000;
   text-align: right;
   max-width: 50vw;
@@ -569,7 +570,6 @@ div.marker-circle.marker_Int.marker_Int7p {
 }
 .legend {
   display: inline-block;
-  max-height: 40vh;
   background: #444444;
   border-radius: 5px;
   overflow: hidden;

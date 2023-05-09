@@ -132,7 +132,7 @@ main {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  z-index: 100000001;
+  z-index: 100000005;
 }
 #loading-wrap {
   margin: 50px 0 0 0;

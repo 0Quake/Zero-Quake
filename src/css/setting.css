@@ -115,7 +115,7 @@ div .tabcontent {
   border-top: solid 1px #666;
   text-align: right;
   font-size: 0;
-  z-index: 999999999;
+  z-index:100000001;
 }
 
 #BtnWrap button {
