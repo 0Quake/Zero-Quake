@@ -339,8 +339,11 @@ function epiCenterUpdate(eid, latitude, longitude) {
 function epiCenterClear(eid) {
   eid = Number(eid);
   if (map) {
-    var epicenterElm = epiCenter.find(function (elm2) {
-      return elm2.eid == eid;
+    epiCenter = epiCenter.filter(function (elm2) {
+      if (elm2.eid == eid) {
+        epicenterElm = elm2;
+      }
+      return elm2.eid !== eid;
     });
     if (epicenterElm && epicenterElm.markerElm) {
       epicenterElm.markerElm.remove();
