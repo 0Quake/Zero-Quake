@@ -142,9 +142,9 @@ main {
   display: none;
   position: fixed;
   inset: 5px;
-  border-radius: 10px;
-  box-shadow: 0 25px 0 0px rgba(255, 0, 0, 0.5);
-  z-index: 9999999;
+  border-radius: 15px;
+  box-shadow: 0 0 0px 15px rgba(255, 0, 0, 0.5);
+  z-index: 100000004;
   pointer-events: none;
 }
 .EEWMode #alertFrame,
