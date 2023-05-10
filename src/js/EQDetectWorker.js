@@ -39,8 +39,6 @@ function EQDetect(data, date) {
     var ptDataTmp;
 
     var detect0;
-    var detect1;
-    var detect2;
     var pgaAvr;
     for (const elm of data) {
       //ポイントごとの処理
@@ -49,17 +47,15 @@ function EQDetect(data, date) {
       if (!ptDataTmp) {
         //都会かどうか
         var isCity = elm.Region == "東京都" || elm.Region == "千葉県" || elm.Region == "埼玉県" || elm.Region == "神奈川県";
-        pointsData[elm.Code] = { detectCount: 0, SUMTmp: [elm.pga], Event: false, isCity: isCity, UpCount: 0 };
-        ptDataTmp = pointsData[elm.Code];
+        ptDataTmp =   pointsData[elm.Code] = { detectCount: 0, SUMTmp: [elm.pga], Event: false, isCity: isCity, UpCount: 0 };
       }
 
       if (elm.data) {
         //PGAの10回平均を求める
         pgaAvr =
-          ptDataTmp.SUMTmp.reduce(function (acc, cur) {
-            return acc + cur;
+          ptDataTmp.SUMTmp.reduce(function (a, b) {
+            return a + b;
           }) / ptDataTmp.SUMTmp.length;
-        if (!pgaAvr) pgaAvr = 0.1; //平均が求められなければ0.1を代入
 
         //平均PGAから閾値を決定
         thresholds.threshold02 = 0.7 * pgaAvr + 0.08;
@@ -71,11 +67,8 @@ function EQDetect(data, date) {
         }
 
         detect0 = elm.pga - pgaAvr >= thresholds.threshold02 || elm.shindo >= thresholds.threshold04; //PGA増加量・震度絶対値で評価
-        detect1 = detect0 && ptDataTmp.detectCount > 0; //detect1に加え、detectCountを加えて評価
-        detect2 = detect1 && ((elm.pga - pgaAvr >= thresholds.threshold03 && ptDataTmp.UpCount > 0) || elm.shindo > thresholds.threshold04);
-
-        elm.detect = detect1;
-        elm.detect2 = detect2;
+        elm.detect = detect0 && ptDataTmp.detectCount > 0; //elm.detect1に加え、detectCountを加えて評価
+        elm.detect2 = elm.detect1 && ((elm.pga - pgaAvr >= thresholds.threshold03 && ptDataTmp.UpCount > 0) || elm.shindo > thresholds.threshold04);
 
         //前回からの変化の有無（描画時の負荷軽減のため）
         elm.changed = elm.pga != ptDataTmp.SUMTmp[ptDataTmp.SUMTmp.length - 1];
@@ -92,14 +85,14 @@ function EQDetect(data, date) {
         ptDataTmp.SUMTmp = ptDataTmp.SUMTmp.slice(0, thresholds.historyCount - 1);
         ptDataTmp.SUMTmp.push(elm.pga);
       }
-      //連続検出回数（detect1は連続検出回数を指標に含むため、detect0で判定）
+      //連続検出回数（elm.detect1は連続検出回数を指標に含むため、detect0で判定）
       if (detect0) {
         ptDataTmp.detectCount++;
       } else {
         ptDataTmp.detectCount = 0;
       }
 
-      if (!detect1 && ptDataTmp.Event) {
+      if (!elm.detect && ptDataTmp.Event) {
         //検出中ではない場合、地震アイテムから観測点データを削除
         ptDataTmp.Event = false;
         for (const elm2 of EQDetect_List) {
@@ -119,18 +112,13 @@ function EQDetect(data, date) {
       if (elm.detect) {
         var ptDataTmp = pointsData[elm.Code];
 
-        //都会かどうかで閾値調整
-        if (ptDataTmp.isCity) {
-          MargeRangeTmp = thresholds.MargeRangeC;
-        } else {
-          MargeRangeTmp = thresholds.MargeRange;
-        }
+        if (!ptDataTmp.Event) {//すでに自観測点が地震アイテムに属していない場合
+          //都会かどうかで閾値調整
+          MargeRangeTmp = ptDataTmp.isCity?thresholds.MargeRangeC:thresholds.MargeRange;
 
-        //すでに自観測点が地震アイテムに属していないことを確認
-        if (!ptDataTmp.Event) {
           //自観測点が地震アイテムの半径+閾値の範囲内に入っている地震アイテムを探す
           var EQD_ItemTmp = EQDetect_List.find(function (elm2) {
-            return geosailing(elm.Location.Latitude, elm.Location.Longitude, elm2.lat, elm2.lng) - elm2.Radius <= Math.max(0, MargeRangeTmp);
+            return geosailing(elm.Location.Latitude, elm.Location.Longitude, elm2.lat, elm2.lng) - elm2.Radius <= MargeRangeTmp;
           });
           if (EQD_ItemTmp) {
             //EQD_ItemTmpに属する観測点から、自観測点からの距離が閾値以下の観測点があるか確認
@@ -153,11 +141,7 @@ function EQDetect(data, date) {
           //最終検知時間（解除時に使用）を更新
           EQD_ItemTmp.last_Detect = new Date();
 
-          if (EQD_ItemTmp.isCity) {
-            threshold01Tmp = thresholds.threshold01C;
-          } else {
-            threshold01Tmp = thresholds.threshold01;
-          }
+          threshold01Tmp =EQD_ItemTmp.isCity? thresholds.threshold01C:thresholds.threshold01;
 
           if (EQD_ItemTmp.Codes.length >= threshold01Tmp) {
             //地震アイテムに属する観測点数が閾値以上なら
