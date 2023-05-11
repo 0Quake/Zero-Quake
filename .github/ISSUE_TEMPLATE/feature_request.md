@@ -1,20 +1,12 @@
----
-name: Feature request
-about: Suggest an idea for this project
-title: ''
-labels: ''
-assignees: ''
+# 提案する機能の概要
+提案する機能の概要を簡単に説明して下さい
 
----
+<br>
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+# 提案する機能がないことによる弊害
+提案する機能がないことにより感じている不便について詳しく説明してください。
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
+<br>
 
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
-
-**Additional context**
-Add any other context or screenshots about the feature request here.
+# その他自由記述（任意）
+画像（イラスト）などを使用していただいてもかまいません。

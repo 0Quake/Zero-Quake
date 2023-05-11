@@ -1,38 +1,39 @@
----
-name: Bug report
-about: Create a report to help us improve
-title: ''
-labels: ''
-assignees: ''
+# バグの概要
+簡潔にバグの概要を説明してください。
 
----
+<br>
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+# バグの再現
+バグを再現できる操作手順を下のように示してください。
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+再現できない場合、直前の操作を説明してください。
+1. ○○をクリックする
+2. ○○をクリックする
+3. ○○が開かない
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+<br>
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+# 表示されるエラーメッセージ
+エラーウィンドウに表示されるエラーメッセージを記入してください。（スクリーンショットも可）
 
-**Desktop (please complete the following information):**
- - OS: [e.g. iOS]
- - Browser [e.g. chrome, safari]
- - Version [e.g. 22]
+エラーメッセージが表示されない場合は、その旨を書いてくださ  い。
 
-**Smartphone (please complete the following information):**
- - Device: [e.g. iPhone6]
- - OS: [e.g. iOS8.1]
- - Browser [e.g. stock browser, safari]
- - Version [e.g. 22]
+<br>
 
-**Additional context**
-Add any other context about the problem here.
+# 環境
+## **お使いのOS**
+(例)Windows 11 23H1
+## **お使いのソフトウェアのバージョン**
+設定画面から確認できます
+
+(例)v1.0.0
+
+<br>
+
+# スクリーンショット（任意）
+よろしければ、エラーが発生している状態のスクリーンショットを添付してください。
+
+<br>
+
+# 自由記述（任意）
+上記項目以外の情報があれば、ここに記述してください。
