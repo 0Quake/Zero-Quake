@@ -1670,6 +1670,7 @@ function tsunamiDataUpdate(data) {
 
   document.getElementById("tsunamiCancel").style.display = data.cancelled ? "block" : "none";
   document.getElementById("tsunamiRevocation").style.display = data.revocation ? "block" : "none";
+  console.log(data);
 
   if (data.cancelled) {
     document.getElementById("tsunamiWrap").style.display = "none";
