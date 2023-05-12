@@ -78,10 +78,6 @@ var config = store.get("config", {
       GetData: false,
       AccessToken: "",
     },
-    projectbs: {
-      GetData: true,
-      Interval: 1000,
-    },
     wolfx: {
       GetData: true,
       Interval: 1000,
@@ -815,7 +811,6 @@ function start() {
   SnetRequest();
 
   kmoniRequest();
-  projectbsRequest();
   wolfxRequest();
   lmoniRequest();
   ymoniRequest();
@@ -1225,61 +1220,7 @@ function SnetRequest() {
   }, config.Source.msil.Interval);
 }
 
-//projectbsへのHTTPリクエスト処理
-var projectbs_lastUpdate = 0;
-function projectbsRequest() {
-  if (config.Source.projectbs.GetData && net.online) {
-    var request = net.request("https://telegram.projectbs.cn/jmaeewjson?_=" + new Date());
-    request.on("response", (res) => {
-      var dataTmp = "";
-      res.on("data", (chunk) => {
-        dataTmp += chunk;
-      });
-      res.on("end", function () {
-        var json = jsonParse(dataTmp);
-        if (projectbs_lastUpdate < json.updated) {
-          projectbs_lastUpdate = json.updated;
-          var EEWdata = {
-            alertflg: json.title == "緊急地震速報（予報）" ? "予報" : "警報", //種別
-            report_id: Number(json.eventId.substring(2, 16)), //地震ID
-            report_num: json.reportNum, //第n報
-            report_time: new Date(json.updated), //発表時刻
-            magnitude: json.magnitude, //マグニチュード
-            calcintensity: shindoConvert(json.maxIntensity, 0), //最大深度
-            depth: json.depth, //深さ
-            is_cancel: json.isCancel, //キャンセル
-            is_final: json.isFinal, //最終報
-            is_training: false, //訓練報
-            latitude: json.epicenterLat, //緯度
-            longitude: json.epicenterLng, //経度
-            region_code: null, //震央地域コード
-            region_name: json.epicenter, //震央地域
-            origin_time: new Date(json.time), //発生時刻
-            isPlum: json.isAssumption,
-            userIntensity: null,
-            arrivalTime: null,
-            intensityAreas: null, //細分区分ごとの予想震度
-            warnZones: [],
-            source: "projectbs",
-          };
-          EEWcontrol(EEWdata);
-        }
-        kmoniTimeUpdate(new Date(), "projectbs", "success");
-      });
-    });
-    request.on("error", (error) => {
-      NetworkError(error, "projectbs");
-      kmoniTimeUpdate(new Date(), "projectbs", "Error");
-    });
-
-    request.end();
-  }
-  setTimeout(function () {
-    projectbsRequest();
-  }, config.Source.projectbs.Interval);
-}
-
-//projectbsへのHTTPリクエスト処理
+//wolfxへのHTTPリクエスト処理
 var wolfx_lastUpdate = 0;
 function wolfxRequest() {
   if (config.Source.wolfx.GetData && net.online) {
