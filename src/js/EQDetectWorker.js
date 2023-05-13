@@ -47,7 +47,7 @@ function EQDetect(data, date) {
       if (!ptDataTmp) {
         //都会かどうか
         var isCity = elm.Region == "東京都" || elm.Region == "千葉県" || elm.Region == "埼玉県" || elm.Region == "神奈川県";
-        ptDataTmp =   pointsData[elm.Code] = { detectCount: 0, SUMTmp: [elm.pga], Event: false, isCity: isCity, UpCount: 0 };
+        ptDataTmp = pointsData[elm.Code] = { detectCount: 0, SUMTmp: [elm.pga], Event: false, isCity: isCity, UpCount: 0 };
       }
 
       if (elm.data) {
@@ -67,8 +67,8 @@ function EQDetect(data, date) {
         }
 
         detect0 = elm.pga - pgaAvr >= thresholds.threshold02 || elm.shindo >= thresholds.threshold04; //PGA増加量・震度絶対値で評価
-        elm.detect = detect0 && ptDataTmp.detectCount > 0; //elm.detect1に加え、detectCountを加えて評価
-        elm.detect2 = elm.detect1 && ((elm.pga - pgaAvr >= thresholds.threshold03 && ptDataTmp.UpCount > 0) || elm.shindo > thresholds.threshold04);
+        elm.detect = detect0 && ptDataTmp.detectCount > 0; //elm.detectに加え、detectCountを加えて評価
+        elm.detect2 = elm.detect && ((elm.pga - pgaAvr >= thresholds.threshold03 && ptDataTmp.UpCount > 0) || elm.shindo > thresholds.threshold04);
 
         //前回からの変化の有無（描画時の負荷軽減のため）
         elm.changed = elm.pga != ptDataTmp.SUMTmp[ptDataTmp.SUMTmp.length - 1];
@@ -85,7 +85,7 @@ function EQDetect(data, date) {
         ptDataTmp.SUMTmp = ptDataTmp.SUMTmp.slice(0, thresholds.historyCount - 1);
         ptDataTmp.SUMTmp.push(elm.pga);
       }
-      //連続検出回数（elm.detect1は連続検出回数を指標に含むため、detect0で判定）
+      //連続検出回数（elm.detectは連続検出回数を指標に含むため、detect0で判定）
       if (detect0) {
         ptDataTmp.detectCount++;
       } else {
@@ -112,9 +112,10 @@ function EQDetect(data, date) {
       if (elm.detect) {
         var ptDataTmp = pointsData[elm.Code];
 
-        if (!ptDataTmp.Event) {//すでに自観測点が地震アイテムに属していない場合
+        if (!ptDataTmp.Event) {
+          //すでに自観測点が地震アイテムに属していない場合
           //都会かどうかで閾値調整
-          MargeRangeTmp = ptDataTmp.isCity?thresholds.MargeRangeC:thresholds.MargeRange;
+          MargeRangeTmp = ptDataTmp.isCity ? thresholds.MargeRangeC : thresholds.MargeRange;
 
           //自観測点が地震アイテムの半径+閾値の範囲内に入っている地震アイテムを探す
           var EQD_ItemTmp = EQDetect_List.find(function (elm2) {
@@ -141,7 +142,7 @@ function EQDetect(data, date) {
           //最終検知時間（解除時に使用）を更新
           EQD_ItemTmp.last_Detect = new Date();
 
-          threshold01Tmp =EQD_ItemTmp.isCity? thresholds.threshold01C:thresholds.threshold01;
+          threshold01Tmp = EQD_ItemTmp.isCity ? thresholds.threshold01C : thresholds.threshold01;
 
           if (EQD_ItemTmp.Codes.length >= threshold01Tmp) {
             //地震アイテムに属する観測点数が閾値以上なら
