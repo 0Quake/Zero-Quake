@@ -403,3 +403,19 @@ td {
 .estimated_intensity_map_img {
   image-rendering: pixelated;
 }
+
+#estimated_intensity_map_toggle {
+  position: absolute;
+  top: 50px;
+  left: 5px;
+  background: #444;
+  border: solid 1px #999;
+  border-radius: 5px;
+  padding: 5px;
+}
+#legend3A {
+  display: none;
+}
+#estimated_intensity_map_toggle {
+  display: none;
+}

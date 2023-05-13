@@ -100,7 +100,7 @@
     <div id="mapcontainer"></div>
 
     <div id="menu_wrap">
-      <nav id="menu">
+      <nav id="menu" class="menu">
         <h2>レイヤーの切り替え</h2>
         <h3>ベースマップ</h3>
         <div class="radio">
@@ -123,12 +123,24 @@
       </nav>
     </div>
     <button id="layerSwitch_toggle">layers</button>
+
+    <div id="estimated_intensity_map_toggle" class="menu">
+      <h3>地図の塗りつぶし</h3>
+      <div class="radio">
+        <label><input type="radio" name="mapFillSelect" value="fill1" id="estshindomap_radio">推計震度分布図</label>
+        <label><input type="radio" name="mapFillSelect" value="fill2" checked>細分区域 最大震度</label>
+      </div>
+    </div>
+
     <div id="legendWrap">
       <div class="legend" id="legend2">
         <img src="./img/dosha_scale.svg">
       </div>
       <div class="legend" id="legend1">
         <img src="./img/tsunami_scale.svg">
+      </div>
+      <div class="legend" id="legend3A">
+        <img src="./img/estimated_intensity_map_scale.svg">
       </div>
     </div>
 

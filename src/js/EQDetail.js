@@ -542,10 +542,8 @@ function Mapinit() {
   };
   zoomLevelContinue();
   map.on("zoom", zoomLevelContinue);
-  map.on("load", zoomLevelContinue);
   map.on("load", function () {
     zoomLevelContinue();
-
     mapFillDraw();
   });
 
@@ -615,6 +613,14 @@ document.getElementsByName("overlaySelect").forEach(function (elm) {
     }
   });
 });
+var estShindoMapDraw = false;
+document.getElementsByName("mapFillSelect").forEach(function (elm) {
+  elm.addEventListener("change", function () {
+    estShindoMapDraw = this.value == "fill1";
+    mapFillDraw();
+  });
+});
+
 document.getElementById("over2").addEventListener("change", function () {
   document.getElementById("legend1").style.display = this.checked ? "inline-block" : "none";
 });
@@ -646,6 +652,7 @@ shindo7C = rStyle.getPropertyValue("--IntTheme_7_BgColor").match(/\d+/g);
 shindo7C = { r: Number(shindo7C[0]), g: Number(shindo7C[1]), b: Number(shindo7C[2]) };
 
 //推計震度分布リスト取得→描画
+var estimated_intensity_map_layers = [];
 function estimated_intensity_mapReq() {
   fetch("https://www.jma.go.jp/bosai/estimated_intensity_map/data/list.json")
     .then(function (res) {
@@ -658,17 +665,7 @@ function estimated_intensity_mapReq() {
       if (ItemTmp) {
         InfoType_add("type-6");
 
-        /*
-        estimated_intensity_map_legend = L.control({ position: "bottomright" });
-        estimated_intensity_map_legend.onAdd = function () {
-          var div = L.DomUtil.create("div");
-          div.classList.add("legend");
-          div.innerHTML = "<img src='./img/estimated_intensity_map_scale.svg'>";
-          return div;
-        };
-*/
         idTmp = ItemTmp.url;
-        // var estimated_intensity_map_layer = L.layerGroup();
 
         ItemTmp.mesh_num.forEach(function (elm, index) {
           var latTmp = Number(elm.substring(0, 2)) / 1.5;
@@ -694,6 +691,7 @@ function estimated_intensity_mapReq() {
               "raster-fade-duration": 0,
             },
           });
+          estimated_intensity_map_layers.push("estimated_intensity_map_layer_" + index);
 
           /*
           let mapImg = new Image();
@@ -808,19 +806,11 @@ function estimated_intensity_mapReq() {
             
             var dataURL = estimated_intensity_map_canvas.toDataURL("image/png");
           };*/
-        }); /*
-        L.control
-          .layers(
-            {},
-            {
-              推計震度分布図: estimated_intensity_map_layer,
-            },
-            {
-              position: "topright",
-              collapsed: false,
-            }
-          )
-          .addTo(map);*/
+        });
+        document.getElementById("estshindomap_radio").setAttribute("checked", true);
+        estShindoMapDraw = true;
+        mapFillDraw();
+        document.getElementById("estimated_intensity_map_toggle").style.display = "block";
       }
     });
 }
@@ -1161,6 +1151,15 @@ function mapFillDraw() {
   map.setFilter("Int6+", Int6pT);
   map.setFilter("Int7", Int7T);
   map.setFilter("Int7+", Int7pT);
+
+  estimated_intensity_map_layers.forEach(function (elm2) {
+    map.setLayoutProperty(elm2, "visibility", estShindoMapDraw ? "visible" : "none");
+  });
+  document.getElementById("legend3A").style.display = estShindoMapDraw ? "block" : "none";
+
+  ["Int0", "Int1", "Int2", "Int3", "Int4", "Int5-", "Int5+", "Int6-", "Int6+", "Int7", "Int7+"].forEach(function (elm2) {
+    map.setLayoutProperty(elm2, "visibility", estShindoMapDraw ? "none" : "visible");
+  });
 }
 
 //都道府県ごとの情報描画（リスト）
@@ -1217,7 +1216,8 @@ function add_Area_info(name, maxInt) {
     icon.classList.add("MaxShindoIcon");
     icon.innerHTML = '<div style="background:' + color[0] + ";color:" + color[1] + '">' + maxInt + "</div>";
 
-    var AreaPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<h3>細分区域</h3><div>" + name + "</div><div>震度" + maxInt + "</div>");
+    var maxIntStr = shindoConvert(maxInt, 1);
+    var AreaPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<h3 style='background:" + color[0] + ";color:" + color[1] + "'>震度 " + maxIntStr + "</h3><div>細分区域<br>" + name + "</div><div></div>");
     markerElm = new maplibregl.Marker(icon).setLngLat([pointLocation[1], pointLocation[0]]).setPopup(AreaPopup).addTo(map);
   }
 
@@ -1285,27 +1285,17 @@ function add_IntensityStation_info(lat, lng, name, int) {
 
   var wrap3 = document.querySelectorAll(".WrapLevel3");
 
+  var intStr = shindoConvert(int, 1);
+
   var newDiv = document.createElement("div");
   var color4 = shindoConvert(int, 2);
   newDiv.innerHTML = "<span style='background:" + color4[0] + ";color:" + color4[1] + ";'>" + int + "</span>" + name;
   newDiv.classList.add("ShindoItem", "ShindoItem4");
-
-  /*
-  var divIcon = L.divIcon({
-    html: '<div style="background:' + color4[0] + ";color:" + color4[1] + '">' + int + "</div>",
-    className: "ShindoIcon",
-    iconSize: [23, 23],
-  });
-
-  L.marker([lat, lng], { icon: divIcon, pane: "shadowPane" })
-    .addTo(map)
-    .bindPopup("<h3>観測点</h3><div>" + name + "</div><div>震度" + int + "</div>");*/
-
   const icon = document.createElement("div");
   icon.classList.add("ShindoIcon");
   icon.innerHTML = '<div style="background:' + color4[0] + ";color:" + color4[1] + '">' + int + "</div>";
 
-  var PtPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<h3>観測点</h3><div>" + name + "</div><div>震度" + int + "</div>");
+  var PtPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<h3 style='background:" + color4[0] + ";color:" + color4[1] + "'>震度 " + intStr + "</h3><div>震度観測点<br>" + name + "</div><div></div>");
   markerElm = new maplibregl.Marker(icon).setLngLat([lng, lat]).setPopup(PtPopup).addTo(map);
 
   wrap3[wrap3.length - 1].appendChild(newDiv);
@@ -1361,7 +1351,7 @@ function EQInfoControl(data) {
       img.src = "./img/epicenter.svg";
       img.classList.add("epicenterIcon");
 
-      var ESPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<h3>震央</h3><div>" + EQInfo.epiCenter + "</div>");
+      var ESPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<h3 style='background: rgb(149, 46, 46);'>震央</h3><div>" + EQInfo.epiCenter + "</div>");
       ESmarkerElm = new maplibregl.Marker(img).setLngLat([data.lng, data.lat]).setPopup(ESPopup).addTo(map);
     } else {
       ESmarkerElm.setLngLat([data.lng, data.lat]);
