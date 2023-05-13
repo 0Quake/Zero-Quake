@@ -3097,6 +3097,7 @@ function mergeDeeply(target, source, opts) {
       const targetValue = target[sourceKey];
       if (isConcatArray && Array.isArray(sourceValue) && Array.isArray(targetValue)) {
         result[sourceKey] = targetValue.concat(...sourceValue);
+        //eslint-disable-next-line
       } else if (isObject(sourceValue) && target.hasOwnProperty(sourceKey)) {
         result[sourceKey] = mergeDeeply(targetValue, sourceValue, opts);
       } else {
