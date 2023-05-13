@@ -32,8 +32,7 @@ const { JSDOM } = require("jsdom");
 const Store = require("electron-store");
 var WebSocketClient = require("websocket").client;
 const store = new Store();
-var config = store.get("config", {
-  setting1: true,
+var defaultConfigVal = {
   system: {
     crashReportAutoSend: "yes",
   },
@@ -156,7 +155,11 @@ var config = store.get("config", {
       TsunamiYohoColor: "rgb(66, 158, 255)",
     },
   },
-});
+};
+var config = store.get("config", defaultConfigVal);
+config = mergeDeeply(defaultConfigVal, config);
+store.set("config", config);
+
 let mainWindow, settingWindow, tsunamiWindow, kmoniWorker;
 var kmoniActive = false;
 var EstShindoFetch = false;
@@ -3082,4 +3085,24 @@ function LatLngConvert(data) {
 //２地点の緯度経度から距離（km）を算出
 function geosailing(latA, lngA, latB, lngB) {
   return Math.acos(Math.sin(Math.atan(Math.tan(latA * (Math.PI / 180)))) * Math.sin(Math.atan(Math.tan(latB * (Math.PI / 180)))) + Math.cos(Math.atan(Math.tan(latA * (Math.PI / 180)))) * Math.cos(Math.atan(Math.tan(latB * (Math.PI / 180)))) * Math.cos(lngA * (Math.PI / 180) - lngB * (Math.PI / 180))) * 6371.008;
+}
+
+//連想配列オブジェクトのマージ
+function mergeDeeply(target, source, opts) {
+  const isObject = (obj) => obj && typeof obj === "object" && !Array.isArray(obj);
+  const isConcatArray = opts && opts.concatArray;
+  let result = Object.assign({}, target);
+  if (isObject(target) && isObject(source)) {
+    for (const [sourceKey, sourceValue] of Object.entries(source)) {
+      const targetValue = target[sourceKey];
+      if (isConcatArray && Array.isArray(sourceValue) && Array.isArray(targetValue)) {
+        result[sourceKey] = targetValue.concat(...sourceValue);
+      } else if (isObject(sourceValue) && target.hasOwnProperty(sourceKey)) {
+        result[sourceKey] = mergeDeeply(targetValue, sourceValue, opts);
+      } else {
+        Object.assign(result, { [sourceKey]: sourceValue });
+      }
+    }
+  }
+  return result;
 }
