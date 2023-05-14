@@ -134,8 +134,19 @@ main {
   align-items: center;
   z-index: 100000005;
 }
+#loading-wrap,
+.mini-loading-wrap {
+  margin: auto;
+  text-align: center;
+  background-image: url(../img/loading.svg);
+  background-size: cover;
+  background-position: center;
+  width: 30px;
+  height: 30px;
+}
 #loading-wrap {
-  margin: 50px 0 0 0;
+  width: 50px;
+  height: 50px;
 }
 
 #alertFrame {
@@ -1055,36 +1066,6 @@ button:hover {
   }
   100% {
     box-shadow: 0 0 0 0px rgb(16, 243, 0);
-  }
-}
-
-.loading-ring {
-  animation: rotate 1.5s infinite ease-in-out, rotate2 3s infinite linear;
-  transform-origin: center center;
-}
-.mini-loading-wrap {
-  text-align: center;
-  margin: 10px 5px;
-}
-
-@keyframes rotate {
-  0% {
-    stroke-dashoffset: 157;
-  }
-  50% {
-    stroke-dashoffset: 0;
-  }
-  100% {
-    stroke-dashoffset: -157;
-  }
-}
-
-@keyframes rotate2 {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
   }
 }
 #errorMsg {

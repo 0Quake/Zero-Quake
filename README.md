@@ -93,6 +93,8 @@
 
   ([mapshaper.org](https://mapshaper.org/)で単純化して使用)
 
+- ローディング画像 MIT © Utkarsh Verma
+
 ## 参考資料
 
 [@NoneType1](https://twitter.com/NoneType1) |
