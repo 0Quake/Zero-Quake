@@ -962,7 +962,7 @@ function estShindoControl(response) {
     var SectionEstShindoTmp = "0";
   }
   EEWcontrol({
-    report_id: EidTmp,
+    report_id: Number(EidTmp),
     report_num: RNumTmp,
     userIntensity: SectionEstShindoTmp,
     source: "kmoniImg",
