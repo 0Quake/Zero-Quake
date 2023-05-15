@@ -136,7 +136,7 @@ main {
 }
 #loading-wrap,
 .mini-loading-wrap {
-  margin: auto;
+  margin: 80px auto 0 auto;
   text-align: center;
   background-image: url(../img/loading.svg);
   background-size: cover;
