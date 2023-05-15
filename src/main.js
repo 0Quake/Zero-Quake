@@ -379,6 +379,7 @@ var errorMsgBox = false;
 process.on("uncaughtException", function (err) {
   //Window_notification("予期しないエラーが発生しました。", "error");
   if (!errorMsgBox && app.isReady()) {
+    if(String(err.stack).startsWith("Error: net::ERR_")) return false;
     errorMsgBox = true;
     options.detail = "動作を選択してください。\n10秒で自動的に再起動します。\nエラーコードは以下の通りです。\n" + err.stack;
 
