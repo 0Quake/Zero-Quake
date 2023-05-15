@@ -222,7 +222,7 @@ if (app.isPackaged) {
 //アプリの更新を確認
 var update_data;
 function checkUpdate() {
-  let request = net.request("https://api.github.com/repos/0quake/Zero-Quake/releases");
+  let request = net.request("https://api.github.com/repos/0quake/Zero-Quake/releases?_=" + Number(new Date()));
 
   request.on("response", (res) => {
     if (!300 <= res._responseHead.statusCode && !res._responseHead.statusCode < 200) {
