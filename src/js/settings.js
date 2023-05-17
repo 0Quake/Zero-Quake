@@ -18,14 +18,10 @@ window.electronAPI.messageSend((event, request) => {
     TTSpitchSet(setting.notice.voice_parameter.pitch);
     TTSspeedSet(setting.notice.voice_parameter.rate);
 
-    document.querySelectorAll("#TTSvoiceSelect option").forEach(function (elm) {
-      if (elm.value == setting.notice.voice_parameter.voice) {
-        elm.setAttribute("selected", true);
-      }
-    });
+    selectBoxSet(document.getElementById("TTSvoiceSelect"), setting.notice.voice_parameter.voice)
 
-    document.getElementById("BugReportAutoSend").checked = setting.system.crashReportAutoSend;
 
+    selectBoxSet(document.getElementById("BugReportAutoSend"), setting.system.crashReportAutoSend)
     document.getElementById("Axis_GetData").checked = setting.Source.axis.GetData;
     document.getElementById("Wolfx_GetData").checked = setting.Source.wolfx.GetData;
     document.getElementById("msil_GetData").checked = setting.Source.msil.GetData;
@@ -85,7 +81,7 @@ document.getElementById("check_update").addEventListener("click", function () {
 });
 
 document.getElementById("apply").addEventListener("click", function () {
-  setting.system.crashReportAutoSend = document.getElementById("BugReportAutoSend").checked;
+  setting.system.crashReportAutoSend = document.getElementById("BugReportAutoSend").value;
   setting.home.latitude = document.getElementById("latitude").value;
   setting.home.longitude = document.getElementById("longitude").value;
   setting.home.Section = document.getElementById("saibun").value;
@@ -323,4 +319,12 @@ function TTSvolumeSet(val) {
   document.getElementById("TTSVolumeN").value = val;
   document.getElementById("TTSVolumeR").value = val;
   TTSvolume = val;
+}
+function selectBoxSet(selectElm,TargetValue){
+  selectElm.querySelectorAll("option").forEach(function(elm){
+    if(elm.value==TargetValue){
+      elm.setAttribute("selected",true)
+      return true
+    }
+  })
 }

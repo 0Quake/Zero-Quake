@@ -178,7 +178,7 @@
 
                 <div id="smallWrap">
                     <small>&copy;2022-2023 benidate</small>
-                    <p>ライセンス：<a href="../LICENSE.md" target="_blank">GNU General Public License v2.0</a></p>
+                    <p><a href="../LICENSE.md" target="_blank">GNU General Public License v2.0</a></p>
                     <p>このソフトウェアは無保証です。</p>
                 </div>
 
@@ -363,7 +363,14 @@
             <div id="tab1_content11" class="tabcontent">
                 <h3><span>全般</span>システム設定</h3>
                 <section>
-                    <label><input type="checkbox" id="BugReportAutoSend">バグレポートを自動送信</label>
+                    <label>バグレポートの送信
+                        <select id="BugReportAutoSend">
+                            <option value="yes">自動送信</option>
+                            <option value="confirm">毎回確認</option>
+                            <option value="no" selected>送信しない</option>
+                        </select>
+                    </label>
+                    <p>エラーメッセージのみを送信し、個人を特定できる情報の送信は行いません。</p>
                 </section>
             </div>
             <div id="BtnWrap">
