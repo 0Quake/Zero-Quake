@@ -1369,30 +1369,30 @@ function AXIS_WS() {
       AXIS_WS_TryConnect();
     });
     connection.on("message", function (message) {
-      if (message.type === "utf8") {
-        var data = JSON.parse(message.utf8Data);
-        if (data.Title && (data.Title == "緊急地震速報（予報）" || data.Title == "緊急地震速報（警報）")) {
-          //eew
-          EEWdetect(3, data);
-        } else if (data.channel == "jmx-seismology") {
-          //地震情報
-          eqInfoControl(
-            [
-              {
-                eventId: data.message.Head.EventID,
-                category: data.message.Head.Title,
-                reportDateTime: data.message.Head.ReportDateTime,
-                OriginTime: data.message.Head.TargetDateTime,
-                epiCenter: data.message.Body.Earthquake.Hypocenter.Area.Name,
-                M: data.message.Body.Earthquake.Magnitude,
-                maxI: data.message.Body.Intensity.Observation.MaxInt,
-                cancel: null,
-                DetailURL: [],
-              },
-            ],
-            "jma"
-          );
-        }
+      console.log("aaaaa");
+      var data = JSON.parse(message.utf8Data);
+      if (data.Title && (data.Title == "緊急地震速報（予報）" || data.Title == "緊急地震速報（警報）")) {
+        //eew
+        EEWdetect(3, data);
+      } else if (data.channel == "jmx-seismology") {
+        //地震情報
+        eqInfoControl(
+          [
+            {
+              eventId: data.message.Head.EventID,
+              category: data.message.Head.Title,
+              reportDateTime: data.message.Head.ReportDateTime,
+              OriginTime: data.message.Head.TargetDateTime,
+              epiCenter: data.message.Body.Earthquake.Hypocenter.Area.Name,
+              M: data.message.Body.Earthquake.Magnitude,
+              maxI: data.message.Body.Intensity.Observation.MaxInt,
+              cancel: null,
+              DetailURL: [],
+            },
+          ],
+          "jma"
+        );
+
         kmoniTimeUpdate(new Date() - Replay, "axis", "success");
       }
     });
