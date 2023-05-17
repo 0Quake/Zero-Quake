@@ -18,7 +18,7 @@ function replay(ReplayDate) {
 /* eslint-enable */
 //replay("2023/4/19 19:23:10");
 //replay("2023/4/6 13:10:40");
-//replay("2023/04/04 16:11:00"); //２か所同時
+replay("2023/04/04 16:11:00"); //２か所同時
 //replay("2023/3/27 0:04:25");
 //replay("2023/03/11 05:12:30"); //２か所同時
 //replay("2020/06/15 02:28:38");//２か所同時
@@ -379,7 +379,7 @@ var errorMsgBox = false;
 process.on("uncaughtException", function (err) {
   //Window_notification("予期しないエラーが発生しました。", "error");
   if (!errorMsgBox && app.isReady()) {
-    if(String(err.stack).startsWith("Error: net::ERR_")) return false;
+    if (String(err.stack).startsWith("Error: net::ERR_")) return false;
     errorMsgBox = true;
     options.detail = "動作を選択してください。\n10秒で自動的に再起動します。\nエラーコードは以下の通りです。\n" + err.stack;
 
@@ -936,7 +936,7 @@ function estShindoControl(response) {
     var EidTmp = kmoniEid;
     var RNumTmp = kmoniRNum;
   } else if (!EidTmp && EEW_nowList.length > 0) {
-    var EidTmp = EEW_nowList[0].report_id;
+    var EidTmp = EEW_nowList[0].EventID;
     var RNumTmp = 1;
   } else {
     return false;
@@ -963,8 +963,8 @@ function estShindoControl(response) {
     var SectionEstShindoTmp = "0";
   }
   EEWcontrol({
-    report_id: Number(EidTmp),
-    report_num: RNumTmp,
+    EventID: Number(EidTmp),
+    serial: RNumTmp,
     userIntensity: SectionEstShindoTmp,
     source: "kmoniImg",
   });
@@ -994,8 +994,8 @@ function kmoniRequest() {
         res.on("end", function () {
           var json = jsonParse(dataTmp);
           if (json) {
-            kmoniEid = json.report_id;
-            kmoniRNum = json.report_num;
+            kmoniEid = json.EventID;
+            kmoniRNum = json.serial;
             EEWdetect(2, json, 1);
           }
         });
@@ -1240,11 +1240,11 @@ function wolfxRequest() {
           wolfx_lastUpdate = json.AnnouncedTime;
           var EEWdata = {
             alertflg: json.isWarn ? "警報" : "予報", //種別
-            report_id: Number(json.EventID), //地震ID
-            report_num: json.Serial, //第n報
+            EventID: Number(json.EventID), //地震ID
+            serial: json.Serial, //第n報
             report_time: new Date(json.AnnouncedTime), //発表時刻
             magnitude: json.Magunitude, //マグニチュード
-            calcintensity: shindoConvert(json.MaxIntensity, 0), //最大深度
+            maxInt: shindoConvert(json.MaxIntensity, 0), //最大深度
             depth: json.Depth, //深さ
             is_cancel: json.isCancel, //キャンセル
             is_final: json.isFinal, //最終報
@@ -1370,7 +1370,6 @@ function AXIS_WS() {
       AXIS_WS_TryConnect();
     });
     connection.on("message", function (message) {
-      console.log("aaaaa");
       var data = JSON.parse(message.utf8Data);
       if (data.Title && (data.Title == "緊急地震速報（予報）" || data.Title == "緊急地震速報（警報）")) {
         //eew
@@ -1416,7 +1415,7 @@ function RegularExecution() {
   //EEW解除
   EEW_nowList.forEach(function (elm) {
     if (new Date() - Replay - new Date(dateEncode(3, Number(elm.origin_time), 1)) > 300000) {
-      EEWClear(null, elm.report_id, null, true);
+      EEWClear(null, elm.EventID, null, true);
     }
   });
 
@@ -1660,11 +1659,11 @@ function EEWdetect(type, json, KorL) {
         //複数同時取得できる場合→json.hypoInfo.items.forEach(function (elm) {
         var EEWdata = {
           alertflg: null, //種別
-          report_id: Number(elm.reportId), //地震ID
-          report_num: Number(elm.reportNum), //第n報
+          EventID: Number(elm.reportId), //地震ID
+          serial: Number(elm.reportNum), //第n報
           report_time: new Date(json.realTimeData.dataTime), //発表時刻
           magnitude: Number(elm.magnitude), //マグニチュード
-          calcintensity: shindoConvert(elm.calcintensity, 0), //最大深度
+          maxInt: shindoConvert(elm.calcintensity, 0), //最大深度
           depth: Number(elm.depth.replace("km", "")), //深さ
           is_cancel: Boolean2(elm.isCancel), //キャンセル
           is_final: Boolean2(elm.isFinal), //最終報
@@ -1714,11 +1713,11 @@ function EEWdetect(type, json, KorL) {
     if (json.result.message == "") {
       var EEWdata = {
         alertflg: json.alertflg, //種別
-        report_id: Number(json.report_id), //地震ID
-        report_num: Number(json.report_num), //第n報
+        EventID: Number(json.report_id), //地震ID
+        serial: Number(json.report_num), //第n報
         report_time: new Date(json.report_time), //発表時刻
         magnitude: Number(json.magnitude), //マグニチュード
-        calcintensity: shindoConvert(json.calcintensity, 0), //最大深度
+        maxInt: shindoConvert(json.calcintensity, 0), //最大深度
         depth: Number(json.depth.replace("km", "")), //深さ
         is_cancel: Boolean2(json.is_cancel), //キャンセル
         is_final: Boolean2(json.is_final), //最終報
@@ -1779,11 +1778,11 @@ function EEWdetect(type, json, KorL) {
     var alertflgTmp = json.Title == "緊急地震速報（予報）" ? "予報" : "警報";
     var EEWdata = {
       alertflg: alertflgTmp, //種別
-      report_id: Number(json.EventID), //地震ID
-      report_num: json.Serial, //第n報
+      EventID: Number(json.EventID), //地震ID
+      serial: json.Serial, //第n報
       report_time: new Date(json.ReportDateTime), //発表時刻
       magnitude: Number(json.Magnitude), //マグニチュード
-      calcintensity: shindoConvert(json.Intensity), //最大震度
+      maxInt: shindoConvert(json.Intensity), //最大震度
       depth: Number(json.Hypocenter.Depth.replace("km", "")), //深さ
       is_cancel: json.Flag.is_cancel, //キャンセル
       is_final: json.Flag.is_final, //最終報(P2P→不明)
@@ -1844,11 +1843,11 @@ function EEWdetect(type, json, KorL) {
     }
     var EEWdata = {
       alertflg: "警報", //種別
-      report_id: Number(json.issue.eventId), //地震ID
-      report_num: Number(json.issue.serial), //第n報
+      EventID: Number(json.issue.eventId), //地震ID
+      serial: Number(json.issue.serial), //第n報
       report_time: new Date(json.issue.time), //発表時刻
       magnitude: magnitudeTmp, //マグニチュード
-      calcintensity: shindoConvert(maxIntTmp), //最大震度
+      maxInt: shindoConvert(maxIntTmp), //最大震度
       depth: depthTmp, //深さ
       is_cancel: Boolean(json.canceled), //キャンセル
       is_final: null, //最終報(P2P→不明)
@@ -1890,7 +1889,7 @@ function EEWcontrol(data) {
     var origin_timeTmp = data.origin_time;
   } else {
     var eqj = EEW_Data.find(function (elm) {
-      return elm.EQ_id == data.report_id;
+      return elm.EQ_id == data.EventID;
     });
     if (eqj) {
       origin_timeTmp = eqj.data[eqj.data.length - 1].origin_time;
@@ -1906,20 +1905,20 @@ function EEWcontrol(data) {
   }
 
   var EQJSON = EEW_Data.find(function (elm) {
-    return elm.EQ_id == data.report_id;
+    return elm.EQ_id == data.EventID;
   });
   if (EQJSON) {
     //ID・報の両方一致した情報が存在するか
     var EEWJSON = EQJSON.data.find(function (elm2) {
-      return elm2.report_num == data.report_num;
+      return elm2.serial == data.serial;
     });
     if (EEWJSON) {
       var oneBefore =
-        data.report_num ==
+        data.serial ==
         Math.max.apply(
           null,
           EQJSON.data.map(function (o) {
-            return o.report_num;
+            return o.serial;
           })
         );
 
@@ -1927,7 +1926,7 @@ function EEWcontrol(data) {
         //既知／情報更新
         var changed = false;
         oneBeforeData = EQJSON.data.find(function (elm) {
-          return elm.report_num == data.report_num;
+          return elm.serial == data.serial;
         });
         if (!oneBeforeData.alertflg && data.alertflg) {
           oneBeforeData.alertflg = data.alertflg;
@@ -1937,8 +1936,8 @@ function EEWcontrol(data) {
           oneBeforeData.magnitude = data.magnitude;
           changed = true;
         }
-        if (!oneBeforeData.calcintensity && data.calcintensity) {
-          oneBeforeData.calcintensity = data.calcintensity;
+        if (!oneBeforeData.maxInt && data.maxInt) {
+          oneBeforeData.maxInt = data.maxInt;
           changed = true;
         }
         if (!oneBeforeData.depth && data.depth) {
@@ -2005,18 +2004,18 @@ function EEWcontrol(data) {
     } else {
       //最新の報かどうか
       var saishin =
-        data.report_num >
+        data.serial >
         Math.max.apply(
           null,
           EQJSON.data.map(function (o) {
-            return o.report_num;
+            return o.serial;
           })
         );
       if (saishin) {
         //第２報以降
 
         var EQJSON = EEW_Data.find(function (elm) {
-          return elm.EQ_id == data.report_id;
+          return elm.EQ_id == data.EventID;
         });
 
         if (!data.arrivalTime) {
@@ -2026,12 +2025,12 @@ function EEWcontrol(data) {
           var update_availableID = Math.max.apply(
             null,
             oneBeforeData.map(function (o) {
-              return o.report_num;
+              return o.serial;
             })
           );
 
           oneBeforeData = oneBeforeData.find(function (elm) {
-            return elm.report_num == update_availableID;
+            return elm.serial == update_availableID;
           });
           if (oneBeforeData) {
             data.arrivalTime = oneBeforeData.arrivalTime;
@@ -2049,7 +2048,7 @@ function EEWcontrol(data) {
     //第１報
     EEWAlert(data, true);
     EEW_Data.push({
-      EQ_id: data.report_id,
+      EQ_id: data.EventID,
       canceled: false,
       data: [data],
     });
@@ -2058,7 +2057,7 @@ function EEWcontrol(data) {
   if (!EEW_history[data.source]) EEW_history[data.source] = [];
   if (
     !EEW_history[data.source].find(function (elm) {
-      return data.report_id == elm.report_id && data.report_num == elm.report_num;
+      return data.EventID == elm.EventID && data.serial == elm.serial;
     })
   ) {
     EEW_history[data.source].push(data);
@@ -2070,12 +2069,12 @@ function EEWClear(source, code, reportnum, bypass) {
   if (EEWNow || bypass) {
     if (!bypass && EEW_history[source]) {
       var EEW_detected = EEW_history[source].find(function (elm) {
-        return code == elm.report_id;
+        return code == elm.EventID;
       });
     }
     if (EEW_detected || bypass) {
       EEW_nowList = EEW_nowList.filter(function (elm) {
-        return elm.report_id !== code;
+        return elm.EventID !== code;
       });
       if (mainWindow) {
         mainWindow.webContents.send("message2", {
@@ -2123,8 +2122,8 @@ function EEWAlert(data, first, update) {
       var alertFlg = "";
       if (data.alertflg) alertFlg = "（" + data.alertflg + "）";
       var EEWNotification = new Notification({
-        title: "緊急地震速報" + alertFlg + "#" + data.report_num,
-        body: data.region_name + "\n推定震度：" + data.calcintensity + "  M" + data.magnitude + "  深さ：" + data.depth,
+        title: "緊急地震速報" + alertFlg + "#" + data.serial,
+        body: data.region_name + "\n推定震度：" + data.maxInt + "  M" + data.magnitude + "  深さ：" + data.depth,
         icon: path.join(__dirname, "img/icon.ico"),
       });
       EEWNotification.show();
@@ -2145,13 +2144,13 @@ function EEWAlert(data, first, update) {
   eqInfoControl(
     [
       {
-        eventId: data.report_id,
+        eventId: data.EventID,
         category: "EEW",
         reportDateTime: data.report_time,
         OriginTime: data.origin_time,
         epiCenter: data.region_name,
         M: data.magnitude,
-        maxI: data.calcintensity,
+        maxI: data.maxInt,
         cancel: data.is_cancel,
         DetailURL: [],
       },
@@ -2162,7 +2161,7 @@ function EEWAlert(data, first, update) {
 
   //【現在のEEW】から同一地震、古い報を削除
   EEW_nowList = EEW_nowList.filter(function (elm) {
-    return elm.report_id !== data.report_id;
+    return elm.EventID !== data.EventID;
   });
   //【現在のEEW】配列に追加
   EEW_nowList.push(data);

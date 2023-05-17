@@ -62,7 +62,7 @@ window.addEventListener("load", function () {
 function psWaveAnm() {
   if (now_EEW.length > 0) {
     for (elm of now_EEW) {
-      psWaveCalc(elm.report_id);
+      psWaveCalc(elm.EventID);
     }
   }
   if (background) {
@@ -850,7 +850,7 @@ function EstShindoUpdate(data) {
 function psWaveEntry() {
   now_EEW.forEach(function (elm) {
     if (!elm.is_cancel && elm.arrivalTime) {
-      var countDownElm = document.getElementById("EEW-" + elm.report_id);
+      var countDownElm = document.getElementById("EEW-" + elm.EventID);
       if (countDownElm) {
         countDownElm = countDownElm.querySelector(".countDown");
         if (countDownElm) {
@@ -878,7 +878,7 @@ function psWaveEntry() {
       if (elm.depth <= 700 && distance <= 2000 && TimeTable_JMA2001) {
         var TimeTableTmp = TimeTable_JMA2001[elm.depth];
         var pswaveFind = psWaveList.find(function (elm2) {
-          return elm2.id == elm.report_id;
+          return elm2.id == elm.EventID;
         });
 
         if (pswaveFind) {
@@ -886,14 +886,14 @@ function psWaveEntry() {
           pswaveFind.data.latitude = elm.latitude;
         } else {
           psWaveList.push({
-            id: elm.report_id,
+            id: elm.EventID,
             PCircleElm: null,
             SCircleElm: null,
             data: { latitude: elm.latitude, longitude: elm.longitude, originTime: elm.origin_time, pRadius: 0, sRadius: 0 },
             TimeTable: TimeTableTmp,
           });
         }
-        psWaveCalc(elm.report_id);
+        psWaveCalc(elm.EventID);
       }
     }
   });
@@ -901,7 +901,7 @@ function psWaveEntry() {
   //終わった地震の予報円削除
   psWaveList = psWaveList.filter(function (elm) {
     var stillEEW = now_EEW.find(function (elm2) {
-      return elm2.report_id == elm.id;
+      return elm2.EventID == elm.id;
     });
     if (!stillEEW || stillEEW.is_cancel) {
       if (elm.PCircleElm) {
@@ -1010,7 +1010,7 @@ function psWaveCalc(eid) {
       });
 
       /*
-        id: elm.report_id,
+        id: elm.EventID,
             PCircleElm: null,
             SCircleElm: null,
             data: [{ latitude: elm.latitude, longitude: elm.longitude, originTime: elm.origin_time, pRadius: 0, sRadius: 0 }],
@@ -1019,13 +1019,13 @@ function psWaveCalc(eid) {
   }
 }
 //予報円描画
-function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArrived, SArriveTime, nowDistance) {
+function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrived, SArriveTime, nowDistance) {
   if (!pRadius || (!sRadius && !SnotArrived)) return;
   var EQElm = psWaveList.find(function (elm) {
-    return elm.id == report_id;
+    return elm.id == EventID;
   });
   var EQElm2 = now_EEW.find(function (elm) {
-    return elm.report_id == report_id;
+    return elm.EventID == EventID;
   });
 
   latitude = latitudeConvert(latitude);
@@ -1040,45 +1040,45 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
 
     if (EQElm.PCircleElm) {
       var pcircle = turf.circle(_center, pRadius / 1000, _options);
-      map.getSource("PCircle_" + report_id).setData(pcircle);
+      map.getSource("PCircle_" + EventID).setData(pcircle);
 
       var scircle = turf.circle(_center, sRadius / 1000, _options);
-      map.getSource("SCircle_" + report_id).setData(scircle);
-      map.setPaintProperty("SCircle_" + report_id, "line-width", SnotArrived ? 0 : 2);
+      map.getSource("SCircle_" + EventID).setData(scircle);
+      map.setPaintProperty("SCircle_" + EventID, "line-width", SnotArrived ? 0 : 2);
     } else {
-      map.addSource("PCircle_" + report_id, {
+      map.addSource("PCircle_" + EventID, {
         type: "geojson",
         data: turf.circle(_center, pRadius / 1000, _options),
       });
 
       map.addLayer({
-        id: "PCircle_" + report_id,
+        id: "PCircle_" + EventID,
         type: "line",
-        source: "PCircle_" + report_id,
+        source: "PCircle_" + EventID,
         paint: {
           "line-color": config.color.psWave.PwaveColor,
           "line-width": 2,
         },
       });
 
-      map.addSource("SCircle_" + report_id, {
+      map.addSource("SCircle_" + EventID, {
         type: "geojson",
         data: turf.circle(_center, sRadius / 1000, _options),
       });
 
       map.addLayer({
-        id: "SCircle_" + report_id,
+        id: "SCircle_" + EventID,
         type: "line",
-        source: "SCircle_" + report_id,
+        source: "SCircle_" + EventID,
         paint: {
           "line-color": config.color.psWave.SwaveColor,
           "line-width": 2,
         },
       });
       map.addLayer({
-        id: "SCircle_" + report_id + "_FILL",
+        id: "SCircle_" + EventID + "_FILL",
         type: "fill",
-        source: "SCircle_" + report_id,
+        source: "SCircle_" + EventID,
         paint: {
           "fill-color": config.color.psWave.SwaveColor,
           "fill-opacity": 0.15,
@@ -1089,12 +1089,12 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
       EQElm.SCircleElm = true;
       EQElm = psWaveList[psWaveList.length - 1];
 
-      psWaveCalc(report_id);
+      psWaveCalc(EventID);
     }
 
     if (EQElm.SIElm) {
       if (SnotArrived) {
-        var SWprogressValue = document.getElementById("SWprogressValue_" + report_id);
+        var SWprogressValue = document.getElementById("SWprogressValue_" + EventID);
         if (SWprogressValue) {
           SWprogressValue.setAttribute("stroke-dashoffset", Number(138 - 138 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect))));
         }
@@ -1108,7 +1108,7 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
 
       const el = document.createElement("div");
       el.classList.add("SWaveProgress");
-      el.innerHTML = '<svg width="50" height="50"><circle cx="25" cy="25" r="22" fill="none" stroke-width="5px" stroke="#777"/><circle id="SWprogressValue_' + report_id + '" class="SWprogressValue" cx="25" cy="25" r="22" fill="none" stroke-width="5px" stroke-linecap="round" stroke-dasharray="138" stroke-dashoffset="' + Number(138 - 138 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect))) + '"/></svg>';
+      el.innerHTML = '<svg width="50" height="50"><circle cx="25" cy="25" r="22" fill="none" stroke-width="5px" stroke="#777"/><circle id="SWprogressValue_' + EventID + '" class="SWprogressValue" cx="25" cy="25" r="22" fill="none" stroke-width="5px" stroke-linecap="round" stroke-dasharray="138" stroke-dashoffset="' + Number(138 - 138 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect))) + '"/></svg>';
 
       SIElm = new maplibregl.Marker(el).setLngLat([longitude, latitude]).addTo(map);
 
@@ -1116,7 +1116,7 @@ function psWaveReDraw(report_id, latitude, longitude, pRadius, sRadius, SnotArri
     }
   }
 
-  var EEWPanelElm = document.getElementById("EEW-" + report_id);
+  var EEWPanelElm = document.getElementById("EEW-" + EventID);
 
   if (EQElm2 && EQElm2.distance && EEWPanelElm) {
     EEWPanelElm.querySelector(".PWave_value").setAttribute("stroke-dashoffset", 125.66 - 125.66 * Math.min(pRadius / 1000 / EQElm2.distance, 1));

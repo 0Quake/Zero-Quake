@@ -83,10 +83,10 @@ var EEW_LocalIDs = [];
 function EEWAlertUpdate(data) {
   data.forEach((elm) => {
     var same = now_EEW.find(function (elm2) {
-      return elm.report_id == elm2.report_id && elm.report_num == elm2.report_num;
+      return elm.EventID == elm2.EventID && elm.serial == elm2.serial;
     });
     var sameEQ = now_EEW.find(function (elm2) {
-      return elm.report_id == elm2.report_id;
+      return elm.EventID == elm2.EventID;
     });
 
     if (!sameEQ) {
@@ -103,13 +103,13 @@ function EEWAlertUpdate(data) {
       }
 
       EEWID++;
-      EEW_LocalIDs[elm.report_id] = EEWID;
+      EEW_LocalIDs[elm.EventID] = EEWID;
 
       clone.querySelector(".EEWLocalID").textContent = EEWID;
-      clone.querySelector(".report_num").textContent = elm.report_num;
-      clone.querySelector(".calcintensity").textContent = elm.calcintensity ? elm.calcintensity : "?";
-      clone.querySelector(".calcintensity").style.background = shindoConvert(elm.calcintensity, 2)[0];
-      clone.querySelector(".calcintensity").style.color = shindoConvert(elm.calcintensity, 2)[1];
+      clone.querySelector(".serial").textContent = elm.serial;
+      clone.querySelector(".maxInt").textContent = elm.maxInt ? elm.maxInt : "?";
+      clone.querySelector(".maxInt").style.background = shindoConvert(elm.maxInt, 2)[0];
+      clone.querySelector(".maxInt").style.color = shindoConvert(elm.maxInt, 2)[1];
 
       clone.querySelector(".is_final").style.display = elm.is_final ? "inline" : "none";
       clone.querySelector(".canceled").style.display = elm.is_cancel ? "flex" : "none";
@@ -127,7 +127,7 @@ function EEWAlertUpdate(data) {
 
       clone.querySelector(".distance").textContent = elm.distance ? Math.round(elm.distance) + "km" : "";
 
-      clone.querySelector(".EEWWrap").setAttribute("id", "EEW-" + elm.report_id);
+      clone.querySelector(".EEWWrap").setAttribute("id", "EEW-" + elm.EventID);
 
       document.getElementById("EEW-Panel").appendChild(clone);
       document.getElementById("sokuho-Panel").scroll(0, 0);
@@ -136,13 +136,13 @@ function EEWAlertUpdate(data) {
       if (!same) {
         //既知の地震、新しい報
       }
-      var EQMenu = document.getElementById("EEW-" + elm.report_id);
+      var EQMenu = document.getElementById("EEW-" + elm.EventID);
 
       if (EQMenu) {
         alertflgTmp = "(" + elm.alertflg + ")";
         if (!elm.alertflg) alertflgTmp = "";
         EQMenu.querySelector(".alertflg").textContent = alertflgTmp;
-        EQMenu.querySelector(".report_num").textContent = elm.report_num;
+        EQMenu.querySelector(".serial").textContent = elm.serial;
 
         if (elm.alertflg == "警報") {
           EQMenu.classList.add("keihou");
@@ -152,9 +152,9 @@ function EEWAlertUpdate(data) {
           EQMenu.classList.remove("keihou");
         }
 
-        EQMenu.querySelector(".calcintensity").textContent = elm.calcintensity ? elm.calcintensity : "?";
-        EQMenu.querySelector(".calcintensity").style.background = shindoConvert(elm.calcintensity, 2)[0];
-        EQMenu.querySelector(".calcintensity").style.color = shindoConvert(elm.calcintensity, 2)[1];
+        EQMenu.querySelector(".maxInt").textContent = elm.maxInt ? elm.maxInt : "?";
+        EQMenu.querySelector(".maxInt").style.background = shindoConvert(elm.maxInt, 2)[0];
+        EQMenu.querySelector(".maxInt").style.color = shindoConvert(elm.maxInt, 2)[1];
 
         EQMenu.querySelector(".is_final").style.display = elm.is_final ? "inline" : "none";
         EQMenu.querySelector(".canceled").style.display = elm.is_cancel ? "flex" : "none";
@@ -242,25 +242,25 @@ function EEWAlertUpdate(data) {
       }
     }
 */
-    epiCenterUpdate(elm.report_id, elm.latitude, elm.longitude);
+    epiCenterUpdate(elm.EventID, elm.latitude, elm.longitude);
 
     now_EEW = now_EEW.filter(function (elm2) {
-      return elm2.report_id !== elm.report_id;
+      return elm2.EventID !== elm.EventID;
     });
     now_EEW.push(elm);
   });
   now_EEW = now_EEW.filter(function (elm) {
     var stillEQ = data.find(function (elm2) {
-      return elm.report_id == elm2.report_id;
+      return elm.EventID == elm2.EventID;
     });
     //終わった地震
     if (!stillEQ) {
-      document.getElementById("EEW-" + elm.report_id).remove();
-      epiCenterClear(elm.report_id);
+      document.getElementById("EEW-" + elm.EventID).remove();
+      epiCenterClear(elm.EventID);
     } else if (elm.is_cancel) {
-      epiCenterClear(elm.report_id);
+      epiCenterClear(elm.EventID);
       //setTimeout(function () {
-      document.getElementById("EEW-" + elm.report_id).remove();
+      document.getElementById("EEW-" + elm.EventID).remove();
       // }, 1000);
     }
     return stillEQ;
