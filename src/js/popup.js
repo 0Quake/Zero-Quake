@@ -358,12 +358,13 @@ function epiCenterClear(eid) {
 var template2 = document.getElementById("EQListTemplate");
 var template2_2 = document.getElementById("EQListTemplate2");
 var EQListWrap;
-var EQDetectItem = [];
+var eqInfoDataJMA = [];
 function eqInfoDraw(data, source) {
   var EQTemplate;
   if (source == "jma") {
     EQTemplate = template2;
     EQListWrap = document.getElementById("JMA_EqInfo");
+    eqInfoDataJMA = data;
   } else if (source == "usgs") {
     EQTemplate = template2_2;
     EQListWrap = document.getElementById("USGS_EqInfo");
@@ -377,6 +378,7 @@ function eqInfoDraw(data, source) {
     clone.querySelector(".EQI_datetime").textContent = elm.OriginTime ? dateEncode(4, elm.OriginTime) : "発生時刻不明";
     clone.querySelector(".EQI_magnitude").textContent = "M" + (elm.M ? elm.M : "不明");
     if (source == "jma") {
+      clone.querySelector(".EQItem").setAttribute("id", "EQItem_" + elm.eventId);
       var maxITmp = elm.maxI;
       if (maxITmp == "不明") maxITmp = "?";
       maxITmp = shindoConvert(maxITmp, 0);
@@ -406,6 +408,7 @@ function eqInfoDraw(data, source) {
 }
 
 //🔴地震検知🔴
+var EQDetectItem = [];
 var EQDetectTemplate = document.getElementById("EQDetectTemplate");
 function EQDetect(data) {
   var EQD_Item = EQDetectItem.find(function (elm) {

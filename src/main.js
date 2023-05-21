@@ -1370,8 +1370,10 @@ function AXIS_WS() {
       AXIS_WS_TryConnect();
     });
     connection.on("message", function (message) {
+      console.log(message.utf8Data);
       var data = JSON.parse(message.utf8Data);
       if (data.Title && (data.Title == "緊急地震速報（予報）" || data.Title == "緊急地震速報（警報）")) {
+        console.log("EEW!!!!!!!!!!");
         //eew
         EEWdetect(3, data);
       } else if (data.channel == "jmx-seismology") {
@@ -2340,7 +2342,7 @@ function EQI_JMAXML_Req(url) {
             ValidDateTimeTmp = new Date(ValidDateTimeElm.textContent);
           }
           tsunamiDataTmp = {
-            issue: { time: new Date(xml.querySelector("ReportDateTime").textContent) },
+            issue: { time: new Date(xml.querySelector("ReportDateTime").textContent), EventID: Number(xml.querySelector("EventID").textContent) },
             areas: [],
             revocation: false,
             source: "jmaXML",
@@ -2800,7 +2802,6 @@ function TsunamiInfoControl(data) {
           areas: [],
         });
       }, data.ValidDateTime - new Date());
-      console.log(data.ValidDateTime);
     }
 
     soundPlay("TsunamiInfo");

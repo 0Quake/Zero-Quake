@@ -1105,3 +1105,16 @@ button:hover {
 #errorContent {
   padding: 0 10px;
 }
+#tsunami_button_wrap {
+  padding: 5px 0;
+}
+#tsunami_button_wrap button {
+  display: inline-block;
+  width: calc(50% - 10px);
+  min-width: 120px;
+  margin: 0 5px;
+  border-radius: 7px;
+  height: 30px;
+}
+#tsunami_button_wrap button:hover {
+}

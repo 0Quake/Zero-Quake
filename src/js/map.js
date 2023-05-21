@@ -1145,6 +1145,7 @@ function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrive
 
 //🔴津波情報🔴
 //津波情報更新
+var EQInfoLink = document.getElementById("EQInfoLink");
 function tsunamiDataUpdate(data) {
   map.setFilter("tsunami_MajorWarn", ["==", "name", ""]);
   map.setFilter("tsunami_Warn", ["==", "name", ""]);
@@ -1154,7 +1155,6 @@ function tsunamiDataUpdate(data) {
 
   document.getElementById("tsunamiCancel").style.display = data.cancelled ? "block" : "none";
   document.getElementById("tsunamiRevocation").style.display = data.revocation ? "block" : "none";
-  console.log(data);
 
   if (data.cancelled) {
     document.getElementById("tsunamiWrap").style.display = "none";
@@ -1163,6 +1163,18 @@ function tsunamiDataUpdate(data) {
   } else {
     //    map.addLayer(tsunamiLayer);
 
+    EQInfoLink.style.display = "none";
+    if (data.issue.EventID) {
+      var EQdata = eqInfoDataJMA.find(function (elm) {
+        return elm.eventId == data.issue.EventID;
+      });
+      if (EQdata) {
+        EQInfoLink.style.display = "block";
+
+        console.log(data.issue.EventID);
+        EQInfoLink.dataset.eventid = ("href", "#EQItem_" + data.issue.EventID);
+      }
+    }
     document.getElementById("tsunamiWrap").style.display = "block";
 
     document.body.classList.add("TsunamiMode");
@@ -1264,6 +1276,21 @@ function tsunamiDataUpdate(data) {
     }
   }
 }
+EQInfoLink.addEventListener("click", function (e) {
+  e.preventDefault();
+  var EQItemElm = document.querySelector(EQInfoLink.dataset.eventid);
+  if (EQItemElm) {
+    EQItemElm.scrollIntoView({
+      block: "center",
+    });
+    EQItemElm.animate(
+      {
+        boxShadow: ["0 0 0 0 rgba(203, 27, 27, 1)", "0 0 0 15px rgba(203, 27, 27, 0)"],
+      },
+      500
+    );
+  }
+});
 
 //津波情報色変換
 function tsunamiColorConv(str) {
