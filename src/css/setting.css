@@ -259,8 +259,8 @@ label select {
 label input[type="text"]:focus,
 label input[type="number"]:focus,
 label select :focus {
-  border: solid 1px rgb(230 132 132);
-  outline: solid 1px rgb(230 132 132);
+  border: solid 1px #ccc;
+  outline: solid 1px #ccc;
 }
 
 label input[type="text"],

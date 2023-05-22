@@ -39,7 +39,11 @@
 * {
   font-family: "BIZ UDPGothic", sans-serif;
   box-sizing: border-box;
-  accent-color: rgb(230 132 132);
+  accent-color: #ccc;
+}
+*[type="checkbox"],
+*[type="radio"] {
+  accent-color: rgb(255 146 146);
 }
 
 :root {
