@@ -1361,7 +1361,7 @@ function AXIS_WS() {
     AXIS_WS_TryConnect();
   });
 
-  P2PWSclient.on("connect", function (connection) {
+  AXISWSclient.on("connect", function (connection) {
     connection.on("error", function () {
       kmoniTimeUpdate(new Date() - Replay, "axis", "Error");
     });
@@ -1370,12 +1370,15 @@ function AXIS_WS() {
       AXIS_WS_TryConnect();
     });
     connection.on("message", function (message) {
-      console.log(message.utf8Data);
-      var data = JSON.parse(message.utf8Data);
-      if (data.Title && (data.Title == "緊急地震速報（予報）" || data.Title == "緊急地震速報（警報）")) {
+      var dataStr = message.utf8Data;
+      if (dataStr == "hello") return;
+      console.log(dataStr);
+
+      var data = JSON.parse(dataStr);
+      if (data.channel == "eew") {
         console.log("EEW!!!!!!!!!!");
         //eew
-        EEWdetect(3, data);
+        EEWdetect(3, data.message);
       } else if (data.channel == "jmx-seismology") {
         //地震情報
         eqInfoControl(
@@ -1385,8 +1388,8 @@ function AXIS_WS() {
               category: data.message.Head.Title,
               reportDateTime: data.message.Head.ReportDateTime,
               OriginTime: data.message.Head.TargetDateTime,
-              epiCenter: data.message.Body.Earthquake.Hypocenter.Area.Name,
-              M: data.message.Body.Earthquake.Magnitude,
+              epiCenter: data.message.Body.Earthquake[0].Hypocenter.Area.Name,
+              M: data.message.Body.Earthquake[0].Magnitude,
               maxI: data.message.Body.Intensity.Observation.MaxInt,
               cancel: null,
               DetailURL: [],
@@ -1403,10 +1406,8 @@ function AXIS_WS() {
 
   AXIS_WS_Connect();
 }
-var axisReconnectTimeout = 500;
 function AXIS_WS_TryConnect() {
-  axisReconnectTimeout *= 2;
-  setTimeout(AXIS_WS_Connect, axisReconnectTimeout);
+  setTimeout(AXIS_WS_Connect, 500);
 }
 function AXIS_WS_Connect() {
   if (AXISWSclient) AXISWSclient.connect("wss://ws.axis.prioris.jp/socket", null, null, AXIS_headers);
