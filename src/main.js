@@ -1410,7 +1410,7 @@ function AXIS_WS_TryConnect() {
   setTimeout(AXIS_WS_Connect, 500);
 }
 function AXIS_WS_Connect() {
-  if (AXISWSclient) AXISWSclient.connect("wss://ws.axis.prioris.jp/socket", null, null, AXIS_headers);
+  if (AXISWSclient) AXISWSclient.connect("wss://api.p2pquake.net/v2/ws", null, null, AXIS_headers);
 }
 
 //定期実行

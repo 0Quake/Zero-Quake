@@ -1170,9 +1170,7 @@ function tsunamiDataUpdate(data) {
       });
       if (EQdata) {
         EQInfoLink.style.display = "block";
-
-        console.log(data.issue.EventID);
-        EQInfoLink.dataset.eventid = ("href", "#EQItem_" + data.issue.EventID);
+        EQInfoLink.dataset.eventid = ("#EQItem_" + data.issue.EventID);
       }
     }
     document.getElementById("tsunamiWrap").style.display = "block";
