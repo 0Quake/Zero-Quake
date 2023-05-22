@@ -1370,10 +1370,8 @@ function AXIS_WS() {
       AXIS_WS_TryConnect();
     });
     connection.on("message", function (message) {
-      console.log(message.utf8Data);
       var data = JSON.parse(message.utf8Data);
       if (data.Title && (data.Title == "緊急地震速報（予報）" || data.Title == "緊急地震速報（警報）")) {
-        console.log("EEW!!!!!!!!!!");
         //eew
         EEWdetect(3, data);
       } else if (data.channel == "jmx-seismology") {
@@ -1409,7 +1407,7 @@ function AXIS_WS_TryConnect() {
   setTimeout(AXIS_WS_Connect, axisReconnectTimeout);
 }
 function AXIS_WS_Connect() {
-  if (AXISWSclient) AXISWSclient.connect("wss://ws.axis.prioris.jp/socket", null, null, AXIS_headers);
+  if (AXISWSclient) AXISWSclient.connect("wss://api.p2pquake.net/v2/ws", null, null, AXIS_headers);
 }
 
 //定期実行
