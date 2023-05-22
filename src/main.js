@@ -314,7 +314,7 @@ function ScheduledExecution() {
           //トークン期限切れ
           config.Source.axis.GetData = false;
           store.set("config", config);
-          Window_notification("Axisのアクセストークンが期限切れのため、無効化しました。", "warn");
+          Window_notification("Axisのアクセストークンの期限が切れました。手動でトークンを更新しください。", "warn");
         } else if (json.status == "invalid header authorization") {
           config.Source.axis.GetData = false;
           store.set("config", config);
