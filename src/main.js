@@ -1406,11 +1406,14 @@ function AXIS_WS() {
 
   AXIS_WS_Connect();
 }
+var lastConnectDate = new Date();
 function AXIS_WS_TryConnect() {
-  setTimeout(AXIS_WS_Connect, 500);
+  var timeoutTmp = Math.max(30000 - (new Date() - lastConnectDate), 100);
+  setTimeout(AXIS_WS_Connect, timeoutTmp);
 }
 function AXIS_WS_Connect() {
   if (AXISWSclient) AXISWSclient.connect("wss://ws.axis.prioris.jp/socket", null, null, AXIS_headers);
+  lastConnectDate = new Date();
 }
 
 //定期実行
