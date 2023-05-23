@@ -358,13 +358,11 @@ function epiCenterClear(eid) {
 var template2 = document.getElementById("EQListTemplate");
 var template2_2 = document.getElementById("EQListTemplate2");
 var EQListWrap;
-var eqInfoDataJMA = [];
 function eqInfoDraw(data, source) {
   var EQTemplate;
   if (source == "jma") {
     EQTemplate = template2;
     EQListWrap = document.getElementById("JMA_EqInfo");
-    eqInfoDataJMA = data;
   } else if (source == "usgs") {
     EQTemplate = template2_2;
     EQListWrap = document.getElementById("USGS_EqInfo");

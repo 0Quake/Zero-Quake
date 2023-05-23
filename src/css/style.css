@@ -232,15 +232,13 @@ main {
   background: #444;
   border-left: solid 1px #444;
   width: 350px;
-  transition: width 0.5s;
 }
 #sideBar.close {
   width: 0;
 }
 #sideBar.close #tab1_wrap,
 #sideBar.close #sokuho-Panel {
-  transition: opacity 0.5s;
-  opacity: 0;
+  display: none;
 }
 #SideBarToggle {
   position: absolute;
