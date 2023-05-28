@@ -1381,6 +1381,16 @@ function AXIS_WS() {
         EEWdetect(3, data.message);
       } else if (data.channel == "jmx-seismology") {
         //地震情報
+        var EarthquakeElm = {
+          Hypocenter: { Area: { Name: null } },
+          Magnitude: null,
+        };
+        if (data.message.Body.Earthquake[0]) EarthquakeElm = data.message.Body.Earthquake[0];
+        var IntensityElm = {
+          Observation: { MaxInt: null },
+        };
+        if (data.message.Body.Intensity) IntensityElm = data.message.Body.Intensity;
+
         eqInfoControl(
           [
             {
@@ -1388,9 +1398,9 @@ function AXIS_WS() {
               category: data.message.Head.Title,
               reportDateTime: data.message.Head.ReportDateTime,
               OriginTime: data.message.Head.TargetDateTime,
-              epiCenter: data.message.Body.Earthquake[0].Hypocenter.Area.Name,
-              M: data.message.Body.Earthquake[0].Magnitude,
-              maxI: data.message.Body.Intensity.Observation.MaxInt,
+              epiCenter: EarthquakeElm.Hypocenter.Area.Name,
+              M: EarthquakeElm.Magnitude,
+              maxI: IntensityElm.Observation.MaxInt,
               cancel: null,
               DetailURL: [],
             },

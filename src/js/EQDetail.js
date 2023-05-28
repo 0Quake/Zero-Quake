@@ -1406,20 +1406,6 @@ function mapDraw() {
     jmaURL = [];
     jmaXMLURL = [];
     narikakunURL = [];
-
-    const year = eid.substring(0, 4); //2022
-    const month = eid.substring(4, 6); //2
-    const day = eid.substring(6, 8); //5
-    const hour = eid.substring(8, 10); //21
-    const min = eid.substring(10, 12); //0
-    const sec = eid.substring(12, 14); //0
-
-    document.getElementById("yahooLink").setAttribute("href", "https://typhoon.yahoo.co.jp/weather/jp/earthquake/" + eid + ".html");
-    document.getElementById("yahooLink").style.display = "block";
-    document.getElementById("tenkijpLink").setAttribute("href", "https://earthquake.tenki.jp/bousai/earthquake/detail/" + year + "/" + month + "/" + day + "/" + year + "-" + month + "-" + day + "-" + hour + "-" + min + "-" + sec + ".html");
-    document.getElementById("tenkijpLink").style.display = "block";
-    document.getElementById("gooLink").setAttribute("href", "https://weather.goo.ne.jp/earthquake/id/" + eid + "/");
-    document.getElementById("gooLink").style.display = "block";
   }
 }
 

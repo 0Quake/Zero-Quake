@@ -47,12 +47,6 @@ main .h2 {
   font-family: "M PLUS 1p";
 }
 
-#yahooLink,
-#tenkijpLink,
-#gooLink {
-  display: none;
-}
-
 table,
 tr,
 th,
