@@ -2899,12 +2899,11 @@ function Boolean2(str) {
 }
 //JSONパース（拡張）
 function jsonParse(str) {
-  var json;
-  str = String(str);
   try {
-    json = JSON.parse(str);
+    str = String(str);
+    var json = JSON.parse(str);
   } catch (error) {
-    json = null;
+    return {};
   }
   return json;
 }
