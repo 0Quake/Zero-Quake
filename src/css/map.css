@@ -588,12 +588,11 @@ div.marker-circle.marker_Int.marker_Int7p {
   display: none;
 }
 
-
 @media (max-width: 600px) {
-  #mainContent{
+  #mainContent {
     display: block;
   }
-  #sideBar{
+  #sideBar {
     position: absolute;
     top: 0;
     right: 0;
@@ -601,19 +600,25 @@ div.marker-circle.marker_Int.marker_Int7p {
     height: 100%;
     z-index: 100000000;
   }
-  #sideBar.close #sokuho-Panel{
+  #sideBar.close #sokuho-Panel {
     display: block;
     border-radius: 0 0 0 10px;
     max-height: 50vh;
   }
   #sideBar.close {
-     width: auto;
-     height: auto;
-     background: transparent;
-     border-left: none;
-     }
-  .close #SideBarToggle{
-     right: 0;
-     left: auto;
+    width: auto;
+    height: auto;
+    background: transparent;
+    border-left: none;
   }
+  .close #SideBarToggle {
+    right: 0;
+    left: auto;
+  }
+}
+.maplibregl-ctrl-top-left,
+.maplibregl-ctrl-top-right,
+.maplibregl-ctrl-bottom-left,
+.maplibregl-ctrl-bottom-right {
+  z-index: 100000000;
 }
