@@ -34,6 +34,8 @@
   background: #444;
   border: solid 1px #999;
   border-radius: 5px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
 }
 #menu_wrap {
   position: absolute;
@@ -584,4 +586,34 @@ div.marker-circle.marker_Int.marker_Int7p {
 #legend1,
 #legend2 {
   display: none;
+}
+
+
+@media (max-width: 600px) {
+  #mainContent{
+    display: block;
+  }
+  #sideBar{
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    height: 100%;
+    z-index: 100000000;
+  }
+  #sideBar.close #sokuho-Panel{
+    display: block;
+    border-radius: 0 0 0 10px;
+    max-height: 50vh;
+  }
+  #sideBar.close {
+     width: auto;
+     height: auto;
+     background: transparent;
+     border-left: none;
+     }
+  .close #SideBarToggle{
+     right: 0;
+     left: auto;
+  }
 }
