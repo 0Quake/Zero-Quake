@@ -42,7 +42,7 @@ window.electronAPI.messageSend((event, request) => {
   } else if (request.action == "setting") {
     init();
   } else if (request.action == "EstShindoUpdate") {
-    EstShindoUpdate(request.data);
+    EstShindoUpdate(request);
   } else if (request.action == "Replay") {
     psWaveEntry();
   }
@@ -767,7 +767,32 @@ document.getElementById("tab1_menu2").addEventListener("click", function () {
 });
 
 //予想震度更新
-function EstShindoUpdate(data) {
+function EstShindoUpdate(req) {
+  if (map.getLayer("kmoni-estShindo" + req.eid)) map.removeLayer("kmoni-estShindo" + req.eid);
+  if (map.getSource("kmoni-estShindo" + req.eid)) map.removeSource("kmoni-estShindo" + req.eid);
+  map.addSource("kmoni-estShindo" + req.eid, {
+    type: "image",
+    url: req.data,
+    coordinates: [
+      [123.5, 45.9], //左上
+      [145.8, 46.1], //右上
+      [145.7, 22], //右下
+      [122.6, 22.6], //左下
+    ],
+  });
+  map.addLayer(
+    {
+      id: "kmoni-estShindo" + req.eid,
+      type: "raster",
+      source: "kmoni-estShindo" + req.eid,
+      paint: {
+        "raster-fade-duration": 0,
+        "raster-resampling": "nearest",
+      },
+    },
+    "basemap_LINE"
+  );
+  /*
   map.setFilter("Int0", ["==", "name", ""]);
   map.setFilter("Int1", ["==", "name", ""]);
   map.setFilter("Int2", ["==", "name", ""]);
@@ -843,6 +868,7 @@ function EstShindoUpdate(data) {
   map.setFilter("Int6+", Int6pT);
   map.setFilter("Int7", Int7T);
   map.setFilter("Int7+", Int7pT);
+  */
 }
 
 //🔴予報円🔴
@@ -898,7 +924,7 @@ function psWaveEntry() {
     }
   });
 
-  //終わった地震の予報円削除
+  //終わった地震の予報円削除 予想震度画像削除
   psWaveList = psWaveList.filter(function (elm) {
     var stillEEW = now_EEW.find(function (elm2) {
       return elm2.EventID == elm.id;
@@ -908,6 +934,8 @@ function psWaveEntry() {
         map.setLayoutProperty("PCircle_" + elm.id, "visibility", "none");
         map.setLayoutProperty("SCircle_" + elm.id, "visibility", "none");
         map.setLayoutProperty("SCircle_" + elm.id + "_FILL", "visibility", "none");
+        if (map.getLayer("kmoni-estShindo" + elm.id)) map.removeLayer("kmoni-estShindo" + elm.id);
+        if (map.getSource("kmoni-estShindo" + elm.id)) map.removeSource("kmoni-estShindo" + elm.id);
       }
     }
     return stillEEW;

@@ -87,14 +87,48 @@
                     SnetRedraw(request.date)
                 };
             } else if (request.action == "KmoniEstShindoImgUpdate") {
-                var image = new Image();
-                image.src = request.data;
+                var EScanvas = document.createElement("canvas");
+                EScanvas.width = 472;
+                EScanvas.height = 550;
+                var ctx = EScanvas.getContext("2d");
 
-                image.onload = function () {
-                    EScontext.clearRect(0, 0, EScanvas.width, EScanvas.height);
-                    EScontext.drawImage(image, 0, 0);
-                    EstShindoRedraw(request.date)
+
+                const ESImg = new Image();
+                ESImg.src = request.data; // 画像のURLを指定
+                ESImg.onload = () => {
+                    ctx.drawImage(ESImg, 120, 0);
+                    ctx.clearRect(120, 0, 181, 204);
+                    ctx.drawImage(ESImg, 0, 0, 181, 204, 0, 335, 181, 204);
+
+                    img = ctx.getImageData(0, 0, EScanvas.width, EScanvas.height)
+                    imgData = img.data
+
+                    for (let i = 0; i < imgData.length; i += 4) {
+                        r = imgData[i];
+                        g = imgData[i + 1];
+                        b = imgData[i + 2];
+                        if (r + g + b > 0) {
+                            nrgb = shindoConvert(0.868589 * Math.log(10 ** (5 * RGBtoP(r, g, b) - 2)) + 1)
+                            imgData[i] = nrgb[0]
+                            imgData[i + 1] = nrgb[1]
+                            imgData[i + 2] = nrgb[2]
+                        }
+
+                    }
+                    ctx.putImageData(img, 0, 0);
+
+                    b64 = EScanvas.toDataURL("image/png");
+
+                    window.electronAPI.messageReturn({
+                        action: "kmoniEstShindoReturn",
+                        data: b64,
+                        eid: request.eid,
+                        serial: request.serial
+                    })
+
                 };
+
+
 
             } else if (request.action == "speak") {
                 speechSynthesis.cancel()
@@ -134,8 +168,7 @@
 
                 var rgb = point2RGB(elm.Point.X, elm.Point.Y, context);
                 if (rgb[0] + rgb[1] + rgb[2] !== 0) {
-                    var hsv = RGB2HSV(rgb[0], rgb[1], rgb[2]);
-                    var p = HSVtoP(hsv[0], hsv[1], hsv[2]);
+                    var p = RGBtoP(rgb[0], rgb[1], rgb[2]);
                     var shindo = (10 * p) - 3;
                     var pga = 10 ** (5 * p - 2);
 
@@ -159,8 +192,7 @@
 
                 var rgb = point2RGB(elm.Point.X, elm.Point.Y, Scontext);
                 if (rgb[0] + rgb[1] + rgb[2] !== 0) {
-                    var hsv = RGB2HSV(rgb[0], rgb[1], rgb[2]);
-                    var p = HSVtoP(hsv[0], hsv[1], hsv[2]);
+                    var p = RGBtoP(rgb[0], rgb[1], rgb[2]);
                     var shindo = (10 * p - 3);
                     var pga = 10 ** (5 * p - 2);
 
@@ -185,8 +217,7 @@
             Allpoints.forEach(function (elm, index) {
                 var rgb = point2RGB(elm.Point.X, elm.Point.Y, EScontext);
                 if (rgb[0] + rgb[1] + rgb[2] !== 0) {
-                    var hsv = RGB2HSV(rgb[0], rgb[1], rgb[2]);
-                    var p = HSVtoP(hsv[0], hsv[1], hsv[2]);
+                    var p = RGBtoP(rgb[0], rgb[1], rgb[2]);
                     var tmpNum = 10 ** (5 * p - 2);
                     var EstShindo = 0.868589 * Math.log(tmpNum) + 1
                     var SectionTmp = estShindos.find(function (elm2) { return elm2.Section == elm.Section })
@@ -224,7 +255,8 @@
             var imagedata = ctxTmp.getImageData(x, y, 1, 1);
             return [imagedata.data[0], imagedata.data[1], imagedata.data[2]];
         }
-        function RGB2HSV(r, g, b) {
+
+        function RGBtoP(r, g, b) {
             var max = Math.max(r, g, b);
             var min = Math.min(r, g, b);
 
@@ -248,10 +280,7 @@
             h = h / 360;
             s = s;
             v = v / 255;
-            return [h, s, v];
-        }
 
-        function HSVtoP(h, s, v) {
             var p = 0;
 
             if (v > 0.1 && s > 0.75) {
@@ -270,6 +299,33 @@
             return p;
         }
 
+        function shindoConvert(str) {
+            if (str < 0.5) {
+                return [191, 191, 191]
+            } else if (str < 1.5) {
+                return [121, 168, 179]
+            } else if (str < 2.5) {
+                return [54, 133, 224]
+            } else if (str < 3.5) {
+                return [77, 176, 81]
+            } else if (str < 4.5) {
+                return [191, 184, 55]
+            } else if (str < 5) {
+                return [240, 150, 41]
+            } else if (str < 5.5) {
+                return [245, 113, 61]
+            } else if (str < 6) {
+                return [230, 0, 0]
+            } else if (str < 6.5) {
+                return [138, 10, 10]
+            } else if (6.5 <= str) {
+                return [196, 0, 222]
+            } else if (7.5 <= str) {
+                return [196, 0, 222]
+            } else {
+                return [191, 191, 191]
+            }
+        }
     </script>
 </body>
 
