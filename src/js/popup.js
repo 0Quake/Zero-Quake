@@ -439,6 +439,12 @@ function EQDetect(data) {
     EQDItem.querySelector(".EQD_Regions").innerText = regions.join(" ");
   } else {
     //初回検知
+    EQDetectItem.push({
+      id: data.id,
+      lat: data.lat,
+      lng: data.lng,
+    });
+
     var clone = EQDetectTemplate.content.cloneNode(true);
     var EQDItem = clone.querySelector(".EQDItem");
     EQDItem.setAttribute("id", "EQDItem_" + data.id);
@@ -471,12 +477,6 @@ function EQDetect(data) {
       },
       minzoom: 0,
       maxzoom: 22,
-    });
-
-    EQDetectItem.push({
-      id: data.id,
-      lat: data.lat,
-      lng: data.lng,
     });
   }
 }
