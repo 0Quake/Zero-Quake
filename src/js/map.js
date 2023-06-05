@@ -964,65 +964,35 @@ function psWaveCalc(eid) {
     var PRadius = 0;
     var SRadius = 0;
 
-    var TimeElmTmpP;
-    var TimeElmTmpS;
-
-    var Pfind = TimeTableTmp.find(function (elm2) {
-      return elm2.P == distance;
-    });
-
-    if (Pfind) {
-      TimeElmTmpP = [Pfind, Pfind];
-    } else {
-      var result = [Infinity, 0];
-      var result2 = [Infinity, 0];
-      TimeTableTmp.forEach((a) => {
-        var b = Math.abs(a.P - distance);
-        if (result[0] > b) {
-          result2 = result;
-          result = [b, a];
+      var i=0;
+      for (const elm of TimeTableTmp) {
+        if(i==0){
+          SWmin = elm.S
+          if (SWmin > distance) break;
         }
-      });
-      TimeElmTmpP = [result[1], result2[1]];
-    }
-
-    var Sfind = TimeTableTmp.find(function (elm2) {
-      return elm2.S == distance;
-    });
-
-    var SWmin = Math.min.apply(
-      null,
-      TimeTableTmp.map(function (elm2) {
-        return elm2.S;
-      })
-    );
-    if (Sfind) {
-      TimeElmTmpS = [Sfind, Sfind];
-    } else {
-      var loopI = 0;
-      var result = [Infinity, 0];
-      var result2 = [Infinity, 0];
-      TimeTableTmp.forEach((a) => {
-        var b = Math.abs(a.S - distance);
-        if (result[0] >= b || loopI == 0) {
-          if (loopI == 0) {
-            result2 = [null, TimeTableTmp[1]];
-          } else {
-            result2 = result;
+        if(!PRadius){
+          if(elm.P == distance){
+            PRadius = elm.R
+          }else if(elm.P> distance){
+            elm2 = TimeTableTmp[Math.max(0,i-1)]
+            PRadius = elm.R + ((elm2.R - elm.R) * (distance - elm.P)) / (elm2.P - elm.P);
+            if(SRadius) break;
           }
-          result = [b, a];
         }
-        loopI++;
-      });
-      TimeElmTmpS = [result[1], result2[1]];
-    }
-
-    PRadius = TimeElmTmpP[0].R + ((TimeElmTmpP[1].R - TimeElmTmpP[0].R) * (distance - TimeElmTmpP[0].P)) / (TimeElmTmpP[1].P - TimeElmTmpP[0].P);
-
+        if(!SRadius){
+          if(elm.S == distance){
+            SRadius = elm.R
+          }else if(elm.S> distance){
+            elm2 = TimeTableTmp[i-1]
+            SRadius = elm.R + ((elm2.R - elm.R) * (distance - elm.S)) / (elm2.S - elm.S);
+            if(PRadius) break;
+          }  
+        }
+        i++;
+      }
+        
     if (SWmin > distance) {
-      var ArriveTime = TimeTableTmp.find(function (elm2) {
-        return elm2.R == 0;
-      }).S;
+      var ArriveTime = SWmin;
       window.requestAnimationFrame(function () {
         psWaveReDraw(
           pswaveFind.id,
@@ -1036,7 +1006,6 @@ function psWaveCalc(eid) {
         );
       });
     } else {
-      SRadius = linear([TimeElmTmpS[0].S, TimeElmTmpS[1].S], [TimeElmTmpS[0].R, TimeElmTmpS[1].R])(distance);
       window.requestAnimationFrame(function () {
         psWaveReDraw(pswaveFind.id, pswaveFind.data.latitude, pswaveFind.data.longitude, PRadius * 1000, SRadius * 1000);
       });
