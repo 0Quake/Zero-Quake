@@ -138,9 +138,6 @@
   display: none;
 }
 
-.mapboxgl-control-container * {
-  z-index: 100000000;
-}
 .maplibregl-popup {
   z-index: 200;
 }
@@ -616,9 +613,6 @@ div.marker-circle.marker_Int.marker_Int7p {
     left: auto;
   }
 }
-.maplibregl-ctrl-top-left,
-.maplibregl-ctrl-top-right,
-.maplibregl-ctrl-bottom-left,
-.maplibregl-ctrl-bottom-right {
+.maplibregl-control-container * {
   z-index: 100000000;
 }

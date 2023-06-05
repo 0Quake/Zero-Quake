@@ -1766,7 +1766,7 @@ function EEWdetect(type, json, KorL) {
         EventID: Number(json.report_id), //地震ID
         serial: Number(json.report_num), //第n報
         report_time: new Date(json.report_time), //発表時刻
-        magnitude: Number(json.magunitude), //マグニチュード
+        magnitude: Number(json.magnitude), //マグニチュード
         maxInt: shindoConvert(json.calcintensity, 0), //最大深度
         depth: Number(json.depth.replace("km", "")), //深さ
         is_cancel: Boolean2(json.is_cancel), //キャンセル
@@ -1991,74 +1991,14 @@ function EEWcontrol(data) {
         oneBeforeData = EQJSON.data.find(function (elm) {
           return elm.serial == data.serial;
         });
-        if (!oneBeforeData.alertflg && data.alertflg) {
-          oneBeforeData.alertflg = data.alertflg;
-          changed = true;
-        }
-        if (!oneBeforeData.magnitude && data.magnitude) {
-          oneBeforeData.magnitude = data.magnitude;
-          changed = true;
-        }
-        if (!oneBeforeData.maxInt && data.maxInt) {
-          oneBeforeData.maxInt = data.maxInt;
-          changed = true;
-        }
-        if (!oneBeforeData.depth && data.depth) {
-          oneBeforeData.depth = data.depth;
-          changed = true;
-        }
-        if (!oneBeforeData.is_cancel && data.is_cancel) {
-          oneBeforeData.is_cancel = data.is_cancel;
-          changed = true;
-        }
-        if (!oneBeforeData.is_final && data.is_final) {
-          oneBeforeData.is_final = data.is_final;
-          changed = true;
-        }
-        if (!oneBeforeData.is_training && data.is_training) {
-          oneBeforeData.is_training = data.is_training;
-          changed = true;
-        }
-        if (!oneBeforeData.latitude && data.latitude) {
-          oneBeforeData.latitude = data.latitude;
-          changed = true;
-        }
-        if (!oneBeforeData.longitude && data.longitude) {
-          oneBeforeData.longitude = data.longitude;
-          changed = true;
-        }
-        if (!oneBeforeData.region_code && data.region_code) {
-          oneBeforeData.region_code = data.region_code;
-          changed = true;
-        }
-        if (!oneBeforeData.region_name && data.region_name) {
-          oneBeforeData.region_name = data.region_name;
-          changed = true;
-        }
-        if (!oneBeforeData.origin_time && data.origin_time) {
-          oneBeforeData.origin_time = data.origin_time;
-          changed = true;
-        }
-        if (!oneBeforeData.isPlum && data.isPlum) {
-          oneBeforeData.isPlum = data.isPlum;
-          changed = true;
-        }
-        if (!oneBeforeData.intensityAreas && data.intensityAreas) {
-          oneBeforeData.intensityAreas = data.intensityAreas;
-          changed = true;
-        }
-        if (!oneBeforeData.warnZone && data.warnZone) {
-          oneBeforeData.warnZone = data.warnZone;
-          changed = true;
-        }
-        if (!oneBeforeData.userIntensity && data.userIntensity) {
-          oneBeforeData.userIntensity = data.userIntensity;
-          changed = true;
-        }
-        if (data.arrivalTime && !oneBeforeData.arrivalTime) {
-          oneBeforeData.arrivalTime = data.arrivalTime;
-          changed = true;
-        }
+        var keys = ["alertflg", "EventID", "serial", "report_time", "magnitude", "maxInt", "depth", "is_cancel", "is_final", "is_training", "latitude", "longitude", "region_code", "region_name", "origin_time", "isPlum", "userIntensity", "arrivalTime", "intensityAreas", "warnZones"];
+
+        keys.forEach(function (elm) {
+          if ((!oneBeforeData[elm] || oneBeforeData[elm].length == 0) && data[elm]) {
+            oneBeforeData[elm] = data[elm];
+            changed = true;
+          }
+        });
 
         if (changed) {
           EEWAlert(oneBeforeData, false, true);
