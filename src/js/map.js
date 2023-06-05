@@ -768,11 +768,11 @@ document.getElementById("tab1_menu2").addEventListener("click", function () {
 
 //予想震度更新
 function EstShindoUpdate(req) {
-  if (map.getSource("kmoni-estShindo" + req.eid)){ 
+  if (map.getSource("kmoni-estShindo" + req.eid)) {
     map.getSource("kmoni-estShindo" + req.eid).updateImage({
       url: req.data,
     });
-  }else{
+  } else {
     map.addSource("kmoni-estShindo" + req.eid, {
       type: "image",
       url: req.data,
@@ -796,86 +796,6 @@ function EstShindoUpdate(req) {
       "basemap_LINE"
     );
   }
-  /*
-  now_EEW.forEach(function(elm){
-
-  });
-  map.setFilter("Int0", ["==", "name", ""]);
-  map.setFilter("Int1", ["==", "name", ""]);
-  map.setFilter("Int2", ["==", "name", ""]);
-  map.setFilter("Int3", ["==", "name", ""]);
-  map.setFilter("Int4", ["==", "name", ""]);
-  map.setFilter("Int5-", ["==", "name", ""]);
-  map.setFilter("Int5+", ["==", "name", ""]);
-  map.setFilter("Int6-", ["==", "name", ""]);
-  map.setFilter("Int6+", ["==", "name", ""]);
-  map.setFilter("Int7", ["==", "name", ""]);
-  map.setFilter("Int7+", ["==", "name", ""]);
-  var Int0T = ["any"];
-  var Int1T = ["any"];
-  var Int2T = ["any"];
-  var Int3T = ["any"];
-  var Int4T = ["any"];
-  var Int5mT = ["any"];
-  var Int5pT = ["any"];
-  var Int6mT = ["any"];
-  var Int6pT = ["any"];
-  var Int7T = ["any"];
-  var Int7pT = ["any"];
-
-  data.forEach(function (elm) {
-    if (!elm.Section) return;
-    var shindo = String(shindoConvert(elm.estShindo, 0));
-    switch (shindo) {
-      case "0":
-        Int0T.push(["==", "name", elm.Section]);
-        break;
-      case "1":
-        Int1T.push(["==", "name", elm.Section]);
-        break;
-      case "2":
-        Int2T.push(["==", "name", elm.Section]);
-        break;
-      case "3":
-        Int3T.push(["==", "name", elm.Section]);
-        break;
-      case "4":
-        Int4T.push(["==", "name", elm.Section]);
-        break;
-      case "5-":
-        Int5mT.push(["==", "name", elm.Section]);
-        break;
-      case "5+":
-        Int5pT.push(["==", "name", elm.Section]);
-        break;
-      case "6-":
-        Int6mT.push(["==", "name", elm.Section]);
-        break;
-      case "6+":
-        Int6pT.push(["==", "name", elm.Section]);
-        break;
-      case "7":
-        Int7T.push(["==", "name", elm.Section]);
-        break;
-      case "7+":
-        Int7pT.push(["==", "name", elm.Section]);
-        break;
-      default:
-        break;
-    }
-  });
-  map.setFilter("Int0", Int0T);
-  map.setFilter("Int1", Int1T);
-  map.setFilter("Int2", Int2T);
-  map.setFilter("Int3", Int3T);
-  map.setFilter("Int4", Int4T);
-  map.setFilter("Int5-", Int5mT);
-  map.setFilter("Int5+", Int5pT);
-  map.setFilter("Int6-", Int6mT);
-  map.setFilter("Int6+", Int6pT);
-  map.setFilter("Int7", Int7T);
-  map.setFilter("Int7+", Int7pT);
-  */
 }
 
 //🔴予報円🔴
@@ -955,7 +875,7 @@ function psWaveCalc(eid) {
     return elm2.id == eid;
   });
   if (pswaveFind) {
-    var TimeTableTmp = pswaveFind.TimeTable;  
+    var TimeTableTmp = pswaveFind.TimeTable;
     var SWmin;
     /*var EQElm = psWaveList.find(function (elm) {
       return elm.id == eid;
@@ -968,33 +888,33 @@ function psWaveCalc(eid) {
     var PRadius = 0;
     var SRadius = 0;
 
-      var i=0;
-      for (const elm of TimeTableTmp) {
-        if(i==0){
-          SWmin = elm.S
-          if (SWmin > distance) break;
-        }
-        if(!PRadius){
-          if(elm.P == distance){
-            PRadius = elm.R
-          }else if(elm.P> distance){
-            elm2 = TimeTableTmp[Math.max(0,i-1)]
-            PRadius = elm.R + ((elm2.R - elm.R) * (distance - elm.P)) / (elm2.P - elm.P);
-            if(SRadius) break;
-          }
-        }
-        if(!SRadius){
-          if(elm.S == distance){
-            SRadius = elm.R
-          }else if(elm.S> distance){
-            elm2 = TimeTableTmp[i-1]
-            SRadius = elm.R + ((elm2.R - elm.R) * (distance - elm.S)) / (elm2.S - elm.S);
-            if(PRadius) break;
-          }  
-        }
-        i++;
+    var i = 0;
+    for (const elm of TimeTableTmp) {
+      if (i == 0) {
+        SWmin = elm.S;
+        if (SWmin > distance) break;
       }
-        
+      if (!PRadius) {
+        if (elm.P == distance) {
+          PRadius = elm.R;
+        } else if (elm.P > distance) {
+          elm2 = TimeTableTmp[Math.max(0, i - 1)];
+          PRadius = elm.R + ((elm2.R - elm.R) * (distance - elm.P)) / (elm2.P - elm.P);
+          if (SRadius) break;
+        }
+      }
+      if (!SRadius) {
+        if (elm.S == distance) {
+          SRadius = elm.R;
+        } else if (elm.S > distance) {
+          elm2 = TimeTableTmp[i - 1];
+          SRadius = elm.R + ((elm2.R - elm.R) * (distance - elm.S)) / (elm2.S - elm.S);
+          if (PRadius) break;
+        }
+      }
+      i++;
+    }
+
     if (SWmin > distance) {
       window.requestAnimationFrame(function () {
         psWaveReDraw(
@@ -1117,10 +1037,8 @@ function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrive
     EEWPanelElm.querySelector(".PWave_value").setAttribute("stroke-dashoffset", 125.66 - 125.66 * Math.min(pRadius / 1000 / EQElm2.distance, 1));
     EEWPanelElm.querySelector(".SWave_value").setAttribute("stroke-dashoffset", 125.66 - 125.66 * Math.min(sRadius / 1000 / EQElm2.distance, 1));
 
-    EEWPanelElm.querySelector(".arrived").textContent = sRadius / 1000 >= EQElm2.distance ? "到達" : "未到達";
-
+    var countDownElm = EEWPanelElm.querySelector(".countDown");
     if (EQElm2.arrivalTime) {
-      var countDownElm = EEWPanelElm.querySelector(".countDown");
       var countDown = (EQElm2.arrivalTime - (new Date() - Replay)) / 1000;
       if (countDown > 0) {
         var countDown_min = Math.floor(countDown / 60);
@@ -1132,8 +1050,14 @@ function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrive
           countDownElm.textContent = countDown_min + ":" + String(countDown_sec).padStart(2, "0");
         }
       } else {
-        countDownElm.textContent = "0";
+        countDownElm.textContent = "到達";
       }
+      EEWPanelElm.querySelector(".arrived").style.display = "none";
+      countDownElm.style.display = "block";
+    } else {
+      EEWPanelElm.querySelector(".arrived").textContent = sRadius / 1000 >= EQElm2.distance ? "到達" : "未到達";
+      EEWPanelElm.querySelector(".arrived").style.display = "block";
+      countDownElm.style.display = "none";
     }
   }
 }

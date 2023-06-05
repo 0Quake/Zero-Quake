@@ -4,13 +4,6 @@ var Replay = 0;
 function replay(ReplayDate) {
   if (ReplayDate) {
     Replay = new Date() - new Date(ReplayDate);
-    /*
-    if (mainWindow) {
-      mainWindow.webContents.send("message2", {
-        action: "Replay",
-        data: Replay,
-      });
-    }*/
   } else {
     Replay = 0;
   }
@@ -1967,6 +1960,16 @@ function EEWcontrol(data) {
     data.distance = geosailing(data.latitude, data.longitude, config.home.latitude, config.home.longitude);
   }
 
+  if (data.warnZones.length) {
+    var userSect = data.warnZones.find(function (elm2) {
+      return elm2.Name == config.home.Section;
+    });
+    if (userSect) {
+      data.userIntensity = userSect.IntTo;
+      data.arrivalTime = userSect.ArrivalTime;
+    }
+  }
+
   var EQJSON = EEW_Data.find(function (elm) {
     return elm.EQ_id == data.EventID;
   });
@@ -2014,31 +2017,13 @@ function EEWcontrol(data) {
             return o.serial;
           })
         );
+
       if (saishin) {
         //第２報以降
 
         var EQJSON = EEW_Data.find(function (elm) {
           return elm.EQ_id == data.EventID;
         });
-
-        if (!data.arrivalTime) {
-          var oneBeforeData = EQJSON.data.filter(function (elm) {
-            return elm.arrivalTime;
-          });
-          var update_availableID = Math.max.apply(
-            null,
-            oneBeforeData.map(function (o) {
-              return o.serial;
-            })
-          );
-
-          oneBeforeData = oneBeforeData.find(function (elm) {
-            return elm.serial == update_availableID;
-          });
-          if (oneBeforeData) {
-            data.arrivalTime = oneBeforeData.arrivalTime;
-          }
-        }
 
         EEWAlert(data, false);
         EQJSON.data.push(data);
