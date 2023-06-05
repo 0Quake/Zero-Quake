@@ -793,6 +793,9 @@ function EstShindoUpdate(req) {
     "basemap_LINE"
   );
   /*
+  now_EEW.forEach(function(elm){
+
+  });
   map.setFilter("Int0", ["==", "name", ""]);
   map.setFilter("Int1", ["==", "name", ""]);
   map.setFilter("Int2", ["==", "name", ""]);
@@ -910,6 +913,7 @@ function psWaveEntry() {
         if (pswaveFind) {
           pswaveFind.data.longitude = elm.longitude;
           pswaveFind.data.latitude = elm.latitude;
+          pswaveFind.TimeTable = TimeTableTmp;
         } else {
           psWaveList.push({
             id: elm.EventID,
