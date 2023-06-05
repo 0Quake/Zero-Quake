@@ -768,30 +768,34 @@ document.getElementById("tab1_menu2").addEventListener("click", function () {
 
 //予想震度更新
 function EstShindoUpdate(req) {
-  if (map.getLayer("kmoni-estShindo" + req.eid)) map.removeLayer("kmoni-estShindo" + req.eid);
-  if (map.getSource("kmoni-estShindo" + req.eid)) map.removeSource("kmoni-estShindo" + req.eid);
-  map.addSource("kmoni-estShindo" + req.eid, {
-    type: "image",
-    url: req.data,
-    coordinates: [
-      [123.5, 45.9], //左上
-      [145.8, 46.1], //右上
-      [145.7, 22], //右下
-      [122.6, 22.6], //左下
-    ],
-  });
-  map.addLayer(
-    {
-      id: "kmoni-estShindo" + req.eid,
-      type: "raster",
-      source: "kmoni-estShindo" + req.eid,
-      paint: {
-        "raster-fade-duration": 0,
-        "raster-resampling": "nearest",
+  if (map.getSource("kmoni-estShindo" + req.eid)){ 
+    map.getSource("kmoni-estShindo" + req.eid).updateImage({
+      url: req.data,
+    });
+  }else{
+    map.addSource("kmoni-estShindo" + req.eid, {
+      type: "image",
+      url: req.data,
+      coordinates: [
+        [123.5, 45.9], //左上
+        [145.8, 46.1], //右上
+        [145.7, 22], //右下
+        [122.6, 22.6], //左下
+      ],
+    });
+    map.addLayer(
+      {
+        id: "kmoni-estShindo" + req.eid,
+        type: "raster",
+        source: "kmoni-estShindo" + req.eid,
+        paint: {
+          "raster-fade-duration": 0,
+          "raster-resampling": "nearest",
+        },
       },
-    },
-    "basemap_LINE"
-  );
+      "basemap_LINE"
+    );
+  }
   /*
   now_EEW.forEach(function(elm){
 
@@ -951,7 +955,7 @@ function psWaveCalc(eid) {
     return elm2.id == eid;
   });
   if (pswaveFind) {
-    var TimeTableTmp = pswaveFind.TimeTable;
+    var TimeTableTmp = pswaveFind.TimeTable;  
     var SWmin;
     /*var EQElm = psWaveList.find(function (elm) {
       return elm.id == eid;
@@ -992,7 +996,6 @@ function psWaveCalc(eid) {
       }
         
     if (SWmin > distance) {
-      var ArriveTime = SWmin;
       window.requestAnimationFrame(function () {
         psWaveReDraw(
           pswaveFind.id,
@@ -1001,7 +1004,7 @@ function psWaveCalc(eid) {
           PRadius * 1000,
           0,
           true, //S波未到達
-          ArriveTime, //発生からの到達時間
+          SWmin, //発生からの到達時間
           distance //現在の経過時間
         );
       });
@@ -1009,16 +1012,14 @@ function psWaveCalc(eid) {
       window.requestAnimationFrame(function () {
         psWaveReDraw(pswaveFind.id, pswaveFind.data.latitude, pswaveFind.data.longitude, PRadius * 1000, SRadius * 1000);
       });
-
-      /*
-        id: elm.EventID,
-            PCircleElm: null,
-            SCircleElm: null,
-            data: [{ latitude: elm.latitude, longitude: elm.longitude, originTime: elm.origin_time, pRadius: 0, sRadius: 0 }],
-            TimeTable: TimeTableTmp,*/
     }
   }
 }
+
+let circle_options = {
+  steps: 80,
+  units: "kilometers",
+};
 //予報円描画
 function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrived, SArriveTime, nowDistance) {
   if (!pRadius || (!sRadius && !SnotArrived)) return;
@@ -1029,27 +1030,20 @@ function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrive
     return elm.EventID == EventID;
   });
 
-  latitude = latitudeConvert(latitude);
-  longitude = latitudeConvert(longitude);
-
   if (EQElm) {
     let _center = turf.point([longitude, latitude]);
-    let _options = {
-      steps: 80,
-      units: "kilometers",
-    };
 
     if (EQElm.PCircleElm) {
-      var pcircle = turf.circle(_center, pRadius / 1000, _options);
+      var pcircle = turf.circle(_center, pRadius / 1000, circle_options);
       map.getSource("PCircle_" + EventID).setData(pcircle);
 
-      var scircle = turf.circle(_center, sRadius / 1000, _options);
+      var scircle = turf.circle(_center, sRadius / 1000, circle_options);
       map.getSource("SCircle_" + EventID).setData(scircle);
       map.setPaintProperty("SCircle_" + EventID, "line-width", SnotArrived ? 0 : 2);
     } else {
       map.addSource("PCircle_" + EventID, {
         type: "geojson",
-        data: turf.circle(_center, pRadius / 1000, _options),
+        data: turf.circle(_center, pRadius / 1000, circle_options),
       });
 
       map.addLayer({
@@ -1064,7 +1058,7 @@ function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrive
 
       map.addSource("SCircle_" + EventID, {
         type: "geojson",
-        data: turf.circle(_center, sRadius / 1000, _options),
+        data: turf.circle(_center, sRadius / 1000, circle_options),
       });
 
       map.addLayer({
@@ -1312,14 +1306,4 @@ function tsunamiColorConv(str) {
       break;
   }
   return color;
-}
-
-//線形補完
-function linear(x, y) {
-  return (x0) => {
-    const index = x.reduce((pre, current, i) => (current <= x0 ? i : pre), 0);
-    const i = index === x.length - 1 ? x.length - 2 : index;
-
-    return ((y[i + 1] - y[i]) / (x[i + 1] - x[i])) * (x0 - x[i]) + y[i];
-  };
 }
