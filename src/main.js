@@ -1766,7 +1766,7 @@ function EEWdetect(type, json, KorL) {
         EventID: Number(json.report_id), //地震ID
         serial: Number(json.report_num), //第n報
         report_time: new Date(json.report_time), //発表時刻
-        magnitude: Number(json.magnitude), //マグニチュード
+        magnitude: Number(json.magunitude), //マグニチュード
         maxInt: shindoConvert(json.calcintensity, 0), //最大深度
         depth: Number(json.depth.replace("km", "")), //深さ
         is_cancel: Boolean2(json.is_cancel), //キャンセル
