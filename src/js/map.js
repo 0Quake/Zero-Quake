@@ -14,38 +14,38 @@ window.electronAPI.messageSend((event, request) => {
   switch (request.action) {
     case "kmoniUpdate":
       if (!background) kmoniMapUpdate(request.data, "knet");
-    break;
+      break;
     case "SnetUpdate":
-        kmoniMapUpdate(request.data, "snet");
+      kmoniMapUpdate(request.data, "snet");
       break;
     case "longWaveUpdate":
-        document.getElementById("LWaveWrap").style.display = "block";
-        document.getElementById("maxKaikyu").textContent = request.data.avrrank;
-        if (Number(request.data.avrrank) > 0) {
-          document.getElementById("region_name2").textContent = request.data.avrarea_list.join(" ");
-          document.getElementById("region_name2Wrap").style.display = "block";
-        } else {
-          document.getElementById("region_name2Wrap").style.display = "none";
-        }
+      document.getElementById("LWaveWrap").style.display = "block";
+      document.getElementById("maxKaikyu").textContent = request.data.avrrank;
+      if (Number(request.data.avrrank) > 0) {
+        document.getElementById("region_name2").textContent = request.data.avrarea_list.join(" ");
+        document.getElementById("region_name2Wrap").style.display = "block";
+      } else {
+        document.getElementById("region_name2Wrap").style.display = "none";
+      }
       break;
     case "longWaveClear":
-        document.getElementById("LWaveWrap").style.display = "none";
+      document.getElementById("LWaveWrap").style.display = "none";
       break;
     case "EEWAlertUpdate":
-        psWaveEntry();
-        JMAEstShindoControl(request.data);
+      psWaveEntry();
+      JMAEstShindoControl(request.data);
       break;
     case "tsunamiUpdate":
-        tsunamiDataUpdate(request.data);
+      tsunamiDataUpdate(request.data);
       break;
     case "setting":
-        init();
+      init();
       break;
     case "EstShindoUpdate":
-        EstShindoUpdate(request);
+      EstShindoUpdate(request);
       break;
     case "Replay":
-        psWaveEntry();
+      psWaveEntry();
       break;
     default:
       break;
@@ -691,7 +691,7 @@ function kmoniMapUpdate(dataTmp, type) {
         if (elm.detect2) {
           pointData.markerElm.classList.add("strongDetectingMarker");
         }
-      } else if(pointData.PrevDetect) {
+      } else if (pointData.PrevDetect) {
         pointData.markerElm.classList.remove("strongDetectingMarker", "detectingMarker");
       }
 
@@ -699,7 +699,7 @@ function kmoniMapUpdate(dataTmp, type) {
         var IntTmp = shindoConvert(elm.shindo, 3);
         pointData.markerElm.classList.remove("marker_Int1", "marker_Int2", "marker_Int3", "marker_Int4", "marker_Int5m", "marker_Int5p", "marker_Int6m", "marker_Int6p", "marker_Int7", "marker_Int7p");
         pointData.markerElm.classList.add("marker_Int", "marker_Int" + IntTmp);
-      } else if(pointData.PrevInt >= 0.5) {
+      } else if (pointData.PrevInt >= 0.5) {
         pointData.markerElm.classList.remove("marker_Int");
       }
 
@@ -715,7 +715,7 @@ function kmoniMapUpdate(dataTmp, type) {
 
       pointData.PrevPga = elm.pga;
       pointData.PrevInt = elm.shindo;
-      pointData.PrevDetect = elm.detect
+      pointData.PrevDetect = elm.detect;
     } else if (pointData) {
       pointData.markerElm.style.background = "rgba(128,128,128,0.5)";
       pointData.markerElm.classList.remove("strongDetectingMarker");
@@ -829,8 +829,6 @@ function JMAEstShindoControl(data) {
       JMAEstShindoData[elm2.Name] = elm2;
     });
   });
-
-  console.log("a");
 
   Object.keys(JMAEstShindoData).forEach(function (elm) {
     var sectData = JMAEstShindoData[elm];

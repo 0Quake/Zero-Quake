@@ -689,6 +689,7 @@ function estimated_intensity_mapReq() {
             source: "estimated_intensity_map_" + index,
             paint: {
               "raster-fade-duration": 0,
+              "raster-resampling": "nearest",
             },
           });
           estimated_intensity_map_layers.push("estimated_intensity_map_layer_" + index);
