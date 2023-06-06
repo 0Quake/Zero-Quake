@@ -21,15 +21,6 @@ window.electronAPI.messageSend((event, request) => {
     if (Number(request.data.avrrank) > 0) {
       document.getElementById("region_name2").textContent = request.data.avrarea_list.join(" ");
       document.getElementById("region_name2Wrap").style.display = "block";
-      /*
-      request.data.avrarea_list.forEach(function (elm) {
-        var section = sections.find(function (elm2) {
-          return elm2.name == elm;
-        });
-        if (section) {
-          //section.item.setStyle({ fill: true, fillColor: "#FFF" });
-        }
-      });*/
     } else {
       document.getElementById("region_name2Wrap").style.display = "none";
     }
@@ -593,16 +584,12 @@ function init() {
 
     if (currentZoom < 4.5) {
       document.getElementById("mapcontainer").classList.add("zoomLevel_1");
-      //gjmapT.setStyle({ weight: 20 });
     } else if (currentZoom < 6) {
       document.getElementById("mapcontainer").classList.add("zoomLevel_2");
-      //gjmapT.setStyle({ weight: 25 });
     } else if (currentZoom < 8) {
       document.getElementById("mapcontainer").classList.add("zoomLevel_3");
-      //gjmapT.setStyle({ weight: 35 });
     } else {
       document.getElementById("mapcontainer").classList.add("zoomLevel_4");
-      //gjmapT.setStyle({ weight: 65 });
     }
     if (currentZoom > 11) {
       document.getElementById("mapcontainer").classList.add("popup_show");
@@ -715,7 +702,6 @@ function kmoniMapUpdate(dataTmp, type) {
       pointData.popup.setHTML("<h3 class='PointName' style='border-bottom:solid 2px rgb(" + elm.rgb.join(",") + ")'>" + elm.Name + "<span>" + elm.Type + elm.Code + "</span></h3><h4 class='detecting' style='display:" + detecting + "'>地震検知中</h4><p>震度 " + shindoStr + "</p><p>PGA " + pgaStr + "gal</p>");
 
       pointData.PrevPga = elm.pga;
-      //previous_points[elm.Code] = elm;
     } else if (pointData) {
       pointData.markerElm.style.background = "rgba(128,128,128,0.5)";
       pointData.markerElm.classList.remove("strongDetectingMarker");
@@ -877,13 +863,7 @@ function psWaveCalc(eid) {
   if (pswaveFind) {
     var TimeTableTmp = pswaveFind.TimeTable;
     var SWmin;
-    /*var EQElm = psWaveList.find(function (elm) {
-      return elm.id == eid;
-    });*/
-
     var distance = (new Date() - Replay - pswaveFind.data.originTime) / 1000;
-
-    //if (EQElm) distance += 1;
 
     var PRadius = 0;
     var SRadius = 0;
@@ -1080,8 +1060,6 @@ function tsunamiDataUpdate(data) {
 
     document.body.classList.remove("TsunamiMode");
   } else {
-    //    map.addLayer(tsunamiLayer);
-
     EQInfoLink.style.display = "none";
     if (data.issue.EventID) {
       var EQdata = eqInfoDataJMA.find(function (elm) {
@@ -1102,33 +1080,24 @@ function tsunamiDataUpdate(data) {
     var WatchList = ["any"];
     var YohoList = ["any"];
     data.areas.forEach(function (elm) {
-      /*var tsunamiItem = tsunamiElm.find(function (elm2) {
-        return elm2.name == elm.name;
-      });*/
-
       if (!elm.cancelled) {
         alertNowTmp = true;
-        //var gradeJa;
         switch (elm.grade) {
           case "MajorWarning":
             MajorWarningList.push(["==", "name", elm.name]);
             Tsunami_MajorWarning = true;
-            //gradeJa = "大津波警報";
             break;
           case "Warning":
             WarningList.push(["==", "name", elm.name]);
             Tsunami_Warning = true;
-            //gradeJa = "津波警報";
             break;
           case "Watch":
             WatchList.push(["==", "name", elm.name]);
             Tsunami_Watch = true;
-            //gradeJa = "津波注意報";
             break;
           case "Yoho":
             YohoList.push(["==", "name", elm.name]);
             Tsunami_Yoho = true;
-            //gradeJa = "津波予報";
             break;
           default:
             break;
