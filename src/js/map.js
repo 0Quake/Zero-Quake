@@ -37,6 +37,7 @@ window.electronAPI.messageSend((event, request) => {
     document.getElementById("LWaveWrap").style.display = "none";
   } else if (request.action == "EEWAlertUpdate") {
     psWaveEntry();
+    JMAEstShindoControl(request.data);
   } else if (request.action == "tsunamiUpdate") {
     tsunamiDataUpdate(request.data);
   } else if (request.action == "setting") {
@@ -610,11 +611,12 @@ function init() {
   };
   zoomLevelContinue();
   map.on("zoom", zoomLevelContinue);
-  map.on("load", zoomLevelContinue);
   map.on("load", function () {
     window.electronAPI.messageReturn({
       action: "tsunamiReqest",
     });
+    zoomLevelContinue();
+    JMAEstShindoDraw();
   });
 
   const img = document.createElement("img");
@@ -796,6 +798,97 @@ function EstShindoUpdate(req) {
       "basemap_LINE"
     );
   }
+}
+
+var Int0T = ["any"];
+var Int1T = ["any"];
+var Int2T = ["any"];
+var Int3T = ["any"];
+var Int4T = ["any"];
+var Int5mT = ["any"];
+var Int5pT = ["any"];
+var Int6mT = ["any"];
+var Int6pT = ["any"];
+var Int7T = ["any"];
+var Int7pT = ["any"];
+
+function JMAEstShindoControl(data) {
+  JMAEstShindoData = {};
+  Int0T = ["any"];
+  Int1T = ["any"];
+  Int2T = ["any"];
+  Int3T = ["any"];
+  Int4T = ["any"];
+  Int5mT = ["any"];
+  Int5pT = ["any"];
+  Int6mT = ["any"];
+  Int6pT = ["any"];
+  Int7T = ["any"];
+  Int7pT = ["any"];
+
+  data.forEach(function (elm) {
+    elm.warnZones.forEach(function (elm2) {
+      JMAEstShindoData[elm2.Name] = elm2;
+    });
+  });
+
+  console.log("a");
+
+  Object.keys(JMAEstShindoData).forEach(function (elm) {
+    var sectData = JMAEstShindoData[elm];
+    switch (sectData.IntTo) {
+      case "0":
+        Int0T.push(["==", "name", elm]);
+        break;
+      case "1":
+        Int1T.push(["==", "name", elm]);
+        break;
+      case "2":
+        Int2T.push(["==", "name", elm]);
+        break;
+      case "3":
+        Int3T.push(["==", "name", elm]);
+        break;
+      case "4":
+        Int4T.push(["==", "name", elm]);
+        break;
+      case "5-":
+        Int5mT.push(["==", "name", elm]);
+        break;
+      case "5+":
+        Int5pT.push(["==", "name", elm]);
+        break;
+      case "6-":
+        Int6mT.push(["==", "name", elm]);
+        break;
+      case "6+":
+        Int6pT.push(["==", "name", elm]);
+        break;
+      case "7":
+        Int7T.push(["==", "name", elm]);
+        break;
+      case "7+":
+        Int7pT.push(["==", "name", elm]);
+        break;
+      default:
+        break;
+    }
+  });
+  JMAEstShindoDraw();
+}
+
+function JMAEstShindoDraw() {
+  map.setFilter("Int0", Int0T);
+  map.setFilter("Int1", Int1T);
+  map.setFilter("Int2", Int2T);
+  map.setFilter("Int3", Int3T);
+  map.setFilter("Int4", Int4T);
+  map.setFilter("Int5-", Int5mT);
+  map.setFilter("Int5+", Int5pT);
+  map.setFilter("Int6-", Int6mT);
+  map.setFilter("Int6+", Int6pT);
+  map.setFilter("Int7", Int7T);
+  map.setFilter("Int7+", Int7pT);
 }
 
 //🔴予報円🔴
