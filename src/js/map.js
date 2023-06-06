@@ -11,31 +11,43 @@ var TimeTable_JMA2001;
 var tsunamiCanvas, EQDetectCanvas, PointsCanvas, PSWaveCanvas, overlayCanvas; // eslint-disable-line
 var kmoniMapData;
 window.electronAPI.messageSend((event, request) => {
-  if (request.action == "kmoniUpdate") {
-    if (!background) kmoniMapUpdate(request.data, "knet");
-  } else if (request.action == "SnetUpdate") {
-    kmoniMapUpdate(request.data, "snet");
-  } else if (request.action == "longWaveUpdate") {
-    document.getElementById("LWaveWrap").style.display = "block";
-    document.getElementById("maxKaikyu").textContent = request.data.avrrank;
-    if (Number(request.data.avrrank) > 0) {
-      document.getElementById("region_name2").textContent = request.data.avrarea_list.join(" ");
-      document.getElementById("region_name2Wrap").style.display = "block";
-    } else {
-      document.getElementById("region_name2Wrap").style.display = "none";
-    }
-  } else if (request.action == "longWaveClear") {
-    document.getElementById("LWaveWrap").style.display = "none";
-  } else if (request.action == "EEWAlertUpdate") {
-    psWaveEntry();
-  } else if (request.action == "tsunamiUpdate") {
-    tsunamiDataUpdate(request.data);
-  } else if (request.action == "setting") {
-    init();
-  } else if (request.action == "EstShindoUpdate") {
-    EstShindoUpdate(request);
-  } else if (request.action == "Replay") {
-    psWaveEntry();
+  switch (request.action) {
+    case "kmoniUpdate":
+      if (!background) kmoniMapUpdate(request.data, "knet");
+    break;
+    case "SnetUpdate":
+        kmoniMapUpdate(request.data, "snet");
+      break;
+    case "longWaveUpdate":
+        document.getElementById("LWaveWrap").style.display = "block";
+        document.getElementById("maxKaikyu").textContent = request.data.avrrank;
+        if (Number(request.data.avrrank) > 0) {
+          document.getElementById("region_name2").textContent = request.data.avrarea_list.join(" ");
+          document.getElementById("region_name2Wrap").style.display = "block";
+        } else {
+          document.getElementById("region_name2Wrap").style.display = "none";
+        }
+      break;
+    case "longWaveClear":
+        document.getElementById("LWaveWrap").style.display = "none";
+      break;
+    case "EEWAlertUpdate":
+        psWaveEntry();
+      break;
+    case "tsunamiUpdate":
+        tsunamiDataUpdate(request.data);
+      break;
+    case "setting":
+        init();
+      break;
+    case "EstShindoUpdate":
+        EstShindoUpdate(request);
+      break;
+    case "Replay":
+        psWaveEntry();
+      break;
+    default:
+      break;
   }
 
   document.getElementById("splash").style.display = "none";
@@ -668,9 +680,7 @@ function kmoniMapUpdate(dataTmp, type) {
     pointData = points[elm.Code];
 
     if (elm.data) {
-      if (!pointData) {
-        pointData = points[elm.Code] = addPointMarker(elm);
-      }
+      if (!pointData) pointData = points[elm.Code] = addPointMarker(elm);
 
       pointData.markerElm.style.background = "rgb(" + elm.rgb.join(",") + ")";
 
@@ -679,7 +689,7 @@ function kmoniMapUpdate(dataTmp, type) {
         if (elm.detect2) {
           pointData.markerElm.classList.add("strongDetectingMarker");
         }
-      } else {
+      } else if(pointData.PrevDetect) {
         pointData.markerElm.classList.remove("strongDetectingMarker", "detectingMarker");
       }
 
@@ -687,11 +697,11 @@ function kmoniMapUpdate(dataTmp, type) {
         var IntTmp = shindoConvert(elm.shindo, 3);
         pointData.markerElm.classList.remove("marker_Int1", "marker_Int2", "marker_Int3", "marker_Int4", "marker_Int5m", "marker_Int5p", "marker_Int6m", "marker_Int6p", "marker_Int7", "marker_Int7p");
         pointData.markerElm.classList.add("marker_Int", "marker_Int" + IntTmp);
-      } else {
+      } else if(pointData.PrevInt >= 0.5) {
         pointData.markerElm.classList.remove("marker_Int");
       }
 
-      detecting = elm.detect || elm.detect2 ? "block" : "none";
+      detecting = elm.detect || elm.detect2 ? "<h4 class='detecting'>地震検知中</h4>" : "";
       shindoStr = Math.round(elm.shindo * 10) / 10;
       pgaStr = Math.round(elm.pga * 100) / 100;
       if (elm.Type == "S-net") {
@@ -699,9 +709,11 @@ function kmoniMapUpdate(dataTmp, type) {
         elm.Name = "";
       }
 
-      pointData.popup.setHTML("<h3 class='PointName' style='border-bottom:solid 2px rgb(" + elm.rgb.join(",") + ")'>" + elm.Name + "<span>" + elm.Type + elm.Code + "</span></h3><h4 class='detecting' style='display:" + detecting + "'>地震検知中</h4><p>震度 " + shindoStr + "</p><p>PGA " + pgaStr + "gal</p>");
+      pointData.popup.setHTML("<h3 class='PointName' style='border-bottom-color:rgb(" + elm.rgb.join(",") + ")'>" + elm.Name + "<span>" + elm.Type + elm.Code + "</span></h3>" + detecting + "<p>震度 " + shindoStr + "</p><p>PGA " + pgaStr + "gal</p>");
 
       pointData.PrevPga = elm.pga;
+      pointData.PrevInt = elm.shindo;
+      pointData.PrevDetect = elm.detect
     } else if (pointData) {
       pointData.markerElm.style.background = "rgba(128,128,128,0.5)";
       pointData.markerElm.classList.remove("strongDetectingMarker");
