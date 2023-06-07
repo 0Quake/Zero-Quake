@@ -1721,7 +1721,7 @@ function EEWdetect(type, json, KorL) {
         EventID: Number(json.report_id),
         serial: Number(json.report_num),
         report_time: new Date(json.report_time),
-        magnitude: Number(json.magnitude),
+        magnitude: Number(json.magunitude),
         maxInt: shindoConvert(json.calcintensity, 0),
         depth: Number(json.depth.replace("km", "")),
         is_cancel: Boolean2(json.is_cancel),
