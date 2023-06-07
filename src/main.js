@@ -12,7 +12,7 @@ function replay(ReplayDate) {
 //replay("2023/6/2 17:6:40");
 //replay("2023/4/19 19:23:10");
 //replay("2023/4/6 13:10:40");
-//replay("2023/04/04 16:11:00"); //２か所同時
+replay("2023/04/04 16:11:00"); //２か所同時
 //replay("2023/3/27 0:04:25");
 //replay("2023/03/11 05:12:30"); //２か所同時
 //replay("2020/06/15 02:28:38");//２か所同時
@@ -163,10 +163,10 @@ var EEW_nowList = []; //現在発報中リスト
 var EEW_history = []; //起動中に発生したリスト
 
 var Yoyu = 250;
-var yoyuY = yoyuK = yoyuL = 2500;
+var yoyuY = (yoyuK = yoyuL = 2500);
 var EEWNow = false;
 
-var errorCountk = errorCountl = errorCountyw = errorCountye = 0;
+var errorCountk = (errorCountl = errorCountyw = errorCountye = 0);
 
 var EQDetect_List = [];
 
@@ -174,7 +174,7 @@ var YmoniE, YmoniW;
 var P2P_ConnectData;
 var notifications = [];
 //var notification_id = 0;
-var Kmoni = Lmoni = 20000;
+var Kmoni = (Lmoni = 20000);
 var TestStartTime;
 var monitorVendor = "YE";
 var jmaXML_Fetched = [],
@@ -371,10 +371,12 @@ process.on("uncaughtException", function (err) {
     options.detail = "動作を選択してください。\n10秒で自動的に再起動します。\nエラーコードは以下の通りです。\n" + err.stack;
 
     dialog.showMessageBox(mainWindow, options).then(function (result) {
+      clearTimeout(relaunchTimer);
       if (config.system.crashReportAutoSend == "yes") {
         crashReportSend(err.stack, result);
         errorMsgBox = false;
       } else if (config.system.crashReportAutoSend == "no") {
+        errorResolve(result.response);
         errorMsgBox = false;
       } else {
         dialog.showMessageBox(mainWindow, options2).then(function (result2) {
@@ -385,6 +387,8 @@ process.on("uncaughtException", function (err) {
           if (result2.response == 0) {
             crashReportSend(err.stack, result);
             errorMsgBox = false;
+          } else {
+            errorResolve(result.response);
           }
         });
       }
@@ -441,6 +445,9 @@ function crashReportSend(errMsg, result) {
 
 //アプリのロード完了イベント
 electron.app.on("ready", () => {
+  setTimeout(function () {
+    throw new Error("abdd");
+  });
   //タスクトレイアイコン
   tray = new electron.Tray(`${__dirname}/img/icon.${process.platform === "win32" ? "ico" : "png"}`);
   tray.setToolTip("Zero Quake");
@@ -951,6 +958,7 @@ function kmoniRequest() {
           var json = jsonParse(dataTmp);
           if (json) {
             EEWdetect(2, json, 1);
+            if (json.result.message == "") kmoniEstShindoRequest();
           }
         });
       }
@@ -983,39 +991,40 @@ function kmoniRequest() {
       NetworkError(error, "強震モニタ(画像)");
     });
     request.end();
-
-    if (kmoniEid) {
-      var request = net.request("http://www.kmoni.bosai.go.jp/data/map_img/EstShindoImg/eew/" + dateEncode(2, ReqTime) + "/" + dateEncode(1, ReqTime) + ".eew.gif");
-      request.on("response", (res) => {
-        var dataTmp = [];
-        res.on("data", (chunk) => {
-          dataTmp.push(chunk);
-        });
-        res.on("end", () => {
-          var bufTmp = Buffer.concat(dataTmp);
-          if (kmoniWorker) {
-            var kmoniEstShindoDataTmp = "data:image/gif;base64," + bufTmp.toString("base64");
-            if (kmoniEstShindoDataTmp !== kmoniEstShindoData) {
-              kmoniEstShindoData = kmoniEstShindoDataTmp;
-              kmoniWorker.webContents.send("message2", {
-                action: "KmoniEstShindoImgUpdate",
-                data: kmoniEstShindoData,
-                eid: kmoniEid,
-                serial: kmoniRNum,
-                date: ReqTime,
-              });
-            }
-          }
-        });
-      });
-      request.on("error", (error) => {
-        NetworkError(error, "強震モニタ(画像)");
-      });
-      request.end();
-    }
   }
   if (kmoniTimeout) clearTimeout(kmoniTimeout);
   kmoniTimeout = setTimeout(kmoniRequest, config.Source.kmoni.kmoni.Interval);
+}
+function kmoniEstShindoRequest() {
+  var ReqTime = new Date() - yoyuK - Replay;
+
+  var request = net.request("http://www.kmoni.bosai.go.jp/data/map_img/EstShindoImg/eew/" + dateEncode(2, ReqTime) + "/" + dateEncode(1, ReqTime) + ".eew.gif");
+  request.on("response", (res) => {
+    var dataTmp = [];
+    res.on("data", (chunk) => {
+      dataTmp.push(chunk);
+    });
+    res.on("end", () => {
+      var bufTmp = Buffer.concat(dataTmp);
+      if (kmoniWorker) {
+        var kmoniEstShindoDataTmp = "data:image/gif;base64," + bufTmp.toString("base64");
+        if (kmoniEstShindoDataTmp !== kmoniEstShindoData) {
+          kmoniEstShindoData = kmoniEstShindoDataTmp;
+          kmoniWorker.webContents.send("message2", {
+            action: "KmoniEstShindoImgUpdate",
+            data: kmoniEstShindoData,
+            eid: kmoniEid,
+            serial: kmoniRNum,
+            date: ReqTime,
+          });
+        }
+      }
+    });
+  });
+  request.on("error", (error) => {
+    NetworkError(error, "強震モニタ(画像)");
+  });
+  request.end();
 }
 
 //長周期地震動モニタへのHTTPリクエスト
@@ -1363,7 +1372,6 @@ function AXIS_WS() {
       kmoniTimeUpdate(new Date(), "axis", "success");
 
       if (dataStr == "hello") return;
-      console.log(dataStr);
 
       var data = JSON.parse(dataStr);
       if (data.channel == "eew") {
