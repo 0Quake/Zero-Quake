@@ -21,6 +21,7 @@ window.electronAPI.messageSend((event, request) => {
     case "longWaveUpdate":
       document.getElementById("LWaveWrap").style.display = "block";
       document.getElementById("maxKaikyu").textContent = request.data.avrrank;
+      document.getElementById("Sva").textContent = request.data.avrval;
       if (Number(request.data.avrrank) > 0) {
         document.getElementById("region_name2").textContent = request.data.avrarea_list.join(" ");
         document.getElementById("region_name2Wrap").style.display = "block";
