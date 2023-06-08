@@ -1934,6 +1934,15 @@ function EEWcontrol(data) {
     var userSect = data.warnZones.find(function (elm2) {
       return elm2.Name == config.home.Section;
     });
+    data.warnZones.forEach(function (elm) {
+      Item = oneBeforeData.warnZones.find(function (elm2) {
+        return elm.Name == elm2.Name;
+      });
+      if (Item) {
+        elm = Object.assign(Item, elm);
+      }
+    });
+
     if (userSect) {
       data.userIntensity = userSect.IntTo;
       data.arrivalTime = userSect.ArrivalTime;
