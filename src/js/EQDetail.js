@@ -614,9 +614,11 @@ document.getElementsByName("overlaySelect").forEach(function (elm) {
   });
 });
 var estShindoMapDraw = false;
+var ShindoMapDraw = true;
 document.getElementsByName("mapFillSelect").forEach(function (elm) {
   elm.addEventListener("change", function () {
     estShindoMapDraw = this.value == "fill1";
+    ShindoMapDraw = this.value == "fill2";
     mapFillDraw();
   });
 });
@@ -811,7 +813,7 @@ function estimated_intensity_mapReq() {
         document.getElementById("estshindomap_radio").setAttribute("checked", true);
         estShindoMapDraw = true;
         mapFillDraw();
-        document.getElementById("estimated_intensity_map_toggle").style.display = "block";
+        document.getElementById("estshindomap_radioWrap").style.display = "block";
       }
     });
 }
@@ -1159,7 +1161,7 @@ function mapFillDraw() {
   document.getElementById("legend3A").style.display = estShindoMapDraw ? "block" : "none";
 
   ["Int0", "Int1", "Int2", "Int3", "Int4", "Int5-", "Int5+", "Int6-", "Int6+", "Int7", "Int7+"].forEach(function (elm2) {
-    map.setLayoutProperty(elm2, "visibility", estShindoMapDraw ? "none" : "visible");
+    map.setLayoutProperty(elm2, "visibility", ShindoMapDraw ? "visible" : "none");
   });
 }
 
