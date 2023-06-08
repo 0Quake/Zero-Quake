@@ -12,7 +12,7 @@ function replay(ReplayDate) {
 //replay("2023/6/2 17:6:40");
 //replay("2023/4/19 19:23:10");
 //replay("2023/4/6 13:10:40");
-replay("2023/04/04 16:11:00"); //２か所同時
+//replay("2023/04/04 16:11:00"); //２か所同時
 //replay("2023/3/27 0:04:25");
 //replay("2023/03/11 05:12:30"); //２か所同時
 //replay("2020/06/15 02:28:38");//２か所同時
@@ -173,7 +173,6 @@ var EQDetect_List = [];
 var YmoniE, YmoniW;
 var P2P_ConnectData;
 var notifications = [];
-//var notification_id = 0;
 var Kmoni = (Lmoni = 20000);
 var TestStartTime;
 var monitorVendor = "YE";
@@ -445,9 +444,6 @@ function crashReportSend(errMsg, result) {
 
 //アプリのロード完了イベント
 electron.app.on("ready", () => {
-  setTimeout(function () {
-    throw new Error("abdd");
-  });
   //タスクトレイアイコン
   tray = new electron.Tray(`${__dirname}/img/icon.${process.platform === "win32" ? "ico" : "png"}`);
   tray.setToolTip("Zero Quake");
@@ -522,6 +518,8 @@ ipcMain.on("message", (_event, response) => {
     if (P2P_ConnectData) {
       mainWindow.webContents.send("message2", P2P_ConnectData);
     }
+  } else if (response.action == "replay") {
+    replay(response.date)
   }
 });
 

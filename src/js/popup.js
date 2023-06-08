@@ -74,6 +74,14 @@ window.addEventListener("offline", () => {
   kmoniTimeUpdate(new Date(), new Date(), "Internet", "Error");
 });
 
+function replay(dateStr){
+  date = new Date(dateStr)
+  window.electronAPI.messageReturn({
+    action: "replay",
+    date: date
+  });
+}
+
 //🔴緊急地震速報🔴
 var template = document.getElementById("EEWTemplate");
 var epiCenter = [];

@@ -8,6 +8,13 @@ body {
   overflow: hidden;
 }
 
+#tab1_content2 h2 {
+  margin: 30px 0 15px 0;
+}
+#tab1_content2 h3 {
+  margin: 1.7em 0 0.5em 0;
+}
+
 .EEWMode #tab1_wrap,
 .TsunamiMode #tab1_wrap {
   height: 100%;
@@ -223,6 +230,7 @@ h4 {
 }
 #check_update {
   height: 40px;
+  min-width: 60px;
 }
 #check_update::before {
   content: "autorenew";
@@ -240,13 +248,6 @@ label {
   display: block;
   padding: 0.2em 0;
 }
-#tab1_content2 h2 {
-  margin: 30px 0 15px 0;
-}
-#tab1_content2 h3 {
-  margin: 1.7em 0 0.5em 0;
-}
-
 label input[type="text"],
 label input[type="number"],
 label select {
