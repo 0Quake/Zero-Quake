@@ -9,6 +9,7 @@ function replay(ReplayDate) {
   }
 }
 /* eslint-enable */
+replay("2023/6/11 18:54:20");
 //replay("2023/6/2 17:6:40");
 //replay("2023/4/19 19:23:10");
 //replay("2023/4/6 13:10:40");
@@ -194,6 +195,7 @@ var kmoniPointsDataTmp, SnetPointsDataTmp;
 let tray;
 var RevocationTimer;
 var thresholds;
+//Menu.setApplicationMenu(false);
 
 if (app.isPackaged) {
   //メニューバー非表示
@@ -519,7 +521,7 @@ ipcMain.on("message", (_event, response) => {
       mainWindow.webContents.send("message2", P2P_ConnectData);
     }
   } else if (response.action == "replay") {
-    replay(response.date)
+    replay(response.date);
   }
 });
 
@@ -946,7 +948,7 @@ function kmoniRequest() {
           errorCountk = 0;
         }
         NetworkError(res._responseHead.statusCode, "強震モニタ");
-        kmoniTimeUpdate(new Date(), "kmoni", "Error");
+        kmoniTimeUpdate(new Date() - Replay, "kmoni", "Error");
       } else {
         errorCountk = 0;
         res.on("data", (chunk) => {
@@ -963,7 +965,7 @@ function kmoniRequest() {
     });
     request.on("error", (error) => {
       NetworkError(error, "強震モニタ");
-      kmoniTimeUpdate(new Date(), "kmoni", "Error");
+      kmoniTimeUpdate(new Date() - Replay, "kmoni", "Error");
     });
 
     request.end();
@@ -1038,7 +1040,7 @@ function lmoniRequest() {
           errorCountl = 0;
         }
         NetworkError(res._responseHead.statusCode, "長周期地震動モニタ");
-        kmoniTimeUpdate(new Date(), "Lmoni", "Error");
+        kmoniTimeUpdate(new Date() - Replay, "Lmoni", "Error");
       } else {
         errorCountl = 0;
         res.on("data", (chunk) => {
@@ -1052,7 +1054,7 @@ function lmoniRequest() {
     });
     request.on("error", (error) => {
       NetworkError(error, "長周期地震動モニタ");
-      kmoniTimeUpdate(new Date(), "Lmoni", "Error");
+      kmoniTimeUpdate(new Date() - Replay, "Lmoni", "Error");
     });
 
     request.end();
@@ -1076,7 +1078,7 @@ function ymoniRequest() {
           }
           NetworkError(res._responseHead.statusCode, "Yahoo強震モニタ(East)");
 
-          kmoniTimeUpdate(new Date(), "YahooKmoni", "Error", "East");
+          kmoniTimeUpdate(new Date() - Replay, "YahooKmoni", "Error", "East");
         } else {
           errorCountye = 0;
           res.on("data", (chunk) => {
@@ -1091,7 +1093,7 @@ function ymoniRequest() {
       });
       request.on("error", (error) => {
         NetworkError(error, "Yahoo強震モニタ(East)");
-        kmoniTimeUpdate(new Date(), "YahooKmoni", "Error", "East");
+        kmoniTimeUpdate(new Date() - Replay, "YahooKmoni", "Error", "East");
       });
 
       request.end();
@@ -1106,7 +1108,7 @@ function ymoniRequest() {
             errorCountyw = 0;
           }
           NetworkError(res._responseHead.statusCode, "Yahoo強震モニタ(West)");
-          kmoniTimeUpdate(new Date(), "YahooKmoni", "Error", "West");
+          kmoniTimeUpdate(new Date() - Replay, "YahooKmoni", "Error", "West");
         } else {
           errorCountyw = 0;
           res.on("data", (chunk) => {
@@ -1120,7 +1122,7 @@ function ymoniRequest() {
       });
       request.on("error", (error) => {
         NetworkError(error, "Yahoo強震モニタ(West)");
-        kmoniTimeUpdate(new Date(), "YahooKmoni", "Error", "West");
+        kmoniTimeUpdate(new Date() - Replay, "YahooKmoni", "Error", "West");
       });
 
       request.end();
@@ -1180,7 +1182,7 @@ function SnetRequest() {
     });
     request.on("error", (error) => {
       NetworkError(error, "海しる");
-      kmoniTimeUpdate(new Date(), "Lmoni", "Error");
+      kmoniTimeUpdate(new Date() - Replay, "Lmoni", "Error");
     });
 
     request.end();
@@ -1259,12 +1261,12 @@ function wolfxRequest() {
           };
           EEWcontrol(EEWdata);
         }
-        kmoniTimeUpdate(new Date(), "wolfx", "success");
+        kmoniTimeUpdate(new Date() - Replay, "wolfx", "success");
       });
     });
     request.on("error", (error) => {
       NetworkError(error, "wolfx");
-      kmoniTimeUpdate(new Date(), "wolfx", "Error");
+      kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
     });
 
     request.end();
@@ -1359,15 +1361,15 @@ function AXIS_WS() {
 
   AXISWSclient.on("connect", function (connection) {
     connection.on("error", function () {
-      kmoniTimeUpdate(new Date(), "axis", "Error");
+      kmoniTimeUpdate(new Date() - Replay, "axis", "Error");
     });
     connection.on("close", function () {
-      kmoniTimeUpdate(new Date(), "axis", "Disconnect");
+      kmoniTimeUpdate(new Date() - Replay, "axis", "Disconnect");
       AXIS_WS_TryConnect();
     });
     connection.on("message", function (message) {
       var dataStr = message.utf8Data;
-      kmoniTimeUpdate(new Date(), "axis", "success");
+      kmoniTimeUpdate(new Date() - Replay, "axis", "success");
 
       if (dataStr == "hello") return;
 
@@ -1405,7 +1407,7 @@ function AXIS_WS() {
         );
       }
     });
-    kmoniTimeUpdate(new Date(), "axis", "success");
+    kmoniTimeUpdate(new Date() - Replay, "axis", "success");
   });
 
   AXIS_WS_Connect();
@@ -2611,6 +2613,7 @@ function eqInfoControl(dataList, type, EEW) {
       var eqInfoTmp = [];
       var eqInfoUpdateTmp = [];
       dataList.forEach(function (data) {
+        if (new Date(data.reportDateTime) > new Date() - Replay) return;
         var EQElm = eqInfo.jma.concat(eqInfoTmp).find(function (elm) {
           return elm.eventId == data.eventId;
         });
@@ -2998,7 +3001,7 @@ function shindoConvert(str, responseType, p2p) {
       case 2:
         ConvTable = {
           "?": ["#BFBFBF", "#444"],
-          0: ["#BFBFBF", "#444"],
+          0: ["#505666", "#CCC"],
           1: ["#79A8B3", "#444"],
           2: ["#3685E0", "#FFF"],
           3: ["#4DB051", "#FFF"],
