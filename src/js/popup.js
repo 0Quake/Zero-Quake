@@ -460,7 +460,6 @@ function kmoniTimeUpdate(updateTime, LocalTime, type, condition, vendor) {
   if (updateTime > new Date() - Replay) return;
 
   if (updateTimeTmp < updateTime && type !== "Internet") {
-    console.log(type);
     updateTimeTmp = updateTime;
     document.getElementById("all_UpdateTime").textContent = dateEncode(3, updateTime);
   }

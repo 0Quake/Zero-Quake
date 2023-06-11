@@ -9,6 +9,7 @@ function replay(ReplayDate) {
   }
 }
 /* eslint-enable */
+replay("2023/6/11 18:54:40");
 //replay("2023/6/2 17:6:40");
 //replay("2023/4/19 19:23:10");
 //replay("2023/4/6 13:10:40");
@@ -194,7 +195,6 @@ var kmoniPointsDataTmp, SnetPointsDataTmp;
 let tray;
 var RevocationTimer;
 var thresholds;
-//Menu.setApplicationMenu(false);
 
 if (app.isPackaged) {
   //メニューバー非表示
@@ -1933,14 +1933,6 @@ function EEWcontrol(data) {
     var userSect = data.warnZones.find(function (elm2) {
       return elm2.Name == config.home.Section;
     });
-    data.warnZones.forEach(function (elm) {
-      Item = oneBeforeData.warnZones.find(function (elm2) {
-        return elm.Name == elm2.Name;
-      });
-      if (Item) {
-        elm = Object.assign(Item, elm);
-      }
-    });
 
     if (userSect) {
       data.userIntensity = userSect.IntTo;
@@ -1980,6 +1972,17 @@ function EEWcontrol(data) {
             changed = true;
           }
         });
+
+        if (data.warnZones.length) {
+          data.warnZones.forEach(function (elm) {
+            Item = oneBeforeData.warnZones.find(function (elm2) {
+              return elm.Name == elm2.Name;
+            });
+            if (Item) {
+              elm = Object.assign(Item, elm);
+            }
+          });
+        }
 
         if (changed) {
           EEWAlert(oneBeforeData, false, true);
