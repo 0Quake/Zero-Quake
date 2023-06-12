@@ -74,11 +74,11 @@ window.addEventListener("offline", () => {
   kmoniTimeUpdate(new Date(), new Date(), "Internet", "Error");
 });
 
-function replay(dateStr){
-  date = new Date(dateStr)
+function replay(dateStr) {
+  date = new Date(dateStr);
   window.electronAPI.messageReturn({
     action: "replay",
-    date: date
+    date: date,
   });
 }
 
@@ -457,7 +457,10 @@ document.getElementById("EQInfoSelect").addEventListener("change", function () {
 
 //情報更新時刻更新
 function kmoniTimeUpdate(updateTime, LocalTime, type, condition, vendor) {
-  if (updateTimeTmp < updateTime) {
+  if (updateTime > new Date() - Replay) return;
+
+  if (updateTimeTmp < updateTime && type !== "Internet") {
+    console.log(type);
     updateTimeTmp = updateTime;
     document.getElementById("all_UpdateTime").textContent = dateEncode(3, updateTime);
   }
@@ -505,4 +508,3 @@ function show_errorMsg(data) {
 document.getElementById("errorMsg_close").addEventListener("click", function () {
   errorMsgBox.style.display = "none";
 });
-
