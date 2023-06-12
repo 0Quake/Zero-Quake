@@ -172,21 +172,15 @@ var EQDetect_List = [];
 
 var YmoniE, YmoniW;
 var P2P_ConnectData;
-var notifications = [];
 var Kmoni = (Lmoni = 20000);
 var TestStartTime;
 var monitorVendor = "YE";
-var jmaXML_Fetched = [],
-  nakn_Fetched = [];
-var narikakun_URLs = [],
-  narikakun_EIDs = [];
+var jmaXML_Fetched = nakn_Fetched = narikakun_URLs = narikakun_EIDs = [];
 var eqInfo = { jma: [], usgs: [] };
 var EQInfoFetchIndex = 0;
 var tsunamiData;
 var lwaveTmp;
-var kmoniLastReportTime = 0,
-  lmoniLastReportTime = 0,
-  YkmoniLastReportTime = 0;
+var kmoniLastReportTime = lmoniLastReportTime = YkmoniLastReportTime = 0;
 var kmoniTimeout, lmoniTimeout, ymoniTimeout;
 var msil_lastTime = 0;
 var kmoniEid, kmoniRNum;
@@ -593,12 +587,6 @@ function createWindow() {
         data: eqInfo.jma.slice(0, config.Info.EQInfo.ItemCount),
       });
 
-      if (notifications.length > 0) {
-        mainWindow.webContents.send("message2", {
-          action: "notification_Update",
-          data: notifications,
-        });
-      }
       var threshold01Tmp;
       EQDetect_List.forEach(function (elm) {
         if (elm.isCity) {
