@@ -812,6 +812,7 @@ function estimated_intensity_mapReq() {
         });
         document.getElementById("estshindomap_radio").setAttribute("checked", true);
         estShindoMapDraw = true;
+        ShindoMapDraw = false;
         mapFillDraw();
         document.getElementById("estshindomap_radioWrap").style.display = "block";
       }

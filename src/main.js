@@ -9,7 +9,6 @@ function replay(ReplayDate) {
   }
 }
 /* eslint-enable */
-replay("2023/6/11 18:54:40");
 //replay("2023/6/2 17:6:40");
 //replay("2023/4/19 19:23:10");
 //replay("2023/4/6 13:10:40");
