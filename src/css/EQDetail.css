@@ -406,6 +406,7 @@ td {
   border: solid 1px #999;
   border-radius: 5px;
   padding: 5px;
+  z-index: 100000000;
 }
 #legend3A {
   display: none;
