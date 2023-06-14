@@ -176,7 +176,6 @@ var Kmoni = (Lmoni = 20000);
 var TestStartTime;
 var monitorVendor = "YE";
 var jmaXML_Fetched = [];
-a;
 var nakn_Fetched = [];
 var narikakun_URLs = [];
 var narikakun_EIDs = [];
