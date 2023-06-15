@@ -46,34 +46,6 @@
   accent-color: rgb(255 146 146);
 }
 
-:root {
-  --IntTheme_Q_BgColor: rgb(191, 191, 191);
-  --IntTheme_0_BgColor: rgb(80, 86, 102);
-  --IntTheme_1_BgColor: rgb(134, 168, 198);
-  --IntTheme_2_BgColor: rgb(56, 120, 193);
-  --IntTheme_3_BgColor: rgb(80, 186, 84);
-  --IntTheme_4_BgColor: rgb(204, 209, 74);
-  --IntTheme_5m_BgColor: rgb(231, 150, 21);
-  --IntTheme_5p_BgColor: rgb(255, 91, 22);
-  --IntTheme_6m_BgColor: rgb(237, 0, 0);
-  --IntTheme_6p_BgColor: rgb(128, 9, 9);
-  --IntTheme_7_BgColor: rgb(196, 0, 222);
-  --IntTheme_7p_BgColor: rgb(196, 0, 222);
-
-  --IntTheme_Q_color: rgb(68, 68, 68);
-  --IntTheme_0_color: rgb(204, 204, 204);
-  --IntTheme_1_color: rgb(51, 51, 51);
-  --IntTheme_2_color: rgb(255, 255, 255);
-  --IntTheme_3_color: rgb(34, 34, 34);
-  --IntTheme_4_color: rgb(34, 34, 34);
-  --IntTheme_5m_color: rgb(0, 0, 0);
-  --IntTheme_5p_color: rgb(0, 0, 0);
-  --IntTheme_6m_color: rgb(255, 255, 255);
-  --IntTheme_6p_color: rgb(255, 255, 255);
-  --IntTheme_7_color: rgb(255, 255, 255);
-  --IntTheme_7p_color: rgb(255, 255, 255);
-}
-
 html,
 body {
   min-width: 300px;
@@ -195,7 +167,6 @@ main {
 ::-webkit-scrollbar-thumb:hover {
   background-color: rgba(128, 128, 128, 0.8);
   border: 2px solid transparent;
-
 }
 
 #offline {

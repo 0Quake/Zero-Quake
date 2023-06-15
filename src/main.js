@@ -114,14 +114,6 @@ var defaultConfigVal = {
         background: "rgb(204, 209, 74)",
         color: "rgb(34, 34, 34)",
       },
-      7: {
-        background: "rgb(196, 0, 222)",
-        color: "rgb(255, 255, 255)",
-      },
-      "?": {
-        background: "rgb(191, 191, 191)",
-        color: "rgb(68, 68, 68)",
-      },
       "5m": {
         background: "rgb(231, 150, 21)",
         color: "rgb(0, 0, 0)",
@@ -138,9 +130,17 @@ var defaultConfigVal = {
         background: "rgb(128, 9, 9)",
         color: "rgb(255, 255, 255)",
       },
+      7: {
+        background: "rgb(196, 0, 222)",
+        color: "rgb(255, 255, 255)",
+      },
       "7p": {
         background: "rgb(196, 0, 222)",
         color: "rgb(255, 255, 255)",
+      },
+      "?": {
+        background: "rgb(191, 191, 191)",
+        color: "rgb(68, 68, 68)",
       },
     },
     Tsunami: {
@@ -2990,22 +2990,6 @@ function shindoConvert(str, responseType, p2p) {
       case 1:
         ConvTable = { "?": "?", 0: "0", 1: "1", 2: "2", 3: "3", 4: "4", "5-": "5弱", "5+": "5強", "6-": "6弱", "6+": "6強", 7: "7", "7+": "7以上" };
         break;
-      case 2:
-        ConvTable = {
-          "?": ["#BFBFBF", "#444"],
-          0: ["#505666", "#CCC"],
-          1: ["#79A8B3", "#444"],
-          2: ["#3685E0", "#FFF"],
-          3: ["#4DB051", "#FFF"],
-          4: ["#BFB837", "#333"],
-          "5-": ["#F09629", "#000"],
-          "5+": ["#F5713D", "#000"],
-          "6-": ["#E60000", "#FFF"],
-          "6+": ["#8A0A0A", "#FFF"],
-          7: ["#C400DE", "#FFF"],
-          "7+": ["#C400DE", "#FFF"],
-        };
-        break;
       case 3:
         ConvTable = { "?": null, 0: null, 1: "1", 2: "2", 3: "3", 4: "4", "5-": "5-", "5+": "5p", "6-": "6-", "6+": "6p", 7: "7", "7+": "7p" };
         break;
@@ -3016,6 +3000,7 @@ function shindoConvert(str, responseType, p2p) {
         ConvTable = { "?": 0, 0: 1, 1: 2, 2: 3, 3: 4, 4: 5, "5-": 6, "5+": 7, "6-": 8, "6+": 9, 7: 10, "7+": 11 };
         break;
       case 0:
+      case 2:
       default:
         ConvTable = { "?": "?", 0: "0", 1: "1", 2: "2", 3: "3", 4: "4", "5-": "5-", "5+": "5+", "6-": "6-", "6+": "6+", 7: "7", "7+": "7+" };
         break;

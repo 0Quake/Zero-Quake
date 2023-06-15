@@ -1,10 +1,36 @@
 const root = document.querySelector(":root");
-const rootStyle = getComputedStyle(root);
+
 //eslint-disable-next-line
 var config;
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "setting") {
     config = request.data;
+
+    root.style.setProperty("--IntTheme_Q_BgColor", config.color.Shindo["?"].background);
+    root.style.setProperty("--IntTheme_0_BgColor", config.color.Shindo["0"].background);
+    root.style.setProperty("--IntTheme_1_BgColor", config.color.Shindo["1"].background);
+    root.style.setProperty("--IntTheme_2_BgColor", config.color.Shindo["2"].background);
+    root.style.setProperty("--IntTheme_3_BgColor", config.color.Shindo["3"].background);
+    root.style.setProperty("--IntTheme_4_BgColor", config.color.Shindo["4"].background);
+    root.style.setProperty("--IntTheme_5m_BgColor", config.color.Shindo["5m"].background);
+    root.style.setProperty("--IntTheme_5p_BgColor", config.color.Shindo["5p"].background);
+    root.style.setProperty("--IntTheme_6m_BgColor", config.color.Shindo["6m"].background);
+    root.style.setProperty("--IntTheme_6p_BgColor", config.color.Shindo["6p"].background);
+    root.style.setProperty("--IntTheme_7_BgColor", config.color.Shindo["7"].background);
+    root.style.setProperty("--IntTheme_7p_BgColor", config.color.Shindo["7p"].background);
+
+    root.style.setProperty("--IntTheme_Q_color", config.color.Shindo["?"].color);
+    root.style.setProperty("--IntTheme_0_color", config.color.Shindo["0"].color);
+    root.style.setProperty("--IntTheme_1_color", config.color.Shindo["1"].color);
+    root.style.setProperty("--IntTheme_2_color", config.color.Shindo["2"].color);
+    root.style.setProperty("--IntTheme_3_color", config.color.Shindo["3"].color);
+    root.style.setProperty("--IntTheme_4_color", config.color.Shindo["4"].color);
+    root.style.setProperty("--IntTheme_5m_color", config.color.Shindo["5m"].color);
+    root.style.setProperty("--IntTheme_5p_color", config.color.Shindo["5p"].color);
+    root.style.setProperty("--IntTheme_6m_color", config.color.Shindo["6m"].color);
+    root.style.setProperty("--IntTheme_6p_color", config.color.Shindo["6p"].color);
+    root.style.setProperty("--IntTheme_7_color", config.color.Shindo["7"].color);
+    root.style.setProperty("--IntTheme_7p_color", config.color.Shindo["7p"].color);
   }
 });
 
@@ -136,18 +162,18 @@ function shindoConvert(str, responseType) {
         break;
       case 2:
         ConvTable = {
-          "?": [rootStyle.getPropertyValue("--IntTheme_Q_BgColor"), rootStyle.getPropertyValue("--IntTheme_Q_color")],
-          0: [rootStyle.getPropertyValue("--IntTheme_0_BgColor"), rootStyle.getPropertyValue("--IntTheme_0_color")],
-          1: [rootStyle.getPropertyValue("--IntTheme_1_BgColor"), rootStyle.getPropertyValue("--IntTheme_1_color")],
-          2: [rootStyle.getPropertyValue("--IntTheme_2_BgColor"), rootStyle.getPropertyValue("--IntTheme_2_color")],
-          3: [rootStyle.getPropertyValue("--IntTheme_3_BgColor"), rootStyle.getPropertyValue("--IntTheme_3_color")],
-          4: [rootStyle.getPropertyValue("--IntTheme_4_BgColor"), rootStyle.getPropertyValue("--IntTheme_4_color")],
-          "5-": [rootStyle.getPropertyValue("--IntTheme_5m_BgColor"), rootStyle.getPropertyValue("--IntTheme_5m_color")],
-          "5+": [rootStyle.getPropertyValue("--IntTheme_5p_BgColor"), rootStyle.getPropertyValue("--IntTheme_5p_color")],
-          "6-": [rootStyle.getPropertyValue("--IntTheme_6m_BgColor"), rootStyle.getPropertyValue("--IntTheme_6m_color")],
-          "6+": [rootStyle.getPropertyValue("--IntTheme_6p_BgColor"), rootStyle.getPropertyValue("--IntTheme_6p_color")],
-          7: [rootStyle.getPropertyValue("--IntTheme_7_BgColor"), rootStyle.getPropertyValue("--IntTheme_7_color")],
-          "7+": [rootStyle.getPropertyValue("--IntTheme_7p_BgColor"), rootStyle.getPropertyValue("--IntTheme_7p_color")],
+          "?": [config.color.Shindo["?"].background, config.color.Shindo["?"].color],
+          0: [config.color.Shindo["0"].background, config.color.Shindo["0"].color],
+          1: [config.color.Shindo["1"].background, config.color.Shindo["1"].color],
+          2: [config.color.Shindo["2"].background, config.color.Shindo["2"].color],
+          3: [config.color.Shindo["3"].background, config.color.Shindo["3"].color],
+          4: [config.color.Shindo["4"].background, config.color.Shindo["4"].color],
+          "5-": [config.color.Shindo["5m"].background, config.color.Shindo["5m"].color],
+          "5+": [config.color.Shindo["5p"].background, config.color.Shindo["5p"].color],
+          "6-": [config.color.Shindo["6m"].background, config.color.Shindo["6m"].color],
+          "6+": [config.color.Shindo["6p"].background, config.color.Shindo["6p"].color],
+          7: [config.color.Shindo["7"].background, config.color.Shindo["7"].color],
+          "7+": [config.color.Shindo["7p"].background, config.color.Shindo["7p"].color],
         };
         break;
       case 3:
