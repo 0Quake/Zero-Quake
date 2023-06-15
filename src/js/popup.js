@@ -74,6 +74,7 @@ window.addEventListener("offline", () => {
   kmoniTimeUpdate(new Date(), new Date(), "Internet", "Error");
 });
 
+//eslint-disable-next-line
 function replay(dateStr) {
   date = new Date(dateStr);
   window.electronAPI.messageReturn({

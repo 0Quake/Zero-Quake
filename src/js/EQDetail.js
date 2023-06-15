@@ -13,6 +13,7 @@ var ESmarkerElm;
 var newInfoDateTime = 0;
 var map;
 var jmaURL;
+var jmaLURL = [];
 var jmaXMLURL;
 var narikakunURL;
 var config;
@@ -401,6 +402,11 @@ function Mapinit() {
         { id: "Int6+", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["6p"].background }, filter: ["==", "name", ""] },
         { id: "Int7", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["7"].background }, filter: ["==", "name", ""] },
         { id: "Int7+", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["7p"].background }, filter: ["==", "name", ""] },
+        { id: "LgInt1", type: "fill", source: "basemap", paint: { "fill-color": config.color.LgInt["1"].background }, filter: ["==", "name", ""] },
+        { id: "LgInt2", type: "fill", source: "basemap", paint: { "fill-color": config.color.LgInt["2"].background }, filter: ["==", "name", ""] },
+        { id: "LgInt3", type: "fill", source: "basemap", paint: { "fill-color": config.color.LgInt["3"].background }, filter: ["==", "name", ""] },
+        { id: "LgInt4", type: "fill", source: "basemap", paint: { "fill-color": config.color.LgInt["4"].background }, filter: ["==", "name", ""] },
+
         {
           id: "prefmap_LINE",
           type: "line",
@@ -615,11 +621,29 @@ document.getElementsByName("overlaySelect").forEach(function (elm) {
 });
 var estShindoMapDraw = false;
 var ShindoMapDraw = true;
+var LgIntMapDraw = false;
 document.getElementsByName("mapFillSelect").forEach(function (elm) {
   elm.addEventListener("change", function () {
     estShindoMapDraw = this.value == "fill1";
     ShindoMapDraw = this.value == "fill2";
+    LgIntMapDraw = this.value == "fill4";
     mapFillDraw();
+
+    if (LgIntMapDraw) {
+      document.querySelectorAll(".ShindoIcon,.MaxShindoIcon,#ShindoSample").forEach(function (elm) {
+        elm.style.display = "none";
+      });
+      document.querySelectorAll(".LgIntIcon,.MaxLgIntIcon,#LngIntSample").forEach(function (elm) {
+        elm.style.display = "block";
+      });
+    } else {
+      document.querySelectorAll(".ShindoIcon,.MaxShindoIcon,#ShindoSample").forEach(function (elm) {
+        elm.style.display = "block";
+      });
+      document.querySelectorAll(".LgIntIcon,.MaxLgIntIcon,#LngIntSample").forEach(function (elm) {
+        elm.style.display = "none";
+      });
+    }
   });
 });
 
@@ -706,8 +730,22 @@ function jma_ListReq() {
       mapDraw();
     })
     .catch(function () {});
-}
+  fetch("https://www.jma.go.jp/bosai/ltpgm/data/list.json")
+    .then(function (res) {
+      return res.json();
+    })
+    .then(function (data) {
+      data.forEach(function (elm) {
+        var urlTmp = "https://www.jma.go.jp/bosai/ltpgm/data/" + elm.json;
+        if (elm.eid == eid && !jmaLURL.includes(urlTmp)) {
+          jmaLURL.push(urlTmp);
+        }
+      });
 
+      mapDraw();
+    })
+    .catch(function () {});
+}
 //narikakun地震情報APIリスト取得→narikakun_Fetch
 function narikakun_ListReq(year, month, retry) {
   fetch("https://ntool.online/api/earthquakeList?year=" + year + "&month=" + month)
@@ -803,6 +841,73 @@ function jma_Fetch(url) {
                       add_IntensityStation_info(elm4.latlon.lat, elm4.latlon.lon, elm4.Name, elm4.Int);
                     });
                   }
+                });
+              }
+            });
+          }
+        });
+        mapFillDraw();
+      }
+    });
+}
+
+function jmaL_Fetch(url) {
+  fetch(url)
+    .then(function (res) {
+      return res.json();
+    })
+    .then(function (json) {
+      InfoType_add("type-7");
+
+      document.getElementById("LgInt_radioWrap").style.display = "block";
+      if (json.Body.Earthquake) {
+        var LatLngDepth = json.Body.Earthquake.Hypocenter.Area.Coordinate.replaceAll("+", "｜+").replaceAll("-", "｜-").replaceAll("/", "").split("｜");
+      }
+
+      if (json.Body.Earthquake) {
+        if (json.Body.Earthquake.OriginTime) var originTimeTmp = new Date(json.Body.Earthquake.OriginTime);
+        if (json.Body.Earthquake.Hypocenter.Area.Name) var epiCenterTmp = json.Body.Earthquake.Hypocenter.Area.Name;
+        if (json.Body.Earthquake.Magnitude) var magnitudeTmp = Number(json.Body.Earthquake.Magnitude);
+      }
+      if (json.Body.Intensity && json.Body.Intensity.Observation.MaxInt) var maxIntTmp = json.Body.Intensity.Observation.MaxInt;
+      if (LatLngDepth && !isNaN(LatLngDepth[1]) && LatLngDepth[1]) var LatTmp = Number(LatLngDepth[1]);
+      if (LatLngDepth && !isNaN(LatLngDepth[2]) && LatLngDepth[2]) var LngTmp = Number(LatLngDepth[2]);
+      if (LatLngDepth && !isNaN(LatLngDepth[3]) && LatLngDepth[3]) var depthTmp = Math.abs(Number(LatLngDepth[3]) / 1000);
+
+      var cancelTmp = json.Head.InfoType == "取消";
+
+      if (json.Body.Comments) {
+        var commentText = "";
+        if (json.Body.Comments.ForecastComment && json.Body.Comments.ForecastComment.Text) commentText += json.Body.Comments.ForecastComment.Text;
+        if (json.Body.Comments.FreeFormComment) commentText += json.Body.Comments.FreeFormComment;
+      }
+      EQInfoControl({
+        infoType: json.Head.Title,
+        reportTime: 0,
+        originTime: originTimeTmp,
+        maxI: maxIntTmp,
+        mag: magnitudeTmp,
+        lat: LatTmp,
+        lng: LngTmp,
+        depth: depthTmp,
+        epiCenter: epiCenterTmp,
+        comment: commentText,
+        cancel: cancelTmp,
+      });
+
+      if (json.Body.Intensity && json.Body.Intensity.Observation.Pref) {
+        var newestshindo = shindo_lastUpDate < new Date(json.Head.ReportDateTime);
+        if (newestshindo) shindo_lastUpDate = new Date(json.Head.ReportDateTime);
+        else return;
+        mapFillResetL();
+        json.Body.Intensity.Observation.Pref.forEach(function (elm) {
+          add_Pref_infoL(elm.Name, elm.MaxLgInt);
+          if (elm.Area) {
+            elm.Area.forEach(function (elm2) {
+              add_Area_infoL(elm2.Name, elm2.MaxLgInt);
+              if (elm2.IntensityStation) {
+                elm2.IntensityStation.forEach(function (elm4) {
+                  add_IntensityStation_infoL(elm4.latlon.lat, elm4.latlon.lon, elm4.Name, elm4.LgInt);
                 });
               }
             });
@@ -988,6 +1093,11 @@ var Int6pT = ["any"];
 var Int7T = ["any"];
 var Int7pT = ["any"];
 
+var LgInt1T = ["any"];
+var LgInt2T = ["any"];
+var LgInt3T = ["any"];
+var LgInt4T = ["any"];
+
 function mapFillReset() {
   Int0T = ["any"];
   Int1T = ["any"];
@@ -1012,6 +1122,16 @@ function mapFillReset() {
   map.setFilter("Int7", ["==", "name", ""]);
   map.setFilter("Int7+", ["==", "name", ""]);
 }
+function mapFillResetL() {
+  LgInt1T = ["any"];
+  LgInt2T = ["any"];
+  LgInt3T = ["any"];
+  LgInt4T = ["any"];
+  map.setFilter("LgInt1", ["==", "name", ""]);
+  map.setFilter("LgInt2", ["==", "name", ""]);
+  map.setFilter("LgInt3", ["==", "name", ""]);
+  map.setFilter("LgInt4", ["==", "name", ""]);
+}
 
 function mapFillDraw() {
   map.setFilter("Int0", Int0T);
@@ -1026,6 +1146,11 @@ function mapFillDraw() {
   map.setFilter("Int7", Int7T);
   map.setFilter("Int7+", Int7pT);
 
+  map.setFilter("LgInt1", LgInt1T);
+  map.setFilter("LgInt2", LgInt2T);
+  map.setFilter("LgInt3", LgInt3T);
+  map.setFilter("LgInt4", LgInt4T);
+
   estimated_intensity_map_layers.forEach(function (elm2) {
     map.setLayoutProperty(elm2, "visibility", estShindoMapDraw ? "visible" : "none");
   });
@@ -1033,6 +1158,9 @@ function mapFillDraw() {
 
   ["Int0", "Int1", "Int2", "Int3", "Int4", "Int5-", "Int5+", "Int6-", "Int6+", "Int7", "Int7+"].forEach(function (elm2) {
     map.setLayoutProperty(elm2, "visibility", ShindoMapDraw ? "visible" : "none");
+  });
+  ["LgInt1", "LgInt2", "LgInt3", "LgInt4"].forEach(function (elm2) {
+    map.setLayoutProperty(elm2, "visibility", LgIntMapDraw ? "visible" : "none");
   });
 }
 
@@ -1174,6 +1302,122 @@ function add_IntensityStation_info(lat, lng, name, int) {
 
   wrap3[wrap3.length - 1].appendChild(newDiv);
 }
+//都道府県ごとの情報描画（リスト）
+function add_Pref_infoL(name, maxInt) {
+  /*
+  var newDiv = document.createElement("div");
+  var color1 = shindoConvert(maxInt, 2);
+  newDiv.innerHTML = "<span style='background:" + color1[0] + ";color:" + color1[1] + ";'>" + maxInt + "</span>" + name;
+  newDiv.classList.add("ShindoItem", "ShindoItem1");
+  document.getElementById("Shindo").appendChild(newDiv);
+  newDiv.addEventListener("click", function () {
+    this.classList.toggle("has-open");
+    this.nextElementSibling.classList.toggle("open");
+  });
+
+  var newDiv = document.createElement("div");
+  newDiv.innerHTML = "<div></div>";
+  newDiv.classList.add("WrapLevel1", "close");
+  document.getElementById("Shindo").appendChild(newDiv);
+
+  document.getElementById("splash").style.display = "none";*/
+}
+//細分区域ごとの情報描画（リスト・地図塗りつぶし・地図プロット）
+function add_Area_infoL(name, maxInt) {
+  /*
+  var wrap = document.querySelectorAll(".WrapLevel1");
+
+  var newDiv = document.createElement("div");
+  newDiv.innerHTML = "<span style='background:" + color[0] + ";color:" + color[1] + ";'>" + maxInt + "</span>" + name;
+  newDiv.classList.add("ShindoItem", "ShindoItem2");
+  wrap[wrap.length - 1].appendChild(newDiv);
+  newDiv.addEventListener("click", function () {
+    this.classList.toggle("has-open");
+    this.nextElementSibling.classList.toggle("open");
+  });
+
+  var newDiv2 = document.createElement("div");
+  newDiv2.innerHTML = "<div></div>";
+  newDiv2.classList.add("WrapLevel2", "close");
+  wrap[wrap.length - 1].appendChild(newDiv2);
+
+  if (name == config.home.Saibun) {
+    var newDiv3 = document.createElement("div");
+    newDiv3.innerHTML = "<span style='background:" + color[0] + ";color:" + color[1] + ";'>" + maxInt + "</span>" + name;
+    newDiv3.classList.add("ShindoItem", "ShindoItem2");
+
+    removeChild(document.getElementById("homeShindo"));
+    document.getElementById("homeShindoWrap").style.display = "block";
+    document.getElementById("homeShindo").appendChild(newDiv3);
+  }*/
+  var color = LgIntConvert(maxInt);
+
+  var pointLocation = areaLocation[name];
+  if (pointLocation) {
+    const icon = document.createElement("div");
+    icon.classList.add("MaxLgIntIcon");
+    icon.innerHTML = '<div style="background:' + color[0] + ";color:" + color[1] + '">' + maxInt + "</div>";
+
+    var AreaPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<h3 style='background:" + color[0] + ";color:" + color[1] + "'>長周期地震動階級 " + maxInt + "</h3><div>細分区域<br>" + name + "</div><div></div>");
+    markerElm = new maplibregl.Marker(icon).setLngLat([pointLocation[1], pointLocation[0]]).setPopup(AreaPopup).addTo(map);
+  }
+
+  switch (maxInt) {
+    case "1":
+      LgInt1T.push(["==", "name", name]);
+      break;
+    case "2":
+      LgInt2T.push(["==", "name", name]);
+      break;
+    case "3":
+      LgInt3T.push(["==", "name", name]);
+      break;
+    case "4":
+      LgInt4T.push(["==", "name", name]);
+      break;
+    default:
+      break;
+  }
+}
+//町ごとの情報描画（リスト）
+function add_City_infoL(name, maxInt) {
+  /*
+  var wrap2 = document.querySelectorAll(".WrapLevel2");
+
+  var newDiv = document.createElement("div");
+  var color3 = shindoConvert(maxInt, 2);
+  newDiv.innerHTML = "<span style='background:" + color3[0] + ";color:" + color3[1] + ";'>" + maxInt + "</span>" + name;
+  newDiv.classList.add("ShindoItem", "ShindoItem3");
+  wrap2[wrap2.length - 1].appendChild(newDiv);
+  newDiv.addEventListener("click", function () {
+    this.classList.toggle("has-open");
+    this.nextElementSibling.classList.toggle("open");
+  });
+
+  var newDiv = document.createElement("div");
+  newDiv.innerHTML = "<div></div>";
+  newDiv.classList.add("WrapLevel3", "close");
+  wrap2[wrap2.length - 1].appendChild(newDiv);*/
+}
+//観測点ごとの情報描画（リスト・地図プロット）
+function add_IntensityStation_infoL(lat, lng, name, int) {
+  name = name.replace("＊", "");
+
+  var color4 = LgIntConvert(int, 2);
+  var intStr = int;
+  const icon = document.createElement("div");
+  icon.classList.add("LgIntIcon");
+  icon.innerHTML = '<div style="background:' + color4[0] + ";color:" + color4[1] + '">' + int + "</div>";
+
+  var PtPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<h3 style='background:" + color4[0] + ";color:" + color4[1] + "'>長周期地震動階級 " + intStr + "</h3><div>観測点<br>" + name + "</div><div></div>");
+  markerElm = new maplibregl.Marker(icon).setLngLat([lng, lat]).setPopup(PtPopup).addTo(map);
+  /*
+  var wrap3 = document.querySelectorAll(".WrapLevel3");
+  var newDiv = document.createElement("div");
+  newDiv.innerHTML = "<span style='background:" + color4[0] + ";color:" + color4[1] + ";'>" + int + "</span>" + name;
+  newDiv.classList.add("ShindoItem", "ShindoItem4");
+  wrap3[wrap3.length - 1].appendChild(newDiv);*/
+}
 
 //地震情報マージ
 function EQInfoControl(data) {
@@ -1264,6 +1508,10 @@ function mapDraw() {
   if (eid) {
     jmaURL.forEach(function (elm) {
       jma_Fetch(elm);
+    });
+
+    jmaLURL.forEach(function (elm) {
+      jmaL_Fetch(elm);
     });
 
     narikakunURL.forEach(function (elm) {

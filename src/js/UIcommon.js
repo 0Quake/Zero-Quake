@@ -31,6 +31,16 @@ window.electronAPI.messageSend((event, request) => {
     root.style.setProperty("--IntTheme_6p_color", config.color.Shindo["6p"].color);
     root.style.setProperty("--IntTheme_7_color", config.color.Shindo["7"].color);
     root.style.setProperty("--IntTheme_7p_color", config.color.Shindo["7p"].color);
+
+    root.style.setProperty("--LngIntTheme_1_BgColor", config.color.LgInt["1"].background);
+    root.style.setProperty("--LngIntTheme_2_BgColor", config.color.LgInt["2"].background);
+    root.style.setProperty("--LngIntTheme_3_BgColor", config.color.LgInt["3"].background);
+    root.style.setProperty("--LngIntTheme_4_BgColor", config.color.LgInt["4"].background);
+
+    root.style.setProperty("--LngIntTheme_1_color", config.color.LgInt["1"].color);
+    root.style.setProperty("--LngIntTheme_2_color", config.color.LgInt["2"].color);
+    root.style.setProperty("--LngIntTheme_3_color", config.color.LgInt["3"].color);
+    root.style.setProperty("--LngIntTheme_4_color", config.color.LgInt["4"].color);
   }
 });
 
@@ -192,6 +202,22 @@ function shindoConvert(str, responseType) {
     return ConvTable[ShindoTmp];
   } else {
     return str;
+  }
+}
+
+function LgIntConvert(str) {
+  switch (String(str)) {
+    case "1":
+      return [config.color.LgInt["1"].background, config.color.LgInt["1"].color];
+    case "2":
+      return [config.color.LgInt["2"].background, config.color.LgInt["2"].color];
+    case "3":
+      return [config.color.LgInt["3"].background, config.color.LgInt["3"].color];
+    case "4":
+      return [config.color.LgInt["4"].background, config.color.LgInt["4"].color];
+    case "?":
+    default:
+      return [config.color.LgInt["?"].background, config.color.LgInt["?"].color];
   }
 }
 

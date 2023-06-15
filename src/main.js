@@ -143,6 +143,28 @@ var defaultConfigVal = {
         color: "rgb(68, 68, 68)",
       },
     },
+    LgInt: {
+      1: {
+        background: "rgb(80, 186, 84)",
+        color: "rgb(34, 34, 34)",
+      },
+      2: {
+        background: "rgb(231, 150, 21)",
+        color: "rgb(0, 0, 0)",
+      },
+      3: {
+        background: "rgb(237, 0, 0)",
+        color: "rgb(255, 255, 255)",
+      },
+      4: {
+        background: "rgb(196, 0, 222)",
+        color: "rgb(255, 255, 255)",
+      },
+      "?": {
+        background: "rgb(191, 191, 191)",
+        color: "rgb(68, 68, 68)",
+      },
+    },
     Tsunami: {
       TsunamiMajorWarningColor: "rgb(200, 0, 255)",
       TsunamiWarningColor: "rgb(255, 40, 0)",
