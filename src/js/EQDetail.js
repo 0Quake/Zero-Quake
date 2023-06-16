@@ -622,6 +622,11 @@ document.getElementsByName("overlaySelect").forEach(function (elm) {
 var estShindoMapDraw = false;
 var ShindoMapDraw = true;
 var LgIntMapDraw = false;
+var MapFill = true;
+document.getElementById("mapFillToggle").addEventListener("change",function(){
+  MapFill=this.checked
+  mapFillDraw();
+})
 document.getElementsByName("mapFillSelect").forEach(function (elm) {
   elm.addEventListener("change", function () {
     estShindoMapDraw = this.value == "fill1";
@@ -1157,10 +1162,10 @@ function mapFillDraw() {
   document.getElementById("legend3A").style.display = estShindoMapDraw ? "block" : "none";
 
   ["Int0", "Int1", "Int2", "Int3", "Int4", "Int5-", "Int5+", "Int6-", "Int6+", "Int7", "Int7+"].forEach(function (elm2) {
-    map.setLayoutProperty(elm2, "visibility", ShindoMapDraw ? "visible" : "none");
+    map.setLayoutProperty(elm2, "visibility", ShindoMapDraw && MapFill ? "visible" : "none");
   });
   ["LgInt1", "LgInt2", "LgInt3", "LgInt4"].forEach(function (elm2) {
-    map.setLayoutProperty(elm2, "visibility", LgIntMapDraw ? "visible" : "none");
+    map.setLayoutProperty(elm2, "visibility", LgIntMapDraw && MapFill ? "visible" : "none");
   });
 }
 
@@ -1553,9 +1558,13 @@ function InfoType_add(type) {
   document.getElementById(type).style.display = "inline-block";
   switch (type) {
     case "type-4-1":
+      document.getElementById("type-2").classList.add("disabled");
+      document.getElementById("type-3").classList.add("disabled");
+      break;
     case "type-4-2":
       document.getElementById("type-2").classList.add("disabled");
       document.getElementById("type-3").classList.add("disabled");
+      if(map) map.setZoom(2);
       break;
     case "type-5":
       document.getElementById("type-3").classList.add("disabled");

@@ -707,7 +707,11 @@ function setting_createWindow() {
   settingWindow.webContents.on("did-finish-load", () => {
     settingWindow.webContents.send("message2", {
       action: "setting",
-      data: { config: config, softVersion: process.env.npm_package_version },
+      data: config,
+    });
+    settingWindow.webContents.send("message2", {
+      action: "softVersion",
+      data: process.env.npm_package_version,
     });
     if (update_data) {
       settingWindow.webContents.send("message2", {

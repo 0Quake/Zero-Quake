@@ -1,39 +1,40 @@
-var setting;
+var config;
 var markerElm;
 window.electronAPI.messageSend((event, request) => {
-  if (request.action == "setting") {
-    document.getElementById("splash").style.display = "none";
-
-    setting = request.data.config;
+  if (request.action == "softVersion") {
     document.getElementById("softVersion").innerText = request.data.softVersion;
+  }else if (request.action == "setting") {
+      document.getElementById("splash").style.display = "none";
 
-    document.getElementById("latitude").value = setting.home.latitude;
-    document.getElementById("longitude").value = setting.home.longitude;
-    document.getElementById("EEW_Voice").value = setting.notice.voice.EEW;
-    document.getElementById("EEW2_Voice").value = setting.notice.voice.EEWUpdate;
-    document.getElementById("EQInfo_ItemCount").value = setting.Info.EQInfo.ItemCount;
-    document.getElementById("RealTimeShake_ItemCount").value = setting.Info.RealTimeShake.List.ItemCount;
+    config = request.data;
 
-    TTSvolumeSet(setting.notice.voice_parameter.volume);
-    TTSpitchSet(setting.notice.voice_parameter.pitch);
-    TTSspeedSet(setting.notice.voice_parameter.rate);
+    document.getElementById("latitude").value = config.home.latitude;
+    document.getElementById("longitude").value = config.home.longitude;
+    document.getElementById("EEW_Voice").value = config.notice.voice.EEW;
+    document.getElementById("EEW2_Voice").value = config.notice.voice.EEWUpdate;
+    document.getElementById("EQInfo_ItemCount").value = config.Info.EQInfo.ItemCount;
+    document.getElementById("RealTimeShake_ItemCount").value = config.Info.RealTimeShake.List.ItemCount;
 
-    selectBoxSet(document.getElementById("TTSvoiceSelect"), setting.notice.voice_parameter.voice)
+    TTSvolumeSet(config.notice.voice_parameter.volume);
+    TTSpitchSet(config.notice.voice_parameter.pitch);
+    TTSspeedSet(config.notice.voice_parameter.rate);
+
+    selectBoxSet(document.getElementById("TTSvoiceSelect"), config.notice.voice_parameter.voice)
 
 
-    selectBoxSet(document.getElementById("BugReportAutoSend"), setting.system.crashReportAutoSend)
-    document.getElementById("Axis_GetData").checked = setting.Source.axis.GetData;
-    document.getElementById("Wolfx_GetData").checked = setting.Source.wolfx.GetData;
-    document.getElementById("msil_GetData").checked = setting.Source.msil.GetData;
-    document.getElementById("kmoni_GetData").checked = setting.Source.kmoni.kmoni.GetData;
-    document.getElementById("lmoni_GetData").checked = setting.Source.kmoni.lmoni.GetData;
-    document.getElementById("ymoni_GetData").checked = setting.Source.kmoni.ymoni.GetData;
-    document.getElementById("WolfxInterval").value = setting.Source.wolfx.Interval / 1000;
-    document.getElementById("kmoniInterval").value = setting.Source.kmoni.kmoni.Interval / 1000;
-    document.getElementById("lmoniInterval").value = setting.Source.kmoni.lmoni.Interval / 1000;
-    document.getElementById("ymoniInterval").value = setting.Source.kmoni.ymoni.Interval / 1000;
-    document.getElementById("msilInterval").value = setting.Source.msil.Interval / 1000;
-    if (setting.Source.axis.AccessToken) document.getElementById("Axis_AccessToken").value = setting.Source.axis.AccessToken;
+    selectBoxSet(document.getElementById("BugReportAutoSend"), config.system.crashReportAutoSend)
+    document.getElementById("Axis_GetData").checked = config.Source.axis.GetData;
+    document.getElementById("Wolfx_GetData").checked = config.Source.wolfx.GetData;
+    document.getElementById("msil_GetData").checked = config.Source.msil.GetData;
+    document.getElementById("kmoni_GetData").checked = config.Source.kmoni.kmoni.GetData;
+    document.getElementById("lmoni_GetData").checked = config.Source.kmoni.lmoni.GetData;
+    document.getElementById("ymoni_GetData").checked = config.Source.kmoni.ymoni.GetData;
+    document.getElementById("WolfxInterval").value = config.Source.wolfx.Interval / 1000;
+    document.getElementById("kmoniInterval").value = config.Source.kmoni.kmoni.Interval / 1000;
+    document.getElementById("lmoniInterval").value = config.Source.kmoni.lmoni.Interval / 1000;
+    document.getElementById("ymoniInterval").value = config.Source.kmoni.ymoni.Interval / 1000;
+    document.getElementById("msilInterval").value = config.Source.msil.Interval / 1000;
+    if (config.Source.axis.AccessToken) document.getElementById("Axis_AccessToken").value = config.Source.axis.AccessToken;
 
     init();
   } else if (request.action == "Update_Data") {
@@ -81,35 +82,35 @@ document.getElementById("check_update").addEventListener("click", function () {
 });
 
 document.getElementById("apply").addEventListener("click", function () {
-  setting.system.crashReportAutoSend = document.getElementById("BugReportAutoSend").value;
-  setting.home.latitude = document.getElementById("latitude").value;
-  setting.home.longitude = document.getElementById("longitude").value;
-  setting.home.Section = document.getElementById("saibun").value;
-  setting.notice.voice.EEW = document.getElementById("EEW_Voice").value;
-  setting.notice.voice.EEWUpdate = document.getElementById("EEW2_Voice").value;
-  setting.Info.EQInfo.ItemCount = Number(document.getElementById("EQInfo_ItemCount").value);
-  setting.Info.RealTimeShake.List.ItemCount = Number(document.getElementById("RealTimeShake_ItemCount").value);
-  setting.Source.axis.GetData = document.getElementById("Axis_GetData").checked;
-  setting.Source.axis.AccessToken = document.getElementById("Axis_AccessToken").value;
-  setting.Source.wolfx.GetData = document.getElementById("Wolfx_GetData").checked;
-  setting.Source.msil.GetData = document.getElementById("msil_GetData").checked;
-  setting.Source.kmoni.kmoni.GetData = document.getElementById("kmoni_GetData").checked;
-  setting.Source.kmoni.lmoni.GetData = document.getElementById("lmoni_GetData").checked;
-  setting.Source.kmoni.ymoni.GetData = document.getElementById("ymoni_GetData").checked;
-  setting.Source.wolfx.Interval = Number(document.getElementById("WolfxInterval").value) * 1000;
-  setting.Source.kmoni.kmoni.Interval = Number(document.getElementById("kmoniInterval").value) * 1000;
-  setting.Source.kmoni.lmoni.Interval = Number(document.getElementById("lmoniInterval").value) * 1000;
-  setting.Source.kmoni.ymoni.Interval = Number(document.getElementById("ymoniInterval").value) * 1000;
-  setting.Source.msil.Interval = Number(document.getElementById("msilInterval").value) * 1000;
+  config.system.crashReportAutoSend = document.getElementById("BugReportAutoSend").value;
+  config.home.latitude = document.getElementById("latitude").value;
+  config.home.longitude = document.getElementById("longitude").value;
+  config.home.Section = document.getElementById("saibun").value;
+  config.notice.voice.EEW = document.getElementById("EEW_Voice").value;
+  config.notice.voice.EEWUpdate = document.getElementById("EEW2_Voice").value;
+  config.Info.EQInfo.ItemCount = Number(document.getElementById("EQInfo_ItemCount").value);
+  config.Info.RealTimeShake.List.ItemCount = Number(document.getElementById("RealTimeShake_ItemCount").value);
+  config.Source.axis.GetData = document.getElementById("Axis_GetData").checked;
+  config.Source.axis.AccessToken = document.getElementById("Axis_AccessToken").value;
+  config.Source.wolfx.GetData = document.getElementById("Wolfx_GetData").checked;
+  config.Source.msil.GetData = document.getElementById("msil_GetData").checked;
+  config.Source.kmoni.kmoni.GetData = document.getElementById("kmoni_GetData").checked;
+  config.Source.kmoni.lmoni.GetData = document.getElementById("lmoni_GetData").checked;
+  config.Source.kmoni.ymoni.GetData = document.getElementById("ymoni_GetData").checked;
+  config.Source.wolfx.Interval = Number(document.getElementById("WolfxInterval").value) * 1000;
+  config.Source.kmoni.kmoni.Interval = Number(document.getElementById("kmoniInterval").value) * 1000;
+  config.Source.kmoni.lmoni.Interval = Number(document.getElementById("lmoniInterval").value) * 1000;
+  config.Source.kmoni.ymoni.Interval = Number(document.getElementById("ymoniInterval").value) * 1000;
+  config.Source.msil.Interval = Number(document.getElementById("msilInterval").value) * 1000;
 
-  setting.notice.voice_parameter.rate = TTSspeed;
-  setting.notice.voice_parameter.pitch = TTSpitch;
-  setting.notice.voice_parameter.volume = TTSvolume;
-  setting.notice.voice_parameter.voice = TTSVoiceSelect.value;
+  config.notice.voice_parameter.rate = TTSspeed;
+  config.notice.voice_parameter.pitch = TTSpitch;
+  config.notice.voice_parameter.volume = TTSvolume;
+  config.notice.voice_parameter.voice = TTSVoiceSelect.value;
 
   window.electronAPI.messageReturn({
     action: "settingReturn",
-    data: setting,
+    data: config,
   });
   window.close();
 });
@@ -223,7 +224,7 @@ function init() {
         var saibunElm = document.createElement("option");
         saibunElm.innerText = elm;
         document.getElementById("saibun").appendChild(saibunElm);
-        if (elm == setting.home.Section) saibunElm.selected = true;
+        if (elm == config.home.Section) saibunElm.selected = true;
       });
     });
   map.on("click", "basemap_fill", (e) => {
@@ -253,7 +254,7 @@ function init() {
   img.src = "./img/homePin.svg";
   img.classList.add("homeIcon");
 
-  markerElm = new maplibregl.Marker(img).setLngLat([setting.home.longitude, setting.home.latitude]).addTo(map);
+  markerElm = new maplibregl.Marker(img).setLngLat([config.home.longitude, config.home.latitude]).addTo(map);
 }
 
 //eslint-disable-next-line
@@ -276,7 +277,7 @@ speechSynthesis.onvoiceschanged = () => {
   voices = speechSynthesis.getVoices();
   voices.forEach(function (elm) {
     var selectedT = "";
-    if (setting && elm.name == setting.notice.voice_parameter.voice) {
+    if (config && elm.name == config.notice.voice_parameter.voice) {
       selectedT = " selected";
     }
 
