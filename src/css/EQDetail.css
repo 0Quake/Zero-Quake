@@ -167,6 +167,15 @@ td {
   height: 23px;
   padding: 3.5px;
 }
+
+.LgIntIcon div::before {
+  content: "長";
+  font-size: 65%;
+  margin-right: 3px;
+  font-family: "BIZ UDPGothic", sans-serif;
+  font-weight: bold;
+}
+
 .zoomLevel_4 .ShindoIcon,
 .zoomLevel_4 .LgIntIcon {
   padding: 0;
@@ -193,6 +202,11 @@ td {
   font-family: "M PLUS 1p";
 }
 
+
+.zoomLevel_4 .LgIntIcon div {
+  width: 35px;
+}
+
 .MaxShindoIcon div,
 .MaxLgIntIcon div {
   display: block;
@@ -205,6 +219,17 @@ td {
   border-radius: 2px;
   text-align: center;
   font-family: "M PLUS 1p";
+}
+
+.MaxLgIntIcon div{
+  width: 35px;
+}
+.MaxLgIntIcon div::before {
+  content: "長";
+  font-size: 65%;
+  margin-right: 3px;
+  font-family: "BIZ UDPGothic", sans-serif;
+  font-weight: bold;
 }
 .ShindoIcon,
 .MaxShindoIcon,
@@ -227,6 +252,12 @@ td {
   font-size: 10px;
   margin: 3.5px;
 }
+
+.zoomLevel_1 .MaxLgIntIcon div{
+  width: 22px;
+}
+
+
 .zoomLevel_1 .ShindoIcon,
 .zoomLevel_2 .ShindoIcon,
 .zoomLevel_3 .ShindoIcon,

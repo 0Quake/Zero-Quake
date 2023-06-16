@@ -1308,53 +1308,11 @@ function add_IntensityStation_info(lat, lng, name, int) {
   wrap3[wrap3.length - 1].appendChild(newDiv);
 }
 //都道府県ごとの情報描画（リスト）
-function add_Pref_infoL(name, maxInt) {
-  /*
-  var newDiv = document.createElement("div");
-  var color1 = shindoConvert(maxInt, 2);
-  newDiv.innerHTML = "<span style='background:" + color1[0] + ";color:" + color1[1] + ";'>" + maxInt + "</span>" + name;
-  newDiv.classList.add("ShindoItem", "ShindoItem1");
-  document.getElementById("Shindo").appendChild(newDiv);
-  newDiv.addEventListener("click", function () {
-    this.classList.toggle("has-open");
-    this.nextElementSibling.classList.toggle("open");
-  });
-
-  var newDiv = document.createElement("div");
-  newDiv.innerHTML = "<div></div>";
-  newDiv.classList.add("WrapLevel1", "close");
-  document.getElementById("Shindo").appendChild(newDiv);
-
-  document.getElementById("splash").style.display = "none";*/
+function add_Pref_infoL() {
+  return;
 }
 //細分区域ごとの情報描画（リスト・地図塗りつぶし・地図プロット）
 function add_Area_infoL(name, maxInt) {
-  /*
-  var wrap = document.querySelectorAll(".WrapLevel1");
-
-  var newDiv = document.createElement("div");
-  newDiv.innerHTML = "<span style='background:" + color[0] + ";color:" + color[1] + ";'>" + maxInt + "</span>" + name;
-  newDiv.classList.add("ShindoItem", "ShindoItem2");
-  wrap[wrap.length - 1].appendChild(newDiv);
-  newDiv.addEventListener("click", function () {
-    this.classList.toggle("has-open");
-    this.nextElementSibling.classList.toggle("open");
-  });
-
-  var newDiv2 = document.createElement("div");
-  newDiv2.innerHTML = "<div></div>";
-  newDiv2.classList.add("WrapLevel2", "close");
-  wrap[wrap.length - 1].appendChild(newDiv2);
-
-  if (name == config.home.Saibun) {
-    var newDiv3 = document.createElement("div");
-    newDiv3.innerHTML = "<span style='background:" + color[0] + ";color:" + color[1] + ";'>" + maxInt + "</span>" + name;
-    newDiv3.classList.add("ShindoItem", "ShindoItem2");
-
-    removeChild(document.getElementById("homeShindo"));
-    document.getElementById("homeShindoWrap").style.display = "block";
-    document.getElementById("homeShindo").appendChild(newDiv3);
-  }*/
   var color = LgIntConvert(maxInt);
 
   var pointLocation = areaLocation[name];
@@ -1384,26 +1342,6 @@ function add_Area_infoL(name, maxInt) {
       break;
   }
 }
-//町ごとの情報描画（リスト）
-function add_City_infoL(name, maxInt) {
-  /*
-  var wrap2 = document.querySelectorAll(".WrapLevel2");
-
-  var newDiv = document.createElement("div");
-  var color3 = shindoConvert(maxInt, 2);
-  newDiv.innerHTML = "<span style='background:" + color3[0] + ";color:" + color3[1] + ";'>" + maxInt + "</span>" + name;
-  newDiv.classList.add("ShindoItem", "ShindoItem3");
-  wrap2[wrap2.length - 1].appendChild(newDiv);
-  newDiv.addEventListener("click", function () {
-    this.classList.toggle("has-open");
-    this.nextElementSibling.classList.toggle("open");
-  });
-
-  var newDiv = document.createElement("div");
-  newDiv.innerHTML = "<div></div>";
-  newDiv.classList.add("WrapLevel3", "close");
-  wrap2[wrap2.length - 1].appendChild(newDiv);*/
-}
 //観測点ごとの情報描画（リスト・地図プロット）
 function add_IntensityStation_infoL(lat, lng, name, int) {
   name = name.replace("＊", "");
@@ -1416,12 +1354,6 @@ function add_IntensityStation_infoL(lat, lng, name, int) {
 
   var PtPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<h3 style='background:" + color4[0] + ";color:" + color4[1] + "'>長周期地震動階級 " + intStr + "</h3><div>観測点<br>" + name + "</div><div></div>");
   markerElm = new maplibregl.Marker(icon).setLngLat([lng, lat]).setPopup(PtPopup).addTo(map);
-  /*
-  var wrap3 = document.querySelectorAll(".WrapLevel3");
-  var newDiv = document.createElement("div");
-  newDiv.innerHTML = "<span style='background:" + color4[0] + ";color:" + color4[1] + ";'>" + int + "</span>" + name;
-  newDiv.classList.add("ShindoItem", "ShindoItem4");
-  wrap3[wrap3.length - 1].appendChild(newDiv);*/
 }
 
 //地震情報マージ

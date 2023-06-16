@@ -205,6 +205,7 @@ function shindoConvert(str, responseType) {
   }
 }
 
+//eslint-disable-next-line
 function LgIntConvert(str) {
   switch (String(str)) {
     case "1":
