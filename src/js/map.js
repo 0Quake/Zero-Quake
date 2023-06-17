@@ -999,7 +999,6 @@ function psWaveCalc(eid) {
     }
 
     if (SWmin > distance) {
-      console.log("あ");
       window.requestAnimationFrame(function () {
         psWaveReDraw(
           pswaveFind.id,
@@ -1013,7 +1012,6 @@ function psWaveCalc(eid) {
         );
       });
     } else {
-      console.log("い");
       window.requestAnimationFrame(function () {
         psWaveReDraw(pswaveFind.id, pswaveFind.data.latitude, pswaveFind.data.longitude, PRadius * 1000, SRadius * 1000);
       });
@@ -1027,7 +1025,6 @@ let circle_options = {
 };
 //予報円描画
 function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrived, SArriveTime, nowDistance) {
-  console.log(!pRadius || (!sRadius && !SnotArrived), pRadius, sRadius, SnotArrived);
   if (!pRadius || (!sRadius && !SnotArrived)) return;
   var EQElm = psWaveList.find(function (elm) {
     return elm.id == EventID;
@@ -1035,14 +1032,11 @@ function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrive
   var EQElm2 = now_EEW.find(function (elm) {
     return elm.EventID == EventID;
   });
-  console.log("ぜろ", EventID, psWaveList, EQElm);
 
   if (EQElm) {
-    console.log("だいいちだんかい");
     let _center = turf.point([longitude, latitude]);
 
     if (EQElm.PCircleElm) {
-      console.log("ばつ");
       var pcircle = turf.circle(_center, pRadius / 1000, circle_options);
       map.getSource("PCircle_" + EventID).setData(pcircle);
 
@@ -1050,8 +1044,6 @@ function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrive
       map.getSource("SCircle_" + EventID).setData(scircle);
       map.setPaintProperty("SCircle_" + EventID, "line-width", SnotArrived ? 0 : 2);
     } else {
-      console.log("だいにだんかい");
-
       map.addSource("PCircle_" + EventID, {
         type: "geojson",
         data: turf.circle(_center, pRadius / 1000, circle_options),
