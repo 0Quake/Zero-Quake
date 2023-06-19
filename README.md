@@ -8,14 +8,21 @@
 
 ### 気象庁
 
-- 緊急地震速報（予報・警報）
-- 地震情報（震度速報／震源に関する情報／震度・震源に関する情報／遠地地震に関する情報／長周期地震動に関する観測情報／顕著な地震の震源要素更新のお知らせ／推計震度分布）
-- 津波情報（大津波警報／津波警報／津波注意報／津波予報／津波情報／沖合の津波観測に関する情報）
+- 緊急地震速報（予報／警報）
+- 地震情報
+
+  震度速報／震源に関する情報／震度・震源に関する情報[震度・震源情報/遠地地震に関する情報]  
+  長周期地震動に関する観測情報／顕著な地震の震源要素更新のお知らせ／推計震度分布
+- 津波情報
+
+  大津波警報／津波警報／津波注意報／津波予報  
+  津波情報／沖合の津波観測に関する情報
 
 ### 防災科学研究所
 
 - リアルタイム揺れ情報
-- 長周期地震動情報
+- EEW予想震度(メッシュ)
+- 長周期地震動の情報
 
 ### USGS(アメリカ地質調査所)
 
@@ -33,24 +40,20 @@
 - Axis [© Prioris](https://axis.prioris.jp/)
 - Wolfx [© Wolfx Studio.](https://api.wolfx.jp/)
 
-### 地震情報(震度速報／震源に関する情報／震度・震源に関する情報／顕著な地震の震源要素更新のお知らせ)／推計震度分布
+### 地震情報 (気象庁)
 
 - 気象庁ホームページ [© 気象庁](https://www.jma.go.jp/bosai/map.html?contents=earthquake_map)
 - 気象庁防災情報 XML [© 気象庁](https://xml.kishou.go.jp/xmlpull.html)
 - narikakun.net 地震情報 API [© narikakun](https://dev.narikakun.net/doc/earthquake)
 - Axis [© Prioris](https://axis.prioris.jp/)
 
-### 地震情報(Earthquake Catalog)
+### 地震情報 (Earthquake Catalog)
 
 - FDSN Web Service [© USGS](https://earthquake.usgs.gov/fdsnws/event/1/)
 
-### 大津波警報／津波警報／津波注意報
+### 津波情報 (気象庁)
 
-- P2P 地震情報 API [© @p2pquake_takuya](https://www.p2pquake.net/json_api_v2/)
-- 気象庁防災情報 XML [© 気象庁](https://xml.kishou.go.jp/xmlpull.html)
-
-### 津波情報／津波予報
-
+- P2P 地震情報 API [© @p2pquake_takuya](https://www.p2pquake.net/json_api_v2/)  （大津波警報／津波警報／津波注意報のみ）
 - 気象庁防災情報 XML [© 気象庁](https://xml.kishou.go.jp/xmlpull.html)
 
 ### P 波・S 波 予報円
@@ -63,15 +66,14 @@
 
 ### 地図データ
 
-#### 「オフラインマップ」
-
 #### ベースマップ
 
 - 「標準」
   - 国内：気象庁 予報区等 GIS データ [© 気象庁](https://www.data.jma.go.jp/developer/gis.html)
   - 国外：ne_110m_admin_0_countries [© Natural Earth ](https://www.naturalearthdata.com/downloads/110m-cultural-vectors/)
   - 湖沼：国土数値情報 [© 国土交通省 ](https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-W09-v2_2.html)
-    ([mapshaper.org](https://mapshaper.org/)で単純化して使用)
+
+  ([mapshaper.org](https://mapshaper.org/)で単純化して使用)
 - 「地理院地図(標準)」 [© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)
 - 「地理院地図(淡色)」 [© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)
 - 「地理院地図(写真)」 [© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)
@@ -89,7 +91,7 @@
 
 #### その他
 
-- プレート境界 [テキサス大学](http://www-udc.ig.utexas.edu/external/plates/data.htm)
+- プレート境界データ [© テキサス大学](http://www-udc.ig.utexas.edu/external/plates/data.htm)
 
   ([mapshaper.org](https://mapshaper.org/)で単純化して使用)
 

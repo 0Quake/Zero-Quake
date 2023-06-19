@@ -83,126 +83,126 @@ document.querySelectorAll(".tabgroup").forEach(function (elm) {
 //eslint-disable-next-line
 function shindoConvert(str, responseType) {
   var ShindoTmp;
-  if (!str || str == "不明") {
-    ShindoTmp = "?";
+  if (!str) {
+    ShindoTmp = 0;
   } else if (isNaN(str)) {
-    str = String(str);
-    str = str.replace(/[０-９]/g, function (s) {
+    str = String(str).replace(/[０-９]/g, function (s) {
       return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
-    });
-    str = str.replaceAll("＋", "+").replaceAll("－", "-").replaceAll("強", "+").replaceAll("弱", "-");
-    str = str.replace(/\s+/g, "");
+    }).replaceAll("＋", "+").replaceAll("－", "-").replaceAll("強", "+").replaceAll("弱", "-").replace(/\s+/g, "");
     switch (str) {
-      case "-1":
-      case "?":
-        ShindoTmp = "?";
-        break;
       case "1":
       case "10":
-        ShindoTmp = "1";
+        ShindoTmp = 1;
         break;
       case "2":
       case "20":
-        ShindoTmp = "2";
+        ShindoTmp = 2;
         break;
       case "3":
       case "30":
-        ShindoTmp = "3";
+        ShindoTmp = 3;
         break;
       case "4":
       case "40":
-        ShindoTmp = "4";
+        ShindoTmp = 4;
         break;
       case "5-":
       case "45":
-        ShindoTmp = "5-";
+        ShindoTmp = 5;
         break;
       case "5+":
       case "50":
-        ShindoTmp = "5+";
+        ShindoTmp = 6;
         break;
       case "6-":
       case "55":
-        ShindoTmp = "6-";
+        ShindoTmp = 7;
         break;
       case "6+":
       case "60":
-        ShindoTmp = "6+";
+        ShindoTmp = 8;
         break;
       case "7":
       case "70":
-        ShindoTmp = "7";
+        ShindoTmp = 9;
         break;
       case "99":
-        ShindoTmp = "7+";
+        ShindoTmp = 10;
         break;
+        case "震度５弱以上未入電":
+        case "5+?":
+        ShindoTmp = 11;
+        break;  
+      case "-1":
+      case "?":    
+      case "不明":    
+      default:
+        ShindoTmp = 12;
     }
   } else {
     if (str < 0.5) {
-      ShindoTmp = "0";
+      ShindoTmp = 0;
     } else if (str < 1.5) {
-      ShindoTmp = "1";
+      ShindoTmp = 1;
     } else if (str < 2.5) {
-      ShindoTmp = "2";
+      ShindoTmp = 2;
     } else if (str < 3.5) {
-      ShindoTmp = "3";
+      ShindoTmp = 3;
     } else if (str < 4.5) {
-      ShindoTmp = "4";
+      ShindoTmp = 4;
     } else if (str < 5) {
-      ShindoTmp = "5-";
+      ShindoTmp = 5;
     } else if (str < 5.5) {
-      ShindoTmp = "5+";
+      ShindoTmp = 6;
     } else if (str < 6) {
-      ShindoTmp = "6-";
+      ShindoTmp = 7;
     } else if (str < 6.5) {
-      ShindoTmp = "6+";
+      ShindoTmp = 8;
     } else if (6.5 <= str) {
-      ShindoTmp = "7";
+      ShindoTmp = 9;
     } else if (7.5 <= str) {
-      ShindoTmp = "7+";
+      ShindoTmp = 10;
     } else {
-      ShindoTmp = "?";
+      ShindoTmp = 12;
     }
   }
-  if (["?", "0", "1", "2", "3", "4", "5-", "5+", "6-", "6+", "7", "7+"].includes(ShindoTmp)) {
     var ConvTable;
     switch (responseType) {
       case 1:
-        ConvTable = { "?": "?", 0: "0", 1: "1", 2: "2", 3: "3", 4: "4", "5-": "5弱", "5+": "5強", "6-": "6弱", "6+": "6強", 7: "7", "7+": "7以上" };
+        ConvTable = ["0","1", "2", "3", "4", "5弱", "5強", "6弱", "6強", "7", "7以上", "５弱以上未入電","不明"];
         break;
       case 2:
-        ConvTable = {
-          "?": [config.color.Shindo["?"].background, config.color.Shindo["?"].color],
-          0: [config.color.Shindo["0"].background, config.color.Shindo["0"].color],
-          1: [config.color.Shindo["1"].background, config.color.Shindo["1"].color],
-          2: [config.color.Shindo["2"].background, config.color.Shindo["2"].color],
-          3: [config.color.Shindo["3"].background, config.color.Shindo["3"].color],
-          4: [config.color.Shindo["4"].background, config.color.Shindo["4"].color],
-          "5-": [config.color.Shindo["5m"].background, config.color.Shindo["5m"].color],
-          "5+": [config.color.Shindo["5p"].background, config.color.Shindo["5p"].color],
-          "6-": [config.color.Shindo["6m"].background, config.color.Shindo["6m"].color],
-          "6+": [config.color.Shindo["6p"].background, config.color.Shindo["6p"].color],
-          7: [config.color.Shindo["7"].background, config.color.Shindo["7"].color],
-          "7+": [config.color.Shindo["7p"].background, config.color.Shindo["7p"].color],
-        };
+        ConvTable = [
+          [config.color.Shindo["0"].background, config.color.Shindo["0"].color],
+          [config.color.Shindo["1"].background, config.color.Shindo["1"].color],
+          [config.color.Shindo["2"].background, config.color.Shindo["2"].color],
+          [config.color.Shindo["3"].background, config.color.Shindo["3"].color],
+          [config.color.Shindo["4"].background, config.color.Shindo["4"].color],
+          [config.color.Shindo["5m"].background, config.color.Shindo["5m"].color],
+          [config.color.Shindo["5p"].background, config.color.Shindo["5p"].color],
+          [config.color.Shindo["6m"].background, config.color.Shindo["6m"].color],
+          [config.color.Shindo["6p"].background, config.color.Shindo["6p"].color],
+          [config.color.Shindo["7"].background, config.color.Shindo["7"].color],
+          [config.color.Shindo["7p"].background, config.color.Shindo["7p"].color],
+          [config.color.Shindo["5p?"].background, config.color.Shindo["5p?"].color],
+          [config.color.Shindo["?"].background, config.color.Shindo["?"].color],
+        ];
         break;
       case 3:
-        ConvTable = { "?": null, 0: null, 1: "1", 2: "2", 3: "3", 4: "4", "5-": "5m", "5+": "5p", "6-": "6m", "6+": "6p", 7: "7", "7+": "7p" };
+        ConvTable = [ null,"1", "2", "3", "4", "5m", "5p", "6m", "6p", "7", "7p", "5p?",null];
         break;
       case 4:
-        ConvTable = { "?": null, 0: 0, 1: 1, 2: 2, 3: 3, 4: 4, "5-": 4.5, "5+": 5, "6-": 5.5, "6+": 6, 7: 7, "7+": 7.5 };
+        ConvTable = [ 0,1,2,3,4,4.5,5,5.5,6,7,7.5,4.5 ,null];
         break;
       case 5:
-        ConvTable = { "?": 0, 0: 1, 1: 2, 2: 3, 3: 4, 4: 5, "5-": 6, "5+": 7, "6-": 8, "6+": 9, 7: 10, "7+": 11 };
+        ConvTable = [1,2,3,4,5,6,7,8,9,10,11,null,0];
         break;
       case 0:
       default:
-        return ShindoTmp;
-    }
+        ConvTable = ["0", "1", "2", "3", "4", "5-", "5+", "6-", "6+", "7", "7+", "未","?"]
+        break;
+      }
     return ConvTable[ShindoTmp];
-  } else {
-    return str;
-  }
 }
 
 //eslint-disable-next-line

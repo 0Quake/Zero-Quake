@@ -2,7 +2,7 @@ var config;
 var markerElm;
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "softVersion") {
-    document.getElementById("softVersion").innerText = request.data.softVersion;
+    document.getElementById("softVersion").innerText = request.data;
   }else if (request.action == "setting") {
       document.getElementById("splash").style.display = "none";
 
