@@ -1390,11 +1390,14 @@ function EQInfoControl(data) {
   if (EQInfo.mag) data_M.innerText = EQInfo.mag;
   if (data.magType) data_MT.innerText = data.magType;
 
-  if (EQInfo.depth) {
-    data_depth.innerText = Math.round(EQInfo.depth) + "km";
-  } else if (EQInfo.depth == 0) {
+  if (EQInfo.depth == 0) {
     data_depth.innerText = "ごく浅い";
-  }
+  } else if (EQInfo.depth == 700) {
+      data_depth.innerText = "700km以上";
+  } else if (EQInfo.depth) {
+      data_depth.innerText = Math.round(EQInfo.depth) + "km";
+  } 
+
 
   if (EQInfo.epiCenter) data_center.innerText = EQInfo.epiCenter;
 
