@@ -32,10 +32,9 @@
 
 ### 緊急地震速報
 
-- 強震モニタ
-  - 強震モニタ [© 防災科学技術研究所](http://www.kmoni.bosai.go.jp/)
-  - 長周期地震動モニタ [© 防災科学技術研究所](lmoni.bosai.go.jp)
-  - Yahoo 強震モニタ [© 防災科学技術研究所／Yahoo Japan](https://typhoon.yahoo.co.jp/weather/jp/earthquake/kyoshin/)
+- 強震モニタ [© 防災科学技術研究所](http://www.kmoni.bosai.go.jp/)
+- 長周期地震動モニタ [© 防災科学技術研究所](lmoni.bosai.go.jp)
+- Yahoo 強震モニタ [© 防災科学技術研究所／Yahoo Japan](https://typhoon.yahoo.co.jp/weather/jp/earthquake/kyoshin/)
 - P2P 地震情報 API [© @p2pquake_takuya](https://www.p2pquake.net/json_api_v2/)
 - Axis [© Prioris](https://axis.prioris.jp/)
 - Wolfx [© Wolfx Studio.](https://api.wolfx.jp/)
@@ -58,9 +57,7 @@
 
 ### P 波・S 波 予報円
 
-- 緊急地震速報から得られる、地震発生時刻・深さ・震源の緯度・経度をもとに
-  [JMA2001 走時表](https://www.data.jma.go.jp/eqev/data/bulletin/catalog/appendix/trtime/trt_j.html)
-  を利用して計算
+- 緊急地震速報から得られる、地震発生時刻・深さ・震源の緯度・経度をもとに [JMA2001 走時表](https://www.data.jma.go.jp/eqev/data/bulletin/catalog/appendix/trtime/trt_j.html) を利用して計算
 
 ## その他の情報源
 
