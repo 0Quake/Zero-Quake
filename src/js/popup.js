@@ -448,14 +448,6 @@ document.getElementById("setting").addEventListener("click", function () {
   });
 });
 
-//地震情報[JMA/USGS]選択
-document.getElementById("EQInfoSelect").addEventListener("change", function () {
-  document.querySelectorAll(".activeEQInfo").forEach(function (elm) {
-    elm.classList.remove("activeEQInfo");
-  });
-  document.getElementById(this.value).classList.add("activeEQInfo");
-});
-
 //情報更新時刻更新
 function kmoniTimeUpdate(updateTime, LocalTime, type, condition, vendor) {
   if (updateTime > new Date() - Replay) return;

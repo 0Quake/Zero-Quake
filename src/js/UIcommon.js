@@ -47,23 +47,20 @@ window.electronAPI.messageSend((event, request) => {
 //タブUI
 document.querySelectorAll(".tabmenu").forEach(function (elm) {
   elm.addEventListener("click", function () {
-    //var containsTmp = !elm.classList.contains("active_tabmenu");
-
-    document.querySelectorAll(".active_tabmenu").forEach(function (elm2) {
+    this.parentNode.querySelectorAll(".active_tabmenu").forEach(function (elm2) {
       elm2.classList.remove("active_tabmenu");
     });
-    document.querySelectorAll(".active_tabcontent").forEach(function (elm2) {
+    
+    var id=this.parentNode.parentNode.dataset.tabid
+    this.parentNode.parentNode.querySelectorAll("#tab"+id+"_content > .active_tabcontent").forEach(function (elm2) {
       elm2.classList.remove("active_tabcontent");
     });
-    //if (containsTmp) {
     elm.classList.add("active_tabmenu");
     document.getElementById(elm.dataset.contentid).classList.add("active_tabcontent");
-    //}
   });
 });
 document.querySelectorAll(".tabgroup").forEach(function (elm) {
   elm.addEventListener("click", function () {
-    //var containsTmp = !elm.classList.contains("active_tabmenu");
 
     document.querySelectorAll(".active_tabgroup").forEach(function (elm2) {
       elm2.classList.remove("active_tabgroup");
@@ -71,11 +68,9 @@ document.querySelectorAll(".tabgroup").forEach(function (elm) {
     document.querySelectorAll(".active_tabgroupContent").forEach(function (elm2) {
       elm2.classList.remove("active_tabgroupContent");
     });
-    //if (containsTmp) {
     elm.classList.add("active_tabgroup");
     document.getElementById(elm.dataset.contentid).classList.add("active_tabgroupContent");
     document.getElementById(elm.dataset.contentid).querySelector(".tabmenu").click();
-    //}
   });
 });
 

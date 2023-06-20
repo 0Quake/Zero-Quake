@@ -652,9 +652,6 @@ function addPointMarker(elm) {
   return elm;
 }
 //観測点情報更新
-var detecting;
-var shindoStr;
-var pgaStr;
 var pointData;
 var changed_bypass = false;
 function kmoniMapUpdate(dataTmp, type) {
@@ -706,7 +703,7 @@ function kmoniMapUpdate(dataTmp, type) {
         pointData.markerElm.classList.remove("marker_Int");
       }
 
-      pointData.popupContent ="<h3 class='PointName' style='border-bottom-color:rgb(" + elm.rgb.join(",") + ")'>" + elm.Name?elm.Name:"" + "<span>" + elm.Type + elm.Code + "</span></h3>" + elm.detect ? "<h4 class='detecting'>地震検知中</h4>" : "" + "<p>震度 " + Math.round(elm.shindo * 10) / 10 + "</p><p>PGA " + Math.round(elm.pga * 100) / 100 + "gal</p>"
+      pointData.popupContent ="<h3 class='PointName' style='border-bottom-color:rgb(" + elm.rgb.join(",") + ")'>" + (elm.Name?elm.Name:"") + "<span>" + elm.Type +"_"+ elm.Code + "</span></h3>" + (elm.detect ? "<h4 class='detecting'>地震検知中</h4>" : "") + "<p>震度 " + Math.round(elm.shindo * 10) / 10 + "</p><p>PGA " + Math.round(elm.pga * 100) / 100 + "gal</p>"
       if(pointData.popup.isOpen()) pointData.popup.setHTML(pointData.popupContent);
 
       pointData.PrevInt = elm.shindo;
@@ -715,9 +712,7 @@ function kmoniMapUpdate(dataTmp, type) {
       pointData.markerElm.style.background = "rgba(128,128,128,0.5)";
       pointData.markerElm.classList.remove("strongDetectingMarker", "detectingMarker", "marker_Int");
 
-      var PNameTmp = elm.Name ? elm.Name : "";
-
-      pointData.popupContent = "<h3 class='PointName' style='border-bottom:solid 2px rgba(128,128,128,0.5)'>" + PNameTmp + "<span>" + elm.Code + "</span></h3><p>震度 ?</p><p>PGA ?</p>"
+      pointData.popupContent = "<h3 class='PointName' style='border-bottom:solid 2px rgba(128,128,128,0.5)'>" + (elm.Name?elm.Name:"") + "<span>" +  elm.Type +"_"+elm.Code + "</span></h3><p>震度 ?</p><p>PGA ?</p>"
       if(pointData.popup.isOpen()) pointData.popup.setHTML(pointData.popupContent);
     }
   }
