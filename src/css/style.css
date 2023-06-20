@@ -472,6 +472,7 @@ td {
 #tab1_bar {
   position: relative;
   width: 30px;
+  flex-shrink: 0;
   line-height: 30px;
   font-size: 14px;
   writing-mode: vertical-rl;
@@ -485,7 +486,9 @@ td {
 #tab1_bar::-webkit-scrollbar {
   display: none;
 }
-
+#tab1_bar.tabmenu{
+  width: 30px;
+}
 #setting {
   position: absolute;
   bottom: 0;
