@@ -34,7 +34,7 @@
   background: #444;
   border: solid 1px #999;
   border-radius: 5px;
-  max-height: calc(100vh - 40px);
+  max-height: calc(100% - 40px);
   overflow-y: auto;
 }
 #menu_wrap {
