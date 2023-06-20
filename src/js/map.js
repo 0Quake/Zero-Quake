@@ -644,7 +644,7 @@ function addPointMarker(elm) {
   el.classList.add("marker-circle", "KmoniPoint_" + codeEscaped);
   if (elm.Type == "S-net") el.classList.add("marker-circle-S-net");
   elm.popupContent = "";
-  elm.popup = new maplibregl.Popup({ offset: 10 }).on('open', () => {
+  elm.popup = new maplibregl.Popup({ offset: 10 }).on("open", () => {
     elm.popup.setHTML(elm.popupContent);
   });
   elm.marker = new maplibregl.Marker(el).setLngLat([elm.Location.Longitude, elm.Location.Latitude]).setPopup(elm.popup).addTo(map);
@@ -703,8 +703,8 @@ function kmoniMapUpdate(dataTmp, type) {
         pointData.markerElm.classList.remove("marker_Int");
       }
 
-      pointData.popupContent ="<h3 class='PointName' style='border-bottom-color:rgb(" + elm.rgb.join(",") + ")'>" + (elm.Name?elm.Name:"") + "<span>" + elm.Type +"_"+ elm.Code + "</span></h3>" + (elm.detect ? "<h4 class='detecting'>地震検知中</h4>" : "") + "<p>震度 " + Math.round(elm.shindo * 10) / 10 + "</p><p>PGA " + Math.round(elm.pga * 100) / 100 + "gal</p>"
-      if(pointData.popup.isOpen()) pointData.popup.setHTML(pointData.popupContent);
+      pointData.popupContent = "<h3 class='PointName' style='border-bottom-color:rgb(" + elm.rgb.join(",") + ")'>" + (elm.Name ? elm.Name : "") + "<span>" + elm.Type + "_" + elm.Code + "</span></h3>" + (elm.detect ? "<h4 class='detecting'>地震検知中</h4>" : "") + "<p>震度 " + Math.round(elm.shindo * 10) / 10 + "</p><p>PGA " + Math.round(elm.pga * 100) / 100 + "gal</p>";
+      if (pointData.popup.isOpen()) pointData.popup.setHTML(pointData.popupContent);
 
       pointData.PrevInt = elm.shindo;
       pointData.PrevDetect = elm.detect;
@@ -712,8 +712,8 @@ function kmoniMapUpdate(dataTmp, type) {
       pointData.markerElm.style.background = "rgba(128,128,128,0.5)";
       pointData.markerElm.classList.remove("strongDetectingMarker", "detectingMarker", "marker_Int");
 
-      pointData.popupContent = "<h3 class='PointName' style='border-bottom:solid 2px rgba(128,128,128,0.5)'>" + (elm.Name?elm.Name:"") + "<span>" +  elm.Type +"_"+elm.Code + "</span></h3><p>震度 ?</p><p>PGA ?</p>"
-      if(pointData.popup.isOpen()) pointData.popup.setHTML(pointData.popupContent);
+      pointData.popupContent = "<h3 class='PointName' style='border-bottom:solid 2px rgba(128,128,128,0.5)'>" + (elm.Name ? elm.Name : "") + "<span>" + elm.Type + "_" + elm.Code + "</span></h3><p>震度 ?</p><p>PGA ?</p>";
+      if (pointData.popup.isOpen()) pointData.popup.setHTML(pointData.popupContent);
     }
   }
 }
