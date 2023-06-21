@@ -689,25 +689,20 @@ function kmoniMapUpdate(dataTmp, type) {
 
       if (elm.detect) {
         pointData.markerElm.classList.add("detectingMarker");
-        if (elm.detect2) {
-          pointData.markerElm.classList.add("strongDetectingMarker");
-        }
-      } else if (pointData.PrevDetect) {
+        if (elm.detect2) pointData.markerElm.classList.add("strongDetectingMarker");
+      } else {
         pointData.markerElm.classList.remove("strongDetectingMarker", "detectingMarker");
       }
 
       if (elm.shindo >= 0.5) {
         pointData.markerElm.classList.remove("marker_Int1", "marker_Int2", "marker_Int3", "marker_Int4", "marker_Int5m", "marker_Int5p", "marker_Int6m", "marker_Int6p", "marker_Int7", "marker_Int7p");
         pointData.markerElm.classList.add("marker_Int", "marker_Int" + shindoConvert(elm.shindo, 3));
-      } else if (pointData.PrevInt >= 0.5) {
+      } else {
         pointData.markerElm.classList.remove("marker_Int");
       }
 
       pointData.popupContent = "<h3 class='PointName' style='border-bottom-color:rgb(" + elm.rgb.join(",") + ")'>" + (elm.Name ? elm.Name : "") + "<span>" + elm.Type + "_" + elm.Code + "</span></h3>" + (elm.detect ? "<h4 class='detecting'>地震検知中</h4>" : "") + "<p>震度 " + Math.round(elm.shindo * 10) / 10 + "</p><p>PGA " + Math.round(elm.pga * 100) / 100 + "gal</p>";
       if (pointData.popup.isOpen()) pointData.popup.setHTML(pointData.popupContent);
-
-      pointData.PrevInt = elm.shindo;
-      pointData.PrevDetect = elm.detect;
     } else if (pointData) {
       pointData.markerElm.style.background = "rgba(128,128,128,0.5)";
       pointData.markerElm.classList.remove("strongDetectingMarker", "detectingMarker", "marker_Int");
