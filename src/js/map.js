@@ -9,7 +9,6 @@ var windowLoaded = false;
 var TimeTable_JMA2001;
 var kmoniMapData;
 window.electronAPI.messageSend((event, request) => {
-  console.log(request.action);
   switch (request.action) {
     case "kmoniUpdate":
       if (!background) kmoniMapUpdate(request.data, "knet");

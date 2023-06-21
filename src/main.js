@@ -1977,6 +1977,7 @@ function wolfxRequest() {
         dataTmp += chunk;
       });
       res.on("end", function () {
+        dataTmp = "37 03 00 230505222717 C11 230505222647 ND20230505222644 NCN904 JD////////////// JN/// 390 N375 E1372 010 44 04 RK66519 RT00/// RC0//// EBI 390 S0404 ////// 01 9999=";
         var json = jsonParse(dataTmp);
         if (wolfx_lastUpdate < new Date(json.AnnouncedTime)) {
           wolfx_lastUpdate = json.AnnouncedTime;

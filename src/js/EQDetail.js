@@ -623,10 +623,10 @@ var estShindoMapDraw = false;
 var ShindoMapDraw = true;
 var LgIntMapDraw = false;
 var MapFill = true;
-document.getElementById("mapFillToggle").addEventListener("change",function(){
-  MapFill=this.checked
+document.getElementById("mapFillToggle").addEventListener("change", function () {
+  MapFill = this.checked;
   mapFillDraw();
-})
+});
 document.getElementsByName("mapFillSelect").forEach(function (elm) {
   elm.addEventListener("change", function () {
     estShindoMapDraw = this.value == "fill1";
@@ -1393,11 +1393,10 @@ function EQInfoControl(data) {
   if (EQInfo.depth == 0) {
     data_depth.innerText = "ごく浅い";
   } else if (EQInfo.depth == 700) {
-      data_depth.innerText = "700km以上";
+    data_depth.innerText = "700km以上";
   } else if (EQInfo.depth) {
-      data_depth.innerText = Math.round(EQInfo.depth) + "km";
-  } 
-
+    data_depth.innerText = Math.round(EQInfo.depth) + "km";
+  }
 
   if (EQInfo.epiCenter) data_center.innerText = EQInfo.epiCenter;
 
@@ -1499,7 +1498,7 @@ function InfoType_add(type) {
     case "type-4-2":
       document.getElementById("type-2").classList.add("disabled");
       document.getElementById("type-3").classList.add("disabled");
-      if(map) map.setZoom(2);
+      if (map) map.setZoom(2);
       break;
     case "type-5":
       document.getElementById("type-3").classList.add("disabled");

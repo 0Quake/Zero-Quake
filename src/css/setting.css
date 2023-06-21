@@ -27,16 +27,19 @@ body {
   writing-mode: unset;
   text-orientation: unset;
 }
-
-.tabmenu {
+#tab1_bar .tabmenu {
+  margin: 0 !important;
+  border-radius: 0;
+  background: unset;
   display: block;
   padding: 0.1em 0.5em 0.1em 20px;
   background: #222;
+  border: none;
 }
-.tabmenu:hover {
+#tab1_bar .tabmenu:hover {
   background: #333;
 }
-.active_tabmenu {
+#tab1_bar .active_tabmenu {
   border-left: none;
   background: #333;
   color: #fff;
@@ -60,11 +63,11 @@ body {
   border-radius: 0 0 8px 8px;
   background: rgb(149, 46, 46);
 }
-.tabmenu:first-child {
+#tab1_bar .tabmenu:first-child {
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
 }
-.tabmenu:last-child {
+#tab1_bar .tabmenu:last-child {
   border-bottom-left-radius: 8px;
   border-bottom-right-radius: 8px;
 }

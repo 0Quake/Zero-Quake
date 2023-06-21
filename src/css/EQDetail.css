@@ -202,7 +202,6 @@ td {
   font-family: "M PLUS 1p";
 }
 
-
 .zoomLevel_4 .LgIntIcon div {
   width: 35px;
 }
@@ -221,7 +220,7 @@ td {
   font-family: "M PLUS 1p";
 }
 
-.MaxLgIntIcon div{
+.MaxLgIntIcon div {
   width: 35px;
 }
 .MaxLgIntIcon div::before {
@@ -253,10 +252,9 @@ td {
   margin: 3.5px;
 }
 
-.zoomLevel_1 .MaxLgIntIcon div{
+.zoomLevel_1 .MaxLgIntIcon div {
   width: 22px;
 }
-
 
 .zoomLevel_1 .ShindoIcon,
 .zoomLevel_2 .ShindoIcon,

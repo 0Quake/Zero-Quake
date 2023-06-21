@@ -47,12 +47,13 @@ window.electronAPI.messageSend((event, request) => {
 //タブUI
 document.querySelectorAll(".tabmenu").forEach(function (elm) {
   elm.addEventListener("click", function () {
-    this.parentNode.querySelectorAll(".active_tabmenu").forEach(function (elm2) {
+    var id = this.getAttribute("id").split("_")[0];
+
+    document.querySelectorAll("#" + id + "_bar .active_tabmenu").forEach(function (elm2) {
       elm2.classList.remove("active_tabmenu");
     });
 
-    var id = this.parentNode.parentNode.dataset.tabid;
-    this.parentNode.parentNode.querySelectorAll("#tab" + id + "_content > .active_tabcontent").forEach(function (elm2) {
+    document.querySelectorAll("#" + id + "_content > .active_tabcontent").forEach(function (elm2) {
       elm2.classList.remove("active_tabcontent");
     });
     elm.classList.add("active_tabmenu");
