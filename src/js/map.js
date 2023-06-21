@@ -11,6 +11,7 @@ var TimeTable_JMA2001;
 var tsunamiCanvas, EQDetectCanvas, PointsCanvas, PSWaveCanvas, overlayCanvas; // eslint-disable-line
 var kmoniMapData;
 window.electronAPI.messageSend((event, request) => {
+  console.log(request.action);
   switch (request.action) {
     case "kmoniUpdate":
       if (!background) kmoniMapUpdate(request.data, "knet");
@@ -61,7 +62,8 @@ window.addEventListener("load", function () {
   psWaveAnm();
   setInterval(function () {
     //時計（ローカル時刻）更新
-    if (!background) document.getElementById("PC_TIME").textContent = dateEncode(3, new Date());
+    if (UTDialogShow && !background) document.getElementById("PC_TIME").textContent = dateEncode(3, new Date());
+    document.getElementById("all_UpdateTime").textContent = dateEncode(3, new Date());
   }, 500);
 });
 function psWaveAnm() {
@@ -664,22 +666,19 @@ function kmoniMapUpdate(dataTmp, type) {
     }
   }
   //地図上マーカー
-  if (becomeForeground) {
+  if (becomeForeground || now_EEW.length !== 0 || Object.keys(points).length == 0) {
+    changed_bypass = true;
     becomeForeground = false;
-    changed_bypass = true;
-  } else if (now_EEW.length !== 0 || Object.keys(points).length == 0) {
-    changed_bypass = true;
   } else {
     changed_bypass = false;
   }
 
   if (changed_bypass) {
-    var dataTmp2 = dataTmp.data;
+    dataTmp = dataTmp.data;
   } else {
-    var dataTmp2 = dataTmp.changedData;
+    dataTmp = dataTmp.changedData;
   }
-
-  for (elm of dataTmp2) {
+  for (elm of dataTmp) {
     pointData = points[elm.Code];
 
     if (elm.data) {

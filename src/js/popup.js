@@ -423,7 +423,6 @@ function EQDetectFinish(id) {
 }
 
 //🔴UI🔴
-var updateTimeTmp = 0;
 var updateTimeDialog = document.getElementById("UpdateTime_detail");
 
 //サイドバー表示・非表示
@@ -449,14 +448,17 @@ document.getElementById("setting").addEventListener("click", function () {
 });
 
 //情報更新時刻更新
+var UpdateTime = [];
 function kmoniTimeUpdate(updateTime, LocalTime, type, condition, vendor) {
   if (updateTime > new Date() - Replay) return;
 
-  if (updateTimeTmp < updateTime && type !== "Internet") {
-    updateTimeTmp = updateTime;
-    document.getElementById("all_UpdateTime").textContent = dateEncode(3, updateTime);
-  }
+  UpdateTime[type] = { type: type, updateTime: updateTime, LocalTime: LocalTime, condition: condition, vendor: vendor };
 
+  if (UTDialogShow && !background) {
+    kmoniTimeRedraw(updateTime, LocalTime, type, condition, vendor);
+  }
+}
+function kmoniTimeRedraw(updateTime, LocalTime, type, condition, vendor) {
   if (vendor) {
     document.getElementById("ymoniVendor").textContent = vendor == "YE" ? "East" : "West";
   }
@@ -482,13 +484,20 @@ function kmoniTimeUpdate(updateTime, LocalTime, type, condition, vendor) {
   }
 }
 
+var UTDialogShow = false;
 //接続状況ダイアログ表示
 document.getElementById("UpdateTimeWrap").addEventListener("click", function () {
   updateTimeDialog.showModal();
+  UTDialogShow = true;
+  Object.keys(UpdateTime).forEach(function (elm) {
+    var utData = UpdateTime[elm];
+    kmoniTimeRedraw(utData.updateTime, utData.LocalTime, utData.type, utData.condition, utData.vendor);
+  });
 });
 //接続状況ダイアログ非表示
 document.getElementById("UpdateTimeClose").addEventListener("click", function () {
   updateTimeDialog.close();
+  UTDialogShow = false;
 });
 
 var errorMsgBox = document.getElementById("errorMsg");

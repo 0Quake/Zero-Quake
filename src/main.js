@@ -3495,7 +3495,7 @@ function eqInfoControl(dataList, type, EEW) {
 
     case "usgs":
       dataList = dataList.sort(function (a, b) {
-        return a.OriginTime < b.OriginTime ? -1 : 1;
+        return a.OriginTime > b.OriginTime ? -1 : 1;
       });
       dataList.forEach(function (elm) {
         eqInfoAlert(elm, "usgs");
