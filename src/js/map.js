@@ -4,11 +4,9 @@ var Tsunami_MajorWarning, Tsunami_Warning, Tsunami_Watch, Tsunami_Yoho;
 
 var psWaveList = [];
 var tsunamiAlertNow = false;
-var epicenterIcon; // eslint-disable-line
 var inited = false;
 var windowLoaded = false;
 var TimeTable_JMA2001;
-var tsunamiCanvas, EQDetectCanvas, PointsCanvas, PSWaveCanvas, overlayCanvas; // eslint-disable-line
 var kmoniMapData;
 window.electronAPI.messageSend((event, request) => {
   console.log(request.action);
@@ -168,7 +166,10 @@ function init() {
     style: {
       version: 8,
       glyphs: "https://gsi-cyberjapan.github.io/optimal_bvmap/glyphs/{fontstack}/{range}.pbf",
-
+      transition: {
+        duration: 0,
+        delay: 0,
+      },
       sources: {
         v: {
           type: "vector",
@@ -579,16 +580,65 @@ function init() {
     },
   });
 
+  function tsunamiPopup(e) {
+    if (tsunamiData.areas) {
+      elm = tsunamiData.areas.find(function (elm) {
+        return elm.name == e.features[0].properties.name;
+      });
+      if (elm) {
+        if (!elm.cancelled) {
+          switch (elm.grade) {
+            case "MajorWarning":
+              gradeJa = "大津波警報";
+              break;
+            case "Warning":
+              gradeJa = "津波警報";
+              break;
+            case "Watch":
+              gradeJa = "津波注意報";
+              break;
+            case "Yoho":
+              gradeJa = "津波予報";
+              break;
+            default:
+              break;
+          }
+
+          var firstWave = "";
+          var maxWave = "";
+          var firstCondition = "";
+          if (elm.firstHeight) {
+            firstWave = "<div>第１波 予想到達時刻:" + dateEncode(5, elm.firstHeight) + "</div>";
+          }
+          if (elm.maxHeight) {
+            maxWave = "<div>最大波 予想高さ:" + elm.maxHeight + "</div>";
+          } else if (elm.grade == "Yoho") {
+            maxWave = "<div>予想される津波の高さ:若干の海面変動</div>";
+          }
+          if (elm.firstHeightCondition) {
+            firstCondition = "<div>" + elm.firstHeightCondition + "</div>";
+          }
+          var popupContent = "<h3 style='border-bottom:solid 2px " + tsunamiColorConv(elm.grade) + "'>" + elm.name + "</h3><p> " + gradeJa + " 発令中</p>" + firstWave + maxWave + firstCondition;
+          new maplibregl.Popup().setLngLat(e.lngLat).setHTML(popupContent).addTo(map);
+        }
+      }
+    }
+  }
+  map.on("click", "tsunami_Yoho", tsunamiPopup);
+  map.on("click", "tsunami_Watch", tsunamiPopup);
+  map.on("click", "tsunami_Warn", tsunamiPopup);
+  map.on("click", "tsunami_MajorWarn", tsunamiPopup);
+
   setInterval(function () {
-    map.setLayoutProperty("tsunami_Yoho", "visibility", "none");
-    map.setLayoutProperty("tsunami_Watch", "visibility", "none");
-    map.setLayoutProperty("tsunami_Warn", "visibility", "none");
-    map.setLayoutProperty("tsunami_MajorWarn", "visibility", "none");
+    map.setPaintProperty("tsunami_Yoho", "line-opacity", 0);
+    map.setPaintProperty("tsunami_Watch", "line-opacity", 0);
+    map.setPaintProperty("tsunami_Warn", "line-opacity", 0);
+    map.setPaintProperty("tsunami_MajorWarn", "line-opacity", 0);
     setTimeout(function () {
-      map.setLayoutProperty("tsunami_Yoho", "visibility", "visible");
-      map.setLayoutProperty("tsunami_Watch", "visibility", "visible");
-      map.setLayoutProperty("tsunami_Warn", "visibility", "visible");
-      map.setLayoutProperty("tsunami_MajorWarn", "visibility", "visible");
+      map.setPaintProperty("tsunami_Yoho", "line-opacity", 1);
+      map.setPaintProperty("tsunami_Watch", "line-opacity", 1);
+      map.setPaintProperty("tsunami_Warn", "line-opacity", 1);
+      map.setPaintProperty("tsunami_MajorWarn", "line-opacity", 1);
     }, 300);
   }, 2500);
 
@@ -1129,7 +1179,9 @@ function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrive
 //🔴津波情報🔴
 //津波情報更新
 var EQInfoLink = document.getElementById("EQInfoLink");
+var tsunamiData;
 function tsunamiDataUpdate(data) {
+  tsunamiData = data;
   map.setFilter("tsunami_MajorWarn", ["==", "name", ""]);
   map.setFilter("tsunami_Warn", ["==", "name", ""]);
   map.setFilter("tsunami_Watch", ["==", "name", ""]);
@@ -1186,31 +1238,6 @@ function tsunamiDataUpdate(data) {
           default:
             break;
         }
-
-        /*
-        if (tsunamiItem && tsunamiItem.item) {
-          var firstWave = "";
-          var maxWave = "";
-          var firstCondition = "";
-          if (elm.firstHeight) {
-            firstWave = "<div>第１波 予想到達時刻:" + dateEncode(5, elm.firstHeight) + "</div>";
-          }
-          if (elm.maxHeight) {
-            maxWave = "<div>最大波 予想高さ:" + elm.maxHeight + "</div>";
-          } else if (elm.grade == "Yoho") {
-            maxWave = "<div>予想される津波の高さ:若干の海面変動</div>";
-          }
-          if (elm.firstHeightCondition) {
-            firstCondition = "<div>" + elm.firstHeightCondition + "</div>";
-          }
-          tsunamiItem.item
-            .setStyle({
-              stroke: true,
-              color: tsunamiColorConv(elm.grade),
-              weight: 5,
-            })
-            .setPopupContent("<h3 style='border-bottom:solid 2px " + tsunamiColorConv(elm.grade) + "'>" + tsunamiItem.feature.properties.name + "</h3><p> " + gradeJa + " 発令中</p>" + firstWave + maxWave + firstCondition);
-        }*/
       }
     });
 

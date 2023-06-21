@@ -38,19 +38,28 @@ function tsunamiUpdate(dataTmp) {
   dataTmp.areas.forEach((elm) => {
     if (!elm.canceled) {
       var condition = "";
-      var arrivalTime = "不明";
-      var maxHeight = "不明";
+      var arrivalTime = "";
+      var maxHeight = "";
       if (elm.firstHeight) {
         arrivalTime = dateEncode(5, elm.firstHeight);
         if (elm.firstHeightCondition) {
           condition = elm.firstHeightCondition;
         }
       } else if (elm.firstHeightCondition) {
-        arrivalTime = elm.firstHeightCondition;
+        if (elm.firstHeightCondition == "第１波の到達を確認") {
+          arrivalTime = "到達";
+        } else if (elm.firstHeightCondition == "津波到達中と推測") {
+          arrivalTime = "到達中と推測";
+        } else {
+          arrivalTime = elm.firstHeightCondition;
+        }
       }
 
       if (elm.maxHeight) {
         maxHeight = elm.maxHeight;
+        if (maxHeight.match(/未満/)) {
+          maxHeight = "<" + maxHeight.replace("未満", "");
+        }
       }
       var IconTxt = "";
       switch (elm.grade) {
@@ -86,7 +95,7 @@ function tsunamiUpdate(dataTmp) {
       ihtml += "<td class='disabled-cell'>-</td>";
       ihtml += "<td class='disabled-cell'>-</td>";
       ihtml += "<td class='disabled-cell'>-</td>";
-      ihtml += "<td></td>";
+      ihtml += "<td class='disabled-cell'>-</td>";
       ihtml += "<td>" + condition + "</td>";
       new_tr.innerHTML = ihtml;
       new_tr.classList.add("add-content");
@@ -96,9 +105,10 @@ function tsunamiUpdate(dataTmp) {
       if (elm.stations && Array.isArray(elm.stations)) {
         elm.stations.forEach(function (elm2) {
           var condition = "";
-          var arrivalTime = "不明";
-          var HighTideDateTime = "不明";
-          var omaxHeight = "不明";
+          var arrivalTime = "";
+          var HighTideDateTime = "";
+          var omaxHeight = "";
+          var maxHeightTime = "";
 
           if (elm2.Conditions) {
             condition = elm2.Conditions;
@@ -111,10 +121,10 @@ function tsunamiUpdate(dataTmp) {
           if (elm2.omaxHeight) {
             omaxHeight = elm2.omaxHeight;
             if (elm2.firstHeightInitial) {
-              omaxHeight = elm2.omaxHeight + " (" + elm2.firstHeightInitial + ")";
+              omaxHeight = elm2.omaxHeight + " " + elm2.firstHeightInitial;
             }
-          } else {
-            omaxHeight = maxHeightCondition;
+          } else if (elm2.maxHeightCondition) {
+            omaxHeight = elm2.maxHeightCondition;
           }
           if (elm2.maxHeightTime) {
             maxHeightTime = dateEncode(5, elm2.maxHeightTime);
@@ -127,7 +137,7 @@ function tsunamiUpdate(dataTmp) {
           } else if (elm2.firstHeightCondition == "識別不能") {
             arrivalTime = elm2.firstHeightCondition;
           }
-          if (elm2.firstHeightInitial) arrivalTime += " (" + elm2.firstHeightInitial + ")";
+          if (elm2.firstHeightInitial) arrivalTime += " " + elm2.firstHeightInitial;
 
           var new_tr2 = document.createElement("tr");
 
