@@ -724,6 +724,9 @@ td {
   align-items: center;
   justify-content: right;
 }
+.EQItem:hover {
+  background: #111;
+}
 .EQItem:hover .EQItemOverlay {
   display: block;
 }
