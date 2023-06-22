@@ -1282,6 +1282,10 @@ ipcMain.on("message", (_event, response) => {
     tsunami_createWindow();
   } else if (response.action == "EQInfoWindowOpen") {
     EQInfo_createWindow(response);
+  } else if (response.action == "openAtLogin") {
+    app.setLoginItemSettings({
+      openAtLogin: response.data,
+    });
   } else if (response.action == "settingReturn") {
     config = response.data;
     store.set("config", config);
@@ -1497,6 +1501,10 @@ function setting_createWindow() {
     settingWindow.webContents.send("message2", {
       action: "softVersion",
       data: process.env.npm_package_version,
+    });
+    settingWindow.webContents.send("message2", {
+      action: "openAtLogin",
+      data: app.getLoginItemSettings().openAtLogin,
     });
     if (update_data) {
       settingWindow.webContents.send("message2", {

@@ -585,6 +585,12 @@ td {
   color: #222;
   border: none;
 }
+
+.active_tabmenu:hover {
+  background: #a3a3a3;
+  color: #111;
+  border: none;
+}
 .active_tabgroup {
   background: #333;
   color: #fff;

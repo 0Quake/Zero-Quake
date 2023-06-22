@@ -1,12 +1,16 @@
 var config;
 var markerElm;
 var Replay;
+var openAtLogin = false;
 window.addEventListener("load", function () {
   this.document.getElementById("replay").value = dateEncode(3, new Date()).replaceAll("/", "-");
 });
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "softVersion") {
     document.getElementById("softVersion").innerText = request.data;
+  } else if (request.action == "openAtLogin") {
+    openAtLogin = request.data;
+    document.getElementById("startup").checked = openAtLogin;
   } else if (request.action == "Replay") {
     Replay = request.data;
     offsetCalc();
@@ -118,6 +122,14 @@ document.getElementById("apply").addEventListener("click", function () {
     action: "settingReturn",
     data: config,
   });
+
+  if (document.getElementById("startup").checked !== openAtLogin) {
+    window.electronAPI.messageReturn({
+      action: "openAtLogin",
+      data: document.getElementById("startup").checked,
+    });
+  }
+
   window.close();
 });
 

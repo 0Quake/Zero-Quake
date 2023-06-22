@@ -435,14 +435,18 @@
             <div id="tab1_content11" class="tabcontent">
                 <h3><span>全般</span>システム設定</h3>
                 <section>
-                    <label>バグレポートの送信
-                        <select id="BugReportAutoSend">
-                            <option value="yes">自動送信</option>
-                            <option value="confirm">毎回確認</option>
-                            <option value="no" selected>送信しない</option>
-                        </select>
-                    </label>
-                    <p>エラーメッセージのみを送信し、個人を特定できる情報の送信は行いません。</p>
+                    <h4>バグレポートの送信</h4>
+
+                    <select id="BugReportAutoSend">
+                        <option value="yes">自動送信</option>
+                        <option value="confirm">毎回確認</option>
+                        <option value="no" selected>送信しない</option>
+                    </select>
+                    <p style="font-size: 13px;">エラーメッセージのみを送信し、個人を特定できる情報の送信は行いません。</p>
+                </section>
+                <section>
+                    <h4>スタートアップ</h4>
+                    <label><input type="checkbox" id="startup">OS起動時に自動実行</label>
                 </section>
             </div>
             <div id="tab1_content13" class="tabcontent">
