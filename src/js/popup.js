@@ -322,11 +322,13 @@ function eqInfoDraw(data, source) {
       clone.querySelector(".EEWNotes").style.display = elm.category == "EEW" ? "block" : "none";
 
       clone.querySelector(".EQDetailButton").addEventListener("click", function () {
+        console.log(elm);
         window.electronAPI.messageReturn({
           action: "EQInfoWindowOpen",
           url: "src/EQDetail.html",
           eid: elm.eventId,
           urls: elm.DetailURL,
+          axisData: elm.axisData,
         });
       });
     } else if (source == "usgs") {

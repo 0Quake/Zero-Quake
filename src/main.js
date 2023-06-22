@@ -1586,6 +1586,7 @@ function EQInfo_createWindow(response) {
       eid: response.eid,
       urls: response.urls,
       eew: EEWDataItem,
+      axisData: response.axisData,
     });
   });
 
@@ -2212,6 +2213,7 @@ function AXIS_WS() {
               maxI: IntensityElm.Observation.MaxInt,
               cancel: null,
               DetailURL: [],
+              axisData: data,
             },
           ],
           "jma"
@@ -3473,6 +3475,7 @@ function eqInfoControl(dataList, type, EEW) {
               M: null,
               maxI: null,
               DetailURL: [],
+              axisData: [],
             };
             changed = true;
           }
@@ -3506,6 +3509,11 @@ function eqInfoControl(dataList, type, EEW) {
 
           if (data.DetailURL && data.DetailURL[0] !== "" && !EQElm.DetailURL.includes(data.DetailURL[0])) {
             EQElm.DetailURL.push(data.DetailURL[0]);
+            changed = true;
+          }
+          if (data.axisData) {
+            if (!EQElm.axisData || EQElm.axisData.length) EQElm.axisData = [];
+            EQElm.axisData.push(data.axisData);
             changed = true;
           }
           if (changed) {
