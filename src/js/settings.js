@@ -310,9 +310,6 @@ function init() {
 
 //eslint-disable-next-line
 function MapReDraw() {
-  gjmap.setStyle({
-    fillColor: "#333",
-  });
   lat = document.getElementById("latitude").value;
   lng = document.getElementById("longitude").value;
   markerElm.setLngLat([lng, lat]);

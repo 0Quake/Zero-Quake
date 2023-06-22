@@ -152,8 +152,8 @@
             <div id="tab1_content1" class="tabcontent active_tabcontent">
                 <h3><span>全般</span>現在地</h3>
                 <section>
-                    <label>緯度<input id="latitude" type="number" oninput="MapReDraw()"></label>
-                    <label>緯度<input id="longitude" type="number" oninput="MapReDraw()"></label>
+                    <label>緯度<input id="latitude" type="number" oninput="MapReDraw()" step="0.1" min="-90" max="90"></label>
+                    <label>緯度<input id="longitude" type="number" oninput="MapReDraw()" step="0.1" min="-180" max="180"></label>
                     <label>細分区域<select id="saibun" onchange="MapReDraw()"></select></label>
                     <div id="mapcontainer"></div>
                     <div id="mapContainer"></div>
