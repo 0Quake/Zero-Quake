@@ -1370,6 +1370,11 @@ function createWindow() {
         source: "jma",
         data: eqInfo.jma.slice(0, config.Info.EQInfo.ItemCount),
       });
+      mainWindow.webContents.send("message2", {
+        action: "EQInfo",
+        source: "usgs",
+        data: eqInfo.usgs.slice(0, config.Info.EQInfo.ItemCount),
+      });
 
       var threshold01Tmp;
       EQDetect_List.forEach(function (elm) {
@@ -3277,8 +3282,8 @@ function EQI_USGS_Req() {
     res.on("end", function () {
       var json = jsonParse(dataTmp);
       if (!json) return false;
-      if (usgsLastGenerated < json.metadata.generated) {
-        usgsLastGenerated = json.metadata.generated;
+      if (usgsLastGenerated < json.features[0].properties.updated) {
+        usgsLastGenerated = json.features[0].properties.updated;
 
         var dataTmp2 = [];
         json.features.forEach(function (elm) {
@@ -3302,7 +3307,7 @@ function EQI_USGS_Req() {
                 category: null,
                 OriginTime: new Date(elm.properties.time),
                 epiCenter: jpName ? jpName : elm.properties.place,
-                M: elm.properties.mag,
+                M: Math.round(elm.properties.mag*10)/10,
                 maxI: null,
                 DetailURL: [elm.properties.url],
               });
@@ -3495,10 +3500,9 @@ function eqInfoControl(dataList, type, EEW) {
       break;
 
     case "usgs":
-      dataList = dataList.sort(function (a, b) {
+      dataList.sort(function (a, b) {
         return a.OriginTime > b.OriginTime ? -1 : 1;
-      });
-      dataList.forEach(function (elm) {
+      }).forEach(function (elm) {
         eqInfoAlert(elm, "usgs");
       });
 
@@ -3531,7 +3535,7 @@ function eqInfoAlert(data, source, update) {
     if (mainWindow) {
       mainWindow.webContents.send("message2", {
         action: "EQInfo",
-        source: source,
+        source: "jma",
         data: eqInfo.jma.slice(0, config.Info.EQInfo.ItemCount),
       });
     }
@@ -3544,7 +3548,7 @@ function eqInfoAlert(data, source, update) {
     if (mainWindow) {
       mainWindow.webContents.send("message2", {
         action: "EQInfo",
-        source: source,
+        source: "usgs",
         data: eqInfo.usgs.slice(0, config.Info.EQInfo.ItemCount),
       });
     }
