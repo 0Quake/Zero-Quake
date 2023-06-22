@@ -1374,7 +1374,7 @@ function EQInfoControl(data) {
   if (data.maxI && (mostNew || !EQInfo.maxI)) EQInfo.maxI = data.maxI;
   if (data.mag && (mostNew || !EQInfo.mag)) EQInfo.mag = data.mag;
   if (data.mag && mostNew) data_MT.innerText = "M";
-  if ((data.depth || data.depth === 0) && (mostNew || !EQInfo.depth)) EQInfo.depth = data.depth;
+  if ((data.depth || data.depth === 0) && (mostNew || !EQInfo.depth)) EQInfo.depth = Math.abs(data.depth);
   if (data.epiCenter && (mostNew || !EQInfo.epiCenter)) EQInfo.epiCenter = data.epiCenter;
   if (data.comment) {
     if (!EQInfo.comment) EQInfo.comment = [];

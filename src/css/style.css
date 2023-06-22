@@ -68,26 +68,10 @@ body {
   overflow-x: hidden;
 }
 
-#titleBar {
-  height: 30px;
-  width: 100%;
-  background: #202020;
-  -webkit-app-region: drag;
-  line-height: 30px;
-  font-size: 12px;
-  padding: 0 8px;
+a:any-link {
+  color: rgb(255 192 192);
 }
-#titleBar img {
-  display: inline-block;
-  width: 15px;
-  height: 15px;
-  margin: 7.5px 8px 7.5px 0;
-  vertical-align: bottom;
-}
-.EEWMode #titleBar {
-  background: #400;
-  box-shadow: 0 25px 0 30px rgba(255, 0, 0, 0.5);
-}
+
 h1,
 h2,
 h3,
