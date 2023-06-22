@@ -4,28 +4,28 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url(../font/BIZUDPGothic-Regular.ttf);
+  src: local("BIZ UDPGothic"), url(../font/BIZUDPGothic-Regular.woff) format("woff2");
 }
 @font-face {
   font-family: "M PLUS 1p";
   font-style: normal;
   font-weight: 800;
   font-display: swap;
-  src: url(../font/MPLUS1p-ExtraBold.ttf);
+  src: local("MPLUS1p-ExtraBold"), url(../font/MPLUS1p-ExtraBold.woff) format("woff2");
 }
 @font-face {
   font-family: "Material Icons Round";
   font-style: normal;
   font-weight: 400;
   font-display: block;
-  src: url(../font/MaterialIconsRound.woff2) format("woff2");
+  src: local("MaterialIconsRound-Regular"), url(../font/MaterialIcons.woff) format("woff2");
 }
 
 .material-icons-round {
   font-family: "Material Icons Round";
   font-weight: normal;
   font-style: normal;
-  font-size: 24px;
+  font-size: 1.3em;
   line-height: 1;
   letter-spacing: normal;
   text-transform: none;
@@ -33,6 +33,8 @@
   white-space: nowrap;
   word-wrap: normal;
   direction: ltr;
+  vertical-align: sub;
+  letter-spacing: 0.13em;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -511,6 +513,10 @@ td {
 }
 #tab1_bar.tabmenu {
   width: 30px;
+}
+#tab1_bar .material-icons-round {
+  opacity: 0.8;
+  margin: 0 5px;
 }
 #setting {
   position: absolute;

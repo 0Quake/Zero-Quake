@@ -28,7 +28,7 @@ body {
   text-orientation: unset;
 }
 #tab1_bar .tabmenu {
-  margin: 0 !important;
+  margin: 0;
   border-radius: 0;
   background: unset;
   display: block;
@@ -44,7 +44,6 @@ body {
   background: #333;
   color: #fff;
 }
-
 .active_tabmenu::before {
   content: "chevron_right";
   font-family: "Material Icons Round";
@@ -279,4 +278,9 @@ label select {
 ul,
 ol {
   margin: 0;
+}
+#tab1_bar .tabmenu#tab1_menu2 {
+  padding: 0.5em;
+  margin-top: 20px;
+  border-radius: 8px;
 }
