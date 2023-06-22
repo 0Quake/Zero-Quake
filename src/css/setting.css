@@ -253,6 +253,7 @@ label {
 }
 label input[type="text"],
 label input[type="number"],
+label input[type="datetime-local"],
 label select {
   height: 30px;
   padding: 0 10px;
@@ -262,7 +263,8 @@ label select {
 }
 label input[type="text"]:focus,
 label input[type="number"]:focus,
-label select :focus {
+label input[type="datetime-local"]:focus,
+label select:focus {
   border: solid 1px #ccc;
   outline: solid 1px #ccc;
 }
@@ -270,6 +272,7 @@ label select :focus {
 label input[type="text"],
 label input[type="number"],
 label input[type="range"],
+label input[type="datetime-local"],
 label select {
   width: 100%;
 }

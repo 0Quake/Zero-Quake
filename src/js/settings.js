@@ -1,10 +1,17 @@
 var config;
 var markerElm;
+var Replay;
+window.addEventListener("load", function () {
+  this.document.getElementById("replay").value = dateEncode(3, new Date()).replaceAll("/", "-");
+});
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "softVersion") {
     document.getElementById("softVersion").innerText = request.data;
-  }else if (request.action == "setting") {
-      document.getElementById("splash").style.display = "none";
+  } else if (request.action == "Replay") {
+    Replay = request.data;
+    offsetCalc();
+  } else if (request.action == "setting") {
+    document.getElementById("splash").style.display = "none";
 
     config = request.data;
 
@@ -19,10 +26,9 @@ window.electronAPI.messageSend((event, request) => {
     TTSpitchSet(config.notice.voice_parameter.pitch);
     TTSspeedSet(config.notice.voice_parameter.rate);
 
-    selectBoxSet(document.getElementById("TTSvoiceSelect"), config.notice.voice_parameter.voice)
+    selectBoxSet(document.getElementById("TTSvoiceSelect"), config.notice.voice_parameter.voice);
 
-
-    selectBoxSet(document.getElementById("BugReportAutoSend"), config.system.crashReportAutoSend)
+    selectBoxSet(document.getElementById("BugReportAutoSend"), config.system.crashReportAutoSend);
     document.getElementById("Axis_GetData").checked = config.Source.axis.GetData;
     document.getElementById("Wolfx_GetData").checked = config.Source.wolfx.GetData;
     document.getElementById("msil_GetData").checked = config.Source.msil.GetData;
@@ -118,6 +124,39 @@ document.getElementById("apply").addEventListener("click", function () {
 document.getElementById("cancel").addEventListener("click", function () {
   window.close();
 });
+document.getElementById("replayReset").addEventListener("click", function () {
+  document.getElementById("replay").value = dateEncode(3, new Date()).replaceAll("/", "-");
+  window.electronAPI.messageReturn({
+    action: "replay",
+    date: new Date(),
+  });
+  document.getElementById("replayOffset").innerText = "-";
+});
+
+document.getElementById("replayJump").addEventListener("click", function () {
+  repVal = new Date(document.getElementById("replay").value);
+  if (repVal > new Date()) {
+    repVal = new Date();
+    document.getElementById("replay").value = dateEncode(3, repVal).replaceAll("/", "-");
+  }
+  window.electronAPI.messageReturn({
+    action: "replay",
+    date: repVal,
+  });
+  offsetCalc();
+});
+
+function offsetCalc() {
+  if (Replay == 0) {
+    document.getElementById("replayOffset").innerText = "-";
+  } else {
+    var day = Math.floor(Replay / 1000 / 60 / 60 / 24);
+    var hours = Math.floor((Replay / 1000 / 60 / 60) % 24);
+    var minutes = Math.floor(((Replay / 1000 / 60) % 24) % 60);
+    var seconds = Math.floor((((Replay / 1000) % 24) % 60) % 60);
+    document.getElementById("replayOffset").innerText = "- " + day + "日 " + hours + "時間" + minutes + "分" + seconds + "秒";
+  }
+}
 
 function init() {
   map = new maplibregl.Map({
@@ -321,11 +360,11 @@ function TTSvolumeSet(val) {
   document.getElementById("TTSVolumeR").value = val;
   TTSvolume = val;
 }
-function selectBoxSet(selectElm,TargetValue){
-  selectElm.querySelectorAll("option").forEach(function(elm){
-    if(elm.value==TargetValue){
-      elm.setAttribute("selected",true)
-      return true
+function selectBoxSet(selectElm, TargetValue) {
+  selectElm.querySelectorAll("option").forEach(function (elm) {
+    if (elm.value == TargetValue) {
+      elm.setAttribute("selected", true);
+      return true;
     }
-  })
+  });
 }

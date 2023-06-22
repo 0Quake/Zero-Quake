@@ -1,11 +1,24 @@
 //リプレイ
 var Replay = 0;
+var mainWindow;
 /* eslint-disable */
 function replay(ReplayDate) {
   if (ReplayDate) {
     Replay = new Date() - new Date(ReplayDate);
   } else {
     Replay = 0;
+  }
+  if (mainWindow) {
+    mainWindow.webContents.send("message2", {
+      action: "Replay",
+      data: Replay,
+    });
+  }
+  if (settingWindow) {
+    settingWindow.webContents.send("message2", {
+      action: "Replay",
+      data: Replay,
+    });
   }
 }
 /* eslint-enable */
@@ -936,7 +949,7 @@ var config = store.get("config", defaultConfigVal);
 config = mergeDeeply(defaultConfigVal, config);
 store.set("config", config);
 
-let mainWindow, settingWindow, tsunamiWindow, kmoniWorker;
+let settingWindow, tsunamiWindow, kmoniWorker;
 var kmoniActive = false;
 var kmoniTimeTmp = [];
 var EEW_Data = []; //地震速報リスト
@@ -1402,12 +1415,6 @@ function createWindow() {
       if (SnetPointsDataTmp) {
         mainWindow.webContents.send("message2", SnetPointsDataTmp);
       }
-      if (Replay !== 0) {
-        mainWindow.webContents.send("message2", {
-          action: "Replay",
-          data: Replay,
-        });
-      }
     });
 
     mainWindow.loadFile("src/index.html");
@@ -1468,7 +1475,21 @@ function setting_createWindow() {
     },
     backgroundColor: "#202227",
   });
+  if (Replay !== 0) {
+    settingWindow.webContents.send("message2", {
+      action: "Replay",
+      data: Replay,
+    });
+  }
+
   settingWindow.webContents.on("did-finish-load", () => {
+    if (Replay !== 0) {
+      settingWindow.webContents.send("message2", {
+        action: "Replay",
+        data: Replay,
+      });
+    }
+
     settingWindow.webContents.send("message2", {
       action: "setting",
       data: config,
@@ -1974,7 +1995,7 @@ function SnetRequest() {
 //wolfxへのHTTPリクエスト処理
 var wolfx_lastUpdate = 0;
 function wolfxRequest() {
-  if (config.Source.wolfx.GetData && net.online) {
+  if (config.Source.wolfx.GetData && net.online && Replay == 0) {
     var request = net.request("https://api.wolfx.jp/jma_eew.json?_=" + new Date());
     request.on("response", (res) => {
       var dataTmp = "";
@@ -2076,6 +2097,7 @@ function P2P_WS() {
       setTimeout(P2P_WS_TryConnect, 5000);
     });
     connection.on("message", function (message) {
+      if (Replay == 0) return;
       if (message.type === "utf8") {
         var data = message.utf8Data;
         switch (data.code) {
@@ -2148,6 +2170,7 @@ function AXIS_WS() {
       AXIS_WS_TryConnect();
     });
     connection.on("message", function (message) {
+      if (Replay == 0) return;
       var dataStr = message.utf8Data;
       kmoniTimeUpdate(new Date() - Replay, "axis", "success");
 
@@ -3307,7 +3330,7 @@ function EQI_USGS_Req() {
                 category: null,
                 OriginTime: new Date(elm.properties.time),
                 epiCenter: jpName ? jpName : elm.properties.place,
-                M: Math.round(elm.properties.mag*10)/10,
+                M: Math.round(elm.properties.mag * 10) / 10,
                 maxI: null,
                 DetailURL: [elm.properties.url],
               });
@@ -3500,11 +3523,13 @@ function eqInfoControl(dataList, type, EEW) {
       break;
 
     case "usgs":
-      dataList.sort(function (a, b) {
-        return a.OriginTime > b.OriginTime ? -1 : 1;
-      }).forEach(function (elm) {
-        eqInfoAlert(elm, "usgs");
-      });
+      dataList
+        .sort(function (a, b) {
+          return a.OriginTime > b.OriginTime ? -1 : 1;
+        })
+        .forEach(function (elm) {
+          eqInfoAlert(elm, "usgs");
+        });
 
       break;
     default:

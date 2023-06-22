@@ -30,6 +30,7 @@ window.electronAPI.messageSend((event, request) => {
     config = request.data;
   } else if (request.action == "Replay") {
     Replay = request.data;
+    document.getElementById("replayFrame").style.display = Replay == 0 ? "none" : "block";
   } else if (request.action == "EQInfo") {
     eqInfoDraw(request.data, request.source);
   } else if (request.action == "notification_Update") {
@@ -75,8 +76,8 @@ window.addEventListener("offline", () => {
 });
 
 //eslint-disable-next-line
-function replay(dateStr) {
-  date = new Date(dateStr);
+function replay(date) {
+  if (date) date = new Date(date);
   window.electronAPI.messageReturn({
     action: "replay",
     date: date,

@@ -46,6 +46,10 @@
   accent-color: rgb(255 146 146);
 }
 
+html {
+  background: #202227;
+}
+
 html,
 body {
   min-width: 300px;
@@ -137,6 +141,25 @@ main {
 .EEWMode #alertFrame,
 .TsunamiMode #alertFrame {
   display: block;
+}
+#replayFrame {
+  display: none;
+  position: fixed;
+  inset: 5px;
+  top: 30px;
+  border-radius: 15px;
+  box-shadow: 0 0 0px 35px rgba(56, 124, 143, 0.8);
+  z-index: 100000004;
+  pointer-events: none;
+  text-align: center;
+}
+#replayFrame::before {
+  position: absolute;
+  top: -30px;
+  left: 0;
+  right: 0;
+  line-height: 30px;
+  content: "リプレイ中";
 }
 
 ::-webkit-scrollbar {
