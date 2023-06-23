@@ -1480,7 +1480,6 @@ function add_Area_info(name, maxInt) {
     document.getElementById("homeShindoWrap").style.display = "block";
     document.getElementById("homeShindo").appendChild(newDiv3);
   }
-  console.log("json.Body.Intensity");
 
   var pointLocation = areaLocation[name];
   if (pointLocation) {

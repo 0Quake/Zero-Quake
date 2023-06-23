@@ -1,6 +1,7 @@
 //リプレイ
 var Replay = 0;
-var mainWindow;
+var mainWindow, settingWindow, tsunamiWindow, kmoniWorker;
+
 /* eslint-disable */
 function replay(ReplayDate) {
   if (ReplayDate) {
@@ -789,7 +790,7 @@ var FERegions = {
 
 const electron = require("electron");
 const workerThreads = require("worker_threads");
-const { app, BrowserWindow, ipcMain, net, Notification, shell, dialog, Menu } = electron;
+const { app, BrowserWindow, ipcMain, net, Notification, shell, dialog, Menu, powerSaveBlocker } = electron;
 const path = require("path");
 const { JSDOM } = require("jsdom");
 const Store = require("electron-store");
@@ -806,9 +807,12 @@ var defaultConfigVal = {
     Section: "東京都２３区",
   },
   Info: {
-    EEW: {},
+    EEW: {
+      showTraning: false,
+    },
     EQInfo: {
       ItemCount: 15,
+      Interval: 30000,
     },
     TsunamiInfo: {},
     RealTimeShake: {
@@ -949,7 +953,7 @@ var config = store.get("config", defaultConfigVal);
 config = mergeDeeply(defaultConfigVal, config);
 store.set("config", config);
 
-let settingWindow, tsunamiWindow, kmoniWorker;
+var psBlock;
 var kmoniActive = false;
 var kmoniTimeTmp = [];
 var EEW_Data = []; //地震速報リスト
@@ -2724,6 +2728,7 @@ function EEWdetect(type, json, KorL) {
 //EEW情報マージ→EEWAlert
 function EEWcontrol(data) {
   if (!data) return;
+  if (!config.Info.EEW.showTraning && data.is_training) return;
   if (data.origin_time) {
     var origin_timeTmp = data.origin_time;
   } else {
@@ -2870,6 +2875,7 @@ function EEWClear(source, code, reportnum, bypass) {
 
       if (EEW_nowList.length == 0) {
         EEWNow = false;
+        if (psBlock && powerSaveBlocker.isStarted(psBlock)) powerSaveBlocker.stop(psBlock);
         worker.postMessage({ action: "EEWNow", data: EEWNow });
       }
     }
@@ -2946,6 +2952,7 @@ function EEWAlert(data, first, update) {
   });
   //【現在のEEW】配列に追加
   EEW_nowList.push(data);
+  if (!psBlock || !powerSaveBlocker.isStarted(psBlock)) psBlock = powerSaveBlocker.start("prevent-display-sleep");
 }
 
 //🔴地震情報🔴
@@ -2958,7 +2965,7 @@ function eqInfoUpdate(disableRepeat) {
   EQI_narikakunList_Req("https://ntool.online/api/earthquakeList?year=" + new Date().getFullYear() + "&month=" + (new Date().getMonth() + 1), 10, true);
   EQI_USGS_Req();
 
-  if (!disableRepeat) setTimeout(eqInfoUpdate, 10000);
+  if (!disableRepeat) setTimeout(eqInfoUpdate, config.Info.EQInfo.Interval);
 }
 
 //気象庁JSON 取得・フォーマット変更→eqInfoControl

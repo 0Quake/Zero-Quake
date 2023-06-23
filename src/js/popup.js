@@ -218,7 +218,6 @@ function epiCenterUpdate(eid, latitude, longitude) {
     if (epicenterElm && epicenterElm.markerElm) {
       //情報更新
       epicenterElm.markerElm.setLngLat([longitude, latitude]);
-      epicenterElm.popupElm.setLngLat([longitude, latitude]);
       epicenterElm.latitude = latitude;
       epicenterElm.longitude = longitude;
     } else {
@@ -231,10 +230,11 @@ function epiCenterUpdate(eid, latitude, longitude) {
 
       map.panTo([longitude, latitude], { animate: false });
       map.zoomTo(8, { animate: false });
-      var ESPopup = new maplibregl.Popup({ closeButton: false, closeOnClick: false, className: "epiCenterTooltip", offset: [0, -17] }).setText(EEWIDTmp).setLngLat([longitude, latitude]).addTo(map);
-      var ESMarker = new maplibregl.Marker(img).setLngLat([longitude, latitude]).addTo(map);
 
-      epiCenter.push({ eid: eid, markerElm: ESMarker, popupElm: ESPopup, latitude: latitude, longitude: longitude, EEWID: Number(EEWIDTmp) });
+      var ESPopup = new maplibregl.Popup({ closeButton: false, closeOnClick: false, className: "epiCenterTooltip", offset: [0, -17] }).setText(EEWIDTmp).addTo(map);
+      var ESMarker = new maplibregl.Marker(img).setLngLat([longitude, latitude]).setPopup(ESPopup).addTo(map).togglePopup();
+
+      epiCenter.push({ eid: eid, markerElm: ESMarker, latitude: latitude, longitude: longitude, EEWID: Number(EEWIDTmp) });
       displayTmp = epiCenter.length > 1 ? "inline-block" : "none";
       document.querySelectorAll(".epiCenterTooltip,.EEWLocalID").forEach(function (elm3) {
         elm3.style.display = displayTmp;
@@ -280,8 +280,6 @@ function epiCenterClear(eid) {
     if (epicenterElm && epicenterElm.markerElm) {
       epicenterElm.markerElm.remove();
       epicenterElm.markerElm = null;
-      epicenterElm.popupElm.remove();
-      epicenterElm.popupElm = null;
     }
   }
 }
@@ -322,7 +320,6 @@ function eqInfoDraw(data, source) {
       clone.querySelector(".EEWNotes").style.display = elm.category == "EEW" ? "block" : "none";
 
       clone.querySelector(".EQDetailButton").addEventListener("click", function () {
-        console.log(elm);
         window.electronAPI.messageReturn({
           action: "EQInfoWindowOpen",
           url: "src/EQDetail.html",

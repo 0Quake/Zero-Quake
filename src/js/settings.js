@@ -26,11 +26,12 @@ window.electronAPI.messageSend((event, request) => {
     document.getElementById("EEW2_Voice").value = config.notice.voice.EEWUpdate;
     document.getElementById("EQInfo_ItemCount").value = config.Info.EQInfo.ItemCount;
     document.getElementById("RealTimeShake_ItemCount").value = config.Info.RealTimeShake.List.ItemCount;
+    document.getElementById("EEW_traning").checked = config.Info.EEW.showTraning;
+    document.getElementById("EQInfoInterval").value = config.Info.EQInfo.Interval / 1000;
 
-    document.querySelectorAll("#saibun option").forEach(function(elm){
-      if(elm.innerText==config.home.Section)elm.selected=true
-    })
-    
+    document.querySelectorAll("#saibun option").forEach(function (elm) {
+      if (elm.innerText == config.home.Section) elm.selected = true;
+    });
 
     TTSvolumeSet(config.notice.voice_parameter.volume);
     TTSpitchSet(config.notice.voice_parameter.pitch);
@@ -107,6 +108,8 @@ document.getElementById("apply").addEventListener("click", function () {
   config.notice.voice.EEWUpdate = document.getElementById("EEW2_Voice").value;
   config.Info.EQInfo.ItemCount = Number(document.getElementById("EQInfo_ItemCount").value);
   config.Info.RealTimeShake.List.ItemCount = Number(document.getElementById("RealTimeShake_ItemCount").value);
+  config.Info.EEW.showTraning = document.getElementById("EEW_traning").checked;
+  config.Info.EQInfo.Interval = Number(document.getElementById("EQInfoInterval").value) * 1000;
   config.Source.axis.GetData = document.getElementById("Axis_GetData").checked;
   config.Source.axis.AccessToken = document.getElementById("Axis_AccessToken").value;
   config.Source.wolfx.GetData = document.getElementById("Wolfx_GetData").checked;
@@ -314,7 +317,6 @@ function init() {
     });
     if (optionElm) optionElm.selected = true;
   });
-
 
   const img = document.createElement("img");
   img.src = "./img/homePin.svg";
