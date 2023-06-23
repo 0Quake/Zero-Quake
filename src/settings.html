@@ -146,18 +146,25 @@
                 <span class="material-icons-round">assignment</span>
                 Zero Quakeについて
             </div>
+            <div id="BtnWrap">
+                <button id="cancel">キャンセル</button>
+                <button id="apply">OK</button>
+            </div>
         </div>
 
         <div id="tab1_content" class="tabContentWrap">
             <div id="tab1_content1" class="tabcontent">
                 <h3><span>全般</span>現在地</h3>
                 <section>
+                    <div id="mapcontainer"></div>
+                    <div  class="smalltext">地図クリックで現在地を設定できます。</div>
+
+                    <hr>
+
                     <label>表示名<input id="HomeName" type="text" placeholder="自宅"></label>
                     <label>緯度<input id="latitude" type="number" oninput="MapReDraw()" step="0.1" min="-90" max="90" placeholder="緯度（10進法）"></label>
                     <label>経度<input id="longitude" type="number" oninput="MapReDraw()" step="0.1" min="-180" max="180" placeholder="経度（10進法）"></label>
                     <label>細分区域<select id="saibun" onchange="MapReDraw()"><option selected disabled></option><option>石狩地方北部</option><option>石狩地方中部</option><option>石狩地方南部</option><option>渡島地方北部</option><option>渡島地方東部</option><option>渡島地方西部</option><option>檜山地方</option><option>後志地方北部</option><option>後志地方東部</option><option>後志地方西部</option><option>北海道奥尻島</option><option>空知地方北部</option><option>空知地方中部</option><option>空知地方南部</option><option>上川地方北部</option><option>上川地方中部</option><option>上川地方南部</option><option>留萌地方中北部</option><option>留萌地方南部</option><option>宗谷地方北部</option><option>宗谷地方南部</option><option>北海道利尻礼文</option><option>網走地方</option><option>北見地方</option><option>紋別地方</option><option>胆振地方西部</option><option>胆振地方中東部</option><option>日高地方西部</option><option>日高地方中部</option><option>日高地方東部</option><option>十勝地方北部</option><option>十勝地方中部</option><option>十勝地方南部</option><option>釧路地方北部</option><option>釧路地方中南部</option><option>根室地方北部</option><option>根室地方中部</option><option>根室地方南部</option><option>青森県津軽北部</option><option>青森県津軽南部</option><option>青森県三八上北</option><option>青森県下北</option><option>岩手県沿岸北部</option><option>岩手県沿岸南部</option><option>岩手県内陸北部</option><option>岩手県内陸南部</option><option>宮城県北部</option><option>宮城県南部</option><option>宮城県中部</option><option>秋田県沿岸北部</option><option>秋田県沿岸南部</option><option>秋田県内陸北部</option><option>秋田県内陸南部</option><option>山形県庄内</option><option>山形県最上</option><option>山形県村山</option><option>山形県置賜</option><option>福島県中通り</option><option>福島県浜通り</option><option>福島県会津</option><option>茨城県北部</option><option>茨城県南部</option><option>栃木県北部</option><option>栃木県南部</option><option>群馬県北部</option><option>群馬県南部</option><option>埼玉県北部</option><option>埼玉県南部</option><option>埼玉県秩父</option><option>千葉県北東部</option><option>千葉県北西部</option><option>千葉県南部</option><option>東京都２３区</option><option>東京都多摩東部</option><option>東京都多摩西部</option><option>神津島</option><option>伊豆大島</option><option>新島</option><option>三宅島</option><option>八丈島</option><option>小笠原</option><option>神奈川県東部</option><option>神奈川県西部</option><option>新潟県上越</option><option>新潟県中越</option><option>新潟県下越</option><option>新潟県佐渡</option><option>富山県東部</option><option>富山県西部</option><option>石川県能登</option><option>石川県加賀</option><option>福井県嶺北</option><option>福井県嶺南</option><option>山梨県中・西部</option><option>山梨県東部・富士五湖</option><option>長野県北部</option><option>長野県中部</option><option>長野県南部</option><option>岐阜県飛騨</option><option>岐阜県美濃東部</option><option>岐阜県美濃中西部</option><option>静岡県伊豆</option><option>静岡県東部</option><option>静岡県中部</option><option>静岡県西部</option><option>愛知県東部</option><option>愛知県西部</option><option>三重県北部</option><option>三重県中部</option><option>三重県南部</option><option>滋賀県北部</option><option>滋賀県南部</option><option>京都府北部</option><option>京都府南部</option><option>大阪府北部</option><option>大阪府南部</option><option>兵庫県北部</option><option>兵庫県南東部</option><option>兵庫県南西部</option><option>兵庫県淡路島</option><option>奈良県</option><option>和歌山県北部</option><option>和歌山県南部</option><option>鳥取県東部</option><option>鳥取県中部</option><option>鳥取県西部</option><option>島根県東部</option><option>島根県西部</option><option>島根県隠岐</option><option>岡山県北部</option><option>岡山県南部</option><option>広島県北部</option><option>広島県南東部</option><option>広島県南西部</option><option>徳島県北部</option><option>徳島県南部</option><option>香川県東部</option><option>香川県西部</option><option>愛媛県東予</option><option>愛媛県中予</option><option>愛媛県南予</option><option>高知県東部</option><option>高知県中部</option><option>高知県西部</option><option>山口県北部</option><option>山口県西部</option><option>山口県東部</option><option>山口県中部</option><option>福岡県福岡</option><option>福岡県北九州</option><option>福岡県筑豊</option><option>福岡県筑後</option><option>佐賀県北部</option><option>佐賀県南部</option><option>長崎県北部</option><option>長崎県南西部</option><option>長崎県島原半島</option><option>長崎県対馬</option><option>長崎県壱岐</option><option>長崎県五島</option><option>熊本県阿蘇</option><option>熊本県熊本</option><option>熊本県球磨</option><option>熊本県天草・芦北</option><option>大分県北部</option><option>大分県中部</option><option>大分県南部</option><option>大分県西部</option><option>宮崎県北部平野部</option><option>宮崎県北部山沿い</option><option>宮崎県南部平野部</option><option>宮崎県南部山沿い</option><option>鹿児島県薩摩</option><option>鹿児島県大隅</option><option>鹿児島県十島村</option><option>鹿児島県甑島</option><option>鹿児島県種子島</option><option>鹿児島県屋久島</option><option>鹿児島県奄美北部</option><option>鹿児島県奄美南部</option><option>沖縄県本島北部</option><option>沖縄県本島中南部</option><option>沖縄県久米島</option><option>沖縄県大東島</option><option>沖縄県宮古島</option><option>沖縄県石垣島</option><option>沖縄県与那国島</option><option>沖縄県西表島</option><option>色丹島</option><option>国後島</option><option>択捉島</option><option>鷹島(甑島南方)</option><option>津倉瀬(宇治群島北東方）</option><option>うるま市・金武町境界部地先の埋立地</option></select></label>
-                    <div id="mapcontainer"></div>
-                    <div id="mapContainer"></div>
                 </section>
             </div>
             <div id="tab1_content3" class="tabcontent">
@@ -424,7 +431,7 @@
                 <h4>接続が無効になってしまった場合</h4>
                 <div>アクセストークンが期限切れになっている可能性があります。再度Axisのページでアクセストークンを確認してください。</div>
 
-                <p style="font-size: 13px;">※アクセストークンは基本的に自動更新されますが、移行期間中に当ソフトを起動しなかった場合、自動更新はできません。</p>
+                <p class="smalltext">※アクセストークンは基本的に自動更新されますが、移行期間中に当ソフトを起動しなかった場合、自動更新はできません。</p>
 
             </div>
             <div id="tab1_content14" class="tabcontent">
@@ -448,7 +455,7 @@
                             <option value="no" selected>送信しない</option>
                         </select>
                     </label>
-                    <p style="font-size: 13px;">エラーメッセージのみを送信し、個人を特定できる情報の送信は行いません。</p>
+                    <p class="smalltext">エラーメッセージのみを送信し、個人を特定できる情報の送信は行いません。</p>
                 </section>
                 <section>
                     <h4>スタートアップ</h4>
@@ -463,12 +470,8 @@
                         <input id="replay" type="datetime-local" min="1970-01-01T00:00:00" step="1"><button id="replayJump">ジャンプ</button><button id="replayReset">リセット</button>
                     </label>
                     <div>オフセット：<span id="replayOffset">-</span></div>
-                    <p style="font-size: 13px;">リプレイ中はリアルタイムの情報が入手できません。リプレイで利用できるのは、強震モニタの情報のみです。</p>
+                    <p  class="smalltext">リプレイ中はリアルタイムの情報が入手できません。リプレイで利用できるのは、強震モニタの情報のみです。</p>
                 </section>
-            </div>
-            <div id="BtnWrap">
-                <button id="cancel">キャンセル</button>
-                <button id="apply">OK</button>
             </div>
 
         </div>
