@@ -19,12 +19,18 @@ window.electronAPI.messageSend((event, request) => {
 
     config = request.data;
 
+    document.getElementById("HomeName").value = config.home.name;
     document.getElementById("latitude").value = config.home.latitude;
     document.getElementById("longitude").value = config.home.longitude;
     document.getElementById("EEW_Voice").value = config.notice.voice.EEW;
     document.getElementById("EEW2_Voice").value = config.notice.voice.EEWUpdate;
     document.getElementById("EQInfo_ItemCount").value = config.Info.EQInfo.ItemCount;
     document.getElementById("RealTimeShake_ItemCount").value = config.Info.RealTimeShake.List.ItemCount;
+
+    document.querySelectorAll("#saibun option").forEach(function(elm){
+      if(elm.innerText==config.home.Section)elm.selected=true
+    })
+    
 
     TTSvolumeSet(config.notice.voice_parameter.volume);
     TTSpitchSet(config.notice.voice_parameter.pitch);
@@ -93,6 +99,7 @@ document.getElementById("check_update").addEventListener("click", function () {
 
 document.getElementById("apply").addEventListener("click", function () {
   config.system.crashReportAutoSend = document.getElementById("BugReportAutoSend").value;
+  config.home.name = document.getElementById("HomeName").value;
   config.home.latitude = document.getElementById("latitude").value;
   config.home.longitude = document.getElementById("longitude").value;
   config.home.Section = document.getElementById("saibun").value;
@@ -266,18 +273,6 @@ function init() {
 
   map.addControl(new maplibregl.NavigationControl(), "top-right");
 
-  fetch("./Resource/Section_CenterLocation.json")
-    .then(function (res) {
-      return res.json();
-    })
-    .then(function (json) {
-      Object.keys(json).forEach(function (elm) {
-        var saibunElm = document.createElement("option");
-        saibunElm.innerText = elm;
-        document.getElementById("saibun").appendChild(saibunElm);
-        if (elm == config.home.Section) saibunElm.selected = true;
-      });
-    });
   map.on("click", "basemap_fill", (e) => {
     document.getElementById("latitude").value = e.lngLat.lat;
     document.getElementById("longitude").value = e.lngLat.lng;
@@ -289,17 +284,6 @@ function init() {
     if (optionElm) optionElm.selected = true;
   });
 
-  /*
-  map = L.map("mapcontainer", {
-    maxBounds: [
-      [90, 0],
-      [-90, 360],
-    ],
-
-    zoomAnimation: true, //←オフにするとずれて不自然
-    //preferCanvas: true,←かるくなる？
-  });*/
-  //L.control.scale({ imperial: false }).addTo(map);←縮尺
 
   const img = document.createElement("img");
   img.src = "./img/homePin.svg";

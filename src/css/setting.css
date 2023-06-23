@@ -26,6 +26,7 @@ body {
   height: 100%;
   writing-mode: unset;
   text-orientation: unset;
+  padding: 5px;
 }
 #tab1_bar .tabmenu {
   margin: 0;
