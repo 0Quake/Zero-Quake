@@ -147,8 +147,8 @@
                 Zero Quakeについて
             </div>
             <div id="BtnWrap">
-                <button id="cancel">キャンセル</button>
-                <button id="apply">OK</button>
+                <button id="cancel" title="設定を破棄して終了">キャンセル</button>
+                <button id="apply" title="設定を保存して終了">OK</button>
             </div>
         </div>
 
@@ -156,8 +156,8 @@
             <div id="tab1_content1" class="tabcontent">
                 <h3><span>全般</span>現在地</h3>
                 <section>
-                    <div id="mapcontainer"></div>
-                    <div  class="smalltext">地図クリックで現在地を設定できます。</div>
+                    <div id="mapcontainer" title="地図クリックで現在地を設定"></div>
+                    <div  class="smalltext">地図クリックで現在地を設定</div>
 
                     <hr>
 
@@ -214,6 +214,7 @@
                     </div>
                 </section>
 
+                <hr>
 
                 <h2 id="受信できる情報">受信できる情報</h2>
                 <h3 id="気象庁">気象庁</h3>
@@ -420,6 +421,8 @@
                 <label><input type="checkbox" id="Axis_GetData">データを取得</label>
                 <label>アクセストークン<input type="text" id="Axis_AccessToken" placeholder="アクセストークンの取得方法は下記を参照"></label>
 
+                <hr>
+
                 <h4>Axis 登録の案内</h4>
                 <ol>
                     <li><a href="https://axis.prioris.jp/">Axisのサイト</a>にアクセス</li>
@@ -467,7 +470,7 @@
                 <section>
                     <h4>リプレイ</h4>
                     <label>リプレイ時刻：
-                        <input id="replay" type="datetime-local" min="1970-01-01T00:00:00" step="1"><button id="replayJump">ジャンプ</button><button id="replayReset">リセット</button>
+                        <input id="replay" type="datetime-local" min="1970-01-01T00:00:00" step="1"><button id="replayJump" title="設定した時刻まで巻き戻し">ジャンプ</button><button id="replayReset" title="リプレイを解除">リセット</button>
                     </label>
                     <div>オフセット：<span id="replayOffset">-</span></div>
                     <p  class="smalltext">リプレイ中はリアルタイムの情報が入手できません。リプレイで利用できるのは、強震モニタの情報のみです。</p>
