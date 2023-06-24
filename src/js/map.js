@@ -820,7 +820,7 @@ function EstShindoUpdate(req) {
     i1 = [req.data[4], req.eid];
     map.addSource("kmoni-estShindo1" + req.eid, {
       type: "image",
-      url: req.data[0],
+      url: req.data.a,
       coordinates: [
         [129, 46],
         [145.8, 46.2],
@@ -842,7 +842,7 @@ function EstShindoUpdate(req) {
     );
     map.addSource("kmoni-estShindo2" + req.eid, {
       type: "image",
-      url: req.data[1],
+      url: req.data.b,
       coordinates: [
         [128.8, 42.5],
         [145.8, 42.2],
@@ -864,7 +864,7 @@ function EstShindoUpdate(req) {
     );
     map.addSource("kmoni-estShindo3" + req.eid, {
       type: "image",
-      url: req.data[2],
+      url: req.data.c,
       coordinates: [
         [128.75, 38.2],
         [145.75, 38.1],
@@ -886,7 +886,7 @@ function EstShindoUpdate(req) {
     );
     map.addSource("kmoni-estShindo4" + req.eid, {
       type: "image",
-      url: req.data[2],
+      url: req.data.d,
       coordinates: [
         [128.6, 34.1],
         [146, 34.1],
@@ -908,7 +908,7 @@ function EstShindoUpdate(req) {
     );
     map.addSource("kmoni-estShindo5" + req.eid, {
       type: "image",
-      url: req.data[2],
+      url: req.data.e,
       coordinates: [
         [122.5, 32],
         [131.2, 31.8],
@@ -1048,9 +1048,7 @@ function psWaveEntry() {
     }
 
     if (!elm.is_cancel && elm.origin_time && elm.depth && elm.latitude && elm.longitude) {
-      var distance = Math.floor((new Date() - Replay - elm.origin_time) / 1000);
-
-      if (elm.depth <= 700 && distance <= 2000 && TimeTable_JMA2001) {
+      if (elm.depth <= 700) {
         var TimeTableTmp = TimeTable_JMA2001[elm.depth];
         var pswaveFind = psWaveList.find(function (elm2) {
           return elm2.id == elm.EventID;
@@ -1065,7 +1063,7 @@ function psWaveEntry() {
             id: elm.EventID,
             PCircleElm: null,
             SCircleElm: null,
-            data: { latitude: elm.latitude, longitude: elm.longitude, originTime: elm.origin_time, pRadius: 0, sRadius: 0 },
+            data: { latitude: elm.latitude, longitude: elm.longitude, originTime: elm.origin_time },
             TimeTable: TimeTableTmp,
           });
         }
@@ -1084,8 +1082,20 @@ function psWaveEntry() {
         map.setLayoutProperty("PCircle_" + elm.id, "visibility", "none");
         map.setLayoutProperty("SCircle_" + elm.id, "visibility", "none");
         map.setLayoutProperty("SCircle_" + elm.id + "_FILL", "visibility", "none");
-        if (map.getLayer("kmoni-estShindo" + elm.id)) map.removeLayer("kmoni-estShindo" + elm.id);
-        if (map.getSource("kmoni-estShindo" + elm.id)) map.removeSource("kmoni-estShindo" + elm.id);
+        if (map.getLayer("kmoni-estShindo1" + elm.id)) {
+          map.removeLayer("kmoni-estShindo1" + elm.id);
+          map.removeLayer("kmoni-estShindo2" + elm.id);
+          map.removeLayer("kmoni-estShindo3" + elm.id);
+          map.removeLayer("kmoni-estShindo4" + elm.id);
+          map.removeLayer("kmoni-estShindo5" + elm.id);
+        }
+        if (map.getSource("kmoni-estShindo1" + elm.id)) {
+          map.removeSource("kmoni-estShindo1" + elm.id);
+          map.removeSource("kmoni-estShindo2" + elm.id);
+          map.removeSource("kmoni-estShindo3" + elm.id);
+          map.removeSource("kmoni-estShindo4" + elm.id);
+          map.removeSource("kmoni-estShindo5" + elm.id);
+        }
       }
     }
     return stillEEW;
@@ -1101,8 +1111,8 @@ function psWaveCalc(eid) {
     var SWmin;
     var distance = (new Date() - Replay - pswaveFind.data.originTime) / 1000;
 
-    var PRadius = 0;
-    var SRadius = 0;
+    var PRadius = null;
+    var SRadius = null;
 
     var i = 0;
     for (const elm of TimeTableTmp) {
@@ -1112,15 +1122,18 @@ function psWaveCalc(eid) {
       if (!PRadius) {
         if (elm.P == distance) {
           PRadius = elm.R;
+          if (SRadius || SWmin > distance) break;
         } else if (elm.P > distance) {
-          elm2 = TimeTableTmp[Math.max(0, i - 1)];
+          elm2 = TimeTableTmp[i - 1];
           PRadius = elm.R + ((elm2.R - elm.R) * (distance - elm.P)) / (elm2.P - elm.P);
+          psWaveList;
           if (SRadius || SWmin > distance) break;
         }
       }
-      if (!SRadius && SWmin <= distance) {
+      if (!SRadius && SWmin < distance) {
         if (elm.S == distance) {
           SRadius = elm.R;
+          if (PRadius) break;
         } else if (elm.S > distance) {
           elm2 = TimeTableTmp[i - 1];
           SRadius = elm.R + ((elm2.R - elm.R) * (distance - elm.S)) / (elm2.S - elm.S);
@@ -1129,7 +1142,7 @@ function psWaveCalc(eid) {
       }
       i++;
     }
-
+    console.log(eid, PRadius, SRadius);
     if (SWmin > distance) {
       window.requestAnimationFrame(function () {
         psWaveReDraw(
@@ -1157,7 +1170,6 @@ let circle_options = {
 };
 //予報円描画
 function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrived, SArriveTime, nowDistance) {
-  if (!pRadius || (!sRadius && !SnotArrived)) return;
   var EQElm = psWaveList.find(function (elm) {
     return elm.id == EventID;
   });
@@ -1168,56 +1180,62 @@ function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrive
     let _center = turf.point([longitude, latitude]);
 
     if (EQElm.PCircleElm) {
-      var pcircle = turf.circle(_center, pRadius / 1000, circle_options);
-      map.getSource("PCircle_" + EventID).setData(pcircle);
-
-      var scircle = turf.circle(_center, sRadius / 1000, circle_options);
-      map.getSource("SCircle_" + EventID).setData(scircle);
-      map.setPaintProperty("SCircle_" + EventID, "line-width", SnotArrived ? 0 : 2);
+      if (pRadius) {
+        var pcircle = turf.circle(_center, pRadius / 1000, circle_options);
+        map.getSource("PCircle_" + EventID).setData(pcircle);
+      }
+      if (sRadius) {
+        var scircle = turf.circle(_center, sRadius / 1000, circle_options);
+        map.getSource("SCircle_" + EventID).setData(scircle);
+        map.setPaintProperty("SCircle_" + EventID, "line-width", SnotArrived ? 0 : 2);
+      }
     } else {
-      map.addSource("PCircle_" + EventID, {
-        type: "geojson",
-        data: turf.circle(_center, pRadius / 1000, circle_options),
-      });
+      if (pRadius) {
+        map.addSource("PCircle_" + EventID, {
+          type: "geojson",
+          data: turf.circle(_center, pRadius / 1000, circle_options),
+        });
 
-      map.addLayer({
-        id: "PCircle_" + EventID,
-        type: "line",
-        source: "PCircle_" + EventID,
-        paint: {
-          "line-color": config.color.psWave.PwaveColor,
-          "line-width": 2,
-        },
-      });
+        map.addLayer({
+          id: "PCircle_" + EventID,
+          type: "line",
+          source: "PCircle_" + EventID,
+          paint: {
+            "line-color": config.color.psWave.PwaveColor,
+            "line-width": 2,
+          },
+        });
+      }
 
-      map.addSource("SCircle_" + EventID, {
-        type: "geojson",
-        data: turf.circle(_center, sRadius / 1000, circle_options),
-      });
+      if (sRadius) {
+        map.addSource("SCircle_" + EventID, {
+          type: "geojson",
+          data: turf.circle(_center, sRadius / 1000, circle_options),
+        });
 
-      map.addLayer({
-        id: "SCircle_" + EventID,
-        type: "line",
-        source: "SCircle_" + EventID,
-        paint: {
-          "line-color": config.color.psWave.SwaveColor,
-          "line-width": 2,
-        },
-      });
-      map.addLayer({
-        id: "SCircle_" + EventID + "_FILL",
-        type: "fill",
-        source: "SCircle_" + EventID,
-        paint: {
-          "fill-color": config.color.psWave.SwaveColor,
-          "fill-opacity": 0.15,
-        },
-      });
+        map.addLayer({
+          id: "SCircle_" + EventID,
+          type: "line",
+          source: "SCircle_" + EventID,
+          paint: {
+            "line-color": config.color.psWave.SwaveColor,
+            "line-width": 2,
+          },
+        });
+        map.addLayer({
+          id: "SCircle_" + EventID + "_FILL",
+          type: "fill",
+          source: "SCircle_" + EventID,
+          paint: {
+            "fill-color": config.color.psWave.SwaveColor,
+            "fill-opacity": 0.15,
+          },
+        });
 
-      EQElm.PCircleElm = true;
-      EQElm.SCircleElm = true;
-      EQElm = psWaveList[psWaveList.length - 1];
-
+        EQElm.PCircleElm = true;
+        EQElm.SCircleElm = true;
+        EQElm = psWaveList[psWaveList.length - 1];
+      }
       psWaveCalc(EventID);
     }
 
