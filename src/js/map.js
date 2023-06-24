@@ -798,7 +798,6 @@ document.getElementById("tab1_menu2").addEventListener("click", function () {
   kmoniListDraw(kmoniMapData);
 });
 
-var i1;
 //予想震度更新
 function EstShindoUpdate(req) {
   if (map.getSource("kmoni-estShindo1" + req.eid)) {

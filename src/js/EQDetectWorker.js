@@ -80,7 +80,6 @@ function EQDetect(data, date) {
           ptDataTmp.UpCount = 0;
         }
 
-        //if (!detect2) {
         //PGA平均を求めるためのデータ追加
         ptDataTmp.SUMTmp = ptDataTmp.SUMTmp.slice(0, thresholds.historyCount - 1);
         ptDataTmp.SUMTmp.push(elm.pga);
@@ -101,7 +100,6 @@ function EQDetect(data, date) {
           });
         }
       }
-      //}
       if (elm.changed) changedData.push(elm);
     }
 

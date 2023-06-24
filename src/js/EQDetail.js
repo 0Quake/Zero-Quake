@@ -729,16 +729,12 @@ function Mapinit() {
 
     if (currentZoom < 4.5) {
       document.getElementById("mapcontainer").classList.add("zoomLevel_1");
-      //gjmapT.setStyle({ weight: 20 });
     } else if (currentZoom < 6) {
       document.getElementById("mapcontainer").classList.add("zoomLevel_2");
-      //gjmapT.setStyle({ weight: 25 });
     } else if (currentZoom < 8) {
       document.getElementById("mapcontainer").classList.add("zoomLevel_3");
-      //gjmapT.setStyle({ weight: 35 });
     } else {
       document.getElementById("mapcontainer").classList.add("zoomLevel_4");
-      //gjmapT.setStyle({ weight: 65 });
     }
     if (currentZoom > 11) {
       document.getElementById("mapcontainer").classList.add("popup_show");
@@ -1702,7 +1698,6 @@ function EQInfoControl(data) {
       break;
   }
 
-  //  {originTime:,maxI:,mag:,lat:,lng:,depth:,epiCenter:,comment:,}
   document.getElementById("splash").style.display = "none";
 }
 
@@ -1756,25 +1751,23 @@ function InfoType_add(type) {
   document.getElementById(type).style.display = "inline-block";
   switch (type) {
     case "type-4-1":
+      document.getElementById("type-1").classList.add("disabled");
       document.getElementById("type-2").classList.add("disabled");
       document.getElementById("type-3").classList.add("disabled");
       break;
     case "type-4-2":
+      document.getElementById("type-1").classList.add("disabled");
       document.getElementById("type-2").classList.add("disabled");
       document.getElementById("type-3").classList.add("disabled");
       if (map) map.setZoom(2);
       break;
     case "type-5":
+      document.getElementById("type-1").classList.add("disabled");
       document.getElementById("type-3").classList.add("disabled");
       break;
 
-    /* eslint-disable no-duplicate-case */
     case "type-2":
     case "type-3":
-    case "type-4-1":
-    case "type-4-2":
-    case "type-5":
-      /* eslint-enable */
       document.getElementById("type-1").classList.add("disabled");
       break;
 
