@@ -796,6 +796,7 @@ const path = require("path");
 const { JSDOM } = require("jsdom");
 const Store = require("electron-store");
 var WebSocketClient = require("websocket").client;
+var soft_version = require("../package.json").version;
 const store = new Store();
 var defaultConfigVal = {
   system: {
@@ -1057,7 +1058,7 @@ function checkUpdate() {
     }
   });
   request.on("error", () => {
-    var current_verTmp = process.env.npm_package_version;
+    var current_verTmp = soft_version;
 
     update_data = { check_error: true, check_date: new Date(), latest_version: null, current_version: current_verTmp, update_available: null, dl_page: null };
     if (settingWindow) {
@@ -1217,7 +1218,7 @@ function errorResolve(response) {
 //クラッシュレポートの送信
 function crashReportSend(errMsg, result) {
   let request = net.request({
-    url: "https://zeroquake.wwww.jp/crashReport/?errorMsg=" + encodeURI(errMsg) + "&soft_version=" + encodeURI(process.env.npm_package_version),
+    url: "https://zeroquake.wwww.jp/crashReport/?errorMsg=" + encodeURI(errMsg) + "&soft_version=" + encodeURI(soft_version),
   });
 
   request.on("error", () => {
@@ -1297,7 +1298,7 @@ ipcMain.on("message", (_event, response) => {
 
     settingWindow.webContents.send("message2", {
       action: "setting",
-      data: { config: config, softVersion: process.env.npm_package_version },
+      data: { config: config, softVersion: soft_version },
     });
   } else if (response.action == "checkForUpdate") {
     checkUpdate();
@@ -1505,7 +1506,7 @@ function setting_createWindow() {
     });
     settingWindow.webContents.send("message2", {
       action: "softVersion",
-      data: process.env.npm_package_version,
+      data: soft_version,
     });
     settingWindow.webContents.send("message2", {
       action: "openAtLogin",
