@@ -2,15 +2,15 @@ body {
   overflow: hidden;
 }
 
-hr{
+hr {
   border: none;
   border-top: solid 1px #777;
   margin: 20px 0;
 }
 
-.smalltext{
+.smalltext {
   font-size: 13px;
-  color: #CCC;
+  color: #ccc;
 }
 
 #tab1_wrap {
@@ -284,4 +284,7 @@ ol {
   padding: 0.5em;
   margin-top: 20px;
   border-radius: 8px;
+}
+#tab1_bar .material-icons-round {
+  letter-spacing: 0.13em;
 }
