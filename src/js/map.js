@@ -1190,52 +1190,50 @@ function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrive
         map.setPaintProperty("SCircle_" + EventID, "line-width", SnotArrived ? 0 : 2);
       }
     } else {
-      if (pRadius) {
-        map.addSource("PCircle_" + EventID, {
-          type: "geojson",
-          data: turf.circle(_center, pRadius / 1000, circle_options),
-        });
+      map.addSource("PCircle_" + EventID, {
+        type: "geojson",
+        data: turf.circle(_center, pRadius / 1000, circle_options),
+      });
 
-        map.addLayer({
-          id: "PCircle_" + EventID,
-          type: "line",
-          source: "PCircle_" + EventID,
-          paint: {
-            "line-color": config.color.psWave.PwaveColor,
-            "line-width": 2,
-          },
-        });
-      }
+      map.addLayer({
+        id: "PCircle_" + EventID,
+        type: "line",
+        source: "PCircle_" + EventID,
+        paint: {
+          "line-color": config.color.psWave.PwaveColor,
+          "line-width": 2,
+        },
+      });
 
-      if (sRadius) {
-        map.addSource("SCircle_" + EventID, {
-          type: "geojson",
-          data: turf.circle(_center, sRadius / 1000, circle_options),
-        });
+      sRadTmp = sRadius ? sRadius / 1000 : 0;
+      map.addSource("SCircle_" + EventID, {
+        type: "geojson",
+        data: turf.circle(_center, sRadTmp, circle_options),
+      });
 
-        map.addLayer({
-          id: "SCircle_" + EventID,
-          type: "line",
-          source: "SCircle_" + EventID,
-          paint: {
-            "line-color": config.color.psWave.SwaveColor,
-            "line-width": 2,
-          },
-        });
-        map.addLayer({
-          id: "SCircle_" + EventID + "_FILL",
-          type: "fill",
-          source: "SCircle_" + EventID,
-          paint: {
-            "fill-color": config.color.psWave.SwaveColor,
-            "fill-opacity": 0.15,
-          },
-        });
+      map.addLayer({
+        id: "SCircle_" + EventID,
+        type: "line",
+        source: "SCircle_" + EventID,
+        paint: {
+          "line-color": config.color.psWave.SwaveColor,
+          "line-width": 2,
+        },
+      });
+      map.addLayer({
+        id: "SCircle_" + EventID + "_FILL",
+        type: "fill",
+        source: "SCircle_" + EventID,
+        paint: {
+          "fill-color": config.color.psWave.SwaveColor,
+          "fill-opacity": 0.15,
+        },
+      });
 
-        EQElm.PCircleElm = true;
-        EQElm.SCircleElm = true;
-        EQElm = psWaveList[psWaveList.length - 1];
-      }
+      EQElm.PCircleElm = true;
+      EQElm.SCircleElm = true;
+      EQElm = psWaveList[psWaveList.length - 1];
+
       psWaveCalc(EventID);
     }
 
