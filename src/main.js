@@ -1734,10 +1734,8 @@ function estShindoControl(response) {
     estShindoTmp = {
       action: "EstShindoUpdate",
       data: response.data,
-      //date: response.date,
       eid: response.eid,
       serial: response.serial,
-      //nodata: response.nodata,
     };
     if (mainWindow) {
       mainWindow.webContents.send("message2", estShindoTmp);
@@ -1771,7 +1769,6 @@ function kmoniRequest() {
           var json = jsonParse(dataTmp);
           if (json) {
             EEWdetect(2, json, 1);
-            if (json.result.message == "") kmoniEstShindoRequest();
           }
         });
       }
@@ -1828,7 +1825,6 @@ function kmoniEstShindoRequest() {
             data: kmoniEstShindoData,
             eid: kmoniEid,
             serial: kmoniRNum,
-            date: ReqTime,
           });
         }
       }
@@ -2538,6 +2534,8 @@ function EEWdetect(type, json, KorL) {
     kmoniTimeUpdate(request_time, sourceTmp, "success");
 
     if (json.result.message == "") {
+      if (KorL == 1) kmoniEstShindoRequest();
+
       kmoniEid = json.report_id;
       kmoniRNum = json.report_num;
 

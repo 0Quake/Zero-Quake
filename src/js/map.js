@@ -798,28 +798,130 @@ document.getElementById("tab1_menu2").addEventListener("click", function () {
   kmoniListDraw(kmoniMapData);
 });
 
+var i1;
 //予想震度更新
 function EstShindoUpdate(req) {
-  if (map.getSource("kmoni-estShindo" + req.eid)) {
-    map.getSource("kmoni-estShindo" + req.eid).updateImage({
-      url: req.data,
+  if (map.getSource("kmoni-estShindo1" + req.eid)) {
+    map.getSource("kmoni-estShindo1" + req.eid).updateImage({
+      url: req.data[0],
+    });
+    map.getSource("kmoni-estShindo2" + req.eid).updateImage({
+      url: req.data[1],
+    });
+    map.getSource("kmoni-estShindo3" + req.eid).updateImage({
+      url: req.data[2],
+    });
+    map.getSource("kmoni-estShindo4" + req.eid).updateImage({
+      url: req.data[3],
+    });
+    map.getSource("kmoni-estShindo5" + req.eid).updateImage({
+      url: req.data[4],
     });
   } else {
-    map.addSource("kmoni-estShindo" + req.eid, {
+    i1 = [req.data[4], req.eid];
+    map.addSource("kmoni-estShindo1" + req.eid, {
       type: "image",
-      url: req.data,
+      url: req.data[0],
       coordinates: [
-        [123.5, 45.9], //左上
-        [145.8, 46.1], //右上
-        [145.7, 22], //右下
-        [122.6, 22.6], //左下
+        [129, 46],
+        [145.8, 46.2],
+        [145.8, 42.2],
+        [128.8, 42.5],
       ],
     });
     map.addLayer(
       {
-        id: "kmoni-estShindo" + req.eid,
+        id: "kmoni-estShindo1" + req.eid,
         type: "raster",
-        source: "kmoni-estShindo" + req.eid,
+        source: "kmoni-estShindo1" + req.eid,
+        paint: {
+          "raster-fade-duration": 0,
+          "raster-resampling": "nearest",
+        },
+      },
+      "basemap_LINE"
+    );
+    map.addSource("kmoni-estShindo2" + req.eid, {
+      type: "image",
+      url: req.data[1],
+      coordinates: [
+        [128.8, 42.5],
+        [145.8, 42.2],
+        [145.75, 38.1],
+        [128.75, 38.2],
+      ],
+    });
+    map.addLayer(
+      {
+        id: "kmoni-estShindo2" + req.eid,
+        type: "raster",
+        source: "kmoni-estShindo2" + req.eid,
+        paint: {
+          "raster-fade-duration": 0,
+          "raster-resampling": "nearest",
+        },
+      },
+      "basemap_LINE"
+    );
+    map.addSource("kmoni-estShindo3" + req.eid, {
+      type: "image",
+      url: req.data[2],
+      coordinates: [
+        [128.75, 38.2],
+        [145.75, 38.1],
+        [146, 34.1],
+        [128.6, 34.1],
+      ],
+    });
+    map.addLayer(
+      {
+        id: "kmoni-estShindo3" + req.eid,
+        type: "raster",
+        source: "kmoni-estShindo3" + req.eid,
+        paint: {
+          "raster-fade-duration": 0,
+          "raster-resampling": "nearest",
+        },
+      },
+      "basemap_LINE"
+    );
+    map.addSource("kmoni-estShindo4" + req.eid, {
+      type: "image",
+      url: req.data[2],
+      coordinates: [
+        [128.6, 34.1],
+        [146, 34.1],
+        [145.5, 30],
+        [128.55, 30],
+      ],
+    });
+    map.addLayer(
+      {
+        id: "kmoni-estShindo4" + req.eid,
+        type: "raster",
+        source: "kmoni-estShindo4" + req.eid,
+        paint: {
+          "raster-fade-duration": 0,
+          "raster-resampling": "nearest",
+        },
+      },
+      "basemap_LINE"
+    );
+    map.addSource("kmoni-estShindo5" + req.eid, {
+      type: "image",
+      url: req.data[2],
+      coordinates: [
+        [122.5, 32],
+        [131.2, 31.8],
+        [131, 23.9],
+        [122.45, 23.9],
+      ],
+    });
+    map.addLayer(
+      {
+        id: "kmoni-estShindo5" + req.eid,
+        type: "raster",
+        source: "kmoni-estShindo5" + req.eid,
         paint: {
           "raster-fade-duration": 0,
           "raster-resampling": "nearest",
