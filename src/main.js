@@ -1966,9 +1966,6 @@ function EEWdetect(type, json, KorL) {
       region_name: region_nameTmp,
       origin_time: origin_timeTmp,
       isPlum: conditionTmp,
-      userIntensity: null,
-      arrivalTime: null,
-      intensityAreas: null,
       warnZones: [],
       source: "P2P_EEW",
     };
@@ -1976,15 +1973,16 @@ function EEWdetect(type, json, KorL) {
     var areaTmp = [];
     json.areas.forEach(function (elm) {
       areaTmp.push({
-        pref: elm.pref, //府県予報区
-        name: elm.name, //地域名（細分区域名）
-        scaleFrom: shindoConvert(elm.scaleFrom), //最大予測震度の下限
-        scaleTo: shindoConvert(elm.scaleTo), //最大予測震度の上限
-        kindCode: elm.kindCode, //警報コード( 10 (緊急地震速報（警報） 主要動について、未到達と予測), 11 (緊急地震速報（警報） 主要動について、既に到達と予測), 19 (緊急地震速報（警報） 主要動の到達予想なし（PLUM法による予想）) )
-        arrivalTime: new Date(elm.arrivalTime), //主要動の到達予測時刻
+        Code: null,
+        Name: elm.name,
+        Alert: elm.kindCode == 10||elm.kindCode == 11||elm.kindCode == 19,
+        IntTo: shindoConvert(elm.scaleTo),
+        IntFrom: shindoConvert(elm.scaleFrom),
+        ArrivalTime: new Date(elm.arrivalTime),
+        Arrived: elm.kindCode == 11,
       });
     });
-    EEWdata.intensityAreas = areaTmp;
+    EEWdata.warnZones = areaTmp;
 
     EEWcontrol(EEWdata);
   }catch(err){
