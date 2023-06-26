@@ -161,6 +161,7 @@
 
                     <hr>
 
+                    <label><input id="HomePinShow" type="checkbox">現在地ピンを表示</label>
                     <label>表示名<input id="HomeName" type="text" placeholder="自宅"></label>
                     <label>緯度<input id="latitude" type="number" oninput="MapReDraw()" step="0.1" min="-90" max="90" placeholder="緯度（10進法）"></label>
                     <label>経度<input id="longitude" type="number" oninput="MapReDraw()" step="0.1" min="-180" max="180" placeholder="経度（10進法）"></label>
@@ -572,7 +573,6 @@
             <div id="tab1_content4" class="tabcontent">
                 <h3><span>情報種別ごとの設定</span>緊急地震速報</h3>
                 <label><input type="checkbox" id="EEW_traning">訓練法を受信</label>
-                <p>製作中</p>
             </div>
             <div id="tab1_content5" class="tabcontent">
                 <h3><span>情報種別ごとの設定</span>地震情報</h3>
@@ -585,7 +585,7 @@
             </div>
             <div id="tab1_content6" class="tabcontent">
                 <h3><span>情報種別ごとの設定</span>津波情報</h3>
-                <p>製作中</p>
+                <label><input type="checkbox" id="Tsunami_GetData">津波情報を受信</label>
             </div>
             <div id="tab1_content7" class="tabcontent">
                 <h3><span>情報種別ごとの設定</span>リアルタイム揺れ情報</h3>
@@ -660,8 +660,9 @@
                     <p class="smalltext">エラーメッセージのみを送信し、個人を特定できる情報の送信は行いません。</p>
                 </section>
                 <section>
-                    <h4>スタートアップ</h4>
+                    <h4>起動</h4>
                     <label><input type="checkbox" id="startup">OS起動時に自動実行</label>
+                    <label><input type="checkbox" id="WindowAutoOpen">起動時にメインウィンドウを開く</label>
                 </section>
             </div>
             <div id="tab1_content13" class="tabcontent">

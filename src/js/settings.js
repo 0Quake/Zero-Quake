@@ -40,6 +40,9 @@ window.electronAPI.messageSend((event, request) => {
     selectBoxSet(document.getElementById("TTSvoiceSelect"), config.notice.voice_parameter.voice);
 
     selectBoxSet(document.getElementById("BugReportAutoSend"), config.system.crashReportAutoSend);
+    document.getElementById("WindowAutoOpen").checked = config.system.WindowAutoOpen;
+    document.getElementById("HomePinShow").checked = config.home.ShowPin;
+    document.getElementById("Tsunami_GetData").checked = config.Info.TsunamiInfo.GetData;
     document.getElementById("Axis_GetData").checked = config.Source.axis.GetData;
     document.getElementById("Wolfx_GetData").checked = config.Source.wolfx.GetData;
     document.getElementById("msil_GetData").checked = config.Source.msil.GetData;
@@ -100,6 +103,9 @@ document.getElementById("check_update").addEventListener("click", function () {
 
 document.getElementById("apply").addEventListener("click", function () {
   config.system.crashReportAutoSend = document.getElementById("BugReportAutoSend").value;
+  config.system.WindowAutoOpen = document.getElementById("WindowAutoOpen").checked;
+  config.home.ShowPin = document.getElementById("HomePinShow").checked;
+  config.Info.TsunamiInfo.GetData = document.getElementById("Tsunami_GetData").checked;
   config.home.name = document.getElementById("HomeName").value;
   config.home.latitude = document.getElementById("latitude").value;
   config.home.longitude = document.getElementById("longitude").value;

@@ -747,11 +747,13 @@ function Mapinit() {
     mapFillDraw();
   });
 
-  const img = document.createElement("img");
-  img.src = "./img/homePin.svg";
-  img.classList.add("homeIcon");
+  if (config.home.ShowPin) {
+    const img = document.createElement("img");
+    img.src = "./img/homePin.svg";
+    img.classList.add("homeIcon");
 
-  new maplibregl.Marker(img).setLngLat([config.home.longitude, config.home.latitude]).addTo(map);
+    new maplibregl.Marker(img).setLngLat([config.home.longitude, config.home.latitude]).addTo(map);
+  }
   estimated_intensity_mapReq();
 }
 document.getElementById("layerSwitch_toggle").addEventListener("click", function () {

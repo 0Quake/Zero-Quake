@@ -45,12 +45,14 @@ const store = new Store();
 var defaultConfigVal = {
   system: {
     crashReportAutoSend: "yes",
+    WindowAutoOpen: true,
   },
   home: {
     name: "自宅",
     latitude: 35.68,
     longitude: 139.767,
     Section: "東京都２３区",
+    ShowPin: true,
   },
   Info: {
     EEW: {
@@ -60,7 +62,9 @@ var defaultConfigVal = {
       ItemCount: 15,
       Interval: 30000,
     },
-    TsunamiInfo: {},
+    TsunamiInfo: {
+      GetData: true,
+    },
     RealTimeShake: {
       List: {
         ItemCount: 10,
@@ -259,47 +263,49 @@ function checkUpdate() {
         dataTmp += chunk;
       });
       res.on("end", function () {
-        try{
-        var json = jsonParse(dataTmp);
-        var latest_verTmp = String(json[0].tag_name.replace("v", ""));
-        var p = require("../package.json");
-        var current_verTmp = p.version;
-        var latest_v = latest_verTmp.split(".");
-        var current_v = current_verTmp.split(".");
-        var dl_page = json[0].html_url;
-        var update_detail = json[0].body;
+        try {
+          var json = jsonParse(dataTmp);
+          var latest_verTmp = String(json[0].tag_name.replace("v", ""));
+          var p = require("../package.json");
+          var current_verTmp = p.version;
+          var latest_v = latest_verTmp.split(".");
+          var current_v = current_verTmp.split(".");
+          var dl_page = json[0].html_url;
+          var update_detail = json[0].body;
 
-        var update_available = false;
-        if (latest_v[0] > current_v[0]) {
-          update_available = true;
-        } else if (latest_v[0] == current_v[0]) {
-          if (latest_v[1] > current_v[1]) {
+          var update_available = false;
+          if (latest_v[0] > current_v[0]) {
             update_available = true;
-          } else if (latest_v[1] == current_v[1]) {
-            if (latest_v[2] > current_v[2]) {
+          } else if (latest_v[0] == current_v[0]) {
+            if (latest_v[1] > current_v[1]) {
               update_available = true;
+            } else if (latest_v[1] == current_v[1]) {
+              if (latest_v[2] > current_v[2]) {
+                update_available = true;
 
-              var UpdateNotification = new Notification({
-                title: "ZeroQuakeで更新が利用可能です",
-                body: "v." + current_verTmp + " > v." + latest_verTmp + "更新内容：" + update_detail,
-                icon: path.join(__dirname, "img/icon.ico"),
-              });
-              UpdateNotification.show();
-              UpdateNotification.on("click", function () {
-                setting_createWindow();
-              });
+                var UpdateNotification = new Notification({
+                  title: "ZeroQuakeで更新が利用可能です",
+                  body: "v." + current_verTmp + " > v." + latest_verTmp + "更新内容：" + update_detail,
+                  icon: path.join(__dirname, "img/icon.ico"),
+                });
+                UpdateNotification.show();
+                UpdateNotification.on("click", function () {
+                  setting_createWindow();
+                });
+              }
             }
           }
-        }
 
-        update_data = { check_error: false, check_date: new Date(), latest_version: latest_verTmp, current_version: current_verTmp, update_available: update_available, dl_page: dl_page, update_detail: update_detail };
-        if (settingWindow) {
-          settingWindow.webContents.send("message2", {
-            action: "Update_Data",
-            data: update_data,
-          });
+          update_data = { check_error: false, check_date: new Date(), latest_version: latest_verTmp, current_version: current_verTmp, update_available: update_available, dl_page: dl_page, update_detail: update_detail };
+          if (settingWindow) {
+            settingWindow.webContents.send("message2", {
+              action: "Update_Data",
+              data: update_data,
+            });
+          }
+        } catch (err) {
+          return;
         }
-      }catch(err){return;}
       });
     }
   });
@@ -332,26 +338,28 @@ function ScheduledExecution() {
         dataTmp += chunk;
       });
       res.on("end", function () {
-        try{
-        var json = jsonParse(dataTmp);
-        if (json.status == "generate a new token") {
-          //トークン更新
-          if (json.token) {
-            config.Source.axis.AccessToken = String(json.token);
+        try {
+          var json = jsonParse(dataTmp);
+          if (json.status == "generate a new token") {
+            //トークン更新
+            if (json.token) {
+              config.Source.axis.AccessToken = String(json.token);
+              store.set("config", config);
+              Window_notification("Axisのアクセストークンを更新しました。", "info");
+            }
+          } else if (json.status == "contract has expired") {
+            //トークン期限切れ
+            config.Source.axis.GetData = false;
             store.set("config", config);
-            Window_notification("Axisのアクセストークンを更新しました。", "info");
+            Window_notification("Axisのアクセストークンの期限が切れました。手動でトークンを更新しください。", "warn");
+          } else if (json.status == "invalid header authorization") {
+            config.Source.axis.GetData = false;
+            store.set("config", config);
+            Window_notification("Axisのアクセストークンが不正です。", "error");
           }
-        } else if (json.status == "contract has expired") {
-          //トークン期限切れ
-          config.Source.axis.GetData = false;
-          store.set("config", config);
-          Window_notification("Axisのアクセストークンの期限が切れました。手動でトークンを更新しください。", "warn");
-        } else if (json.status == "invalid header authorization") {
-          config.Source.axis.GetData = false;
-          store.set("config", config);
-          Window_notification("Axisのアクセストークンが不正です。", "error");
+        } catch (err) {
+          return;
         }
-      }catch(err){return;}
       });
     });
 
@@ -365,17 +373,18 @@ app.whenReady().then(() => {
   //ウィンドウ作成
   worker_createWindow();
   kmoniServerSelect();
-  createWindow();
-
   //定期実行着火
   ScheduledExecution();
 
-  app.on("activate", () => {
-    // メインウィンドウが消えている場合は再度メインウィンドウを作成する
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
-    }
-  });
+  if (config.system.WindowAutoOpen) {
+    createWindow();
+    app.on("activate", () => {
+      // メインウィンドウが消えている場合は再度メインウィンドウを作成する
+      if (BrowserWindow.getAllWindows().length === 0) {
+        createWindow();
+      }
+    });
+  }
 
   //初期化処理
   start();
@@ -1035,16 +1044,18 @@ function kmoniRequest() {
         dataTmp.push(chunk);
       });
       res.on("end", () => {
-        try{
-        var bufTmp = Buffer.concat(dataTmp);
-        if (kmoniWorker) {
-          kmoniWorker.webContents.send("message2", {
-            action: "KmoniImgUpdate",
-            data: "data:image/gif;base64," + bufTmp.toString("base64"),
-            date: ReqTime,
-          });
+        try {
+          var bufTmp = Buffer.concat(dataTmp);
+          if (kmoniWorker) {
+            kmoniWorker.webContents.send("message2", {
+              action: "KmoniImgUpdate",
+              data: "data:image/gif;base64," + bufTmp.toString("base64"),
+              date: ReqTime,
+            });
+          }
+        } catch (err) {
+          kmoniTimeUpdate(new Date() - Replay, "kmoni", "Error");
         }
-      }catch(err){ kmoniTimeUpdate(new Date() - Replay, "kmoni", "Error");}
       });
     });
     request.end();
@@ -1062,21 +1073,23 @@ function kmoniEstShindoRequest() {
       dataTmp.push(chunk);
     });
     res.on("end", () => {
-      try{
-      var bufTmp = Buffer.concat(dataTmp);
-      if (kmoniWorker) {
-        var kmoniEstShindoDataTmp = "data:image/gif;base64," + bufTmp.toString("base64");
-        if (kmoniEstShindoDataTmp !== kmoniEstShindoData) {
-          kmoniEstShindoData = kmoniEstShindoDataTmp;
-          kmoniWorker.webContents.send("message2", {
-            action: "KmoniEstShindoImgUpdate",
-            data: kmoniEstShindoData,
-            eid: kmoniEid,
-            serial: kmoniRNum,
-          });
+      try {
+        var bufTmp = Buffer.concat(dataTmp);
+        if (kmoniWorker) {
+          var kmoniEstShindoDataTmp = "data:image/gif;base64," + bufTmp.toString("base64");
+          if (kmoniEstShindoDataTmp !== kmoniEstShindoData) {
+            kmoniEstShindoData = kmoniEstShindoDataTmp;
+            kmoniWorker.webContents.send("message2", {
+              action: "KmoniEstShindoImgUpdate",
+              data: kmoniEstShindoData,
+              eid: kmoniEid,
+              serial: kmoniRNum,
+            });
+          }
         }
+      } catch (err) {
+        return;
       }
-    }catch(err){return;}
     });
   });
   request.on("error", (error) => {
@@ -1145,7 +1158,7 @@ function ymoniRequest() {
 
           res.on("end", function () {
             var json = jsonParse(dataTmp);
-           EEWdetect(1, json);
+            EEWdetect(1, json);
           });
         }
       });
@@ -1218,17 +1231,19 @@ function SnetRequest() {
               dataTmp.push(chunk);
             });
             res.on("end", () => {
-              try{
-              var bufTmp = Buffer.concat(dataTmp);
-              if (kmoniWorker) {
-                var ReqTime = new Date(dateTime);
-                kmoniWorker.webContents.send("message2", {
-                  action: "SnetImgUpdate",
-                  data: "data:image/png;base64," + bufTmp.toString("base64"),
-                  date: ReqTime,
-                });
+              try {
+                var bufTmp = Buffer.concat(dataTmp);
+                if (kmoniWorker) {
+                  var ReqTime = new Date(dateTime);
+                  kmoniWorker.webContents.send("message2", {
+                    action: "SnetImgUpdate",
+                    data: "data:image/png;base64," + bufTmp.toString("base64"),
+                    date: ReqTime,
+                  });
+                }
+              } catch (err) {
+                kmoniTimeUpdate(new Date() - Replay, "Lmoni", "Error");
               }
-            }catch(err){      kmoniTimeUpdate(new Date() - Replay, "Lmoni", "Error");}
             });
           });
           request.end();
@@ -1260,67 +1275,69 @@ function wolfxRequest() {
         dataTmp += chunk;
       });
       res.on("end", function () {
-        try{
-        var json = jsonParse(dataTmp);
-        if (json && wolfx_lastUpdate < new Date(json.AnnouncedTime)) {
-          wolfx_lastUpdate = json.AnnouncedTime;
-          var EBIData = [];
-          EBIStr = json.OriginalText.split("EBI ")[1];
-          if (EBIStr) {
-            EBIStr = EBIStr.split("ECI")[0].split("EII")[0].split(" 9999=")[0];
-            EBIStr = EBIStr.split(" ");
-            if (EBIStr.length % 4 == 0) {
-              for (let i = 0; i < EBIStr.length; i += 4) {
-                var sectName = EEWSectName[EBIStr[i]];
-                var maxInt = EBIStr[i + 1].substring(1, 3);
-                var minInt = EBIStr[i + 1].substring(3, 5);
-                minInt = minInt == "//" ? null : shindoConvert(minInt, 0);
-                var arrivalTime = EBIStr[i + 2];
-                arrivalTime = arrivalTime.substring(0, 2) + ":" + arrivalTime.substring(2, 4) + ":" + arrivalTime.substring(4, 6);
-                arrivalTime = new Date(dateEncode(4, null) + " " + arrivalTime);
+        try {
+          var json = jsonParse(dataTmp);
+          if (json && wolfx_lastUpdate < new Date(json.AnnouncedTime)) {
+            wolfx_lastUpdate = json.AnnouncedTime;
+            var EBIData = [];
+            EBIStr = json.OriginalText.split("EBI ")[1];
+            if (EBIStr) {
+              EBIStr = EBIStr.split("ECI")[0].split("EII")[0].split(" 9999=")[0];
+              EBIStr = EBIStr.split(" ");
+              if (EBIStr.length % 4 == 0) {
+                for (let i = 0; i < EBIStr.length; i += 4) {
+                  var sectName = EEWSectName[EBIStr[i]];
+                  var maxInt = EBIStr[i + 1].substring(1, 3);
+                  var minInt = EBIStr[i + 1].substring(3, 5);
+                  minInt = minInt == "//" ? null : shindoConvert(minInt, 0);
+                  var arrivalTime = EBIStr[i + 2];
+                  arrivalTime = arrivalTime.substring(0, 2) + ":" + arrivalTime.substring(2, 4) + ":" + arrivalTime.substring(4, 6);
+                  arrivalTime = new Date(dateEncode(4, null) + " " + arrivalTime);
 
-                var alertFlg = EBIStr[i + 3].substring(0, 1) == "1";
-                var arrived = EBIStr[i + 3].substring(1, 2) == "1";
+                  var alertFlg = EBIStr[i + 3].substring(0, 1) == "1";
+                  var arrived = EBIStr[i + 3].substring(1, 2) == "1";
 
-                EBIData.push({
-                  Code: Number(EBIStr[i]),
-                  Name: sectName,
-                  Alert: alertFlg,
-                  IntTo: maxInt,
-                  IntFrom: minInt,
-                  ArrivalTime: arrivalTime,
-                  Arrived: arrived,
-                });
-              }
-            } else throw new Error("予想震度等のデコードでエラー");
+                  EBIData.push({
+                    Code: Number(EBIStr[i]),
+                    Name: sectName,
+                    Alert: alertFlg,
+                    IntTo: maxInt,
+                    IntFrom: minInt,
+                    ArrivalTime: arrivalTime,
+                    Arrived: arrived,
+                  });
+                }
+              } else throw new Error("予想震度等のデコードでエラー");
+            }
+            var EEWdata = {
+              alertflg: json.isWarn ? "警報" : "予報",
+              EventID: Number(json.EventID),
+              serial: json.Serial,
+              report_time: new Date(json.AnnouncedTime),
+              magnitude: json.Magunitude,
+              maxInt: shindoConvert(json.MaxIntensity, 0),
+              depth: json.Depth,
+              is_cancel: json.isCancel,
+              is_final: json.isFinal,
+              is_training: json.isTraining,
+              latitude: json.Latitude,
+              longitude: json.Longitude,
+              region_code: null,
+              region_name: json.Hypocenter,
+              origin_time: new Date(json.OriginTime),
+              isPlum: json.isAssumption,
+              userIntensity: null,
+              arrivalTime: null,
+              intensityAreas: null,
+              warnZones: EBIData,
+              source: "wolfx",
+            };
+            EEWcontrol(EEWdata);
           }
-          var EEWdata = {
-            alertflg: json.isWarn ? "警報" : "予報",
-            EventID: Number(json.EventID),
-            serial: json.Serial,
-            report_time: new Date(json.AnnouncedTime),
-            magnitude: json.Magunitude,
-            maxInt: shindoConvert(json.MaxIntensity, 0),
-            depth: json.Depth,
-            is_cancel: json.isCancel,
-            is_final: json.isFinal,
-            is_training: json.isTraining,
-            latitude: json.Latitude,
-            longitude: json.Longitude,
-            region_code: null,
-            region_name: json.Hypocenter,
-            origin_time: new Date(json.OriginTime),
-            isPlum: json.isAssumption,
-            userIntensity: null,
-            arrivalTime: null,
-            intensityAreas: null,
-            warnZones: EBIData,
-            source: "wolfx",
-          };
-          EEWcontrol(EEWdata);
+          kmoniTimeUpdate(new Date() - Replay, "wolfx", "success");
+        } catch (err) {
+          kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
         }
-        kmoniTimeUpdate(new Date() - Replay, "wolfx", "success");
-      }catch(err){ kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");}
       });
     });
     request.on("error", (error) => {
@@ -1530,23 +1547,25 @@ async function kmoniServerSelect() {
       var request = net.request("https://weather-kyoshin.west.edge.storage-yahoo.jp/RealTimeData/" + dateEncode(2, new Date() - yoyuY - Replay) + "/" + dateEncode(1, new Date() - yoyuY - Replay) + ".json");
       request.on("response", (res) => {
         res.on("end", function () {
-          try{
-          if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
-            YmoniW = 2500;
-          } else {
-            YmoniW = new Date() - TestStartTime;
-          }
-          if (YmoniE && YmoniW) {
-            var minTime = Math.min(YmoniE, YmoniW, Kmoni, Lmoni);
-
-            if (minTime == Infinity || minTime == YmoniE) {
-              monitorVendor = "YE";
-            } else if (minTime == Infinity || minTime == YmoniW) {
-              monitorVendor = "YW";
+          try {
+            if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
+              YmoniW = 2500;
+            } else {
+              YmoniW = new Date() - TestStartTime;
             }
-            resolve();
+            if (YmoniE && YmoniW) {
+              var minTime = Math.min(YmoniE, YmoniW, Kmoni, Lmoni);
+
+              if (minTime == Infinity || minTime == YmoniE) {
+                monitorVendor = "YE";
+              } else if (minTime == Infinity || minTime == YmoniW) {
+                monitorVendor = "YW";
+              }
+              resolve();
+            }
+          } catch (err) {
+            return;
           }
-        }catch(err){return;}
         });
       });
       request.on("error", (error) => {
@@ -1605,19 +1624,21 @@ async function yoyuSetK(func) {
               dataTmp += chunk;
             });
             res.on("end", function () {
-              try{
-              var json = jsonParse(dataTmp);
-              if (json) {
-                var resTime = new Date(json.latest_time);
+              try {
+                var json = jsonParse(dataTmp);
+                if (json) {
+                  var resTime = new Date(json.latest_time);
 
-                if (resTimeTmp !== resTime && 0 < loopCount) {
-                  yoyuKOK = true;
-                  yoyuK = new Date() - resTime;
+                  if (resTimeTmp !== resTime && 0 < loopCount) {
+                    yoyuKOK = true;
+                    yoyuK = new Date() - resTime;
+                  }
+                  resTimeTmp = resTime;
                 }
-                resTimeTmp = resTime;
+                resolve();
+              } catch (err) {
+                return;
               }
-              resolve();
-            }catch(err){return;}
             });
           });
 
@@ -1654,17 +1675,19 @@ async function yoyuSetL(func) {
               dataTmp += chunk;
             });
             res.on("end", function () {
-              try{
-              var json = JSON.parse(dataTmp);
-              var resTime = new Date(json.latest_time);
+              try {
+                var json = JSON.parse(dataTmp);
+                var resTime = new Date(json.latest_time);
 
-              if (resTimeTmp !== resTime && 0 < loopCount) {
-                yoyuLOK = true;
-                yoyuL = new Date() - resTime;
+                if (resTimeTmp !== resTime && 0 < loopCount) {
+                  yoyuLOK = true;
+                  yoyuL = new Date() - resTime;
+                }
+                resTimeTmp = resTime;
+                resolve();
+              } catch (err) {
+                return;
               }
-              resTimeTmp = resTime;
-              resolve();
-            }catch(err){return;}
             });
           });
 
@@ -1725,269 +1748,269 @@ function kmoniTimeUpdate(Updatetime, type, condition, vendor) {
 function EEWdetect(type, json, KorL) {
   if (!json) return;
   if (type == 1) {
-    try{
-    //yahookmoni
-    const request_time = new Date(json.realTimeData.dataTime);
+    try {
+      //yahookmoni
+      const request_time = new Date(json.realTimeData.dataTime);
 
-    kmoniTimeUpdate(request_time, "YahooKmoni", "success", monitorVendor);
+      kmoniTimeUpdate(request_time, "YahooKmoni", "success", monitorVendor);
 
-    if (json.hypoInfo) {
-      var elm;
-      elm = json.hypoInfo.items[0];
+      if (json.hypoInfo) {
+        var elm;
+        elm = json.hypoInfo.items[0];
 
-      var YkmoniLastReportTimeTmp = new Date(elm.reportTime);
-      if (YkmoniLastReportTime < YkmoniLastReportTimeTmp) {
-        var EEWdata = {
-          alertflg: null,
-          EventID: Number(elm.reportId),
-          serial: Number(elm.reportNum),
-          report_time: new Date(json.realTimeData.dataTime),
-          magnitude: Number(elm.magnitude),
-          maxInt: shindoConvert(elm.calcintensity, 0), //最大深度
-          depth: Number(elm.depth.replace("km", "")),
-          is_cancel: Boolean2(elm.isCancel),
-          is_final: Boolean2(elm.isFinal), //最終報
-          is_training: Boolean2(elm.isTraining),
-          latitude: LatLngConvert(elm.latitude),
-          longitude: LatLngConvert(elm.longitude),
-          region_code: elm.regionCode,
-          region_name: elm.regionName,
-          origin_time: new Date(elm.originTime),
-          isPlum: false,
-          userIntensity: null,
-          arrivalTime: null,
-          intensityAreas: null,
-          warnZones: [],
-          source: "YahooKmoni",
-        };
+        var YkmoniLastReportTimeTmp = new Date(elm.reportTime);
+        if (YkmoniLastReportTime < YkmoniLastReportTimeTmp) {
+          var EEWdata = {
+            alertflg: null,
+            EventID: Number(elm.reportId),
+            serial: Number(elm.reportNum),
+            report_time: new Date(json.realTimeData.dataTime),
+            magnitude: Number(elm.magnitude),
+            maxInt: shindoConvert(elm.calcintensity, 0), //最大深度
+            depth: Number(elm.depth.replace("km", "")),
+            is_cancel: Boolean2(elm.isCancel),
+            is_final: Boolean2(elm.isFinal), //最終報
+            is_training: Boolean2(elm.isTraining),
+            latitude: LatLngConvert(elm.latitude),
+            longitude: LatLngConvert(elm.longitude),
+            region_code: elm.regionCode,
+            region_name: elm.regionName,
+            origin_time: new Date(elm.originTime),
+            isPlum: false,
+            userIntensity: null,
+            arrivalTime: null,
+            intensityAreas: null,
+            warnZones: [],
+            source: "YahooKmoni",
+          };
 
-        EEWcontrol(EEWdata);
-        YkmoniLastReportTime = YkmoniLastReportTimeTmp;
+          EEWcontrol(EEWdata);
+          YkmoniLastReportTime = YkmoniLastReportTimeTmp;
+        }
       }
+    } catch (err) {
+      kmoniTimeUpdate(new Date() - Replay, "YahooKmoni", "Error", monitorVendor);
     }
-  }catch(err){    kmoniTimeUpdate(new Date() - Replay, "YahooKmoni", "Error", monitorVendor);
-}
-
   } else if (type == 2) {
     //kmoni/lmoni
     if (KorL == 1) var sourceTmp = "kmoni";
     else var sourceTmp = "Lmoni";
 
-    try{
-    var year = parseInt(json.request_time.substring(0, 4));
-    var month = parseInt(json.request_time.substring(4, 6));
-    var day = parseInt(json.request_time.substring(6, 8));
-    var hour = parseInt(json.request_time.substring(8, 10));
-    var min = parseInt(json.request_time.substring(10, 12));
-    var sec = parseInt(json.request_time.substring(12, 15));
-    var request_time = new Date(year, month - 1, day, hour, min, sec);
+    try {
+      var year = parseInt(json.request_time.substring(0, 4));
+      var month = parseInt(json.request_time.substring(4, 6));
+      var day = parseInt(json.request_time.substring(6, 8));
+      var hour = parseInt(json.request_time.substring(8, 10));
+      var min = parseInt(json.request_time.substring(10, 12));
+      var sec = parseInt(json.request_time.substring(12, 15));
+      var request_time = new Date(year, month - 1, day, hour, min, sec);
 
-    var year = parseInt(json.origin_time.substring(0, 4));
-    var month = parseInt(json.origin_time.substring(4, 6));
-    var day = parseInt(json.origin_time.substring(6, 8));
-    var hour = parseInt(json.origin_time.substring(8, 10));
-    var min = parseInt(json.origin_time.substring(10, 12));
-    var sec = parseInt(json.origin_time.substring(12, 15));
-    var origin_timeTmp = new Date(year, month - 1, day, hour, min, sec);
+      var year = parseInt(json.origin_time.substring(0, 4));
+      var month = parseInt(json.origin_time.substring(4, 6));
+      var day = parseInt(json.origin_time.substring(6, 8));
+      var hour = parseInt(json.origin_time.substring(8, 10));
+      var min = parseInt(json.origin_time.substring(10, 12));
+      var sec = parseInt(json.origin_time.substring(12, 15));
+      var origin_timeTmp = new Date(year, month - 1, day, hour, min, sec);
 
-    kmoniTimeUpdate(request_time, sourceTmp, "success");
+      kmoniTimeUpdate(request_time, sourceTmp, "success");
 
-    if (json.result.message == "") {
-      if (KorL == 1) kmoniEstShindoRequest();
+      if (json.result.message == "") {
+        if (KorL == 1) kmoniEstShindoRequest();
 
-      kmoniEid = json.report_id;
-      kmoniRNum = json.report_num;
+        kmoniEid = json.report_id;
+        kmoniRNum = json.report_num;
 
-      var EEWdata = {
-        alertflg: json.alertflg,
-        EventID: Number(json.report_id),
-        serial: Number(json.report_num),
-        report_time: new Date(json.report_time),
-        magnitude: Number(json.magunitude),
-        maxInt: shindoConvert(json.calcintensity, 0),
-        depth: Number(json.depth.replace("km", "")),
-        is_cancel: Boolean2(json.is_cancel),
-        is_final: Boolean2(json.is_final),
-        is_training: Boolean2(json.is_training),
-        latitude: Number(json.latitude),
-        longitude: Number(json.longitude),
-        region_code: json.region_code,
-        region_name: json.region_name,
-        origin_time: origin_timeTmp,
-        isPlum: false,
-        userIntensity: null,
-        arrivalTime: null,
-        intensityAreas: null,
-        warnZones: [],
-        source: sourceTmp,
-      };
-      if (KorL == 1) {
-        var kmoniLastReportTimeTmp = new Date(json.report_time);
-        if (kmoniLastReportTime < kmoniLastReportTimeTmp) EEWcontrol(EEWdata);
-        kmoniLastReportTime = kmoniLastReportTimeTmp;
+        var EEWdata = {
+          alertflg: json.alertflg,
+          EventID: Number(json.report_id),
+          serial: Number(json.report_num),
+          report_time: new Date(json.report_time),
+          magnitude: Number(json.magunitude),
+          maxInt: shindoConvert(json.calcintensity, 0),
+          depth: Number(json.depth.replace("km", "")),
+          is_cancel: Boolean2(json.is_cancel),
+          is_final: Boolean2(json.is_final),
+          is_training: Boolean2(json.is_training),
+          latitude: Number(json.latitude),
+          longitude: Number(json.longitude),
+          region_code: json.region_code,
+          region_name: json.region_name,
+          origin_time: origin_timeTmp,
+          isPlum: false,
+          userIntensity: null,
+          arrivalTime: null,
+          intensityAreas: null,
+          warnZones: [],
+          source: sourceTmp,
+        };
+        if (KorL == 1) {
+          var kmoniLastReportTimeTmp = new Date(json.report_time);
+          if (kmoniLastReportTime < kmoniLastReportTimeTmp) EEWcontrol(EEWdata);
+          kmoniLastReportTime = kmoniLastReportTimeTmp;
+        } else {
+          var lmoniLastReportTimeTmp = new Date(json.report_time);
+          if (lmoniLastReportTime < lmoniLastReportTimeTmp) EEWcontrol(EEWdata);
+          lmoniLastReportTime = lmoniLastReportTimeTmp;
+        }
       } else {
-        var lmoniLastReportTimeTmp = new Date(json.report_time);
-        if (lmoniLastReportTime < lmoniLastReportTimeTmp) EEWcontrol(EEWdata);
-        lmoniLastReportTime = lmoniLastReportTimeTmp;
+        kmoniEid = null;
+        kmoniRNum = null;
       }
-    } else {
-      kmoniEid = null;
-      kmoniRNum = null;
-    }
 
-    if (json.avrarea) {
-      EEWdata = Object.assign(EEWdata, {
-        avrarea: json.avrarea, //主な予想地域
-        avrarea_list: json.avrarea_list, //長周期地震動予想地域リスト
-        avrval: json.avrval, //sva
-        avrrank: json.avrrank, //最大予想長周期地震動階級
-      });
+      if (json.avrarea) {
+        EEWdata = Object.assign(EEWdata, {
+          avrarea: json.avrarea, //主な予想地域
+          avrarea_list: json.avrarea_list, //長周期地震動予想地域リスト
+          avrval: json.avrval, //sva
+          avrrank: json.avrrank, //最大予想長周期地震動階級
+        });
 
-      if (mainWindow) {
-        mainWindow.webContents.send("message2", {
-          action: "longWaveUpdate",
-          data: {
-            avrarea: json.avrarea,
-            avrarea_list: json.avrarea_list,
-            avrval: json.avrval,
-            avrrank: json.avrrank,
-          },
-        });
+        if (mainWindow) {
+          mainWindow.webContents.send("message2", {
+            action: "longWaveUpdate",
+            data: {
+              avrarea: json.avrarea,
+              avrarea_list: json.avrarea_list,
+              avrval: json.avrval,
+              avrrank: json.avrrank,
+            },
+          });
+        }
+      } else if (KorL == 2 && lwaveTmp) {
+        if (mainWindow) {
+          mainWindow.webContents.send("message2", {
+            action: "longWaveClear",
+          });
+        }
       }
-    } else if (KorL == 2 && lwaveTmp) {
-      if (mainWindow) {
-        mainWindow.webContents.send("message2", {
-          action: "longWaveClear",
-        });
-      }
+      if (KorL == 2) lwaveTmp = json.avrarea;
+    } catch (err) {
+      kmoniTimeUpdate(new Date() - Replay, sourceTmp, "Error");
     }
-    if (KorL == 2) lwaveTmp = json.avrarea;
-  }catch(err){
-    kmoniTimeUpdate(new Date() - Replay, sourceTmp, "Error");
-  }
   } else if (type == 3) {
     //axis
 
-    try{
-    var alertflgTmp = json.Title == "緊急地震速報（予報）" ? "予報" : "警報";
-    var EBIData = [];
-    json.Forecast.forEach(function (elm) {
-      EBIData.push({
-        Code: elm.Code,
-        Name: elm.Name,
-        Alert: null,
-        IntTo: elm.Intensity.To,
-        IntFrom: elm.Intensity.From,
-        ArrivalTime: null,
-        Arrived: null,
+    try {
+      var alertflgTmp = json.Title == "緊急地震速報（予報）" ? "予報" : "警報";
+      var EBIData = [];
+      json.Forecast.forEach(function (elm) {
+        EBIData.push({
+          Code: elm.Code,
+          Name: elm.Name,
+          Alert: null,
+          IntTo: elm.Intensity.To,
+          IntFrom: elm.Intensity.From,
+          ArrivalTime: null,
+          Arrived: null,
+        });
       });
-    });
-    var EEWdata = {
-      alertflg: alertflgTmp,
-      EventID: Number(json.EventID),
-      serial: json.Serial,
-      report_time: new Date(json.ReportDateTime),
-      magnitude: Number(json.Magnitude),
-      maxInt: shindoConvert(json.Intensity),
-      depth: Number(json.Hypocenter.Depth.replace("km", "")),
-      is_cancel: json.Flag.is_cancel,
-      is_final: json.Flag.is_final,
-      is_training: json.Flag.is_training,
-      latitude: json.Hypocenter.Coordinate[1],
-      longitude: json.Hypocenter.Coordinate[0],
-      region_code: json.Hypocenter.Code,
-      region_name: json.Hypocenter.Name,
-      origin_time: new Date(json.OriginDateTime),
-      isPlum: null,
-      userIntensity: null,
-      arrivalTime: null,
-      intensityAreas: null,
-      warnZones: EBIData,
-      source: "axis",
-    };
-    EEWcontrol(EEWdata);
-  }catch(err){
-    kmoniTimeUpdate(new Date() - Replay, "axis", "Error");
-  }
+      var EEWdata = {
+        alertflg: alertflgTmp,
+        EventID: Number(json.EventID),
+        serial: json.Serial,
+        report_time: new Date(json.ReportDateTime),
+        magnitude: Number(json.Magnitude),
+        maxInt: shindoConvert(json.Intensity),
+        depth: Number(json.Hypocenter.Depth.replace("km", "")),
+        is_cancel: json.Flag.is_cancel,
+        is_final: json.Flag.is_final,
+        is_training: json.Flag.is_training,
+        latitude: json.Hypocenter.Coordinate[1],
+        longitude: json.Hypocenter.Coordinate[0],
+        region_code: json.Hypocenter.Code,
+        region_name: json.Hypocenter.Name,
+        origin_time: new Date(json.OriginDateTime),
+        isPlum: null,
+        userIntensity: null,
+        arrivalTime: null,
+        intensityAreas: null,
+        warnZones: EBIData,
+        source: "axis",
+      };
+      EEWcontrol(EEWdata);
+    } catch (err) {
+      kmoniTimeUpdate(new Date() - Replay, "axis", "Error");
+    }
   } else if (type == 4) {
     //P2P
-    try{
-    var maxIntTmp = Math.floor(
-      Math.max.apply(
-        null,
-        json.areas.map(function (p) {
-          return p.scaleTo;
-        })
-      )
-    );
+    try {
+      var maxIntTmp = Math.floor(
+        Math.max.apply(
+          null,
+          json.areas.map(function (p) {
+            return p.scaleTo;
+          })
+        )
+      );
 
-    var latitudeTmp;
-    var longitudeTmp;
-    var depthTmp;
-    var magnitudeTmp;
-    var region_nameTmp;
-    var origin_timeTmp;
-    var conditionTmp = false;
-    if (json.earthquake) {
-      latitudeTmp = json.earthquake.hypocenter.latitude;
-      longitudeTmp = json.earthquake.hypocenter.longitude;
-      depthTmp = json.earthquake.hypocenter.depth;
-      magnitudeTmp = json.earthquake.hypocenter.magnitude;
-      region_nameTmp = json.earthquake.hypocenter.name;
-      origin_timeTmp = new Date(json.earthquake.originTime);
-      conditionTmp = json.earthquake.condition == "仮定震源要素";
+      var latitudeTmp;
+      var longitudeTmp;
+      var depthTmp;
+      var magnitudeTmp;
+      var region_nameTmp;
+      var origin_timeTmp;
+      var conditionTmp = false;
+      if (json.earthquake) {
+        latitudeTmp = json.earthquake.hypocenter.latitude;
+        longitudeTmp = json.earthquake.hypocenter.longitude;
+        depthTmp = json.earthquake.hypocenter.depth;
+        magnitudeTmp = json.earthquake.hypocenter.magnitude;
+        region_nameTmp = json.earthquake.hypocenter.name;
+        origin_timeTmp = new Date(json.earthquake.originTime);
+        conditionTmp = json.earthquake.condition == "仮定震源要素";
+      }
+      var EBIData = [];
+      json.areas.forEach(function (elm) {
+        EBIData.push({
+          Code: null,
+          Name: elm.name,
+          Alert: alertFlg,
+          IntTo: shindoConvert(elm.scaleTo, 0, true),
+          IntFrom: shindoConvert(elm.scaleFrom, 0, true),
+          ArrivalTime: elm.arrivalTime,
+          Arrived: elm.kindCode == 11,
+        });
+      });
+      var EEWdata = {
+        alertflg: "警報",
+        EventID: Number(json.issue.eventId),
+        serial: Number(json.issue.serial),
+        report_time: new Date(json.issue.time),
+        magnitude: magnitudeTmp,
+        maxInt: shindoConvert(maxIntTmp, 0, true),
+        depth: depthTmp,
+        is_cancel: Boolean(json.canceled),
+        is_final: null,
+        is_training: Boolean(json.test),
+        latitude: latitudeTmp,
+        longitude: longitudeTmp,
+        region_code: "",
+        region_name: region_nameTmp,
+        origin_time: origin_timeTmp,
+        isPlum: conditionTmp,
+        warnZones: [],
+        source: "P2P_EEW",
+      };
+
+      var areaTmp = [];
+      json.areas.forEach(function (elm) {
+        areaTmp.push({
+          Code: null,
+          Name: elm.name,
+          Alert: elm.kindCode == 10 || elm.kindCode == 11 || elm.kindCode == 19,
+          IntTo: shindoConvert(elm.scaleTo),
+          IntFrom: shindoConvert(elm.scaleFrom),
+          ArrivalTime: new Date(elm.arrivalTime),
+          Arrived: elm.kindCode == 11,
+        });
+      });
+      EEWdata.warnZones = areaTmp;
+
+      EEWcontrol(EEWdata);
+    } catch (err) {
+      kmoniTimeUpdate(new Date() - Replay, "P2P_EEW", "Error");
     }
-    var EBIData = [];
-    json.areas.forEach(function (elm) {
-      EBIData.push({
-        Code: null,
-        Name: elm.name,
-        Alert: alertFlg,
-        IntTo: shindoConvert(elm.scaleTo, 0, true),
-        IntFrom: shindoConvert(elm.scaleFrom, 0, true),
-        ArrivalTime: elm.arrivalTime,
-        Arrived: elm.kindCode == 11,
-      });
-    });
-    var EEWdata = {
-      alertflg: "警報",
-      EventID: Number(json.issue.eventId),
-      serial: Number(json.issue.serial),
-      report_time: new Date(json.issue.time),
-      magnitude: magnitudeTmp,
-      maxInt: shindoConvert(maxIntTmp, 0, true),
-      depth: depthTmp,
-      is_cancel: Boolean(json.canceled),
-      is_final: null,
-      is_training: Boolean(json.test),
-      latitude: latitudeTmp,
-      longitude: longitudeTmp,
-      region_code: "",
-      region_name: region_nameTmp,
-      origin_time: origin_timeTmp,
-      isPlum: conditionTmp,
-      warnZones: [],
-      source: "P2P_EEW",
-    };
-
-    var areaTmp = [];
-    json.areas.forEach(function (elm) {
-      areaTmp.push({
-        Code: null,
-        Name: elm.name,
-        Alert: elm.kindCode == 10||elm.kindCode == 11||elm.kindCode == 19,
-        IntTo: shindoConvert(elm.scaleTo),
-        IntFrom: shindoConvert(elm.scaleFrom),
-        ArrivalTime: new Date(elm.arrivalTime),
-        Arrived: elm.kindCode == 11,
-      });
-    });
-    EEWdata.warnZones = areaTmp;
-
-    EEWcontrol(EEWdata);
-  }catch(err){
-    kmoniTimeUpdate(new Date() - Replay, "P2P_EEW", "Error");
-  }
   }
 }
 
@@ -2243,52 +2266,54 @@ function EQI_JMA_Req() {
       dataTmp += chunk;
     });
     res.on("end", function () {
-      try{
-      var json = jsonParse(dataTmp);
-      if (!json) return false;
-      var dataTmp2 = [];
-      json = json.filter(function (elm) {
-        return elm.ttl == "震度速報" || elm.ttl == "震源に関する情報" || elm.ttl == "震源・震度情報" || elm.ttl == "遠地地震に関する情報" || elm.ttl == "顕著な地震の震源要素更新のお知らせ";
-      });
-      json = json.sort(function (a, b) {
-        var r = 0;
-        if (a.at > b.at) {
-          r = -1;
-        } else if (a.at < b.at) {
-          r = 1;
-        }
-        return r;
-      });
+      try {
+        var json = jsonParse(dataTmp);
+        if (!json) return false;
+        var dataTmp2 = [];
+        json = json.filter(function (elm) {
+          return elm.ttl == "震度速報" || elm.ttl == "震源に関する情報" || elm.ttl == "震源・震度情報" || elm.ttl == "遠地地震に関する情報" || elm.ttl == "顕著な地震の震源要素更新のお知らせ";
+        });
+        json = json.sort(function (a, b) {
+          var r = 0;
+          if (a.at > b.at) {
+            r = -1;
+          } else if (a.at < b.at) {
+            r = 1;
+          }
+          return r;
+        });
 
-      var jmaJsonEIDs = [];
-      for (let elm of json) {
-        var eidTmp = elm.eid;
-        if (!jmaJsonEIDs.includes(eidTmp)) {
-          jmaJsonEIDs.push(eidTmp);
-          if (jmaJsonEIDs.length == config.Info.EQInfo.ItemCount) break;
+        var jmaJsonEIDs = [];
+        for (let elm of json) {
+          var eidTmp = elm.eid;
+          if (!jmaJsonEIDs.includes(eidTmp)) {
+            jmaJsonEIDs.push(eidTmp);
+            if (jmaJsonEIDs.length == config.Info.EQInfo.ItemCount) break;
+          }
         }
+        json.forEach(function (elm) {
+          if (jmaJsonEIDs.includes(elm.eid)) {
+            var maxi = elm.maxi;
+            if (!maxi || maxi == "") maxi = null;
+            dataTmp2.push({
+              eventId: elm.eid,
+              category: elm.ttl,
+              OriginTime: new Date(elm.at),
+              epiCenter: elm.anm,
+              M: elm.mag,
+              maxI: maxi,
+              cancel: elm.ift == "取消",
+
+              reportDateTime: new Date(elm.rdt),
+              DetailURL: [String("https://www.jma.go.jp/bosai/quake/data/" + elm.json)],
+            });
+          }
+        });
+
+        eqInfoControl(dataTmp2, "jma");
+      } catch (err) {
+        return;
       }
-      json.forEach(function (elm) {
-        if (jmaJsonEIDs.includes(elm.eid)) {
-          var maxi = elm.maxi;
-          if (!maxi || maxi == "") maxi = null;
-          dataTmp2.push({
-            eventId: elm.eid,
-            category: elm.ttl,
-            OriginTime: new Date(elm.at),
-            epiCenter: elm.anm,
-            M: elm.mag,
-            maxI: maxi,
-            cancel: elm.ift == "取消",
-
-            reportDateTime: new Date(elm.rdt),
-            DetailURL: [String("https://www.jma.go.jp/bosai/quake/data/" + elm.json)],
-          });
-        }
-      });
-
-      eqInfoControl(dataTmp2, "jma");
-    }catch(err){return;}
     });
   });
   request.on("error", (error) => {
@@ -2306,18 +2331,20 @@ function EQI_JMAXMLList_Req() {
       dataTmp += chunk;
     });
     res.on("end", function () {
-      try{
-      const parser = new new JSDOM().window.DOMParser();
-      const xml = parser.parseFromString(dataTmp, "text/html");
-      if (!xml) return;
-      xml.querySelectorAll("entry").forEach(function (elm) {
-        var url;
-        var urlElm = elm.querySelector("id");
-        if (urlElm) url = urlElm.textContent;
-        if (!url) return;
-        EQI_JMAXML_Req(url);
-      });
-    }catch(err){return;}
+      try {
+        const parser = new new JSDOM().window.DOMParser();
+        const xml = parser.parseFromString(dataTmp, "text/html");
+        if (!xml) return;
+        xml.querySelectorAll("entry").forEach(function (elm) {
+          var url;
+          var urlElm = elm.querySelector("id");
+          if (urlElm) url = urlElm.textContent;
+          if (!url) return;
+          EQI_JMAXML_Req(url);
+        });
+      } catch (err) {
+        return;
+      }
     });
   });
   request.on("error", (error) => {
@@ -2339,240 +2366,242 @@ function EQI_JMAXML_Req(url) {
       dataTmp += chunk;
     });
     res.on("end", function () {
-      try{
-      const parser = new new JSDOM().window.DOMParser();
-      const xml = parser.parseFromString(dataTmp, "text/html");
-      if (!xml) return false;
+      try {
+        const parser = new new JSDOM().window.DOMParser();
+        const xml = parser.parseFromString(dataTmp, "text/html");
+        if (!xml) return false;
 
-      var title = xml.title;
-      var cancel = false;
-      var cancelElm = xml.querySelector("InfoType");
-      if (cancelElm) cancel = cancelElm.textContent == "取り消し";
+        var title = xml.title;
+        var cancel = false;
+        var cancelElm = xml.querySelector("InfoType");
+        if (cancelElm) cancel = cancelElm.textContent == "取り消し";
 
-      if (title == "震度速報" || title == "震源に関する情報" || title == "震源・震度に関する情報" || title == "遠地地震に関する情報" || title == "顕著な地震の震源要素更新のお知らせ") {
-        //地震情報
-        var EarthquakeElm = xml.querySelector("Body Earthquake");
-        var originTimeTmp;
-        var epiCenterTmp;
-        var magnitudeTmp;
-        if (EarthquakeElm) {
-          originTimeTmp = new Date(EarthquakeElm.querySelector("OriginTime").textContent);
-          epiCenterTmp = EarthquakeElm.querySelector("Name").textContent;
-          magnitudeTmp = Number(EarthquakeElm.getElementsByTagName("jmx_eb:Magnitude")[0].textContent);
-        }
-
-        var IntensityElm = xml.querySelector("Body Intensity");
-        var maxIntTmp;
-        if (IntensityElm) {
-          maxIntTmp = shindoConvert(IntensityElm.querySelector("Observation > MaxInt").textContent);
-        }
-        if (maxIntTmp == "[objectHTMLUnknownElement]") maxIntTmp = null;
-        eqInfoControl(
-          [
-            {
-              eventId: xml.querySelector("EventID").textContent,
-              category: xml.title,
-              OriginTime: originTimeTmp,
-              epiCenter: epiCenterTmp,
-              M: magnitudeTmp,
-              maxI: maxIntTmp,
-              cancel: cancel,
-              reportDateTime: new Date(xml.querySelector("ReportDateTime").textContent),
-              DetailURL: [url],
-            },
-          ],
-          "jma"
-        );
-      } else if (title == "津波情報a" || /大津波警報|津波警報|津波注意報|津波予報/.test(title)) {
-        //津波予報
-        var tsunamiDataTmp;
-        if (cancel) {
-          tsunamiDataTmp = {
-            issue: { time: new Date(xml.querySelector("ReportDateTime").textContent) },
-            areas: [],
-            revocation: true,
-          };
-        } else {
-          var ValidDateTimeElm = xml.querySelector("ValidDateTime");
-          var ValidDateTimeTmp;
-          if (ValidDateTimeElm) {
-            ValidDateTimeTmp = new Date(ValidDateTimeElm.textContent);
+        if (title == "震度速報" || title == "震源に関する情報" || title == "震源・震度に関する情報" || title == "遠地地震に関する情報" || title == "顕著な地震の震源要素更新のお知らせ") {
+          //地震情報
+          var EarthquakeElm = xml.querySelector("Body Earthquake");
+          var originTimeTmp;
+          var epiCenterTmp;
+          var magnitudeTmp;
+          if (EarthquakeElm) {
+            originTimeTmp = new Date(EarthquakeElm.querySelector("OriginTime").textContent);
+            epiCenterTmp = EarthquakeElm.querySelector("Name").textContent;
+            magnitudeTmp = Number(EarthquakeElm.getElementsByTagName("jmx_eb:Magnitude")[0].textContent);
           }
-          tsunamiDataTmp = {
-            issue: { time: new Date(xml.querySelector("ReportDateTime").textContent), EventID: Number(xml.querySelector("EventID").textContent) },
-            areas: [],
-            revocation: false,
-            source: "jmaXML",
-            ValidDateTime: ValidDateTimeTmp,
-          };
 
-          if (xml.querySelector("Body").querySelector("Tsunami")) {
-            var tsunamiElm = xml.querySelector("Body").querySelector("Tsunami");
-            if (tsunamiElm.querySelector("Forecast")) {
-              tsunamiElm
-                .querySelector("Forecast")
-                .querySelectorAll("Item")
-                .forEach(function (elm) {
-                  var gradeTmp;
-                  var canceledTmp = false;
-                  switch (Number(elm.querySelector("Category").querySelector("Kind").querySelector("Code").textContent)) {
-                    case 52:
-                    case 53:
-                      gradeTmp = "MajorWarning";
-                      break;
-                    case 51:
-                      gradeTmp = "Warning";
-                      break;
-                    case 62:
-                      gradeTmp = "Watch";
-                      break;
-                    case 71:
-                    case 72:
-                    case 73:
-                      gradeTmp = "Yoho";
-                      break;
-                    case 50:
-                    case 60:
-                      canceledTmp = true;
-                      break;
-                    default:
-                      break;
-                  }
-                  var firstHeightTmp;
-                  var firstHeightConditionTmp;
-                  var maxHeightTmp;
-                  if (elm.querySelector("FirstHeight")) {
-                    if (elm.querySelector("FirstHeight").querySelector("ArrivalTime")) {
-                      firstHeightTmp = new Date(elm.querySelector("FirstHeight").querySelector("ArrivalTime").textContent);
-                    }
-                    if (elm.querySelector("FirstHeight").querySelector("Condition")) {
-                      firstHeightConditionTmp = elm.querySelector("FirstHeight").querySelector("Condition").textContent;
-                    }
-                  }
-                  if (elm.querySelector("MaxHeight")) {
-                    var maxheightElm = elm.querySelector("MaxHeight").getElementsByTagName("jmx_eb:TsunamiHeight");
-                    if (maxheightElm) {
-                      maxHeightTmp = maxheightElm[0].getAttribute("description");
-                      maxHeightTmp = maxHeightTmp.replace(/[Ａ-Ｚａ-ｚ０-９．]/g, function (s) {
-                        return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
-                      });
-                    }
-                  }
-                  var stations = [];
-                  if (elm.querySelector("Station")) {
-                    elm.querySelectorAll("Station").forEach(function (elm2) {
-                      var nameTmp;
-                      var highTideTimeTmp;
-                      var ArrivalTimeTmp;
-                      var ConditionTmp;
-                      nameTmp = elm2.querySelector("Name").textContent;
-                      highTideTimeTmp = new Date(elm2.querySelector("HighTideDateTime").textContent);
-                      if (elm2.querySelector("FirstHeight").querySelector("ArrivalTime")) ArrivalTimeTmp = new Date(elm2.querySelector("FirstHeight").querySelector("ArrivalTime").textContent);
-                      if (elm2.querySelector("Condition")) ConditionTmp = elm2.querySelector("Condition").textContent;
-                      stations.push({
-                        name: nameTmp,
-                        HighTideDateTime: highTideTimeTmp,
-                        ArrivalTime: ArrivalTimeTmp,
-                        Condition: ConditionTmp,
-                      });
-                    });
-                  }
-
-                  tsunamiDataTmp.areas.push({
-                    code: Number(elm.querySelector("Category").querySelector("Kind").querySelector("Code").textContent),
-                    grade: gradeTmp,
-                    name: elm.querySelector("Name").textContent,
-                    canceled: canceledTmp,
-                    firstHeight: firstHeightTmp,
-                    firstHeightCondition: firstHeightConditionTmp,
-                    stations: stations,
-                    maxHeight: maxHeightTmp,
-                  });
-                });
+          var IntensityElm = xml.querySelector("Body Intensity");
+          var maxIntTmp;
+          if (IntensityElm) {
+            maxIntTmp = shindoConvert(IntensityElm.querySelector("Observation > MaxInt").textContent);
+          }
+          if (maxIntTmp == "[objectHTMLUnknownElement]") maxIntTmp = null;
+          eqInfoControl(
+            [
+              {
+                eventId: xml.querySelector("EventID").textContent,
+                category: xml.title,
+                OriginTime: originTimeTmp,
+                epiCenter: epiCenterTmp,
+                M: magnitudeTmp,
+                maxI: maxIntTmp,
+                cancel: cancel,
+                reportDateTime: new Date(xml.querySelector("ReportDateTime").textContent),
+                DetailURL: [url],
+              },
+            ],
+            "jma"
+          );
+        } else if (title == "津波情報a" || /大津波警報|津波警報|津波注意報|津波予報/.test(title)) {
+          //津波予報
+          var tsunamiDataTmp;
+          if (cancel) {
+            tsunamiDataTmp = {
+              issue: { time: new Date(xml.querySelector("ReportDateTime").textContent) },
+              areas: [],
+              revocation: true,
+            };
+          } else {
+            var ValidDateTimeElm = xml.querySelector("ValidDateTime");
+            var ValidDateTimeTmp;
+            if (ValidDateTimeElm) {
+              ValidDateTimeTmp = new Date(ValidDateTimeElm.textContent);
             }
-            if (tsunamiElm.querySelector("Observation")) {
-              tsunamiElm
-                .querySelector("Observation")
-                .querySelectorAll("Item")
-                .forEach(function (elm) {
-                  var stations = [];
-                  if (elm.querySelector("Station")) {
-                    elm.querySelectorAll("Station").forEach(function (elm2) {
-                      var nameTmp;
-                      var ArrivalTimeTmp;
-                      var firstHeightConditionTmp;
-                      var firstHeightInitialTmp;
-                      var maxheightTime;
-                      var maxHeightCondition;
-                      var oMaxHeightTmp;
-                      nameTmp = elm2.querySelector("Name").textContent;
-                      if (elm2.querySelector("FirstHeight")) {
+            tsunamiDataTmp = {
+              issue: { time: new Date(xml.querySelector("ReportDateTime").textContent), EventID: Number(xml.querySelector("EventID").textContent) },
+              areas: [],
+              revocation: false,
+              source: "jmaXML",
+              ValidDateTime: ValidDateTimeTmp,
+            };
+
+            if (xml.querySelector("Body").querySelector("Tsunami")) {
+              var tsunamiElm = xml.querySelector("Body").querySelector("Tsunami");
+              if (tsunamiElm.querySelector("Forecast")) {
+                tsunamiElm
+                  .querySelector("Forecast")
+                  .querySelectorAll("Item")
+                  .forEach(function (elm) {
+                    var gradeTmp;
+                    var canceledTmp = false;
+                    switch (Number(elm.querySelector("Category").querySelector("Kind").querySelector("Code").textContent)) {
+                      case 52:
+                      case 53:
+                        gradeTmp = "MajorWarning";
+                        break;
+                      case 51:
+                        gradeTmp = "Warning";
+                        break;
+                      case 62:
+                        gradeTmp = "Watch";
+                        break;
+                      case 71:
+                      case 72:
+                      case 73:
+                        gradeTmp = "Yoho";
+                        break;
+                      case 50:
+                      case 60:
+                        canceledTmp = true;
+                        break;
+                      default:
+                        break;
+                    }
+                    var firstHeightTmp;
+                    var firstHeightConditionTmp;
+                    var maxHeightTmp;
+                    if (elm.querySelector("FirstHeight")) {
+                      if (elm.querySelector("FirstHeight").querySelector("ArrivalTime")) {
+                        firstHeightTmp = new Date(elm.querySelector("FirstHeight").querySelector("ArrivalTime").textContent);
+                      }
+                      if (elm.querySelector("FirstHeight").querySelector("Condition")) {
+                        firstHeightConditionTmp = elm.querySelector("FirstHeight").querySelector("Condition").textContent;
+                      }
+                    }
+                    if (elm.querySelector("MaxHeight")) {
+                      var maxheightElm = elm.querySelector("MaxHeight").getElementsByTagName("jmx_eb:TsunamiHeight");
+                      if (maxheightElm) {
+                        maxHeightTmp = maxheightElm[0].getAttribute("description");
+                        maxHeightTmp = maxHeightTmp.replace(/[Ａ-Ｚａ-ｚ０-９．]/g, function (s) {
+                          return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
+                        });
+                      }
+                    }
+                    var stations = [];
+                    if (elm.querySelector("Station")) {
+                      elm.querySelectorAll("Station").forEach(function (elm2) {
+                        var nameTmp;
+                        var highTideTimeTmp;
+                        var ArrivalTimeTmp;
+                        var ConditionTmp;
+                        nameTmp = elm2.querySelector("Name").textContent;
+                        highTideTimeTmp = new Date(elm2.querySelector("HighTideDateTime").textContent);
                         if (elm2.querySelector("FirstHeight").querySelector("ArrivalTime")) ArrivalTimeTmp = new Date(elm2.querySelector("FirstHeight").querySelector("ArrivalTime").textContent);
-                        if (elm2.querySelector("FirstHeight").querySelector("Condition")) firstHeightConditionTmp = elm2.querySelector("FirstHeight").querySelector("Condition").textContent;
-                        if (elm2.querySelector("FirstHeight").querySelector("Initial")) firstHeightInitialTmp = elm2.querySelector("FirstHeight").querySelector("Initial").textContent;
-                      }
-                      if (elm2.querySelector("MaxHeight")) {
-                        var maxheightElm = elm2.querySelector("MaxHeight").getElementsByTagName("jmx_eb:TsunamiHeight")[0];
-                        if (maxheightElm) {
-                          oMaxHeightTmp = maxheightElm.getAttribute("description");
-                          oMaxHeightTmp = oMaxHeightTmp.replace(/[Ａ-Ｚａ-ｚ０-９．]/g, function (s) {
-                            return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
-                          });
-                        }
-
-                        var maxheightTimeElm = elm2.querySelector("MaxHeight").getElementsByTagName("DateTime");
-                        if (maxheightTimeElm) {
-                          maxheightTime = new Date(maxheightTimeElm.textContent);
-                        }
-                        var maxheightConditionElm = elm2.querySelector("MaxHeight").getElementsByTagName("Condition");
-                        if (maxheightConditionElm) {
-                          maxHeightCondition = elm2.querySelector("MaxHeight").getElementsByTagName("Condition").textContent;
-                        }
-                      }
-
-                      stations.push({
-                        name: nameTmp,
-                        ArrivedTime: ArrivalTimeTmp,
-                        firstHeightCondition: firstHeightConditionTmp,
-                        firstHeightInitial: firstHeightInitialTmp,
-                        omaxHeight: oMaxHeightTmp,
-                        maxHeightTime: maxheightTime,
-                        maxHeightCondition: maxHeightCondition,
+                        if (elm2.querySelector("Condition")) ConditionTmp = elm2.querySelector("Condition").textContent;
+                        stations.push({
+                          name: nameTmp,
+                          HighTideDateTime: highTideTimeTmp,
+                          ArrivalTime: ArrivalTimeTmp,
+                          Condition: ConditionTmp,
+                        });
                       });
-                    });
-                  }
+                    }
 
-                  var tsunamiItem = tsunamiDataTmp.areas.find(function (elm2) {
-                    return elm2.name == elm.querySelector("Name").textContent;
-                  });
-
-                  if (tsunamiItem) {
-                    stations.forEach(function (elm2) {
-                      var stationElm = tsunamiItem.stations.find(function (elm3) {
-                        return elm3.name == elm2.name;
-                      });
-                      if (stationElm) {
-                        stationElm.ArrivedTime = elm2.ArrivedTime;
-                        stationElm.firstHeightCondition = elm2.firstHeightCondition;
-                        stationElm.firstHeightInitial = elm2.firstHeightInitial;
-                        stationElm.omaxHeight = elm2.omaxHeight;
-                        stationElm.maxheightTime = elm2.ArrivedTime;
-                        stationElm.maxHeightCondition = elm2.maxHeightCondition;
-                      }
-                    });
-                  } else {
                     tsunamiDataTmp.areas.push({
+                      code: Number(elm.querySelector("Category").querySelector("Kind").querySelector("Code").textContent),
+                      grade: gradeTmp,
                       name: elm.querySelector("Name").textContent,
+                      canceled: canceledTmp,
+                      firstHeight: firstHeightTmp,
+                      firstHeightCondition: firstHeightConditionTmp,
                       stations: stations,
+                      maxHeight: maxHeightTmp,
                     });
-                  }
-                });
+                  });
+              }
+              if (tsunamiElm.querySelector("Observation")) {
+                tsunamiElm
+                  .querySelector("Observation")
+                  .querySelectorAll("Item")
+                  .forEach(function (elm) {
+                    var stations = [];
+                    if (elm.querySelector("Station")) {
+                      elm.querySelectorAll("Station").forEach(function (elm2) {
+                        var nameTmp;
+                        var ArrivalTimeTmp;
+                        var firstHeightConditionTmp;
+                        var firstHeightInitialTmp;
+                        var maxheightTime;
+                        var maxHeightCondition;
+                        var oMaxHeightTmp;
+                        nameTmp = elm2.querySelector("Name").textContent;
+                        if (elm2.querySelector("FirstHeight")) {
+                          if (elm2.querySelector("FirstHeight").querySelector("ArrivalTime")) ArrivalTimeTmp = new Date(elm2.querySelector("FirstHeight").querySelector("ArrivalTime").textContent);
+                          if (elm2.querySelector("FirstHeight").querySelector("Condition")) firstHeightConditionTmp = elm2.querySelector("FirstHeight").querySelector("Condition").textContent;
+                          if (elm2.querySelector("FirstHeight").querySelector("Initial")) firstHeightInitialTmp = elm2.querySelector("FirstHeight").querySelector("Initial").textContent;
+                        }
+                        if (elm2.querySelector("MaxHeight")) {
+                          var maxheightElm = elm2.querySelector("MaxHeight").getElementsByTagName("jmx_eb:TsunamiHeight")[0];
+                          if (maxheightElm) {
+                            oMaxHeightTmp = maxheightElm.getAttribute("description");
+                            oMaxHeightTmp = oMaxHeightTmp.replace(/[Ａ-Ｚａ-ｚ０-９．]/g, function (s) {
+                              return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
+                            });
+                          }
+
+                          var maxheightTimeElm = elm2.querySelector("MaxHeight").getElementsByTagName("DateTime");
+                          if (maxheightTimeElm) {
+                            maxheightTime = new Date(maxheightTimeElm.textContent);
+                          }
+                          var maxheightConditionElm = elm2.querySelector("MaxHeight").getElementsByTagName("Condition");
+                          if (maxheightConditionElm) {
+                            maxHeightCondition = elm2.querySelector("MaxHeight").getElementsByTagName("Condition").textContent;
+                          }
+                        }
+
+                        stations.push({
+                          name: nameTmp,
+                          ArrivedTime: ArrivalTimeTmp,
+                          firstHeightCondition: firstHeightConditionTmp,
+                          firstHeightInitial: firstHeightInitialTmp,
+                          omaxHeight: oMaxHeightTmp,
+                          maxHeightTime: maxheightTime,
+                          maxHeightCondition: maxHeightCondition,
+                        });
+                      });
+                    }
+
+                    var tsunamiItem = tsunamiDataTmp.areas.find(function (elm2) {
+                      return elm2.name == elm.querySelector("Name").textContent;
+                    });
+
+                    if (tsunamiItem) {
+                      stations.forEach(function (elm2) {
+                        var stationElm = tsunamiItem.stations.find(function (elm3) {
+                          return elm3.name == elm2.name;
+                        });
+                        if (stationElm) {
+                          stationElm.ArrivedTime = elm2.ArrivedTime;
+                          stationElm.firstHeightCondition = elm2.firstHeightCondition;
+                          stationElm.firstHeightInitial = elm2.firstHeightInitial;
+                          stationElm.omaxHeight = elm2.omaxHeight;
+                          stationElm.maxheightTime = elm2.ArrivedTime;
+                          stationElm.maxHeightCondition = elm2.maxHeightCondition;
+                        }
+                      });
+                    } else {
+                      tsunamiDataTmp.areas.push({
+                        name: elm.querySelector("Name").textContent,
+                        stations: stations,
+                      });
+                    }
+                  });
+              }
             }
           }
+          TsunamiInfoControl(tsunamiDataTmp);
         }
-        TsunamiInfoControl(tsunamiDataTmp);
+      } catch (err) {
+        return;
       }
-    }catch(err){return;}
     });
   });
   request.on("error", (error) => {
@@ -2592,47 +2621,49 @@ function EQI_USGS_Req() {
       dataTmp += chunk;
     });
     res.on("end", function () {
-      try{
-      var json = jsonParse(dataTmp);
-      if (!json) return false;
-      if (json.features[0].properties && usgsLastGenerated < json.features[0].properties.updated) {
-        usgsLastGenerated = json.features[0].properties.updated;
+      try {
+        var json = jsonParse(dataTmp);
+        if (!json) return false;
+        if (json.features[0].properties && usgsLastGenerated < json.features[0].properties.updated) {
+          usgsLastGenerated = json.features[0].properties.updated;
 
-        var dataTmp2 = [];
-        json.features.forEach(function (elm) {
-          var request = net.request("https://earthquake.usgs.gov/ws/geoserve/regions.json?latitude=" + elm.geometry.coordinates[1] + "&longitude=" + elm.geometry.coordinates[0] + "&type=fe");
-          request.on("response", (res) => {
-            var dataTmp = "";
-            res.on("data", (chunk) => {
-              dataTmp += chunk;
-            });
-            res.on("end", function () {
-              var json = jsonParse(dataTmp);
-              var FE_ID;
-              var i = 0;
-              while (!FE_ID && i < json.fe.features.length) {
-                FE_ID = json.fe.features[i].properties.number;
-                i++;
-              }
-              var jpName = FERegions[FE_ID];
-              dataTmp2.push({
-                eventId: elm.id,
-                category: null,
-                OriginTime: new Date(elm.properties.time),
-                epiCenter: jpName ? jpName : elm.properties.place,
-                M: Math.round(elm.properties.mag * 10) / 10,
-                maxI: null,
-                DetailURL: [elm.properties.url],
+          var dataTmp2 = [];
+          json.features.forEach(function (elm) {
+            var request = net.request("https://earthquake.usgs.gov/ws/geoserve/regions.json?latitude=" + elm.geometry.coordinates[1] + "&longitude=" + elm.geometry.coordinates[0] + "&type=fe");
+            request.on("response", (res) => {
+              var dataTmp = "";
+              res.on("data", (chunk) => {
+                dataTmp += chunk;
               });
-              if (dataTmp2.length <= config.Info.EQInfo.ItemCount) {
-                eqInfoControl(dataTmp2, "usgs");
-              }
+              res.on("end", function () {
+                var json = jsonParse(dataTmp);
+                var FE_ID;
+                var i = 0;
+                while (!FE_ID && i < json.fe.features.length) {
+                  FE_ID = json.fe.features[i].properties.number;
+                  i++;
+                }
+                var jpName = FERegions[FE_ID];
+                dataTmp2.push({
+                  eventId: elm.id,
+                  category: null,
+                  OriginTime: new Date(elm.properties.time),
+                  epiCenter: jpName ? jpName : elm.properties.place,
+                  M: Math.round(elm.properties.mag * 10) / 10,
+                  maxI: null,
+                  DetailURL: [elm.properties.url],
+                });
+                if (dataTmp2.length <= config.Info.EQInfo.ItemCount) {
+                  eqInfoControl(dataTmp2, "usgs");
+                }
+              });
             });
+            request.end();
           });
-          request.end();
-        });
+        }
+      } catch (err) {
+        return;
       }
-    }catch(err){return;}
     });
   });
   request.on("error", (error) => {
@@ -2651,35 +2682,37 @@ function EQI_narikakunList_Req(url, num, first) {
       dataTmp += chunk;
     });
     res.on("end", function () {
-      try{
-      var json = jsonParse(dataTmp);
-      if (!json || !json.lists) return false;
-      narikakun_URLs = narikakun_URLs.concat(json.lists.reverse());
+      try {
+        var json = jsonParse(dataTmp);
+        if (!json || !json.lists) return false;
+        narikakun_URLs = narikakun_URLs.concat(json.lists.reverse());
 
-      if (narikakun_URLs.length < config.Info.EQInfo.ItemCount && first) {
-        var yearTmp = new Date().getFullYear();
-        var monthTmp = new Date().getMonth();
-        if (monthTmp == 0) {
-          yearTmp = new Date().getFullYear() - 1;
-          monthTmp = 1;
-        }
-        EQI_narikakunList_Req("https://ntool.online/api/earthquakeList?year=" + yearTmp + "&month=" + monthTmp, config.Info.EQInfo.ItemCount - json.lists.length, false);
-      } else {
-        for (let elm of narikakun_URLs) {
-          var eidTmp = elm.split("_")[2];
-          if (nakn_Fetched.indexOf(url) === -1) {
-            nakn_Fetched.push(elm);
-            EQI_narikakun_Req(elm);
+        if (narikakun_URLs.length < config.Info.EQInfo.ItemCount && first) {
+          var yearTmp = new Date().getFullYear();
+          var monthTmp = new Date().getMonth();
+          if (monthTmp == 0) {
+            yearTmp = new Date().getFullYear() - 1;
+            monthTmp = 1;
           }
-          if (!narikakun_EIDs.includes(eidTmp)) {
-            narikakun_EIDs.push(eidTmp);
-            if (narikakun_EIDs.length == config.Info.EQInfo.ItemCount) break;
+          EQI_narikakunList_Req("https://ntool.online/api/earthquakeList?year=" + yearTmp + "&month=" + monthTmp, config.Info.EQInfo.ItemCount - json.lists.length, false);
+        } else {
+          for (let elm of narikakun_URLs) {
+            var eidTmp = elm.split("_")[2];
+            if (nakn_Fetched.indexOf(url) === -1) {
+              nakn_Fetched.push(elm);
+              EQI_narikakun_Req(elm);
+            }
+            if (!narikakun_EIDs.includes(eidTmp)) {
+              narikakun_EIDs.push(eidTmp);
+              if (narikakun_EIDs.length == config.Info.EQInfo.ItemCount) break;
+            }
           }
+          narikakun_URLs = [];
+          narikakun_EIDs = [];
         }
-        narikakun_URLs = [];
-        narikakun_EIDs = [];
+      } catch (err) {
+        return;
       }
-    }catch(err){return;}
     });
   });
   request.on("error", (error) => {
@@ -2697,32 +2730,34 @@ function EQI_narikakun_Req(url) {
       dataTmp += chunk;
     });
     res.on("end", function () {
-      try{
-      var json = jsonParse(dataTmp);
+      try {
+        var json = jsonParse(dataTmp);
 
-      if (!json) return;
+        if (!json) return;
 
-      var originTimeTmp = json.Body.Earthquake ? new Date(json.Body.Earthquake.OriginTime) : null;
-      var epiCenterTmp = json.Body.Earthquake ? json.Body.Earthquake.Hypocenter.Name : null;
-      var MagnitudeTmp = json.Body.Earthquake ? json.Body.Earthquake.Magnitude : null;
-      var MaxITmp = json.Body.Intensity ? json.Body.Intensity.Observation.MaxInt : null;
-      var cancel = json.Head.InfoType == "取消";
+        var originTimeTmp = json.Body.Earthquake ? new Date(json.Body.Earthquake.OriginTime) : null;
+        var epiCenterTmp = json.Body.Earthquake ? json.Body.Earthquake.Hypocenter.Name : null;
+        var MagnitudeTmp = json.Body.Earthquake ? json.Body.Earthquake.Magnitude : null;
+        var MaxITmp = json.Body.Intensity ? json.Body.Intensity.Observation.MaxInt : null;
+        var cancel = json.Head.InfoType == "取消";
 
-      var dataTmp2 = [
-        {
-          eventId: json.Head.EventID,
-          category: json.Head.Title,
-          OriginTime: originTimeTmp,
-          epiCenter: epiCenterTmp,
-          M: MagnitudeTmp,
-          maxI: MaxITmp,
-          cancel: cancel,
-          reportDateTime: new Date(json.Head.ReportDateTime),
-          DetailURL: [url],
-        },
-      ];
-      eqInfoControl(dataTmp2, "jma");
-    }catch(err){return;}
+        var dataTmp2 = [
+          {
+            eventId: json.Head.EventID,
+            category: json.Head.Title,
+            OriginTime: originTimeTmp,
+            epiCenter: epiCenterTmp,
+            M: MagnitudeTmp,
+            maxI: MaxITmp,
+            cancel: cancel,
+            reportDateTime: new Date(json.Head.ReportDateTime),
+            DetailURL: [url],
+          },
+        ];
+        eqInfoControl(dataTmp2, "jma");
+      } catch (err) {
+        return;
+      }
     });
   });
   request.on("error", (error) => {
@@ -2883,6 +2918,7 @@ function eqInfoAlert(data, source, update) {
 
 //🔴津波情報🔴
 function TsunamiInfoControl(data) {
+  if (!config.Info.TsunamiInfo.GetData) return;
   var newInfo = !tsunamiData || !tsunamiData.issue || tsunamiData.issue.time < data.issue.time;
   if (newInfo) {
     //情報の有効期限
