@@ -259,6 +259,7 @@ function checkUpdate() {
         dataTmp += chunk;
       });
       res.on("end", function () {
+        try{
         var json = jsonParse(dataTmp);
         var latest_verTmp = String(json[0].tag_name.replace("v", ""));
         var p = require("../package.json");
@@ -298,6 +299,7 @@ function checkUpdate() {
             data: update_data,
           });
         }
+      }catch(err){return;}
       });
     }
   });
@@ -330,6 +332,7 @@ function ScheduledExecution() {
         dataTmp += chunk;
       });
       res.on("end", function () {
+        try{
         var json = jsonParse(dataTmp);
         if (json.status == "generate a new token") {
           //トークン更新
@@ -348,6 +351,7 @@ function ScheduledExecution() {
           store.set("config", config);
           Window_notification("Axisのアクセストークンが不正です。", "error");
         }
+      }catch(err){return;}
       });
     });
 
@@ -461,9 +465,7 @@ function errorResolve(response) {
 }
 //クラッシュレポートの送信
 function crashReportSend(errMsg, result) {
-  let request = net.request({
-    url: "https://zeroquake.wwww.jp/crashReport/?errorMsg=" + encodeURI(errMsg) + "&soft_version=" + encodeURI(soft_version),
-  });
+  let request = net.request("https://zeroquake.wwww.jp/crashReport/?errorMsg=" + encodeURI(errMsg) + "&soft_version=" + encodeURI(soft_version));
 
   request.on("error", () => {
     dialog.showMessageBox(mainWindow, options3).then(function () {
@@ -1033,6 +1035,7 @@ function kmoniRequest() {
         dataTmp.push(chunk);
       });
       res.on("end", () => {
+        try{
         var bufTmp = Buffer.concat(dataTmp);
         if (kmoniWorker) {
           kmoniWorker.webContents.send("message2", {
@@ -1041,10 +1044,8 @@ function kmoniRequest() {
             date: ReqTime,
           });
         }
+      }catch(err){ kmoniTimeUpdate(new Date() - Replay, "kmoni", "Error");}
       });
-    });
-    request.on("error", (error) => {
-      NetworkError(error, "強震モニタ(画像)");
     });
     request.end();
   }
@@ -1061,6 +1062,7 @@ function kmoniEstShindoRequest() {
       dataTmp.push(chunk);
     });
     res.on("end", () => {
+      try{
       var bufTmp = Buffer.concat(dataTmp);
       if (kmoniWorker) {
         var kmoniEstShindoDataTmp = "data:image/gif;base64," + bufTmp.toString("base64");
@@ -1074,6 +1076,7 @@ function kmoniEstShindoRequest() {
           });
         }
       }
+    }catch(err){return;}
     });
   });
   request.on("error", (error) => {
@@ -1103,7 +1106,7 @@ function lmoniRequest() {
         });
         res.on("end", function () {
           var json = jsonParse(dataTmp);
-          if (json) EEWdetect(2, json, 2);
+          EEWdetect(2, json, 2);
         });
       }
     });
@@ -1142,7 +1145,7 @@ function ymoniRequest() {
 
           res.on("end", function () {
             var json = jsonParse(dataTmp);
-            if (json) EEWdetect(1, json);
+           EEWdetect(1, json);
           });
         }
       });
@@ -1171,7 +1174,7 @@ function ymoniRequest() {
           });
           res.on("end", function () {
             var json = jsonParse(dataTmp);
-            if (json) EEWdetect(1, json);
+            EEWdetect(1, json);
           });
         }
       });
@@ -1215,6 +1218,7 @@ function SnetRequest() {
               dataTmp.push(chunk);
             });
             res.on("end", () => {
+              try{
               var bufTmp = Buffer.concat(dataTmp);
               if (kmoniWorker) {
                 var ReqTime = new Date(dateTime);
@@ -1224,10 +1228,8 @@ function SnetRequest() {
                   date: ReqTime,
                 });
               }
+            }catch(err){      kmoniTimeUpdate(new Date() - Replay, "Lmoni", "Error");}
             });
-          });
-          request.on("error", (error) => {
-            NetworkError(error, "海しる");
           });
           request.end();
 
@@ -1258,7 +1260,7 @@ function wolfxRequest() {
         dataTmp += chunk;
       });
       res.on("end", function () {
-        dataTmp = "37 03 00 230505222717 C11 230505222647 ND20230505222644 NCN904 JD////////////// JN/// 390 N375 E1372 010 44 04 RK66519 RT00/// RC0//// EBI 390 S0404 ////// 01 9999=";
+        try{
         var json = jsonParse(dataTmp);
         if (json && wolfx_lastUpdate < new Date(json.AnnouncedTime)) {
           wolfx_lastUpdate = json.AnnouncedTime;
@@ -1290,7 +1292,7 @@ function wolfxRequest() {
                   Arrived: arrived,
                 });
               }
-            } else throw new Error("予想震度等のでコードでエラー");
+            } else throw new Error("予想震度等のデコードでエラー");
           }
           var EEWdata = {
             alertflg: json.isWarn ? "警報" : "予報",
@@ -1318,6 +1320,7 @@ function wolfxRequest() {
           EEWcontrol(EEWdata);
         }
         kmoniTimeUpdate(new Date() - Replay, "wolfx", "success");
+      }catch(err){ kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");}
       });
     });
     request.on("error", (error) => {
@@ -1527,6 +1530,7 @@ async function kmoniServerSelect() {
       var request = net.request("https://weather-kyoshin.west.edge.storage-yahoo.jp/RealTimeData/" + dateEncode(2, new Date() - yoyuY - Replay) + "/" + dateEncode(1, new Date() - yoyuY - Replay) + ".json");
       request.on("response", (res) => {
         res.on("end", function () {
+          try{
           if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
             YmoniW = 2500;
           } else {
@@ -1542,6 +1546,7 @@ async function kmoniServerSelect() {
             }
             resolve();
           }
+        }catch(err){return;}
         });
       });
       request.on("error", (error) => {
@@ -1600,6 +1605,7 @@ async function yoyuSetK(func) {
               dataTmp += chunk;
             });
             res.on("end", function () {
+              try{
               var json = jsonParse(dataTmp);
               if (json) {
                 var resTime = new Date(json.latest_time);
@@ -1611,6 +1617,7 @@ async function yoyuSetK(func) {
                 resTimeTmp = resTime;
               }
               resolve();
+            }catch(err){return;}
             });
           });
 
@@ -1647,6 +1654,7 @@ async function yoyuSetL(func) {
               dataTmp += chunk;
             });
             res.on("end", function () {
+              try{
               var json = JSON.parse(dataTmp);
               var resTime = new Date(json.latest_time);
 
@@ -1656,6 +1664,7 @@ async function yoyuSetL(func) {
               }
               resTimeTmp = resTime;
               resolve();
+            }catch(err){return;}
             });
           });
 
@@ -1716,6 +1725,7 @@ function kmoniTimeUpdate(Updatetime, type, condition, vendor) {
 function EEWdetect(type, json, KorL) {
   if (!json) return;
   if (type == 1) {
+    try{
     //yahookmoni
     const request_time = new Date(json.realTimeData.dataTime);
 
@@ -1755,8 +1765,15 @@ function EEWdetect(type, json, KorL) {
         YkmoniLastReportTime = YkmoniLastReportTimeTmp;
       }
     }
+  }catch(err){    kmoniTimeUpdate(new Date() - Replay, "YahooKmoni", "Error", monitorVendor);
+}
+
   } else if (type == 2) {
     //kmoni/lmoni
+    if (KorL == 1) var sourceTmp = "kmoni";
+    else var sourceTmp = "Lmoni";
+
+    try{
     var year = parseInt(json.request_time.substring(0, 4));
     var month = parseInt(json.request_time.substring(4, 6));
     var day = parseInt(json.request_time.substring(6, 8));
@@ -1772,10 +1789,6 @@ function EEWdetect(type, json, KorL) {
     var min = parseInt(json.origin_time.substring(10, 12));
     var sec = parseInt(json.origin_time.substring(12, 15));
     var origin_timeTmp = new Date(year, month - 1, day, hour, min, sec);
-
-    var sourceTmp;
-    if (KorL == 1) sourceTmp = "kmoni";
-    else sourceTmp = "Lmoni";
 
     kmoniTimeUpdate(request_time, sourceTmp, "success");
 
@@ -1849,9 +1862,13 @@ function EEWdetect(type, json, KorL) {
       }
     }
     if (KorL == 2) lwaveTmp = json.avrarea;
+  }catch(err){
+    kmoniTimeUpdate(new Date() - Replay, sourceTmp, "Error");
+  }
   } else if (type == 3) {
     //axis
 
+    try{
     var alertflgTmp = json.Title == "緊急地震速報（予報）" ? "予報" : "警報";
     var EBIData = [];
     json.Forecast.forEach(function (elm) {
@@ -1889,8 +1906,12 @@ function EEWdetect(type, json, KorL) {
       source: "axis",
     };
     EEWcontrol(EEWdata);
+  }catch(err){
+    kmoniTimeUpdate(new Date() - Replay, "axis", "Error");
+  }
   } else if (type == 4) {
     //P2P
+    try{
     var maxIntTmp = Math.floor(
       Math.max.apply(
         null,
@@ -1966,6 +1987,9 @@ function EEWdetect(type, json, KorL) {
     EEWdata.intensityAreas = areaTmp;
 
     EEWcontrol(EEWdata);
+  }catch(err){
+    kmoniTimeUpdate(new Date() - Replay, "P2P_EEW", "Error");
+  }
   }
 }
 
@@ -2221,6 +2245,7 @@ function EQI_JMA_Req() {
       dataTmp += chunk;
     });
     res.on("end", function () {
+      try{
       var json = jsonParse(dataTmp);
       if (!json) return false;
       var dataTmp2 = [];
@@ -2265,6 +2290,7 @@ function EQI_JMA_Req() {
       });
 
       eqInfoControl(dataTmp2, "jma");
+    }catch(err){return;}
     });
   });
   request.on("error", (error) => {
@@ -2282,6 +2308,7 @@ function EQI_JMAXMLList_Req() {
       dataTmp += chunk;
     });
     res.on("end", function () {
+      try{
       const parser = new new JSDOM().window.DOMParser();
       const xml = parser.parseFromString(dataTmp, "text/html");
       if (!xml) return;
@@ -2292,6 +2319,7 @@ function EQI_JMAXMLList_Req() {
         if (!url) return;
         EQI_JMAXML_Req(url);
       });
+    }catch(err){return;}
     });
   });
   request.on("error", (error) => {
@@ -2313,6 +2341,7 @@ function EQI_JMAXML_Req(url) {
       dataTmp += chunk;
     });
     res.on("end", function () {
+      try{
       const parser = new new JSDOM().window.DOMParser();
       const xml = parser.parseFromString(dataTmp, "text/html");
       if (!xml) return false;
@@ -2545,6 +2574,7 @@ function EQI_JMAXML_Req(url) {
         }
         TsunamiInfoControl(tsunamiDataTmp);
       }
+    }catch(err){return;}
     });
   });
   request.on("error", (error) => {
@@ -2564,6 +2594,7 @@ function EQI_USGS_Req() {
       dataTmp += chunk;
     });
     res.on("end", function () {
+      try{
       var json = jsonParse(dataTmp);
       if (!json) return false;
       if (json.features[0].properties && usgsLastGenerated < json.features[0].properties.updated) {
@@ -2603,6 +2634,7 @@ function EQI_USGS_Req() {
           request.end();
         });
       }
+    }catch(err){return;}
     });
   });
   request.on("error", (error) => {
@@ -2621,6 +2653,7 @@ function EQI_narikakunList_Req(url, num, first) {
       dataTmp += chunk;
     });
     res.on("end", function () {
+      try{
       var json = jsonParse(dataTmp);
       if (!json || !json.lists) return false;
       narikakun_URLs = narikakun_URLs.concat(json.lists.reverse());
@@ -2648,6 +2681,7 @@ function EQI_narikakunList_Req(url, num, first) {
         narikakun_URLs = [];
         narikakun_EIDs = [];
       }
+    }catch(err){return;}
     });
   });
   request.on("error", (error) => {
@@ -2665,6 +2699,7 @@ function EQI_narikakun_Req(url) {
       dataTmp += chunk;
     });
     res.on("end", function () {
+      try{
       var json = jsonParse(dataTmp);
 
       if (!json) return;
@@ -2689,6 +2724,7 @@ function EQI_narikakun_Req(url) {
         },
       ];
       eqInfoControl(dataTmp2, "jma");
+    }catch(err){return;}
     });
   });
   request.on("error", (error) => {
@@ -2951,7 +2987,7 @@ function jsonParse(str) {
     str = String(str);
     var json = JSON.parse(str);
   } catch (error) {
-    return {};
+    return null;
   }
   return json;
 }
