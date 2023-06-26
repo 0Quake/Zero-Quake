@@ -214,7 +214,7 @@ var Yoyu = 250;
 var yoyuY = (yoyuK = yoyuL = 2500);
 var EEWNow = false;
 
-var errorCountk = (errorCountl = errorCountyw = errorCountye = 0);
+var errorCountk = (errorCountkI = errorCountkEI = errorCountl = errorCountyw = errorCountye = 0);
 
 var EQDetect_List = [];
 
@@ -372,7 +372,7 @@ function ScheduledExecution() {
 app.whenReady().then(() => {
   //ウィンドウ作成
   worker_createWindow();
-  kmoniServerSelect();
+  kmoniServerSelectY();
   //定期実行着火
   ScheduledExecution();
 
@@ -1001,19 +1001,22 @@ function estShindoControl(response) {
 }
 
 var kmoniEstShindoData;
+var kmoniEEW_url = true;
+var kmoniI_url = 0;
 //強震モニタへのHTTPリクエスト
 function kmoniRequest() {
   if (net.online && config.Source.kmoni.kmoni.GetData) {
     var ReqTime = new Date() - yoyuK - Replay;
 
-    var request = net.request("http://www.kmoni.bosai.go.jp/webservice/hypo/eew/" + dateEncode(1, ReqTime) + ".json");
+    var urlTmp = kmoniEEW_url ? "http://www.kmoni.bosai.go.jp/webservice/hypo/eew/" + dateEncode(1, ReqTime) + ".json" : "https://smi.lmoniexp.bosai.go.jp/webservice/hypo/eew/" + dateEncode(1, ReqTime) + ".json";
+    var request = net.request(urlTmp);
     request.on("response", (res) => {
       var dataTmp = "";
       if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
         errorCountk++;
         if (errorCountk > 3) {
-          kmoniServerSelect();
           errorCountk = 0;
+          kmoniEEW_url = !kmoniEEW_url;
         }
         NetworkError(res._responseHead.statusCode, "強震モニタ");
         kmoniTimeUpdate(new Date() - Replay, "kmoni", "Error");
@@ -1037,36 +1040,53 @@ function kmoniRequest() {
 
     request.end();
 
-    var request = net.request("http://www.kmoni.bosai.go.jp/data/map_img/RealTimeImg/acmap_s/" + dateEncode(2, ReqTime) + "/" + dateEncode(1, ReqTime) + ".acmap_s.gif");
-    request.on("response", (res) => {
-      var dataTmp = [];
-      res.on("data", (chunk) => {
-        dataTmp.push(chunk);
-      });
-      res.on("end", () => {
-        try {
-          var bufTmp = Buffer.concat(dataTmp);
-          if (kmoniWorker) {
-            kmoniWorker.webContents.send("message2", {
-              action: "KmoniImgUpdate",
-              data: "data:image/gif;base64," + bufTmp.toString("base64"),
-              date: ReqTime,
-            });
+    if (kmoniI_url != 2 || dateEncode(1, ReqTime) % 2 == 0) {
+      var urlTmp = ["https://smi.lmoniexp.bosai.go.jp/data/map_img/RealTimeImg/acmap_s/" + dateEncode(2, ReqTime) + "/" + dateEncode(1, ReqTime) + ".acmap_s.gif", "http://www.kmoni.bosai.go.jp/data/map_img/RealTimeImg/acmap_s/" + dateEncode(2, ReqTime) + "/" + dateEncode(1, ReqTime) + ".acmap_s.gif", "https://realtime-earthquake-monitor.appspot.com/acmap_s/" + dateEncode(1, ReqTime)][kmoniI_url];
+
+      var request = net.request(urlTmp);
+      request.on("response", (res) => {
+        var dataTmp = [];
+        res.on("data", (chunk) => {
+          dataTmp.push(chunk);
+        });
+        res.on("end", () => {
+          try {
+            if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
+              errorCountkI++;
+              if (errorCountkI > 3) {
+                errorCountkI = 0;
+                kmoniI_url++;
+                if (kmoniI_url > 2) kmoniI_url = 0;
+              }
+              kmoniTimeUpdate(new Date() - Replay, "kmoni", "Error");
+            } else {
+              errorCountkI = 0;
+              var bufTmp = Buffer.concat(dataTmp);
+              if (kmoniWorker) {
+                kmoniWorker.webContents.send("message2", {
+                  action: "KmoniImgUpdate",
+                  data: "data:image/gif;base64," + bufTmp.toString("base64"),
+                  date: ReqTime,
+                });
+              }
+            }
+          } catch (err) {
+            kmoniTimeUpdate(new Date() - Replay, "kmoni", "Error");
           }
-        } catch (err) {
-          kmoniTimeUpdate(new Date() - Replay, "kmoni", "Error");
-        }
+        });
       });
-    });
-    request.end();
+      request.end();
+    }
   }
   if (kmoniTimeout) clearTimeout(kmoniTimeout);
   kmoniTimeout = setTimeout(kmoniRequest, config.Source.kmoni.kmoni.Interval);
 }
+var kmoniEI_URL = true;
 function kmoniEstShindoRequest() {
   var ReqTime = new Date() - yoyuK - Replay;
 
-  var request = net.request("http://www.kmoni.bosai.go.jp/data/map_img/EstShindoImg/eew/" + dateEncode(2, ReqTime) + "/" + dateEncode(1, ReqTime) + ".eew.gif");
+  var urlTmp = kmoniEI_URL ? "http://www.kmoni.bosai.go.jp/data/map_img/EstShindoImg/eew/" + dateEncode(2, ReqTime) + "/" + dateEncode(1, ReqTime) + ".eew.gif" : "https://smi.lmoniexp.bosai.go.jp/data/map_img/EstShindoImg/eew/" + dateEncode(2, ReqTime) + "/" + dateEncode(1, ReqTime) + ".eew.gif";
+  var request = net.request(urlTmp);
   request.on("response", (res) => {
     var dataTmp = [];
     res.on("data", (chunk) => {
@@ -1074,17 +1094,26 @@ function kmoniEstShindoRequest() {
     });
     res.on("end", () => {
       try {
-        var bufTmp = Buffer.concat(dataTmp);
-        if (kmoniWorker) {
-          var kmoniEstShindoDataTmp = "data:image/gif;base64," + bufTmp.toString("base64");
-          if (kmoniEstShindoDataTmp !== kmoniEstShindoData) {
-            kmoniEstShindoData = kmoniEstShindoDataTmp;
-            kmoniWorker.webContents.send("message2", {
-              action: "KmoniEstShindoImgUpdate",
-              data: kmoniEstShindoData,
-              eid: kmoniEid,
-              serial: kmoniRNum,
-            });
+        if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
+          errorCountkEI++;
+          if (errorCountkEI > 3) {
+            errorCountkEI = 0;
+            kmoniEI_URL = !kmoniEI_URL;
+          }
+          kmoniTimeUpdate(new Date() - Replay, "kmoni", "Error");
+        } else {
+          var bufTmp = Buffer.concat(dataTmp);
+          if (kmoniWorker) {
+            var kmoniEstShindoDataTmp = "data:image/gif;base64," + bufTmp.toString("base64");
+            if (kmoniEstShindoDataTmp !== kmoniEstShindoData) {
+              kmoniEstShindoData = kmoniEstShindoDataTmp;
+              kmoniWorker.webContents.send("message2", {
+                action: "KmoniEstShindoImgUpdate",
+                data: kmoniEstShindoData,
+                eid: kmoniEid,
+                serial: kmoniRNum,
+              });
+            }
           }
         }
       } catch (err) {
@@ -1105,11 +1134,6 @@ function lmoniRequest() {
     request.on("response", (res) => {
       var dataTmp = "";
       if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
-        errorCountl++;
-        if (errorCountl > 3) {
-          kmoniServerSelect();
-          errorCountl = 0;
-        }
         NetworkError(res._responseHead.statusCode, "長周期地震動モニタ");
         kmoniTimeUpdate(new Date() - Replay, "Lmoni", "Error");
       } else {
@@ -1144,7 +1168,7 @@ function ymoniRequest() {
         if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
           errorCountye++;
           if (errorCountye > 3) {
-            kmoniServerSelect();
+            kmoniServerSelectY();
             errorCountye = 0;
           }
           NetworkError(res._responseHead.statusCode, "Yahoo強震モニタ(East)");
@@ -1175,7 +1199,7 @@ function ymoniRequest() {
         if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
           errorCountyw++;
           if (errorCountyw > 3) {
-            kmoniServerSelect();
+            kmoniServerSelectY();
             errorCountyw = 0;
           }
           NetworkError(res._responseHead.statusCode, "Yahoo強震モニタ(West)");
@@ -1519,7 +1543,7 @@ function RegularExecution() {
 }
 
 //Yahoo強震モニタのサーバーを選択
-async function kmoniServerSelect() {
+async function kmoniServerSelectY() {
   await new Promise((resolve) => {
     TestStartTime = new Date();
     if (net.online) {
