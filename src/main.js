@@ -2796,7 +2796,7 @@ function eqInfoControl(dataList, type, EEW) {
     case "jma":
       var eqInfoTmp = [];
       var eqInfoUpdateTmp = [];
-      var audioPlay=false;
+      var audioPlay = false;
 
       dataList.forEach(function (data) {
         if (new Date(data.reportDateTime) > new Date() - Replay) return;
@@ -2810,21 +2810,21 @@ function eqInfoControl(dataList, type, EEW) {
           var changed = false;
           if (EEW && EQElm.category !== "EEW") return; //EEW以外の情報が入っているとき、EEWによる情報を破棄
           if (!EEW && EQElm.category == "EEW") {
-              //EEWによらない情報が入ったら、EEWによる情報をクリアー
-              newer = true;
-              EQElm = {
-                eventId: EQElm.eventId,
-                category: null,
-                reportDateTime: null,
-                OriginTime: null,
-                epiCenter: null,
-                M: null,
-                maxI: null,
-                DetailURL: [],
-                axisData: [],
-              };
-              changed = true;
-              audioPlay = true;
+            //EEWによらない情報が入ったら、EEWによる情報をクリアー
+            newer = true;
+            EQElm = {
+              eventId: EQElm.eventId,
+              category: null,
+              reportDateTime: null,
+              OriginTime: null,
+              epiCenter: null,
+              M: null,
+              maxI: null,
+              DetailURL: [],
+              axisData: [],
+            };
+            changed = true;
+            audioPlay = true;
           }
 
           if (data.OriginTime && (!EQElm.OriginTime || newer)) {
@@ -2877,10 +2877,10 @@ function eqInfoControl(dataList, type, EEW) {
         }
       });
       if (eqInfoTmp.length > 0) {
-        eqInfoAlert(eqInfoTmp, "jma", false,true);
+        eqInfoAlert(eqInfoTmp, "jma", false, audioPlay);
       }
       if (eqInfoUpdateTmp.length > 0) {
-        eqInfoAlert(eqInfoUpdateTmp, "jma", true,audioPlay);
+        eqInfoAlert(eqInfoUpdateTmp, "jma", true, audioPlay);
       }
 
       break;
@@ -2901,15 +2901,16 @@ function eqInfoControl(dataList, type, EEW) {
 }
 
 //地震情報通知（音声・画面表示等）
-function eqInfoAlert(data, source, update,audioPlay) {
+function eqInfoAlert(data, source, update, audioPlay) {
   if (source == "jma") {
     if (!update) {
       eqInfo.jma = eqInfo.jma.concat(data);
     }
     if (audioPlay) {
-      soundPlay("EQInfo");
+      if (EQInfoFetchIndex > 0) {
+        soundPlay("EQInfo");
+      }
     }
-
 
     eqInfo.jma = eqInfo.jma.sort(function (a, b) {
       var r = 0;
