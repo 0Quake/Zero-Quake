@@ -281,6 +281,8 @@ td {
   font-size: 0;
   text-align: center;
 }
+.LgIntIcon,
+.MaxLgIntIcon,
 #LngIntSample {
   display: none;
 }

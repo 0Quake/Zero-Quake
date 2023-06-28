@@ -75,8 +75,8 @@ window.electronAPI.messageSend((event, request) => {
       }
     }
     Mapinit();
-    InfoFetch()
-    } else if (request.action == "setting") {
+    InfoFetch();
+  } else if (request.action == "setting") {
     config = request.data;
     document.getElementById("areaName").textContent = config.home.name;
   }
@@ -559,6 +559,7 @@ function Mapinit() {
     new maplibregl.Marker(img).setLngLat([config.home.longitude, config.home.latitude]).addTo(map);
   }
   estimated_intensity_mapReq();
+  mapFillSwitch();
 }
 document.getElementById("layerSwitch_toggle").addEventListener("click", function () {
   document.getElementById("menu_wrap").classList.toggle("menu_show");
@@ -627,29 +628,30 @@ document.getElementById("mapFillToggle").addEventListener("change", function () 
   MapFill = this.checked;
   mapFillDraw();
 });
-document.getElementsByName("mapFillSelect").forEach(function (elm) {
-  elm.addEventListener("change", function () {
-    estShindoMapDraw = this.value == "fill1";
-    ShindoMapDraw = this.value == "fill2";
-    LgIntMapDraw = this.value == "fill4";
-    mapFillDraw();
+function mapFillSwitch() {
+  estShindoMapDraw = this.value == "fill1";
+  ShindoMapDraw = this.value == "fill2";
+  LgIntMapDraw = this.value == "fill4";
+  mapFillDraw();
 
-    if (LgIntMapDraw) {
-      document.querySelectorAll(".ShindoIcon,.MaxShindoIcon,#ShindoSample").forEach(function (elm) {
-        elm.style.display = "none";
-      });
-      document.querySelectorAll(".LgIntIcon,.MaxLgIntIcon,#LngIntSample").forEach(function (elm) {
-        elm.style.display = "block";
-      });
-    } else {
-      document.querySelectorAll(".ShindoIcon,.MaxShindoIcon,#ShindoSample").forEach(function (elm) {
-        elm.style.display = "block";
-      });
-      document.querySelectorAll(".LgIntIcon,.MaxLgIntIcon,#LngIntSample").forEach(function (elm) {
-        elm.style.display = "none";
-      });
-    }
-  });
+  if (LgIntMapDraw) {
+    document.querySelectorAll(".ShindoIcon,.MaxShindoIcon,#ShindoSample").forEach(function (elm) {
+      elm.style.display = "none";
+    });
+    document.querySelectorAll(".LgIntIcon,.MaxLgIntIcon,#LngIntSample").forEach(function (elm) {
+      elm.style.display = "block";
+    });
+  } else {
+    document.querySelectorAll(".ShindoIcon,.MaxShindoIcon,#ShindoSample").forEach(function (elm) {
+      elm.style.display = "block";
+    });
+    document.querySelectorAll(".LgIntIcon,.MaxLgIntIcon,#LngIntSample").forEach(function (elm) {
+      elm.style.display = "none";
+    });
+  }
+}
+document.getElementsByName("mapFillSelect").forEach(function (elm) {
+  elm.addEventListener("change", mapFillSwitch);
 });
 
 document.getElementById("over2").addEventListener("change", function () {
@@ -698,6 +700,10 @@ function estimated_intensity_mapReq() {
               [lngTmp, latTmp],
             ],
           });
+
+          ZoomBounds.extend([lngTmp, lat2Tmp]);
+          ZoomBounds.extend([lng2Tmp, latTmp]);
+
           map.addLayer({
             id: "estimated_intensity_map_layer_" + index,
             type: "raster",
@@ -852,6 +858,7 @@ function jma_Fetch(url) {
           }
         });
         mapFillDraw();
+        mapZoomReset();
       }
     });
 }
@@ -919,6 +926,7 @@ function jmaL_Fetch(url) {
           }
         });
         mapFillDraw();
+        mapZoomReset();
       }
     });
 }
@@ -1013,6 +1021,7 @@ function jmaXMLFetch(url) {
           }
         });
         mapFillDraw();
+        mapZoomReset();
       }
     });
 }
@@ -1082,6 +1091,7 @@ function narikakun_Fetch(url) {
             }
           });
           mapFillDraw();
+          mapZoomReset();
         }
       }
     });
@@ -1146,6 +1156,7 @@ function axisInfoCtrl(json) {
       }
     });
     mapFillDraw();
+    mapZoomReset();
   }
 }
 
@@ -1235,6 +1246,10 @@ function mapFillDraw() {
   });
 }
 
+function mapZoomReset() {
+  map.fitBounds(ZoomBounds, { padding: 40, maxZoom: 7, animate: false });
+}
+
 //都道府県ごとの情報描画（リスト）
 function add_Pref_info(name, maxInt) {
   var newDiv = document.createElement("div");
@@ -1292,6 +1307,7 @@ function add_Area_info(name, maxInt) {
     var maxIntStr = shindoConvert(maxInt, 1);
     var AreaPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<h3 style='background:" + color[0] + ";color:" + color[1] + "'>震度 " + maxIntStr + "</h3><div>細分区域<br>" + name + "</div><div></div>");
     markerElm = new maplibregl.Marker(icon).setLngLat([pointLocation[1], pointLocation[0]]).setPopup(AreaPopup).addTo(map);
+    ZoomBounds.extend([pointLocation[1], pointLocation[0]]);
   }
 
   var shindo = String(shindoConvert(maxInt, 0));
@@ -1352,6 +1368,9 @@ function add_City_info(name, maxInt) {
   newDiv.classList.add("WrapLevel3", "close");
   wrap2[wrap2.length - 1].appendChild(newDiv);
 }
+
+var ZoomBounds = new maplibregl.LngLatBounds();
+
 //観測点ごとの情報描画（リスト・地図プロット）
 function add_IntensityStation_info(lat, lng, name, int) {
   name = name.replace("＊", "");
@@ -1372,6 +1391,7 @@ function add_IntensityStation_info(lat, lng, name, int) {
   markerElm = new maplibregl.Marker(icon).setLngLat([lng, lat]).setPopup(PtPopup).addTo(map);
 
   wrap3[wrap3.length - 1].appendChild(newDiv);
+  ZoomBounds.extend([lng, lat]);
 }
 //都道府県ごとの情報描画（リスト）
 function add_Pref_infoL() {
@@ -1389,6 +1409,7 @@ function add_Area_infoL(name, maxInt) {
 
     var AreaPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<h3 style='background:" + color[0] + ";color:" + color[1] + "'>長周期地震動階級 " + maxInt + "</h3><div>細分区域<br>" + name + "</div><div></div>");
     markerElm = new maplibregl.Marker(icon).setLngLat([pointLocation[1], pointLocation[0]]).setPopup(AreaPopup).addTo(map);
+    ZoomBounds.extend([pointLocation[1], pointLocation[0]]);
   }
 
   switch (maxInt) {
@@ -1420,6 +1441,8 @@ function add_IntensityStation_infoL(lat, lng, name, int) {
 
   var PtPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<h3 style='background:" + color4[0] + ";color:" + color4[1] + "'>長周期地震動階級 " + intStr + "</h3><div>観測点<br>" + name + "</div><div></div>");
   markerElm = new maplibregl.Marker(icon).setLngLat([lng, lat]).setPopup(PtPopup).addTo(map);
+
+  ZoomBounds.extend([lng, lat]);
 }
 
 //地震情報マージ
@@ -1469,6 +1492,8 @@ function EQInfoControl(data) {
   if (EQInfo.comment) data_comment.innerHTML = EQInfo.comment.join("\n");
 
   if (data.lat && data.lng) {
+    ZoomBounds.extend([data.lng, data.lat]);
+
     if (!ESmarkerElm) {
       const img = document.createElement("img");
       img.src = "./img/epicenter.svg";
@@ -1480,8 +1505,8 @@ function EQInfoControl(data) {
       ESmarkerElm.setLngLat([data.lng, data.lat]);
     }
 
-    map.panTo([data.lng, data.lat], { animate: false });
-    map.zoomTo(8, { animate: false });
+    //map.panTo([data.lng, data.lat], { animate: false });
+    //map.zoomTo(8, { animate: false });
   }
 
   switch (data.infoType) {
