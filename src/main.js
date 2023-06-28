@@ -1078,11 +1078,17 @@ function kmoniRequest() {
       request.end();
     }
   }
+  if (kmoniEid && kmoniEI_URL) kmoniEstShindoRequest();
+
   if (kmoniTimeout) clearTimeout(kmoniTimeout);
   kmoniTimeout = setTimeout(kmoniRequest, config.Source.kmoni.kmoni.Interval);
 }
 var kmoniEI_URL = true;
+var kmoniEidT, kmoniRNumT;
 function kmoniEstShindoRequest() {
+  if(kmoniEid == kmoniEidT && kmoniRNum == kmoniRNumT) return;
+  kmoniEid=kmoniEidT
+  kmoniRNum=kmoniRNumT
   var ReqTime = new Date() - yoyuK - Replay;
 
   var urlTmp = kmoniEI_URL ? "http://www.kmoni.bosai.go.jp/data/map_img/EstShindoImg/eew/" + dateEncode(2, ReqTime) + "/" + dateEncode(1, ReqTime) + ".eew.gif" : "https://smi.lmoniexp.bosai.go.jp/data/map_img/EstShindoImg/eew/" + dateEncode(2, ReqTime) + "/" + dateEncode(1, ReqTime) + ".eew.gif";
@@ -1154,6 +1160,8 @@ function lmoniRequest() {
 
     request.end();
   }
+  if (kmoniEid && !kmoniEI_URL) kmoniEstShindoRequest();
+
   if (lmoniTimeout) clearTimeout(lmoniTimeout);
   lmoniTimeout = setTimeout(lmoniRequest, config.Source.kmoni.lmoni.Interval);
 }
@@ -1840,7 +1848,7 @@ function EEWdetect(type, json, KorL) {
       kmoniTimeUpdate(request_time, sourceTmp, "success");
 
       if (json.result.message == "") {
-        if (KorL == 1) kmoniEstShindoRequest();
+        if (KorL == 1 && !kmoniEid) kmoniEstShindoRequest();
 
         kmoniEid = json.report_id;
         kmoniRNum = json.report_num;
