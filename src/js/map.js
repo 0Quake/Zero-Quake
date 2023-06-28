@@ -78,14 +78,11 @@ function psWaveAnm() {
   }
 }
 
-document.getElementById("layerSwitch_toggle").addEventListener("click", function () {
-  document.getElementById("menu_wrap").classList.toggle("menu_show");
-});
-document.getElementById("menu_wrap").addEventListener("click", function () {
+document.getElementById("layerSwitch_close").addEventListener("click", function () {
   document.getElementById("menu_wrap").classList.remove("menu_show");
 });
-document.getElementById("menu").addEventListener("click", function () {
-  event.stopPropagation();
+document.getElementById("menu").addEventListener("click", function (e) {
+  e.stopPropagation();
 });
 
 var mapSelect = document.getElementsByName("mapSelect");
@@ -635,6 +632,27 @@ function init() {
   }, 2500);
 
   map.addControl(new maplibregl.NavigationControl(), "top-right");
+
+  var layerButton = document.createElement("button");
+  layerButton.innerText = "layers";
+  layerButton.title = "レイヤーの切り替え";
+  layerButton.setAttribute("id", "layerSwitch_toggle");
+  layerButton.addEventListener("click", function () {
+    document.getElementById("menu_wrap").classList.toggle("menu_show");
+  });
+
+  var TLControlWrapper = document.createElement("div");
+  TLControlWrapper.className = "maplibregl-ctrl maplibregl-ctrl-group transparent-ctrl";
+  TLControlWrapper.appendChild(layerButton);
+  map.addControl(
+    {
+      onAdd: function () {
+        return TLControlWrapper;
+      },
+      onRemove: function () {},
+    },
+    "top-left"
+  );
 
   var zoomLevelContinue = function () {
     var currentZoom = map.getZoom();

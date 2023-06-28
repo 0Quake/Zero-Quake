@@ -11,9 +11,6 @@
   flex: 1;
 }
 #layerSwitch_toggle {
-  position: absolute;
-  top: 5px;
-  left: 5px;
   border-radius: 5px;
   background: #444;
   border: solid 1px #999;
@@ -23,14 +20,15 @@
   height: 40px;
   line-height: 40px;
   padding: 0;
-  margin: 0;
+  margin: 5px;
   z-index: 100000001;
 }
 #menu {
+  position: absolute;
   padding: 10px 5px;
-  background: #444;
+  background: #333;
   border: solid 1px #999;
-  border-radius: 5px;
+  border-radius: 10px;
   max-height: calc(100% - 40px);
   overflow-y: auto;
 }
@@ -108,7 +106,11 @@
 .maplibregl-ctrl {
   background: #444;
   color: #fff;
-  border: solid 1px #999 !important;
+  border: solid 1px #999;
+}
+.transparent-ctrl {
+  background: transparent;
+  border: none;
 }
 .maplibregl-ctrl-group button + button {
   border-top: none;

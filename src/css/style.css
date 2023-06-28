@@ -742,7 +742,7 @@ td {
   align-items: center;
   justify-content: right;
 }
-.EQItemOverlay:focus-within{
+.EQItemOverlay:focus-within {
   display: block;
 }
 .EQItem:hover {
@@ -878,7 +878,9 @@ td {
   position: relative;
   padding: 0;
   border: none;
-  border-radius: 20px;
+  border-radius: 10px;
+  background: #333;
+  border: solid 1px #999;
 }
 #UpdateTime_detail_content {
   margin-top: 40px;
@@ -896,7 +898,7 @@ td {
   right: 0;
   left: 0;
   height: 40px;
-  background: #333;
+  background: #444;
   line-height: 40px;
 }
 .popup_menubar h2 {
@@ -911,7 +913,7 @@ td {
   font-size: 20px;
   margin: 0;
   padding: 0;
-  border-radius: 10px 20px 10px 10px;
+  border-radius: 10px;
 }
 dialog::backdrop {
   background: rgba(0, 0, 0, 0.4);

@@ -527,6 +527,48 @@ function Mapinit() {
   });
   map.addControl(new maplibregl.NavigationControl(), "top-right");
 
+  var layerButton = document.createElement("button");
+  layerButton.innerText = "layers";
+  layerButton.title = "レイヤーの切り替え";
+  layerButton.setAttribute("id", "layerSwitch_toggle");
+  layerButton.addEventListener("click", function () {
+    document.getElementById("menu_wrap").classList.toggle("menu_show");
+  });
+
+  var layerMenu = document.createElement("div");
+  layerMenu.setAttribute("id", "estimated_intensity_map_toggle");
+  layerMenu.classList.add("menu");
+  layerMenu.innerHTML = "<h3>地震情報選択</h3>";
+  var radioWrap = document.createElement("div");
+  radioWrap.classList.add("radio");
+  radioWrap.innerHTML = '<label id="estshindomap_radioWrap"><input type="radio" name="mapFillSelect" value="fill1" id="estshindomap_radio">推計震度分布図</label>';
+  radioWrap.innerHTML += '<label><input type="radio" name="mapFillSelect" value="fill2" checked>各地の震度</label>';
+  radioWrap.innerHTML += '<label id="LgInt_radioWrap"><input type="radio" name="mapFillSelect" value="fill4">各地の長周期地震動階級</label>';
+  var checkWrap = document.createElement("div");
+  checkWrap.classList.add("check");
+  checkWrap.innerHTML = '<label><input type="checkbox" id="mapFillToggle" value="fill3" checked>地図の塗りつぶし</label>';
+
+  layerMenu.appendChild(radioWrap);
+  layerMenu.appendChild(checkWrap);
+
+  var TLControlWrapper = document.createElement("div");
+  TLControlWrapper.className = "maplibregl-ctrl maplibregl-ctrl-group transparent-ctrl";
+  TLControlWrapper.appendChild(layerButton);
+  TLControlWrapper.appendChild(layerMenu);
+  map.addControl(
+    {
+      onAdd: function () {
+        return TLControlWrapper;
+      },
+      onRemove: function () {},
+    },
+    "top-left"
+  );
+  document.getElementById("mapFillToggle").addEventListener("change", function () {
+    MapFill = this.checked;
+    mapFillDraw();
+  });
+
   var continueButton = document.createElement("button");
   continueButton.innerText = "sync";
   continueButton.title = "情報を再取得";
@@ -598,14 +640,12 @@ function Mapinit() {
   mapFillDraw();
   mapFillSwitch();
 }
-document.getElementById("layerSwitch_toggle").addEventListener("click", function () {
-  document.getElementById("menu_wrap").classList.toggle("menu_show");
-});
+
 document.getElementById("menu_wrap").addEventListener("click", function () {
   document.getElementById("menu_wrap").classList.remove("menu_show");
 });
-document.getElementById("menu").addEventListener("click", function () {
-  event.stopPropagation();
+document.getElementById("menu").addEventListener("click", function (e) {
+  e.stopPropagation();
 });
 
 var mapSelect = document.getElementsByName("mapSelect");
@@ -661,10 +701,6 @@ var estShindoMapDraw = false;
 var ShindoMapDraw = true;
 var LgIntMapDraw = false;
 var MapFill = true;
-document.getElementById("mapFillToggle").addEventListener("change", function () {
-  MapFill = this.checked;
-  mapFillDraw();
-});
 function mapFillSwitch(val) {
   if (val) {
     estShindoMapDraw = val == "fill1";

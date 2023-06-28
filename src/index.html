@@ -97,7 +97,9 @@
                 <div id="mapcontainer"></div>
                 <div id="menu_wrap">
                     <nav id="menu" class="menu">
-                        <h2>レイヤーの切り替え</h2>
+                        <h2 class="popup_menubar">レイヤーの切り替え
+                            <button id="layerSwitch_close">close</button>
+                        </h2>
                         <h3>ベースマップ</h3>
                         <div class="radio">
                             <label><input type="radio" name="mapSelect" value="" checked>標準</label>
@@ -118,7 +120,6 @@
                         </div>
                     </nav>
                 </div>
-                <button id="layerSwitch_toggle">layers</button>
                 <div id="notification_Area" class="no_notification">
                     <h3>通知センター</h3>
                     <button id="notification_more" aria-label="通知をもっとみる"></button>
