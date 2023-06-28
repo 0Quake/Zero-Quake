@@ -486,3 +486,8 @@ td {
 #LgInt_radioWrap {
   display: none;
 }
+@media (max-width: 600px) {
+  #tableWrap {
+    display: block;
+  }
+}

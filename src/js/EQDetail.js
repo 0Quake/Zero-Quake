@@ -527,29 +527,41 @@ function Mapinit() {
   });
   map.addControl(new maplibregl.NavigationControl(), "top-right");
 
-  var continueButton=document.createElement("button")
-  continueButton.innerText="sync"
-  continueButton.title="情報を再取得"
-  continueButton.className='material-icons-round'
-  var sync=false;
-  continueButton.addEventListener("click",function(){
-    if(sync)return
-    sync = true
-     InfoFetch()
-     continueButton.animate([
-      { transform: 'rotate(0deg)' },
-      { transform: 'rotate(720deg)' }
-    ], {
+  var continueButton = document.createElement("button");
+  continueButton.innerText = "sync";
+  continueButton.title = "情報を再取得";
+  continueButton.className = "material-icons-round";
+  var sync = false;
+  continueButton.addEventListener("click", function () {
+    if (sync) return;
+    sync = true;
+    InfoFetch();
+    continueButton.animate([{ transform: "rotate(0deg)" }, { transform: "rotate(720deg)" }], {
       duration: 2000,
-      fill:"backwards",
-      easing:"linear"
+      fill: "backwards",
+      easing: "linear",
     });
-     setTimeout(function(){sync=false;},1000)
-  })
-  var cbWrapper=document.createElement("div")
-  cbWrapper.className='maplibregl-ctrl maplibregl-ctrl-group'
-  cbWrapper.appendChild(continueButton)
-  map.addControl({onAdd:function (){return cbWrapper},onRemove:function(){}})
+    setTimeout(function () {
+      sync = false;
+    }, 1000);
+  });
+
+  var homeButton = document.createElement("button");
+  homeButton.innerText = "home";
+  homeButton.title = "ズーム範囲をリセット";
+  homeButton.className = "material-icons-round";
+  homeButton.addEventListener("click", mapZoomReset);
+
+  var cbWrapper = document.createElement("div");
+  cbWrapper.className = "maplibregl-ctrl maplibregl-ctrl-group";
+  cbWrapper.appendChild(continueButton);
+  cbWrapper.appendChild(homeButton);
+  map.addControl({
+    onAdd: function () {
+      return cbWrapper;
+    },
+    onRemove: function () {},
+  });
 
   var zoomLevelContinue = function () {
     var currentZoom = map.getZoom();
@@ -583,6 +595,7 @@ function Mapinit() {
     new maplibregl.Marker(img).setLngLat([config.home.longitude, config.home.latitude]).addTo(map);
   }
   estimated_intensity_mapReq();
+  mapFillDraw();
   mapFillSwitch();
 }
 document.getElementById("layerSwitch_toggle").addEventListener("click", function () {
@@ -652,11 +665,12 @@ document.getElementById("mapFillToggle").addEventListener("change", function () 
   MapFill = this.checked;
   mapFillDraw();
 });
-function mapFillSwitch() {
-  estShindoMapDraw = this.value == "fill1";
-  ShindoMapDraw = this.value == "fill2";
-  LgIntMapDraw = this.value == "fill4";
-  mapFillDraw();
+function mapFillSwitch(val) {
+  if (val) {
+    estShindoMapDraw = val == "fill1";
+    ShindoMapDraw = val == "fill2";
+    LgIntMapDraw = val == "fill4";
+  }
 
   if (LgIntMapDraw) {
     document.querySelectorAll(".ShindoIcon,.MaxShindoIcon,#ShindoSample").forEach(function (elm) {
@@ -675,7 +689,9 @@ function mapFillSwitch() {
   }
 }
 document.getElementsByName("mapFillSelect").forEach(function (elm) {
-  elm.addEventListener("change", mapFillSwitch);
+  elm.addEventListener("change", function () {
+    mapFillSwitch(elm.value);
+  });
 });
 
 document.getElementById("over2").addEventListener("change", function () {
