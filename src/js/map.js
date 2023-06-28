@@ -1137,7 +1137,6 @@ function psWaveCalc(eid) {
       }
       i++;
     }
-    console.log(eid, PRadius, SRadius);
     if (SWmin > distance) {
       window.requestAnimationFrame(function () {
         psWaveReDraw(
