@@ -529,7 +529,7 @@ function Mapinit() {
 
   var continueButton=document.createElement("button")
   continueButton.innerText="sync"
-  continueButton.title="情報を更新"
+  continueButton.title="情報を再取得"
   continueButton.className='material-icons-round'
   var sync=false;
   continueButton.addEventListener("click",function(){
