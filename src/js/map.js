@@ -1137,7 +1137,6 @@ function psWaveCalc(eid) {
       }
       i++;
     }
-    console.log(eid, PRadius, SRadius);
     if (SWmin > distance) {
       window.requestAnimationFrame(function () {
         psWaveReDraw(
@@ -1405,19 +1404,19 @@ function tsunamiColorConv(str) {
   var color;
   switch (str) {
     case "MajorWarning":
-      color = "rgb(200,0,255)";
+      color = config.color.Tsunami.TsunamiMajorWarningColor;
       break;
     case "Warning":
-      color = "rgb(255,40,0)";
+      color = config.color.Tsunami.TsunamiWarningColor;
       break;
     case "Watch":
-      color = "rgb(250,245,0)";
+      color = config.color.Tsunami.TsunamiWatchColor;
       break;
     case "Yoho":
-      color = "rgb(66, 158, 255)";
+      color = config.color.Tsunami.TsunamiYohoColor;
       break;
     default:
-      color = "#FFF";
+      color = "transparent";
       break;
   }
   return color;

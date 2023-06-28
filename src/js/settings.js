@@ -156,7 +156,7 @@ document.getElementById("replayReset").addEventListener("click", function () {
   document.getElementById("replay").value = dateEncode(3, new Date()).replaceAll("/", "-");
   window.electronAPI.messageReturn({
     action: "replay",
-    date: new Date(),
+    date: null,
   });
   document.getElementById("replayOffset").innerText = "-";
 });
@@ -180,7 +180,7 @@ function offsetCalc() {
   } else {
     var day = Math.floor(Replay / 1000 / 60 / 60 / 24);
     var hours = Math.floor((Replay / 1000 / 60 / 60) % 24);
-    var minutes = Math.floor(((Replay / 1000 / 60) % 24) % 60);
+    var minutes = Math.floor((Replay / 1000 / 60) % 60);
     var seconds = Math.floor((((Replay / 1000) % 24) % 60) % 60);
     document.getElementById("replayOffset").innerText = "- " + day + "日 " + hours + "時間" + minutes + "分" + seconds + "秒";
   }

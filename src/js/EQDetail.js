@@ -527,6 +527,30 @@ function Mapinit() {
   });
   map.addControl(new maplibregl.NavigationControl(), "top-right");
 
+  var continueButton=document.createElement("button")
+  continueButton.innerText="sync"
+  continueButton.title="情報を再取得"
+  continueButton.className='material-icons-round'
+  var sync=false;
+  continueButton.addEventListener("click",function(){
+    if(sync)return
+    sync = true
+     InfoFetch()
+     continueButton.animate([
+      { transform: 'rotate(0deg)' },
+      { transform: 'rotate(720deg)' }
+    ], {
+      duration: 2000,
+      fill:"backwards",
+      easing:"linear"
+    });
+     setTimeout(function(){sync=false;},1000)
+  })
+  var cbWrapper=document.createElement("div")
+  cbWrapper.className='maplibregl-ctrl maplibregl-ctrl-group'
+  cbWrapper.appendChild(continueButton)
+  map.addControl({onAdd:function (){return cbWrapper},onRemove:function(){}})
+
   var zoomLevelContinue = function () {
     var currentZoom = map.getZoom();
     document.getElementById("mapcontainer").classList.remove("zoomLevel_1", "zoomLevel_2", "zoomLevel_3", "zoomLevel_4", "popup_show");
@@ -953,6 +977,7 @@ function jmaXMLFetch(url) {
       var epiCenterTmp;
       var magnitudeTmp;
       var LatLngDepth;
+      var magnitudeTypeTmp;
       if (EarthquakeElm) {
         originTimeTmp = new Date(EarthquakeElm.querySelector("OriginTime").textContent);
         epiCenterTmp = EarthquakeElm.querySelector("Name").textContent;

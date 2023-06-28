@@ -1,10 +1,6 @@
 :root {
   --PwaveColor: rgb(48, 148, 255);
   --SwaveColor: rgb(255, 62, 48);
-  --TsunamiMajorWarningColor: rgb(200, 0, 255);
-  --TsunamiWarningColor: rgb(255, 40, 0);
-  --TsunamiWatchColor: rgb(250, 245, 0);
-  --TsunamiYohoColor: rgb(66, 158, 255);
 }
 #mapcontainer_Wrap {
   position: relative;

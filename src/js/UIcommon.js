@@ -41,6 +41,12 @@ window.electronAPI.messageSend((event, request) => {
     root.style.setProperty("--LngIntTheme_2_color", config.color.LgInt["2"].color);
     root.style.setProperty("--LngIntTheme_3_color", config.color.LgInt["3"].color);
     root.style.setProperty("--LngIntTheme_4_color", config.color.LgInt["4"].color);
+
+    root.style.setProperty("--TsunamiMajorWarningColor", config.color.Tsunami.TsunamiMajorWarningColor);
+    root.style.setProperty("--TsunamiWarningColor",  config.color.Tsunami.TsunamiWarningColor);
+    root.style.setProperty("--TsunamiWatchColor",  config.color.Tsunami.TsunamiWatchColor);
+    root.style.setProperty("--TsunamiYohoColor",  config.color.Tsunami.TsunamiYohoColor);
+
   }
 });
 
