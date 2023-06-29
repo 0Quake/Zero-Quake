@@ -37,6 +37,7 @@ var EEWData;
 var axisDatas;
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "metaData") {
+    console.log("aaaaaaaaaaaaaa")
     eid = request.eid;
     if (request.urls && Array.isArray(request.urls)) {
       jmaURL = request.urls.filter(function (elm) {
@@ -84,8 +85,9 @@ window.electronAPI.messageSend((event, request) => {
 
 //情報取得
 function InfoFetch() {
+  /*
   jma_ListReq();
-  narikakun_ListReq(new Date().getFullYear(), new Date().getMonth() + 1);
+  narikakun_ListReq(new Date().getFullYear(), new Date().getMonth() + 1);*/
   if (EEWData) EQInfoControl(EEWData);
   if (axisDatas) {
     axisDatas.forEach(function (elm) {
@@ -765,6 +767,11 @@ function estimated_intensity_mapReq() {
           var lngTmp = Number(elm.substring(2, 4)) + 100;
           var lat2Tmp = latTmp + 2 / 3;
           var lng2Tmp = lngTmp + 1;
+
+          if (map.getSource("estimated_intensity_map_" + index)) {
+            map.removeLayer("estimated_intensity_map_layer_" + index);
+            map.removeSource("estimated_intensity_map_" + index);
+          }
 
           map.addSource("estimated_intensity_map_" + index, {
             type: "image",

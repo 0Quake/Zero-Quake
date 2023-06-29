@@ -23,7 +23,7 @@ function replay(ReplayDate) {
   }
 }
 /* eslint-enable */
-//replay("2023/06/24 21:24:30");
+//replay("2023/05/05 14:42:06");
 //replay("2023/04/04 16:11:00"); //２か所同時
 //replay("2023/03/11 05:12:30"); //２か所同時
 //replay("2020/06/15 02:28:38");//２か所同時
@@ -821,7 +821,22 @@ function tsunami_createWindow() {
   });
 }
 //地震情報ウィンドウ表示処理
+var EQI_Window={}
+const handleUrlOpen = (e, url) => {
+  if (url.match(/^http/)) {
+    e.preventDefault();
+    shell.openExternal(url);
+  }
+};
 function EQInfo_createWindow(response) {
+  var EQInfoWindowT = EQI_Window[response.eid]
+  if(EQInfoWindowT){
+    
+    if (EQInfoWindowT.window.isMinimized()) EQInfoWindowT.window.restore();
+    if (!EQInfoWindowT.window.isFocused()) EQInfoWindowT.window.focus();
+    return;
+  }
+  
   var EQInfoWindow = new BrowserWindow({
     minWidth: 600,
     minHeight: 300,
@@ -833,33 +848,36 @@ function EQInfo_createWindow(response) {
     backgroundColor: "#202227",
   });
 
-  EQInfoWindow.webContents.on("did-finish-load", () => {
-    EQInfoWindow.webContents.send("message2", {
+
+  var EEWDataItem = EEW_Data.find(function (elm) {
+    return elm.EQ_id == response.eid;
+  });
+  var metadata= {
+    action: "metaData",
+    eid: response.eid,
+    urls: response.urls,
+    eew: EEWDataItem,
+    axisData: response.axisData,
+  }
+  EQI_Window[response.eid] = {window:EQInfoWindow, metadata:metadata};
+
+  EQI_Window[response.eid].window.webContents.on("did-finish-load", () => {
+    EQI_Window[response.eid].window.webContents.send("message2", {
       action: "setting",
       data: config,
     });
-    var EEWDataItem = EEW_Data.find(function (elm) {
-      return elm.EQ_id == response.eid;
-    });
 
-    EQInfoWindow.webContents.send("message2", {
-      action: "metaData",
-      eid: response.eid,
-      urls: response.urls,
-      eew: EEWDataItem,
-      axisData: response.axisData,
-    });
+    EQI_Window[response.eid].window.webContents.send("message2",  metadata);
   });
 
-  EQInfoWindow.loadFile(response.url);
-  const handleUrlOpen = (e, url) => {
-    if (url.match(/^http/)) {
-      e.preventDefault();
-      shell.openExternal(url);
-    }
-  };
-  EQInfoWindow.webContents.on("will-navigate", handleUrlOpen);
-  EQInfoWindow.webContents.on("new-window", handleUrlOpen);
+  EQI_Window[response.eid].window.on("closed", () => {
+    EQI_Window[response.eid] = null;
+  });
+
+  EQI_Window[response.eid].window.loadFile(response.url);
+  EQI_Window[response.eid].window.webContents.on("will-navigate", handleUrlOpen);
+  EQI_Window[response.eid].window.webContents.on("new-window", handleUrlOpen);
+
 }
 
 //開始処理
@@ -2937,6 +2955,19 @@ function eqInfoAlert(data, source, update, audioPlay) {
         data: eqInfo.jma.slice(0, config.Info.EQInfo.ItemCount),
       });
     }
+    data.forEach(function(elm){
+      if(EQI_Window[elm.eventId]){
+        var metadata = EQI_Window[elm.eventId].metadata;
+        var EEWDataItem = EEW_Data.find(function (elm2) {
+          return elm2.EQ_id == elm.eventId;
+        });      
+
+        metadata.urls = elm.urls;
+        metadata.eew = EEWDataItem;
+        metadata.axisData = elm.axisData;
+        EQI_Window[elm.eventId].window.webContents.send("message2",  metadata);
+      }
+    })
   } else if (source == "usgs") {
     eqInfo.usgs = eqInfo.usgs.filter((item) => {
       return item.eventId !== data.eventId;

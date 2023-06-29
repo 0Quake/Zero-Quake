@@ -615,3 +615,7 @@ div.marker-circle.marker_Int.marker_Int7p {
 .maplibregl-control-container * {
   z-index: 100000000;
 }
+
+.maplibregl-popup-close-button{
+  margin: 0;
+}
