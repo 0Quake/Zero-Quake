@@ -722,10 +722,6 @@ function kmoniMapUpdate(dataTmp, type) {
   if (!dataTmp.data) return;
   if (type == "knet") {
     kmoniMapData = dataTmp.data;
-    if (config && document.getElementById("tab1_content2").classList.contains("active_tabcontent")) {
-      //リアルタイム震度タブ
-      kmoniListDraw(dataTmp.data);
-    }
   }
   //地図上マーカー
   if (becomeForeground || now_EEW.length !== 0 || Object.keys(points).length == 0) {
@@ -762,54 +758,17 @@ function kmoniMapUpdate(dataTmp, type) {
         pointData.markerElm.classList.remove("marker_Int");
       }
 
-      pointData.popupContent = "<h3 class='PointName' style='border-bottom-color:rgb(" + elm.rgb.join(",") + ")'>" + (elm.Name ? elm.Name : "") + "<span>" + elm.Type + "_" + elm.Code + "</span></h3>" + (elm.detect ? "<h4 class='detecting'>地震検知中</h4>" : "") + "<p>震度 " + Math.round(elm.shindo * 10) / 10 + "</p><p>PGA " + Math.round(elm.pga * 100) / 100 + "gal</p>";
+      pointData.popupContent = "<h3 class='PointName' style='border-bottom-color:rgb(" + elm.rgb.join(",") + ")'>" + (elm.Name ? elm.Name : "") + "<span>" + elm.Type + "_" + elm.Code + "</span></h3>" + (elm.detect ? "<h4 class='detecting'>地震検知中</h4>" : "");
       if (pointData.popup.isOpen()) pointData.popup.setHTML(pointData.popupContent);
     } else if (pointData) {
       pointData.markerElm.style.background = "rgba(128,128,128,0.5)";
       pointData.markerElm.classList.remove("strongDetectingMarker", "detectingMarker", "marker_Int");
 
-      pointData.popupContent = "<h3 class='PointName' style='border-bottom:solid 2px rgba(128,128,128,0.5)'>" + (elm.Name ? elm.Name : "") + "<span>" + elm.Type + "_" + elm.Code + "</span></h3><p>震度 ?</p><p>PGA ?</p>";
+      pointData.popupContent = "<h3 class='PointName' style='border-bottom:solid 2px rgba(128,128,128,0.5)'>" + (elm.Name ? elm.Name : "") + "<span>" + elm.Type + "_" + elm.Code + "</span></h3>";
       if (pointData.popup.isOpen()) pointData.popup.setHTML(pointData.popupContent);
     }
   }
 }
-
-//強震モニタリストの描画
-var pointListLoading = document.getElementById("pointListLoading");
-var pointList = document.getElementById("pointList");
-
-function kmoniListDraw(dataTmp) {
-  if (!dataTmp) {
-    pointListLoading.style.display = "block";
-    pointList.innerHTML = "";
-    return false;
-  }
-  pointListLoading.style.display = "none";
-  var shindoList = dataTmp
-    .filter(function (elm) {
-      return elm.shindo;
-    })
-    .sort(function (a, b) {
-      return b.shindo - a.shindo;
-    });
-  var htmlTmp = "";
-  for (let a = 0; a < config.Info.RealTimeShake.List.ItemCount; a++) {
-    var shindoElm = shindoList[a];
-    if (shindoElm.shindo) {
-      var shindoColor = shindoConvert(shindoElm.shindo, 2);
-      var IntDetail = "";
-      if (a == 0) IntDetail = "<div class='intDetail'>" + Math.round(shindoElm.shindo * 10) / 10 + "</div>";
-
-      htmlTmp += "<li><div class='int' style='color:" + shindoColor[1] + ";background:" + shindoColor[0] + "'>" + shindoConvert(shindoElm.shindo, 0) + IntDetail + "</div><div class='Pointname'>" + shindoElm.Region + " " + shindoElm.Name + "</div><div class='PGA'>" + Math.round(shindoElm.pga * 100) / 100 + "gal</div></li>";
-    }
-  }
-  pointList.innerHTML = htmlTmp;
-}
-
-//タブ有効化時 即時に描画
-document.getElementById("tab1_menu2").addEventListener("click", function () {
-  kmoniListDraw(kmoniMapData);
-});
 
 //予想震度更新
 function EstShindoUpdate(req) {

@@ -1802,6 +1802,7 @@ function kmoniTimeUpdate(Updatetime, type, condition, vendor) {
 function EEWdetect(type, json, KorL) {
   if (!json) return;
   if (type == 1) {
+    return
     try {
       //yahookmoni
       const request_time = new Date(json.realTimeData.dataTime);
@@ -1847,10 +1848,17 @@ function EEWdetect(type, json, KorL) {
     }
   } else if (type == 2) {
     //kmoni/lmoni
+    try {
+      if (json.result.message == "") {
+        kmoniEid = json.report_id;
+        kmoniRNum = json.report_num;
+      }
+    }catch(err){return;}
+
+    return;
     if (KorL == 1) var sourceTmp = "kmoni";
     else var sourceTmp = "Lmoni";
 
-    try {
       var year = parseInt(json.request_time.substring(0, 4));
       var month = parseInt(json.request_time.substring(4, 6));
       var day = parseInt(json.request_time.substring(6, 8));
