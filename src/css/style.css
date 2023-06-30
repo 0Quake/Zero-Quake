@@ -233,7 +233,7 @@ main {
   margin: auto;
   border-radius: 10px 0 0 10px;
   padding: 0;
-  z-index: 100000000;
+  z-index: 100000002;
 }
 #SideBarToggle::before {
   display: inline-block;
@@ -926,11 +926,18 @@ button {
   vertical-align: middle;
   border-radius: 10px;
   cursor: pointer;
-  margin: 4px;
+  margin: 6px;
 }
 button:hover {
   background-color: rgb(149, 46, 46);
   color: #fff;
+}
+
+button:focus{
+  background-color: rgb(149, 46, 46);
+  color: #fff;
+  outline: solid 1px rgb(149, 46, 46);
+  outline-offset: 3px;
 }
 
 #TsunamiDetail {

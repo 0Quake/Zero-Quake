@@ -192,9 +192,14 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.maplibregl-popup-close-button {
+.maplibregl-popup-close-butto,.maplibregl-popup-close-button:focus {
   height: 30px;
   width: 30px;
+  margin: 0;
+  background: none;
+  border: none;
+  outline: none;
+  color: #CCC;
 }
 .maplibregl-popup-content p {
   padding: 0.3em 0;
@@ -616,6 +621,3 @@ div.marker-circle.marker_Int.marker_Int7p {
   z-index: 100000000;
 }
 
-.maplibregl-popup-close-button{
-  margin: 0;
-}
