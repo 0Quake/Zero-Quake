@@ -18,17 +18,22 @@ var thresholds = {
   time01: 10000, //最後の検出~解除[ms]
 };
 
+var Replay = 0;
+
 workerThreads.parentPort.postMessage({
   action: "thresholds",
   data: thresholds,
 });
 
 workerThreads.parentPort.on("message", (message) => {
-  if (message.action == "EEWDetect") {
+  if (message.action == "EQDetect") {
     //観測点ごとのデータを毎秒受信
     EQDetect(message.data, message.date);
   } else if (message.action == "EEWNow") {
     EEWNow = message.data;
+  } else if (message.action == "Replay") {
+    Replay = message.data;
+    pointsData = {};
   }
 });
 
@@ -138,7 +143,7 @@ function EQDetect(data, date) {
 
         if (EQD_ItemTmp) {
           //最終検知時間（解除時に使用）を更新
-          EQD_ItemTmp.last_Detect = new Date();
+          EQD_ItemTmp.last_Detect = new Date() - Replay;
 
           threshold01Tmp = EQD_ItemTmp.isCity ? thresholds.threshold01C : thresholds.threshold01;
 
@@ -155,7 +160,7 @@ function EQDetect(data, date) {
         } else if (elm.detect2) {
           //自観測点がどの地震アイテムにも属さず、検知レベルがLv.2以上の場合
           //自観測点を中心とした新規地震アイテム作成
-          EQDetect_List.push({ id: EQDetectID, lat: elm.Location.Latitude, lng: elm.Location.Longitude, Codes: [elm], Radius: 0, maxPGA: elm.pga, maxInt: elm.shindo, detectCount: 1, Up: false, Lv: 0, last_Detect: new Date(), origin_Time: new Date(), showed: false, isCity: ptDataTmp.isCity });
+          EQDetect_List.push({ id: EQDetectID, lat: elm.Location.Latitude, lng: elm.Location.Longitude, Codes: [elm], Radius: 0, maxPGA: elm.pga, maxInt: elm.shindo, detectCount: 1, Up: false, Lv: 0, last_Detect: new Date() - Replay, origin_Time: new Date() - Replay, showed: false, isCity: ptDataTmp.isCity });
           EQDetectID++;
         }
       }
@@ -165,7 +170,7 @@ function EQDetect(data, date) {
   //地震検知解除
   var index = 0;
   for (const elm of EQDetect_List) {
-    if (EEWNow || new Date() - elm.origin_Time > thresholds.time00 || new Date() - elm.last_Detect > thresholds.time01) {
+    if (EEWNow || new Date() - Replay - elm.origin_Time > thresholds.time00 || new Date() - Replay - elm.last_Detect > thresholds.time01) {
       //EEW発令中・発生から閾値以上経過・最後の検知から閾値以上経過
       EQDetect_List.splice(index, 1);
       workerThreads.parentPort.postMessage({

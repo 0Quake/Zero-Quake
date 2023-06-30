@@ -9,6 +9,10 @@ function replay(ReplayDate) {
   } else {
     Replay = 0;
   }
+  EQDetect_List = []
+  EEW_nowList = []
+  worker.postMessage({ action: "Replay", data: Replay, });
+
   if (mainWindow) {
     mainWindow.webContents.send("message2", {
       action: "Replay",
@@ -720,7 +724,7 @@ function worker_createWindow() {
   kmoniWorker.loadFile("src/kmoniWorker.html");
   kmoniActive = new Date();
 }
-//ワーカーウィンドウ表示処理
+//設定ウィンドウ表示処理
 function setting_createWindow() {
   if (settingWindow) {
     if (settingWindow.isMinimized()) settingWindow.restore();
@@ -985,7 +989,7 @@ worker.on("error", (error) => {
 function kmoniControl(data, date) {
   kmoniActive = new Date();
 
-  worker.postMessage({ action: "EEWDetect", data: data, date: date });
+  worker.postMessage({ action: "EQDetect", data: data, date: date });
 }
 
 //海しるリアルタイム揺れ情報処理

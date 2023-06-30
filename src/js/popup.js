@@ -31,6 +31,15 @@ window.electronAPI.messageSend((event, request) => {
   } else if (request.action == "Replay") {
     Replay = request.data;
     document.getElementById("replayFrame").style.display = Replay == 0 ? "none" : "block";
+    Object.keys(points).forEach(function(elm){
+      pointData = points[elm];
+      pointData.markerElm.style.background = "rgba(128,128,128,0.5)";
+      pointData.markerElm.classList.remove("strongDetectingMarker", "detectingMarker", "marker_Int");
+
+      pointData.popupContent = "<h3 class='PointName' style='border-bottom:solid 2px rgba(128,128,128,0.5)'>" + (elm.Name ? elm.Name : "") + "<span>" + elm.Type + "_" + elm.Code + "</span></h3><p>震度 ?</p><p>PGA ?</p>";
+      if (pointData.popup.isOpen()) pointData.popup.setHTML(pointData.popupContent);
+
+    })
   } else if (request.action == "EQInfo") {
     eqInfoDraw(request.data, request.source);
   } else if (request.action == "notification_Update") {
