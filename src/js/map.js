@@ -7,7 +7,6 @@ var tsunamiAlertNow = false;
 var inited = false;
 var windowLoaded = false;
 var TimeTable_JMA2001;
-var kmoniMapData;
 window.electronAPI.messageSend((event, request) => {
   switch (request.action) {
     case "kmoniUpdate":

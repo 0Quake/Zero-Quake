@@ -2944,17 +2944,6 @@ function Window_notification(message, type) {
   }
 }
 
-//真偽地判定（拡張）
-function Boolean2(str) {
-  switch (str) {
-    case "true":
-      return true;
-    case "false":
-      return false;
-    default:
-      return Boolean(str);
-  }
-}
 //JSONパース（拡張）
 function jsonParse(str) {
   try {
@@ -3147,22 +3136,6 @@ function shindoConvert(str, responseType) {
       break;
   }
   return ConvTable[ShindoTmp];
-}
-//緯度・経度のフォーマット統一
-function LatLngConvert(data) {
-  if (!isNaN(data)) {
-    return Number(data);
-  } else if (data.match(/N/)) {
-    return Number(data.replace("N", ""));
-  } else if (data.match(/S/)) {
-    return 0 - Number(data.replace("S", ""));
-  } else if (data.match(/E/)) {
-    return Number(data.replace("E", ""));
-  } else if (data.match(/W/)) {
-    return 0 - Number(data.replace("W", ""));
-  } else {
-    return data;
-  }
 }
 
 //２地点の緯度経度から距離（km）を算出
