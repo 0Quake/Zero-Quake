@@ -9,9 +9,9 @@ function replay(ReplayDate) {
   } else {
     Replay = 0;
   }
-  EQDetect_List = []
-  EEW_nowList = []
-  worker.postMessage({ action: "Replay", data: Replay, });
+  EQDetect_List = [];
+  EEW_nowList = [];
+  worker.postMessage({ action: "Replay", data: Replay });
 
   if (mainWindow) {
     mainWindow.webContents.send("message2", {
@@ -234,8 +234,6 @@ var narikakun_EIDs = [];
 var eqInfo = { jma: [], usgs: [] };
 var EQInfoFetchIndex = 0;
 var tsunamiData;
-var lwaveTmp;
-var kmoniLastReportTime = (lmoniLastReportTime = YkmoniLastReportTime = 0);
 var kmoniTimeout, lmoniTimeout, ymoniTimeout;
 var msil_lastTime = 0;
 var kmoniEid, kmoniRNum;
@@ -825,7 +823,7 @@ function tsunami_createWindow() {
   });
 }
 //地震情報ウィンドウ表示処理
-var EQI_Window={}
+var EQI_Window = {};
 const handleUrlOpen = (e, url) => {
   if (url.match(/^http/)) {
     e.preventDefault();
@@ -833,14 +831,13 @@ const handleUrlOpen = (e, url) => {
   }
 };
 function EQInfo_createWindow(response) {
-  var EQInfoWindowT = EQI_Window[response.eid]
-  if(EQInfoWindowT){
-    
+  var EQInfoWindowT = EQI_Window[response.eid];
+  if (EQInfoWindowT) {
     if (EQInfoWindowT.window.isMinimized()) EQInfoWindowT.window.restore();
     if (!EQInfoWindowT.window.isFocused()) EQInfoWindowT.window.focus();
     return;
   }
-  
+
   var EQInfoWindow = new BrowserWindow({
     minWidth: 600,
     minHeight: 300,
@@ -852,18 +849,17 @@ function EQInfo_createWindow(response) {
     backgroundColor: "#202227",
   });
 
-
   var EEWDataItem = EEW_Data.find(function (elm) {
     return elm.EQ_id == response.eid;
   });
-  var metadata= {
+  var metadata = {
     action: "metaData",
     eid: response.eid,
     urls: response.urls,
     eew: EEWDataItem,
     axisData: response.axisData,
-  }
-  EQI_Window[response.eid] = {window:EQInfoWindow, metadata:metadata};
+  };
+  EQI_Window[response.eid] = { window: EQInfoWindow, metadata: metadata };
 
   EQI_Window[response.eid].window.webContents.on("did-finish-load", () => {
     EQI_Window[response.eid].window.webContents.send("message2", {
@@ -871,7 +867,7 @@ function EQInfo_createWindow(response) {
       data: config,
     });
 
-    EQI_Window[response.eid].window.webContents.send("message2",  metadata);
+    EQI_Window[response.eid].window.webContents.send("message2", metadata);
   });
 
   EQI_Window[response.eid].window.on("closed", () => {
@@ -881,7 +877,6 @@ function EQInfo_createWindow(response) {
   EQI_Window[response.eid].window.loadFile(response.url);
   EQI_Window[response.eid].window.webContents.on("will-navigate", handleUrlOpen);
   EQI_Window[response.eid].window.webContents.on("new-window", handleUrlOpen);
-
 }
 
 //開始処理
@@ -1108,9 +1103,9 @@ function kmoniRequest() {
 var kmoniEI_URL = true;
 var kmoniEidT, kmoniRNumT;
 function kmoniEstShindoRequest() {
-  if(kmoniEid == kmoniEidT && kmoniRNum == kmoniRNumT) return;
-  kmoniEid=kmoniEidT
-  kmoniRNum=kmoniRNumT
+  if (kmoniEid == kmoniEidT && kmoniRNum == kmoniRNumT) return;
+  kmoniEid = kmoniEidT;
+  kmoniRNum = kmoniRNumT;
   var ReqTime = new Date() - yoyuK - Replay;
 
   var urlTmp = kmoniEI_URL ? "http://www.kmoni.bosai.go.jp/data/map_img/EstShindoImg/eew/" + dateEncode(2, ReqTime) + "/" + dateEncode(1, ReqTime) + ".eew.gif" : "https://smi.lmoniexp.bosai.go.jp/data/map_img/EstShindoImg/eew/" + dateEncode(2, ReqTime) + "/" + dateEncode(1, ReqTime) + ".eew.gif";
@@ -1799,156 +1794,21 @@ function kmoniTimeUpdate(Updatetime, type, condition, vendor) {
 }
 
 //情報フォーマット変更・新報検知→EEWcontrol
-function EEWdetect(type, json, KorL) {
+function EEWdetect(type, json /*, KorL*/) {
   if (!json) return;
-  if (type == 1) {
-    return
-    try {
-      //yahookmoni
-      const request_time = new Date(json.realTimeData.dataTime);
-
-      kmoniTimeUpdate(request_time, "YahooKmoni", "success", monitorVendor);
-
-      if (json.hypoInfo) {
-        var elm;
-        elm = json.hypoInfo.items[0];
-
-        var YkmoniLastReportTimeTmp = new Date(elm.reportTime);
-        if (YkmoniLastReportTime < YkmoniLastReportTimeTmp) {
-          var EEWdata = {
-            alertflg: null,
-            EventID: Number(elm.reportId),
-            serial: Number(elm.reportNum),
-            report_time: new Date(json.realTimeData.dataTime),
-            magnitude: Number(elm.magnitude),
-            maxInt: shindoConvert(elm.calcintensity, 0), //最大深度
-            depth: Number(elm.depth.replace("km", "")),
-            is_cancel: Boolean2(elm.isCancel),
-            is_final: Boolean2(elm.isFinal), //最終報
-            is_training: Boolean2(elm.isTraining),
-            latitude: LatLngConvert(elm.latitude),
-            longitude: LatLngConvert(elm.longitude),
-            region_code: elm.regionCode,
-            region_name: elm.regionName,
-            origin_time: new Date(elm.originTime),
-            isPlum: false,
-            userIntensity: null,
-            arrivalTime: null,
-            intensityAreas: null,
-            warnZones: [],
-            source: "YahooKmoni",
-          };
-
-          EEWcontrol(EEWdata);
-          YkmoniLastReportTime = YkmoniLastReportTimeTmp;
-        }
-      }
-    } catch (err) {
-      kmoniTimeUpdate(new Date() - Replay, "YahooKmoni", "Error", monitorVendor);
-    }
-  } else if (type == 2) {
+  //if (type == 1) { y-kmoni
+  if (type == 2) {
     //kmoni/lmoni
     try {
       if (json.result.message == "") {
         kmoniEid = json.report_id;
         kmoniRNum = json.report_num;
-      }
-    }catch(err){return;}
-
-    return;
-    if (KorL == 1) var sourceTmp = "kmoni";
-    else var sourceTmp = "Lmoni";
-
-      var year = parseInt(json.request_time.substring(0, 4));
-      var month = parseInt(json.request_time.substring(4, 6));
-      var day = parseInt(json.request_time.substring(6, 8));
-      var hour = parseInt(json.request_time.substring(8, 10));
-      var min = parseInt(json.request_time.substring(10, 12));
-      var sec = parseInt(json.request_time.substring(12, 15));
-      var request_time = new Date(year, month - 1, day, hour, min, sec);
-
-      var year = parseInt(json.origin_time.substring(0, 4));
-      var month = parseInt(json.origin_time.substring(4, 6));
-      var day = parseInt(json.origin_time.substring(6, 8));
-      var hour = parseInt(json.origin_time.substring(8, 10));
-      var min = parseInt(json.origin_time.substring(10, 12));
-      var sec = parseInt(json.origin_time.substring(12, 15));
-      var origin_timeTmp = new Date(year, month - 1, day, hour, min, sec);
-
-      kmoniTimeUpdate(request_time, sourceTmp, "success");
-
-      if (json.result.message == "") {
-        if (KorL == 1 && !kmoniEid) kmoniEstShindoRequest();
-
-        kmoniEid = json.report_id;
-        kmoniRNum = json.report_num;
-
-        var EEWdata = {
-          alertflg: json.alertflg,
-          EventID: Number(json.report_id),
-          serial: Number(json.report_num),
-          report_time: new Date(json.report_time),
-          magnitude: Number(json.magunitude),
-          maxInt: shindoConvert(json.calcintensity, 0),
-          depth: Number(json.depth.replace("km", "")),
-          is_cancel: Boolean2(json.is_cancel),
-          is_final: Boolean2(json.is_final),
-          is_training: Boolean2(json.is_training),
-          latitude: Number(json.latitude),
-          longitude: Number(json.longitude),
-          region_code: json.region_code,
-          region_name: json.region_name,
-          origin_time: origin_timeTmp,
-          isPlum: false,
-          userIntensity: null,
-          arrivalTime: null,
-          intensityAreas: null,
-          warnZones: [],
-          source: sourceTmp,
-        };
-        if (KorL == 1) {
-          var kmoniLastReportTimeTmp = new Date(json.report_time);
-          if (kmoniLastReportTime < kmoniLastReportTimeTmp) EEWcontrol(EEWdata);
-          kmoniLastReportTime = kmoniLastReportTimeTmp;
-        } else {
-          var lmoniLastReportTimeTmp = new Date(json.report_time);
-          if (lmoniLastReportTime < lmoniLastReportTimeTmp) EEWcontrol(EEWdata);
-          lmoniLastReportTime = lmoniLastReportTimeTmp;
-        }
       } else {
         kmoniEid = null;
         kmoniRNum = null;
       }
-
-      if (json.avrarea) {
-        EEWdata = Object.assign(EEWdata, {
-          avrarea: json.avrarea, //主な予想地域
-          avrarea_list: json.avrarea_list, //長周期地震動予想地域リスト
-          avrval: json.avrval, //sva
-          avrrank: json.avrrank, //最大予想長周期地震動階級
-        });
-
-        if (mainWindow) {
-          mainWindow.webContents.send("message2", {
-            action: "longWaveUpdate",
-            data: {
-              avrarea: json.avrarea,
-              avrarea_list: json.avrarea_list,
-              avrval: json.avrval,
-              avrrank: json.avrrank,
-            },
-          });
-        }
-      } else if (KorL == 2 && lwaveTmp) {
-        if (mainWindow) {
-          mainWindow.webContents.send("message2", {
-            action: "longWaveClear",
-          });
-        }
-      }
-      if (KorL == 2) lwaveTmp = json.avrarea;
     } catch (err) {
-      kmoniTimeUpdate(new Date() - Replay, sourceTmp, "Error");
+      return;
     }
   } else if (type == 3) {
     //axis
@@ -2967,19 +2827,19 @@ function eqInfoAlert(data, source, update, audioPlay) {
         data: eqInfo.jma.slice(0, config.Info.EQInfo.ItemCount),
       });
     }
-    data.forEach(function(elm){
-      if(EQI_Window[elm.eventId]){
+    data.forEach(function (elm) {
+      if (EQI_Window[elm.eventId]) {
         var metadata = EQI_Window[elm.eventId].metadata;
         var EEWDataItem = EEW_Data.find(function (elm2) {
           return elm2.EQ_id == elm.eventId;
-        });      
+        });
 
         metadata.urls = elm.urls;
         metadata.eew = EEWDataItem;
         metadata.axisData = elm.axisData;
-        EQI_Window[elm.eventId].window.webContents.send("message2",  metadata);
+        EQI_Window[elm.eventId].window.webContents.send("message2", metadata);
       }
-    })
+    });
   } else if (source == "usgs") {
     eqInfo.usgs = eqInfo.usgs.filter((item) => {
       return item.eventId !== data.eventId;
