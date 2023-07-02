@@ -73,6 +73,7 @@ var defaultConfigVal = {
       List: {
         ItemCount: 10,
       },
+      DetectEarthquake: false,
     },
   },
   Source: {
@@ -1255,7 +1256,7 @@ function ymoniRequest() {
 
 //海しるへのHTTPリクエスト処理
 function SnetRequest() {
-  if (net.online) {
+  if (net.online && config.Source.msil.GetData) {
     var request = net.request("https://www.msil.go.jp/arcgis/rest/services/Msil/DisasterPrevImg1/ImageServer/query?f=json&returnGeometry=false&outFields=msilstarttime%2Cmsilendtime&_=" + new Date());
     request.on("response", (res) => {
       var dataTmp = "";

@@ -13,6 +13,7 @@
 
   震度速報／震源に関する情報／震度・震源に関する情報[震度・震源情報/遠地地震に関する情報]  
   長周期地震動に関する観測情報／顕著な地震の震源要素更新のお知らせ／推計震度分布
+
 - 津波情報
 
   大津波警報／津波警報／津波注意報／津波予報  
@@ -21,7 +22,7 @@
 ### 防災科学研究所
 
 - リアルタイム揺れ情報
-- EEW予想震度(メッシュ)
+- EEW 予想震度(メッシュ)
 - 長周期地震動の情報
 
 ### USGS(アメリカ地質調査所)
@@ -32,9 +33,6 @@
 
 ### 緊急地震速報
 
-- 強震モニタ [© 防災科学技術研究所](http://www.kmoni.bosai.go.jp/)
-- 長周期地震動モニタ [© 防災科学技術研究所](lmoni.bosai.go.jp)
-- Yahoo 強震モニタ [© 防災科学技術研究所／Yahoo Japan](https://typhoon.yahoo.co.jp/weather/jp/earthquake/kyoshin/)
 - P2P 地震情報 API [© @p2pquake_takuya](https://www.p2pquake.net/json_api_v2/)
 - Axis [© Prioris](https://axis.prioris.jp/)
 - Wolfx [© Wolfx Studio.](https://api.wolfx.jp/)
@@ -52,8 +50,14 @@
 
 ### 津波情報 (気象庁)
 
-- P2P 地震情報 API [© @p2pquake_takuya](https://www.p2pquake.net/json_api_v2/)  （大津波警報／津波警報／津波注意報のみ）
+- P2P 地震情報 API [© @p2pquake_takuya](https://www.p2pquake.net/json_api_v2/) （大津波警報／津波警報／津波注意報のみ）
 - 気象庁防災情報 XML [© 気象庁](https://xml.kishou.go.jp/xmlpull.html)
+
+### リアルタイム揺れ情報
+
+- 強震モニタ [© 防災科学技術研究所](http://www.kmoni.bosai.go.jp/)
+- 長周期地震動モニタ [© 防災科学技術研究所](lmoni.bosai.go.jp)
+- Yahoo 強震モニタ [© 防災科学技術研究所／Yahoo Japan](https://typhoon.yahoo.co.jp/weather/jp/earthquake/kyoshin/)
 
 ### P 波・S 波 予報円
 
@@ -66,11 +70,13 @@
 #### ベースマップ
 
 - 「標準」
+
   - 国内：気象庁 予報区等 GIS データ [© 気象庁](https://www.data.jma.go.jp/developer/gis.html)
   - 国外：ne_110m_admin_0_countries [© Natural Earth ](https://www.naturalearthdata.com/downloads/110m-cultural-vectors/)
   - 湖沼：国土数値情報 [© 国土交通省 ](https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-W09-v2_2.html)
 
   ([mapshaper.org](https://mapshaper.org/)で単純化して使用)
+
 - 「地理院地図(標準)」 [© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)
 - 「地理院地図(淡色)」 [© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)
 - 「地理院地図(写真)」 [© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)

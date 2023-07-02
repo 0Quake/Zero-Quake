@@ -40,6 +40,7 @@ window.electronAPI.messageSend((event, request) => {
     selectBoxSet(document.getElementById("TTSvoiceSelect"), config.notice.voice_parameter.voice);
 
     selectBoxSet(document.getElementById("BugReportAutoSend"), config.system.crashReportAutoSend);
+    document.getElementById("EarthquakeDetect").checked = config.Info.RealTimeShake.DetectEarthquake;
     document.getElementById("WindowAutoOpen").checked = config.system.WindowAutoOpen;
     document.getElementById("HomePinShow").checked = config.home.ShowPin;
     document.getElementById("Tsunami_GetData").checked = config.Info.TsunamiInfo.GetData;
@@ -103,6 +104,7 @@ document.getElementById("check_update").addEventListener("click", function () {
 
 document.getElementById("apply").addEventListener("click", function () {
   config.system.crashReportAutoSend = document.getElementById("BugReportAutoSend").value;
+  config.Info.RealTimeShake.DetectEarthquake = document.getElementById("EarthquakeDetect").checked;
   config.system.WindowAutoOpen = document.getElementById("WindowAutoOpen").checked;
   config.home.ShowPin = document.getElementById("HomePinShow").checked;
   config.Info.TsunamiInfo.GetData = document.getElementById("Tsunami_GetData").checked;

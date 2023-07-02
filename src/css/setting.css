@@ -288,6 +288,12 @@ ol {
 #tab1_bar .material-icons-round {
   letter-spacing: 0.13em;
 }
-#layerSwitch_toggle{
+#layerSwitch_toggle {
   margin: 0;
+}
+#tab1_content2 {
+  line-height: 1.5em;
+}
+#tab1_content2 li {
+  margin: 0.5em 0;
 }
