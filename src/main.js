@@ -556,7 +556,7 @@ ipcMain.on("message", (_event, response) => {
 
     settingWindow.webContents.send("message2", {
       action: "setting",
-      data: { config: config, softVersion: soft_version },
+      data: config,
     });
   } else if (response.action == "checkForUpdate") {
     checkUpdate();
