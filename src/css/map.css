@@ -488,18 +488,6 @@ div.marker-circle.marker_Int.marker_Int7p {
   background: var(--TsunamiYohoColor);
 }
 
-.PWave,
-.SWave {
-  /*transition: linear 1s;*/
-  pointer-events: none;
-}
-.PWave {
-  stroke: var(--PwaveColor);
-}
-.SWave {
-  stroke: var(--SwaveColor);
-}
-
 .Wave_progress .PWave_value {
   background: var(--PwaveColor);
 }

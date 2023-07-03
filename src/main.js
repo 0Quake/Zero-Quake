@@ -56,6 +56,7 @@ var defaultConfigVal = {
     latitude: 35.68,
     longitude: 139.767,
     Section: "東京都２３区",
+    TsunamiSect: "東京湾内湾",
     ShowPin: true,
   },
   Info: {
