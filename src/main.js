@@ -41,6 +41,7 @@ const electron = require("electron");
 const workerThreads = require("worker_threads");
 const { app, BrowserWindow, ipcMain, net, Notification, shell, dialog, Menu, powerSaveBlocker } = electron;
 const path = require("path");
+const fs = require("fs");
 const { JSDOM } = require("jsdom");
 const Store = require("electron-store");
 var WebSocketClient = require("websocket").client;
@@ -256,6 +257,8 @@ if (app.isPackaged) {
 
 //アプリの更新を確認
 var update_data;
+var downloadURL;
+
 function checkUpdate() {
   let request = net.request("https://api.github.com/repos/0quake/Zero-Quake/releases?_=" + Number(new Date()));
 
@@ -275,6 +278,7 @@ function checkUpdate() {
           var current_v = current_verTmp.split(".");
           var dl_page = json[0].html_url;
           var update_detail = json[0].body;
+          downloadURL = json[0].assets[0].browser_download_url;
 
           var update_available = false;
           if (latest_v[0] > current_v[0]) {
@@ -286,14 +290,21 @@ function checkUpdate() {
               if (latest_v[2] > current_v[2]) {
                 update_available = true;
 
-                var UpdateNotification = new Notification({
-                  title: "ZeroQuakeで更新が利用可能です",
-                  body: "v." + current_verTmp + " > v." + latest_verTmp + "更新内容：" + update_detail,
-                  icon: path.join(__dirname, "img/icon.ico"),
-                });
-                UpdateNotification.show();
-                UpdateNotification.on("click", function () {
-                  setting_createWindow();
+                var options4 = {
+                  type: "question",
+                  title: "アプリケーションの更新",
+                  message: "Zero Quake で更新が利用可能です。",
+                  detail: "v." + current_verTmp + " > v." + latest_verTmp + "\n操作を選択してください。[今すぐ更新]をすることをお勧めします。",
+                  buttons: ["今すぐ更新", "詳細", "後で確認"],
+                  noLink: true,
+                };
+
+                dialog.showMessageBox(mainWindow, options4).then(function (result) {
+                  if (result.response == 0) {
+                    if (downloadURL) doUpdate(downloadURL);
+                  } else if (result.response == 1) {
+                    setting_createWindow(true);
+                  }
                 });
               }
             }
@@ -325,6 +336,19 @@ function checkUpdate() {
   });
 
   // リクエストの送信
+  request.end();
+}
+
+function doUpdate(url) {
+  var request = net.request(url);
+  request.on("response", (res) => {
+    res.pipe(fs.createWriteStream("ZeroQuakeInstaller.exe")).on("close", function () {
+      var COMMAND = "start ZeroQuakeInstaller.exe";
+      var spawn = require("child_process").spawn;
+      spawn(COMMAND, [], { shell: true, detached: true, stdio: "inherit" });
+      app.exit(0);
+    });
+  });
   request.end();
 }
 
@@ -579,6 +603,8 @@ ipcMain.on("message", (_event, response) => {
     }
   } else if (response.action == "replay") {
     replay(response.date);
+  } else if (response.action == "startInstall") {
+    if (downloadURL) doUpdate(downloadURL);
   }
 });
 
@@ -724,7 +750,7 @@ function worker_createWindow() {
   kmoniActive = new Date();
 }
 //設定ウィンドウ表示処理
-function setting_createWindow() {
+function setting_createWindow(update) {
   if (settingWindow) {
     if (settingWindow.isMinimized()) settingWindow.restore();
     if (!settingWindow.isFocused()) settingWindow.focus();
@@ -774,6 +800,11 @@ function setting_createWindow() {
       settingWindow.webContents.send("message2", {
         action: "Update_Data",
         data: update_data,
+      });
+    }
+    if (update) {
+      settingWindow.webContents.send("message2", {
+        action: "updatePanel",
       });
     }
   });

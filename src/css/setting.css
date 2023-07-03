@@ -232,8 +232,8 @@ h4 {
   margin-top: 10px;
 }
 #check_update {
-  height: 40px;
   min-width: 60px;
+  padding: 10px 5px;
 }
 #check_update::before {
   content: "autorenew";
@@ -296,4 +296,26 @@ ol {
 }
 #tab1_content2 li {
   margin: 0.5em 0;
+}
+#update_BtnWrap {
+  font-size: 0;
+  text-align: center;
+  margin: 3px 0;
+}
+#update_BtnWrap button {
+  margin: 3px;
+}
+#update-check-date-wrap {
+  margin: 0;
+}
+#update-detail {
+  font-size: 14px;
+  line-height: 1.4em;
+  background: #333;
+  border-radius: 5px;
+  padding: 5px;
+  border: solid 1px #777;
+  max-height: 51px;
+  overflow: auto;
+  max-width: 500px;
 }

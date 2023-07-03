@@ -6,7 +6,12 @@ window.addEventListener("load", function () {
   this.document.getElementById("replay").value = dateEncode(3, new Date()).replaceAll("/", "-");
 });
 window.electronAPI.messageSend((event, request) => {
-  if (request.action == "softVersion") {
+  if (request.action == "updatePanel") {
+    document.querySelector(".active_tabcontent").classList.remove("active_tabcontent");
+    document.querySelector(".active_tabmenu").classList.remove("active_tabmenu");
+    document.getElementById("tab1_content2").classList.add("active_tabcontent");
+    document.getElementById("tab1_menu2").classList.add("active_tabmenu");
+  } else if (request.action == "softVersion") {
     document.getElementById("softVersion").innerText = request.data;
   } else if (request.action == "openAtLogin") {
     openAtLogin = request.data;
@@ -65,12 +70,18 @@ window.electronAPI.messageSend((event, request) => {
 var updateWrap = document.getElementById("update-wrap");
 var updateStatus = document.getElementById("update-status");
 var updateVersion = document.getElementById("update-version");
+var updateBtnWrap = document.getElementById("update_BtnWrap");
 var downloadLink = document.getElementById("downloadLink");
 var update_detail = document.getElementById("update-detail");
+downloadLink.addEventListener("click", function () {
+  var lnk = document.createElement("a");
+  lnk.href = this.dataset.href;
+  lnk.click();
+});
 function UpdateDataDraw(data) {
   document.getElementById("update-check-date").innerText = dateEncode(3, data.check_date);
   updateWrap.classList.remove("U-error", "U-available", "U-not_available");
-  downloadLink.style.display = "none";
+  updateBtnWrap.style.display = "none";
   update_detail.style.display = "none";
 
   if (data.check_error) {
@@ -81,11 +92,11 @@ function UpdateDataDraw(data) {
     if (data.update_available) {
       updateWrap.classList.add("U-available");
       updateStatus.innerText = "更新が利用可能です。";
-      downloadLink.setAttribute("href", data.dl_page);
+      downloadLink.dataset.href = data.dl_page;
       updateVersion.innerText = "ver." + data.current_version + " > ver." + data.latest_version;
-      update_detail.innerText = "更新内容：" + data.update_detail.replace(/\r?\n/g, "");
-      downloadLink.style.display = "block";
-      update_detail.style.display = "inline";
+      update_detail.innerText = data.update_detail;
+      updateBtnWrap.style.display = "block";
+      update_detail.style.display = "block";
     } else {
       updateWrap.classList.add("U-not_available");
       updateStatus.innerText = "お使いのアプリケーションは最新の状態です。";
@@ -98,6 +109,12 @@ document.getElementById("check_update").addEventListener("click", function () {
   updateStatus.innerText = "更新を確認中...";
   window.electronAPI.messageReturn({
     action: "checkForUpdate",
+  });
+});
+document.getElementById("InstallBtn").addEventListener("click", function () {
+  updateStatus.innerText = "インストールの準備中...";
+  window.electronAPI.messageReturn({
+    action: "startInstall",
   });
 });
 

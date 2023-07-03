@@ -750,18 +750,11 @@ function kmoniMapUpdate(dataTmp, type) {
         pointData.markerElm.classList.remove("strongDetectingMarker", "detectingMarker");
       }
 
-      if (elm.shindo >= 0.5) {
-        pointData.markerElm.classList.remove("marker_Int1", "marker_Int2", "marker_Int3", "marker_Int4", "marker_Int5m", "marker_Int5p", "marker_Int6m", "marker_Int6p", "marker_Int7", "marker_Int7p");
-        pointData.markerElm.classList.add("marker_Int", "marker_Int" + shindoConvert(elm.shindo, 3));
-      } else {
-        pointData.markerElm.classList.remove("marker_Int");
-      }
-
       pointData.popupContent = "<h3 class='PointName' style='border-bottom-color:rgb(" + elm.rgb.join(",") + ")'>" + (elm.Name ? elm.Name : "") + "<span>" + elm.Type + "_" + elm.Code + "</span></h3>" + (elm.detect ? "<h4 class='detecting'>地震検知中</h4>" : "");
       if (pointData.popup.isOpen()) pointData.popup.setHTML(pointData.popupContent);
     } else if (pointData) {
       pointData.markerElm.style.background = "rgba(128,128,128,0.5)";
-      pointData.markerElm.classList.remove("strongDetectingMarker", "detectingMarker", "marker_Int");
+      pointData.markerElm.classList.remove("strongDetectingMarker", "detectingMarker");
 
       pointData.popupContent = "<h3 class='PointName' style='border-bottom:solid 2px rgba(128,128,128,0.5)'>" + (elm.Name ? elm.Name : "") + "<span>" + elm.Type + "_" + elm.Code + "</span></h3>";
       if (pointData.popup.isOpen()) pointData.popup.setHTML(pointData.popupContent);
