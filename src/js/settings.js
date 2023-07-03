@@ -2,6 +2,7 @@ var config;
 var markerElm;
 var Replay;
 var openAtLogin = false;
+var tsunamiSect;
 window.addEventListener("load", function () {
   this.document.getElementById("replay").value = dateEncode(3, new Date()).replaceAll("/", "-");
 });
@@ -33,9 +34,10 @@ window.electronAPI.messageSend((event, request) => {
     document.getElementById("EEW_traning").checked = config.Info.EEW.showTraning;
     document.getElementById("EQInfoInterval").value = config.Info.EQInfo.Interval / 1000;
 
-    document.querySelectorAll("#saibun option").forEach(function (elm) {
-      if (elm.innerText == config.home.Section) elm.selected = true;
-    });
+    selectBoxSet(document.getElementById("saibun"), config.home.Section)
+    tsunamiSect = config.home.TsunamiSect
+    selectBoxSet(document.getElementById("tsunamiSect"), tsunamiSect)
+    map.setFilter("tsunami_LINE_selected", ["==", "name", tsunamiSect]);
 
     TTSvolumeSet(config.notice.voice_parameter.volume);
     TTSpitchSet(config.notice.voice_parameter.pitch);
@@ -128,6 +130,7 @@ document.getElementById("apply").addEventListener("click", function () {
   config.home.latitude = document.getElementById("latitude").value;
   config.home.longitude = document.getElementById("longitude").value;
   config.home.Section = document.getElementById("saibun").value;
+  config.home.TsunamiSect = document.getElementById("tsunamiSect").value;
   config.notice.voice.EEW = document.getElementById("EEW_Voice").value;
   config.notice.voice.EEWUpdate = document.getElementById("EEW2_Voice").value;
   config.Info.EQInfo.ItemCount = Number(document.getElementById("EQInfo_ItemCount").value);
@@ -236,8 +239,44 @@ function init() {
           data: "./Resource/prefectures.json",
           attribution: "気象庁",
         },
+        tsunami: {
+          type: "geojson",
+          data: "./Resource/tsunami.json",
+          attribution: "気象庁",
+        },
       },
       layers: [
+        {
+          id: "tsunami_LINE",
+          type: "line",
+          source: "tsunami",
+          layout: {
+            "line-join": "round",
+            "line-cap": "butt",
+          },
+          paint: {
+            "line-color": "#666",
+            "line-width": ["interpolate", ["linear"], ["zoom"], 2, 5, 5, 10, 10, 40, 18, 150],
+          },
+          minzoom: 0,
+          maxzoom: 22,
+        },
+        {
+          id: "tsunami_LINE_selected",
+          type: "line",
+          source: "tsunami",
+          layout: {
+            "line-join": "round",
+            "line-cap": "butt",
+          },
+          paint: {
+            "line-color": "#FFF",
+            "line-width": ["interpolate", ["linear"], ["zoom"], 2, 10, 5, 20, 10, 80, 18, 300],
+          },
+          minzoom: 0,
+          maxzoom: 22,
+          filter: ["==", "name", ""],
+        },
         {
           id: "basemap_fill",
           type: "fill",
@@ -335,11 +374,17 @@ function init() {
     document.getElementById("longitude").value = e.lngLat.lng;
     markerElm.setLngLat(e.lngLat);
 
-    var optionElm = Array.from(document.querySelectorAll("#saibun option")).find(function (elm) {
-      return elm.innerText == e.features[0].properties.name;
-    });
-    if (optionElm) optionElm.selected = true;
+    selectBoxSet(document.getElementById("saibun"), e.features[0].properties.name);
   });
+
+  map.on("click", "tsunami_LINE", (e) => {
+    tsunamiSect = e.features[0].properties.name;
+
+    map.setFilter("tsunami_LINE_selected", ["==", "name", tsunamiSect]);
+
+    selectBoxSet(document.getElementById("tsunamiSect"), tsunamiSect);
+  });
+
 
   const img = document.createElement("img");
   img.src = "./img/homePin.svg";
@@ -354,6 +399,9 @@ function MapReDraw() {
   lng = document.getElementById("longitude").value;
   markerElm.setLngLat([lng, lat]);
 }
+document.getElementById("tsunamiSect").addEventListener("change",function(){
+  tsunamiSect = this.value;
+})
 
 var TTSspeed = 1;
 var TTSpitch = 1;

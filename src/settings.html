@@ -362,6 +362,10 @@
                             <option>津倉瀬(宇治群島北東方）</option>
                             <option>うるま市・金武町境界部地先の埋立地</option>
                         </select></label>
+                        <label>津波予報区<select id="tsunamiSect" onchange="MapReDraw()">
+                            <option selected disabled></option>
+                            <option>オホーツク海沿岸</option><option>愛知県外海</option><option>愛媛県宇和海</option><option>愛媛県瀬戸内</option><option>伊勢・三河湾</option><option>伊豆諸島</option><option>壱岐・対馬</option><option>茨城県</option><option>隠岐</option><option>奄美群島・トカラ列島</option><option>岡山県</option><option>沖縄本島地方</option><option>岩手県</option><option>宮古島・八重山地方</option><option>宮崎県</option><option>宮城県</option><option>熊本県天草灘沿岸</option><option>広島県</option><option>香川県</option><option>佐賀県北部</option><option>佐渡</option><option>三重県南部</option><option>山形県</option><option>山口県瀬戸内海沿岸</option><option>山口県日本海沿岸</option><option>鹿児島県西部</option><option>鹿児島県東部</option><option>種子島・屋久島地方</option><option>秋田県</option><option>小笠原諸島</option><option>新潟県上中下越</option><option>青森県太平洋沿岸</option><option>青森県日本海沿岸</option><option>静岡県</option><option>石川県加賀</option><option>石川県能登</option><option>千葉県九十九里・外房</option><option>千葉県内房</option><option>相模湾・三浦半島</option><option>大阪府</option><option>大東島地方</option><option>大分県瀬戸内海沿岸</option><option>大分県豊後水道沿岸</option><option>淡路島南部</option><option>長崎県西方</option><option>鳥取県</option><option>島根県出雲・石見</option><option>東京湾内湾</option><option>徳島県</option><option>富山県</option><option>福井県</option><option>福岡県瀬戸内海沿岸</option><option>福岡県日本海沿岸</option><option>福島県</option><option>兵庫県瀬戸内</option><option>兵庫県北部</option><option>北海道太平洋沿岸西部</option><option>北海道太平洋沿岸中部</option><option>北海道日本海沿岸南部</option><option>北海道日本海沿岸北部</option><option>陸奥湾</option><option>和歌山県</option><option>帰属未定1</option><option>帰属未定2</option><option>帰属未定3</option><option>帰属未定4</option><option>北海道太平洋沿岸東部</option><option>京都府</option><option>高知県</option><option>有明・八代海</option>
+                        </select><label>
                 </section>
             </div>
             <div id="tab1_content3" class="tabcontent">
@@ -526,6 +530,7 @@
             <div id="tab1_content6" class="tabcontent">
                 <h3><span>情報種別ごとの設定</span>津波情報</h3>
                 <label><input type="checkbox" id="Tsunami_GetData">津波情報を受信</label>
+                <div class="smalltext">現在地の津波予報区は、［全般＞現在地］より設定を行ってください。</div>
             </div>
             <div id="tab1_content7" class="tabcontent">
                 <h3><span>情報種別ごとの設定</span>リアルタイム揺れ情報</h3>
