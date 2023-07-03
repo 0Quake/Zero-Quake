@@ -842,12 +842,15 @@ function tsunami_createWindow() {
   });
 
   tsunamiWindow.webContents.on("did-finish-load", () => {
-    if (tsunamiWindow) {
-      tsunamiWindow.webContents.send("message2", {
-        action: "tsunamiUpdate",
-        data: tsunamiData,
-      });
-    }
+    tsunamiWindow.webContents.send("message2", {
+      action: "tsunamiUpdate",
+      data: tsunamiData,
+    });
+    tsunamiWindow.webContents.send("message2", {
+      action: "setting",
+      data: config,
+    });
+
   });
   tsunamiWindow.loadFile("src/TsunamiDetail.html");
 
