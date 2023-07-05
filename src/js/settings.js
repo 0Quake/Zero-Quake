@@ -35,10 +35,10 @@ window.electronAPI.messageSend((event, request) => {
     document.getElementById("EEW_traning").checked = config.Info.EEW.showTraning;
     document.getElementById("EQInfoInterval").value = config.Info.EQInfo.Interval / 1000;
 
-    selectBoxSet(document.getElementById("saibun"), config.home.Section)
-    tsunamiSect = config.home.TsunamiSect
-    selectBoxSet(document.getElementById("tsunamiSect"), tsunamiSect)
-    if(map) map.setFilter("tsunami_LINE_selected", ["==", "name", tsunamiSect]);
+    selectBoxSet(document.getElementById("saibun"), config.home.Section);
+    tsunamiSect = config.home.TsunamiSect;
+    selectBoxSet(document.getElementById("tsunamiSect"), tsunamiSect);
+    if (map) map.setFilter("tsunami_LINE_selected", ["==", "name", tsunamiSect]);
 
     TTSvolumeSet(config.notice.voice_parameter.volume);
     TTSpitchSet(config.notice.voice_parameter.pitch);
@@ -367,7 +367,6 @@ function init() {
       ],
     },
   });
-  if(tsunamiSect) map.setFilter("tsunami_LINE_selected", ["==", "name", tsunamiSect]);
 
   map.addControl(new maplibregl.NavigationControl(), "top-right");
 
@@ -387,12 +386,14 @@ function init() {
     selectBoxSet(document.getElementById("tsunamiSect"), tsunamiSect);
   });
 
-
   const img = document.createElement("img");
   img.src = "./img/homePin.svg";
   img.classList.add("homeIcon");
 
   markerElm = new maplibregl.Marker(img).setLngLat([config.home.longitude, config.home.latitude]).addTo(map);
+  map.on("load", function () {
+    if (tsunamiSect) map.setFilter("tsunami_LINE_selected", ["==", "name", tsunamiSect]);
+  });
 }
 
 //eslint-disable-next-line
@@ -401,9 +402,9 @@ function MapReDraw() {
   lng = document.getElementById("longitude").value;
   markerElm.setLngLat([lng, lat]);
 }
-document.getElementById("tsunamiSect").addEventListener("change",function(){
+document.getElementById("tsunamiSect").addEventListener("change", function () {
   tsunamiSect = this.value;
-})
+});
 
 var TTSspeed = 1;
 var TTSpitch = 1;
