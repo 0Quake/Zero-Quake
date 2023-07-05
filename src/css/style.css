@@ -1179,3 +1179,37 @@ button:focus{
   border-radius: 7px;
   height: 30px;
 }
+#TsunamiMySectData {
+  border-radius: 5px;
+  text-align: center;
+  border: solid 1px #F00;
+  margin: 8px;
+  padding: 3px;
+}
+#TsunamiMySectData h3 {
+  margin: 0 0 3px 0;
+  background: #333;
+  padding: 3px;
+  border-radius: 3px;
+}
+#firstHeightData,
+#maxHeightData {
+  font-size: 13px;
+  color: #CCC;
+  margin: 0 5px;
+}
+#firstHeightData span,
+#maxHeightData span {
+  font-size: 18px;
+  color: #FFF;
+  margin-left: 2px;
+}
+#firstHeightCondition {
+  font-size: 14px;
+  background: #CCC;
+  color: #000;
+  border-radius: 3px;
+}
+#tsunamiForecastWrap{
+  text-align: left;
+}

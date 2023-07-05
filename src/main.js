@@ -2437,8 +2437,7 @@ function EQI_JMAXML_Req(url) {
                     if (elm.querySelector("MaxHeight")) {
                       var maxheightElm = elm.querySelector("MaxHeight").getElementsByTagName("jmx_eb:TsunamiHeight");
                       if (maxheightElm) {
-                        maxHeightTmp = maxheightElm[0].getAttribute("description");
-                        maxHeightTmp = maxHeightTmp.replace(/[Ａ-Ｚａ-ｚ０-９．]/g, function (s) {
+                        maxHeightTmp = maxheightElm[0].getAttribute("description").replace(/[Ａ-Ｚａ-ｚ０-９．]/g, function (s) {
                           return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
                         });
                       }
@@ -2899,9 +2898,8 @@ function TsunamiInfoControl(data) {
   if (newInfo) {
     //情報の有効期限
     if (data.ValidDateTime) {
-      if (data.ValidDateTime - new Date() < 0) {
-        return;
-      }
+      if (data.ValidDateTime < new Date()) return;
+      
       clearTimeout(RevocationTimer);
       RevocationTimer = setTimeout(function () {
         TsunamiInfoControl({

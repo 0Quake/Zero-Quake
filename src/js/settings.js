@@ -1,3 +1,4 @@
+var map;
 var config;
 var markerElm;
 var Replay;
@@ -37,7 +38,7 @@ window.electronAPI.messageSend((event, request) => {
     selectBoxSet(document.getElementById("saibun"), config.home.Section)
     tsunamiSect = config.home.TsunamiSect
     selectBoxSet(document.getElementById("tsunamiSect"), tsunamiSect)
-    map.setFilter("tsunami_LINE_selected", ["==", "name", tsunamiSect]);
+    if(map) map.setFilter("tsunami_LINE_selected", ["==", "name", tsunamiSect]);
 
     TTSvolumeSet(config.notice.voice_parameter.volume);
     TTSpitchSet(config.notice.voice_parameter.pitch);
@@ -366,6 +367,7 @@ function init() {
       ],
     },
   });
+  if(tsunamiSect) map.setFilter("tsunami_LINE_selected", ["==", "name", tsunamiSect]);
 
   map.addControl(new maplibregl.NavigationControl(), "top-right");
 

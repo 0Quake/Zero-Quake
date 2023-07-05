@@ -335,7 +335,9 @@
   margin: 0;
 }
 #tsunamiSample li {
-  padding: 0.2em 0.5em;
+  display: inline-block;
+  padding: 0;
+  font-size: 14px;
 }
 #tsunamiSample li span {
   display: inline-block;
