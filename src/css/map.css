@@ -138,7 +138,7 @@
 }
 
 .maplibregl-popup {
-  z-index: 200;
+  z-index: 1000;
 }
 .maplibregl-popup-anchor-bottom .maplibregl-popup-tip {
   border-top-color: #888 !important;
@@ -386,7 +386,7 @@
 .homeIcon {
   width: 30px;
   height: 30px;
-  z-index: 99;
+  z-index: 999;
   top: -15px;
 }
 .epiCenterTooltip {

@@ -28,7 +28,7 @@ workerThreads.parentPort.postMessage({
 workerThreads.parentPort.on("message", (message) => {
   if (message.action == "EQDetect") {
     //観測点ごとのデータを毎秒受信
-    EQDetect(message.data, message.date);
+    EQDetect(message.data, message.date, message.detect);
   } else if (message.action == "EEWNow") {
     EEWNow = message.data;
   } else if (message.action == "Replay") {
@@ -37,10 +37,10 @@ workerThreads.parentPort.on("message", (message) => {
   }
 });
 
-function EQDetect(data, date) {
+function EQDetect(data, date, detect) {
   var changedData = [];
 
-  if (!EEWNow) {
+  if (!EEWNow && detect) {
     var ptDataTmp;
 
     var detect0;

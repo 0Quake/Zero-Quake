@@ -7,6 +7,7 @@ window.electronAPI.messageSend((event, request) => {
   }
 });
 
+var mySectElm;
 function tsunamiUpdate(dataTmp) {
   var Tsunami_MajorWarning = (Tsunami_Warning = Tsunami_Watch = Tsunami_Yoho = false);
   document.getElementById("dateTime").style.display = "block";
@@ -100,7 +101,11 @@ function tsunamiUpdate(dataTmp) {
       new_tr.innerHTML = ihtml;
       new_tr.classList.add("add-content");
       new_tr.classList.add("ListItem_" + elm.grade);
+      new_tr.setAttribute("tabindex", "0");
       document.getElementById(elm.grade + "Info").after(new_tr);
+      if (config && config.home.TsunamiSect && elm.name == config.home.TsunamiSect) {
+        mySectElm = new_tr;
+      }
 
       if (elm.stations && Array.isArray(elm.stations)) {
         elm.stations.forEach(function (elm2) {
@@ -166,4 +171,8 @@ function tsunamiUpdate(dataTmp) {
   document.getElementById("WarningInfo").style.display = Tsunami_Warning ? "table-row" : "none";
   document.getElementById("WatchInfo").style.display = Tsunami_Watch ? "table-row" : "none";
   document.getElementById("YohoInfo").style.display = Tsunami_Yoho ? "table-row" : "none";
+  mySectElm.scrollIntoView({ behavior: "smooth", block: "center" });
+  setTimeout(function () {
+    mySectElm.focus();
+  }, 100);
 }

@@ -933,7 +933,7 @@ button:hover {
   color: #fff;
 }
 
-button:focus{
+button:focus {
   background-color: rgb(149, 46, 46);
   color: #fff;
   outline: solid 1px rgb(149, 46, 46);
@@ -1182,7 +1182,7 @@ button:focus{
 #TsunamiMySectData {
   border-radius: 5px;
   text-align: center;
-  border: solid 1px #F00;
+  border: solid 1px #f00;
   margin: 8px;
   padding: 3px;
 }
@@ -1195,21 +1195,25 @@ button:focus{
 #firstHeightData,
 #maxHeightData {
   font-size: 13px;
-  color: #CCC;
+  color: #ccc;
   margin: 0 5px;
 }
 #firstHeightData span,
 #maxHeightData span {
   font-size: 18px;
-  color: #FFF;
+  color: #fff;
   margin-left: 2px;
 }
 #firstHeightCondition {
   font-size: 14px;
-  background: #CCC;
+  background: #ccc;
   color: #000;
   border-radius: 3px;
 }
-#tsunamiForecastWrap{
+#tsunamiForecastWrap {
   text-align: left;
+  padding: 2px 0;
+}
+#tsunamiSectTitle {
+  font-size: 18px;
 }

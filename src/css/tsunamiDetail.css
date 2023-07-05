@@ -91,7 +91,7 @@ table td {
 }
 
 table tr:nth-child(2n) {
-  background: #444;
+  background: #333;
 }
 
 #MajorWarningInfo::after {
@@ -207,4 +207,10 @@ h1#title {
   margin-right: 3px;
   overflow: hidden;
   vertical-align: middle;
+}
+.add-content:focus {
+  outline: solid 2px #fff;
+  outline-offset: 3px;
+  z-index: 100;
+  background: #414141;
 }
