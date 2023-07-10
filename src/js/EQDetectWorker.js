@@ -40,7 +40,7 @@ workerThreads.parentPort.on("message", (message) => {
 function EQDetect(data, date, detect) {
   var changedData = [];
 
-  if (!EEWNow && detect) {
+  if (!EEWNow) {
     var ptDataTmp;
 
     var detect0;
@@ -56,44 +56,46 @@ function EQDetect(data, date, detect) {
       }
 
       if (elm.data) {
-        //PGAの10回平均を求める
-        pgaAvr =
-          ptDataTmp.SUMTmp.reduce(function (a, b) {
-            return a + b;
-          }) / ptDataTmp.SUMTmp.length;
+        if (detect) {
+          //PGAの10回平均を求める
+          pgaAvr =
+            ptDataTmp.SUMTmp.reduce(function (a, b) {
+              return a + b;
+            }) / ptDataTmp.SUMTmp.length;
 
-        //平均PGAから閾値を決定
-        thresholds.threshold02 = 0.7 * pgaAvr + 0.08;
-        thresholds.threshold03 = 0.8 * pgaAvr + 0.5;
-        if (ptDataTmp.isCity) {
-          //都会では閾値を大きく
-          thresholds.threshold02 *= 2;
-          thresholds.threshold03 *= 2;
+          //平均PGAから閾値を決定
+          thresholds.threshold02 = 0.7 * pgaAvr + 0.08;
+          thresholds.threshold03 = 0.8 * pgaAvr + 0.5;
+          if (ptDataTmp.isCity) {
+            //都会では閾値を大きく
+            thresholds.threshold02 *= 2;
+            thresholds.threshold03 *= 2;
+          }
+
+          detect0 = elm.pga - pgaAvr >= thresholds.threshold02 || elm.shindo >= thresholds.threshold04; //PGA増加量・震度絶対値で評価
+          elm.detect = detect0 && ptDataTmp.detectCount > 0; //elm.detectに加え、detectCountを加えて評価
+          elm.detect2 = elm.detect && ((elm.pga - pgaAvr >= thresholds.threshold03 && ptDataTmp.UpCount > 0) || elm.shindo > thresholds.threshold04);
+
+          //連続上昇回数（変化なし含む）
+          if (elm.pga - ptDataTmp.SUMTmp[ptDataTmp.SUMTmp.length - 1] >= 0) {
+            ptDataTmp.UpCount++;
+          } else {
+            ptDataTmp.UpCount = 0;
+          }
+          //連続検出回数（elm.detectは連続検出回数を指標に含むため、detect0で判定）
+          if (detect0) {
+            ptDataTmp.detectCount++;
+          } else {
+            ptDataTmp.detectCount = 0;
+          }
         }
-
-        detect0 = elm.pga - pgaAvr >= thresholds.threshold02 || elm.shindo >= thresholds.threshold04; //PGA増加量・震度絶対値で評価
-        elm.detect = detect0 && ptDataTmp.detectCount > 0; //elm.detectに加え、detectCountを加えて評価
-        elm.detect2 = elm.detect && ((elm.pga - pgaAvr >= thresholds.threshold03 && ptDataTmp.UpCount > 0) || elm.shindo > thresholds.threshold04);
 
         //前回からの変化の有無（描画時の負荷軽減のため）
         elm.changed = elm.pga != ptDataTmp.SUMTmp[ptDataTmp.SUMTmp.length - 1];
 
-        //連続上昇回数（変化なし含む）
-        if (elm.pga - ptDataTmp.SUMTmp[ptDataTmp.SUMTmp.length - 1] >= 0) {
-          ptDataTmp.UpCount++;
-        } else {
-          ptDataTmp.UpCount = 0;
-        }
-
         //PGA平均を求めるためのデータ追加
         ptDataTmp.SUMTmp = ptDataTmp.SUMTmp.slice(0, thresholds.historyCount - 1);
         ptDataTmp.SUMTmp.push(elm.pga);
-      }
-      //連続検出回数（elm.detectは連続検出回数を指標に含むため、detect0で判定）
-      if (detect0) {
-        ptDataTmp.detectCount++;
-      } else {
-        ptDataTmp.detectCount = 0;
       }
 
       if (!elm.detect && ptDataTmp.Event) {
@@ -111,57 +113,59 @@ function EQDetect(data, date, detect) {
     var MargeRangeTmp;
     var threshold01Tmp;
     //単独点の検知情報をグルーピング
-    for (const elm of data) {
-      if (elm.detect) {
-        var ptDataTmp = pointsData[elm.Code];
+    if (detect) {
+      for (const elm of data) {
+        if (elm.detect) {
+          var ptDataTmp = pointsData[elm.Code];
 
-        if (!ptDataTmp.Event) {
-          //すでに自観測点が地震アイテムに属していない場合
-          //都会かどうかで閾値調整
-          MargeRangeTmp = ptDataTmp.isCity ? thresholds.MargeRangeC : thresholds.MargeRange;
+          if (!ptDataTmp.Event) {
+            //すでに自観測点が地震アイテムに属していない場合
+            //都会かどうかで閾値調整
+            MargeRangeTmp = ptDataTmp.isCity ? thresholds.MargeRangeC : thresholds.MargeRange;
 
-          //自観測点が地震アイテムの半径+閾値の範囲内に入っている地震アイテムを探す
-          var EQD_ItemTmp = EQDetect_List.find(function (elm2) {
-            return geosailing(elm.Location.Latitude, elm.Location.Longitude, elm2.lat, elm2.lng) - elm2.Radius <= MargeRangeTmp;
-          });
-          if (EQD_ItemTmp) {
-            //EQD_ItemTmpに属する観測点から、自観測点からの距離が閾値以下の観測点があるか確認
-            var CodesTmp = EQD_ItemTmp.Codes.find(function (elm3) {
-              return geosailing(elm.Location.Latitude, elm.Location.Longitude, elm3.Location.Latitude, elm3.Location.Longitude) <= MargeRangeTmp;
+            //自観測点が地震アイテムの半径+閾値の範囲内に入っている地震アイテムを探す
+            var EQD_ItemTmp = EQDetect_List.find(function (elm2) {
+              return geosailing(elm.Location.Latitude, elm.Location.Longitude, elm2.lat, elm2.lng) - elm2.Radius <= MargeRangeTmp;
             });
+            if (EQD_ItemTmp) {
+              //EQD_ItemTmpに属する観測点から、自観測点からの距離が閾値以下の観測点があるか確認
+              var CodesTmp = EQD_ItemTmp.Codes.find(function (elm3) {
+                return geosailing(elm.Location.Latitude, elm.Location.Longitude, elm3.Location.Latitude, elm3.Location.Longitude) <= MargeRangeTmp;
+              });
 
-            if (CodesTmp) {
-              //地震アイテムに自観測点を追加
-              EQD_ItemTmp.Codes.push(elm);
-              ptDataTmp.Event = true;
-              //地震アイテムの「半径」を更新
-              var radiusTmp = geosailing(elm.Location.Latitude, elm.Location.Longitude, EQD_ItemTmp.lat, EQD_ItemTmp.lng);
-              if (EQD_ItemTmp.Radius < radiusTmp) EQD_ItemTmp.Radius = radiusTmp;
+              if (CodesTmp) {
+                //地震アイテムに自観測点を追加
+                EQD_ItemTmp.Codes.push(elm);
+                ptDataTmp.Event = true;
+                //地震アイテムの「半径」を更新
+                var radiusTmp = geosailing(elm.Location.Latitude, elm.Location.Longitude, EQD_ItemTmp.lat, EQD_ItemTmp.lng);
+                if (EQD_ItemTmp.Radius < radiusTmp) EQD_ItemTmp.Radius = radiusTmp;
+              }
             }
           }
-        }
 
-        if (EQD_ItemTmp) {
-          //最終検知時間（解除時に使用）を更新
-          EQD_ItemTmp.last_Detect = new Date() - Replay;
+          if (EQD_ItemTmp) {
+            //最終検知時間（解除時に使用）を更新
+            EQD_ItemTmp.last_Detect = new Date() - Replay;
 
-          threshold01Tmp = EQD_ItemTmp.isCity ? thresholds.threshold01C : thresholds.threshold01;
+            threshold01Tmp = EQD_ItemTmp.isCity ? thresholds.threshold01C : thresholds.threshold01;
 
-          if (EQD_ItemTmp.Codes.length >= threshold01Tmp) {
-            //地震アイテムに属する観測点数が閾値以上なら
+            if (EQD_ItemTmp.Codes.length >= threshold01Tmp) {
+              //地震アイテムに属する観測点数が閾値以上なら
 
-            //情報をmainプロセスへ送信
-            workerThreads.parentPort.postMessage({
-              action: "EQDetectAdd",
-              data: EQD_ItemTmp,
-            });
-            EQD_ItemTmp.showed = true; //新地震アイテムかどうかの判別用
+              //情報をmainプロセスへ送信
+              workerThreads.parentPort.postMessage({
+                action: "EQDetectAdd",
+                data: EQD_ItemTmp,
+              });
+              EQD_ItemTmp.showed = true; //新地震アイテムかどうかの判別用
+            }
+          } else if (elm.detect2) {
+            //自観測点がどの地震アイテムにも属さず、検知レベルがLv.2以上の場合
+            //自観測点を中心とした新規地震アイテム作成
+            EQDetect_List.push({ id: EQDetectID, lat: elm.Location.Latitude, lng: elm.Location.Longitude, Codes: [elm], Radius: 0, maxPGA: elm.pga, maxInt: elm.shindo, detectCount: 1, Up: false, Lv: 0, last_Detect: new Date() - Replay, origin_Time: new Date() - Replay, showed: false, isCity: ptDataTmp.isCity });
+            EQDetectID++;
           }
-        } else if (elm.detect2) {
-          //自観測点がどの地震アイテムにも属さず、検知レベルがLv.2以上の場合
-          //自観測点を中心とした新規地震アイテム作成
-          EQDetect_List.push({ id: EQDetectID, lat: elm.Location.Latitude, lng: elm.Location.Longitude, Codes: [elm], Radius: 0, maxPGA: elm.pga, maxInt: elm.shindo, detectCount: 1, Up: false, Lv: 0, last_Detect: new Date() - Replay, origin_Time: new Date() - Replay, showed: false, isCity: ptDataTmp.isCity });
-          EQDetectID++;
         }
       }
     }

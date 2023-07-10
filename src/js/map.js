@@ -1285,9 +1285,11 @@ function tsunamiDataUpdate(data) {
         EQInfoLink.dataset.eventid = "#EQItem_" + data.issue.EventID;
       }
     }
-    if(config.home.TsunamiSect){
-      var sectData = data.areas.find(function(elm){return elm.name == config.home.TsunamiSect})
-      if(sectData){
+    if (config.home.TsunamiSect) {
+      var sectData = data.areas.find(function (elm) {
+        return elm.name == config.home.TsunamiSect;
+      });
+      if (sectData) {
         switch (sectData.grade) {
           case "MajorWarning":
             gradeJa = "大津波警報";
@@ -1306,22 +1308,21 @@ function tsunamiDataUpdate(data) {
             break;
         }
 
-
         var firstWave = "";
         var maxWave = "";
         if (sectData.firstHeight) {
           firstWave = "第1波予想<span>" + dateEncode(5, sectData.firstHeight) + "</span>";
         } else {
           switch (sectData.firstHeightCondition) {
-          case "津波到達中と推測":
-            firstWave = "第1波予想<span>到達中</span>";
-            break;
-          case "第１波の到達を確認":
-            firstWave = "第1波<span>到達</span>";
-            break;
-          default:
-            break;
-        }
+            case "津波到達中と推測":
+              firstWave = "第1波予想<span>到達中</span>";
+              break;
+            case "第１波の到達を確認":
+              firstWave = "第1波<span>到達</span>";
+              break;
+            default:
+              break;
+          }
         }
         if (sectData.maxHeight) {
           maxWave = " 最大波<span>" + sectData.maxHeight + "</span>";
@@ -1329,15 +1330,15 @@ function tsunamiDataUpdate(data) {
           maxWave = " 若干の海面変動";
         }
 
-        document.getElementById("tsunamiSectTitle").innerText = sectData.name + " " + gradeJa
-        document.getElementById("firstHeightData").innerHTML = firstWave
-        document.getElementById("maxHeightData").innerHTML = maxWave
-        document.getElementById("firstHeightCondition").style.display = sectData.firstHeightCondition == "ただちに津波来襲と予測" ? "block":"none"
+        document.getElementById("tsunamiSectTitle").innerText = sectData.name + " " + gradeJa;
+        document.getElementById("firstHeightData").innerHTML = firstWave;
+        document.getElementById("maxHeightData").innerHTML = maxWave;
+        document.getElementById("firstHeightCondition").style.display = sectData.firstHeightCondition == "ただちに津波来襲と予測" ? "block" : "none";
 
         document.getElementById("TsunamiMySectData").style.border = "solid 1px " + tsunamiColorConv(sectData.grade);
-        document.getElementById("TsunamiMySectData").style.display = "block"
+        document.getElementById("TsunamiMySectData").style.display = "block";
       } else {
-        document.getElementById("TsunamiMySectData").style.display = "none"
+        document.getElementById("TsunamiMySectData").style.display = "none";
       }
     }
     document.getElementById("tsunamiWrap").style.display = "block";

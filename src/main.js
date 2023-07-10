@@ -1374,6 +1374,7 @@ function wolfxRequest() {
                   var maxInt = EBIStr[i + 1].substring(1, 3);
                   var minInt = EBIStr[i + 1].substring(3, 5);
                   minInt = minInt == "//" ? null : shindoConvert(minInt, 0);
+                  maxInt = maxInt == "//" ? null : shindoConvert(maxInt, 0);
                   var arrivalTime = EBIStr[i + 2];
                   arrivalTime = arrivalTime.substring(0, 2) + ":" + arrivalTime.substring(2, 4) + ":" + arrivalTime.substring(4, 6);
                   arrivalTime = new Date(dateEncode(4, null) + " " + arrivalTime);
