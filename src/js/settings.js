@@ -33,8 +33,10 @@ window.electronAPI.messageSend((event, request) => {
     document.getElementById("EEW2_Voice").value = config.notice.voice.EEWUpdate;
     document.getElementById("EQInfo_ItemCount").value = config.Info.EQInfo.ItemCount;
     document.getElementById("EEW_traning").checked = config.Info.EEW.showTraning;
+    document.getElementById("EEW_IntQ").checked = config.Info.EEW.IntQuestion;
     document.getElementById("EQInfoInterval").value = config.Info.EQInfo.Interval / 1000;
 
+    selectBoxSet(document.getElementById("EEW_IntFilter"), config.Info.EEW.IntThreshold);
     selectBoxSet(document.getElementById("saibun"), config.home.Section);
     tsunamiSect = config.home.TsunamiSect;
     selectBoxSet(document.getElementById("tsunamiSect"), tsunamiSect);
@@ -136,6 +138,9 @@ document.getElementById("apply").addEventListener("click", function () {
   config.notice.voice.EEWUpdate = document.getElementById("EEW2_Voice").value;
   config.Info.EQInfo.ItemCount = Number(document.getElementById("EQInfo_ItemCount").value);
   config.Info.EEW.showTraning = document.getElementById("EEW_traning").checked;
+  config.Info.EEW.IntQuestion = document.getElementById("EEW_IntQ").checked;
+  config.Info.EEW.IntThreshold = document.getElementById("EEW_IntFilter").value;
+
   config.Info.EQInfo.Interval = Number(document.getElementById("EQInfoInterval").value) * 1000;
   config.Source.axis.GetData = document.getElementById("Axis_GetData").checked;
   config.Source.axis.AccessToken = document.getElementById("Axis_AccessToken").value;

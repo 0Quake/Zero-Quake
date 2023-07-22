@@ -62,6 +62,8 @@ var defaultConfigVal = {
   Info: {
     EEW: {
       showTraning: false,
+      IntThreshold: 0,
+      IntQuestion: true,
     },
     EQInfo: {
       ItemCount: 15,
@@ -1968,6 +1970,7 @@ function EEWdetect(type, json /*, KorL*/) {
 function EEWcontrol(data) {
   if (!data) return;
   if (!config.Info.EEW.showTraning && data.is_training) return;
+
   if (data.origin_time) {
     var origin_timeTmp = data.origin_time;
   } else {
@@ -1987,7 +1990,7 @@ function EEWcontrol(data) {
     data.distance = geosailing(data.latitude, data.longitude, config.home.latitude, config.home.longitude);
   }
 
-  if (data.warnZones.length) {
+  if (data.warnZones && data.warnZones.length) {
     var userSect = data.warnZones.find(function (elm2) {
       return elm2.Name == config.home.Section;
     });
@@ -2042,7 +2045,7 @@ function EEWcontrol(data) {
           });
         }
 
-        if (changed) {
+        if (changed) {         
           EEWAlert(oneBeforeData, false, true);
         }
       }
@@ -2073,6 +2076,12 @@ function EEWcontrol(data) {
     }
   } else {
     //第１報
+    if(!data.maxInt){
+      if(!config.Info.EEW.IntQuestion) return;
+    } else if(shindoConvert(config.Info.EEW.IntThreshold, 5) > shindoConvert(data.maxInt, 5)) {
+      return;
+    }
+    
     EEWAlert(data, true);
     EEW_Data.push({
       EQ_id: data.EventID,

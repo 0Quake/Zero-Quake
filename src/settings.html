@@ -516,7 +516,27 @@
             </div>
             <div id="tab1_content4" class="tabcontent">
                 <h3><span>情報種別ごとの設定</span>緊急地震速報</h3>
-                <label><input type="checkbox" id="EEW_traning">訓練法を受信</label>
+                <label><input type="checkbox" id="EEW_traning">訓練報を受信</label>
+
+                <h4>通知条件</h4>
+                <label>震度の条件
+                    <select id="EEW_IntFilter">
+                        <option disabled selected></option>
+
+                        <option value="0">すべて</option>
+                        <option value="1">震度1以上</option>
+                        <option value="2">震度2以上</option>
+                        <option value="3">震度3以上</option>
+                        <option value="4">震度4以上</option>
+                        <option value="5-">震度5弱以上</option>
+                        <option value="5+">震度5強以上</option>
+                        <option value="6-">震度6弱以上</option>
+                        <option value="6+">震度6強以上</option>
+                        <option value="7">震度7以上</option>
+                    </select>
+                </label>
+                <label><input type="checkbox" id="EEW_IntQ">震度不明時も通知</label>
+
             </div>
             <div id="tab1_content5" class="tabcontent">
                 <h3><span>情報種別ごとの設定</span>地震情報</h3>
