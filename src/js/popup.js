@@ -300,9 +300,9 @@ var template2 = document.getElementById("EQListTemplate");
 var template2_2 = document.getElementById("EQListTemplate2");
 var EQListWrap;
 function eqInfoDraw(data, source) {
-  eqInfoDataJMA = data;
   var EQTemplate;
   if (source == "jma") {
+    eqInfoDataJMA = data;
     EQTemplate = template2;
     EQListWrap = document.getElementById("JMA_EqInfo");
   } else if (source == "usgs") {

@@ -27,7 +27,6 @@ function replay(ReplayDate) {
   }
 }
 /* eslint-enable */
-//replay("2023/05/05 14:42:06");
 //replay("2023/04/04 16:11:00"); //２か所同時
 //replay("2023/03/11 05:12:30"); //２か所同時
 //replay("2020/06/15 02:28:38");//２か所同時
@@ -1351,7 +1350,7 @@ function SnetRequest() {
 //wolfxへのHTTPリクエスト処理
 var wolfx_lastUpdate = 0;
 function wolfxRequest() {
-  if (config.Source.wolfx.GetData && net.online && Replay == 0) {
+  if (config.Source.wolfx.GetData && net.isOnline) {
     var request = net.request("https://api.wolfx.jp/jma_eew.json?_=" + new Date());
     request.on("response", (res) => {
       var dataTmp = "";
@@ -1461,13 +1460,6 @@ function P2P_WS() {
       if (message.type === "utf8") {
         var data = message.utf8Data;
         switch (data.code) {
-          case 551:
-            eqInfoUpdate(true);
-            setTimeout(function () {
-              eqInfoUpdate(true);
-            }, 3000);
-            //地震情報
-            break;
           case 552:
             //津波情報
             if (data.canceled) {
@@ -2722,7 +2714,6 @@ function EQI_narikakun_Req(url) {
   });
   request.end();
 }
-
 //地震情報マージ→eqInfoAlert
 function eqInfoControl(dataList, type, EEW) {
   switch (type) {

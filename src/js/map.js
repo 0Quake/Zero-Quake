@@ -908,6 +908,7 @@ var Int7T = ["any"];
 var Int7pT = ["any"];
 
 function JMAEstShindoControl(data) {
+  console.log(data);
   JMAEstShindoData = {};
   Int0T = ["any"];
   Int1T = ["any"];
@@ -1011,28 +1012,26 @@ function psWaveEntry() {
       }
     }
 
-    if (!elm.is_cancel && elm.origin_time && elm.depth && elm.latitude && elm.longitude) {
-      if (elm.depth <= 700) {
-        var TimeTableTmp = TimeTable_JMA2001[elm.depth];
-        var pswaveFind = psWaveList.find(function (elm2) {
-          return elm2.id == elm.EventID;
-        });
+    if (!elm.is_cancel && elm.origin_time && elm.depth && elm.latitude && elm.longitude && elm.depth <= 700 && TimeTable_JMA2001) {
+      var TimeTableTmp = TimeTable_JMA2001[elm.depth];
+      var pswaveFind = psWaveList.find(function (elm2) {
+        return elm2.id == elm.EventID;
+      });
 
-        if (pswaveFind) {
-          pswaveFind.data.longitude = elm.longitude;
-          pswaveFind.data.latitude = elm.latitude;
-          pswaveFind.TimeTable = TimeTableTmp;
-        } else {
-          psWaveList.push({
-            id: elm.EventID,
-            PCircleElm: null,
-            SCircleElm: null,
-            data: { latitude: elm.latitude, longitude: elm.longitude, originTime: elm.origin_time },
-            TimeTable: TimeTableTmp,
-          });
-        }
-        psWaveCalc(elm.EventID);
+      if (pswaveFind) {
+        pswaveFind.data.longitude = elm.longitude;
+        pswaveFind.data.latitude = elm.latitude;
+        pswaveFind.TimeTable = TimeTableTmp;
+      } else {
+        psWaveList.push({
+          id: elm.EventID,
+          PCircleElm: null,
+          SCircleElm: null,
+          data: { latitude: elm.latitude, longitude: elm.longitude, originTime: elm.origin_time },
+          TimeTable: TimeTableTmp,
+        });
       }
+      psWaveCalc(elm.EventID);
     }
   });
 
@@ -1277,11 +1276,12 @@ function tsunamiDataUpdate(data) {
   } else {
     EQInfoLink.style.display = "none";
     if (data.issue.EventID) {
+      console.log(data.issue.EventID);
       var EQdata = eqInfoDataJMA.find(function (elm) {
         return elm.eventId == data.issue.EventID;
       });
       if (EQdata) {
-        EQInfoLink.style.display = "block";
+        EQInfoLink.style.display = "inline-block";
         EQInfoLink.dataset.eventid = "#EQItem_" + data.issue.EventID;
       }
     }

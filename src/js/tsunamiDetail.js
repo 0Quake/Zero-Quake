@@ -105,6 +105,10 @@ function tsunamiUpdate(dataTmp) {
       document.getElementById(elm.grade + "Info").after(new_tr);
       if (config && config.home.TsunamiSect && elm.name == config.home.TsunamiSect) {
         mySectElm = new_tr;
+        mySectElm.scrollIntoView({ behavior: "smooth", block: "center" });
+        setTimeout(function () {
+          mySectElm.focus();
+        }, 100);
       }
 
       if (elm.stations && Array.isArray(elm.stations)) {
@@ -171,8 +175,4 @@ function tsunamiUpdate(dataTmp) {
   document.getElementById("WarningInfo").style.display = Tsunami_Warning ? "table-row" : "none";
   document.getElementById("WatchInfo").style.display = Tsunami_Watch ? "table-row" : "none";
   document.getElementById("YohoInfo").style.display = Tsunami_Yoho ? "table-row" : "none";
-  mySectElm.scrollIntoView({ behavior: "smooth", block: "center" });
-  setTimeout(function () {
-    mySectElm.focus();
-  }, 100);
 }
