@@ -241,7 +241,8 @@ var EQInfoFetchIndex = 0;
 var tsunamiData;
 var kmoniTimeout, lmoniTimeout, ymoniTimeout;
 var msil_lastTime = 0;
-var kmoniEid, kmoniRNum;
+var kmoniEid;
+//var kmoniRNum;
 var kmoniPointsDataTmp, SnetPointsDataTmp;
 let tray;
 var RevocationTimer;
@@ -1054,7 +1055,7 @@ function estShindoControl(response) {
   }
 }
 
-var kmoniEstShindoData;
+//var kmoniEstShindoData;
 var kmoniEEW_url = true;
 var kmoniI_url = 0;
 //強震モニタへのHTTPリクエスト
@@ -1138,8 +1139,9 @@ function kmoniRequest() {
   kmoniTimeout = setTimeout(kmoniRequest, config.Source.kmoni.kmoni.Interval);
 }
 var kmoniEI_URL = true;
-var kmoniEidT, kmoniRNumT;
+//var kmoniEidT, kmoniRNumT;
 function kmoniEstShindoRequest() {
+  /*
   if (kmoniEid == kmoniEidT && kmoniRNum == kmoniRNumT) return;
   kmoniEid = kmoniEidT;
   kmoniRNum = kmoniRNumT;
@@ -1185,6 +1187,7 @@ function kmoniEstShindoRequest() {
     NetworkError(error, "強震モニタ(画像)");
   });
   request.end();
+  */
 }
 
 //長周期地震動モニタへのHTTPリクエスト
