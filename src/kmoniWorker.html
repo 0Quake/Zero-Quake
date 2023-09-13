@@ -118,15 +118,15 @@
                     ctx5.drawImage(ESImg, 0, 0, 170, 205, 0, 0, 170, 205);
 
                     img = ctx1.getImageData(0, 0, EScanvas1.width, EScanvas1.height)
-                    ctx1.putImageData(es_colorConv(img), 0, 0);
+                    ctx1.putImageData(img, 0, 0);
                     img2 = ctx2.getImageData(0, 0, EScanvas2.width, EScanvas2.height)
-                    ctx2.putImageData(es_colorConv(img2), 0, 0);
+                    ctx2.putImageData(img2, 0, 0);
                     img3 = ctx3.getImageData(0, 0, EScanvas3.width, EScanvas3.height)
-                    ctx3.putImageData(es_colorConv(img3), 0, 0);
+                    ctx3.putImageData(img3, 0, 0);
                     img4 = ctx4.getImageData(0, 0, EScanvas4.width, EScanvas4.height)
-                    ctx4.putImageData(es_colorConv(img4), 0, 0);
+                    ctx4.putImageData(img4, 0, 0);
                     img5 = ctx5.getImageData(0, 0, EScanvas5.width, EScanvas5.height)
-                    ctx5.putImageData(es_colorConv(img5), 0, 0);
+                    ctx5.putImageData(img5, 0, 0);
 
                     b64_1 = EScanvas1.toDataURL("image/png");
                     b64_2 = EScanvas2.toDataURL("image/png");

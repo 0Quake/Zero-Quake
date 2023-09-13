@@ -64,6 +64,7 @@ var defaultConfigVal = {
       showTraning: false,
       IntThreshold: 0,
       IntQuestion: true,
+      IntType: "max",
     },
     EQInfo: {
       ItemCount: 15,
@@ -1996,7 +1997,7 @@ function EEWcontrol(data) {
     });
 
     if (userSect) {
-      data.userIntensity = userSect.IntTo;
+      data.userIntensity = config.Info.EEW.IntType == "max" ? userSect.IntTo : userSect.IntFrom;
       data.arrivalTime = userSect.ArrivalTime;
     }
   }
@@ -2045,7 +2046,7 @@ function EEWcontrol(data) {
           });
         }
 
-        if (changed) {         
+        if (changed) {
           EEWAlert(oneBeforeData, false, true);
         }
       }
@@ -2076,12 +2077,12 @@ function EEWcontrol(data) {
     }
   } else {
     //第１報
-    if(!data.maxInt){
-      if(!config.Info.EEW.IntQuestion) return;
-    } else if(shindoConvert(config.Info.EEW.IntThreshold, 5) > shindoConvert(data.maxInt, 5)) {
+    if (!data.maxInt) {
+      if (!config.Info.EEW.IntQuestion) return;
+    } else if (shindoConvert(config.Info.EEW.IntThreshold, 5) > shindoConvert(data.maxInt, 5)) {
       return;
     }
-    
+
     EEWAlert(data, true);
     EEW_Data.push({
       EQ_id: data.EventID,

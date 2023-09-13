@@ -49,6 +49,7 @@ window.electronAPI.messageSend((event, request) => {
     selectBoxSet(document.getElementById("TTSvoiceSelect"), config.notice.voice_parameter.voice);
 
     selectBoxSet(document.getElementById("BugReportAutoSend"), config.system.crashReportAutoSend);
+    selectBoxSet(document.getElementById("intType"), config.Info.EEW.IntType);
     document.getElementById("EarthquakeDetect").checked = config.Info.RealTimeShake.DetectEarthquake;
     document.getElementById("WindowAutoOpen").checked = config.system.WindowAutoOpen;
     document.getElementById("HomePinShow").checked = config.home.ShowPin;
@@ -125,6 +126,8 @@ document.getElementById("InstallBtn").addEventListener("click", function () {
 
 document.getElementById("apply").addEventListener("click", function () {
   config.system.crashReportAutoSend = document.getElementById("BugReportAutoSend").value;
+  config.Info.EEW.IntType = document.getElementById("intType").value;
+
   config.Info.RealTimeShake.DetectEarthquake = document.getElementById("EarthquakeDetect").checked;
   config.system.WindowAutoOpen = document.getElementById("WindowAutoOpen").checked;
   config.home.ShowPin = document.getElementById("HomePinShow").checked;

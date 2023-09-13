@@ -930,7 +930,8 @@ function JMAEstShindoControl(data) {
 
   Object.keys(JMAEstShindoData).forEach(function (elm) {
     var sectData = JMAEstShindoData[elm];
-    switch (sectData.IntTo) {
+    IntData = config.Info.EEW.IntType == "max" ? sectData.IntTo : sectData.IntFrom;
+    switch (IntData) {
       case "0":
         Int0T.push(["==", "name", elm]);
         break;
