@@ -59,7 +59,6 @@
 
 - 強震モニタ [© 防災科学技術研究所](http://www.kmoni.bosai.go.jp/)
 - 長周期地震動モニタ [© 防災科学技術研究所](lmoni.bosai.go.jp)
-- Yahoo 強震モニタ [© 防災科学技術研究所／Yahoo Japan](https://typhoon.yahoo.co.jp/weather/jp/earthquake/kyoshin/)
 
 ### リアルタイム地震情報 (Early-est)
 
