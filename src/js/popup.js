@@ -347,7 +347,11 @@ function eqInfoDraw(data, source) {
       });
     } else if (source == "usgs") {
       clone.querySelector(".EQDetailButton").addEventListener("click", function () {
-        window.open(elm.DetailURL);
+        //window.open(elm.DetailURL);
+        window.electronAPI.messageReturn({
+          action: "EQInfoWindowOpen_website",
+          url: String(elm.DetailURL),
+        });
       });
     }
     EQListWrap.appendChild(clone);

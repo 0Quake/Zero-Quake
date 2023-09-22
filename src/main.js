@@ -50,6 +50,7 @@ var defaultConfigVal = {
   system: {
     crashReportAutoSend: "yes",
     WindowAutoOpen: true,
+    alwaysOnTop: false,
   },
   home: {
     name: "自宅",
@@ -576,6 +577,8 @@ ipcMain.on("message", (_event, response) => {
     tsunami_createWindow();
   } else if (response.action == "EQInfoWindowOpen") {
     EQInfo_createWindow(response);
+  } else if (response.action == "EQInfoWindowOpen_website") {
+    EQInfo_createWindowWS(response);
   } else if (response.action == "openAtLogin") {
     app.setLoginItemSettings({
       openAtLogin: response.data,
@@ -633,6 +636,7 @@ function createWindow() {
         backgroundThrottling: false,
       },
       backgroundColor: "#202227",
+      alwaysOnTop: config.system.alwaysOnTop,
     });
     if (Replay !== 0) {
       mainWindow.webContents.send("message2", {
@@ -742,6 +746,7 @@ function worker_createWindow() {
     },
     backgroundThrottling: false,
     show: false,
+    alwaysOnTop: config.system.alwaysOnTop,
   });
   kmoniWorker.on("close", () => {
     kmoniWorker = null;
@@ -774,6 +779,7 @@ function setting_createWindow(update) {
       icon: path.join(__dirname, "img/icon.ico"),
     },
     backgroundColor: "#202227",
+    alwaysOnTop: config.system.alwaysOnTop,
   });
   if (Replay !== 0) {
     settingWindow.webContents.send("message2", {
@@ -844,6 +850,7 @@ function tsunami_createWindow() {
       icon: path.join(__dirname, "img/icon.ico"),
     },
     backgroundColor: "#202227",
+    alwaysOnTop: config.system.alwaysOnTop,
   });
 
   tsunamiWindow.webContents.on("did-finish-load", () => {
@@ -887,6 +894,7 @@ function EQInfo_createWindow(response) {
       icon: path.join(__dirname, "img/icon.ico"),
     },
     backgroundColor: "#202227",
+    alwaysOnTop: config.system.alwaysOnTop,
   });
 
   var EEWDataItem = EEW_Data.find(function (elm) {
@@ -917,6 +925,21 @@ function EQInfo_createWindow(response) {
   EQI_Window[response.eid].window.loadFile(response.url);
   EQI_Window[response.eid].window.webContents.on("will-navigate", handleUrlOpen);
   EQI_Window[response.eid].window.webContents.on("new-window", handleUrlOpen);
+}
+
+function EQInfo_createWindowWS(response) {
+  var EQInfoWindow = new BrowserWindow({
+    minWidth: 600,
+    minHeight: 300,
+    webPreferences: {
+      title: "地震詳細情報 - Zero Quake",
+      icon: path.join(__dirname, "img/icon.ico"),
+    },
+    backgroundColor: "#FFFFFF",
+    alwaysOnTop: config.system.alwaysOnTop,
+  });
+
+  EQInfoWindow.loadURL(response.url);
 }
 
 //開始処理

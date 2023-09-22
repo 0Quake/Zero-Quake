@@ -52,6 +52,7 @@ window.electronAPI.messageSend((event, request) => {
     selectBoxSet(document.getElementById("intType"), config.Info.EEW.IntType);
     document.getElementById("EarthquakeDetect").checked = config.Info.RealTimeShake.DetectEarthquake;
     document.getElementById("WindowAutoOpen").checked = config.system.WindowAutoOpen;
+    document.getElementById("alwaysOnTop").checked = config.system.alwaysOnTop;
     document.getElementById("HomePinShow").checked = config.home.ShowPin;
     document.getElementById("Tsunami_GetData").checked = config.Info.TsunamiInfo.GetData;
     document.getElementById("Axis_GetData").checked = config.Source.axis.GetData;
@@ -130,6 +131,7 @@ document.getElementById("apply").addEventListener("click", function () {
 
   config.Info.RealTimeShake.DetectEarthquake = document.getElementById("EarthquakeDetect").checked;
   config.system.WindowAutoOpen = document.getElementById("WindowAutoOpen").checked;
+  config.system.alwaysOnTop = document.getElementById("alwaysOnTop").checked;
   config.home.ShowPin = document.getElementById("HomePinShow").checked;
   config.Info.TsunamiInfo.GetData = document.getElementById("Tsunami_GetData").checked;
   config.home.name = document.getElementById("HomeName").value;

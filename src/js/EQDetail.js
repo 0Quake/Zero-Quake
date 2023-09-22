@@ -544,6 +544,7 @@ function Mapinit() {
   radioWrap.innerHTML = '<label id="estshindomap_radioWrap"><input type="radio" name="mapFillSelect" value="fill1" id="estshindomap_radio">推計震度分布図</label>';
   radioWrap.innerHTML += '<label><input type="radio" name="mapFillSelect" value="fill2" checked>各地の震度</label>';
   radioWrap.innerHTML += '<label id="LgInt_radioWrap"><input type="radio" name="mapFillSelect" value="fill4">各地の長周期地震動階級</label>';
+
   var checkWrap = document.createElement("div");
   checkWrap.classList.add("check");
   checkWrap.innerHTML = '<label><input type="checkbox" id="mapFillToggle" value="fill3" checked>地図の塗りつぶし</label>';
@@ -567,6 +568,12 @@ function Mapinit() {
   document.getElementById("mapFillToggle").addEventListener("change", function () {
     MapFill = this.checked;
     mapFillDraw();
+  });
+
+  document.getElementsByName("mapFillSelect").forEach(function (elm) {
+    elm.addEventListener("change", function () {
+      mapFillSwitch(elm.value);
+    });
   });
 
   var continueButton = document.createElement("button");
@@ -723,12 +730,8 @@ function mapFillSwitch(val) {
       elm.style.display = "none";
     });
   }
+  mapFillDraw();
 }
-document.getElementsByName("mapFillSelect").forEach(function (elm) {
-  elm.addEventListener("change", function () {
-    mapFillSwitch(elm.value);
-  });
-});
 
 document.getElementById("over2").addEventListener("change", function () {
   document.getElementById("legend1").style.display = this.checked ? "inline-block" : "none";
