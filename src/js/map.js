@@ -908,7 +908,6 @@ var Int7T = ["any"];
 var Int7pT = ["any"];
 
 function JMAEstShindoControl(data) {
-  console.log(data);
   JMAEstShindoData = {};
   Int0T = ["any"];
   Int1T = ["any"];
@@ -1014,7 +1013,7 @@ function psWaveEntry() {
     }
 
     if (!elm.is_cancel && elm.origin_time && elm.depth && elm.latitude && elm.longitude && elm.depth <= 700 && TimeTable_JMA2001) {
-      var TimeTableTmp = TimeTable_JMA2001[elm.depth];
+      var TimeTableTmp = TimeTable_JMA2001[depthFilter(elm.depth)];
       var pswaveFind = psWaveList.find(function (elm2) {
         return elm2.id == elm.EventID;
       });
@@ -1277,7 +1276,6 @@ function tsunamiDataUpdate(data) {
   } else {
     EQInfoLink.style.display = "none";
     if (data.issue.EventID) {
-      console.log(data.issue.EventID);
       var EQdata = eqInfoDataJMA.find(function (elm) {
         return elm.eventId == data.issue.EventID;
       });
@@ -1446,4 +1444,18 @@ function tsunamiColorConv(str) {
       break;
   }
   return color;
+}
+
+function depthFilter(depth) {
+  if (!isFinite(depth) || depth < 0) {
+    return 0;
+  } else if (depth > 700) {
+    return 700;
+  } else if (200 <= depth) {
+    return Math.floor(depth / 10) * 10;
+  } else if (50 <= depth) {
+    return Math.floor(depth / 5) * 5;
+  } else {
+    return Math.floor(depth / 2) * 2;
+  }
 }

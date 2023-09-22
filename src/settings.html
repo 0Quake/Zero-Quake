@@ -597,10 +597,8 @@
 
 
                 <h4>通知条件</h4>
-                <label>震度の条件
+                <label>予想最大震度の条件
                     <select id="EEW_IntFilter">
-                        <option disabled selected></option>
-
                         <option value="0">すべて</option>
                         <option value="1">震度1以上</option>
                         <option value="2">震度2以上</option>
@@ -613,7 +611,10 @@
                         <option value="7">震度7以上</option>
                     </select>
                 </label>
-                <label><input type="checkbox" id="EEW_IntQ">震度不明時も通知</label>
+                <div class="smalltext">続報による下方修正で 条件を下回った場合でも、その地震については情報の表示・更新を続けます。</div>
+
+                <label><input type="checkbox" id="EEW_IntQ">予想最大震度 不明時も通知</label>
+                <div class="smalltext">一度でも予想最大震度が発表された場合、以降 震度不明であっても通知します。</div>
 
             </div>
             <div id="tab1_content5" class="tabcontent">

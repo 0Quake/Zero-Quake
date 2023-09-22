@@ -182,7 +182,7 @@
 
                                 <h2 class="traning">訓練</h2>
                                 <h2>
-                                    <div class="EEWLocalID">0</div>緊急地震速報<span class="alertflg"></span>
+                                    <div class="EEWLocalID">0</div><span class="Title_EEW">緊急地震速報</span><span class="Title_EarlyEst">Early-Est 地震情報</span><span class="alertflg"></span>
                                     <div class="EEW_MenuRight">第<span class="serial"></span>報 <span class="is_final">(最終報)</span></div>
                                 </h2>
 
@@ -217,7 +217,7 @@
                                     </div>
 
 
-                                    <div class="canceled">キャンセルされました</div>
+                                    <div class="canceled">取り消されました</div>
                                 </div>
                             </div>
                         </template>
@@ -309,12 +309,10 @@
                                 <div>
                                     <div class="statusIcon" id="Internet_ICN"></div>
                                     <span>インターネット接続状況</span>
+                                    <div class="timeView"><span id="PC_TIME">読み込み中...</span> (PC時刻)</div>
                                     <div id="Internet_UT" class="timeView"></div>
                                 </div>
-                                <div>
-                                    <span>PC時刻</span>
-                                    <div id="PC_TIME" class="timeView">読み込み中...</div>
-                                </div>
+
 
 
 
@@ -352,6 +350,13 @@
                                     <div class="statusIcon" id="msilImg_ICN"></div>
                                     <span>海しる</span>
                                     <div id="msilImg_UT" class="timeView">読み込み中...</div>
+                                </div>
+
+                                <h3>リアルタイム地震情報</h3>
+                                <div class="timeItem">
+                                    <div class="statusIcon" id="Early-est_ICN"></div>
+                                    <span>Early-est</span>
+                                    <div id="Early-est_UT" class="timeView">読み込み中...</div>
                                 </div>
 
                             </div>

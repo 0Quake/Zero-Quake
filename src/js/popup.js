@@ -117,6 +117,8 @@ function EEWAlertUpdate(data) {
         clone.querySelector(".EEWWrap").classList.add("keihou");
       } else if (elm.alertflg == "予報") {
         clone.querySelector(".EEWWrap").classList.add("yohou");
+      } else if (elm.alertflg == "EarlyEst") {
+        clone.querySelector(".EEWWrap").classList.add("EarlyEst");
       }
 
       EEWID++;
@@ -132,8 +134,8 @@ function EEWAlertUpdate(data) {
       clone.querySelector(".canceled").style.display = elm.is_cancel ? "flex" : "none";
       clone.querySelector(".region_name").textContent = elm.region_name ? elm.region_name : "震源地域不明";
       clone.querySelector(".origin_time").textContent = dateEncode(3, elm.origin_time);
-      clone.querySelector(".magnitude").textContent = elm.magnitude ? elm.magnitude : "不明";
-      clone.querySelector(".depth").textContent = elm.depth ? elm.depth : "不明";
+      clone.querySelector(".magnitude").textContent = elm.magnitude ? Math.round(elm.magnitude * 10) / 10 : "不明";
+      clone.querySelector(".depth").textContent = elm.depth ? Math.round(elm.depth) : "不明";
       clone.querySelector(".traning").style.display = elm.is_training ? "block" : "none";
       clone.querySelector(".EpicenterElement").style.display = !elm.isPlum ? "block" : "none";
       clone.querySelector(".NoEpicenterElement").style.display = elm.isPlum ? "block" : "none";
@@ -142,7 +144,9 @@ function EEWAlertUpdate(data) {
       clone.querySelector(".userDataWrap").style.background = shindoConvert(elm.userIntensity, 2)[0];
       clone.querySelector(".userDataWrap").style.color = shindoConvert(elm.userIntensity, 2)[1];
 
-      clone.querySelector(".distance").textContent = elm.distance ? Math.round(elm.distance) + "km" : "";
+      if (elm.distance < 10000) distanceTmp = Math.round(elm.distance);
+      else distanceTmp = Math.round(elm.distance / 1000) / 10 + "万";
+      clone.querySelector(".distance").textContent = elm.distance ? distanceTmp + "km" : "";
 
       clone.querySelector(".EEWWrap").setAttribute("id", "EEW-" + elm.EventID);
 
@@ -174,8 +178,8 @@ function EEWAlertUpdate(data) {
         EQMenu.querySelector(".canceled").style.display = elm.is_cancel ? "flex" : "none";
         EQMenu.querySelector(".region_name").textContent = elm.region_name ? elm.region_name : "震源地域不明";
         EQMenu.querySelector(".origin_time").textContent = dateEncode(3, elm.origin_time);
-        EQMenu.querySelector(".magnitude").textContent = elm.magnitude ? elm.magnitude : "不明";
-        EQMenu.querySelector(".depth").textContent = elm.depth ? elm.depth : "不明";
+        EQMenu.querySelector(".magnitude").textContent = elm.magnitude ? Math.round(elm.magnitude * 10) / 10 : "不明";
+        EQMenu.querySelector(".depth").textContent = elm.depth ? Math.round(elm.depth) : "不明";
 
         EQMenu.querySelector(".EpicenterElement").style.display = !elm.isPlum ? "block" : "none";
         EQMenu.querySelector(".NoEpicenterElement").style.display = elm.isPlum ? "block" : "none";
@@ -184,7 +188,9 @@ function EEWAlertUpdate(data) {
         EQMenu.querySelector(".userDataWrap").style.background = shindoConvert(elm.userIntensity, 2)[0];
         EQMenu.querySelector(".userDataWrap").style.color = shindoConvert(elm.userIntensity, 2)[1];
 
-        EQMenu.querySelector(".distance").textContent = elm.distance ? Math.round(elm.distance) + "km" : "";
+        if (elm.distance < 10000) distanceTmp = Math.round(elm.distance);
+        else distanceTmp = Math.round(elm.distance / 1000) / 10 + "万";
+        EQMenu.querySelector(".distance").textContent = elm.distance ? distanceTmp + "km" : "";
       }
     }
     epiCenterUpdate(elm.EventID, elm.latitude, elm.longitude);
