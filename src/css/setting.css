@@ -116,6 +116,11 @@ hr {
   margin: 0 10px;
 }
 
+#softName a {
+  color: inherit;
+  text-decoration: unset;
+}
+
 div .tabcontent {
   height: 100%;
   overflow: auto;

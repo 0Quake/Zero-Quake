@@ -63,7 +63,6 @@ window.electronAPI.messageSend((event, request) => {
     document.getElementById("WolfxInterval").value = config.Source.wolfx.Interval / 1000;
     document.getElementById("kmoniInterval").value = config.Source.kmoni.kmoni.Interval / 1000;
     document.getElementById("lmoniInterval").value = config.Source.kmoni.lmoni.Interval / 1000;
-    document.getElementById("ymoniInterval").value = config.Source.kmoni.ymoni.Interval / 1000;
     document.getElementById("msilInterval").value = config.Source.msil.Interval / 1000;
     if (config.Source.axis.AccessToken) document.getElementById("Axis_AccessToken").value = config.Source.axis.AccessToken;
 
@@ -155,7 +154,6 @@ document.getElementById("apply").addEventListener("click", function () {
   config.Source.wolfx.Interval = Number(document.getElementById("WolfxInterval").value) * 1000;
   config.Source.kmoni.kmoni.Interval = Number(document.getElementById("kmoniInterval").value) * 1000;
   config.Source.kmoni.lmoni.Interval = Number(document.getElementById("lmoniInterval").value) * 1000;
-  config.Source.kmoni.ymoni.Interval = Number(document.getElementById("ymoniInterval").value) * 1000;
   config.Source.msil.Interval = Number(document.getElementById("msilInterval").value) * 1000;
 
   config.notice.voice_parameter.rate = TTSspeed;
