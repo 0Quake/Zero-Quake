@@ -22,12 +22,14 @@
 ### 防災科学研究所
 
 - リアルタイム揺れ情報
-- EEW 予想震度(メッシュ)
-- 長周期地震動の情報
 
 ### USGS(アメリカ地質調査所)
 
 - Earthquake Catalog
+
+### Early-est
+
+- リアルタイム地震情報
 
 ## 情報源
 
@@ -59,6 +61,10 @@
 - 長周期地震動モニタ [© 防災科学技術研究所](lmoni.bosai.go.jp)
 - Yahoo 強震モニタ [© 防災科学技術研究所／Yahoo Japan](https://typhoon.yahoo.co.jp/weather/jp/earthquake/kyoshin/)
 
+### リアルタイム地震情報 (Early-est)
+
+- Early-est [© イタリア国立地球物理学火山学研究所](http://early-est.rm.ingv.it)
+
 ### P 波・S 波 予報円
 
 - 緊急地震速報から得られる、地震発生時刻・深さ・震源の緯度・経度をもとに [JMA2001 走時表](https://www.data.jma.go.jp/eqev/data/bulletin/catalog/appendix/trtime/trt_j.html) を利用して計算
@@ -83,7 +89,7 @@
 - 「地理院地図(白地図)」 [© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)
 - 「OpenStreetMap」 [© OpenStreetMap contributors](https://www.openstreetmap.org/copyright/)
 
-#### オーバーレイ
+#### オーバーレイ（ハザードマップなど）
 
 - 「詳細地図(地名・道路等)」 [© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)
 - 「地理院 陰影起伏図」 [© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)
@@ -97,6 +103,14 @@
 - プレート境界データ [© テキサス大学](http://www-udc.ig.utexas.edu/external/plates/data.htm)
 
   ([mapshaper.org](https://mapshaper.org/)で単純化して使用)
+
+### フォント
+
+- Google Fonts
+  - 太字 MPLUS1p-ExtraBold
+  - 標準 BIZUDPGothic-Regular
+  - 数字 AzeretMono-Regular
+  - アイコン MaterialIcons
 
 ## 参考資料
 

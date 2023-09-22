@@ -988,25 +988,30 @@ function earlyEstReq() {
         dataTmp += chunk;
       });
       res.on("end", function () {
-        let parser = new new JSDOM().window.DOMParser();
-        let doc = parser.parseFromString(dataTmp, "text/xml");
-        doc.querySelectorAll("eventParameters event").forEach(function (elm) {
-          var data = {
-            alertflg: "EarlyEst",
-            EventID: 901471985000000000000 + Number(String(elm.getAttribute("publicID")).slice(-12)), //気象庁EIDと確実に区別するため、EarlyEstのIPアドレスと連結,
-            serial: Number(elm.querySelector("origin quality").getElementsByTagName("ee:report_count")[0].textContent),
-            report_time: ConvertJST(new Date(elm.querySelector("creationInfo creationTime").textContent)),
-            magnitude: Number(elm.querySelector("magnitude mag value").textContent),
-            depth: Number(elm.querySelector("origin depth value").textContent) / 1000,
-            latitude: Number(elm.querySelector("origin latitude value").textContent),
-            longitude: Number(elm.querySelector("origin longitude value").textContent),
-            region_name: elm.querySelector("origin region").textContent,
-            origin_time: ConvertJST(new Date(elm.querySelector("origin time value").textContent)),
-            source: "EarlyEst",
-          };
-          EarlyEstControl(data);
-        });
-        kmoniTimeUpdate(new Date() - Replay, "Early-est", "success");
+        try {
+          let parser = new new JSDOM().window.DOMParser();
+          let doc = parser.parseFromString(dataTmp, "text/xml");
+          doc.querySelectorAll("eventParameters event").forEach(function (elm) {
+            var data = {
+              alertflg: "EarlyEst",
+              EventID: 901471985000000000000 + Number(String(elm.getAttribute("publicID")).slice(-12)), //気象庁EIDと確実に区別するため、EarlyEstのIPアドレスと連結,
+              serial: Number(elm.querySelector("origin quality").getElementsByTagName("ee:report_count")[0].textContent),
+              report_time: ConvertJST(new Date(elm.querySelector("creationInfo creationTime").textContent)),
+              magnitude: Number(elm.querySelector("magnitude mag value").textContent),
+              depth: Number(elm.querySelector("origin depth value").textContent) / 1000,
+              latitude: Number(elm.querySelector("origin latitude value").textContent),
+              longitude: Number(elm.querySelector("origin longitude value").textContent),
+              region_name: elm.querySelector("origin region").textContent,
+              origin_time: ConvertJST(new Date(elm.querySelector("origin time value").textContent)),
+              source: "EarlyEst",
+            };
+            EarlyEstControl(data);
+          });
+          kmoniTimeUpdate(new Date() - Replay, "Early-est", "success");
+        } catch (err) {
+          NetworkError(err, "Early-est");
+          kmoniTimeUpdate(new Date() - Replay, "Early-est", "Error");
+        }
       });
     }
   });
