@@ -642,7 +642,6 @@ function createWindow() {
     }
 
     mainWindow.webContents.on("did-finish-load", () => {
-      replay("2023/09/22 21:19:00"); //２か所同時
       if (notifyData) {
         mainWindow.webContents.send("message2", notifyData);
       }

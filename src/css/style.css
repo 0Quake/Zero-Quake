@@ -20,6 +20,13 @@
   font-display: block;
   src: local("MaterialIconsRound-Regular"), url(../font/MaterialIcons.woff) format("woff2");
 }
+@font-face {
+  font-family: "AzeretMono-Regular";
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: local("AzeretMono-Regular"), url(../font/AzeretMono-Regular.woff) format("woff2");
+}
 
 .material-icons-round {
   font-family: "Material Icons Round";
@@ -391,12 +398,12 @@ h2 {
 .magnitude {
   font-size: 35px;
   margin: 0 10px 0 5px;
-  font-family: ui-monospace;
+  font-family: "AzeretMono-Regular", ui-monospace;
   font-weight: bold;
 }
 .depth {
   font-size: 25px;
-  font-family: ui-monospace;
+  font-family: "AzeretMono-Regular", ui-monospace;
   font-weight: bold;
 }
 .region_name {
@@ -409,7 +416,7 @@ h2 {
   color: #ccc;
   text-align: center;
   white-space: nowrap;
-  font-family: ui-monospace;
+  font-family: "AzeretMono-Regular", ui-monospace;
 }
 .graphWrap {
   border-radius: 22px;
@@ -421,11 +428,11 @@ h2 {
 }
 .countDown {
   font-size: 16px;
-  font-family: ui-monospace;
+  font-family: "AzeretMono-Regular", ui-monospace;
 }
 .distance {
   font-size: 9px;
-  font-family: ui-monospace;
+  font-family: "AzeretMono-Regular", ui-monospace;
 }
 
 .maxInt {
@@ -675,7 +682,7 @@ td {
   vertical-align: middle;
   text-align: right;
   margin-left: auto;
-  font-family: ui-monospace;
+  font-family: "AzeretMono-Regular", ui-monospace;
 }
 #tab2_wrap {
   height: 100%;
@@ -716,7 +723,7 @@ td {
 .EQI_datetime {
   margin-bottom: 10px;
   font-size: 14px;
-  font-family: ui-monospace;
+  font-family: "AzeretMono-Regular", ui-monospace;
 }
 .EQItem {
   position: relative;
@@ -798,7 +805,11 @@ td {
 .EQI_epiCenter {
   float: left;
 }
+.EQI_magnitude_unit {
+  font-size: 16px;
+}
 .EQI_magnitude {
+  font-family: "AzeretMono-Regular", ui-monospace;
   font-size: 20px;
   float: right;
 }
@@ -850,7 +861,7 @@ td {
   padding: 0;
   z-index: 1000;
   background: #222;
-  font-family: ui-monospace, sans-serif;
+  font-family: "AzeretMono-Regular", ui-monospace, sans-serif;
   text-align: center;
 }
 .statusIcon {
@@ -878,7 +889,7 @@ td {
   margin-left: 30px;
   font-size: 14px;
   color: #ccc;
-  font-family: ui-monospace;
+  font-family: "AzeretMono-Regular", ui-monospace;
 }
 .timeView span {
   font-family: inherit;
