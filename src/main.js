@@ -91,10 +91,6 @@ var defaultConfigVal = {
         GetData: true,
         Interval: 1000,
       },
-      ymoni: {
-        GetData: true,
-        Interval: 1000,
-      },
     },
     msil: {
       GetData: true,
@@ -107,6 +103,10 @@ var defaultConfigVal = {
     wolfx: {
       GetData: true,
       Interval: 1000,
+    },
+    EarlyEst: {
+      GetData: true,
+      Interval: 20000,
     },
   },
   notice: {
@@ -977,52 +977,53 @@ function ConvertJST(time) {
   return new Date(time.setHours(time.getHours() + 9));
 }
 function earlyEstReq() {
-  var request = net.request("http://early-est.rm.ingv.it/monitor.xml");
-  request.on("response", (res) => {
-    if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
-      NetworkError(res._responseHead.statusCode, "Early-est");
+  if (config.Source.EarlyEst.GetData) {
+    var request = net.request("http://early-est.rm.ingv.it/monitor.xml");
+    request.on("response", (res) => {
+      if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
+        NetworkError(res._responseHead.statusCode, "Early-est");
+        kmoniTimeUpdate(new Date() - Replay, "Early-est", "Error");
+      } else {
+        var dataTmp = "";
+        res.on("data", (chunk) => {
+          dataTmp += chunk;
+        });
+        res.on("end", function () {
+          try {
+            let parser = new new JSDOM().window.DOMParser();
+            let doc = parser.parseFromString(dataTmp, "text/xml");
+            doc.querySelectorAll("eventParameters event").forEach(function (elm) {
+              var data = {
+                alertflg: "EarlyEst",
+                EventID: 901471985000000000000 + Number(String(elm.getAttribute("publicID")).slice(-12)), //気象庁EIDと確実に区別するため、EarlyEstのIPアドレスと連結,
+                serial: Number(elm.querySelector("origin quality").getElementsByTagName("ee:report_count")[0].textContent),
+                report_time: ConvertJST(new Date(elm.querySelector("creationInfo creationTime").textContent)),
+                magnitude: Number(elm.querySelector("magnitude mag value").textContent),
+                depth: Number(elm.querySelector("origin depth value").textContent) / 1000,
+                latitude: Number(elm.querySelector("origin latitude value").textContent),
+                longitude: Number(elm.querySelector("origin longitude value").textContent),
+                region_name: elm.querySelector("origin region").textContent,
+                origin_time: ConvertJST(new Date(elm.querySelector("origin time value").textContent)),
+                source: "EarlyEst",
+              };
+              EarlyEstControl(data);
+            });
+            kmoniTimeUpdate(new Date() - Replay, "Early-est", "success");
+          } catch (err) {
+            NetworkError(err, "Early-est");
+            kmoniTimeUpdate(new Date() - Replay, "Early-est", "Error");
+          }
+        });
+      }
+    });
+    request.on("error", (error) => {
+      NetworkError(error, "Early-est");
       kmoniTimeUpdate(new Date() - Replay, "Early-est", "Error");
-    } else {
-      var dataTmp = "";
-      res.on("data", (chunk) => {
-        dataTmp += chunk;
-      });
-      res.on("end", function () {
-        try {
-          let parser = new new JSDOM().window.DOMParser();
-          let doc = parser.parseFromString(dataTmp, "text/xml");
-          doc.querySelectorAll("eventParameters event").forEach(function (elm) {
-            var data = {
-              alertflg: "EarlyEst",
-              EventID: 901471985000000000000 + Number(String(elm.getAttribute("publicID")).slice(-12)), //気象庁EIDと確実に区別するため、EarlyEstのIPアドレスと連結,
-              serial: Number(elm.querySelector("origin quality").getElementsByTagName("ee:report_count")[0].textContent),
-              report_time: ConvertJST(new Date(elm.querySelector("creationInfo creationTime").textContent)),
-              magnitude: Number(elm.querySelector("magnitude mag value").textContent),
-              depth: Number(elm.querySelector("origin depth value").textContent) / 1000,
-              latitude: Number(elm.querySelector("origin latitude value").textContent),
-              longitude: Number(elm.querySelector("origin longitude value").textContent),
-              region_name: elm.querySelector("origin region").textContent,
-              origin_time: ConvertJST(new Date(elm.querySelector("origin time value").textContent)),
-              source: "EarlyEst",
-            };
-            EarlyEstControl(data);
-          });
-          kmoniTimeUpdate(new Date() - Replay, "Early-est", "success");
-        } catch (err) {
-          NetworkError(err, "Early-est");
-          kmoniTimeUpdate(new Date() - Replay, "Early-est", "Error");
-        }
-      });
-    }
-  });
-  request.on("error", (error) => {
-    NetworkError(error, "Early-est");
-    kmoniTimeUpdate(new Date() - Replay, "Early-est", "Error");
-  });
+    });
 
-  request.end();
-
-  setTimeout(earlyEstReq, 5000);
+    request.end();
+  }
+  setTimeout(earlyEstReq, config.Source.EarlyEst.Interval);
 }
 
 const worker = new workerThreads.Worker(path.join(__dirname, "js/EQDetectWorker.js"), {
