@@ -60,7 +60,6 @@ window.electronAPI.messageSend((event, request) => {
     document.getElementById("msil_GetData").checked = config.Source.msil.GetData;
     document.getElementById("kmoni_GetData").checked = config.Source.kmoni.kmoni.GetData;
     document.getElementById("lmoni_GetData").checked = config.Source.kmoni.lmoni.GetData;
-    document.getElementById("ymoni_GetData").checked = config.Source.kmoni.ymoni.GetData;
     document.getElementById("WolfxInterval").value = config.Source.wolfx.Interval / 1000;
     document.getElementById("kmoniInterval").value = config.Source.kmoni.kmoni.Interval / 1000;
     document.getElementById("lmoniInterval").value = config.Source.kmoni.lmoni.Interval / 1000;
@@ -153,7 +152,6 @@ document.getElementById("apply").addEventListener("click", function () {
   config.Source.msil.GetData = document.getElementById("msil_GetData").checked;
   config.Source.kmoni.kmoni.GetData = document.getElementById("kmoni_GetData").checked;
   config.Source.kmoni.lmoni.GetData = document.getElementById("lmoni_GetData").checked;
-  config.Source.kmoni.ymoni.GetData = document.getElementById("ymoni_GetData").checked;
   config.Source.wolfx.Interval = Number(document.getElementById("WolfxInterval").value) * 1000;
   config.Source.kmoni.kmoni.Interval = Number(document.getElementById("kmoniInterval").value) * 1000;
   config.Source.kmoni.lmoni.Interval = Number(document.getElementById("lmoniInterval").value) * 1000;
