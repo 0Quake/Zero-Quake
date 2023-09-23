@@ -139,10 +139,12 @@
 
                 var rgb = point2RGB(elm.Point.X, elm.Point.Y, context);
                 if (rgb[0] + rgb[1] + rgb[2] !== 0) {
+                    //リアルタイム震度画像を、無理やり[最大加速度画像を求める手法（@NoneType1様）]で解析
                     var p = RGBtoP(rgb[0], rgb[1], rgb[2]);
-                    var shindo = (10 * p) - 3;
-                    var pga = 10 ** (5 * p - 2);
-
+                    var tmpNum = 10 ** (5 * p - 2);//無理やり求めた最大加速度（誤りの値・意味を持たない）
+                    var shindo = 0.868589 * Math.log(tmpNum) + 1//"正しい"震度に換算（対数を利用）
+                    p2 = (shindo + 3) / 10//正しいPに換算
+                    var pga = 10 ** (5 * p2 - 2);//"正しい"PGAを算出
                     elm.data = true
                     elm.rgb = rgb
                     elm.shindo = shindo
@@ -164,8 +166,10 @@
                 var rgb = point2RGB(elm.Point.X, elm.Point.Y, Scontext);
                 if (rgb[0] + rgb[1] + rgb[2] !== 0) {
                     var p = RGBtoP(rgb[0], rgb[1], rgb[2]);
-                    var shindo = (10 * p - 3);
-                    var pga = 10 ** (5 * p - 2);
+                    var tmpNum = 10 ** (5 * p - 2);
+                    var shindo = 0.868589 * Math.log(tmpNum) + 1
+                    p2 = (shindo + 3) / 10
+                    var pga = 10 ** (5 * p2 - 2);
 
                     elm.data = true
                     elm.rgb = rgb

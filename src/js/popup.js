@@ -39,7 +39,7 @@ window.electronAPI.messageSend((event, request) => {
       pointData.markerElm.style.background = "rgba(128,128,128,0.5)";
       pointData.markerElm.classList.remove("strongDetectingMarker", "detectingMarker", "marker_Int");
 
-      pointData.popupContent = "<h3 class='PointName' style='border-bottom:solid 2px rgba(128,128,128,0.5)'>" + (elm.Name ? elm.Name : "") + "<span>" + elm.Type + "_" + elm.Code + "</span></h3><p>震度 ?</p><p>PGA ?</p>";
+      pointData.popupContent = "<h3 class='PointName' style='border-bottom:solid 2px rgba(128,128,128,0.5)'>" + (elm.Name ? elm.Name : "") + "<span>" + elm.Type + "_" + elm.Code + "</span></h3>";
       if (pointData.popup.isOpen()) pointData.popup.setHTML(pointData.popupContent);
     });
   } else if (request.action == "EQInfo") {
