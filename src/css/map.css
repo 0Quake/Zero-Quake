@@ -454,7 +454,28 @@
   display: none;
 }
 
+#sideBar.close #sokuho-Panel {
+  display: block;
+  border-radius: 0 0 0 10px;
+  max-height: 50vh;
+  position: absolute;
+  top: 0;
+  right: 60px;
+  min-width: 300px;
+  z-index: 999;
+}
+
+body {
+  min-width: 450px;
+}
+
 @media (max-width: 600px) {
+  #sideBar.close #sokuho-Panel {
+    max-height: max(200px, 50vh);
+    right: calc(50vw - 150px);
+    min-width: 300px;
+  }
+
   #mainContent {
     display: block;
   }
