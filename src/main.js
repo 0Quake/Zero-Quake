@@ -1,7 +1,7 @@
 //リプレイ
 var Replay = 0;
 var mainWindow, settingWindow, tsunamiWindow, kmoniWorker;
-
+var worker;
 /* eslint-disable */
 function replay(ReplayDate) {
   if (ReplayDate) {
@@ -11,7 +11,7 @@ function replay(ReplayDate) {
   }
   EQDetect_List = [];
   EEW_nowList = [];
-  worker.postMessage({ action: "Replay", data: Replay });
+  if (worker) worker.postMessage({ action: "Replay", data: Replay });
 
   if (mainWindow) {
     mainWindow.webContents.send("message2", {
@@ -1026,7 +1026,7 @@ function earlyEstReq() {
   setTimeout(earlyEstReq, config.Source.EarlyEst.Interval);
 }
 
-const worker = new workerThreads.Worker(path.join(__dirname, "js/EQDetectWorker.js"), {
+worker = new workerThreads.Worker(path.join(__dirname, "js/EQDetectWorker.js"), {
   workerData: "From Main", // Worker に初期値を渡せる
 });
 worker.on("message", (message) => {
@@ -1445,7 +1445,7 @@ function wolfxRequest() {
       res.on("end", function () {
         try {
           var json = jsonParse(dataTmp);
-          if (json && wolfx_lastUpdate < new Date(json.AnnouncedTime)) {
+          if (json && (wolfx_lastUpdate < new Date(json.AnnouncedTime) || Replay)) {
             wolfx_lastUpdate = json.AnnouncedTime;
             var EBIData = [];
             EBIStr = json.OriginalText.split("EBI ")[1];
@@ -1502,8 +1502,8 @@ function wolfxRequest() {
               source: "wolfx",
             };
             EEWcontrol(EEWdata);
+            kmoniTimeUpdate(new Date() - Replay, "wolfx", "success");
           }
-          kmoniTimeUpdate(new Date() - Replay, "wolfx", "success");
         } catch (err) {
           kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
         }

@@ -589,7 +589,6 @@ function init() {
     if (e.sourceId == "hinanjo" && hinanjoCheck.checked) {
       if (e.tile != undefined) {
         var ca = e.tile.tileID.canonical;
-        console.log("a");
         if (map.getLayer("hinanjo_eq_" + ca.x + ca.y + ca.z)) map.removeLayer("hinanjo_eq_" + ca.x + ca.y + ca.z);
         if (map.getSource("hinanjo_eq_" + ca.x + ca.y + ca.z)) map.removeSource("hinanjo_eq_" + ca.x + ca.y + ca.z);
         if (map.getLayer("hinanjo_ts_" + ca.x + ca.y + ca.z)) map.removeLayer("hinanjo_ts_" + ca.x + ca.y + ca.z);
@@ -1125,6 +1124,7 @@ function psWaveCalc(eid) {
           if (SRadius || SWmin > distance) break;
         } else if (elm.P > distance) {
           elm2 = TimeTableTmp[i - 1];
+          if (!elm2) elm2 = elm;
           PRadius = elm.R + ((elm2.R - elm.R) * (distance - elm.P)) / (elm2.P - elm.P);
           psWaveList;
           if (SRadius || SWmin > distance) break;
