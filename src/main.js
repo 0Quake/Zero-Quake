@@ -441,7 +441,7 @@ const options2 = {
 const options3 = {
   type: "error",
   title: "エラー",
-  message: "エラーログ送信に失敗しました。",
+  message: "エラー情報の送信に失敗しました。",
   detail: "",
   buttons: ["OK"],
 };
