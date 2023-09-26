@@ -12,10 +12,6 @@
 </head>
 
 <body>
-    <!-- <div id="titleBar"><img src="./img/icon.svg">Zero Quake</div>-->
-
-
-
     <main>
         <div id="splash">
             <svg width="256" height="256" viewBox="0 0 67.733332 67.733333" version="1.1" id="svg5" inkscape:version="1.2 (dc2aedaf03, 2022-05-15)" sodipodi:docname="logo.svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg">
@@ -117,6 +113,7 @@
                             <label><input type="checkbox" name="overlaySelect" value="over2" id="over2">津波浸水想定 ハザードマップ</label>
                             <label><input type="checkbox" name="overlaySelect" value="over3" id="over3">土砂災害警戒区域(急傾斜地の崩壊) ハザードマップ</label>
                             <label><input type="checkbox" name="overlaySelect" value="over4" id="over4">土砂災害警戒区域(地すべり) ハザードマップ</label>
+                            <label><input type="checkbox" id="hinanjo">避難所（地震/津波）</label>
                         </div>
                     </nav>
                 </div>
@@ -141,7 +138,7 @@
                         <img src="./img/tsunami_scale.svg">
                     </div>
                     <div class="legend">
-                        <img src="./img/nied_acmap_s_w_scale.svg">
+                        <img src="./img/nied_jma_s_w_scale.svg">
                     </div>
                 </div>
             </div>
@@ -182,7 +179,7 @@
 
                                 <h2 class="traning">訓練</h2>
                                 <h2>
-                                    <div class="EEWLocalID">0</div>緊急地震速報<span class="alertflg"></span>
+                                    <div class="EEWLocalID">0</div><span class="Title_EEW">緊急地震速報</span><span class="Title_EarlyEst">Early-Est 地震情報</span><span class="alertflg"></span>
                                     <div class="EEW_MenuRight">第<span class="serial"></span>報 <span class="is_final">(最終報)</span></div>
                                 </h2>
 
@@ -217,7 +214,7 @@
                                     </div>
 
 
-                                    <div class="canceled">キャンセルされました</div>
+                                    <div class="canceled">取り消されました</div>
                                 </div>
                             </div>
                         </template>
@@ -259,7 +256,9 @@
                                     <div class="EQI_detailWrap">
                                         <div class="EQI_datetime"></div>
                                         <div class="EQI_epiCenter"></div>
-                                        <div class="EQI_magnitude"></div>
+                                        <div class="EQI_magnitude_Wrap">
+                                            M<span class="EQI_magnitude"></span>
+                                        </div>
                                     </div>
                                     <div class="EQItemOverlay">
                                         <button class="EQDetailButton">description</button>
@@ -272,7 +271,9 @@
                                     <div class="EQI_detailWrap">
                                         <div class="EQI_datetime"></div>
                                         <div class="EQI_epiCenter"></div>
-                                        <div class="EQI_magnitude"></div>
+                                        <div class="EQI_magnitude_Wrap">
+                                            M<span class="EQI_magnitude"></span>
+                                        </div>
                                     </div>
                                     <div class="EQItemOverlay">
                                         <button class="EQDetailButton">description</button>
@@ -309,12 +310,10 @@
                                 <div>
                                     <div class="statusIcon" id="Internet_ICN"></div>
                                     <span>インターネット接続状況</span>
+                                    <div class="timeView"><span id="PC_TIME">読み込み中...</span> (PC時刻)</div>
                                     <div id="Internet_UT" class="timeView"></div>
                                 </div>
-                                <div>
-                                    <span>PC時刻</span>
-                                    <div id="PC_TIME" class="timeView">読み込み中...</div>
-                                </div>
+
 
 
 
@@ -352,6 +351,13 @@
                                     <div class="statusIcon" id="msilImg_ICN"></div>
                                     <span>海しる</span>
                                     <div id="msilImg_UT" class="timeView">読み込み中...</div>
+                                </div>
+
+                                <h3>リアルタイム地震情報</h3>
+                                <div class="timeItem">
+                                    <div class="statusIcon" id="Early-est_ICN"></div>
+                                    <span>Early-est</span>
+                                    <div id="Early-est_UT" class="timeView">読み込み中...</div>
                                 </div>
 
                             </div>

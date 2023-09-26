@@ -134,6 +134,9 @@
                 <div id="tab1_menu9" class="tabmenu" data-contentid="tab1_content9">
                     海しる
                 </div>
+                <div id="tab1_menu15" class="tabmenu" data-contentid="tab1_content15">
+                    Early-est
+                </div>
             </div>
 
             <div id="tab1_group4" class="tabgroup" data-contentid="tab1_group4_content"><span class="material-icons-round">notifications</span>通知と音声</div>
@@ -458,7 +461,7 @@
             </div>
             <div id="tab1_content2" class="tabcontent">
 
-                <h2 id="softName"><img src="./img/icon.svg">Zero Quake V<span id="softVersion">取得中</span></h2>
+                <h2 id="softName"><a href="https://zeroquake.wwww.jp/"><img src="./img/icon.svg">Zero Quake V<span id="softVersion">取得中</span></a></h2>
 
                 <div id="smallWrap">
                     <small>&copy;2022-2023 benidate</small>
@@ -489,6 +492,8 @@
 
                 <hr>
 
+
+
                 <h2 id="受信できる情報">受信できる情報</h2>
                 <h3 id="気象庁">気象庁</h3>
                 <ul>
@@ -503,12 +508,14 @@
                 <h3 id="防災科学研究所">防災科学研究所</h3>
                 <ul>
                     <li>リアルタイム揺れ情報</li>
-                    <li>EEW 予想震度(メッシュ)</li>
-                    <li>長周期地震動の情報</li>
                 </ul>
                 <h3 id="usgsアメリカ地質調査所">USGS(アメリカ地質調査所)</h3>
                 <ul>
                     <li>Earthquake Catalog</li>
+                </ul>
+                <h3 id="early-est">Early-est</h3>
+                <ul>
+                    <li>リアルタイム地震情報</li>
                 </ul>
                 <h2 id="情報源">情報源</h2>
                 <h3 id="緊急地震速報">緊急地震速報</h3>
@@ -537,7 +544,10 @@
                 <ul>
                     <li>強震モニタ <a href="http://www.kmoni.bosai.go.jp/">© 防災科学技術研究所</a></li>
                     <li>長周期地震動モニタ <a href="lmoni.bosai.go.jp">© 防災科学技術研究所</a></li>
-                    <li>Yahoo 強震モニタ <a href="https://typhoon.yahoo.co.jp/weather/jp/earthquake/kyoshin/">© 防災科学技術研究所／Yahoo Japan</a></li>
+                </ul>
+                <h3 id="リアルタイム地震情報-early-est">リアルタイム地震情報 (Early-est)</h3>
+                <ul>
+                    <li>Early-est <a href="http://early-est.rm.ingv.it">© イタリア国立地球物理学火山学研究所</a></li>
                 </ul>
                 <h3 id="p-波・s-波-予報円">P 波・S 波 予報円</h3>
                 <ul>
@@ -561,7 +571,7 @@
                     <li>「地理院地図(白地図)」 <a href="https://maps.gsi.go.jp/development/ichiran.html">© 国土地理院</a></li>
                     <li>「OpenStreetMap」 <a href="https://www.openstreetmap.org/copyright/">© OpenStreetMap contributors</a></li>
                 </ul>
-                <h4 id="オーバーレイ">オーバーレイ</h4>
+                <h4 id="オーバーレイ（ハザードマップなど）">オーバーレイ（ハザードマップなど）</h4>
                 <ul>
                     <li>「詳細地図(地名・道路等)」 <a href="https://maps.gsi.go.jp/development/ichiran.html">© 国土地理院</a></li>
                     <li>「地理院 陰影起伏図」 <a href="https://maps.gsi.go.jp/development/ichiran.html">© 国土地理院</a></li>
@@ -575,12 +585,21 @@
                     <li>プレート境界データ <a href="http://www-udc.ig.utexas.edu/external/plates/data.htm">© テキサス大学</a><br>
                         (<a href="https://mapshaper.org/">mapshaper.org</a>で単純化して使用)</li>
                 </ul>
+                <h3 id="フォント">フォント</h3>
+                <ul>
+                    <li>Google Fonts
+                        <ul>
+                            <li>太字 MPLUS1p-ExtraBold</li>
+                            <li>標準 BIZUDPGothic-Regular</li>
+                            <li>数字 AzeretMono-Regular</li>
+                            <li>アイコン MaterialIcons</li>
+                        </ul>
+                    </li>
+                </ul>
                 <h2 id="参考資料">参考資料</h2>
-                <p><a href="https://twitter.com/NoneType1">@NoneType1</a> |<a href="https://qiita.com/NoneType1/items/a4d2cf932e20b56ca444">多項式補間を使用して強震モニタ画像から数値データを決定する</a><br>
-                    <a href="https://twitter.com/ingen084">@ingen084</a> |<a href="https://qiita.com/ingen084/items/7e91f8da2996972ac586">強震モニタの画像から震度と地点を特定するまで</a>
+                <p><a href="https://twitter.com/NoneType1">@NoneType1</a> | <a href="https://qiita.com/NoneType1/items/a4d2cf932e20b56ca444">多項式補間を使用して強震モニタ画像から数値データを決定する</a><br>
+                    <a href="https://twitter.com/ingen084">@ingen084</a> | <a href="https://qiita.com/ingen084/items/7e91f8da2996972ac586">強震モニタの画像から震度と地点を特定するまで</a>
                 </p>
-
-
 
             </div>
             <div id="tab1_content4" class="tabcontent">
@@ -597,10 +616,8 @@
 
 
                 <h4>通知条件</h4>
-                <label>震度の条件
+                <label>予想最大震度の条件
                     <select id="EEW_IntFilter">
-                        <option disabled selected></option>
-
                         <option value="0">すべて</option>
                         <option value="1">震度1以上</option>
                         <option value="2">震度2以上</option>
@@ -613,7 +630,10 @@
                         <option value="7">震度7以上</option>
                     </select>
                 </label>
-                <label><input type="checkbox" id="EEW_IntQ">震度不明時も通知</label>
+                <div class="smalltext">続報による下方修正で 条件を下回った場合でも、その地震については情報の表示・更新を続けます。</div>
+
+                <label><input type="checkbox" id="EEW_IntQ">予想最大震度 不明時も通知</label>
+                <div class="smalltext">一度でも予想最大震度が発表された場合、以降 震度不明であっても通知します。</div>
 
             </div>
             <div id="tab1_content5" class="tabcontent">
@@ -647,10 +667,6 @@
                 <h4>長周期地震動モニタ</h4>
                 <label><input type="checkbox" id="lmoni_GetData">データを取得</label>
                 <label> 情報取得間隔（秒）<input id="lmoniInterval" type="number" min="1" max="300" value="1" step="1"></label>
-
-                <h4>Yahoo! 強震モニタ</h4>
-                <label><input type="checkbox" id="ymoni_GetData">データを取得</label>
-                <label> 情報取得間隔（秒）<input id="ymoniInterval" type="number" min="1" max="300" value="1" step="1"></label>
 
             </div>
             <div id="tab1_content9" class="tabcontent">
@@ -705,7 +721,8 @@
                 <section>
                     <h4>起動</h4>
                     <label><input type="checkbox" id="startup">OS起動時に自動実行</label>
-                    <label><input type="checkbox" id="WindowAutoOpen">起動時にメインウィンドウを開く</label>
+                    <label><input type="checkbox" id="alwaysOnTop">常に最前面に表示</label>
+                    <label><input type="checkbox" id="WindowAutoOpen">アプリ起動時にメイン画面を開く</label>
                 </section>
             </div>
             <div id="tab1_content13" class="tabcontent">
@@ -718,6 +735,11 @@
                     <div>オフセット：<span id="replayOffset">-</span></div>
                     <p class="smalltext">リプレイ中はリアルタイムの情報が入手できません。リプレイで利用できるのは、強震モニタの情報のみです。</p>
                 </section>
+            </div>
+            <div id="tab1_content15" class="tabcontent">
+                <h3><span>情報源ごとの設定</span>Early-est</h3>
+                <label><input type="checkbox" id="EarlyEst_GetData">データを取得</label>
+                <label> 情報取得間隔（秒）<input id="EarlyEstInterval" type="number" min="5" max="300" value="1" step="1"></label>
             </div>
 
         </div>

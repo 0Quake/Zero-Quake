@@ -101,49 +101,6 @@
                     Scontext.drawImage(image, 0, 0);
                     SnetRedraw(request.date)
                 };
-            } else if (request.action == "KmoniEstShindoImgUpdate") {
-                const ESImg = new Image();
-                ESImg.src = request.data; // 画像のURLを指定
-                ESImg.onload = () => {
-
-                    ctx1.drawImage(ESImg, 0, 0);
-                    ctx2.drawImage(ESImg, 0, -100);
-                    ctx3.drawImage(ESImg, 0, -200);
-                    ctx4.drawImage(ESImg, 0, -300);
-
-                    ctx1.clearRect(0, 0, 170, 100);
-                    ctx2.clearRect(0, 0, 170, 100);
-                    ctx3.clearRect(0, 0, 170, 5);
-
-                    ctx5.drawImage(ESImg, 0, 0, 170, 205, 0, 0, 170, 205);
-
-                    img = ctx1.getImageData(0, 0, EScanvas1.width, EScanvas1.height)
-                    ctx1.putImageData(img, 0, 0);
-                    img2 = ctx2.getImageData(0, 0, EScanvas2.width, EScanvas2.height)
-                    ctx2.putImageData(img2, 0, 0);
-                    img3 = ctx3.getImageData(0, 0, EScanvas3.width, EScanvas3.height)
-                    ctx3.putImageData(img3, 0, 0);
-                    img4 = ctx4.getImageData(0, 0, EScanvas4.width, EScanvas4.height)
-                    ctx4.putImageData(img4, 0, 0);
-                    img5 = ctx5.getImageData(0, 0, EScanvas5.width, EScanvas5.height)
-                    ctx5.putImageData(img5, 0, 0);
-
-                    b64_1 = EScanvas1.toDataURL("image/png");
-                    b64_2 = EScanvas2.toDataURL("image/png");
-                    b64_3 = EScanvas3.toDataURL("image/png");
-                    b64_4 = EScanvas4.toDataURL("image/png");
-                    b64_5 = EScanvas5.toDataURL("image/png");
-                    window.electronAPI.messageReturn({
-                        action: "kmoniEstShindoReturn",
-                        data: { a: b64_1, b: b64_2, c: b64_3, d: b64_4, e: b64_5 },
-                        eid: request.eid,
-                        serial: request.serial
-                    })
-
-                };
-
-
-
             } else if (request.action == "speak") {
                 speechSynthesis.cancel()
                 // 発言を作成
@@ -182,10 +139,12 @@
 
                 var rgb = point2RGB(elm.Point.X, elm.Point.Y, context);
                 if (rgb[0] + rgb[1] + rgb[2] !== 0) {
+                    //リアルタイム震度画像を、無理やり[最大加速度画像を求める手法（@NoneType1様）]で解析
                     var p = RGBtoP(rgb[0], rgb[1], rgb[2]);
-                    var shindo = (10 * p) - 3;
-                    var pga = 10 ** (5 * p - 2);
-
+                    var tmpNum = 10 ** (5 * p - 2);//無理やり求めた最大加速度（誤りの値・意味を持たない）
+                    var shindo = 0.868589 * Math.log(tmpNum) + 1//"正しい"震度に換算（対数を利用）
+                    p2 = (shindo + 3) / 10//正しいPに換算
+                    var pga = 10 ** (5 * p2 - 2);//"正しい"PGAを算出
                     elm.data = true
                     elm.rgb = rgb
                     elm.shindo = shindo
@@ -207,8 +166,10 @@
                 var rgb = point2RGB(elm.Point.X, elm.Point.Y, Scontext);
                 if (rgb[0] + rgb[1] + rgb[2] !== 0) {
                     var p = RGBtoP(rgb[0], rgb[1], rgb[2]);
-                    var shindo = (10 * p - 3);
-                    var pga = 10 ** (5 * p - 2);
+                    var tmpNum = 10 ** (5 * p - 2);
+                    var shindo = 0.868589 * Math.log(tmpNum) + 1
+                    p2 = (shindo + 3) / 10
+                    var pga = 10 ** (5 * p2 - 2);
 
                     elm.data = true
                     elm.rgb = rgb

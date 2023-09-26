@@ -423,7 +423,7 @@ td {
   font-size: 14px;
   margin-right: 5px;
   color: #ccc;
-  font-family: ui-monospace, sans-serif;
+  font-family: "AzeretMono-Regular", ui-monospace, sans-serif;
 }
 #homeShindoWrap {
   display: none;

@@ -20,6 +20,13 @@
   font-display: block;
   src: local("MaterialIconsRound-Regular"), url(../font/MaterialIcons.woff) format("woff2");
 }
+@font-face {
+  font-family: "AzeretMono-Regular";
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: local("AzeretMono-Regular"), url(../font/AzeretMono-Regular.woff) format("woff2");
+}
 
 .material-icons-round {
   font-family: "Material Icons Round";
@@ -324,7 +331,8 @@ h2 {
   background: #333;
 }
 .EEWWrap h2,
-.EQDItem h2 {
+.EQDItem h2,
+.EEWWrap.EarlyEst h2 {
   float: none;
   background: rgb(39, 110, 50);
   color: #fff;
@@ -343,6 +351,21 @@ h2 {
   background: rgb(175, 54, 54);
   color: #fff;
 }
+.Title_EarlyEst,
+.Title_EEW {
+  display: none;
+}
+.EEWWrap.keihou .Title_EEW,
+.EEWWrap.yohou .Title_EEW {
+  display: inline;
+}
+.EEWWrap.EarlyEst .Title_EarlyEst {
+  display: inline;
+}
+.EEWWrap.EarlyEst .alertflg {
+  display: none;
+}
+
 .EQDItem.lv1 h2::after {
   content: " 弱い検出";
 }
@@ -375,12 +398,12 @@ h2 {
 .magnitude {
   font-size: 35px;
   margin: 0 10px 0 5px;
-  font-family: ui-monospace;
+  font-family: "AzeretMono-Regular", ui-monospace;
   font-weight: bold;
 }
 .depth {
   font-size: 25px;
-  font-family: ui-monospace;
+  font-family: "AzeretMono-Regular", ui-monospace;
   font-weight: bold;
 }
 .region_name {
@@ -393,7 +416,7 @@ h2 {
   color: #ccc;
   text-align: center;
   white-space: nowrap;
-  font-family: ui-monospace;
+  font-family: "AzeretMono-Regular", ui-monospace;
 }
 .graphWrap {
   border-radius: 22px;
@@ -405,11 +428,11 @@ h2 {
 }
 .countDown {
   font-size: 16px;
-  font-family: ui-monospace;
+  font-family: "AzeretMono-Regular", ui-monospace;
 }
 .distance {
-  font-size: 10px;
-  font-family: ui-monospace;
+  font-size: 9px;
+  font-family: "AzeretMono-Regular", ui-monospace;
 }
 
 .maxInt {
@@ -559,7 +582,7 @@ td {
 }
 #tab2_bar {
   padding: 5px 3px;
-  background: #333;
+  background: #222;
 }
 #tab2_bar .tabmenu {
   margin: 0 4px;
@@ -659,7 +682,7 @@ td {
   vertical-align: middle;
   text-align: right;
   margin-left: auto;
-  font-family: ui-monospace;
+  font-family: "AzeretMono-Regular", ui-monospace;
 }
 #tab2_wrap {
   height: 100%;
@@ -700,7 +723,7 @@ td {
 .EQI_datetime {
   margin-bottom: 10px;
   font-size: 14px;
-  font-family: ui-monospace;
+  font-family: "AzeretMono-Regular", ui-monospace;
 }
 .EQItem {
   position: relative;
@@ -782,9 +805,18 @@ td {
 .EQI_epiCenter {
   float: left;
 }
-.EQI_magnitude {
-  font-size: 20px;
+.EQI_magnitude_unit {
+  font-size: 16px;
+}
+.EQI_magnitude_Wrap {
+  font-family: "AzeretMono-Regular", ui-monospace;
+  font-size: 18px;
   float: right;
+}
+.EQI_magnitude {
+  font-size: 24px;
+  font-family: "AzeretMono-Regular", ui-monospace;
+  margin-left: 5px;
 }
 
 /*.Wave_progress {
@@ -834,7 +866,7 @@ td {
   padding: 0;
   z-index: 1000;
   background: #222;
-  font-family: ui-monospace, sans-serif;
+  font-family: "AzeretMono-Regular", ui-monospace, sans-serif;
   text-align: center;
 }
 .statusIcon {
@@ -862,6 +894,10 @@ td {
   margin-left: 30px;
   font-size: 14px;
   color: #ccc;
+  font-family: "AzeretMono-Regular", ui-monospace;
+}
+.timeView span {
+  font-family: inherit;
 }
 #Internet_UT {
   display: none;
@@ -914,6 +950,9 @@ td {
   margin: 0;
   padding: 0;
   border-radius: 10px;
+}
+dialog {
+  user-select: none;
 }
 dialog::backdrop {
   background: rgba(0, 0, 0, 0.4);

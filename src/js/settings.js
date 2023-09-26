@@ -52,18 +52,19 @@ window.electronAPI.messageSend((event, request) => {
     selectBoxSet(document.getElementById("intType"), config.Info.EEW.IntType);
     document.getElementById("EarthquakeDetect").checked = config.Info.RealTimeShake.DetectEarthquake;
     document.getElementById("WindowAutoOpen").checked = config.system.WindowAutoOpen;
+    document.getElementById("alwaysOnTop").checked = config.system.alwaysOnTop;
     document.getElementById("HomePinShow").checked = config.home.ShowPin;
     document.getElementById("Tsunami_GetData").checked = config.Info.TsunamiInfo.GetData;
     document.getElementById("Axis_GetData").checked = config.Source.axis.GetData;
     document.getElementById("Wolfx_GetData").checked = config.Source.wolfx.GetData;
+    document.getElementById("EarlyEst_GetData").checked = config.Source.EarlyEst.GetData;
     document.getElementById("msil_GetData").checked = config.Source.msil.GetData;
     document.getElementById("kmoni_GetData").checked = config.Source.kmoni.kmoni.GetData;
     document.getElementById("lmoni_GetData").checked = config.Source.kmoni.lmoni.GetData;
-    document.getElementById("ymoni_GetData").checked = config.Source.kmoni.ymoni.GetData;
     document.getElementById("WolfxInterval").value = config.Source.wolfx.Interval / 1000;
+    document.getElementById("EarlyEstInterval").value = config.Source.EarlyEst.Interval / 1000;
     document.getElementById("kmoniInterval").value = config.Source.kmoni.kmoni.Interval / 1000;
     document.getElementById("lmoniInterval").value = config.Source.kmoni.lmoni.Interval / 1000;
-    document.getElementById("ymoniInterval").value = config.Source.kmoni.ymoni.Interval / 1000;
     document.getElementById("msilInterval").value = config.Source.msil.Interval / 1000;
     if (config.Source.axis.AccessToken) document.getElementById("Axis_AccessToken").value = config.Source.axis.AccessToken;
 
@@ -130,6 +131,7 @@ document.getElementById("apply").addEventListener("click", function () {
 
   config.Info.RealTimeShake.DetectEarthquake = document.getElementById("EarthquakeDetect").checked;
   config.system.WindowAutoOpen = document.getElementById("WindowAutoOpen").checked;
+  config.system.alwaysOnTop = document.getElementById("alwaysOnTop").checked;
   config.home.ShowPin = document.getElementById("HomePinShow").checked;
   config.Info.TsunamiInfo.GetData = document.getElementById("Tsunami_GetData").checked;
   config.home.name = document.getElementById("HomeName").value;
@@ -148,14 +150,14 @@ document.getElementById("apply").addEventListener("click", function () {
   config.Source.axis.GetData = document.getElementById("Axis_GetData").checked;
   config.Source.axis.AccessToken = document.getElementById("Axis_AccessToken").value;
   config.Source.wolfx.GetData = document.getElementById("Wolfx_GetData").checked;
+  config.Source.EarlyEst.GetData = document.getElementById("EarlyEst_GetData").checked;
   config.Source.msil.GetData = document.getElementById("msil_GetData").checked;
   config.Source.kmoni.kmoni.GetData = document.getElementById("kmoni_GetData").checked;
   config.Source.kmoni.lmoni.GetData = document.getElementById("lmoni_GetData").checked;
-  config.Source.kmoni.ymoni.GetData = document.getElementById("ymoni_GetData").checked;
   config.Source.wolfx.Interval = Number(document.getElementById("WolfxInterval").value) * 1000;
+  config.Source.EarlyEst.Interval = Number(document.getElementById("EarlyEstInterval").value) * 1000;
   config.Source.kmoni.kmoni.Interval = Number(document.getElementById("kmoniInterval").value) * 1000;
   config.Source.kmoni.lmoni.Interval = Number(document.getElementById("lmoniInterval").value) * 1000;
-  config.Source.kmoni.ymoni.Interval = Number(document.getElementById("ymoniInterval").value) * 1000;
   config.Source.msil.Interval = Number(document.getElementById("msilInterval").value) * 1000;
 
   config.notice.voice_parameter.rate = TTSspeed;
