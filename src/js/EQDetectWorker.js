@@ -64,8 +64,8 @@ function EQDetect(data, date, detect) {
             }) / ptDataTmp.SUMTmp.length;
 
           //平均PGAから閾値を決定
-          thresholds.threshold02 = 0.6 * pgaAvr + 0.04;
-          thresholds.threshold03 = 0.7 * pgaAvr + 0.3;
+          thresholds.threshold02 = 0.1 * pgaAvr + 0.01;
+          thresholds.threshold03 = 0.3 * pgaAvr + 0.05;
           if (ptDataTmp.isCity) {
             //都会では閾値を大きく
             thresholds.threshold02 *= 2;
