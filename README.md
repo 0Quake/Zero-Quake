@@ -85,7 +85,6 @@
 - 「地理院地図(標準)」 [© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)
 - 「地理院地図(淡色)」 [© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)
 - 「地理院地図(写真)」 [© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)
-- 「地理院地図(白地図)」 [© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)
 - 「OpenStreetMap」 [© OpenStreetMap contributors](https://www.openstreetmap.org/copyright/)
 
 #### オーバーレイ（ハザードマップなど）

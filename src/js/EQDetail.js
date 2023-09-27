@@ -167,14 +167,6 @@ function Mapinit() {
           minzoom: 2,
           maxzoom: 18,
         },
-        tile3: {
-          type: "raster",
-          tiles: ["https://cyberjapandata.gsi.go.jp/xyz/blank/{z}/{x}/{y}.png"],
-          tileSize: 256,
-          attribution: "国土地理院",
-          minzoom: 5,
-          maxzoom: 14,
-        },
         tile4: {
           type: "raster",
           tiles: ["http://tile.openstreetmap.org/{z}/{x}/{y}.png"],
@@ -256,12 +248,6 @@ function Mapinit() {
           id: "tile2",
           type: "raster",
           source: "tile2",
-          layout: { visibility: "none" },
-        },
-        {
-          id: "tile3",
-          type: "raster",
-          source: "tile3",
           layout: { visibility: "none" },
         },
         {
