@@ -223,7 +223,7 @@ var EarlyEst_Data = []; //Earlyest地震速報リスト
 var EarlyEst_history = []; //起動中に発生したリスト
 
 var Yoyu = 250;
-var yoyuY = (yoyuK = yoyuL = 2500);
+var yoyuK = (yoyuL = 2500);
 var EEWNow = false;
 
 var errorCountk = (errorCountkI = errorCountkEI = errorCountl = errorCountyw = errorCountye = 0);
