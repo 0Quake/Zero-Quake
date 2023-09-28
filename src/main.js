@@ -2290,7 +2290,6 @@ function EEWClear(source, code, reportnum, bypass) {
 
 //EEW通知（音声・画面表示等）
 function EEWAlert(data, first, update) {
-  return;
   EEWNow = true;
   worker.postMessage({ action: "EEWNow", data: EEWNow });
 
