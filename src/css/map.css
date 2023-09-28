@@ -496,3 +496,6 @@ body {
 .maplibregl-control-container * {
   z-index: 100000000;
 }
+.maplibregl-ctrl-group {
+  box-shadow: none !important;
+}

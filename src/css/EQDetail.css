@@ -169,6 +169,7 @@ td {
   border-radius: 4px;
   margin-right: 10px;
   font-family: "M PLUS 1p";
+  outline: solid 1px #fff;
 }
 
 .ShindoItem4 span,
