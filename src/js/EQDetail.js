@@ -94,9 +94,13 @@ function InfoFetch() {
       axisInfoCtrl(elm.message);
     });
   }
+  estimated_intensity_mapReq();
+  mapFillDraw();
+  mapFillSwitch();
 }
 //地図初期化
 function Mapinit() {
+  if (map) return;
   map = new maplibregl.Map({
     container: "mapcontainer",
     center: [138.46, 32.99125],
@@ -703,9 +707,6 @@ function Mapinit() {
 
     new maplibregl.Marker(img).setLngLat([config.home.longitude, config.home.latitude]).addTo(map);
   }
-  estimated_intensity_mapReq();
-  mapFillDraw();
-  mapFillSwitch();
 }
 
 document.getElementById("menu_wrap").addEventListener("click", function () {
