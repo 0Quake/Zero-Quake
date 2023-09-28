@@ -12,7 +12,7 @@ var thresholds = {
   threshold02: null, //1次フラグ条件のPGA増加量[gal]
   threshold03: null, //2次フラグ条件のPGA増加量[gal]
   threshold04: 3, //1次フラグ条件の震度
-  threshold05: 0.4, //イベントの観測点数が最大時のn倍未満で解除
+  threshold05: 0.3, //イベントの観測点数が最大時のn倍未満で解除
   MargeRange: 30, //地震の同定範囲[km]
   MargeRangeC: 20, //地震の同定範囲[km]【都会】
   time00: 300000, //最初の検出~解除[ms](優先)

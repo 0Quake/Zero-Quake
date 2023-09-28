@@ -230,11 +230,7 @@ var errorCountk = (errorCountkI = errorCountkEI = errorCountl = errorCountyw = e
 
 var EQDetect_List = [];
 
-var YmoniE, YmoniW;
 var P2P_ConnectData;
-var Kmoni = (Lmoni = 20000);
-var TestStartTime;
-var monitorVendor = "YE";
 var jmaXML_Fetched = [];
 var nakn_Fetched = [];
 var narikakun_URLs = [];
@@ -242,10 +238,9 @@ var narikakun_EIDs = [];
 var eqInfo = { jma: [], usgs: [] };
 var EQInfoFetchIndex = 0;
 var tsunamiData;
-var kmoniTimeout, lmoniTimeout, ymoniTimeout;
+var kmoniTimeout, lmoniTimeout;
 var msil_lastTime = 0;
 var kmoniEid;
-//var kmoniRNum;
 var kmoniPointsDataTmp, SnetPointsDataTmp;
 let tray;
 var RevocationTimer;
@@ -406,7 +401,6 @@ function ScheduledExecution() {
 app.whenReady().then(() => {
   //ウィンドウ作成
   worker_createWindow();
-  kmoniServerSelectY();
   //定期実行着火
   ScheduledExecution();
 
@@ -953,12 +947,8 @@ function start() {
   kmoniRequest();
   wolfxRequest();
   lmoniRequest();
-  ymoniRequest();
   yoyuSetK(function () {
     kmoniRequest();
-  });
-  yoyuSetY(function () {
-    ymoniRequest();
   });
   yoyuSetL(function () {
     lmoniRequest();
@@ -1302,76 +1292,6 @@ function lmoniRequest() {
   lmoniTimeout = setTimeout(lmoniRequest, config.Source.kmoni.lmoni.Interval);
 }
 
-//Yahoo強震モニタへのHTTPリクエスト処理
-function ymoniRequest() {
-  if (net.online && config.Source.kmoni.ymoni.GetData) {
-    if (monitorVendor == "YE") {
-      var request = net.request("https://weather-kyoshin.east.edge.storage-yahoo.jp/RealTimeData/" + dateEncode(2, new Date() - yoyuY - Replay) + "/" + dateEncode(1, new Date() - yoyuY - Replay) + ".json");
-      request.on("response", (res) => {
-        var dataTmp = "";
-        if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
-          errorCountye++;
-          if (errorCountye > 3) {
-            kmoniServerSelectY();
-            errorCountye = 0;
-          }
-          NetworkError(res._responseHead.statusCode, "Yahoo強震モニタ(East)");
-
-          kmoniTimeUpdate(new Date() - Replay, "YahooKmoni", "Error", "East");
-        } else {
-          errorCountye = 0;
-          res.on("data", (chunk) => {
-            dataTmp += chunk;
-          });
-
-          res.on("end", function () {
-            var json = jsonParse(dataTmp);
-            EEWdetect(1, json);
-          });
-        }
-      });
-      request.on("error", (error) => {
-        NetworkError(error, "Yahoo強震モニタ(East)");
-        kmoniTimeUpdate(new Date() - Replay, "YahooKmoni", "Error", "East");
-      });
-
-      request.end();
-    } else if (monitorVendor == "YW") {
-      var request = net.request("https://weather-kyoshin.west.edge.storage-yahoo.jp/RealTimeData/" + dateEncode(2, new Date() - yoyuY - Replay) + "/" + dateEncode(1, new Date() - yoyuY - Replay) + ".json");
-      request.on("response", (res) => {
-        var dataTmp = "";
-        if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
-          errorCountyw++;
-          if (errorCountyw > 3) {
-            kmoniServerSelectY();
-            errorCountyw = 0;
-          }
-          NetworkError(res._responseHead.statusCode, "Yahoo強震モニタ(West)");
-          kmoniTimeUpdate(new Date() - Replay, "YahooKmoni", "Error", "West");
-        } else {
-          errorCountyw = 0;
-          res.on("data", (chunk) => {
-            dataTmp += chunk;
-          });
-          res.on("end", function () {
-            var json = jsonParse(dataTmp);
-            EEWdetect(1, json);
-          });
-        }
-      });
-      request.on("error", (error) => {
-        NetworkError(error, "Yahoo強震モニタ(West)");
-        kmoniTimeUpdate(new Date() - Replay, "YahooKmoni", "Error", "West");
-      });
-
-      request.end();
-    }
-  }
-
-  if (ymoniTimeout) clearTimeout(ymoniTimeout);
-  ymoniTimeout = setTimeout(ymoniRequest, config.Source.kmoni.ymoni.Interval);
-}
-
 //海しるへのHTTPリクエスト処理
 function SnetRequest() {
   if (net.online && config.Source.msil.GetData) {
@@ -1678,96 +1598,6 @@ function RegularExecution() {
   }
 
   setTimeout(RegularExecution, 1000);
-}
-
-//Yahoo強震モニタのサーバーを選択
-async function kmoniServerSelectY() {
-  await new Promise((resolve) => {
-    TestStartTime = new Date();
-    if (net.online) {
-      var request = net.request("https://weather-kyoshin.east.edge.storage-yahoo.jp/RealTimeData/" + dateEncode(2, new Date() - yoyuY - Replay) + "/" + dateEncode(1, new Date() - yoyuY - Replay) + ".json");
-      request.on("response", (res) => {
-        if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
-          YmoniE = 25000;
-        } else {
-          YmoniE = new Date() - TestStartTime;
-        }
-
-        if (YmoniE && YmoniW) {
-          var minTime = Math.min(YmoniE, YmoniW, Kmoni, Lmoni);
-
-          if (minTime == Infinity || minTime == YmoniE) {
-            monitorVendor = "YE";
-          } else if (minTime == Infinity || minTime == YmoniW) {
-            monitorVendor = "YW";
-          }
-          resolve();
-        }
-      });
-
-      request.end();
-      var request = net.request("https://weather-kyoshin.west.edge.storage-yahoo.jp/RealTimeData/" + dateEncode(2, new Date() - yoyuY - Replay) + "/" + dateEncode(1, new Date() - yoyuY - Replay) + ".json");
-      request.on("response", (res) => {
-        res.on("end", function () {
-          try {
-            if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
-              YmoniW = 2500;
-            } else {
-              YmoniW = new Date() - TestStartTime;
-            }
-            if (YmoniE && YmoniW) {
-              var minTime = Math.min(YmoniE, YmoniW, Kmoni, Lmoni);
-
-              if (minTime == Infinity || minTime == YmoniE) {
-                monitorVendor = "YE";
-              } else if (minTime == Infinity || minTime == YmoniW) {
-                monitorVendor = "YW";
-              }
-              resolve();
-            }
-          } catch (err) {
-            return;
-          }
-        });
-      });
-      request.on("error", (error) => {
-        NetworkError(error, "Yahoo強震モニタ(West)");
-      });
-
-      request.end();
-    }
-  });
-}
-
-//Yahoo強震モニタの取得オフセット設定
-async function yoyuSetY(func) {
-  var yoyuYOK = false;
-  var loopCount = 0;
-  var ReqTimeTmp2 = new Date();
-  if (net.online) {
-    while (!yoyuYOK) {
-      await new Promise((resolve) => {
-        var urlTmp;
-        if (monitorVendor == "YW") urlTmp = "west";
-        else urlTmp = "east";
-        var request = net.request("https://weather-kyoshin." + urlTmp + ".edge.storage-yahoo.jp/RealTimeData/" + dateEncode(2, ReqTimeTmp2 - Replay) + "/" + dateEncode(1, ReqTimeTmp2 - Replay) + ".json");
-        request.on("response", (res) => {
-          if (!(300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200)) {
-            yoyuY = new Date() - ReqTimeTmp2 + Yoyu;
-            yoyuYOK = true;
-          }
-          resolve();
-        });
-        request.end();
-      });
-      if (loopCount > 25) {
-        yoyuY = 2500 + Yoyu;
-        break;
-      }
-      loopCount++;
-    }
-  }
-  return func();
 }
 
 //強震モニタの取得オフセット設定

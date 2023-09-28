@@ -60,8 +60,8 @@ window.addEventListener("load", function () {
   psWaveAnm();
   setInterval(function () {
     //時計（ローカル時刻）更新
-    if (UTDialogShow && !background) document.getElementById("PC_TIME").textContent = dateEncode(3, new Date());
-    document.getElementById("all_UpdateTime").textContent = dateEncode(3, new Date());
+    if (UTDialogShow && !background) document.getElementById("PC_TIME").textContent = dateEncode(3, new Date() - Replay);
+    document.getElementById("all_UpdateTime").textContent = dateEncode(3, new Date() - Replay);
   }, 500);
 });
 function psWaveAnm() {

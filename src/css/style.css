@@ -869,6 +869,9 @@ td {
   font-family: "AzeretMono-Regular", ui-monospace, sans-serif;
   text-align: center;
 }
+#all_UpdateTime {
+  font-family: "AzeretMono-Regular", ui-monospace, sans-serif;
+}
 .statusIcon {
   display: inline-block;
   width: 6px;
