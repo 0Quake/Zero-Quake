@@ -12,6 +12,7 @@ var thresholds = {
   threshold02: null, //1次フラグ条件のPGA増加量[gal]
   threshold03: null, //2次フラグ条件のPGA増加量[gal]
   threshold04: 3, //1次フラグ条件の震度
+  threshold05: 0.4, //イベントの観測点数が最大時のn倍未満で解除
   MargeRange: 30, //地震の同定範囲[km]
   MargeRangeC: 20, //地震の同定範囲[km]【都会】
   time00: 300000, //最初の検出~解除[ms](優先)
@@ -64,8 +65,8 @@ function EQDetect(data, date, detect) {
             }) / ptDataTmp.SUMTmp.length;
 
           //平均PGAから閾値を決定
-          thresholds.threshold02 = 0.1 * pgaAvr + 0.01;
-          thresholds.threshold03 = 0.3 * pgaAvr + 0.05;
+          thresholds.threshold02 = 0.2 * pgaAvr + 0.02;
+          thresholds.threshold03 = 0.7 * pgaAvr + 0.2;
           if (ptDataTmp.isCity) {
             //都会では閾値を大きく
             thresholds.threshold02 *= 2;
@@ -136,6 +137,7 @@ function EQDetect(data, date, detect) {
               if (CodesTmp) {
                 //地震アイテムに自観測点を追加
                 EQD_ItemTmp.Codes.push(elm);
+                EQD_ItemTmp.Codes_history.push(elm);
                 ptDataTmp.Event = true;
                 //地震アイテムの「半径」を更新
                 var radiusTmp = geosailing(elm.Location.Latitude, elm.Location.Longitude, EQD_ItemTmp.lat, EQD_ItemTmp.lng);
@@ -163,7 +165,7 @@ function EQDetect(data, date, detect) {
           } else if (elm.detect2) {
             //自観測点がどの地震アイテムにも属さず、検知レベルがLv.2以上の場合
             //自観測点を中心とした新規地震アイテム作成
-            EQDetect_List.push({ id: EQDetectID, lat: elm.Location.Latitude, lng: elm.Location.Longitude, Codes: [elm], Radius: 0, maxPGA: elm.pga, maxInt: elm.shindo, detectCount: 1, Up: false, Lv: 0, last_Detect: new Date() - Replay, origin_Time: new Date() - Replay, showed: false, isCity: ptDataTmp.isCity });
+            EQDetect_List.push({ id: EQDetectID, lat: elm.Location.Latitude, lng: elm.Location.Longitude, Codes: [elm], Codes_history: [elm], Radius: 0, maxPGA: elm.pga, maxInt: elm.shindo, detectCount: 1, Up: false, Lv: 0, last_Detect: new Date() - Replay, origin_Time: new Date() - Replay, showed: false, isCity: ptDataTmp.isCity });
             EQDetectID++;
           }
         }
@@ -174,7 +176,7 @@ function EQDetect(data, date, detect) {
   //地震検知解除
   var index = 0;
   for (const elm of EQDetect_List) {
-    if (EEWNow || new Date() - Replay - elm.origin_Time > thresholds.time00 || new Date() - Replay - elm.last_Detect > thresholds.time01) {
+    if (EEWNow || new Date() - Replay - elm.origin_Time > thresholds.time00 || new Date() - Replay - elm.last_Detect > thresholds.time01 || elm.Codes.length < elm.Codes_history.length * thresholds.threshold05) {
       //EEW発令中・発生から閾値以上経過・最後の検知から閾値以上経過
       EQDetect_List.splice(index, 1);
       workerThreads.parentPort.postMessage({

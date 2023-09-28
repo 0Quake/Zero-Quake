@@ -169,21 +169,11 @@
 .maplibregl-popup-content {
   margin: 0;
   min-width: 180px;
+  padding: 0;
 }
 
-.maplibregl-popup-content:has(h3) {
-  padding: 35px 5px 5px 5px;
-}
-.maplibregl-popup-content:has(.PointName) {
-  padding: 30px 0 0 0;
-}
 .PointPopup h3,
 .maplibregl-popup-content h3 {
-  float: none;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
   height: 30px;
   line-height: 30px;
   padding: 0 25px 0 5px;
@@ -195,7 +185,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.maplibregl-popup-close-butto,
+.maplibregl-popup-close-button,
 .maplibregl-popup-close-button:focus {
   height: 30px;
   width: 30px;
@@ -284,8 +274,8 @@
 }
 
 .detecting {
-  display: none;
   margin: 3px 0;
+  text-align: center;
 }
 
 .zoomLevel_1 .marker-circle {
