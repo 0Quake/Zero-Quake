@@ -1,3 +1,4 @@
+@charset "utf-8";
 * {
   box-sizing: border-box;
 }
@@ -88,7 +89,8 @@ td {
   display: none;
 }
 
-.ShindoItem {
+.ShindoItem,
+.ShindoItemL {
   background: #333;
   border-top: solid 1px #666;
   border-bottom: solid 1px #666;
@@ -99,21 +101,33 @@ td {
 
 .ShindoItem1:hover,
 .ShindoItem2:hover,
-.ShindoItem3:hover {
+.ShindoItem3:hover,
+.ShindoItem1L:hover,
+.ShindoItem2L:hover,
+.ShindoItem3L:hover {
   background: #444;
+}
+#homeShindo .ShindoItem:hover,
+#homeShindoL .ShindoItemL:hover {
+  background-color: #333;
 }
 
 .ShindoItem1,
 .ShindoItem2,
-.ShindoItem3 {
+.ShindoItem3,
+.ShindoItem1L,
+.ShindoItem2L,
+.ShindoItem3L {
   cursor: pointer;
 }
 
-.ShindoItem4 {
+.ShindoItem4,
+.ShindoItem4L {
   cursor: default;
 }
 
-.ShindoItem::before {
+.ShindoItem::before,
+.ShindoItemL::before {
   content: "";
   display: inline-block;
   font-size: 16px;
@@ -124,17 +138,29 @@ td {
 
 .ShindoItem1::before,
 .ShindoItem2::before,
-.ShindoItem3::before {
+.ShindoItem3::before,
+.ShindoItem1L::before,
+.ShindoItem2L::before,
+.ShindoItem3L::before {
   content: "expand_more";
 }
 
 .ShindoItem1.has-open::before,
 .ShindoItem2.has-open::before,
-.ShindoItem3.has-open::before {
+.ShindoItem3.has-open::before,
+.ShindoItem1L.has-open::before,
+.ShindoItem2L.has-open::before,
+.ShindoItem3L.has-open::before {
   content: "expand_less";
 }
 
-.ShindoItem span {
+#homeShindo .ShindoItem::before,
+#homeShindoL .ShindoItemL::before {
+  content: "";
+}
+
+.ShindoItem span,
+.ShindoItemL span {
   display: inline-block;
   width: 30px;
   height: 30px;
@@ -143,6 +169,16 @@ td {
   border-radius: 4px;
   margin-right: 10px;
   font-family: "M PLUS 1p";
+}
+
+.ShindoItem4 span,
+.ShindoItem4L span {
+  border-radius: 50%;
+}
+
+.ShindoItemL span::before {
+  content: "長";
+  font-size: 12px;
 }
 
 .close {
@@ -155,7 +191,10 @@ td {
 
 .WrapLevel1,
 .WrapLevel2,
-.WrapLevel3 {
+.WrapLevel3,
+.WrapLevel1L,
+.WrapLevel2L,
+.WrapLevel3L {
   padding-left: 15px;
 }
 
@@ -401,7 +440,9 @@ td {
 }
 
 #AllOpen,
-#AllClose {
+#AllClose,
+#AllOpenL,
+#AllCloseL {
   width: 25px;
   height: 25px;
   border-radius: 12.5px;
@@ -428,14 +469,9 @@ td {
 #homeShindoWrap {
   display: none;
 }
-#homeShindo .ShindoItem {
+#homeShindo .ShindoItem,
+#homeShindoL .ShindoItemL {
   cursor: default;
-}
-#homeShindo .ShindoItem:hover {
-  background: #333;
-}
-#homeShindo .ShindoItem::before {
-  display: none;
 }
 #infoKind {
   text-align: center;

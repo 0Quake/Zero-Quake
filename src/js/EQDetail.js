@@ -1056,6 +1056,7 @@ function jmaL_Fetch(url) {
         var newestshindo = shindo_lastUpDate < new Date(json.Head.ReportDateTime);
         if (newestshindo) shindo_lastUpDate = new Date(json.Head.ReportDateTime);
         else return;
+        removeChild(document.getElementById("LngInt"));
         mapFillResetL();
         json.Body.Intensity.Observation.Pref.forEach(function (elm) {
           add_Pref_infoL(elm.Name, elm.MaxLgInt);
@@ -1434,7 +1435,7 @@ function add_Area_info(name, maxInt) {
   newDiv2.classList.add("WrapLevel2", "close");
   wrap[wrap.length - 1].appendChild(newDiv2);
 
-  if (name == config.home.Saibun) {
+  if (name == config.home.Section) {
     var newDiv3 = document.createElement("div");
     newDiv3.innerHTML = "<span style='background:" + color[0] + ";color:" + color[1] + ";'>" + maxInt + "</span>" + name;
     newDiv3.classList.add("ShindoItem", "ShindoItem2");
@@ -1540,12 +1541,54 @@ function add_IntensityStation_info(lat, lng, name, int) {
   ZoomBounds.extend([lng, lat]);
 }
 //都道府県ごとの情報描画（リスト）
-function add_Pref_infoL() {
-  return;
+function add_Pref_infoL(name, lngInt) {
+  var newDiv = document.createElement("div");
+  var color1 = LgIntConvert(lngInt);
+
+  newDiv.innerHTML = "<span style='background:" + color1[0] + ";color:" + color1[1] + ";'>" + lngInt + "</span>" + name;
+  newDiv.classList.add("ShindoItemL", "ShindoItem1L");
+  document.getElementById("LngInt").appendChild(newDiv);
+  newDiv.addEventListener("click", function () {
+    this.classList.toggle("has-open");
+    this.nextElementSibling.classList.toggle("open");
+  });
+
+  var newDiv = document.createElement("div");
+  newDiv.innerHTML = "<div></div>";
+  newDiv.classList.add("WrapLevel1L", "close");
+  document.getElementById("LngInt").appendChild(newDiv);
+
+  document.getElementById("splash").style.display = "none";
+  console.log("a");
 }
 //細分区域ごとの情報描画（リスト・地図塗りつぶし・地図プロット）
 function add_Area_infoL(name, maxInt) {
+  var wrap = document.querySelectorAll(".WrapLevel1L");
   var color = LgIntConvert(maxInt);
+
+  var newDiv = document.createElement("div");
+  newDiv.innerHTML = "<span style='background:" + color[0] + ";color:" + color[1] + ";'>" + maxInt + "</span>" + name;
+  newDiv.classList.add("ShindoItemL", "ShindoItem2L");
+  wrap[wrap.length - 1].appendChild(newDiv);
+  newDiv.addEventListener("click", function () {
+    this.classList.toggle("has-open");
+    this.nextElementSibling.classList.toggle("open");
+  });
+
+  var newDiv2 = document.createElement("div");
+  newDiv2.innerHTML = "<div></div>";
+  newDiv2.classList.add("WrapLevel2L", "close");
+  wrap[wrap.length - 1].appendChild(newDiv2);
+
+  if (name == config.home.Section) {
+    var newDiv3 = document.createElement("div");
+    newDiv3.innerHTML = "<span style='background:" + color[0] + ";color:" + color[1] + ";'>" + maxInt + "</span>" + name;
+    newDiv3.classList.add("ShindoItemL", "ShindoItem2L");
+
+    removeChild(document.getElementById("homeShindoL"));
+    document.getElementById("homeShindoWrap").style.display = "block";
+    document.getElementById("homeShindoL").appendChild(newDiv3);
+  }
 
   var pointLocation = areaLocation[name];
   if (pointLocation) {
@@ -1577,10 +1620,17 @@ function add_Area_infoL(name, maxInt) {
 }
 //観測点ごとの情報描画（リスト・地図プロット）
 function add_IntensityStation_infoL(lat, lng, name, int) {
+  var wrap3 = document.querySelectorAll(".WrapLevel2L");
   name = name.replace("＊", "");
 
   var color4 = LgIntConvert(int, 2);
   var intStr = int;
+
+  var newDiv = document.createElement("div");
+  newDiv.innerHTML = "<span style='background:" + color4[0] + ";color:" + color4[1] + ";'>" + int + "</span>" + name;
+  newDiv.classList.add("ShindoItemL", "ShindoItem4L");
+  wrap3[wrap3.length - 1].appendChild(newDiv);
+
   const icon = document.createElement("div");
   icon.classList.add("LgIntIcon");
   icon.innerHTML = '<div style="background:' + color4[0] + ";color:" + color4[1] + '">' + int + "</div>";
@@ -1720,6 +1770,23 @@ document.getElementById("AllClose").addEventListener("click", function () {
     elm.classList.remove("has-open");
   });
   document.querySelectorAll(".WrapLevel1,.WrapLevel2,.WrapLevel3").forEach(function (elm) {
+    elm.classList.remove("open");
+  });
+});
+
+document.getElementById("AllOpenL").addEventListener("click", function () {
+  document.querySelectorAll(".ShindoItem1L,.ShindoItem2L,.ShindoItem3L").forEach(function (elm) {
+    elm.classList.add("has-open");
+  });
+  document.querySelectorAll(".WrapLevel1L,.WrapLevel2L,.WrapLevel3L").forEach(function (elm) {
+    elm.classList.add("open");
+  });
+});
+document.getElementById("AllCloseL").addEventListener("click", function () {
+  document.querySelectorAll(".ShindoItem1L,.ShindoItem2L,.ShindoItem3L").forEach(function (elm) {
+    elm.classList.remove("has-open");
+  });
+  document.querySelectorAll(".WrapLevel1L,.WrapLevel2L,.WrapLevel3L").forEach(function (elm) {
     elm.classList.remove("open");
   });
 });
