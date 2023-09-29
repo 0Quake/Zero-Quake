@@ -1302,41 +1302,45 @@ function SnetRequest() {
         dataTmp += chunk;
       });
       res.on("end", function () {
-        var json = jsonParse(dataTmp);
-        if (!json || !json.features || !Array.isArray(json.features)) return false;
-        var dateTime = 0;
-        var NowDateTime = Number(new Date() - Replay);
-        json.features.forEach(function (elm) {
-          if (NowDateTime - dateTime > NowDateTime - elm.attributes.msilstarttime && NowDateTime >= elm.attributes.msilstarttime) {
-            dateTime = Number(elm.attributes.msilstarttime);
-          }
-        });
-        if (msil_lastTime < dateTime) {
-          var request = net.request("https://www.msil.go.jp/arcgis/rest/services/Msil/DisasterPrevImg1/ImageServer//exportImage?f=image&time=" + dateTime + "%2C" + dateTime + "&bbox=13409547.546603577%2C2713376.239114911%2C16907305.960932314%2C5966536.162931148&size=400%2C400");
-          request.on("response", (res) => {
-            var dataTmp = [];
-            res.on("data", (chunk) => {
-              dataTmp.push(chunk);
-            });
-            res.on("end", () => {
-              try {
-                var bufTmp = Buffer.concat(dataTmp);
-                if (kmoniWorker) {
-                  var ReqTime = new Date(dateTime);
-                  kmoniWorker.webContents.send("message2", {
-                    action: "SnetImgUpdate",
-                    data: "data:image/png;base64," + bufTmp.toString("base64"),
-                    date: ReqTime,
-                  });
-                }
-              } catch (err) {
-                kmoniTimeUpdate(new Date() - Replay, "Lmoni", "Error");
-              }
-            });
+        try {
+          var json = jsonParse(dataTmp);
+          if (!json || !json.features || !Array.isArray(json.features)) return false;
+          var dateTime = 0;
+          var NowDateTime = Number(new Date() - Replay);
+          json.features.forEach(function (elm) {
+            if (NowDateTime - dateTime > NowDateTime - elm.attributes.msilstarttime && NowDateTime >= elm.attributes.msilstarttime) {
+              dateTime = Number(elm.attributes.msilstarttime);
+            }
           });
-          request.end();
+          if (msil_lastTime < dateTime) {
+            var request = net.request("https://www.msil.go.jp/arcgis/rest/services/Msil/DisasterPrevImg1/ImageServer//exportImage?f=image&time=" + dateTime + "%2C" + dateTime + "&bbox=13409547.546603577%2C2713376.239114911%2C16907305.960932314%2C5966536.162931148&size=400%2C400");
+            request.on("response", (res) => {
+              var dataTmp = [];
+              res.on("data", (chunk) => {
+                dataTmp.push(chunk);
+              });
+              res.on("end", () => {
+                try {
+                  var bufTmp = Buffer.concat(dataTmp);
+                  if (kmoniWorker) {
+                    var ReqTime = new Date(dateTime);
+                    kmoniWorker.webContents.send("message2", {
+                      action: "SnetImgUpdate",
+                      data: "data:image/png;base64," + bufTmp.toString("base64"),
+                      date: ReqTime,
+                    });
+                  }
+                } catch (err) {
+                  kmoniTimeUpdate(new Date() - Replay, "Lmoni", "Error");
+                }
+              });
+            });
+            request.end();
 
-          msil_lastTime = dateTime;
+            msil_lastTime = dateTime;
+          }
+        } catch (err) {
+          kmoniTimeUpdate(new Date() - Replay, "Lmoni", "Error");
         }
       });
     });
@@ -2634,25 +2638,32 @@ function EQI_USGS_Req() {
                 dataTmp += chunk;
               });
               res.on("end", function () {
-                var json = jsonParse(dataTmp);
-                var FE_ID;
-                var i = 0;
-                while (!FE_ID && i < json.fe.features.length) {
-                  FE_ID = json.fe.features[i].properties.number;
-                  i++;
-                }
-                var jpName = FERegions[FE_ID];
-                dataTmp2.push({
-                  eventId: elm.id,
-                  category: null,
-                  OriginTime: new Date(elm.properties.time),
-                  epiCenter: jpName ? jpName : elm.properties.place,
-                  M: Math.round(elm.properties.mag * 10) / 10,
-                  maxI: null,
-                  DetailURL: [elm.properties.url],
-                });
-                if (dataTmp2.length <= config.Info.EQInfo.ItemCount) {
-                  eqInfoControl(dataTmp2, "usgs");
+                try {
+                  var json = jsonParse(dataTmp);
+                  var FE_ID;
+                  var i = 0;
+                  if (!json.fe) return;
+                  while (!FE_ID && i < json.fe.features.length) {
+                    FE_ID = json.fe.features[i].properties.number;
+                    i++;
+                  }
+                  if (FE_ID) {
+                    var jpName = FERegions[FE_ID];
+                    dataTmp2.push({
+                      eventId: elm.id,
+                      category: null,
+                      OriginTime: new Date(elm.properties.time),
+                      epiCenter: jpName ? jpName : elm.properties.place,
+                      M: Math.round(elm.properties.mag * 10) / 10,
+                      maxI: null,
+                      DetailURL: [elm.properties.url],
+                    });
+                    if (dataTmp2.length <= config.Info.EQInfo.ItemCount) {
+                      eqInfoControl(dataTmp2, "usgs");
+                    }
+                  }
+                } catch (err) {
+                  return;
                 }
               });
             });
