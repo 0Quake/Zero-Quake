@@ -944,9 +944,11 @@ function JMAEstShindoControl(data) {
   Int7pT = ["any"];
 
   data.forEach(function (elm) {
-    elm.warnZones.forEach(function (elm2) {
-      JMAEstShindoData[elm2.Name] = elm2;
-    });
+    if (elm.warnZones && Array.isArray(elm.warnZones)) {
+      elm.warnZones.forEach(function (elm2) {
+        JMAEstShindoData[elm2.Name] = elm2;
+      });
+    }
   });
 
   Object.keys(JMAEstShindoData).forEach(function (elm) {

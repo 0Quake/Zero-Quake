@@ -6,6 +6,9 @@ var openAtLogin = false;
 var tsunamiSect;
 window.addEventListener("load", function () {
   this.document.getElementById("replay").value = dateEncode(3, new Date()).replaceAll("/", "-");
+  this.document.getElementById("EEWE_EventID").value = dateEncode(1, new Date()).replaceAll("/", "-");
+  this.document.getElementById("EEWE_report_time").value = dateEncode(3, new Date()).replaceAll("/", "-");
+  this.document.getElementById("EEWE_origin_time").value = dateEncode(3, new Date()).replaceAll("/", "-");
 });
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "updatePanel") {
@@ -31,6 +34,7 @@ window.electronAPI.messageSend((event, request) => {
     document.getElementById("longitude").value = config.home.longitude;
     document.getElementById("EEW_Voice").value = config.notice.voice.EEW;
     document.getElementById("EEW2_Voice").value = config.notice.voice.EEWUpdate;
+    document.getElementById("EEW3_Voice").value = config.notice.voice.EEWCancel;
     document.getElementById("EQInfo_ItemCount").value = config.Info.EQInfo.ItemCount;
     document.getElementById("EEW_traning").checked = config.Info.EEW.showTraning;
     document.getElementById("EEW_IntQ").checked = config.Info.EEW.IntQuestion;
@@ -141,6 +145,7 @@ document.getElementById("apply").addEventListener("click", function () {
   config.home.TsunamiSect = document.getElementById("tsunamiSect").value;
   config.notice.voice.EEW = document.getElementById("EEW_Voice").value;
   config.notice.voice.EEWUpdate = document.getElementById("EEW2_Voice").value;
+  config.notice.voice.EEWCancel = document.getElementById("EEW3_Voice").value;
   config.Info.EQInfo.ItemCount = Number(document.getElementById("EQInfo_ItemCount").value);
   config.Info.EEW.showTraning = document.getElementById("EEW_traning").checked;
   config.Info.EEW.IntQuestion = document.getElementById("EEW_IntQ").checked;
@@ -478,3 +483,30 @@ function selectBoxSet(selectElm, TargetValue) {
     }
   });
 }
+
+document.getElementById("Start_simulation").addEventListener("click", function () {
+  var EEWData = {
+    alertflg: document.getElementById("EEWE_alertflg").value,
+    EventID: Number(document.getElementById("EEWE_EventID").value),
+    serial: Number(document.getElementById("EEWE_serial").value),
+    report_time: new Date(document.getElementById("EEWE_report_time").value),
+    magnitude: Number(document.getElementById("EEWE_magnitude").value),
+    maxInt: document.getElementById("EEWE_maxInt").value,
+    depth: Number(document.getElementById("EEWE_depth").value),
+    is_cancel: document.getElementById("EEWE_is_cancel").checked,
+    is_final: document.getElementById("EEWE_is_final").checked,
+    is_training: true,
+    latitude: Number(document.getElementById("EEWE_latitude").value),
+    longitude: Number(document.getElementById("EEWE_longitude").value),
+    region_code: "",
+    region_name: document.getElementById("EEWE_region_name").value,
+    origin_time: new Date(document.getElementById("EEWE_origin_time").value),
+    isPlum: document.getElementById("EEWE_isPlum").checked,
+    source: "simulation",
+  };
+  console.log(EEWData);
+  window.electronAPI.messageReturn({
+    action: "EEWSimulation",
+    data: EEWData,
+  });
+});

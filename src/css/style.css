@@ -396,13 +396,13 @@ h2 {
   line-height: 30px;
 }
 .magnitude {
-  font-size: 35px;
+  font-size: 34px;
   margin: 0 10px 0 5px;
   font-family: "AzeretMono-Regular", ui-monospace;
   font-weight: bold;
 }
 .depth {
-  font-size: 25px;
+  font-size: 22px;
   font-family: "AzeretMono-Regular", ui-monospace;
   font-weight: bold;
 }

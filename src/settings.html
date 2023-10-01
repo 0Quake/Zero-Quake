@@ -457,6 +457,131 @@
 
                     <label>緊急地震速報（初報）：<input id="EEW_Voice" type="text" placeholder="緊急地震速報の発令時に読み上げる文章（第1報）"></label>
                     <label>緊急地震速報（続報）：<input id="EEW2_Voice" type="text" placeholder="緊急地震速報の発令時に読み上げる文章（第2報以降）"></label>
+                    <label>緊急地震速報（キャンセル）：<input id="EEW3_Voice" type="text" placeholder="緊急地震速報の取り消し時に読み上げる文章"></label>
+
+                    <details>
+                        <summary>サンプル読み上げ文章</summary>
+                        <div class="tableWrap">
+                            <table id="sampleTextTable">
+                                <tr>
+                                    <td>簡易</td>
+                                    <td>地震です。地震です</td>
+                                </tr>
+                                <tr>
+                                    <td>簡易２</td>
+                                    <td>緊急地震速報です。</td>
+                                </tr>
+                                <tr>
+                                    <td>呼びかけ</td>
+                                    <td>緊急地震速報です。強い揺れに警戒してください。揺れが収まるまで身を守ってください。</td>
+                                </tr>
+                                <tr>
+                                    <td>一般向け</td>
+                                    <td>緊急地震速報です。{region_name}で最大の震度、{maxInt}の地震が発生しました。現在地の予想震度は{local_Int}です。</td>
+                                </tr>
+                                <tr>
+                                    <td>一般向け 詳細</td>
+                                    <td>緊急地震速報、{grade}、{training}。現在地の予想震度は{local_Int}。地震の規模を表すマグニチュードは、{magnitude}と予想されます。この地震で予想される最大の震度は、{maxInt}です。{region_name}の、深さ{depth}キロメートルで発生しました。</td>
+                                </tr>
+                                <tr>
+                                    <td>詳細</td>
+                                    <td>緊急地震速報、{grade}、第{serial}報、{training}。現在地の予想震度は{local_Int}。予想マグニチュード、{magnitude}。予想最大震度、{maxInt}。{region_name}の、深さ{depth}キロメートルで、{origin_time}に発生。{final}</td>
+                                </tr>
+                                <tr>
+                                    <td>キャンセル</td>
+                                    <td>緊急地震速報が取り消されました。</td>
+                                </tr>
+
+                            </table>
+                        </div>
+                    </details>
+
+                    <details>
+                        <summary>読み上げ用タグの解説</summary>
+                        <div class="tableWrap">
+                            <table id="tagTable">
+                                <tr>
+                                    <th>タグ</th>
+                                    <th>意味</th>
+                                    <th>とりうる値</th>
+                                </tr>
+                                <tr>
+                                    <th colspan="3">電文情報</th>
+                                </tr>
+                                <tr>
+                                    <td>{grade}</td>
+                                    <td>種別</td>
+                                    <td>予報,警報</td>
+                                </tr>
+                                <tr>
+                                    <td>{serial}</td>
+                                    <td>報数</td>
+                                    <td>1以上の数字</td>
+                                </tr>
+                                <tr>
+                                    <td>{final}</td>
+                                    <td>最終報かどうか</td>
+                                    <td>最終報, ""</td>
+                                </tr>
+                                <tr>
+                                    <td>{report_time}</td>
+                                    <td>発表時刻</td>
+                                    <td>hh時mm分ss秒</td>
+                                </tr>
+                                <tr>
+                                    <td>{training}</td>
+                                    <td>テスト報かどうか</td>
+                                    <td>テスト報, ""</td>
+                                </tr>
+                                <tr>
+                                    <td>{training2}</td>
+                                    <td>テスト報かどうか(文章)</td>
+                                    <td>これは訓練報です。, ""</td>
+                                </tr>
+
+                                <tr>
+                                    <th colspan="3">震源要素</th>
+                                </tr>
+                                <tr>
+                                    <td>{region_name}</td>
+                                    <td>震央地名</td>
+                                    <td>細分区域名</td>
+                                </tr>
+                                <tr>
+                                    <td>{depth}</td>
+                                    <td>震源の深さ</td>
+                                    <td>数字</td>
+                                </tr>
+                                <tr>
+                                    <td>{origin_time}</td>
+                                    <td>発生時刻</td>
+                                    <td>hh時mm分ss秒</td>
+                                </tr>
+                                <tr>
+                                    <th colspan="3">その他</th>
+                                </tr>
+                                <tr>
+                                    <td>{magnitude}</td>
+                                    <td>マグニチュード</td>
+                                    <td>数字</td>
+                                </tr>
+                                <tr>
+                                    <td>{maxInt}</td>
+                                    <td>予想最大震度</td>
+                                    <td>0, 1, 2, 3, 4, 5弱, 5強, 6弱 ,6強, 7, 7以上, 不明</td>
+                                </tr>
+                                <tr>
+                                    <td>{local_Int}</td>
+                                    <td>設定地点の予想震度</td>
+                                    <td>0, 1, 2, 3, 4, 5弱, 5強, 6弱 ,6強, 7, 7以上, 不明</td>
+                                </tr>
+                            </table>
+                            <div class="smalltext">※データがない場合、基本的に値は ""（空文字）となります。{maxInt}, {local_Int}のみ"不明"となります。</div>
+
+
+                        </div>
+                    </details>
+
                 </section>
             </div>
             <div id="tab1_content2" class="tabcontent">
@@ -733,6 +858,239 @@
                     </label>
                     <div>オフセット：<span id="replayOffset">-</span></div>
                     <p class="smalltext">リプレイ中はリアルタイムの情報が入手できません。リプレイで利用できるのは、強震モニタの情報のみです。</p>
+                </section>
+                <section>
+                    <h4>緊急地震速報</h4>
+                    <label>EventID<input type="number" min="19700101000001" value="1" id="EEWE_EventID"></label>
+                    <label>種別<select id="EEWE_alertflg">
+                            <option>警報</option>
+                            <option>予報</option>
+                        </select></label>
+                    <label>報数<input type="number" min="1" max="9999" value="1" id="EEWE_serial"></label>
+                    <label>発表日時 <input id="EEWE_report_time" type="datetime-local" min="1970-01-01T00:00:00" step="1"></label>
+                    <label><input id="EEWE_is_final" type="checkbox">最終報</label>
+                    <label><input id="EEWE_is_cancel" type="checkbox">キャンセル報</label>
+                    <label>マグニチュード <input id="EEWE_magnitude" type="number" min="0" value="3.5" max="10" step="0.1"></label>
+                    <label>最大震度
+                        <select id="EEWE_maxInt">
+                            <option value="0" selected>震度0</option>
+                            <option value="1">震度1</option>
+                            <option value="2">震度2</option>
+                            <option value="3">震度3</option>
+                            <option value="4">震度4</option>
+                            <option value="5-">震度5弱</option>
+                            <option value="5+">震度5強</option>
+                            <option value="6-">震度6弱</option>
+                            <option value="6+">震度6強</option>
+                            <option value="7">震度7</option>
+                        </select>
+                    </label>
+                    <label><input id="EEWE_isPlum" type="checkbox">仮定震源要素</label>
+                    <label>発生日時 <input id="EEWE_origin_time" type="datetime-local" min="1970-01-01T00:00:00" step="1"></label>
+                    <label>震央地域名
+                        <select id="EEWE_region_name">
+                            <option>石狩地方北部</option>
+                            <option>石狩地方中部</option>
+                            <option>石狩地方南部</option>
+                            <option>渡島地方北部</option>
+                            <option>渡島地方東部</option>
+                            <option>渡島地方西部</option>
+                            <option>檜山地方</option>
+                            <option>後志地方北部</option>
+                            <option>後志地方東部</option>
+                            <option>後志地方西部</option>
+                            <option>北海道奥尻島</option>
+                            <option>空知地方北部</option>
+                            <option>空知地方中部</option>
+                            <option>空知地方南部</option>
+                            <option>上川地方北部</option>
+                            <option>上川地方中部</option>
+                            <option>上川地方南部</option>
+                            <option>留萌地方中北部</option>
+                            <option>留萌地方南部</option>
+                            <option>宗谷地方北部</option>
+                            <option>宗谷地方南部</option>
+                            <option>北海道利尻礼文</option>
+                            <option>網走地方</option>
+                            <option>北見地方</option>
+                            <option>紋別地方</option>
+                            <option>胆振地方西部</option>
+                            <option>胆振地方中東部</option>
+                            <option>日高地方西部</option>
+                            <option>日高地方中部</option>
+                            <option>日高地方東部</option>
+                            <option>十勝地方北部</option>
+                            <option>十勝地方中部</option>
+                            <option>十勝地方南部</option>
+                            <option>釧路地方北部</option>
+                            <option>釧路地方中南部</option>
+                            <option>根室地方北部</option>
+                            <option>根室地方中部</option>
+                            <option>根室地方南部</option>
+                            <option>青森県津軽北部</option>
+                            <option>青森県津軽南部</option>
+                            <option>青森県三八上北</option>
+                            <option>青森県下北</option>
+                            <option>岩手県沿岸北部</option>
+                            <option>岩手県沿岸南部</option>
+                            <option>岩手県内陸北部</option>
+                            <option>岩手県内陸南部</option>
+                            <option>宮城県北部</option>
+                            <option>宮城県南部</option>
+                            <option>宮城県中部</option>
+                            <option>秋田県沿岸北部</option>
+                            <option>秋田県沿岸南部</option>
+                            <option>秋田県内陸北部</option>
+                            <option>秋田県内陸南部</option>
+                            <option>山形県庄内</option>
+                            <option>山形県最上</option>
+                            <option>山形県村山</option>
+                            <option>山形県置賜</option>
+                            <option>福島県中通り</option>
+                            <option>福島県浜通り</option>
+                            <option>福島県会津</option>
+                            <option>茨城県北部</option>
+                            <option>茨城県南部</option>
+                            <option>栃木県北部</option>
+                            <option>栃木県南部</option>
+                            <option>群馬県北部</option>
+                            <option>群馬県南部</option>
+                            <option>埼玉県北部</option>
+                            <option>埼玉県南部</option>
+                            <option>埼玉県秩父</option>
+                            <option>千葉県北東部</option>
+                            <option>千葉県北西部</option>
+                            <option>千葉県南部</option>
+                            <option selected>東京都２３区</option>
+                            <option>東京都多摩東部</option>
+                            <option>東京都多摩西部</option>
+                            <option>神津島</option>
+                            <option>伊豆大島</option>
+                            <option>新島</option>
+                            <option>三宅島</option>
+                            <option>八丈島</option>
+                            <option>小笠原</option>
+                            <option>神奈川県東部</option>
+                            <option>神奈川県西部</option>
+                            <option>新潟県上越</option>
+                            <option>新潟県中越</option>
+                            <option>新潟県下越</option>
+                            <option>新潟県佐渡</option>
+                            <option>富山県東部</option>
+                            <option>富山県西部</option>
+                            <option>石川県能登</option>
+                            <option>石川県加賀</option>
+                            <option>福井県嶺北</option>
+                            <option>福井県嶺南</option>
+                            <option>山梨県中・西部</option>
+                            <option>山梨県東部・富士五湖</option>
+                            <option>長野県北部</option>
+                            <option>長野県中部</option>
+                            <option>長野県南部</option>
+                            <option>岐阜県飛騨</option>
+                            <option>岐阜県美濃東部</option>
+                            <option>岐阜県美濃中西部</option>
+                            <option>静岡県伊豆</option>
+                            <option>静岡県東部</option>
+                            <option>静岡県中部</option>
+                            <option>静岡県西部</option>
+                            <option>愛知県東部</option>
+                            <option>愛知県西部</option>
+                            <option>三重県北部</option>
+                            <option>三重県中部</option>
+                            <option>三重県南部</option>
+                            <option>滋賀県北部</option>
+                            <option>滋賀県南部</option>
+                            <option>京都府北部</option>
+                            <option>京都府南部</option>
+                            <option>大阪府北部</option>
+                            <option>大阪府南部</option>
+                            <option>兵庫県北部</option>
+                            <option>兵庫県南東部</option>
+                            <option>兵庫県南西部</option>
+                            <option>兵庫県淡路島</option>
+                            <option>奈良県</option>
+                            <option>和歌山県北部</option>
+                            <option>和歌山県南部</option>
+                            <option>鳥取県東部</option>
+                            <option>鳥取県中部</option>
+                            <option>鳥取県西部</option>
+                            <option>島根県東部</option>
+                            <option>島根県西部</option>
+                            <option>島根県隠岐</option>
+                            <option>岡山県北部</option>
+                            <option>岡山県南部</option>
+                            <option>広島県北部</option>
+                            <option>広島県南東部</option>
+                            <option>広島県南西部</option>
+                            <option>徳島県北部</option>
+                            <option>徳島県南部</option>
+                            <option>香川県東部</option>
+                            <option>香川県西部</option>
+                            <option>愛媛県東予</option>
+                            <option>愛媛県中予</option>
+                            <option>愛媛県南予</option>
+                            <option>高知県東部</option>
+                            <option>高知県中部</option>
+                            <option>高知県西部</option>
+                            <option>山口県北部</option>
+                            <option>山口県西部</option>
+                            <option>山口県東部</option>
+                            <option>山口県中部</option>
+                            <option>福岡県福岡</option>
+                            <option>福岡県北九州</option>
+                            <option>福岡県筑豊</option>
+                            <option>福岡県筑後</option>
+                            <option>佐賀県北部</option>
+                            <option>佐賀県南部</option>
+                            <option>長崎県北部</option>
+                            <option>長崎県南西部</option>
+                            <option>長崎県島原半島</option>
+                            <option>長崎県対馬</option>
+                            <option>長崎県壱岐</option>
+                            <option>長崎県五島</option>
+                            <option>熊本県阿蘇</option>
+                            <option>熊本県熊本</option>
+                            <option>熊本県球磨</option>
+                            <option>熊本県天草・芦北</option>
+                            <option>大分県北部</option>
+                            <option>大分県中部</option>
+                            <option>大分県南部</option>
+                            <option>大分県西部</option>
+                            <option>宮崎県北部平野部</option>
+                            <option>宮崎県北部山沿い</option>
+                            <option>宮崎県南部平野部</option>
+                            <option>宮崎県南部山沿い</option>
+                            <option>鹿児島県薩摩</option>
+                            <option>鹿児島県大隅</option>
+                            <option>鹿児島県十島村</option>
+                            <option>鹿児島県甑島</option>
+                            <option>鹿児島県種子島</option>
+                            <option>鹿児島県屋久島</option>
+                            <option>鹿児島県奄美北部</option>
+                            <option>鹿児島県奄美南部</option>
+                            <option>沖縄県本島北部</option>
+                            <option>沖縄県本島中南部</option>
+                            <option>沖縄県久米島</option>
+                            <option>沖縄県大東島</option>
+                            <option>沖縄県宮古島</option>
+                            <option>沖縄県石垣島</option>
+                            <option>沖縄県与那国島</option>
+                            <option>沖縄県西表島</option>
+                            <option>色丹島</option>
+                            <option>国後島</option>
+                            <option>択捉島</option>
+                            <option>鷹島(甑島南方)</option>
+                            <option>津倉瀬(宇治群島北東方）</option>
+                            <option>うるま市・金武町境界部地先の埋立地</option>
+                        </select>
+                    </label>
+                    <label>緯度 <input id="EEWE_latitude" type="number" min="-90" max="90" value="35.6809591"></label>
+                    <label>経度 <input id="EEWE_longitude" type="number" min="-180" max="180" value="139.7673068"></label>
+
+
+                    <label>深さ(km) <input id="EEWE_depth" type="number" min="0" max="6500" step="1" value="10"></label>
+                    <button id="Start_simulation">シミュレーション</button>
                 </section>
             </div>
             <div id="tab1_content15" class="tabcontent">

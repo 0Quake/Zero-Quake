@@ -118,6 +118,8 @@ var defaultConfigVal = {
     },
     voice: {
       EEW: "緊急地震速報です。強い揺れに警戒してください。",
+      EEWUpdate: "緊急地震速報が更新されました。",
+      EEWCancel: "緊急地震速報が取り消されました。",
     },
   },
   color: {
@@ -585,6 +587,8 @@ ipcMain.on("message", (_event, response) => {
       action: "setting",
       data: config,
     });
+  } else if (response.action == "EEWSimulation") {
+    EEWAlert(response.data);
   } else if (response.action == "checkForUpdate") {
     checkUpdate();
   } else if (response.action == "tsunamiReqest") {
@@ -1835,8 +1839,8 @@ function EEWdetect(type, json /*, KorL*/) {
           Code: null,
           Name: elm.name,
           Alert: alertFlg,
-          IntTo: shindoConvert(elm.scaleTo, 0, true),
-          IntFrom: shindoConvert(elm.scaleFrom, 0, true),
+          IntTo: shindoConvert(elm.scaleTo, 0),
+          IntFrom: shindoConvert(elm.scaleFrom, 0),
           ArrivalTime: elm.arrivalTime,
           Arrived: elm.kindCode == 11,
         });
@@ -1847,7 +1851,7 @@ function EEWdetect(type, json /*, KorL*/) {
         serial: Number(json.issue.serial),
         report_time: new Date(json.issue.time),
         magnitude: magnitudeTmp,
-        maxInt: shindoConvert(maxIntTmp, 0, true),
+        maxInt: shindoConvert(maxIntTmp, 0),
         depth: depthTmp,
         is_cancel: Boolean(json.canceled),
         is_final: null,
@@ -2140,11 +2144,12 @@ function EEWAlert(data, first, update) {
       if (data.alertflg == "警報") {
         soundPlay("EEW1");
       } else {
+        3;
         soundPlay("EEW2");
       }
-      speak(config.notice.voice.EEW);
+      speak(EEWTextGenerate(data), false);
     } else {
-      speak(config.notice.voice.EEWUpdate);
+      speak(EEWTextGenerate(data), true);
     }
     if (mainWindow) {
       mainWindow.webContents.send("message2", {
@@ -2999,6 +3004,46 @@ function speak(str) {
     });
   }
 }
+function EEWTextGenerate(EEWData, update) {
+  if (EEWData.is_cancel) {
+    text = config.notice.voice.EEWCancel;
+  } else if (update) {
+    text = config.notice.voice.EEWUpdate;
+  } else {
+    text = config.notice.voice.EEW;
+  }
+
+  text = update ? config.notice.voice.EEWUpdate : config.notice.voice.EEW;
+  text = text.replaceAll("{grade}", EEWData.alertflg ? EEWData.alertflg : "");
+  text = text.replaceAll("{serial}", EEWData.serial ? EEWData.serial : "");
+  text = text.replaceAll("{final}", EEWData.is_final ? "最終報" : "");
+  text = text.replaceAll("{magnitude}", EEWData.magnitude ? EEWData.magnitude : "");
+  text = text.replaceAll("{maxInt}", EEWData.maxInt ? shindoConvert(EEWData.maxInt, 1) : "");
+  text = text.replaceAll("{depth}", EEWData.depth ? EEWData.depth : "");
+  text = text.replaceAll("{training}", EEWData.is_training ? "テスト報" : "");
+  text = text.replaceAll("{training2}", EEWData.is_training ? "これは訓練報です。" : "");
+  text = text.replaceAll("{region_name}", EEWData.region_name ? EEWData.region_name : "");
+  text = text.replaceAll("{report_time}", EEWData.report_time ? dateEncode(5, EEWData.report_time) : "");
+  text = text.replaceAll("{origin_time}", EEWData.origin_time ? dateEncode(5, EEWData.origin_time) : "");
+  if (EEWData.warnZones && EEWData.warnZones.length) {
+    var userSect = EEWData.warnZones.find(function (elm2) {
+      return elm2.Name == config.home.Section;
+    });
+
+    if (userSect) {
+      var userInt = config.Info.EEW.IntType == "max" ? userSect.IntTo : userSect.IntFrom;
+      text = text.replaceAll("{local_Int}", shindoConvert(userInt, 1));
+    } else {
+      text = text.replaceAll("{local_Int}", "不明");
+    }
+  } else {
+    text = text.replaceAll("{local_Int}", "不明");
+  }
+
+  //text.replaceAll("{EventID}", EEWData.EventID);
+  console.log(text);
+  return text;
+}
 //音声再生(kmoniWorker連携)
 function soundPlay(name) {
   if (kmoniWorker) {
@@ -3054,13 +3099,13 @@ function dateEncode(type, dateTmp) {
     var ss = String(dateTmp.getSeconds()).padStart(2, "0");
     return YYYY + MM + DD + hh + mm + ss;
   } else if (type == 2) {
-    //YYYYMMDDHHMMSS
+    //YYYYMMDD
     var YYYY = String(dateTmp.getFullYear());
     var MM = String(dateTmp.getMonth() + 1).padStart(2, "0");
     var DD = String(dateTmp.getDate()).padStart(2, "0");
     return YYYY + MM + DD;
   } else if (type == 3) {
-    //YYYYMMDDHHMMSS
+    //YYYY/MM/DD HH:MM:SS
     var YYYY = String(dateTmp.getFullYear());
     var MM = String(dateTmp.getMonth() + 1).padStart(2, "0");
     var DD = String(dateTmp.getDate()).padStart(2, "0");
@@ -3069,11 +3114,17 @@ function dateEncode(type, dateTmp) {
     var ss = String(dateTmp.getSeconds()).padStart(2, "0");
     return YYYY + "/" + MM + "/" + DD + " " + hh + ":" + mm + ":" + ss;
   } else if (type == 4) {
-    //YYYYMMDDHHMMSS
+    //YYYY/MM/DD
     var YYYY = String(dateTmp.getFullYear());
     var MM = String(dateTmp.getMonth() + 1).padStart(2, "0");
     var DD = String(dateTmp.getDate()).padStart(2, "0");
     return YYYY + "/" + MM + "/" + DD;
+  } else if (type == 5) {
+    //YYYYMMDDHHMMSS
+    var hh = String(dateTmp.getHours()).padStart(2, "0");
+    var mm = String(dateTmp.getMinutes()).padStart(2, "0");
+    var ss = String(dateTmp.getSeconds()).padStart(2, "0");
+    return hh + "時" + mm + "分" + ss + "秒";
   } else {
     var YYYY = String(dateTmp.getFullYear());
     var MM = String(dateTmp.getMonth() + 1).padStart(2, "0");
