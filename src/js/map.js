@@ -784,139 +784,6 @@ function kmoniMapUpdate(dataTmp, type) {
   }
 }
 
-//予想震度更新
-function EstShindoUpdate(req) {
-  if (map.getSource("kmoni-estShindo1" + req.eid)) {
-    map.getSource("kmoni-estShindo1" + req.eid).updateImage({
-      url: req.data[0],
-    });
-    map.getSource("kmoni-estShindo2" + req.eid).updateImage({
-      url: req.data[1],
-    });
-    map.getSource("kmoni-estShindo3" + req.eid).updateImage({
-      url: req.data[2],
-    });
-    map.getSource("kmoni-estShindo4" + req.eid).updateImage({
-      url: req.data[3],
-    });
-    map.getSource("kmoni-estShindo5" + req.eid).updateImage({
-      url: req.data[4],
-    });
-  } else {
-    i1 = [req.data[4], req.eid];
-    map.addSource("kmoni-estShindo1" + req.eid, {
-      type: "image",
-      url: req.data.a,
-      coordinates: [
-        [129, 46],
-        [145.8, 46.2],
-        [145.8, 42.2],
-        [128.8, 42.5],
-      ],
-    });
-    map.addLayer(
-      {
-        id: "kmoni-estShindo1" + req.eid,
-        type: "raster",
-        source: "kmoni-estShindo1" + req.eid,
-        paint: {
-          "raster-fade-duration": 0,
-          "raster-resampling": "nearest",
-        },
-      },
-      "basemap_LINE"
-    );
-    map.addSource("kmoni-estShindo2" + req.eid, {
-      type: "image",
-      url: req.data.b,
-      coordinates: [
-        [128.8, 42.5],
-        [145.8, 42.2],
-        [145.75, 38.1],
-        [128.75, 38.2],
-      ],
-    });
-    map.addLayer(
-      {
-        id: "kmoni-estShindo2" + req.eid,
-        type: "raster",
-        source: "kmoni-estShindo2" + req.eid,
-        paint: {
-          "raster-fade-duration": 0,
-          "raster-resampling": "nearest",
-        },
-      },
-      "basemap_LINE"
-    );
-    map.addSource("kmoni-estShindo3" + req.eid, {
-      type: "image",
-      url: req.data.c,
-      coordinates: [
-        [128.75, 38.2],
-        [145.75, 38.1],
-        [146, 34.1],
-        [128.6, 34.1],
-      ],
-    });
-    map.addLayer(
-      {
-        id: "kmoni-estShindo3" + req.eid,
-        type: "raster",
-        source: "kmoni-estShindo3" + req.eid,
-        paint: {
-          "raster-fade-duration": 0,
-          "raster-resampling": "nearest",
-        },
-      },
-      "basemap_LINE"
-    );
-    map.addSource("kmoni-estShindo4" + req.eid, {
-      type: "image",
-      url: req.data.d,
-      coordinates: [
-        [128.6, 34.1],
-        [146, 34.1],
-        [145.5, 30],
-        [128.55, 30],
-      ],
-    });
-    map.addLayer(
-      {
-        id: "kmoni-estShindo4" + req.eid,
-        type: "raster",
-        source: "kmoni-estShindo4" + req.eid,
-        paint: {
-          "raster-fade-duration": 0,
-          "raster-resampling": "nearest",
-        },
-      },
-      "basemap_LINE"
-    );
-    map.addSource("kmoni-estShindo5" + req.eid, {
-      type: "image",
-      url: req.data.e,
-      coordinates: [
-        [122.5, 32],
-        [131.2, 31.8],
-        [131, 23.9],
-        [122.45, 23.9],
-      ],
-    });
-    map.addLayer(
-      {
-        id: "kmoni-estShindo5" + req.eid,
-        type: "raster",
-        source: "kmoni-estShindo5" + req.eid,
-        paint: {
-          "raster-fade-duration": 0,
-          "raster-resampling": "nearest",
-        },
-      },
-      "basemap_LINE"
-    );
-  }
-}
-
 var Int0T = ["any"];
 var Int1T = ["any"];
 var Int2T = ["any"];
@@ -1049,8 +916,6 @@ function psWaveEntry() {
       } else {
         psWaveList.push({
           id: elm.EventID,
-          PCircleElm: null,
-          SCircleElm: null,
           data: { latitude: elm.latitude, longitude: elm.longitude, originTime: elm.origin_time },
           TimeTable: TimeTableTmp,
         });
@@ -1065,24 +930,10 @@ function psWaveEntry() {
       return elm2.EventID == elm.id;
     });
     if (!stillEEW || stillEEW.is_cancel) {
-      if (elm.PCircleElm) {
+      if (map.getLayer("PCircle_" + elm.id)) {
         map.setLayoutProperty("PCircle_" + elm.id, "visibility", "none");
         map.setLayoutProperty("SCircle_" + elm.id, "visibility", "none");
         map.setLayoutProperty("SCircle_" + elm.id + "_FILL", "visibility", "none");
-        if (map.getLayer("kmoni-estShindo1" + elm.id)) {
-          map.removeLayer("kmoni-estShindo1" + elm.id);
-          map.removeLayer("kmoni-estShindo2" + elm.id);
-          map.removeLayer("kmoni-estShindo3" + elm.id);
-          map.removeLayer("kmoni-estShindo4" + elm.id);
-          map.removeLayer("kmoni-estShindo5" + elm.id);
-        }
-        if (map.getSource("kmoni-estShindo1" + elm.id)) {
-          map.removeSource("kmoni-estShindo1" + elm.id);
-          map.removeSource("kmoni-estShindo2" + elm.id);
-          map.removeSource("kmoni-estShindo3" + elm.id);
-          map.removeSource("kmoni-estShindo4" + elm.id);
-          map.removeSource("kmoni-estShindo5" + elm.id);
-        }
       }
     }
     return stillEEW;
@@ -1166,7 +1017,7 @@ function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrive
   if (EQElm) {
     let _center = turf.point([longitude, latitude]);
 
-    if (EQElm.PCircleElm) {
+    if (map.getSource("PCircle_" + EventID)) {
       if (pRadius) {
         var pcircle = turf.circle(_center, pRadius / 1000, circle_options);
         map.getSource("PCircle_" + EventID).setData(pcircle);
@@ -1217,8 +1068,6 @@ function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrive
         },
       });
 
-      EQElm.PCircleElm = true;
-      EQElm.SCircleElm = true;
       EQElm = psWaveList[psWaveList.length - 1];
 
       psWaveCalc(EventID);

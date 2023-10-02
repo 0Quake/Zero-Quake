@@ -87,10 +87,6 @@ var defaultConfigVal = {
         GetData: true,
         Interval: 1000,
       },
-      lmoni: {
-        GetData: true,
-        Interval: 1000,
-      },
     },
     msil: {
       GetData: true,
@@ -220,15 +216,13 @@ var kmoniActive = false;
 var kmoniTimeTmp = [];
 var EEW_Data = []; //地震速報リスト
 var EEW_nowList = []; //現在発報中リスト
-var EEW_history = []; //起動中に発生したリスト
 var EarlyEst_Data = []; //Earlyest地震速報リスト
 var EarlyEst_history = []; //起動中に発生したリスト
 
-var Yoyu = 250;
 var yoyuK = (yoyuL = 2500);
 var EEWNow = false;
 
-var errorCountk = (errorCountkI = errorCountkEI = errorCountl = errorCountyw = errorCountye = 0);
+var errorCountkI = (errorCountkEI = errorCountl = errorCountyw = errorCountye = 0);
 
 var EQDetect_List = [];
 
@@ -240,9 +234,8 @@ var narikakun_EIDs = [];
 var eqInfo = { jma: [], usgs: [] };
 var EQInfoFetchIndex = 0;
 var tsunamiData;
-var kmoniTimeout, lmoniTimeout;
+var kmoniTimeout;
 var msil_lastTime = 0;
-var kmoniEid;
 var kmoniPointsDataTmp, SnetPointsDataTmp;
 let tray;
 var RevocationTimer;
@@ -338,8 +331,6 @@ function checkUpdate() {
       });
     }
   });
-
-  // リクエストの送信
   request.end();
 }
 
@@ -675,9 +666,6 @@ function createWindow() {
           action: "EEWAlertUpdate",
           data: EEW_nowList,
         });
-        if (estShindoTmp) {
-          mainWindow.webContents.send("message2", estShindoTmp);
-        }
       }
 
       mainWindow.webContents.send("message2", {
@@ -950,12 +938,8 @@ function start() {
 
   kmoniRequest();
   wolfxRequest();
-  lmoniRequest();
   yoyuSetK(function () {
     kmoniRequest();
-  });
-  yoyuSetL(function () {
-    lmoniRequest();
   });
   //↑接続処理
 
@@ -1111,62 +1095,11 @@ function SnetControl(data, date) {
   }
 }
 
-var estShindoTmp;
-var estShindoTmp;
-//強震モニタ予想震度処理
-function estShindoControl(response) {
-  if (!estShindoTmp || estShindoTmp.eid !== response.eid || estShindoTmp.serial !== response.serial) {
-    estShindoTmp = {
-      action: "EstShindoUpdate",
-      data: response.data,
-      eid: response.eid,
-      serial: response.serial,
-    };
-    if (mainWindow) {
-      mainWindow.webContents.send("message2", estShindoTmp);
-    }
-  }
-}
-
-//var kmoniEstShindoData;
-var kmoniEEW_url = true;
 var kmoniI_url = 0;
 //強震モニタへのHTTPリクエスト
 function kmoniRequest() {
   if (net.online && config.Source.kmoni.kmoni.GetData) {
     var ReqTime = new Date() - yoyuK - Replay;
-
-    var urlTmp = kmoniEEW_url ? "http://www.kmoni.bosai.go.jp/webservice/hypo/eew/" + dateEncode(1, ReqTime) + ".json" : "https://smi.lmoniexp.bosai.go.jp/webservice/hypo/eew/" + dateEncode(1, ReqTime) + ".json";
-    var request = net.request(urlTmp);
-    request.on("response", (res) => {
-      var dataTmp = "";
-      if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
-        errorCountk++;
-        if (errorCountk > 3) {
-          errorCountk = 0;
-          kmoniEEW_url = !kmoniEEW_url;
-        }
-        NetworkError(res._responseHead.statusCode, "強震モニタ");
-        kmoniTimeUpdate(new Date() - Replay, "kmoni", "Error");
-      } else {
-        errorCountk = 0;
-        res.on("data", (chunk) => {
-          dataTmp += chunk;
-        });
-        res.on("end", function () {
-          var json = jsonParse(dataTmp);
-          if (json) {
-            EEWdetect(2, json, 1);
-          }
-        });
-      }
-    });
-    request.on("error", (error) => {
-      NetworkError(error, "強震モニタ");
-      kmoniTimeUpdate(new Date() - Replay, "kmoni", "Error");
-    });
-
-    request.end();
 
     if (kmoniI_url != 2 || dateEncode(1, ReqTime) % 2 == 0) {
       var urlTmp = ["https://smi.lmoniexp.bosai.go.jp/data/map_img/RealTimeImg/jma_s/" + dateEncode(2, ReqTime) + "/" + dateEncode(1, ReqTime) + ".jma_s.gif", "http://www.kmoni.bosai.go.jp/data/map_img/RealTimeImg/jma_s/" + dateEncode(2, ReqTime) + "/" + dateEncode(1, ReqTime) + ".jma_s.gif"][kmoniI_url];
@@ -1206,94 +1139,9 @@ function kmoniRequest() {
       request.end();
     }
   }
-  if (kmoniEid && kmoniEI_URL) kmoniEstShindoRequest();
 
   if (kmoniTimeout) clearTimeout(kmoniTimeout);
   kmoniTimeout = setTimeout(kmoniRequest, config.Source.kmoni.kmoni.Interval);
-}
-var kmoniEI_URL = true;
-//var kmoniEidT, kmoniRNumT;
-function kmoniEstShindoRequest() {
-  /*
-  if (kmoniEid == kmoniEidT && kmoniRNum == kmoniRNumT) return;
-  kmoniEid = kmoniEidT;
-  kmoniRNum = kmoniRNumT;
-  var ReqTime = new Date() - yoyuK - Replay;
-
-  var urlTmp = kmoniEI_URL ? "http://www.kmoni.bosai.go.jp/data/map_img/EstShindoImg/eew/" + dateEncode(2, ReqTime) + "/" + dateEncode(1, ReqTime) + ".eew.gif" : "https://smi.lmoniexp.bosai.go.jp/data/map_img/EstShindoImg/eew/" + dateEncode(2, ReqTime) + "/" + dateEncode(1, ReqTime) + ".eew.gif";
-  var request = net.request(urlTmp);
-  request.on("response", (res) => {
-    var dataTmp = [];
-    res.on("data", (chunk) => {
-      dataTmp.push(chunk);
-    });
-    res.on("end", () => {
-      try {
-        if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
-          errorCountkEI++;
-          if (errorCountkEI > 3) {
-            errorCountkEI = 0;
-            kmoniEI_URL = !kmoniEI_URL;
-          }
-          kmoniTimeUpdate(new Date() - Replay, "kmoni", "Error");
-        } else {
-          var bufTmp = Buffer.concat(dataTmp);
-          if (kmoniWorker) {
-            var kmoniEstShindoDataTmp = "data:image/gif;base64," + bufTmp.toString("base64");
-            if (kmoniEstShindoDataTmp !== kmoniEstShindoData) {
-              kmoniEstShindoData = kmoniEstShindoDataTmp;
-              kmoniWorker.webContents.send("message2", {
-                action: "KmoniEstShindoImgUpdate",
-                data: kmoniEstShindoData,
-                eid: kmoniEid,
-                serial: kmoniRNum,
-              });
-            }
-          }
-        }
-      } catch (err) {
-        return;
-      }
-    });
-  });
-  request.on("error", (error) => {
-    NetworkError(error, "強震モニタ(画像)");
-  });
-  request.end();
-  */
-}
-
-//長周期地震動モニタへのHTTPリクエスト
-function lmoniRequest() {
-  if (net.online && config.Source.kmoni.lmoni.GetData) {
-    var request = net.request("https://www.lmoni.bosai.go.jp/monitor/webservice/hypo/eew/" + dateEncode(1, new Date() - yoyuL - Replay) + ".json");
-    request.on("response", (res) => {
-      var dataTmp = "";
-      if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
-        NetworkError(res._responseHead.statusCode, "長周期地震動モニタ");
-        kmoniTimeUpdate(new Date() - Replay, "Lmoni", "Error");
-      } else {
-        errorCountl = 0;
-        res.on("data", (chunk) => {
-          dataTmp += chunk;
-        });
-        res.on("end", function () {
-          var json = jsonParse(dataTmp);
-          EEWdetect(2, json, 2);
-        });
-      }
-    });
-    request.on("error", (error) => {
-      NetworkError(error, "長周期地震動モニタ");
-      kmoniTimeUpdate(new Date() - Replay, "Lmoni", "Error");
-    });
-
-    request.end();
-  }
-  if (kmoniEid && !kmoniEI_URL) kmoniEstShindoRequest();
-
-  if (lmoniTimeout) clearTimeout(lmoniTimeout);
-  lmoniTimeout = setTimeout(lmoniRequest, config.Source.kmoni.lmoni.Interval);
 }
 
 //海しるへのHTTPリクエスト処理
@@ -1335,7 +1183,7 @@ function SnetRequest() {
                     });
                   }
                 } catch (err) {
-                  kmoniTimeUpdate(new Date() - Replay, "Lmoni", "Error");
+                  kmoniTimeUpdate(new Date() - Replay, "msilImg", "Error");
                 }
               });
             });
@@ -1344,13 +1192,13 @@ function SnetRequest() {
             msil_lastTime = dateTime;
           }
         } catch (err) {
-          kmoniTimeUpdate(new Date() - Replay, "Lmoni", "Error");
+          kmoniTimeUpdate(new Date() - Replay, "msilImg", "Error");
         }
       });
     });
     request.on("error", (error) => {
       NetworkError(error, "海しる");
-      kmoniTimeUpdate(new Date() - Replay, "Lmoni", "Error");
+      kmoniTimeUpdate(new Date() - Replay, "msilImg", "Error");
     });
 
     request.end();
@@ -1596,7 +1444,7 @@ function RegularExecution() {
   //EEW解除
   EEW_nowList.forEach(function (elm) {
     if (new Date() - Replay - new Date(dateEncode(3, Number(elm.origin_time), 1)) > 300000) {
-      EEWClear(null, elm.EventID, null, true);
+      EEWClear(elm.EventID);
     }
   });
 
@@ -1659,56 +1507,6 @@ async function yoyuSetK(func) {
   return true;
 }
 
-//長周期地震動モニタの取得オフセット設定
-async function yoyuSetL(func) {
-  var yoyuLOK = false;
-  var loopCount = 0;
-  var resTimeTmp;
-  while (!yoyuLOK) {
-    await new Promise((resolve) => {
-      try {
-        if (net.online) {
-          var dataTmp = "";
-          var request = net.request("https://smi.lmoniexp.bosai.go.jp/webservice/server/pros/latest.json?_" + Number(new Date()));
-          request.on("response", (res) => {
-            res.on("data", (chunk) => {
-              dataTmp += chunk;
-            });
-            res.on("end", function () {
-              try {
-                var json = JSON.parse(dataTmp);
-                var resTime = new Date(json.latest_time);
-
-                if (resTimeTmp !== resTime && 0 < loopCount) {
-                  yoyuLOK = true;
-                  yoyuL = new Date() - resTime;
-                }
-                resTimeTmp = resTime;
-                resolve();
-              } catch (err) {
-                return;
-              }
-            });
-          });
-
-          request.end();
-        }
-      } catch (err) {
-        return;
-      }
-    });
-    if (loopCount > 25) {
-      yoyuL = 2500 + Yoyu;
-      break;
-    }
-
-    loopCount++;
-  }
-
-  func();
-  return true;
-}
-
 //情報最終更新時刻を更新
 function kmoniTimeUpdate(Updatetime, type, condition, vendor) {
   var sendData = {
@@ -1745,23 +1543,9 @@ function kmoniTimeUpdate(Updatetime, type, condition, vendor) {
 }
 
 //情報フォーマット変更・新報検知→EEWcontrol
-function EEWdetect(type, json /*, KorL*/) {
+function EEWdetect(type, json) {
   if (!json) return;
-  //if (type == 1) { y-kmoni
-  if (type == 2) {
-    //kmoni/lmoni
-    try {
-      if (json.result.message == "") {
-        kmoniEid = json.report_id;
-        kmoniRNum = json.report_num;
-      } else {
-        kmoniEid = null;
-        kmoniRNum = null;
-      }
-    } catch (err) {
-      return;
-    }
-  } else if (type == 3) {
+  if (type == 3) {
     //axis
 
     try {
@@ -1887,35 +1671,33 @@ function EEWdetect(type, json /*, KorL*/) {
   }
 }
 
-//EEW情報マージ→EEWAlert
+//EEW情報マージ
 function EEWcontrol(data) {
-  if (!data) return;
-  if (!config.Info.EEW.showTraning && data.is_training) return;
+  if (!data) return; //データがない場合、処理終了
+  if (!config.Info.EEW.showTraning && data.is_training) return; //訓練法を受信するかどうか（設定に準拠）
 
   if (data.origin_time) {
     var origin_timeTmp = data.origin_time;
   } else {
-    var eqj = EEW_Data.find(function (elm) {
-      return elm.EQ_id == data.EventID;
-    });
-    if (eqj) {
-      origin_timeTmp = eqj.data[eqj.data.length - 1].origin_time;
-    } else {
-      origin_timeTmp = new Date() - Replay;
-    }
+    var origin_timeTmp = new Date() - Replay;
   }
+
+  //５分以上前の地震／未来の地震（リプレイ時）を除外
   var pastTime = new Date() - Replay - origin_timeTmp;
   if (pastTime > 300000 || pastTime < 0) return;
 
+  //現在地との距離
   if (data.latitude && data.longitude) {
     data.distance = geosailing(data.latitude, data.longitude, config.home.latitude, config.home.longitude);
   }
 
   if (data.warnZones && data.warnZones.length) {
+    //設定された細分区域のデータ参照
     var userSect = data.warnZones.find(function (elm2) {
       return elm2.Name == config.home.Section;
     });
 
+    //現在地の予想震度・到達予想時刻
     if (userSect) {
       data.userIntensity = config.Info.EEW.IntType == "max" ? userSect.IntTo : userSect.IntFrom;
       data.arrivalTime = userSect.ArrivalTime;
@@ -1926,98 +1708,78 @@ function EEWcontrol(data) {
     return elm.EQ_id == data.EventID;
   });
   if (EQJSON) {
-    //ID・報の両方一致した情報が存在するか
+    //同一地震のデータが既に存在する場合
     var EEWJSON = EQJSON.data.find(function (elm2) {
       return elm2.serial == data.serial;
     });
     if (EEWJSON) {
-      var oneBefore =
-        data.serial ==
-        Math.max.apply(
-          null,
-          EQJSON.data.map(function (o) {
-            return o.serial;
-          })
-        );
-
+      //同じ報数の情報が既に存在する（マージ処理へ）
+      // prettier-ignore
+      var oneBefore = data.serial == Math.max.apply(null, EQJSON.data.map(function(o){ return o.serial;}));
       if (oneBefore) {
-        //既知／情報更新
+        //最新報である場合
         var changed = false;
+        //マージ元のデータ
         oneBeforeData = EQJSON.data.find(function (elm) {
           return elm.serial == data.serial;
         });
-        var keys = ["alertflg", "EventID", "serial", "report_time", "magnitude", "maxInt", "depth", "is_cancel", "is_final", "is_training", "latitude", "longitude", "region_code", "region_name", "origin_time", "isPlum", "userIntensity", "arrivalTime", "intensityAreas", "warnZones"];
 
+        //キーごとにマージ
+        var keys = ["alertflg", "EventID", "serial", "report_time", "magnitude", "maxInt", "depth", "is_cancel", "is_final", "is_training", "latitude", "longitude", "region_code", "region_name", "origin_time", "isPlum", "userIntensity", "arrivalTime", "intensityAreas", "warnZones"];
         keys.forEach(function (elm) {
-          if ((!oneBeforeData[elm] || oneBeforeData[elm].length == 0) && data[elm]) {
+          if (data[elm] && (!oneBeforeData[elm] || oneBeforeData[elm].length == 0)) {
             oneBeforeData[elm] = data[elm];
             changed = true;
           }
         });
 
-        if (data.warnZones.length) {
+        if (Array.isArray(data.warnZones)) {
           data.warnZones.forEach(function (elm) {
+            //一致する細分区域のデータを検索
             Item = oneBeforeData.warnZones.find(function (elm2) {
               return elm.Name == elm2.Name;
             });
-            if (Item) {
-              elm = Object.assign(Item, elm);
-            }
+            if (Item) elm = Object.assign(Item, elm); //データをマージ
           });
         }
-
-        if (changed) {
-          EEWAlert(oneBeforeData, false, true);
-        }
+        //データに変化があれば、警報処理へ
+        if (changed) EEWAlert(oneBeforeData, false, true);
       }
     } else {
-      //最新の報かどうか
-      var saishin =
-        data.serial >
-        Math.max.apply(
-          null,
-          EQJSON.data.map(function (o) {
-            return o.serial;
-          })
-        );
-
+      //同じ報数の情報がない場合
+      // prettier-ignore
+      var saishin = data.serial > Math.max.apply(null,EQJSON.data.map(function(o){return o.serial;}));
       if (saishin) {
-        //第２報以降
-
+        //最新の報である
         var EQJSON = EEW_Data.find(function (elm) {
           return elm.EQ_id == data.EventID;
         });
-
-        EEWAlert(data, false);
+        //データ追加
         EQJSON.data.push(data);
-        if (data.is_cancel) {
-          EQJSON.canceled = true;
-        }
+        if (data.is_cancel) EQJSON.canceled = true;
+        //警報処理
+        EEWAlert(data, false);
       }
     }
   } else {
     //第１報
     if (!data.maxInt) {
+      //震度不明を無視するか（設定に準拠）
       if (!config.Info.EEW.IntQuestion) return;
     } else if (shindoConvert(config.Info.EEW.IntThreshold, 5) > shindoConvert(data.maxInt, 5)) {
+      //震度通知条件（設定に準拠）
       return;
     }
 
-    EEWAlert(data, true);
+    //データ追加
     EEW_Data.push({
       EQ_id: data.EventID,
       canceled: false,
       data: [data],
     });
-  }
-  //EEW履歴に追加
-  if (!EEW_history[data.source]) EEW_history[data.source] = [];
-  if (
-    !EEW_history[data.source].find(function (elm) {
-      return data.EventID == elm.EventID && data.serial == elm.serial;
-    })
-  ) {
-    EEW_history[data.source].push(data);
+
+    //警報処理
+    EEWAlert(data, true);
   }
 }
 
@@ -2097,32 +1859,22 @@ function EarlyEstControl(data) {
 }
 
 //EEW解除処理
-function EEWClear(source, code, reportnum, bypass) {
-  if (EEWNow || bypass) {
-    if (!bypass && EEW_history[source]) {
-      var EEW_detected = EEW_history[source].find(function (elm) {
-        return code == elm.EventID;
-      });
-    }
-    if (EEW_detected || bypass) {
-      EEW_nowList = EEW_nowList.filter(function (elm) {
-        return elm.EventID !== code;
-      });
-      if (mainWindow) {
-        mainWindow.webContents.send("message2", {
-          action: "EEWAlertUpdate",
-          data: EEW_nowList,
-        });
-      }
+function EEWClear(EventID) {
+  EEW_nowList = EEW_nowList.filter(function (elm) {
+    return elm.EventID !== EventID;
+  });
+  if (mainWindow) {
+    mainWindow.webContents.send("message2", {
+      action: "EEWAlertUpdate",
+      data: EEW_nowList,
+    });
+  }
 
-      if (estShindoTmp && estShindoTmp.eid == code) estShindoTmp = null;
-
-      if (EEW_nowList.length == 0) {
-        EEWNow = false;
-        if (psBlock && powerSaveBlocker.isStarted(psBlock)) powerSaveBlocker.stop(psBlock);
-        worker.postMessage({ action: "EEWNow", data: EEWNow });
-      }
-    }
+  if (EEW_nowList.length == 0) {
+    EEWNow = false;
+    //パワーセーブ再開
+    if (psBlock && powerSaveBlocker.isStarted(psBlock)) powerSaveBlocker.stop(psBlock);
+    worker.postMessage({ action: "EEWNow", data: EEWNow });
   }
 }
 
@@ -2217,9 +1969,6 @@ function EarlyEstAlert(data, first, update) {
     if (first) {
       createWindow();
       soundPlay("EEW2");
-      //speak(config.notice.voice.EEW);
-    } else {
-      //speak(config.notice.voice.EEWUpdate);
     }
     if (mainWindow) {
       mainWindow.webContents.send("message2", {
@@ -3040,8 +2789,6 @@ function EEWTextGenerate(EEWData, update) {
     text = text.replaceAll("{local_Int}", "不明");
   }
 
-  //text.replaceAll("{EventID}", EEWData.EventID);
-  console.log(text);
   return text;
 }
 //音声再生(kmoniWorker連携)
@@ -3055,7 +2802,7 @@ function soundPlay(name) {
 }
 
 //ネットワークエラー処理
-function NetworkError(/*error, type*/) {
+function NetworkError() {
   return false;
 }
 //メインウィンドウ内通知
@@ -3089,50 +2836,24 @@ function jsonParse(str) {
 function dateEncode(type, dateTmp) {
   if (!dateTmp) dateTmp = new Date();
   else dateTmp = new Date(dateTmp);
+
+  var YYYY = String(dateTmp.getFullYear());
+  var MM = String(dateTmp.getMonth() + 1).padStart(2, "0");
+  var DD = String(dateTmp.getDate()).padStart(2, "0");
+  var hh = String(dateTmp.getHours()).padStart(2, "0");
+  var mm = String(dateTmp.getMinutes()).padStart(2, "0");
+  var ss = String(dateTmp.getSeconds()).padStart(2, "0");
   if (type == 1) {
-    //YYYYMMDDHHMMSS
-    var YYYY = String(dateTmp.getFullYear());
-    var MM = String(dateTmp.getMonth() + 1).padStart(2, "0");
-    var DD = String(dateTmp.getDate()).padStart(2, "0");
-    var hh = String(dateTmp.getHours()).padStart(2, "0");
-    var mm = String(dateTmp.getMinutes()).padStart(2, "0");
-    var ss = String(dateTmp.getSeconds()).padStart(2, "0");
     return YYYY + MM + DD + hh + mm + ss;
   } else if (type == 2) {
-    //YYYYMMDD
-    var YYYY = String(dateTmp.getFullYear());
-    var MM = String(dateTmp.getMonth() + 1).padStart(2, "0");
-    var DD = String(dateTmp.getDate()).padStart(2, "0");
     return YYYY + MM + DD;
   } else if (type == 3) {
-    //YYYY/MM/DD HH:MM:SS
-    var YYYY = String(dateTmp.getFullYear());
-    var MM = String(dateTmp.getMonth() + 1).padStart(2, "0");
-    var DD = String(dateTmp.getDate()).padStart(2, "0");
-    var hh = String(dateTmp.getHours()).padStart(2, "0");
-    var mm = String(dateTmp.getMinutes()).padStart(2, "0");
-    var ss = String(dateTmp.getSeconds()).padStart(2, "0");
     return YYYY + "/" + MM + "/" + DD + " " + hh + ":" + mm + ":" + ss;
   } else if (type == 4) {
-    //YYYY/MM/DD
-    var YYYY = String(dateTmp.getFullYear());
-    var MM = String(dateTmp.getMonth() + 1).padStart(2, "0");
-    var DD = String(dateTmp.getDate()).padStart(2, "0");
     return YYYY + "/" + MM + "/" + DD;
   } else if (type == 5) {
-    //YYYYMMDDHHMMSS
-    var hh = String(dateTmp.getHours()).padStart(2, "0");
-    var mm = String(dateTmp.getMinutes()).padStart(2, "0");
-    var ss = String(dateTmp.getSeconds()).padStart(2, "0");
     return hh + "時" + mm + "分" + ss + "秒";
   } else {
-    var YYYY = String(dateTmp.getFullYear());
-    var MM = String(dateTmp.getMonth() + 1).padStart(2, "0");
-    var DD = String(dateTmp.getDate()).padStart(2, "0");
-    var hh = String(dateTmp.getHours()).padStart(2, "0");
-    var mm = String(dateTmp.getMinutes()).padStart(2, "0");
-    var ss = String(dateTmp.getSeconds()).padStart(2, "0");
-
     type.replaceAll("YYYY", YYYY);
     type.replaceAll("MM", MM);
     type.replaceAll("DD", DD);
