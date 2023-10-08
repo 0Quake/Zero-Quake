@@ -420,6 +420,18 @@ function EQDetect(data) {
     });
 
     map.addLayer({
+      id: "EQDItemF_" + data.id,
+      type: "fill",
+      source: "EQDItem_" + data.id,
+      paint: {
+        "fill-color": "#FFF",
+        "fill-opacity": 0.3,
+      },
+      minzoom: 0,
+      maxzoom: 22,
+    });
+
+    map.addLayer({
       id: "EQDItem_" + data.id,
       type: "line",
       source: "EQDItem_" + data.id,
@@ -436,7 +448,9 @@ function EQDetect(data) {
 function EQDetectFinish(id) {
   EQDetectItem.forEach(function (elmA, index) {
     if (elmA.id == id) {
-      map.setLayoutProperty("EQDItem_" + id, "visibility", "none");
+      map.removeLayer("EQDItem_" + id);
+      map.removeLayer("EQDItemF_" + id);
+      map.removeSource("EQDItem_" + id);
       EQDetectItem.splice(index, 1);
     }
   });

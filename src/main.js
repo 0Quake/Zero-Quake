@@ -238,7 +238,6 @@ var kmoniTimeout;
 var msil_lastTime = 0;
 var kmoniPointsDataTmp, SnetPointsDataTmp;
 let tray;
-var RevocationTimer;
 var thresholds;
 
 if (app.isPackaged) {
@@ -349,45 +348,47 @@ function doUpdate(url) {
 
 //定期実行
 function ScheduledExecution() {
-  checkUpdate();
+  setInterval(() => {
+    wolfxRequest();
+    checkUpdate();
 
-  //axisのアクセストークン確認
-  if (config.Source.axis.GetData) {
-    var request = net.request("https://axis.prioris.jp/api/token/refresh/?token=" + config.Source.axis.AccessToken);
-    request.on("response", (res) => {
-      var dataTmp = "";
-      res.on("data", (chunk) => {
-        dataTmp += chunk;
-      });
-      res.on("end", function () {
-        try {
-          var json = jsonParse(dataTmp);
-          if (json.status == "generate a new token") {
-            //トークン更新
-            if (json.token) {
-              config.Source.axis.AccessToken = String(json.token);
+    //axisのアクセストークン確認
+    if (config.Source.axis.GetData) {
+      var request = net.request("https://axis.prioris.jp/api/token/refresh/?token=" + config.Source.axis.AccessToken);
+      request.on("response", (res) => {
+        var dataTmp = "";
+        res.on("data", (chunk) => {
+          dataTmp += chunk;
+        });
+        res.on("end", function () {
+          try {
+            var json = jsonParse(dataTmp);
+            if (json.status == "generate a new token") {
+              //トークン更新
+              if (json.token) {
+                config.Source.axis.AccessToken = String(json.token);
+                store.set("config", config);
+                Window_notification("Axisのアクセストークンを更新しました。", "info");
+              }
+            } else if (json.status == "contract has expired") {
+              //トークン期限切れ
+              config.Source.axis.GetData = false;
               store.set("config", config);
-              Window_notification("Axisのアクセストークンを更新しました。", "info");
+              Window_notification("Axisのアクセストークンの期限が切れました。手動でトークンを更新しください。", "warn");
+            } else if (json.status == "invalid header authorization") {
+              config.Source.axis.GetData = false;
+              store.set("config", config);
+              Window_notification("Axisのアクセストークンが不正です。", "error");
             }
-          } else if (json.status == "contract has expired") {
-            //トークン期限切れ
-            config.Source.axis.GetData = false;
-            store.set("config", config);
-            Window_notification("Axisのアクセストークンの期限が切れました。手動でトークンを更新しください。", "warn");
-          } else if (json.status == "invalid header authorization") {
-            config.Source.axis.GetData = false;
-            store.set("config", config);
-            Window_notification("Axisのアクセストークンが不正です。", "error");
+          } catch (err) {
+            return;
           }
-        } catch (err) {
-          return;
-        }
+        });
       });
-    });
 
-    request.end();
-  }
-  setTimeout(ScheduledExecution, 1800000);
+      request.end();
+    }
+  }, 600000);
 }
 
 //準備完了イベント
@@ -1210,6 +1211,7 @@ function SnetRequest() {
 
 //wolfxへのHTTPリクエスト処理
 var wolfx_lastUpdate = 0;
+var wolfx_timeout;
 function wolfxRequest() {
   if (config.Source.wolfx.GetData && net.isOnline) {
     var request = net.request("https://api.wolfx.jp/jma_eew.json?_=" + new Date());
@@ -1292,9 +1294,8 @@ function wolfxRequest() {
 
     request.end();
   }
-  setTimeout(function () {
-    wolfxRequest();
-  }, config.Source.wolfx.Interval);
+  clearTimeout(wolfx_timeout);
+  wolfx_timeout = setTimeout(wolfxRequest, config.Source.wolfx.Interval);
 }
 
 //P2P地震情報API WebSocket接続・受信処理
@@ -1447,6 +1448,16 @@ function RegularExecution() {
       EEWClear(elm.EventID);
     }
   });
+
+  //津波情報解除
+  if (data.ValidDateTime <= new Date()) {
+    TsunamiInfoControl({
+      issue: { time: tsunamiData.ValidDateTime },
+      revocation: true,
+      cancelled: false,
+      areas: [],
+    });
+  }
 
   //kmoniWorker監視
   if (new Date() - kmoniActive > 5000) {
@@ -2702,28 +2713,13 @@ function TsunamiInfoControl(data) {
   var newInfo = !tsunamiData || !tsunamiData.issue || tsunamiData.issue.time < data.issue.time;
   if (newInfo) {
     //情報の有効期限
-    if (data.ValidDateTime) {
-      if (data.ValidDateTime < new Date()) return;
-
-      clearTimeout(RevocationTimer);
-      RevocationTimer = setTimeout(function () {
-        TsunamiInfoControl({
-          issue: { time: tsunamiData.ValidDateTime },
-          revocation: true,
-          cancelled: false,
-          areas: [],
-        });
-      }, data.ValidDateTime - new Date());
-    }
+    if (data.ValidDateTime && data.ValidDateTime < new Date()) return;
 
     soundPlay("TsunamiInfo");
 
     tsunamiData = data;
 
-    if (newInfo) {
-      //アラート
-      createWindow();
-    }
+    if (newInfo) createWindow(); //アラート
 
     if (mainWindow) {
       mainWindow.webContents.send("message2", {
