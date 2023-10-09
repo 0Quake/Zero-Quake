@@ -232,6 +232,9 @@
   border-radius: 50%;
   z-index: 220;
 }
+.kmoni_hide .marker-circle {
+  display: none;
+}
 .marker-circle-S-net {
   border-radius: 20%;
 }

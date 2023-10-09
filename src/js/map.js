@@ -633,6 +633,9 @@ function init() {
       map.setLayoutProperty(elm, "visibility", hinanjoCheck.checked ? "visible" : "none");
     });
   });
+  document.getElementById("kmoni_points").addEventListener("change", function () {
+    document.getElementById("mapcontainer").classList.toggle("kmoni_hide");
+  });
 
   map.on("click", "tsunami_Yoho", tsunamiPopup);
   map.on("click", "tsunami_Watch", tsunamiPopup);

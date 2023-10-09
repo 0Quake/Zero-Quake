@@ -2584,11 +2584,12 @@ function eqInfoControl(dataList, type, EEW) {
             EQElm.epiCenter = data.epiCenter;
             changed = true;
           }
-          if (data.M == "Ｍ不明" || data.M == "NaN") data.M = null;
           if (data.M && (!EQElm.M || newer)) {
             EQElm.M = data.M;
             changed = true;
           }
+          if (data.M == "Ｍ不明" || data.M == "NaN") EQElm.M = null;
+
           if (data.maxI && (!EQElm.maxI || newer)) {
             EQElm.maxI = data.maxI;
             changed = true;
