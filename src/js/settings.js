@@ -386,6 +386,24 @@ function init() {
     document.getElementById("longitude").value = e.lngLat.lng;
     markerElm.setLngLat(e.lngLat);
 
+    var minDistance = Infinity;
+    var tsunamiSect;
+    map
+      .queryRenderedFeatures({
+        layers: ["tsunami_LINE"],
+      })
+      .forEach(function (elm) {
+        coordinates = turf.centroid(elm).geometry.coordinates;
+        // 距離を求める
+        var distance = turf.distance(turf.point([e.lngLat.lng, e.lngLat.lat]), coordinates);
+        if (minDistance > distance) {
+          minDistance = distance;
+          tsunamiSect = elm.properties.name;
+        }
+      });
+    map.setFilter("tsunami_LINE_selected", ["==", "name", tsunamiSect]);
+    selectBoxSet(document.getElementById("tsunamiSect"), tsunamiSect);
+
     selectBoxSet(document.getElementById("saibun"), e.features[0].properties.name);
   });
 
@@ -415,6 +433,7 @@ function MapReDraw() {
 }
 document.getElementById("tsunamiSect").addEventListener("change", function () {
   tsunamiSect = this.value;
+  map.setFilter("tsunami_LINE_selected", ["==", "name", this.value]);
 });
 
 var TTSspeed = 1;
