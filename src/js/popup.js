@@ -306,7 +306,6 @@ var template2 = document.getElementById("EQListTemplate");
 var template2_2 = document.getElementById("EQListTemplate2");
 var EQListWrap;
 function eqInfoDraw(data, source) {
-  console.log(data);
   var EQTemplate;
   if (source == "jma") {
     eqInfoDataJMA = data;

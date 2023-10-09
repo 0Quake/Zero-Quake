@@ -1450,7 +1450,7 @@ function RegularExecution() {
   });
 
   //津波情報解除
-  if (data.ValidDateTime <= new Date()) {
+  if (tsunamiData.ValidDateTime <= new Date()) {
     TsunamiInfoControl({
       issue: { time: tsunamiData.ValidDateTime },
       revocation: true,
@@ -1777,7 +1777,7 @@ function EEWcontrol(data) {
     if (!data.maxInt) {
       //震度不明を無視するか（設定に準拠）
       if (!config.Info.EEW.IntQuestion) return;
-    } else if (shindoConvert(config.Info.EEW.IntThreshold, 5) > shindoConvert(data.maxInt, 5)) {
+    } else if (shindoConvert(config.Info.EEW.IntThreshold, 5) >= shindoConvert(data.maxInt, 5) && shindoConvert(data.maxInt) !== "?") {
       //震度通知条件（設定に準拠）
       return;
     }
@@ -2982,7 +2982,7 @@ function shindoConvert(str, responseType) {
       ConvTable = [0, 1, 2, 3, 4, 4.5, 5, 5.5, 6, 7, 7.5, 4.5, null];
       break;
     case 5:
-      ConvTable = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, null, 0];
+      ConvTable = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, null, 11];
       break;
     case 0:
     default:
