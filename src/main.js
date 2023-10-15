@@ -1331,6 +1331,16 @@ function P2P_WS() {
               data.revocation = false;
               data.source = "P2P";
             }
+            data.areas.forEach((elm) => {
+              if (elm.firstHeight) {
+                if (elm.firstHeight.condition) elm.firstHeightCondition = elm.firstHeight.condition;
+                if (elm.firstHeight.arrivalTime) elm.firstHeight = new Date(elm.firstHeight.arrivalTime);
+                else elm.firstHeight = null;
+              }
+              if (elm.maxHeight && elm.maxHeight.description) {
+                elm.maxHeight = elm.maxHeight.description;
+              }
+            });
             TsunamiInfoControl(data);
             break;
           case 554:

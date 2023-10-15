@@ -9,6 +9,7 @@ window.electronAPI.messageSend((event, request) => {
 
 var mySectElm;
 function tsunamiUpdate(dataTmp) {
+  console.log(dataTmp);
   var Tsunami_MajorWarning = (Tsunami_Warning = Tsunami_Watch = Tsunami_Yoho = false);
   document.getElementById("dateTime").style.display = "block";
   document.getElementById("revocation").style.display = "none";
@@ -60,6 +61,8 @@ function tsunamiUpdate(dataTmp) {
         maxHeight = elm.maxHeight;
         if (maxHeight.match(/未満/)) {
           maxHeight = "<" + maxHeight.replace("未満", "");
+        } else if (maxHeight.match(/超/)) {
+          maxHeight = ">" + maxHeight.replace("超", "");
         }
       }
       var IconTxt = "";
