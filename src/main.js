@@ -944,10 +944,12 @@ function start() {
   });
   //↑接続処理
 
-  //地震情報
+  //防災情報XML 長期フィード取得
+  EQI_JMAXMLList_Req(true);
+  //地震情報定期取得 着火
   eqInfoUpdate();
 
-  //定期実行発火
+  //定期実行 着火
   RegularExecution();
   earlyEstReq();
 }
@@ -2027,7 +2029,6 @@ function EarlyEstAlert(data, first, update) {
 //地震情報更新処理
 function eqInfoUpdate(disableRepeat) {
   EQInfoFetchIndex++;
-  EQI_JMA_Req();
   EQI_JMAXMLList_Req();
   EQI_narikakunList_Req("https://ntool.online/api/earthquakeList?year=" + new Date().getFullYear() + "&month=" + (new Date().getMonth() + 1), 10, true);
   EQI_USGS_Req();
@@ -2035,74 +2036,9 @@ function eqInfoUpdate(disableRepeat) {
   if (!disableRepeat) setTimeout(eqInfoUpdate, config.Info.EQInfo.Interval);
 }
 
-//気象庁JSON 取得・フォーマット変更→eqInfoControl
-function EQI_JMA_Req() {
-  var request = net.request("https://www.jma.go.jp/bosai/quake/data/list.json");
-  request.on("response", (res) => {
-    var dataTmp = "";
-    res.on("data", (chunk) => {
-      dataTmp += chunk;
-    });
-    res.on("end", function () {
-      try {
-        var json = jsonParse(dataTmp);
-        if (!json) return false;
-        var dataTmp2 = [];
-        json = json.filter(function (elm) {
-          return elm.ttl == "震度速報" || elm.ttl == "震源に関する情報" || elm.ttl == "震源・震度情報" || elm.ttl == "遠地地震に関する情報" || elm.ttl == "顕著な地震の震源要素更新のお知らせ";
-        });
-        json = json.sort(function (a, b) {
-          var r = 0;
-          if (a.at > b.at) {
-            r = -1;
-          } else if (a.at < b.at) {
-            r = 1;
-          }
-          return r;
-        });
-
-        var jmaJsonEIDs = [];
-        for (let elm of json) {
-          var eidTmp = elm.eid;
-          if (!jmaJsonEIDs.includes(eidTmp)) {
-            jmaJsonEIDs.push(eidTmp);
-            if (jmaJsonEIDs.length == config.Info.EQInfo.ItemCount) break;
-          }
-        }
-        json.forEach(function (elm) {
-          if (jmaJsonEIDs.includes(elm.eid)) {
-            var maxi = elm.maxi;
-            if (!maxi || maxi == "") maxi = null;
-            dataTmp2.push({
-              eventId: elm.eid,
-              category: elm.ttl,
-              OriginTime: new Date(elm.at),
-              epiCenter: elm.anm,
-              M: elm.mag,
-              maxI: maxi,
-              cancel: elm.ift == "取消",
-
-              reportDateTime: new Date(elm.rdt),
-              DetailURL: [String("https://www.jma.go.jp/bosai/quake/data/" + elm.json)],
-            });
-          }
-        });
-
-        eqInfoControl(dataTmp2, "jma");
-      } catch (err) {
-        return;
-      }
-    });
-  });
-  request.on("error", (error) => {
-    NetworkError(error, "気象庁ホームページ");
-  });
-  request.end();
-}
-
 //気象庁XMLリスト取得→EQI_JMAXML_Req
-function EQI_JMAXMLList_Req() {
-  var request = net.request("https://www.data.jma.go.jp/developer/xml/feed/eqvol.xml");
+function EQI_JMAXMLList_Req(LongPeriodFeed) {
+  var request = net.request(LongPeriodFeed ? "https://www.data.jma.go.jp/developer/xml/feed/eqvol_l.xml" : "https://www.data.jma.go.jp/developer/xml/feed/eqvol.xml");
   request.on("response", (res) => {
     var dataTmp = "";
     res.on("data", (chunk) => {
@@ -2113,12 +2049,19 @@ function EQI_JMAXMLList_Req() {
         const parser = new new JSDOM().window.DOMParser();
         const xml = parser.parseFromString(dataTmp, "text/html");
         if (!xml) return;
+        var EQInfoCount = 0;
         xml.querySelectorAll("entry").forEach(function (elm) {
           var url;
           var urlElm = elm.querySelector("id");
           if (urlElm) url = urlElm.textContent;
           if (!url) return;
-          EQI_JMAXML_Req(url);
+          title = elm.querySelector("title").textContent;
+          if (title == "震度速報" || title == "震源に関する情報" || title == "震源・震度に関する情報" || title == "遠地地震に関する情報" || title == "顕著な地震の震源要素更新のお知らせ") {
+            if (EQInfoCount >= config.Info.EQInfo.ItemCount) EQI_JMAXML_Req(url);
+            EQInfoCount++;
+          } else if (title == "津波情報a" || /大津波警報|津波警報|津波注意報|津波予報/.test(title)) {
+            EQI_JMAXML_Req(url);
+          }
         });
       } catch (err) {
         return;
@@ -2202,7 +2145,11 @@ function EQI_JMAXML_Req(url) {
             var ValidDateTimeTmp;
             if (ValidDateTimeElm) {
               ValidDateTimeTmp = new Date(ValidDateTimeElm.textContent);
+            } else {
+              ValidDateTimeTmp = new Date(xml.querySelector("ReportDateTime").textContent);
+              ValidDateTimeTmp.setHours(ValidDateTimeTmp.getHours() + 12);
             }
+            if (ValidDateTimeTmp < new Date()) return;
             tsunamiDataTmp = {
               issue: { time: new Date(xml.querySelector("ReportDateTime").textContent), EventID: Number(xml.querySelector("EventID").textContent) },
               areas: [],
