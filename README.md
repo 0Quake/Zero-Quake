@@ -5,11 +5,13 @@
 ![](https://img.shields.io/github/license/0quake/Zero-Quake)
 
 ## 受信できる情報
+
 ### 気象庁
 
 - ### 緊急地震速報
 
-  予報・警報 ／ キャンセル報・PLUM法など含む
+  予報・警報 ／ キャンセル報・PLUM 法など含む
+
 - ### 地震情報
 
   震度速報／震源に関する情報／震度・震源に関する情報[震度・震源情報/遠地地震に関する情報]  
@@ -20,8 +22,8 @@
   大津波警報／津波警報／津波注意報／津波予報  
   津波情報／沖合の津波観測に関する情報
 
-
 ### その他
+
 - リアルタイム揺れ情報（強震モニタ）
 - Earthquake Catalog（USGS）
 - リアルタイム地震情報（Early-Est）
@@ -30,13 +32,12 @@
 
 ### 緊急地震速報
 
-- P2P 地震情報 API [© @p2pquake_takuya](https://www.p2pquake.net/json_api_v2/)
-- Axis [© Prioris](https://axis.prioris.jp/)
 - Wolfx [© Wolfx Studio.](https://api.wolfx.jp/)
+- Axis（無料登録必須） [© Prioris](https://axis.prioris.jp/)
+- P2P 地震情報 API（警報のみ） [© @p2pquake_takuya](https://www.p2pquake.net/json_api_v2/)
 
 ### 地震情報 (気象庁)
 
-- 気象庁ホームページ [© 気象庁](https://www.jma.go.jp/bosai/map.html?contents=earthquake_map)
 - 気象庁防災情報 XML [© 気象庁](https://xml.kishou.go.jp/xmlpull.html)
 - narikakun.net 地震情報 API [© narikakun](https://dev.narikakun.net/doc/earthquake)
 - Axis [© Prioris](https://axis.prioris.jp/)
@@ -47,7 +48,7 @@
 
 ### 津波情報 (気象庁)
 
-- P2P 地震情報 API [© @p2pquake_takuya](https://www.p2pquake.net/json_api_v2/) 
+- P2P 地震情報 API [© @p2pquake_takuya](https://www.p2pquake.net/json_api_v2/)
 - 気象庁防災情報 XML [© 気象庁](https://xml.kishou.go.jp/xmlpull.html)
 
 ### リアルタイム揺れ情報
@@ -69,7 +70,7 @@
 
 #### ベースマップ
 
-- 「標準」  (単純化して使用)
+- 「標準」 (単純化して使用)
   - 国内：気象庁 予報区等 GIS データ [© 気象庁](https://www.data.jma.go.jp/developer/gis.html)
   - 国外：ne_110m_admin_0_countries [© Natural Earth ](https://www.naturalearthdata.com/downloads/110m-cultural-vectors/)
   - 湖沼：国土数値情報 [© 国土交通省 ](https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-W09-v2_2.html)
@@ -90,7 +91,8 @@
 - 「避難所」 [© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)
 
 ### フォント（Google Fonts）
-  - 太字 MPLUS1p-ExtraBold
-  - 標準 BIZUDPGothic-Regular
-  - 数字 AzeretMono-Regular
-  - アイコン MaterialIcons
+
+- 太字 MPLUS1p-ExtraBold
+- 標準 BIZUDPGothic-Regular
+- 数字 AzeretMono-Regular
+- アイコン MaterialIcons
