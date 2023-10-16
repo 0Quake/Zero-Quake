@@ -1456,13 +1456,13 @@ function AXIS_WS_Connect() {
 function RegularExecution() {
   //EEW解除
   EEW_nowList.forEach(function (elm) {
-    if (new Date() - Replay - new Date(dateEncode(3, Number(elm.origin_time), 1)) > 300000) {
+    if (new Date() - Replay - new Date(elm.origin_time) > 300000) {
       EEWClear(elm.EventID);
     }
   });
 
   //津波情報解除
-  if (tsunamiData.ValidDateTime <= new Date()) {
+  if (tsunamiData && tsunamiData.ValidDateTime <= new Date()) {
     TsunamiInfoControl({
       issue: { time: tsunamiData.ValidDateTime },
       revocation: true,
@@ -2610,6 +2610,9 @@ function eqInfoControl(dataList, type, EEW) {
 //地震情報通知（音声・画面表示等）
 function eqInfoAlert(data, source, update, audioPlay) {
   if (source == "jma") {
+    data = data.filter(function (elm) {
+      return elm.OriginTime;
+    });
     if (!update) {
       eqInfo.jma = eqInfo.jma.concat(data);
     }

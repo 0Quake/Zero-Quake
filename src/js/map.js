@@ -927,16 +927,16 @@ function psWaveEntry() {
     }
   });
 
-  //終わった地震の予報円削除 予想震度画像削除
+  //終わった地震の予報円削除
   psWaveList = psWaveList.filter(function (elm) {
     var stillEEW = now_EEW.find(function (elm2) {
       return elm2.EventID == elm.id;
     });
     if (!stillEEW || stillEEW.is_cancel) {
       if (map.getLayer("PCircle_" + elm.id)) {
-        map.setLayoutProperty("PCircle_" + elm.id, "visibility", "none");
-        map.setLayoutProperty("SCircle_" + elm.id, "visibility", "none");
-        map.setLayoutProperty("SCircle_" + elm.id + "_FILL", "visibility", "none");
+        map.removeLayer("PCircle_" + elm.id);
+        map.removeLayer("SCircle_" + elm.id);
+        map.removeLayer("SCircle_" + elm.id + "_FILL");
       }
     }
     return stillEEW;

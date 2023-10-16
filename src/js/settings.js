@@ -4,6 +4,7 @@ var markerElm;
 var Replay;
 var openAtLogin = false;
 var tsunamiSect;
+var tsunamiFeatures;
 window.addEventListener("load", function () {
   this.document.getElementById("replay").value = dateEncode(3, new Date()).replaceAll("/", "-");
   this.document.getElementById("EEWE_EventID").value = dateEncode(1, new Date()).replaceAll("/", "-");
@@ -223,9 +224,13 @@ function offsetCalc() {
 function init() {
   map = new maplibregl.Map({
     container: "mapcontainer",
-    center: [138.46, 32.99125],
+    center: [config.home.longitude, config.home.latitude],
     zoom: 4,
     attributionControl: true,
+    maxBounds: [
+      [115, 15],
+      [155, 52],
+    ],
     style: {
       version: 8,
       glyphs: "https://gsi-cyberjapan.github.io/optimal_bvmap/glyphs/{fontstack}/{range}.pbf",
@@ -264,14 +269,6 @@ function init() {
           id: "tsunami_LINE",
           type: "line",
           source: "tsunami",
-          layout: {
-            "line-join": "round",
-            "line-cap": "butt",
-          },
-          paint: {
-            "line-color": "#666",
-            "line-width": ["interpolate", ["linear"], ["zoom"], 2, 5, 5, 10, 10, 40, 18, 150],
-          },
           minzoom: 0,
           maxzoom: 22,
         },
@@ -390,31 +387,23 @@ function init() {
 
     var minDistance = Infinity;
     var tsunamiSect;
-    map
-      .queryRenderedFeatures({
-        layers: ["tsunami_LINE"],
-      })
-      .forEach(function (elm) {
-        coordinates = turf.centroid(elm).geometry.coordinates;
-        // 距離を求める
-        var distance = turf.distance(turf.point([e.lngLat.lng, e.lngLat.lat]), coordinates);
-        if (minDistance > distance) {
-          minDistance = distance;
-          tsunamiSect = elm.properties.name;
-        }
-      });
+    tsunamiFeatures.forEach(function (elm) {
+      coordinates = turf.centroid(elm).geometry.coordinates;
+      // 距離を求める
+      var distance = turf.distance(turf.point([e.lngLat.lng, e.lngLat.lat]), coordinates);
+      if (minDistance > distance) {
+        minDistance = distance;
+        tsunamiSect = elm.properties.name;
+      }
+    });
     map.setFilter("tsunami_LINE_selected", ["==", "name", tsunamiSect]);
     selectBoxSet(document.getElementById("tsunamiSect"), tsunamiSect);
 
     selectBoxSet(document.getElementById("saibun"), e.features[0].properties.name);
-  });
 
-  map.on("click", "tsunami_LINE", (e) => {
-    tsunamiSect = e.features[0].properties.name;
-
-    map.setFilter("tsunami_LINE_selected", ["==", "name", tsunamiSect]);
-
-    selectBoxSet(document.getElementById("tsunamiSect"), tsunamiSect);
+    map.flyTo({
+      center: [e.lngLat.lng, e.lngLat.lat],
+    });
   });
 
   const img = document.createElement("img");
@@ -424,6 +413,7 @@ function init() {
   markerElm = new maplibregl.Marker(img).setLngLat([config.home.longitude, config.home.latitude]).addTo(map);
   map.on("load", function () {
     if (tsunamiSect) map.setFilter("tsunami_LINE_selected", ["==", "name", tsunamiSect]);
+    tsunamiFeatures = map.querySourceFeatures("tsunami");
   });
 }
 
