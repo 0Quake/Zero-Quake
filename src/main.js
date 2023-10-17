@@ -1396,7 +1396,7 @@ function AXIS_WS() {
       AXIS_WS_TryConnect();
     });
     connection.on("message", function (message) {
-      if (Replay == 0) return;
+      if (Replay !== 0) return;
       var dataStr = message.utf8Data;
       kmoniTimeUpdate(new Date() - Replay, "axis", "success");
 
