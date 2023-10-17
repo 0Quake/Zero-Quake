@@ -270,8 +270,8 @@ function checkUpdate() {
           var latest_verTmp = String(json[0].tag_name.replace("v", ""));
           var p = require("../package.json");
           var current_verTmp = p.version;
-          var latest_v = latest_verTmp.split(".");
-          var current_v = current_verTmp.split(".");
+          var latest_v = String(latest_verTmp).split(".");
+          var current_v = String(current_verTmp).split(".");
           var dl_page = json[0].html_url;
           var update_detail = json[0].body;
           downloadURL = json[0].assets[0].browser_download_url;
@@ -337,10 +337,14 @@ function doUpdate(url) {
   var request = net.request(url);
   request.on("response", (res) => {
     res.pipe(fs.createWriteStream("ZeroQuakeInstaller.exe")).on("close", function () {
-      var COMMAND = "start ZeroQuakeInstaller.exe";
-      var spawn = require("child_process").spawn;
-      spawn(COMMAND, [], { shell: true, detached: true, stdio: "inherit" });
-      app.exit(0);
+      try {
+        var COMMAND = "start ZeroQuakeInstaller.exe";
+        var spawn = require("child_process").spawn;
+        spawn(COMMAND, [], { shell: true, detached: true, stdio: "inherit" });
+        app.exit(0);
+      } catch (err) {
+        throw new Error("インストーラーの起動に失敗しました。エラーメッセージは以下の通りです。" + err);
+      }
     });
   });
   request.end();
@@ -896,22 +900,25 @@ function EQInfo_createWindow(response) {
   };
   EQI_Window[response.eid] = { window: EQInfoWindow, metadata: metadata };
 
-  EQI_Window[response.eid].window.webContents.on("did-finish-load", () => {
-    EQI_Window[response.eid].window.webContents.send("message2", {
-      action: "setting",
-      data: config,
+  var targetWindow = EQI_Window[response.eid].window;
+  if (targetWindow) {
+    targetWindow.webContents.on("did-finish-load", () => {
+      targetWindow.webContents.send("message2", {
+        action: "setting",
+        data: config,
+      });
+
+      targetWindow.webContents.send("message2", metadata);
     });
 
-    EQI_Window[response.eid].window.webContents.send("message2", metadata);
-  });
+    targetWindow.on("closed", () => {
+      EQI_Window[response.eid] = null;
+    });
 
-  EQI_Window[response.eid].window.on("closed", () => {
-    EQI_Window[response.eid] = null;
-  });
-
-  EQI_Window[response.eid].window.loadFile(response.url);
-  EQI_Window[response.eid].window.webContents.on("will-navigate", handleUrlOpen);
-  EQI_Window[response.eid].window.webContents.on("new-window", handleUrlOpen);
+    targetWindow.loadFile(response.url);
+    targetWindow.webContents.on("will-navigate", handleUrlOpen);
+    targetWindow.webContents.on("new-window", handleUrlOpen);
+  }
 }
 
 function EQInfo_createWindowWS(response) {
@@ -926,7 +933,7 @@ function EQInfo_createWindowWS(response) {
     alwaysOnTop: config.system.alwaysOnTop,
   });
 
-  EQInfoWindow.loadURL(response.url);
+  if (EQInfoWindow) EQInfoWindow.loadURL(response.url);
 }
 
 //開始処理
@@ -1225,10 +1232,10 @@ function wolfxRequest() {
       res.on("end", function () {
         try {
           var json = jsonParse(dataTmp);
-          if (json && (wolfx_lastUpdate < new Date(json.AnnouncedTime) || Replay)) {
+          if (json && json.AnnouncedTime && (wolfx_lastUpdate < new Date(json.AnnouncedTime) || Replay)) {
             wolfx_lastUpdate = json.AnnouncedTime;
             var EBIData = [];
-            EBIStr = json.OriginalText.split("EBI ")[1];
+            EBIStr = String(json.OriginalText).split("EBI ")[1];
             if (EBIStr) {
               EBIStr = EBIStr.split("ECI")[0].split("EII")[0].split(" 9999=")[0];
               EBIStr = EBIStr.split(" ");
@@ -1354,9 +1361,7 @@ function P2P_WS() {
           default:
             return false;
         }
-        if (data.time) {
-          kmoniTimeUpdate(new Date(data.time), "P2P_EEW", "success");
-        }
+        if (data.time) kmoniTimeUpdate(new Date(data.time), "P2P_EEW", "success");
       }
     });
     kmoniTimeUpdate(new Date() - Replay, "P2P_EEW", "success");
@@ -1652,6 +1657,7 @@ function EEWdetect(type, json) {
           Arrived: elm.kindCode == 11,
         });
       });
+      if (!json.issue) return;
       var EEWdata = {
         alertflg: "警報",
         EventID: Number(json.issue.eventId),
@@ -2348,7 +2354,7 @@ function EQI_USGS_Req() {
       try {
         var json = jsonParse(dataTmp);
         if (!json) return false;
-        if (json.features[0].properties && usgsLastGenerated < json.features[0].properties.updated) {
+        if (json.features[0].properties && json.features[0].properties.updated && usgsLastGenerated < json.features[0].properties.updated) {
           usgsLastGenerated = json.features[0].properties.updated;
 
           var dataTmp2 = [];
@@ -2428,7 +2434,7 @@ function EQI_narikakunList_Req(url, num, first) {
           EQI_narikakunList_Req("https://ntool.online/api/earthquakeList?year=" + yearTmp + "&month=" + monthTmp, config.Info.EQInfo.ItemCount - json.lists.length, false);
         } else {
           for (let elm of narikakun_URLs) {
-            var eidTmp = elm.split("_")[2];
+            var eidTmp = String(elm).split("_")[2];
             if (nakn_Fetched.indexOf(url) === -1) {
               nakn_Fetched.push(elm);
               EQI_narikakun_Req(elm);
