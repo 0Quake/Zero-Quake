@@ -96,6 +96,9 @@ var defaultConfigVal = {
       GetData: false,
       AccessToken: "",
     },
+    ProjectBS: {
+      GetData: true,
+    },
     wolfx: {
       GetData: true,
       Interval: 1000,
@@ -934,6 +937,7 @@ function start() {
   //↓接続処理
   P2P_WS();
   AXIS_WS();
+  ProjectBS_WS()
 
   SnetRequest();
 
@@ -1227,61 +1231,8 @@ function wolfxRequest() {
           var json = jsonParse(dataTmp);
           if (json && (wolfx_lastUpdate < new Date(json.AnnouncedTime) || Replay)) {
             wolfx_lastUpdate = json.AnnouncedTime;
-            var EBIData = [];
-            EBIStr = json.OriginalText.split("EBI ")[1];
-            if (EBIStr) {
-              EBIStr = EBIStr.split("ECI")[0].split("EII")[0].split(" 9999=")[0];
-              EBIStr = EBIStr.split(" ");
-              if (EBIStr.length % 4 == 0) {
-                for (let i = 0; i < EBIStr.length; i += 4) {
-                  var sectName = EEWSectName[EBIStr[i]];
-                  var maxInt = EBIStr[i + 1].substring(1, 3);
-                  var minInt = EBIStr[i + 1].substring(3, 5);
-                  minInt = minInt == "//" ? null : shindoConvert(minInt, 0);
-                  maxInt = maxInt == "//" ? null : shindoConvert(maxInt, 0);
-                  var arrivalTime = EBIStr[i + 2];
-                  arrivalTime = arrivalTime.substring(0, 2) + ":" + arrivalTime.substring(2, 4) + ":" + arrivalTime.substring(4, 6);
-                  arrivalTime = new Date(dateEncode(4, null) + " " + arrivalTime);
-
-                  var alertFlg = EBIStr[i + 3].substring(0, 1) == "1";
-                  var arrived = EBIStr[i + 3].substring(1, 2) == "1";
-
-                  EBIData.push({
-                    Code: Number(EBIStr[i]),
-                    Name: sectName,
-                    Alert: alertFlg,
-                    IntTo: maxInt,
-                    IntFrom: minInt,
-                    ArrivalTime: arrivalTime,
-                    Arrived: arrived,
-                  });
-                }
-              } else throw new Error("予想震度等のデコードでエラー");
-            }
-            var EEWdata = {
-              alertflg: json.isWarn ? "警報" : "予報",
-              EventID: Number(json.EventID),
-              serial: json.Serial,
-              report_time: new Date(json.AnnouncedTime),
-              magnitude: json.Magunitude,
-              maxInt: shindoConvert(json.MaxIntensity, 0),
-              depth: json.Depth,
-              is_cancel: json.isCancel,
-              is_final: json.isFinal,
-              is_training: json.isTraining,
-              latitude: json.Latitude,
-              longitude: json.Longitude,
-              region_code: null,
-              region_name: json.Hypocenter,
-              origin_time: new Date(json.OriginTime),
-              isPlum: json.isAssumption,
-              userIntensity: null,
-              arrivalTime: null,
-              intensityAreas: null,
-              warnZones: EBIData,
-              source: "wolfx",
-            };
-            EEWcontrol(EEWdata);
+            EEWdetect(2,json)
+            
             kmoniTimeUpdate(new Date() - Replay, "wolfx", "success");
           }
         } catch (err) {
@@ -1452,6 +1403,50 @@ function AXIS_WS_Connect() {
   lastConnectDate = new Date();
 }
 
+//ProjectBS WebSocket接続・受信処理
+var PBSWSclient;
+function ProjectBS_WS() {
+  if (!config.Source.ProjectBS.GetData) return;
+  PBSWSclient = new WebSocketClient();
+
+  PBSWSclient.on("connectFailed", function () {
+    kmoniTimeUpdate(new Date() - Replay, "ProjectBS", "Error");
+    AXIS_WS_TryConnect();
+  });
+
+  PBSWSclient.on("connect", function (connection) {
+    connection.on("error", function () {
+      kmoniTimeUpdate(new Date() - Replay, "ProjectBS", "Error");
+    });
+    connection.on("close", function () {
+      kmoniTimeUpdate(new Date() - Replay, "ProjectBS", "Disconnect");
+      PBS_WS_TryConnect();
+    });
+    connection.on("message", function (message) {
+      if (Replay !== 0) return;
+      var dataStr = message.utf8Data;
+      kmoniTimeUpdate(new Date() - Replay, "ProjectBS", "success");
+
+      console.log(dataStr)
+      //            EEWdetect(1,json)
+
+    });
+    connection.sendUTF("querytelegram");
+    kmoniTimeUpdate(new Date() - Replay, "ProjectBS", "success");
+  });
+
+  PBS_WS_Connect();
+}
+var PBSlastConnectDate = new Date();
+function PBS_WS_TryConnect() {
+  var timeoutTmp = Math.max(30000 - (new Date() - PBSlastConnectDate), 100);
+  setTimeout(PBS_WS_Connect, timeoutTmp);
+}
+function PBS_WS_Connect() {
+  if (PBSWSclient) PBSWSclient.connect("wss://telegram.projectbs.cn/jmaeewws");
+  PBSlastConnectDate = new Date();
+}
+
 //定期実行
 function RegularExecution() {
   //EEW解除
@@ -1568,8 +1563,64 @@ function kmoniTimeUpdate(Updatetime, type, condition, vendor) {
 //情報フォーマット変更・新報検知→EEWcontrol
 function EEWdetect(type, json) {
   if (!json) return;
-  if (type == 3) {
-    //axis
+  if (type == 1 || type == 2) {
+    var EBIData = [];
+    EBIStr = json.OriginalText.split("EBI ")[1];
+    if (EBIStr) {
+      EBIStr = EBIStr.split("ECI")[0].split("EII")[0].split(" 9999=")[0];
+      EBIStr = EBIStr.split(" ");
+      if (EBIStr.length % 4 == 0) {
+        for (let i = 0; i < EBIStr.length; i += 4) {
+          var sectName = EEWSectName[EBIStr[i]];
+          var maxInt = EBIStr[i + 1].substring(1, 3);
+          var minInt = EBIStr[i + 1].substring(3, 5);
+          minInt = minInt == "//" ? null : shindoConvert(minInt, 0);
+          maxInt = maxInt == "//" ? null : shindoConvert(maxInt, 0);
+          var arrivalTime = EBIStr[i + 2];
+          arrivalTime = arrivalTime.substring(0, 2) + ":" + arrivalTime.substring(2, 4) + ":" + arrivalTime.substring(4, 6);
+          arrivalTime = new Date(dateEncode(4, null) + " " + arrivalTime);
+
+          var alertFlg = EBIStr[i + 3].substring(0, 1) == "1";
+          var arrived = EBIStr[i + 3].substring(1, 2) == "1";
+
+          EBIData.push({
+            Code: Number(EBIStr[i]),
+            Name: sectName,
+            Alert: alertFlg,
+            IntTo: maxInt,
+            IntFrom: minInt,
+            ArrivalTime: arrivalTime,
+            Arrived: arrived,
+          });
+        }
+      } else throw new Error("予想震度等のデコードでエラー");
+    }
+    var EEWdata = {
+      alertflg: json.isWarn ? "警報" : "予報",
+      EventID: Number(json.EventID),
+      serial: json.Serial,
+      report_time: new Date(json.AnnouncedTime),
+      magnitude: json.Magunitude,
+      maxInt: shindoConvert(json.MaxIntensity, 0),
+      depth: json.Depth,
+      is_cancel: json.isCancel,
+      is_final: json.isFinal,
+      is_training: json.isTraining,
+      latitude: json.Latitude,
+      longitude: json.Longitude,
+      region_code: null,
+      region_name: json.Hypocenter,
+      origin_time: new Date(json.OriginTime),
+      isPlum: json.isAssumption,
+      userIntensity: null,
+      arrivalTime: null,
+      intensityAreas: null,
+      warnZones: EBIData,
+      source: type==1 ? "ProjectBS":"wolfx",
+    };
+    EEWcontrol(EEWdata);
+   }else if (type == 3) {
+      //axis
 
     try {
       var alertflgTmp = json.Title == "緊急地震速報（予報）" ? "予報" : "警報";
