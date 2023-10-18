@@ -1358,39 +1358,47 @@ function AXIS_WS() {
 
       if (dataStr == "hello") return;
 
-      var data = JSON.parse(dataStr);
-      if (data.channel == "eew") {
-        //eew
-        EEWdetect(3, data.message);
-      } else if (data.channel == "jmx-seismology") {
-        //地震情報
-        var EarthquakeElm = {
-          Hypocenter: { Area: { Name: null } },
-          Magnitude: null,
-        };
-        if (data.message.Body.Earthquake[0]) EarthquakeElm = data.message.Body.Earthquake[0];
-        var IntensityElm = {
-          Observation: { MaxInt: null },
-        };
-        if (data.message.Body.Intensity) IntensityElm = data.message.Body.Intensity;
+      var data = jsonParse(dataStr);
 
-        eqInfoControl(
-          [
-            {
-              eventId: data.message.Head.EventID,
-              category: data.message.Head.Title,
-              reportDateTime: data.message.Head.ReportDateTime,
-              OriginTime: data.message.Head.TargetDateTime,
-              epiCenter: EarthquakeElm.Hypocenter.Area.Name,
-              M: EarthquakeElm.Magnitude,
-              maxI: IntensityElm.Observation.MaxInt,
-              cancel: null,
-              DetailURL: [],
-              axisData: data,
-            },
-          ],
-          "jma"
-        );
+      if (data && data.channel) {
+        switch (data.channel) {
+          case "eew":
+            EEWdetect(3, data.message);
+            break;
+          case "jmx-seismology":
+            //地震情報
+            var EarthquakeElm = {
+              Hypocenter: { Area: { Name: null } },
+              Magnitude: null,
+            };
+            if (data.message.Body.Earthquake[0]) EarthquakeElm = data.message.Body.Earthquake[0];
+            var IntensityElm = {
+              Observation: { MaxInt: null },
+            };
+            if (data.message.Body.Intensity) IntensityElm = data.message.Body.Intensity;
+
+            eqInfoControl(
+              [
+                {
+                  eventId: data.message.Head.EventID,
+                  category: data.message.Head.Title,
+                  reportDateTime: data.message.Head.ReportDateTime,
+                  OriginTime: data.message.Head.TargetDateTime,
+                  epiCenter: EarthquakeElm.Hypocenter.Area.Name,
+                  M: EarthquakeElm.Magnitude,
+                  maxI: IntensityElm.Observation.MaxInt,
+                  cancel: null,
+                  DetailURL: [],
+                  axisData: data,
+                },
+              ],
+              "jma"
+            );
+            break;
+
+          default:
+            break;
+        }
       }
     });
     kmoniTimeUpdate(new Date() - Replay, "axis", "success");
@@ -1435,7 +1443,6 @@ function ProjectBS_WS() {
       console.log(dataStr);
       //            EEWdetect(1,json)
     });
-    connection.sendUTF("querytelegram");
     kmoniTimeUpdate(new Date() - Replay, "ProjectBS", "success");
   });
 
