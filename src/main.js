@@ -1278,9 +1278,12 @@ function P2P_WS() {
       setTimeout(P2P_WS_TryConnect, 5000);
     });
     connection.on("message", function (message) {
-      if (Replay == 0) return;
-      if (message.type === "utf8") {
-        var data = message.utf8Data;
+      if (Replay == 0 && message.type === "utf8") {
+        var data = JSON.parse(message.utf8Data);
+
+        if (data.time) kmoniTimeUpdate(new Date(data.time), "P2P_EEW", "success");
+        else kmoniTimeUpdate(new Date(), "P2P_EEW", "success");
+
         switch (data.code) {
           case 552:
             //津波情報
@@ -1312,7 +1315,6 @@ function P2P_WS() {
           default:
             return false;
         }
-        if (data.time) kmoniTimeUpdate(new Date(data.time), "P2P_EEW", "success");
       }
     });
     kmoniTimeUpdate(new Date() - Replay, "P2P_EEW", "success");
