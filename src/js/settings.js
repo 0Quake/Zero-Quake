@@ -62,6 +62,7 @@ window.electronAPI.messageSend((event, request) => {
     document.getElementById("Tsunami_GetData").checked = config.Info.TsunamiInfo.GetData;
     document.getElementById("Axis_GetData").checked = config.Source.axis.GetData;
     document.getElementById("Wolfx_GetData").checked = config.Source.wolfx.GetData;
+    document.getElementById("ProjectBS_GetData").checked = config.Source.ProjectBS.GetData;
     document.getElementById("EarlyEst_GetData").checked = config.Source.EarlyEst.GetData;
     document.getElementById("msil_GetData").checked = config.Source.msil.GetData;
     document.getElementById("kmoni_GetData").checked = config.Source.kmoni.kmoni.GetData;
@@ -156,6 +157,7 @@ document.getElementById("apply").addEventListener("click", function () {
   config.Source.axis.GetData = document.getElementById("Axis_GetData").checked;
   config.Source.axis.AccessToken = document.getElementById("Axis_AccessToken").value;
   config.Source.wolfx.GetData = document.getElementById("Wolfx_GetData").checked;
+  config.Source.ProjectBS.GetData = document.getElementById("ProjectBS_GetData").checked;
   config.Source.EarlyEst.GetData = document.getElementById("EarlyEst_GetData").checked;
   config.Source.msil.GetData = document.getElementById("msil_GetData").checked;
   config.Source.kmoni.kmoni.GetData = document.getElementById("kmoni_GetData").checked;

@@ -1442,8 +1442,7 @@ function ProjectBS_WS() {
       var dataStr = message.utf8Data;
       kmoniTimeUpdate(new Date() - Replay, "ProjectBS", "success");
 
-      console.log(dataStr);
-      //            EEWdetect(1,json)
+      EEWdetect(1, jsonParse(dataStr));
     });
     kmoniTimeUpdate(new Date() - Replay, "ProjectBS", "success");
   });
@@ -1576,7 +1575,66 @@ function kmoniTimeUpdate(Updatetime, type, condition, vendor) {
 //情報フォーマット変更・新報検知→EEWcontrol
 function EEWdetect(type, json) {
   if (!json) return;
-  if (type == 1 || type == 2) {
+  if (type == 1) {
+    //ProjectBS
+    var EBIData = [];
+    EBIStr = String(json.originalTelegram).split("EBI ")[1];
+    codeData = String(json.originalTelegram).split(" ");
+    if (EBIStr) {
+      EBIStr = EBIStr.split("ECI")[0].split("EII")[0].split(" 9999=")[0];
+      EBIStr = EBIStr.split(" ");
+      if (EBIStr.length % 4 == 0) {
+        for (let i = 0; i < EBIStr.length; i += 4) {
+          var sectName = EEWSectName[EBIStr[i]];
+          var maxInt = EBIStr[i + 1].substring(1, 3);
+          var minInt = EBIStr[i + 1].substring(3, 5);
+          minInt = minInt == "//" ? null : shindoConvert(minInt, 0);
+          maxInt = maxInt == "//" ? null : shindoConvert(maxInt, 0);
+          var arrivalTime = EBIStr[i + 2];
+          arrivalTime = arrivalTime.substring(0, 2) + ":" + arrivalTime.substring(2, 4) + ":" + arrivalTime.substring(4, 6);
+          arrivalTime = new Date(dateEncode(4, null) + " " + arrivalTime);
+
+          var alertFlg = EBIStr[i + 3].substring(0, 1) == "1";
+          var arrived = EBIStr[i + 3].substring(1, 2) == "1";
+
+          EBIData.push({
+            Code: Number(EBIStr[i]),
+            Name: sectName,
+            Alert: alertFlg,
+            IntTo: maxInt,
+            IntFrom: minInt,
+            ArrivalTime: arrivalTime,
+            Arrived: arrived,
+          });
+        }
+      } else throw new Error("予想震度等のデコードでエラー");
+    }
+
+    var EEWdata = {
+      alertflg: json.isWarn ? "警報" : "予報",
+      EventID: Number(json.eventID),
+      serial: json.serial,
+      report_time: new Date(json.issue.time),
+      magnitude: json.hypocenter.magnitude,
+      maxInt: shindoConvert(json.maxIntensity, 0),
+      depth: json.hypocenter.location.depth,
+      is_cancel: json.isCancel,
+      is_final: json.isFinal,
+      is_training: codeData[2] == "01" || codeData[2] == "30",
+      latitude: json.hypocenter.location.lat,
+      longitude: json.hypocenter.location.lng,
+      region_name: json.hypocenter.name,
+      origin_time: new Date(json.originTime),
+      isPlum: json.hypocenter.isEstimate,
+      userIntensity: null,
+      arrivalTime: null,
+      intensityAreas: null,
+      warnZones: EBIData,
+      source: "ProjectBS",
+    };
+    EEWcontrol(EEWdata);
+  } else if (type == 2) {
+    //wolfx
     var EBIData = [];
     EBIStr = String(json.OriginalText).split("EBI ")[1];
     if (EBIStr) {
@@ -1621,7 +1679,6 @@ function EEWdetect(type, json) {
       is_training: json.isTraining,
       latitude: json.Latitude,
       longitude: json.Longitude,
-      region_code: null,
       region_name: json.Hypocenter,
       origin_time: new Date(json.OriginTime),
       isPlum: json.isAssumption,
@@ -1629,7 +1686,7 @@ function EEWdetect(type, json) {
       arrivalTime: null,
       intensityAreas: null,
       warnZones: EBIData,
-      source: type == 1 ? "ProjectBS" : "wolfx",
+      source: "wolfx",
     };
     EEWcontrol(EEWdata);
   } else if (type == 3) {
@@ -1662,7 +1719,6 @@ function EEWdetect(type, json) {
         is_training: json.Flag.is_training,
         latitude: json.Hypocenter.Coordinate[1],
         longitude: json.Hypocenter.Coordinate[0],
-        region_code: json.Hypocenter.Code,
         region_name: json.Hypocenter.Name,
         origin_time: new Date(json.OriginDateTime),
         isPlum: null,
@@ -1730,7 +1786,6 @@ function EEWdetect(type, json) {
         is_training: Boolean(json.test),
         latitude: latitudeTmp,
         longitude: longitudeTmp,
-        region_code: "",
         region_name: region_nameTmp,
         origin_time: origin_timeTmp,
         isPlum: conditionTmp,
@@ -1813,7 +1868,7 @@ function EEWcontrol(data) {
         });
 
         //キーごとにマージ
-        var keys = ["alertflg", "EventID", "serial", "report_time", "magnitude", "maxInt", "depth", "is_cancel", "is_final", "is_training", "latitude", "longitude", "region_code", "region_name", "origin_time", "isPlum", "userIntensity", "arrivalTime", "intensityAreas", "warnZones"];
+        var keys = ["alertflg", "EventID", "serial", "report_time", "magnitude", "maxInt", "depth", "is_cancel", "is_final", "is_training", "latitude", "longitude", "region_name", "origin_time", "isPlum", "userIntensity", "arrivalTime", "intensityAreas", "warnZones"];
         keys.forEach(function (elm) {
           if (data[elm] && (!oneBeforeData[elm] || oneBeforeData[elm].length == 0)) {
             oneBeforeData[elm] = data[elm];
