@@ -803,6 +803,11 @@
                 <label>アクセストークン<input type="text" id="Axis_AccessToken" placeholder="アクセストークンの取得方法は下記を参照"></label>
 
                 <hr>
+                <span class="smalltext">
+                    比較的 低遅延での情報取得が可能です。
+                    <br>※AXISはベータ版のサービスであり、予期せぬサービス停止、配信メッセージの遅延が発生する可能性があります。
+                </span>
+
 
                 <h4>Axis 登録の案内</h4>
                 <ol>
@@ -821,11 +826,15 @@
             <div id="tab1_content14" class="tabcontent">
                 <h3><span>情報源ごとの設定</span>Wolfx</h3>
                 <label><input type="checkbox" id="Wolfx_GetData">データを取得</label>
-                <label> 情報取得間隔（秒）<input id="WolfxInterval" type="number" min="0.5" max="300" value="1" step="0.5"></label>
+                <hr>
+                <span class="smalltext">
+                    起動時にHTTPプロトコルで情報を取得し、その後はWebSocketで随時情報を受け取ります。
+                </span>
             </div>
             <div id="tab1_content16" class="tabcontent">
                 <h3><span>情報源ごとの設定</span>Project BS</h3>
                 <label><input type="checkbox" id="ProjectBS_GetData">データを取得</label>
+                <p class="smalltext">※アクセストークンは基本的に自動更新されますが、移行期間中に当ソフトを起動しなかった場合、自動更新はできません。</p>
             </div>
             <div id="tab1_content10" class="tabcontent">
                 <h3><span>通知と音声</span>プッシュ通知</h3>

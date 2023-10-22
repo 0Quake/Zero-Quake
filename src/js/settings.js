@@ -66,7 +66,6 @@ window.electronAPI.messageSend((event, request) => {
     document.getElementById("EarlyEst_GetData").checked = config.Source.EarlyEst.GetData;
     document.getElementById("msil_GetData").checked = config.Source.msil.GetData;
     document.getElementById("kmoni_GetData").checked = config.Source.kmoni.kmoni.GetData;
-    document.getElementById("WolfxInterval").value = config.Source.wolfx.Interval / 1000;
     document.getElementById("EarlyEstInterval").value = config.Source.EarlyEst.Interval / 1000;
     document.getElementById("kmoniInterval").value = config.Source.kmoni.kmoni.Interval / 1000;
     document.getElementById("msilInterval").value = config.Source.msil.Interval / 1000;
@@ -161,7 +160,6 @@ document.getElementById("apply").addEventListener("click", function () {
   config.Source.EarlyEst.GetData = document.getElementById("EarlyEst_GetData").checked;
   config.Source.msil.GetData = document.getElementById("msil_GetData").checked;
   config.Source.kmoni.kmoni.GetData = document.getElementById("kmoni_GetData").checked;
-  config.Source.wolfx.Interval = Number(document.getElementById("WolfxInterval").value) * 1000;
   config.Source.EarlyEst.Interval = Number(document.getElementById("EarlyEstInterval").value) * 1000;
   config.Source.kmoni.kmoni.Interval = Number(document.getElementById("kmoniInterval").value) * 1000;
   config.Source.msil.Interval = Number(document.getElementById("msilInterval").value) * 1000;
