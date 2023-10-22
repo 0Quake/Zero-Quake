@@ -698,6 +698,12 @@ function Mapinit() {
   map.on("load", function () {
     zoomLevelContinue();
     mapFillDraw();
+    layerSelect(config.data.layer);
+    radioSet("mapSelect", config.data.layer);
+    config.data.overlay.forEach(function (elm) {
+      overlaySelect(elm, true);
+      document.getElementById(elm).checked = true;
+    });
   });
 
   if (config.home.ShowPin) {
@@ -712,50 +718,76 @@ function Mapinit() {
 document.getElementById("menu_wrap").addEventListener("click", function () {
   document.getElementById("menu_wrap").classList.remove("menu_show");
 });
+document.getElementById("layerSwitch_close").addEventListener("click", function () {
+  document.getElementById("menu_wrap").classList.remove("menu_show");
+});
 document.getElementById("menu").addEventListener("click", function (e) {
   e.stopPropagation();
 });
 
 var mapSelect = document.getElementsByName("mapSelect");
 var tilemapActive = false;
+function layerSelect(layerName) {
+  map.setLayoutProperty("tile0", "visibility", "none");
+  map.setLayoutProperty("tile1", "visibility", "none");
+  map.setLayoutProperty("tile2", "visibility", "none");
+  map.setLayoutProperty("tile4", "visibility", "none");
+
+  if (layerName) {
+    tilemapActive = true;
+    map.setLayoutProperty(layerName, "visibility", "visible");
+  } else {
+    tilemapActive = false;
+  }
+  if (!tilemapActive && overlayCount == 0) {
+    map.setLayoutProperty("basemap_fill", "visibility", "visible");
+    map.setLayoutProperty("worldmap_fill", "visibility", "visible");
+  } else {
+    map.setLayoutProperty("basemap_fill", "visibility", "none");
+    map.setLayoutProperty("worldmap_fill", "visibility", "none");
+  }
+  config.data.layer = layerName;
+  window.electronAPI.messageReturn({
+    action: "settingReturn",
+    data: config,
+  });
+}
+
 mapSelect.forEach(function (elm) {
   elm.addEventListener("change", function () {
-    for (let i = 0; i < mapSelect.length - 1; i++) {
-      map.setLayoutProperty("tile" + i, "visibility", "none");
-    }
-
-    if (this.value) {
-      tilemapActive = true;
-      map.setLayoutProperty(this.value, "visibility", "visible");
-    } else {
-      tilemapActive = false;
-    }
-    if (!tilemapActive && overlayCount == 0) {
-      map.setLayoutProperty("basemap_fill", "visibility", "visible");
-      map.setLayoutProperty("worldmap_fill", "visibility", "visible");
-    } else {
-      map.setLayoutProperty("basemap_fill", "visibility", "none");
-      map.setLayoutProperty("worldmap_fill", "visibility", "none");
-    }
+    layerSelect(this.value);
   });
 });
 var overlayCount = 0;
-document.getElementsByName("overlaySelect").forEach(function (elm) {
-  elm.addEventListener("change", function () {
-    var visibility = this.checked ? "visible" : "none";
-    if (this.value == "gsi_vector") {
+function overlaySelect(layerName, checked) {
+  if (layerName == "kmoni_points") return;
+  console.log(layerName);
+  var visibility = checked ? "visible" : "none";
+  if (layerName !== "hinanjo" && layerName !== "kmoni_points") {
+    if (layerName == "gsi_vector") {
       ["海岸線", "河川中心線人工水路地下", "河川中心線枯れ川部", "河川中心線", "海岸線堤防等に接する部分破線", "水涯線", "水涯線堤防等に接する部分破線", "水部表記線polygon", "行政区画界線国の所属界", "道路中心線ZL4-10国道", "道路中心線ZL4-10高速", "道路中心線色0", "鉄道中心線0", "鉄道中心線旗竿0", "道路中心線ククリ橋0", "道路中心線色橋0", "建築物0", "鉄道中心線橋0", "鉄道中心線旗竿橋0", "道路中心線色1", "鉄道中心線1", "鉄道中心線旗竿1", "道路中心線ククリ橋1", "道路中心線色橋1", "道路縁", "行政区画界線25000市区町村界", "行政区画界線25000都府県界及び北海道総合振興局・振興局界", "注記シンボル付きソート順100以上", "注記シンボルなし縦ソート順100以上", "注記シンボルなし横ソート順100以上", "注記角度付き線", "注記シンボル付きソート順100未満", "注記シンボルなし縦ソート順100未満", "注記シンボルなし横ソート順100未満"].forEach(function (elm) {
         map.setLayoutProperty(elm, "visibility", visibility);
       });
     } else {
-      if (this.checked) {
+      if (checked) {
         overlayCount++;
       } else {
         overlayCount--;
       }
 
-      map.setLayoutProperty(this.value, "visibility", visibility);
+      map.setLayoutProperty(layerName, "visibility", visibility);
     }
+
+    if (layerName == "over2") {
+      document.getElementById("legend1").style.display = checked ? "inline-block" : "none";
+    } else if (layerName == "over3") {
+      over3_visiblity = checked;
+      document.getElementById("legend2").style.display = over3_visiblity || over4_visiblity ? "inline-block" : "none";
+    } else if (layerName == "over4") {
+      over4_visiblity = checked;
+      document.getElementById("legend2").style.display = over3_visiblity || over4_visiblity ? "inline-block" : "none";
+    }
+
     if (!tilemapActive && overlayCount == 0) {
       map.setLayoutProperty("basemap_fill", "visibility", "visible");
       map.setLayoutProperty("worldmap_fill", "visibility", "visible");
@@ -763,6 +795,21 @@ document.getElementsByName("overlaySelect").forEach(function (elm) {
       map.setLayoutProperty("basemap_fill", "visibility", "none");
       map.setLayoutProperty("worldmap_fill", "visibility", "none");
     }
+  }
+  var selectedLayer = [];
+  document.getElementsByName("overlaySelect").forEach(function (elm) {
+    if (elm.checked) selectedLayer.push(elm.value);
+  });
+
+  config.data.overlay = selectedLayer;
+  window.electronAPI.messageReturn({
+    action: "settingReturn",
+    data: config,
+  });
+}
+document.getElementsByName("overlaySelect").forEach(function (elm) {
+  elm.addEventListener("change", function () {
+    overlaySelect(this.value, this.checked);
   });
 });
 var estShindoMapDraw = false;
@@ -1835,4 +1882,10 @@ function hinanjoPopup(e) {
     .setLngLat(e.lngLat)
     .setHTML("<h3>指定緊急避難場所</h3><p>" + DataTmp.name + "</p>対応：" + supportType + (DataTmp.remarks ? "<div>" + DataTmp.remarks + "</div>" : ""))
     .addTo(map);
+}
+
+function radioSet(name, val) {
+  document.getElementsByName(name).forEach(function (elm) {
+    if (elm.value == val) elm.checked = true;
+  });
 }

@@ -208,6 +208,10 @@ var defaultConfigVal = {
       TsunamiYohoColor: "rgb(66, 158, 255)",
     },
   },
+  data: {
+    layer: "",
+    overlay: [],
+  },
 };
 var config = store.get("config", defaultConfigVal);
 config = mergeDeeply(defaultConfigVal, config);
@@ -581,10 +585,12 @@ ipcMain.on("message", (_event, response) => {
     config = response.data;
     store.set("config", config);
 
-    settingWindow.webContents.send("message2", {
-      action: "setting",
-      data: config,
-    });
+    if (settingWindow) {
+      settingWindow.webContents.send("message2", {
+        action: "setting",
+        data: config,
+      });
+    }
   } else if (response.action == "EEWSimulation") {
     EEWAlert(response.data);
   } else if (response.action == "checkForUpdate") {
