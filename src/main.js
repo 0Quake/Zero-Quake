@@ -101,7 +101,6 @@ var defaultConfigVal = {
     },
     wolfx: {
       GetData: true,
-      Interval: 1000,
     },
     EarlyEst: {
       GetData: true,
@@ -941,19 +940,20 @@ function EQInfo_createWindowWS(response) {
 
 //開始処理
 function start() {
-  //↓接続処理
+  //↓WebSocket接続処理
   P2P_WS();
   AXIS_WS();
   ProjectBS_WS();
+  Wolfx_WS();
 
+  //HTTP定期GET着火
   SnetRequest();
-
   kmoniRequest();
+  yoyuSetK(kmoniRequest);
+
+  //EEW現状取得（HTTP/1回きり）
   wolfxRequest();
-  yoyuSetK(function () {
-    kmoniRequest();
-  });
-  //↑接続処理
+  ProjectBSRequest();
 
   //防災情報XML 長期フィード取得
   EQI_JMAXMLList_Req(true);
@@ -1223,8 +1223,6 @@ function SnetRequest() {
 }
 
 //wolfxへのHTTPリクエスト処理
-var wolfx_lastUpdate = 0;
-var wolfx_timeout;
 function wolfxRequest() {
   if (config.Source.wolfx.GetData && net.isOnline) {
     var request = net.request("https://api.wolfx.jp/jma_eew.json?_=" + new Date());
@@ -1236,12 +1234,8 @@ function wolfxRequest() {
       res.on("end", function () {
         try {
           var json = jsonParse(dataTmp);
-          if (json && json.AnnouncedTime && (wolfx_lastUpdate < new Date(json.AnnouncedTime) || Replay)) {
-            wolfx_lastUpdate = json.AnnouncedTime;
-            EEWdetect(2, json);
-
-            kmoniTimeUpdate(new Date() - Replay, "wolfx", "success");
-          }
+          EEWdetect(2, json);
+          kmoniTimeUpdate(new Date() - Replay, "wolfx", "success");
         } catch (err) {
           kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
         }
@@ -1254,8 +1248,34 @@ function wolfxRequest() {
 
     request.end();
   }
-  clearTimeout(wolfx_timeout);
-  wolfx_timeout = setTimeout(wolfxRequest, config.Source.wolfx.Interval);
+}
+
+//ProjectBSへのHTTPリクエスト処理
+function ProjectBSRequest() {
+  if (config.Source.ProjectBS.GetData && net.isOnline) {
+    var request = net.request("https://telegram.projectbs.cn/jmaeewjson?_=" + new Date());
+    request.on("response", (res) => {
+      var dataTmp = "";
+      res.on("data", (chunk) => {
+        dataTmp += chunk;
+      });
+      res.on("end", function () {
+        try {
+          var json = jsonParse(dataTmp);
+          EEWdetect(1, json);
+          kmoniTimeUpdate(new Date() - Replay, "ProjectBS", "success");
+        } catch (err) {
+          kmoniTimeUpdate(new Date() - Replay, "ProjectBS", "Error");
+        }
+      });
+    });
+    request.on("error", (error) => {
+      NetworkError(error, "ProjectBS");
+      kmoniTimeUpdate(new Date() - Replay, "ProjectBS", "Error");
+    });
+
+    request.end();
+  }
 }
 
 //P2P地震情報API WebSocket接続・受信処理
@@ -1426,7 +1446,7 @@ function ProjectBS_WS() {
 
   PBSWSclient.on("connectFailed", function () {
     kmoniTimeUpdate(new Date() - Replay, "ProjectBS", "Error");
-    AXIS_WS_TryConnect();
+    PBS_WS_TryConnect();
   });
 
   PBSWSclient.on("connect", function (connection) {
@@ -1457,6 +1477,50 @@ function PBS_WS_TryConnect() {
 function PBS_WS_Connect() {
   if (PBSWSclient) PBSWSclient.connect("wss://telegram.projectbs.cn/jmaeewws");
   PBSlastConnectDate = new Date();
+}
+
+//Wolfx WebSocket接続・受信処理
+var WolfxWSclient;
+function Wolfx_WS() {
+  if (!config.Source.wolfx.GetData) return;
+  WolfxWSclient = new WebSocketClient();
+
+  WolfxWSclient.on("connectFailed", function () {
+    kmoniTimeUpdate(new Date() - Replay, "Wolfx", "Error");
+    AXIS_WS_TryConnect();
+  });
+
+  WolfxWSclient.on("connect", function (connection) {
+    connection.on("error", function () {
+      kmoniTimeUpdate(new Date() - Replay, "Wolfx", "Error");
+    });
+    connection.on("close", function () {
+      kmoniTimeUpdate(new Date() - Replay, "Wolfx", "Disconnect");
+      Wolfx_WS_TryConnect();
+    });
+    connection.on("message", function (message) {
+      if (Replay !== 0) return;
+      try {
+        var json = jsonParse(message.utf8Data);
+        EEWdetect(2, json);
+        kmoniTimeUpdate(new Date() - Replay, "wolfx", "success");
+      } catch (err) {
+        kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
+      }
+    });
+    kmoniTimeUpdate(new Date() - Replay, "Wolfx", "success");
+  });
+
+  Wolfx_WS_Connect();
+}
+var WolfxlastConnectDate = new Date();
+function Wolfx_WS_TryConnect() {
+  var timeoutTmp = Math.max(30000 - (new Date() - WolfxlastConnectDate), 100);
+  setTimeout(Wolfx_WS_Connect, timeoutTmp);
+}
+function Wolfx_WS_Connect() {
+  if (WolfxWSclient) WolfxWSclient.connect("wss://ws-api.wolfx.jp/jma_eew");
+  WolfxlastConnectDate = new Date();
 }
 
 //定期実行
