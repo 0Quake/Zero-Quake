@@ -33,6 +33,7 @@
 ### 緊急地震速報
 
 - Wolfx [© Wolfx Studio.](https://api.wolfx.jp/)
+- ProjectBS [© CrossRoad 十字路口](https://doc.telegram.projectbs.cn/jmaeew/)
 - Axis（無料登録必須） [© Prioris](https://axis.prioris.jp/)
 - P2P 地震情報 API（警報のみ） [© @p2pquake_takuya](https://www.p2pquake.net/json_api_v2/)
 
@@ -40,7 +41,7 @@
 
 - 気象庁防災情報 XML [© 気象庁](https://xml.kishou.go.jp/xmlpull.html)
 - narikakun.net 地震情報 API [© narikakun](https://dev.narikakun.net/doc/earthquake)
-- Axis [© Prioris](https://axis.prioris.jp/)
+- Axis（無料登録必須） [© Prioris](https://axis.prioris.jp/)
 
 ### 地震情報 (Earthquake Catalog)
 

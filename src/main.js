@@ -101,7 +101,6 @@ var defaultConfigVal = {
     },
     wolfx: {
       GetData: true,
-      Interval: 1000,
     },
     EarlyEst: {
       GetData: true,
@@ -208,6 +207,10 @@ var defaultConfigVal = {
       TsunamiWatchColor: "rgb(250, 245, 0)",
       TsunamiYohoColor: "rgb(66, 158, 255)",
     },
+  },
+  data: {
+    layer: "",
+    overlay: [],
   },
 };
 var config = store.get("config", defaultConfigVal);
@@ -582,10 +585,12 @@ ipcMain.on("message", (_event, response) => {
     config = response.data;
     store.set("config", config);
 
-    settingWindow.webContents.send("message2", {
-      action: "setting",
-      data: config,
-    });
+    if (settingWindow) {
+      settingWindow.webContents.send("message2", {
+        action: "setting",
+        data: config,
+      });
+    }
   } else if (response.action == "EEWSimulation") {
     EEWAlert(response.data);
   } else if (response.action == "checkForUpdate") {
@@ -941,19 +946,20 @@ function EQInfo_createWindowWS(response) {
 
 //開始処理
 function start() {
-  //↓接続処理
+  //↓WebSocket接続処理
   P2P_WS();
   AXIS_WS();
   ProjectBS_WS();
+  Wolfx_WS();
 
+  //HTTP定期GET着火
   SnetRequest();
-
   kmoniRequest();
+  yoyuSetK(kmoniRequest);
+
+  //EEW現状取得（HTTP/1回きり）
   wolfxRequest();
-  yoyuSetK(function () {
-    kmoniRequest();
-  });
-  //↑接続処理
+  ProjectBSRequest();
 
   //防災情報XML 長期フィード取得
   EQI_JMAXMLList_Req(true);
@@ -1223,8 +1229,6 @@ function SnetRequest() {
 }
 
 //wolfxへのHTTPリクエスト処理
-var wolfx_lastUpdate = 0;
-var wolfx_timeout;
 function wolfxRequest() {
   if (config.Source.wolfx.GetData && net.isOnline) {
     var request = net.request("https://api.wolfx.jp/jma_eew.json?_=" + new Date());
@@ -1236,12 +1240,8 @@ function wolfxRequest() {
       res.on("end", function () {
         try {
           var json = jsonParse(dataTmp);
-          if (json && json.AnnouncedTime && (wolfx_lastUpdate < new Date(json.AnnouncedTime) || Replay)) {
-            wolfx_lastUpdate = json.AnnouncedTime;
-            EEWdetect(2, json);
-
-            kmoniTimeUpdate(new Date() - Replay, "wolfx", "success");
-          }
+          EEWdetect(2, json);
+          kmoniTimeUpdate(new Date() - Replay, "wolfx", "success");
         } catch (err) {
           kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
         }
@@ -1254,8 +1254,34 @@ function wolfxRequest() {
 
     request.end();
   }
-  clearTimeout(wolfx_timeout);
-  wolfx_timeout = setTimeout(wolfxRequest, config.Source.wolfx.Interval);
+}
+
+//ProjectBSへのHTTPリクエスト処理
+function ProjectBSRequest() {
+  if (config.Source.ProjectBS.GetData && net.isOnline) {
+    var request = net.request("https://telegram.projectbs.cn/jmaeewjson?_=" + new Date());
+    request.on("response", (res) => {
+      var dataTmp = "";
+      res.on("data", (chunk) => {
+        dataTmp += chunk;
+      });
+      res.on("end", function () {
+        try {
+          var json = jsonParse(dataTmp);
+          EEWdetect(1, json);
+          kmoniTimeUpdate(new Date() - Replay, "ProjectBS", "success");
+        } catch (err) {
+          kmoniTimeUpdate(new Date() - Replay, "ProjectBS", "Error");
+        }
+      });
+    });
+    request.on("error", (error) => {
+      NetworkError(error, "ProjectBS");
+      kmoniTimeUpdate(new Date() - Replay, "ProjectBS", "Error");
+    });
+
+    request.end();
+  }
 }
 
 //P2P地震情報API WebSocket接続・受信処理
@@ -1278,9 +1304,12 @@ function P2P_WS() {
       setTimeout(P2P_WS_TryConnect, 5000);
     });
     connection.on("message", function (message) {
-      if (Replay == 0) return;
-      if (message.type === "utf8") {
-        var data = message.utf8Data;
+      if (Replay == 0 && message.type === "utf8") {
+        var data = JSON.parse(message.utf8Data);
+
+        if (data.time) kmoniTimeUpdate(new Date(data.time), "P2P_EEW", "success");
+        else kmoniTimeUpdate(new Date(), "P2P_EEW", "success");
+
         switch (data.code) {
           case 552:
             //津波情報
@@ -1312,7 +1341,6 @@ function P2P_WS() {
           default:
             return false;
         }
-        if (data.time) kmoniTimeUpdate(new Date(data.time), "P2P_EEW", "success");
       }
     });
     kmoniTimeUpdate(new Date() - Replay, "P2P_EEW", "success");
@@ -1424,7 +1452,7 @@ function ProjectBS_WS() {
 
   PBSWSclient.on("connectFailed", function () {
     kmoniTimeUpdate(new Date() - Replay, "ProjectBS", "Error");
-    AXIS_WS_TryConnect();
+    PBS_WS_TryConnect();
   });
 
   PBSWSclient.on("connect", function (connection) {
@@ -1440,8 +1468,7 @@ function ProjectBS_WS() {
       var dataStr = message.utf8Data;
       kmoniTimeUpdate(new Date() - Replay, "ProjectBS", "success");
 
-      console.log(dataStr);
-      //            EEWdetect(1,json)
+      EEWdetect(1, jsonParse(dataStr));
     });
     kmoniTimeUpdate(new Date() - Replay, "ProjectBS", "success");
   });
@@ -1456,6 +1483,50 @@ function PBS_WS_TryConnect() {
 function PBS_WS_Connect() {
   if (PBSWSclient) PBSWSclient.connect("wss://telegram.projectbs.cn/jmaeewws");
   PBSlastConnectDate = new Date();
+}
+
+//Wolfx WebSocket接続・受信処理
+var WolfxWSclient;
+function Wolfx_WS() {
+  if (!config.Source.wolfx.GetData) return;
+  WolfxWSclient = new WebSocketClient();
+
+  WolfxWSclient.on("connectFailed", function () {
+    kmoniTimeUpdate(new Date() - Replay, "Wolfx", "Error");
+    AXIS_WS_TryConnect();
+  });
+
+  WolfxWSclient.on("connect", function (connection) {
+    connection.on("error", function () {
+      kmoniTimeUpdate(new Date() - Replay, "Wolfx", "Error");
+    });
+    connection.on("close", function () {
+      kmoniTimeUpdate(new Date() - Replay, "Wolfx", "Disconnect");
+      Wolfx_WS_TryConnect();
+    });
+    connection.on("message", function (message) {
+      if (Replay !== 0) return;
+      try {
+        var json = jsonParse(message.utf8Data);
+        EEWdetect(2, json);
+        kmoniTimeUpdate(new Date() - Replay, "wolfx", "success");
+      } catch (err) {
+        kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
+      }
+    });
+    kmoniTimeUpdate(new Date() - Replay, "Wolfx", "success");
+  });
+
+  Wolfx_WS_Connect();
+}
+var WolfxlastConnectDate = new Date();
+function Wolfx_WS_TryConnect() {
+  var timeoutTmp = Math.max(30000 - (new Date() - WolfxlastConnectDate), 100);
+  setTimeout(Wolfx_WS_Connect, timeoutTmp);
+}
+function Wolfx_WS_Connect() {
+  if (WolfxWSclient) WolfxWSclient.connect("wss://ws-api.wolfx.jp/jma_eew");
+  WolfxlastConnectDate = new Date();
 }
 
 //定期実行
@@ -1574,7 +1645,66 @@ function kmoniTimeUpdate(Updatetime, type, condition, vendor) {
 //情報フォーマット変更・新報検知→EEWcontrol
 function EEWdetect(type, json) {
   if (!json) return;
-  if (type == 1 || type == 2) {
+  if (type == 1) {
+    //ProjectBS
+    var EBIData = [];
+    EBIStr = String(json.originalTelegram).split("EBI ")[1];
+    codeData = String(json.originalTelegram).split(" ");
+    if (EBIStr) {
+      EBIStr = EBIStr.split("ECI")[0].split("EII")[0].split(" 9999=")[0];
+      EBIStr = EBIStr.split(" ");
+      if (EBIStr.length % 4 == 0) {
+        for (let i = 0; i < EBIStr.length; i += 4) {
+          var sectName = EEWSectName[EBIStr[i]];
+          var maxInt = EBIStr[i + 1].substring(1, 3);
+          var minInt = EBIStr[i + 1].substring(3, 5);
+          minInt = minInt == "//" ? null : shindoConvert(minInt, 0);
+          maxInt = maxInt == "//" ? null : shindoConvert(maxInt, 0);
+          var arrivalTime = EBIStr[i + 2];
+          arrivalTime = arrivalTime.substring(0, 2) + ":" + arrivalTime.substring(2, 4) + ":" + arrivalTime.substring(4, 6);
+          arrivalTime = new Date(dateEncode(4, null) + " " + arrivalTime);
+
+          var alertFlg = EBIStr[i + 3].substring(0, 1) == "1";
+          var arrived = EBIStr[i + 3].substring(1, 2) == "1";
+
+          EBIData.push({
+            Code: Number(EBIStr[i]),
+            Name: sectName,
+            Alert: alertFlg,
+            IntTo: maxInt,
+            IntFrom: minInt,
+            ArrivalTime: arrivalTime,
+            Arrived: arrived,
+          });
+        }
+      } else throw new Error("予想震度等のデコードでエラー");
+    }
+
+    var EEWdata = {
+      alertflg: json.isWarn ? "警報" : "予報",
+      EventID: Number(json.eventID),
+      serial: json.serial,
+      report_time: new Date(json.issue.time),
+      magnitude: json.hypocenter.magnitude,
+      maxInt: shindoConvert(json.maxIntensity, 0),
+      depth: json.hypocenter.location.depth,
+      is_cancel: json.isCancel,
+      is_final: json.isFinal,
+      is_training: codeData[2] == "01" || codeData[2] == "30",
+      latitude: json.hypocenter.location.lat,
+      longitude: json.hypocenter.location.lng,
+      region_name: json.hypocenter.name,
+      origin_time: new Date(json.originTime),
+      isPlum: json.hypocenter.isEstimate,
+      userIntensity: null,
+      arrivalTime: null,
+      intensityAreas: null,
+      warnZones: EBIData,
+      source: "ProjectBS",
+    };
+    EEWcontrol(EEWdata);
+  } else if (type == 2) {
+    //wolfx
     var EBIData = [];
     EBIStr = String(json.OriginalText).split("EBI ")[1];
     if (EBIStr) {
@@ -1619,7 +1749,6 @@ function EEWdetect(type, json) {
       is_training: json.isTraining,
       latitude: json.Latitude,
       longitude: json.Longitude,
-      region_code: null,
       region_name: json.Hypocenter,
       origin_time: new Date(json.OriginTime),
       isPlum: json.isAssumption,
@@ -1627,7 +1756,7 @@ function EEWdetect(type, json) {
       arrivalTime: null,
       intensityAreas: null,
       warnZones: EBIData,
-      source: type == 1 ? "ProjectBS" : "wolfx",
+      source: "wolfx",
     };
     EEWcontrol(EEWdata);
   } else if (type == 3) {
@@ -1660,7 +1789,6 @@ function EEWdetect(type, json) {
         is_training: json.Flag.is_training,
         latitude: json.Hypocenter.Coordinate[1],
         longitude: json.Hypocenter.Coordinate[0],
-        region_code: json.Hypocenter.Code,
         region_name: json.Hypocenter.Name,
         origin_time: new Date(json.OriginDateTime),
         isPlum: null,
@@ -1728,7 +1856,6 @@ function EEWdetect(type, json) {
         is_training: Boolean(json.test),
         latitude: latitudeTmp,
         longitude: longitudeTmp,
-        region_code: "",
         region_name: region_nameTmp,
         origin_time: origin_timeTmp,
         isPlum: conditionTmp,
@@ -1811,7 +1938,7 @@ function EEWcontrol(data) {
         });
 
         //キーごとにマージ
-        var keys = ["alertflg", "EventID", "serial", "report_time", "magnitude", "maxInt", "depth", "is_cancel", "is_final", "is_training", "latitude", "longitude", "region_code", "region_name", "origin_time", "isPlum", "userIntensity", "arrivalTime", "intensityAreas", "warnZones"];
+        var keys = ["alertflg", "EventID", "serial", "report_time", "magnitude", "maxInt", "depth", "is_cancel", "is_final", "is_training", "latitude", "longitude", "region_name", "origin_time", "isPlum", "userIntensity", "arrivalTime", "intensityAreas", "warnZones"];
         keys.forEach(function (elm) {
           if (data[elm] && (!oneBeforeData[elm] || oneBeforeData[elm].length == 0)) {
             oneBeforeData[elm] = data[elm];
