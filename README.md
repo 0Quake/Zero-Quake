@@ -1,7 +1,7 @@
 # Zero-Quake
 
 ![](https://img.shields.io/github/downloads/0quake/Zero-Quake/total)
-![](https://img.shields.io/github/package-json/v/0quake/Zero-Quake)
+![](https://img.shields.io/github/v/release/0Quake/Zero-Quake)
 ![](https://img.shields.io/github/license/0quake/Zero-Quake)
 
 ## 受信できる情報
@@ -35,7 +35,6 @@
   </ul>
   </details>
 
-
 - ### 津波情報
 
   大津波警報／津波警報／津波注意報／津波予報※  
@@ -49,6 +48,7 @@
   </details>
 
 ### リアルタイム揺れ情報
+
 - K-NET, KiK-net（防災科学技術研究所 強震観測網）
 - S-net, 相模湾地震観測施設（防災科学技術研究所 海底地震計）
 <details>
@@ -59,7 +59,6 @@
   <li>海しる <a href="https://www.msil.go.jp/">© Japan Coast Guard, 防災科学技術研究所</a>（海底／3分毎）</li>
 </ul>
 </details>
-
 
 ### その他
 
@@ -72,7 +71,6 @@
   <li>Early-est <a href="http://early-est.rm.ingv.it">© イタリア国立地球物理学火山学研究所</a></li>
 </ol>
 </details>
-
 
 ## 使用素材
 

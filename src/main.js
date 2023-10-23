@@ -988,8 +988,8 @@ function earlyEstReq() {
         });
         res.on("end", function () {
           try {
-            var latitude= Number(elm.querySelector("origin latitude value").textContent);
-            var longitude= Number(elm.querySelector("origin longitude value").textContent);
+            var latitude = Number(elm.querySelector("origin latitude value").textContent);
+            var longitude = Number(elm.querySelector("origin longitude value").textContent);
 
             var request2 = net.request("https://earthquake.usgs.gov/ws/geoserve/regions.json?latitude=" + latitude + "&longitude=" + longitude + "&type=fe");
             request2.on("response", (res) => {
@@ -1007,26 +1007,26 @@ function earlyEstReq() {
                     FE_ID = json.fe.features[i].properties.number;
                     i++;
                   }
-                  if (!FE_ID) jpName =elm.querySelector("origin region").textConten;
-                    var jpName = FERegions[FE_ID];
-                    let parser = new new JSDOM().window.DOMParser();
-                    let doc = parser.parseFromString(dataTmp, "text/xml");
-                    doc.querySelectorAll("eventParameters event").forEach(function (elm) {
-                      var data = {
-                        alertflg: "EarlyEst",
-                        EventID: 901471985000000000000 + Number(String(elm.getAttribute("publicID")).slice(-12)), //気象庁EIDと確実に区別するため、EarlyEstのIPアドレスと連結,
-                        serial: Number(elm.querySelector("origin quality").getElementsByTagName("ee:report_count")[0].textContent) + 1,
-                        report_time: ConvertJST(new Date(elm.querySelector("creationInfo creationTime").textContent)),
-                        magnitude: Number(elm.querySelector("magnitude mag value").textContent),
-                        depth: Number(elm.querySelector("origin depth value").textContent) / 1000,
-                        latitude: latitude,
-                        longitude:  longitude,
-                        region_name: jpName,
-                        origin_time: ConvertJST(new Date(elm.querySelector("origin time value").textContent)),
-                        source: "EarlyEst",
-                      };
-                      EarlyEstControl(data);
-                    });                  
+                  if (!FE_ID) jpName = elm.querySelector("origin region").textConten;
+                  var jpName = FERegions[FE_ID];
+                  let parser = new new JSDOM().window.DOMParser();
+                  let doc = parser.parseFromString(dataTmp, "text/xml");
+                  doc.querySelectorAll("eventParameters event").forEach(function (elm) {
+                    var data = {
+                      alertflg: "EarlyEst",
+                      EventID: 901471985000000000000 + Number(String(elm.getAttribute("publicID")).slice(-12)), //気象庁EIDと確実に区別するため、EarlyEstのIPアドレスと連結,
+                      serial: Number(elm.querySelector("origin quality").getElementsByTagName("ee:report_count")[0].textContent) + 1,
+                      report_time: ConvertJST(new Date(elm.querySelector("creationInfo creationTime").textContent)),
+                      magnitude: Number(elm.querySelector("magnitude mag value").textContent),
+                      depth: Number(elm.querySelector("origin depth value").textContent) / 1000,
+                      latitude: latitude,
+                      longitude: longitude,
+                      region_name: jpName,
+                      origin_time: ConvertJST(new Date(elm.querySelector("origin time value").textContent)),
+                      source: "EarlyEst",
+                    };
+                    EarlyEstControl(data);
+                  });
                 } catch (err) {
                   return;
                 }
