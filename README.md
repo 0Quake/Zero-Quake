@@ -10,7 +10,7 @@
 
 - ### 緊急地震速報
 
-  予報・警報 ／ キャンセル報・PLUM 法など含む
+  予報・警報／キャンセル報／PLUM 法など含む
 
 - ### 地震情報
 
@@ -24,7 +24,7 @@
 
 ### その他
 
-- リアルタイム揺れ情報（強震モニタ）
+- リアルタイム揺れ情報（K-NET,KiK-net,S-net,相模湾地震観測施設）
 - Earthquake Catalog（USGS）
 - リアルタイム地震情報（Early-Est）
 
@@ -53,8 +53,9 @@
 
 ### リアルタイム揺れ情報
 
-- 強震モニタ [© 防災科学技術研究所](http://www.kmoni.bosai.go.jp/)
-- 長周期地震動モニタ [© 防災科学技術研究所](lmoni.bosai.go.jp)
+- 強震モニタ（地上） [© 防災科学技術研究所](http://www.kmoni.bosai.go.jp/)
+- 長周期地震動モニタ（地上） [© 防災科学技術研究所](lmoni.bosai.go.jp)
+- 海しる（海底地震計）[© Japan Coast Guard, 防災科学技術研究所](https://www.msil.go.jp/)
 
 ### リアルタイム地震情報 (Early-est)
 
