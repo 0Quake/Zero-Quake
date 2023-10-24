@@ -511,7 +511,6 @@ document.getElementById("Start_simulation").addEventListener("click", function (
     isPlum: document.getElementById("EEWE_isPlum").checked,
     source: "simulation",
   };
-  console.log(EEWData);
   window.electronAPI.messageReturn({
     action: "EEWSimulation",
     data: EEWData,

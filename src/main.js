@@ -958,7 +958,6 @@ function start() {
 
   //EEW現状取得（HTTP/1回きり）
   wolfxRequest();
-  ProjectBSRequest();
 
   //防災情報XML 長期フィード取得
   EQI_JMAXMLList_Req(true);
@@ -1033,7 +1032,6 @@ function earlyEstReq() {
               });
             });
             request2.end();
-
           } catch (err) {
             kmoniTimeUpdate(new Date() - Replay, "Early-est", "Error");
           }
@@ -1280,33 +1278,6 @@ function wolfxRequest() {
   }
 }
 
-//ProjectBSへのHTTPリクエスト処理
-function ProjectBSRequest() {
-  if (config.Source.ProjectBS.GetData && net.isOnline) {
-    var request = net.request("https://telegram.projectbs.cn/jmaeewjson?_=" + new Date());
-    request.on("response", (res) => {
-      var dataTmp = "";
-      res.on("data", (chunk) => {
-        dataTmp += chunk;
-      });
-      res.on("end", function () {
-        try {
-          var json = jsonParse(dataTmp);
-          EEWdetect(1, json);
-          kmoniTimeUpdate(new Date() - Replay, "ProjectBS", "success");
-        } catch (err) {
-          kmoniTimeUpdate(new Date() - Replay, "ProjectBS", "Error");
-        }
-      });
-    });
-    request.on("error", () => {
-      kmoniTimeUpdate(new Date() - Replay, "ProjectBS", "Error");
-    });
-
-    request.end();
-  }
-}
-
 //P2P地震情報API WebSocket接続・受信処理
 var P2PWSclient;
 
@@ -1537,6 +1508,7 @@ function Wolfx_WS() {
         kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
       }
     });
+    connection.sendUTF("queryjson");
     kmoniTimeUpdate(new Date() - Replay, "wolfx", "success");
   });
 

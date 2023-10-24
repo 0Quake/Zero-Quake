@@ -111,7 +111,6 @@ function overlaySelect(layerName, checked) {
       map.setLayoutProperty(elm, "visibility", checked ? "visible" : "none");
     });
   } else if (layerName == "kmoni_points") {
-    console.log("aaaaa");
     if (checked) document.getElementById("mapcontainer").classList.remove("kmoni_hide");
     else document.getElementById("mapcontainer").classList.add("kmoni_hide");
   } else {
@@ -743,7 +742,7 @@ function addPointMarker(elm) {
 
   const el = document.createElement("div");
   el.classList.add("marker-circle", "KmoniPoint_" + codeEscaped);
-  if (elm.Type == "S-net"||elm.Type == "Sagami") el.classList.add("marker-circle-S-net");
+  if (elm.Type == "S-net" || elm.Type == "Sagami") el.classList.add("marker-circle-S-net");
   elm.popupContent = "";
   elm.popup = new maplibregl.Popup({ offset: 10 }).on("open", () => {
     elm.popup.setHTML(elm.popupContent);

@@ -492,11 +492,7 @@ function kmoniTimeUpdate(updateTime, LocalTime, type, condition, vendor) {
   }
 }
 function kmoniTimeRedraw(updateTime, LocalTime, type, condition) {
-  try{
   document.getElementById(type + "_UT").textContent = dateEncode(3, updateTime);
-  }catch(e){
-    console.log(type)
-  }
   var iconElm = document.getElementById(type + "_ICN");
 
   if (condition == "success") {
