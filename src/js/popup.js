@@ -27,8 +27,6 @@ window.electronAPI.messageSend((event, request) => {
     kmoniTimeUpdate(request.Updatetime, request.LocalTime, "kmoniImg", "success");
   } else if (request.action == "SnetUpdate") {
     kmoniTimeUpdate(request.Updatetime, request.LocalTime, "msilImg", "success");
-  } else if (request.action == "MSSelect") {
-    document.getElementById(request.str).selected = true;
   } else if (request.action == "setting") {
     config = request.data;
   } else if (request.action == "Replay") {
@@ -493,12 +491,12 @@ function kmoniTimeUpdate(updateTime, LocalTime, type, condition, vendor) {
     kmoniTimeRedraw(updateTime, LocalTime, type, condition, vendor);
   }
 }
-function kmoniTimeRedraw(updateTime, LocalTime, type, condition, vendor) {
-  if (vendor) {
-    document.getElementById("ymoniVendor").textContent = vendor == "YE" ? "East" : "West";
-  }
+function kmoniTimeRedraw(updateTime, LocalTime, type, condition) {
+  try{
   document.getElementById(type + "_UT").textContent = dateEncode(3, updateTime);
-
+  }catch(e){
+    console.log(type)
+  }
   var iconElm = document.getElementById(type + "_ICN");
 
   if (condition == "success") {

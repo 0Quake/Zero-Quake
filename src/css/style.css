@@ -931,6 +931,10 @@ td {
   text-align: center;
   margin: 25px 0 0 0;
 }
+#UpdateTime_detail {
+  border: none;
+  border-bottom: solid 1px #666;
+}
 .popup_menubar {
   position: absolute;
   top: 0;

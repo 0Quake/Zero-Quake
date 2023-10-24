@@ -27,9 +27,6 @@ function replay(ReplayDate) {
   }
 }
 /* eslint-enable */
-//replay("2023/04/04 16:11:00"); //２か所同時
-//replay("2023/03/11 05:12:30"); //２か所同時
-//replay("2020/06/15 02:28:38");//２か所同時
 
 // prettier-ignore
 var EEWSectName = { 135: "宗谷支庁北部", 136: "宗谷支庁南部", 125: "上川支庁北部", 126: "上川支庁中部", 127: "上川支庁南部", 130: "留萌支庁中北部", 131: "留萌支庁南部", 139: "北海道利尻礼文", 150: "日高支庁西部", 151: "日高支庁中部", 152: "日高支庁東部", 145: "胆振支庁西部", 146: "胆振支庁中東部", 110: "檜山支庁", 105: "渡島支庁北部", 106: "渡島支庁東部", 107: "渡島支庁西部", 140: "網走支庁網走", 141: "網走支庁北見", 142: "網走支庁紋別", 165: "根室支庁北部", 166: "根室支庁中部", 167: "根室支庁南部", 160: "釧路支庁北部", 161: "釧路支庁中南部", 155: "十勝支庁北部", 156: "十勝支庁中部", 157: "十勝支庁南部", 119: "北海道奥尻島", 120: "空知支庁北部", 121: "空知支庁中部", 122: "空知支庁南部", 100: "石狩支庁北部", 101: "石狩支庁中部", 102: "石狩支庁南部", 115: "後志支庁北部", 116: "後志支庁東部", 117: "後志支庁西部", 200: "青森県津軽北部", 201: "青森県津軽南部", 202: "青森県三八上北", 203: "青森県下北", 230: "秋田県沿岸北部", 231: "秋田県沿岸南部", 232: "秋田県内陸北部", 233: "秋田県内陸南部", 210: "岩手県沿岸北部", 211: "岩手県沿岸南部", 212: "岩手県内陸北部", 213: "岩手県内陸南部", 220: "宮城県北部", 221: "宮城県南部", 222: "宮城県中部", 240: "山形県庄内", 241: "山形県最上", 242: "山形県村山", 243: "山形県置賜", 250: "福島県中通り", 251: "福島県浜通り", 252: "福島県会津", 300: "茨城県北部", 301: "茨城県南部", 310: "栃木県北部", 311: "栃木県南部", 320: "群馬県北部", 321: "群馬県南部", 330: "埼玉県北部", 331: "埼玉県南部", 332: "埼玉県秩父", 350: "東京都２３区", 351: "東京都多摩東部", 352: "東京都多摩西部", 354: "神津島", 355: "伊豆大島", 356: "新島", 357: "三宅島", 358: "八丈島", 359: "小笠原", 340: "千葉県北東部", 341: "千葉県北西部", 342: "千葉県南部", 360: "神奈川県東部", 361: "神奈川県西部", 420: "長野県北部", 421: "長野県中部", 422: "長野県南部", 410: "山梨県東部", 411: "山梨県中・西部", 412: "山梨県東部・富士五湖", 440: "静岡県伊豆", 441: "静岡県東部", 442: "静岡県中部", 443: "静岡県西部", 450: "愛知県東部", 451: "愛知県西部", 430: "岐阜県飛騨", 431: "岐阜県美濃東部", 432: "岐阜県美濃中西部", 460: "三重県北部", 461: "三重県中部", 462: "三重県南部", 370: "新潟県上越", 371: "新潟県中越", 372: "新潟県下越", 375: "新潟県佐渡", 380: "富山県東部", 381: "富山県西部", 390: "石川県能登", 391: "石川県加賀", 400: "福井県嶺北", 401: "福井県嶺南", 500: "滋賀県北部", 501: "滋賀県南部", 510: "京都府北部", 511: "京都府南部", 520: "大阪府北部", 521: "大阪府南部", 530: "兵庫県北部", 531: "兵庫県南東部", 532: "兵庫県南西部", 535: "兵庫県淡路島", 540: "奈良県", 550: "和歌山県北部", 551: "和歌山県南部", 580: "岡山県北部", 581: "岡山県南部", 590: "広島県北部", 591: "広島県南東部", 592: "広島県南西部", 570: "島根県東部", 571: "島根県西部", 575: "島根県隠岐", 560: "鳥取県東部", 562: "鳥取県中部", 563: "鳥取県西部", 600: "徳島県北部", 601: "徳島県南部", 610: "香川県東部", 611: "香川県西部", 620: "愛媛県東予", 621: "愛媛県中予", 622: "愛媛県南予", 630: "高知県東部", 631: "高知県中部", 632: "高知県西部", 700: "山口県北部", 701: "山口県東部", 702: "山口県西部", 710: "福岡県福岡", 711: "福岡県北九州", 712: "福岡県筑豊", 713: "福岡県筑後", 750: "大分県北部", 751: "大分県中部", 752: "大分県南部", 753: "大分県西部", 730: "長崎県北部", 731: "長崎県南西部", 732: "長崎県島原半島", 735: "長崎県対馬", 736: "長崎県壱岐", 737: "長崎県五島", 720: "佐賀県北部", 721: "佐賀県南部", 740: "熊本県阿蘇", 741: "熊本県熊本", 742: "熊本県球磨", 743: "熊本県天草・芦北", 760: "宮崎県北部平野部", 761: "宮崎県北部山沿い", 762: "宮崎県南部平野部", 763: "宮崎県南部山沿い", 770: "鹿児島県薩摩", 771: "鹿児島県大隅", 774: "鹿児島県十島村", 775: "鹿児島県甑島", 776: "鹿児島県種子島", 777: "鹿児島県屋久島", 778: "鹿児島県奄美北部", 779: "鹿児島県奄美南部", 800: "沖縄県本島北部", 801: "沖縄県本島中南部", 802: "沖縄県久米島", 803: "沖縄県大東島", 804: "沖縄県宮古島", 805: "沖縄県石垣島", 806: "沖縄県与那国島", 807: "沖縄県西表島" };
@@ -219,7 +216,7 @@ store.set("config", config);
 
 var psBlock;
 var kmoniActive = false;
-var kmoniTimeTmp = [];
+var kmoniTimeTmp = {};
 var EEW_Data = []; //地震速報リスト
 var EEW_nowList = []; //現在発報中リスト
 var EarlyEst_Data = []; //Earlyest地震速報リスト
@@ -232,7 +229,6 @@ var errorCountkI = (errorCountkEI = errorCountl = errorCountyw = errorCountye = 
 
 var EQDetect_List = [];
 
-var P2P_ConnectData;
 var jmaXML_Fetched = [];
 var nakn_Fetched = [];
 var narikakun_URLs = [];
@@ -257,10 +253,10 @@ if (app.isPackaged) {
   }
 }
 
-//アプリの更新を確認
 var update_data;
 var downloadURL;
 
+//アップデートの確認
 function checkUpdate() {
   let request = net.request("https://api.github.com/repos/0quake/Zero-Quake/releases?_=" + Number(new Date()));
 
@@ -349,6 +345,7 @@ function checkUpdate() {
   request.end();
 }
 
+//アップデートの実行
 function doUpdate(url) {
   var request = net.request(url);
   request.on("response", (res) => {
@@ -618,9 +615,6 @@ ipcMain.on("message", (_event, response) => {
     if (SnetPointsDataTmp) {
       mainWindow.webContents.send("message2", SnetPointsDataTmp);
     }
-    if (P2P_ConnectData) {
-      mainWindow.webContents.send("message2", P2P_ConnectData);
-    }
   } else if (response.action == "replay") {
     replay(response.date);
   } else if (response.action == "startInstall") {
@@ -668,13 +662,14 @@ function createWindow() {
         });
       }
 
-      kmoniTimeTmp.forEach(function (elm) {
+      Object.keys(kmoniTimeTmp).forEach(function (key) {
+        elm = kmoniTimeTmp[key];
         mainWindow.webContents.send("message2", {
           action: "kmoniTimeUpdate",
           Updatetime: elm.Updatetime,
           LocalTime: elm.LocalTime,
           type: elm.type,
-          condition: "success",
+          condition: elm.condition,
         });
       });
 
@@ -716,10 +711,6 @@ function createWindow() {
           });
         }
       });
-
-      if (P2P_ConnectData) {
-        mainWindow.webContents.send("message2", P2P_ConnectData);
-      }
 
       if (kmoniPointsDataTmp) {
         mainWindow.webContents.send("message2", kmoniPointsDataTmp);
@@ -937,7 +928,6 @@ function EQInfo_createWindow(response) {
     targetWindow.webContents.on("new-window", handleUrlOpen);
   }
 }
-
 function EQInfo_createWindowWS(response) {
   var EQInfoWindow = new BrowserWindow({
     minWidth: 600,
@@ -988,7 +978,6 @@ function earlyEstReq() {
     var request = net.request("http://early-est.rm.ingv.it/monitor.xml");
     request.on("response", (res) => {
       if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
-        NetworkError(res._responseHead.statusCode, "Early-est");
         kmoniTimeUpdate(new Date() - Replay, "Early-est", "Error");
       } else {
         var dataTmp = "";
@@ -1034,25 +1023,24 @@ function earlyEstReq() {
                       origin_time: ConvertJST(new Date(elm.querySelector("origin time value").textContent)),
                       source: "EarlyEst",
                     };
+                    kmoniTimeUpdate(new Date() - Replay, "Early-est", "success");
                     EarlyEstControl(data);
                   });
                 } catch (err) {
+                  kmoniTimeUpdate(new Date() - Replay, "Early-est", "Error");
                   return;
                 }
               });
             });
             request2.end();
 
-            kmoniTimeUpdate(new Date() - Replay, "Early-est", "success");
           } catch (err) {
-            NetworkError(err, "Early-est");
             kmoniTimeUpdate(new Date() - Replay, "Early-est", "Error");
           }
         });
       }
     });
-    request.on("error", (error) => {
-      NetworkError(error, "Early-est");
+    request.on("error", () => {
       kmoniTimeUpdate(new Date() - Replay, "Early-est", "Error");
     });
 
@@ -1239,6 +1227,7 @@ function SnetRequest() {
                       date: ReqTime,
                     });
                   }
+                  kmoniTimeUpdate(new Date() - Replay, "msilImg", "success");
                 } catch (err) {
                   kmoniTimeUpdate(new Date() - Replay, "msilImg", "Error");
                 }
@@ -1253,8 +1242,7 @@ function SnetRequest() {
         }
       });
     });
-    request.on("error", (error) => {
-      NetworkError(error, "海しる");
+    request.on("error", () => {
       kmoniTimeUpdate(new Date() - Replay, "msilImg", "Error");
     });
 
@@ -1284,8 +1272,7 @@ function wolfxRequest() {
         }
       });
     });
-    request.on("error", (error) => {
-      NetworkError(error, "wolfx");
+    request.on("error", () => {
       kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
     });
 
@@ -1312,8 +1299,7 @@ function ProjectBSRequest() {
         }
       });
     });
-    request.on("error", (error) => {
-      NetworkError(error, "ProjectBS");
+    request.on("error", () => {
       kmoniTimeUpdate(new Date() - Replay, "ProjectBS", "Error");
     });
 
@@ -1529,16 +1515,16 @@ function Wolfx_WS() {
   WolfxWSclient = new WebSocketClient();
 
   WolfxWSclient.on("connectFailed", function () {
-    kmoniTimeUpdate(new Date() - Replay, "Wolfx", "Error");
+    kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
     AXIS_WS_TryConnect();
   });
 
   WolfxWSclient.on("connect", function (connection) {
     connection.on("error", function () {
-      kmoniTimeUpdate(new Date() - Replay, "Wolfx", "Error");
+      kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
     });
     connection.on("close", function () {
-      kmoniTimeUpdate(new Date() - Replay, "Wolfx", "Disconnect");
+      kmoniTimeUpdate(new Date() - Replay, "wolfx", "Disconnect");
       Wolfx_WS_TryConnect();
     });
     connection.on("message", function (message) {
@@ -1551,7 +1537,7 @@ function Wolfx_WS() {
         kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
       }
     });
-    kmoniTimeUpdate(new Date() - Replay, "Wolfx", "success");
+    kmoniTimeUpdate(new Date() - Replay, "wolfx", "success");
   });
 
   Wolfx_WS_Connect();
@@ -1658,25 +1644,12 @@ function kmoniTimeUpdate(Updatetime, type, condition, vendor) {
     mainWindow.webContents.send("message2", sendData);
   }
 
-  if (type == "P2P_EEW") {
-    P2P_ConnectData = sendData;
-  }
-  var kmoniTimeTmpElm = kmoniTimeTmp.find(function (elm) {
-    return elm.type == type;
-  });
-  if (kmoniTimeTmpElm) {
-    kmoniTimeTmpElm = {
-      type: type,
-      Updatetime: Updatetime,
-      LocalTime: new Date(),
-    };
-  } else {
-    kmoniTimeTmp.push({
-      type: type,
-      Updatetime: Updatetime,
-      LocalTime: new Date(),
-    });
-  }
+  kmoniTimeTmp[type] = {
+    type: type,
+    Updatetime: Updatetime,
+    LocalTime: new Date(),
+    condition: condition,
+  };
 }
 
 //情報フォーマット変更・新報検知→EEWcontrol
@@ -2033,6 +2006,7 @@ function EEWcontrol(data) {
   }
 }
 
+//EarlyEst地震情報マージ
 function EarlyEstControl(data) {
   if (!data) return;
 
@@ -2290,13 +2264,15 @@ function EQI_JMAXMLList_Req(LongPeriodFeed) {
             EQI_JMAXML_Req(url);
           }
         });
+        kmoniTimeUpdate(new Date() - Replay, "JMAXML", "success");
       } catch (err) {
+        kmoniTimeUpdate(new Date() - Replay, "JMAXML", "Error");
         return;
       }
     });
   });
-  request.on("error", (error) => {
-    NetworkError(error, "気象庁防災情報XML");
+  request.on("error", () => {
+    kmoniTimeUpdate(new Date() - Replay, "JMAXML", "Error");
   });
 
   request.end();
@@ -2550,13 +2526,15 @@ function EQI_JMAXML_Req(url) {
           }
           TsunamiInfoControl(tsunamiDataTmp);
         }
+        kmoniTimeUpdate(new Date() - Replay, "JMAXML", "success");
       } catch (err) {
+        kmoniTimeUpdate(new Date() - Replay, "JMAXML", "Error");
         return;
       }
     });
   });
-  request.on("error", (error) => {
-    NetworkError(error, "気象庁防災情報XML");
+  request.on("error", () => {
+    kmoniTimeUpdate(new Date() - Replay, "JMAXML", "Error");
   });
 
   request.end();
@@ -2619,13 +2597,15 @@ function EQI_USGS_Req() {
             request.end();
           });
         }
+        kmoniTimeUpdate(new Date() - Replay, "USGS", "success");
       } catch (err) {
+        kmoniTimeUpdate(new Date() - Replay, "USGS", "Error");
         return;
       }
     });
   });
-  request.on("error", (error) => {
-    NetworkError(error, "USGS");
+  request.on("error", () => {
+    kmoniTimeUpdate(new Date() - Replay, "USGS", "Error");
   });
 
   request.end();
@@ -2668,13 +2648,15 @@ function EQI_narikakunList_Req(url, num, first) {
           narikakun_URLs = [];
           narikakun_EIDs = [];
         }
+        kmoniTimeUpdate(new Date() - Replay, "ntool", "success");
       } catch (err) {
+        kmoniTimeUpdate(new Date() - Replay, "ntool", "Error");
         return;
       }
     });
   });
-  request.on("error", (error) => {
-    NetworkError(error, "narikakun 地震情報API");
+  request.on("error", () => {
+    kmoniTimeUpdate(new Date() - Replay, "ntool", "Error");
   });
   request.end();
 }
@@ -2713,13 +2695,15 @@ function EQI_narikakun_Req(url) {
           },
         ];
         eqInfoControl(dataTmp2, "jma");
+        kmoniTimeUpdate(new Date() - Replay, "ntool", "success");
       } catch (err) {
+        kmoniTimeUpdate(new Date() - Replay, "ntool", "Error");
         return;
       }
     });
   });
-  request.on("error", (error) => {
-    NetworkError(error, "narikakun 地震情報API");
+  request.on("error", () => {
+    kmoniTimeUpdate(new Date() - Replay, "ntool", "Error");
   });
   request.end();
 }
@@ -2937,6 +2921,8 @@ function speak(str) {
     });
   }
 }
+
+//EEW時読み上げ文章 生成
 function EEWTextGenerate(EEWData, update) {
   if (EEWData.is_cancel) {
     text = config.notice.voice.EEWCancel;
@@ -2985,10 +2971,6 @@ function soundPlay(name) {
   }
 }
 
-//ネットワークエラー処理
-function NetworkError() {
-  return false;
-}
 //メインウィンドウ内通知
 var notifyData;
 function Window_notification(message, type) {
@@ -3031,8 +3013,6 @@ function dateEncode(type, dateTmp) {
     return YYYY + MM + DD + hh + mm + ss;
   } else if (type == 2) {
     return YYYY + MM + DD;
-  } else if (type == 3) {
-    return YYYY + "/" + MM + "/" + DD + " " + hh + ":" + mm + ":" + ss;
   } else if (type == 4) {
     return YYYY + "/" + MM + "/" + DD;
   } else if (type == 5) {
