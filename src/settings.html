@@ -619,78 +619,84 @@
                 </section>
 
                 <hr>
-
-
-
-                <h2 id="受信できる情報">受信できる情報</h2>
-                <h3 id="気象庁">気象庁</h3>
+                <h2 id="%E5%8F%97%E4%BF%A1%E3%81%A7%E3%81%8D%E3%82%8B%E6%83%85%E5%A0%B1">受信できる情報</h2>
+                <h3 id="%E6%B0%97%E8%B1%A1%E5%BA%81">気象庁</h3>
                 <ul>
-                    <li>緊急地震速報（予報／警報）</li>
-                    <li>地震情報<br>
-                        震度速報／震源に関する情報／震度・震源に関する情報[震度・震源情報/遠地地震に関する情報]<br>
-                        長周期地震動に関する観測情報／顕著な地震の震源要素更新のお知らせ／推計震度分布</li>
-                    <li>津波情報<br>
-                        大津波警報／津波警報／津波注意報／津波予報<br>
-                        津波情報／沖合の津波観測に関する情報</li>
+                    <li>
+                        <h3 id="%E7%B7%8A%E6%80%A5%E5%9C%B0%E9%9C%87%E9%80%9F%E5%A0%B1">緊急地震速報</h3>
+                        <p>予報・警報／キャンセル報／PLUM 法など含む</p>
+                        <details>
+                            <summary>情報源</summary>
+                            <ul>
+                                <li>Wolfx <a href="https://api.wolfx.jp/">© Wolfx Studio.</a></li>
+                                <li>ProjectBS <a href="https://doctelegram.projectbs.cn/jmaeew/">© CrossRoad</a></li>
+                                <li>Axis <a href="https://axis.prioris.jp/">© Prioris</a>（無料登録必須）</li>
+                                <li>P2P 地震情報 API <a href="https://www.p2pquake.net/json_api_v2/">© P2P地震情報</a>（警報のみ）</li>
+                            </ul>
+                        </details>
+                    </li>
+                    <li>
+                        <h3 id="%E5%9C%B0%E9%9C%87%E6%83%85%E5%A0%B1">地震情報</h3>
+                        <p>震度速報／震源に関する情報／震度・震源に関する情報[震度・震源情報/遠地地震に関する情報]<br>
+                            長周期地震動に関する観測情報※／顕著な地震の震源要素更新のお知らせ／推計震度分布※</p>
+                        <details>
+                            <summary>情報源</summary>
+                            <ul>
+                                <li>気象庁防災情報 XML <a href="https://xml.kishou.go.jp/xmlpull.html">© 気象庁</a></li>
+                                <li>nTool Earthquake API<a href="https://ntool.online/apidoc/earthquakeapi">© Narikakun Network</a></li>
+                                <li>Axis <a href="https://axis.prioris.jp/">© Prioris</a>（無料登録必須）</li>
+                                <li>気象庁ホームページ <a href="https://www.jma.go.jp/">© 気象庁</a>（※の項目のみ）</li>
+                            </ul>
+                        </details>
+                    </li>
+                    <li>
+                        <h3 id="%E6%B4%A5%E6%B3%A2%E6%83%85%E5%A0%B1">津波情報</h3>
+                        <p>大津波警報／津波警報／津波注意報／津波予報※<br>
+                            津波情報／沖合の津波観測に関する情報※</p>
+                        <details>
+                            <summary>情報源</summary>
+                            <ul>
+                                <li>気象庁防災情報 XML <a href="https://xml.kishou.go.jp/xmlpull.html">© 気象庁</a></li>
+                                <li>P2P 地震情報 API <a href="https://www.p2pquake.net/json_api_v2/">@p2pquake_takuya</a>（※の項目を除く）</li>
+                            </ul>
+                        </details>
+                    </li>
                 </ul>
-                <h3 id="防災科学研究所">防災科学研究所</h3>
+                <h3 id="%E3%83%AA%E3%82%A2%E3%83%AB%E3%82%BF%E3%82%A4%E3%83%A0%E6%8F%BA%E3%82%8C%E6%83%85%E5%A0%B1">リアルタイム揺れ情報</h3>
                 <ul>
-                    <li>リアルタイム揺れ情報</li>
+                    <li>K-NET, KiK-net（防災科学技術研究所 強震観測網）</li>
+                    <li>S-net, 相模湾地震観測施設（防災科学技術研究所 海底地震計）</li>
                 </ul>
-                <h3 id="usgsアメリカ地質調査所">USGS(アメリカ地質調査所)</h3>
+                <details>
+                    <summary>情報源</summary>
+                    <ul>
+                        <li>強震モニタ <a href="http://www.kmoni.bosai.go.jp/">© 防災科学技術研究所</a>（強震／毎秒）</li>
+                        <li>長周期地震動モニタ <a href="http://www.lmoni.bosai.go.jp/">© 防災科学技術研究所</a>（強震／毎秒）</li>
+                        <li>海しる <a href="https://www.msil.go.jp/">© Japan Coast Guard, 防災科学技術研究所</a>（海底／3分毎）</li>
+                    </ul>
+                </details>
+                <h3 id="%E3%81%9D%E3%81%AE%E4%BB%96">その他</h3>
+                <ol>
+                    <li>Earthquake Catalog（USGS）</li>
+                    <li>リアルタイム地震情報（Early-Est）</li>
+                </ol>
+                <details>
+                    <summary>情報源</summary>
+                    <ol>
+                        <li>FDSN Web Service <a href="https://earthquake.usgs.gov/fdsnws/event/1/">© USGS</a></li>
+                        <li>Early-est <a href="http://early-est.rm.ingv.it">© イタリア国立地球物理学火山学研究所</a></li>
+                    </ol>
+                </details>
+                <h2 id="%E4%BD%BF%E7%94%A8%E7%B4%A0%E6%9D%90">使用素材</h2>
+                <h3 id="%E5%9C%B0%E5%9B%B3%E3%83%87%E3%83%BC%E3%82%BF">地図データ</h3>
+                <h4 id="%E3%83%99%E3%83%BC%E3%82%B9%E3%83%9E%E3%83%83%E3%83%97">ベースマップ</h4>
                 <ul>
-                    <li>Earthquake Catalog</li>
-                </ul>
-                <h3 id="early-est">Early-est</h3>
-                <ul>
-                    <li>リアルタイム地震情報</li>
-                </ul>
-                <h2 id="情報源">情報源</h2>
-                <h3 id="緊急地震速報">緊急地震速報</h3>
-                <ul>
-                    <li>P2P 地震情報 API <a href="https://www.p2pquake.net/json_api_v2/">© @p2pquake_takuya</a></li>
-                    <li>Axis <a href="https://axis.prioris.jp/">© Prioris</a></li>
-                    <li>Wolfx <a href="https://api.wolfx.jp/">© Wolfx Studio.</a></li>
-                </ul>
-                <h3 id="地震情報-気象庁">地震情報 (気象庁)</h3>
-                <ul>
-                    <li>気象庁ホームページ <a href="https://www.jma.go.jp/bosai/map.html?contents=earthquake_map">© 気象庁</a></li>
-                    <li>気象庁防災情報 XML <a href="https://xml.kishou.go.jp/xmlpull.html">© 気象庁</a></li>
-                    <li><a href="http://narikakun.net">narikakun.net</a> 地震情報 API <a href="https://dev.narikakun.net/doc/earthquake">© narikakun</a></li>
-                    <li>Axis <a href="https://axis.prioris.jp/">© Prioris</a></li>
-                </ul>
-                <h3 id="地震情報-earthquake-catalog">地震情報 (Earthquake Catalog)</h3>
-                <ul>
-                    <li>FDSN Web Service <a href="https://earthquake.usgs.gov/fdsnws/event/1/">© USGS</a></li>
-                </ul>
-                <h3 id="津波情報-気象庁">津波情報 (気象庁)</h3>
-                <ul>
-                    <li>P2P 地震情報 API <a href="https://www.p2pquake.net/json_api_v2/">© @p2pquake_takuya</a> （大津波警報／津波警報／津波注意報のみ）</li>
-                    <li>気象庁防災情報 XML <a href="https://xml.kishou.go.jp/xmlpull.html">© 気象庁</a></li>
-                </ul>
-                <h3 id="リアルタイム揺れ情報">リアルタイム揺れ情報</h3>
-                <ul>
-                    <li>強震モニタ <a href="http://www.kmoni.bosai.go.jp/">© 防災科学技術研究所</a></li>
-                    <li>長周期地震動モニタ <a href="lmoni.bosai.go.jp">© 防災科学技術研究所</a></li>
-                </ul>
-                <h3 id="リアルタイム地震情報-early-est">リアルタイム地震情報 (Early-est)</h3>
-                <ul>
-                    <li>Early-est <a href="http://early-est.rm.ingv.it">© イタリア国立地球物理学火山学研究所</a></li>
-                </ul>
-                <h3 id="p-波・s-波-予報円">P 波・S 波 予報円</h3>
-                <ul>
-                    <li>緊急地震速報から得られる、地震発生時刻・深さ・震源の緯度・経度をもとに <a href="https://www.data.jma.go.jp/eqev/data/bulletin/catalog/appendix/trtime/trt_j.html">JMA2001 走時表</a> を利用して計算</li>
-                </ul>
-                <h2 id="その他の情報源">その他の情報源</h2>
-                <h3 id="地図データ">地図データ</h3>
-                <h4 id="ベースマップ">ベースマップ</h4>
-                <ul>
-                    <li>「標準」
+                    <li>「標準」 (単純化して使用)
                         <ul>
                             <li>国内：気象庁 予報区等 GIS データ <a href="https://www.data.jma.go.jp/developer/gis.html">© 気象庁</a></li>
                             <li>国外：ne_110m_admin_0_countries <a href="https://www.naturalearthdata.com/downloads/110m-cultural-vectors/">© Natural Earth </a></li>
-                            <li>湖沼：国土数値情報 <a href="https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-W09-v2_2.html">© 国土交通省 </a><br>
-                                (<a href="https://mapshaper.org/">mapshaper.org</a>で単純化して使用)</li>
+                            <li>湖沼：国土数値情報 <a href="https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-W09-v2_2.html">© 国土交通省 </a></li>
+                            <li>プレート境界： <a href="http://www-udc.ig.utexas.edu/external/plates/data.htm">© テキサス大学</a></li>
                         </ul>
                     </li>
                     <li>「地理院地図(標準)」 <a href="https://maps.gsi.go.jp/development/ichiran.html">© 国土地理院</a></li>
@@ -698,7 +704,7 @@
                     <li>「地理院地図(写真)」 <a href="https://maps.gsi.go.jp/development/ichiran.html">© 国土地理院</a></li>
                     <li>「OpenStreetMap」 <a href="https://www.openstreetmap.org/copyright/">© OpenStreetMap contributors</a></li>
                 </ul>
-                <h4 id="オーバーレイ（ハザードマップなど）">オーバーレイ（ハザードマップなど）</h4>
+                <h4 id="%E3%82%AA%E3%83%BC%E3%83%90%E3%83%BC%E3%83%AC%E3%82%A4%E3%83%8F%E3%82%B6%E3%83%BC%E3%83%89%E3%83%9E%E3%83%83%E3%83%97%E3%81%AA%E3%81%A9">オーバーレイ（ハザードマップなど）</h4>
                 <ul>
                     <li>「詳細地図(地名・道路等)」 <a href="https://maps.gsi.go.jp/development/ichiran.html">© 国土地理院</a></li>
                     <li>「地理院 陰影起伏図」 <a href="https://maps.gsi.go.jp/development/ichiran.html">© 国土地理院</a></li>
@@ -706,28 +712,15 @@
                     <li>「地理院 津波浸水想定 ハザードマップ」 <a href="https://maps.gsi.go.jp/development/ichiran.html">© 国土地理院</a></li>
                     <li>「地理院 土砂災害警戒区域（急傾斜地の崩壊） ハザードマップ」 <a href="https://maps.gsi.go.jp/development/ichiran.html">© 国土地理院</a></li>
                     <li>「地理院 土砂災害警戒区域（地すべり） ハザードマップ」 <a href="https://maps.gsi.go.jp/development/ichiran.html">© 国土地理院</a></li>
+                    <li>「避難所」 <a href="https://maps.gsi.go.jp/development/ichiran.html">© 国土地理院</a></li>
                 </ul>
-                <h4 id="その他">その他</h4>
+                <h3 id="%E3%83%95%E3%82%A9%E3%83%B3%E3%83%88google-fonts">フォント（Google Fonts）</h3>
                 <ul>
-                    <li>プレート境界データ <a href="http://www-udc.ig.utexas.edu/external/plates/data.htm">© テキサス大学</a><br>
-                        (<a href="https://mapshaper.org/">mapshaper.org</a>で単純化して使用)</li>
+                    <li>太字 MPLUS1p-ExtraBold</li>
+                    <li>標準 BIZUDPGothic-Regular</li>
+                    <li>数字 AzeretMono-Regular</li>
+                    <li>アイコン MaterialIcons</li>
                 </ul>
-                <h3 id="フォント">フォント</h3>
-                <ul>
-                    <li>Google Fonts
-                        <ul>
-                            <li>太字 MPLUS1p-ExtraBold</li>
-                            <li>標準 BIZUDPGothic-Regular</li>
-                            <li>数字 AzeretMono-Regular</li>
-                            <li>アイコン MaterialIcons</li>
-                        </ul>
-                    </li>
-                </ul>
-                <h2 id="参考資料">参考資料</h2>
-                <p><a href="https://twitter.com/NoneType1">@NoneType1</a> | <a href="https://qiita.com/NoneType1/items/a4d2cf932e20b56ca444">多項式補間を使用して強震モニタ画像から数値データを決定する</a><br>
-                    <a href="https://twitter.com/ingen084">@ingen084</a> | <a href="https://qiita.com/ingen084/items/7e91f8da2996972ac586">強震モニタの画像から震度と地点を特定するまで</a>
-                </p>
-
             </div>
             <div id="tab1_content4" class="tabcontent">
                 <h3><span>情報種別ごとの設定</span>緊急地震速報</h3>

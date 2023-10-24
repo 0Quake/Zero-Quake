@@ -280,7 +280,17 @@ function checkUpdate() {
           var current_v = String(current_verTmp).split(".");
           var dl_page = json[0].html_url;
           var update_detail = json[0].body;
-          downloadURL = json[0].assets[0].browser_download_url;
+          downloadURL = json[0].assets[0];
+          if (downloadURL && downloadURL.browser_download_url) downloadURL = downloadURL.browser_download_url;
+          else {
+            update_data = { check_error: true, check_date: new Date() };
+            if (settingWindow) {
+              settingWindow.webContents.send("message2", {
+                action: "Update_Data",
+                data: update_data,
+              });
+            }
+          }
 
           var update_available = false;
           if (latest_v[0] > current_v[0]) {
@@ -358,55 +368,54 @@ function doUpdate(url) {
 
 //定期実行
 function ScheduledExecution() {
-  setInterval(() => {
-    wolfxRequest();
-    checkUpdate();
+  wolfxRequest();
+  checkUpdate();
 
-    //axisのアクセストークン確認
-    if (config.Source.axis.GetData) {
-      var request = net.request("https://axis.prioris.jp/api/token/refresh/?token=" + config.Source.axis.AccessToken);
-      request.on("response", (res) => {
-        var dataTmp = "";
-        res.on("data", (chunk) => {
-          dataTmp += chunk;
-        });
-        res.on("end", function () {
-          try {
-            var json = jsonParse(dataTmp);
-            if (json.status == "generate a new token") {
-              //トークン更新
-              if (json.token) {
-                config.Source.axis.AccessToken = String(json.token);
-                store.set("config", config);
-                Window_notification("Axisのアクセストークンを更新しました。", "info");
-              }
-            } else if (json.status == "contract has expired") {
-              //トークン期限切れ
-              config.Source.axis.GetData = false;
-              store.set("config", config);
-              Window_notification("Axisのアクセストークンの期限が切れました。手動でトークンを更新しください。", "warn");
-            } else if (json.status == "invalid header authorization") {
-              config.Source.axis.GetData = false;
-              store.set("config", config);
-              Window_notification("Axisのアクセストークンが不正です。", "error");
-            }
-          } catch (err) {
-            return;
-          }
-        });
+  //axisのアクセストークン確認
+  if (config.Source.axis.GetData) {
+    var request = net.request("https://axis.prioris.jp/api/token/refresh/?token=" + config.Source.axis.AccessToken);
+    request.on("response", (res) => {
+      var dataTmp = "";
+      res.on("data", (chunk) => {
+        dataTmp += chunk;
       });
+      res.on("end", function () {
+        try {
+          var json = jsonParse(dataTmp);
+          if (json.status == "generate a new token") {
+            //トークン更新
+            if (json.token) {
+              config.Source.axis.AccessToken = String(json.token);
+              store.set("config", config);
+              Window_notification("Axisのアクセストークンを更新しました。", "info");
+            }
+          } else if (json.status == "contract has expired") {
+            //トークン期限切れ
+            config.Source.axis.GetData = false;
+            store.set("config", config);
+            Window_notification("Axisのアクセストークンの期限が切れました。手動でトークンを更新しください。", "warn");
+          } else if (json.status == "invalid header authorization") {
+            config.Source.axis.GetData = false;
+            store.set("config", config);
+            Window_notification("Axisのアクセストークンが不正です。", "error");
+          }
+        } catch (err) {
+          return;
+        }
+      });
+    });
 
-      request.end();
-    }
-  }, 600000);
+    request.end();
+  }
 }
 
 //準備完了イベント
 app.whenReady().then(() => {
   //ウィンドウ作成
   worker_createWindow();
-  //定期実行着火
+  //定期実行
   ScheduledExecution();
+  setInterval(ScheduledExecution, 600000);
 
   if (config.system.WindowAutoOpen) {
     createWindow();
