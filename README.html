@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>README.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="zero-quake">Zero-Quake</h1>
+<p><img src="https://img.shields.io/github/downloads/0quake/Zero-Quake/total" alt="">
+<img src="https://img.shields.io/github/v/release/0Quake/Zero-Quake" alt="">
+<img src="https://img.shields.io/github/license/0quake/Zero-Quake" alt=""></p>
+<h2 id="%E5%8F%97%E4%BF%A1%E3%81%A7%E3%81%8D%E3%82%8B%E6%83%85%E5%A0%B1">受信できる情報</h2>
+<h3 id="%E6%B0%97%E8%B1%A1%E5%BA%81">気象庁</h3>
+<ul>
+<li>
+<h3 id="%E7%B7%8A%E6%80%A5%E5%9C%B0%E9%9C%87%E9%80%9F%E5%A0%B1">緊急地震速報</h3>
+<p>予報・警報／キャンセル報／PLUM 法など含む</p>
+<details>
+<summary>情報源</summary>
+<ul>
+  <li>Wolfx <a href="https://api.wolfx.jp/">© Wolfx Studio.</a></li>
+  <li>ProjectBS <a href="https://doctelegram.projectbs.cn/jmaeew/">© CrossRoad</a></li>
+  <li>Axis <a href="https://axis.prioris.jp/">© Prioris</a>（無料登録必須）</li>
+  <li>P2P 地震情報 API <a href="https://www.p2pquake.net/json_api_v2/">© P2P地震情報</a>（警報のみ）</li>
+</ul>
+</details>
+</li>
+<li>
+<h3 id="%E5%9C%B0%E9%9C%87%E6%83%85%E5%A0%B1">地震情報</h3>
+<p>震度速報／震源に関する情報／震度・震源に関する情報[震度・震源情報/遠地地震に関する情報]<br>
+長周期地震動に関する観測情報※／顕著な地震の震源要素更新のお知らせ／推計震度分布※</p>
+<details>
+<summary>情報源</summary>
+<ul>
+  <li>気象庁防災情報 XML <a href="https://xml.kishou.go.jp/xmlpull.html">© 気象庁</a></li>
+  <li>nTool Earthquake API<a href="https://ntool.online/apidoc/earthquakeapi">© Narikakun Network</a></li>
+  <li>Axis <a href="https://axis.prioris.jp/">© Prioris</a>（無料登録必須）</li>
+  <li>気象庁ホームページ <a href="https://www.jma.go.jp/">© 気象庁</a>（※の項目のみ）</li>
+</ul>
+</details>
+</li>
+<li>
+<h3 id="%E6%B4%A5%E6%B3%A2%E6%83%85%E5%A0%B1">津波情報</h3>
+<p>大津波警報／津波警報／津波注意報／津波予報※<br>
+津波情報／沖合の津波観測に関する情報※</p>
+<details>
+<summary>情報源</summary>
+<ul>
+  <li>気象庁防災情報 XML <a href="https://xml.kishou.go.jp/xmlpull.html">© 気象庁</a></li>
+  <li>P2P 地震情報 API <a href="https://www.p2pquake.net/json_api_v2/">@p2pquake_takuya</a>（※の項目を除く）</li>
+</ul>
+</details>
+</li>
+</ul>
+<h3 id="%E3%83%AA%E3%82%A2%E3%83%AB%E3%82%BF%E3%82%A4%E3%83%A0%E6%8F%BA%E3%82%8C%E6%83%85%E5%A0%B1">リアルタイム揺れ情報</h3>
+<ul>
+<li>K-NET, KiK-net（防災科学技術研究所 強震観測網）</li>
+<li>S-net, 相模湾地震観測施設（防災科学技術研究所 海底地震計）</li>
+</ul>
+<details>
+<summary>情報源</summary>
+<ul>
+  <li>強震モニタ <a href="http://www.kmoni.bosai.go.jp/">© 防災科学技術研究所</a>（強震／毎秒）</li>
+  <li>長周期地震動モニタ <a href="http://www.lmoni.bosai.go.jp/">© 防災科学技術研究所</a>（強震／毎秒）</li>
+  <li>海しる <a href="https://www.msil.go.jp/">© Japan Coast Guard, 防災科学技術研究所</a>（海底／3分毎）</li>
+</ul>
+</details>
+<h3 id="%E3%81%9D%E3%81%AE%E4%BB%96">その他</h3>
+<ol>
+<li>Earthquake Catalog（USGS）</li>
+<li>リアルタイム地震情報（Early-Est）</li>
+</ol>
+<details>
+<summary>情報源</summary>
+<ol>
+  <li>FDSN Web Service <a href="https://earthquake.usgs.gov/fdsnws/event/1/">© USGS</a></li>
+  <li>Early-est <a href="http://early-est.rm.ingv.it">© イタリア国立地球物理学火山学研究所</a></li>
+</ol>
+</details>
+<h2 id="%E4%BD%BF%E7%94%A8%E7%B4%A0%E6%9D%90">使用素材</h2>
+<h3 id="%E5%9C%B0%E5%9B%B3%E3%83%87%E3%83%BC%E3%82%BF">地図データ</h3>
+<h4 id="%E3%83%99%E3%83%BC%E3%82%B9%E3%83%9E%E3%83%83%E3%83%97">ベースマップ</h4>
+<ul>
+<li>「標準」 (単純化して使用)
+<ul>
+<li>国内：気象庁 予報区等 GIS データ <a href="https://www.data.jma.go.jp/developer/gis.html">© 気象庁</a></li>
+<li>国外：ne_110m_admin_0_countries <a href="https://www.naturalearthdata.com/downloads/110m-cultural-vectors/">© Natural Earth </a></li>
+<li>湖沼：国土数値情報 <a href="https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-W09-v2_2.html">© 国土交通省 </a></li>
+<li>プレート境界： <a href="http://www-udc.ig.utexas.edu/external/plates/data.htm">© テキサス大学</a></li>
+</ul>
+</li>
+<li>「地理院地図(標準)」 <a href="https://maps.gsi.go.jp/development/ichiran.html">© 国土地理院</a></li>
+<li>「地理院地図(淡色)」 <a href="https://maps.gsi.go.jp/development/ichiran.html">© 国土地理院</a></li>
+<li>「地理院地図(写真)」 <a href="https://maps.gsi.go.jp/development/ichiran.html">© 国土地理院</a></li>
+<li>「OpenStreetMap」 <a href="https://www.openstreetmap.org/copyright/">© OpenStreetMap contributors</a></li>
+</ul>
+<h4 id="%E3%82%AA%E3%83%BC%E3%83%90%E3%83%BC%E3%83%AC%E3%82%A4%E3%83%8F%E3%82%B6%E3%83%BC%E3%83%89%E3%83%9E%E3%83%83%E3%83%97%E3%81%AA%E3%81%A9">オーバーレイ（ハザードマップなど）</h4>
+<ul>
+<li>「詳細地図(地名・道路等)」 <a href="https://maps.gsi.go.jp/development/ichiran.html">© 国土地理院</a></li>
+<li>「地理院 陰影起伏図」 <a href="https://maps.gsi.go.jp/development/ichiran.html">© 国土地理院</a></li>
+<li>「地理院 火山基本図データ」 <a href="https://maps.gsi.go.jp/development/ichiran.html">© 国土地理院</a></li>
+<li>「地理院 津波浸水想定 ハザードマップ」 <a href="https://maps.gsi.go.jp/development/ichiran.html">© 国土地理院</a></li>
+<li>「地理院 土砂災害警戒区域（急傾斜地の崩壊） ハザードマップ」 <a href="https://maps.gsi.go.jp/development/ichiran.html">© 国土地理院</a></li>
+<li>「地理院 土砂災害警戒区域（地すべり） ハザードマップ」 <a href="https://maps.gsi.go.jp/development/ichiran.html">© 国土地理院</a></li>
+<li>「避難所」 <a href="https://maps.gsi.go.jp/development/ichiran.html">© 国土地理院</a></li>
+</ul>
+<h3 id="%E3%83%95%E3%82%A9%E3%83%B3%E3%83%88google-fonts">フォント（Google Fonts）</h3>
+<ul>
+<li>太字 MPLUS1p-ExtraBold</li>
+<li>標準 BIZUDPGothic-Regular</li>
+<li>数字 AzeretMono-Regular</li>
+<li>アイコン MaterialIcons</li>
+</ul>
+
+</body>
+</html>
