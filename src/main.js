@@ -622,6 +622,13 @@ ipcMain.on("message", (_event, response) => {
   }
 });
 
+const unresponsiveMsg = {
+  type: "question",
+  title: "ウィンドウが応答しません。",
+  message: "動作を選択してください。",
+  buttons: ["画面を再表示" ,"アプリを再起動", "待機"],
+  noLink: true,
+};
 //メインウィンドウ表示処理
 function createWindow() {
   if (mainWindow && !mainWindow.isDestroyed()) {
@@ -721,6 +728,31 @@ function createWindow() {
     });
 
     mainWindow.loadFile("src/index.html");
+    
+
+    mainWindow.on("unresponsive", () => {
+      mainWindow.responsive = true;
+      setTimeout(function(){
+        if(mainWindow.responsive) {
+          dialog.showMessageBox(mainWindow, unresponsiveMsg).then(function (result) {
+            switch (result.response) {
+              case 0:
+                mainWindow.loadFile("src/index.html");
+                break;
+              case 1:
+                app.relaunch();
+                app.exit(0);
+                break;
+              default:
+                break;
+            }
+          });
+        }
+      },5000)
+    });
+    mainWindow.on("responsive", () => {
+      mainWindow.responsive = false;
+    });
 
     mainWindow.on("close", (event) => {
       event.preventDefault();

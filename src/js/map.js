@@ -760,7 +760,7 @@ function kmoniMapUpdate(dataTmp, type) {
     kmoniMapData = dataTmp.data;
   }
   //地図上マーカー
-  if (becomeForeground || now_EEW.length !== 0 || Object.keys(points).length == 0) {
+  if (becomeForeground || Object.keys(points).length == 0) {
     changed_bypass = true;
     becomeForeground = false;
   } else {
