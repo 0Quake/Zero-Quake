@@ -629,7 +629,7 @@
                             <summary>情報源</summary>
                             <ul>
                                 <li>Wolfx <a href="https://api.wolfx.jp/">© Wolfx Studio.</a></li>
-                                <li>ProjectBS <a href="https://doctelegram.projectbs.cn/jmaeew/">© CrossRoad</a></li>
+                                <li>ProjectBS <a href="https://doc.telegram.projectbs.cn/jmaeew/">© CrossRoad</a></li>
                                 <li>Axis <a href="https://axis.prioris.jp/">© Prioris</a>（無料登録必須）</li>
                                 <li>P2P 地震情報 API <a href="https://www.p2pquake.net/json_api_v2/">© P2P地震情報</a>（警報のみ）</li>
                             </ul>
@@ -736,7 +736,29 @@
 
 
                 <h4>通知条件</h4>
-                <label>予想最大震度の条件
+                <div class="smalltext">続報による下方修正で 条件を下回った場合でも、その地震については情報の表示・更新を続けます。</div>
+
+                <h5>予想最大震度</h5>
+                <label>しきい値
+                    <select id="EEW_userIntFilter">
+                        <option value="0">すべて</option>
+                        <option value="1">震度1以上</option>
+                        <option value="2">震度2以上</option>
+                        <option value="3">震度3以上</option>
+                        <option value="4">震度4以上</option>
+                        <option value="5-">震度5弱以上</option>
+                        <option value="5+">震度5強以上</option>
+                        <option value="6-">震度6弱以上</option>
+                        <option value="6+">震度6強以上</option>
+                        <option value="7">震度7以上</option>
+                    </select>
+                </label>
+
+                <label><input type="checkbox" id="EEW_IntQ">予想最大震度 不明時も通知</label>
+                <div class="smalltext">一度でも予想最大震度が発表された場合、以降 震度不明であっても通知します。</div>
+
+                <h5>現在地の予想震度</h5>
+                <label>しきい値
                     <select id="EEW_IntFilter">
                         <option value="0">すべて</option>
                         <option value="1">震度1以上</option>
@@ -750,10 +772,9 @@
                         <option value="7">震度7以上</option>
                     </select>
                 </label>
-                <div class="smalltext">続報による下方修正で 条件を下回った場合でも、その地震については情報の表示・更新を続けます。</div>
 
-                <label><input type="checkbox" id="EEW_IntQ">予想最大震度 不明時も通知</label>
-                <div class="smalltext">一度でも予想最大震度が発表された場合、以降 震度不明であっても通知します。</div>
+                <label><input type="checkbox" id="EEW_userIntQ">予想震度 不明時も通知</label>
+                <div class="smalltext">一度でも予想震度が発表された場合、以降 予想震度情報がない場合も通知します。</div>
 
             </div>
             <div id="tab1_content5" class="tabcontent">

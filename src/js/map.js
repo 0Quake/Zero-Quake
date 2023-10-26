@@ -712,8 +712,8 @@ function init() {
     layerSelect(config.data.layer);
     radioSet("mapSelect", config.data.layer);
     config.data.overlay.forEach(function (elm) {
-      overlaySelect(elm, true);
       document.getElementById(elm).checked = true;
+      overlaySelect(elm, true);
     });
   });
 
