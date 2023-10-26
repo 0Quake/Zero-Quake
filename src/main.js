@@ -1019,6 +1019,7 @@ function earlyEstReq() {
         });
         res.on("end", function () {
           try {
+            kmoniTimeUpdate(new Date() - Replay, "Early-est", "success");
             var latitude = Number(elm.querySelector("origin latitude value").textContent);
             var longitude = Number(elm.querySelector("origin longitude value").textContent);
             if(!latitude ||  !longitude)return;
@@ -1065,7 +1066,6 @@ function earlyEstReq() {
               });
             });
             request2.end();
-            kmoniTimeUpdate(new Date() - Replay, "Early-est", "success");
           } catch (err) {
             kmoniTimeUpdate(new Date() - Replay, "Early-est", "Error");
           }
