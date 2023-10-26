@@ -62,6 +62,8 @@ var defaultConfigVal = {
       showTraning: false,
       IntThreshold: 0,
       IntQuestion: true,
+      userIntThreshold: 0,
+      userIntQuestion: true,
       IntType: "max",
     },
     EQInfo: {
@@ -597,7 +599,7 @@ ipcMain.on("message", (_event, response) => {
       });
     }
   } else if (response.action == "EEWSimulation") {
-    EEWAlert(response.data);
+    EEWcontrol(response.data);
   } else if (response.action == "checkForUpdate") {
     checkUpdate();
   } else if (response.action == "tsunamiReqest") {
@@ -1015,9 +1017,10 @@ function earlyEstReq() {
         });
         res.on("end", function () {
           try {
+            kmoniTimeUpdate(new Date() - Replay, "Early-est", "success");
             var latitude = Number(elm.querySelector("origin latitude value").textContent);
             var longitude = Number(elm.querySelector("origin longitude value").textContent);
-
+            if(!latitude ||  !longitude)return;
             var request2 = net.request("https://earthquake.usgs.gov/ws/geoserve/regions.json?latitude=" + latitude + "&longitude=" + longitude + "&type=fe");
             request2.on("response", (res) => {
               var dataTmp2 = "";
@@ -1052,7 +1055,6 @@ function earlyEstReq() {
                       origin_time: ConvertJST(new Date(elm.querySelector("origin time value").textContent)),
                       source: "EarlyEst",
                     };
-                    kmoniTimeUpdate(new Date() - Replay, "Early-est", "success");
                     EarlyEstControl(data);
                   });
                 } catch (err) {
@@ -1991,7 +1993,15 @@ function EEWcontrol(data) {
     if (!data.maxInt) {
       //震度不明を無視するか（設定に準拠）
       if (!config.Info.EEW.IntQuestion) return;
-    } else if (shindoConvert(config.Info.EEW.IntThreshold, 5) >= shindoConvert(data.maxInt, 5) && shindoConvert(data.maxInt) !== "?") {
+    } else if (shindoConvert(config.Info.EEW.IntThreshold, 5) > shindoConvert(data.maxInt, 5) && shindoConvert(data.maxInt) !== "?") {
+      //震度通知条件（設定に準拠）
+      return;
+    }
+
+    if (!data.userIntensity) {
+      //震度不明を無視するか（設定に準拠）
+      if (!config.Info.EEW.userIntQuestion) return;
+    } else if (shindoConvert(config.Info.EEW.userIntThreshold, 5) > shindoConvert(data.userIntensity, 5) && shindoConvert(data.userIntensity) !== "?") {
       //震度通知条件（設定に準拠）
       return;
     }
