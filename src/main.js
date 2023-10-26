@@ -365,7 +365,6 @@ function doUpdate(url) {
 
 //定期実行
 function ScheduledExecution() {
-  wolfxRequest();
   checkUpdate();
 
   //axisのアクセストークン確認
@@ -626,7 +625,7 @@ const unresponsiveMsg = {
   type: "question",
   title: "ウィンドウが応答しません。",
   message: "動作を選択してください。",
-  buttons: ["画面を再表示" ,"アプリを再起動", "待機"],
+  buttons: ["画面を再表示", "アプリを再起動", "待機"],
   noLink: true,
 };
 //メインウィンドウ表示処理
@@ -728,12 +727,11 @@ function createWindow() {
     });
 
     mainWindow.loadFile("src/index.html");
-    
 
     mainWindow.on("unresponsive", () => {
       mainWindow.responsive = true;
-      setTimeout(function(){
-        if(mainWindow.responsive) {
+      setTimeout(function () {
+        if (mainWindow.responsive) {
           dialog.showMessageBox(mainWindow, unresponsiveMsg).then(function (result) {
             switch (result.response) {
               case 0:
@@ -748,7 +746,7 @@ function createWindow() {
             }
           });
         }
-      },5000)
+      }, 5000);
     });
     mainWindow.on("responsive", () => {
       mainWindow.responsive = false;
