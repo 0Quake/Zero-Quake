@@ -505,7 +505,6 @@ function kmoniTimeRedraw(updateTime, LocalTime, type, condition) {
       iconElm.classList.remove("Error");
       break;
   }
-
 }
 
 var UTDialogShow = false;

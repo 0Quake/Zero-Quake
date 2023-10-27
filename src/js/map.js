@@ -115,7 +115,7 @@ function overlaySelect(layerName, checked) {
         map.setLayoutProperty(elm, "visibility", visibility);
       });
     } else {
-      overlayCount+=checked?1:-1;
+      overlayCount += checked ? 1 : -1;
       map.setLayoutProperty(layerName, "visibility", visibility);
     }
 
@@ -578,56 +578,56 @@ function init() {
   });
 
   map.on("sourcedataloading", (e) => {
-    if (e.sourceId == "hinanjo" && hinanjoCheck.checked&&e.tile != undefined) {
-        var ca = e.tile.tileID.canonical;
-        if (map.getLayer("hinanjo_eq_" + ca.x + ca.y + ca.z)) map.removeLayer("hinanjo_eq_" + ca.x + ca.y + ca.z);
-        if (map.getSource("hinanjo_eq_" + ca.x + ca.y + ca.z)) map.removeSource("hinanjo_eq_" + ca.x + ca.y + ca.z);
-        if (map.getLayer("hinanjo_ts_" + ca.x + ca.y + ca.z)) map.removeLayer("hinanjo_ts_" + ca.x + ca.y + ca.z);
-        if (map.getSource("hinanjo_ts_" + ca.x + ca.y + ca.z)) map.removeSource("hinanjo_ts_" + ca.x + ca.y + ca.z);
+    if (e.sourceId == "hinanjo" && hinanjoCheck.checked && e.tile != undefined) {
+      var ca = e.tile.tileID.canonical;
+      if (map.getLayer("hinanjo_eq_" + ca.x + ca.y + ca.z)) map.removeLayer("hinanjo_eq_" + ca.x + ca.y + ca.z);
+      if (map.getSource("hinanjo_eq_" + ca.x + ca.y + ca.z)) map.removeSource("hinanjo_eq_" + ca.x + ca.y + ca.z);
+      if (map.getLayer("hinanjo_ts_" + ca.x + ca.y + ca.z)) map.removeLayer("hinanjo_ts_" + ca.x + ca.y + ca.z);
+      if (map.getSource("hinanjo_ts_" + ca.x + ca.y + ca.z)) map.removeSource("hinanjo_ts_" + ca.x + ca.y + ca.z);
 
-        map.addSource("hinanjo_eq_" + ca.x + ca.y + ca.z, {
-          type: "geojson",
-          data: "https://cyberjapandata.gsi.go.jp/xyz/skhb04/" + ca.z + "/" + ca.x + "/" + ca.y + ".geojson",
-        });
+      map.addSource("hinanjo_eq_" + ca.x + ca.y + ca.z, {
+        type: "geojson",
+        data: "https://cyberjapandata.gsi.go.jp/xyz/skhb04/" + ca.z + "/" + ca.x + "/" + ca.y + ".geojson",
+      });
 
-        map.addLayer({
-          id: "hinanjo_eq_" + ca.x + ca.y + ca.z,
-          type: "circle",
-          source: "hinanjo_eq_" + ca.x + ca.y + ca.z,
-          layout: { visibility: hinanjoCheck.checked ? "visible" : "none" },
-          paint: {
-            "circle-color": "#bf8715",
-            "circle-radius": 6,
-            "circle-stroke-width": 1,
-            "circle-stroke-color": "#222",
-          },
-          minzoom: 10,
-          maxzoom: 22,
-        });
+      map.addLayer({
+        id: "hinanjo_eq_" + ca.x + ca.y + ca.z,
+        type: "circle",
+        source: "hinanjo_eq_" + ca.x + ca.y + ca.z,
+        layout: { visibility: hinanjoCheck.checked ? "visible" : "none" },
+        paint: {
+          "circle-color": "#bf8715",
+          "circle-radius": 6,
+          "circle-stroke-width": 1,
+          "circle-stroke-color": "#222",
+        },
+        minzoom: 10,
+        maxzoom: 22,
+      });
 
-        map.addSource("hinanjo_ts_" + ca.x + ca.y + ca.z, {
-          type: "geojson",
-          data: "https://cyberjapandata.gsi.go.jp/xyz/skhb05/" + ca.z + "/" + ca.x + "/" + ca.y + ".geojson",
-        });
+      map.addSource("hinanjo_ts_" + ca.x + ca.y + ca.z, {
+        type: "geojson",
+        data: "https://cyberjapandata.gsi.go.jp/xyz/skhb05/" + ca.z + "/" + ca.x + "/" + ca.y + ".geojson",
+      });
 
-        map.addLayer({
-          id: "hinanjo_ts_" + ca.x + ca.y + ca.z,
-          type: "circle",
-          source: "hinanjo_ts_" + ca.x + ca.y + ca.z,
-          layout: { visibility: hinanjoCheck.checked ? "visible" : "none" },
-          paint: {
-            "circle-color": "#2488c7",
-            "circle-radius": 6,
-            "circle-stroke-width": 1,
-            "circle-stroke-color": "#222",
-          },
-          minzoom: 10,
-          maxzoom: 22,
-        });
+      map.addLayer({
+        id: "hinanjo_ts_" + ca.x + ca.y + ca.z,
+        type: "circle",
+        source: "hinanjo_ts_" + ca.x + ca.y + ca.z,
+        layout: { visibility: hinanjoCheck.checked ? "visible" : "none" },
+        paint: {
+          "circle-color": "#2488c7",
+          "circle-radius": 6,
+          "circle-stroke-width": 1,
+          "circle-stroke-color": "#222",
+        },
+        minzoom: 10,
+        maxzoom: 22,
+      });
 
-        map.on("click", "hinanjo_eq_" + ca.x + ca.y + ca.z, hinanjoPopup);
-        map.on("click", "hinanjo_ts_" + ca.x + ca.y + ca.z, hinanjoPopup);
-        hinanjoLayers.push("hinanjo_eq_" + ca.x + ca.y + ca.z, "hinanjo_ts_" + ca.x + ca.y + ca.z);
+      map.on("click", "hinanjo_eq_" + ca.x + ca.y + ca.z, hinanjoPopup);
+      map.on("click", "hinanjo_ts_" + ca.x + ca.y + ca.z, hinanjoPopup);
+      hinanjoLayers.push("hinanjo_eq_" + ca.x + ca.y + ca.z, "hinanjo_ts_" + ca.x + ca.y + ca.z);
     }
   });
 

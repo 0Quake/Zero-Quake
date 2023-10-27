@@ -20,7 +20,7 @@ window.electronAPI.messageSend((event, request) => {
     document.getElementById("softVersion").innerText = request.softVersion;
     openAtLogin = request.openAtLogin;
     document.getElementById("startup").checked = openAtLogin;
-    if(request.updatePanelMode){
+    if (request.updatePanelMode) {
       document.querySelector(".active_tabcontent").classList.remove("active_tabcontent");
       document.querySelector(".active_tabmenu").classList.remove("active_tabmenu");
       document.getElementById("tab1_content2").classList.add("active_tabcontent");
@@ -29,11 +29,9 @@ window.electronAPI.messageSend((event, request) => {
 
     config = request.config;
 
-    configDataDraw()
+    configDataDraw();
     mapInit();
-  } else if (request.action == "Update_Data") {
-    UpdateDataDraw(request.data);
-  }
+  } else if (request.action == "Update_Data") UpdateDataDraw(request.data);
 });
 
 var updateWrap = document.getElementById("update-wrap");
@@ -49,7 +47,7 @@ downloadLink.addEventListener("click", function () {
   lnk.click();
 });
 
-function  configDataDraw(){
+function configDataDraw() {
   document.getElementById("HomeName").value = config.home.name;
   document.getElementById("latitude").value = config.home.latitude;
   document.getElementById("longitude").value = config.home.longitude;
@@ -216,9 +214,8 @@ document.getElementById("replayJump").addEventListener("click", function () {
 });
 
 function offsetCalc() {
-  if (Replay == 0) {
-    document.getElementById("replayOffset").innerText = "-";
-  } else {
+  if (Replay == 0) document.getElementById("replayOffset").innerText = "-";
+  else {
     var day = Math.floor(Replay / 1000 / 60 / 60 / 24);
     var hours = Math.floor((Replay / 1000 / 60 / 60) % 24);
     var minutes = Math.floor((Replay / 1000 / 60) % 60);
@@ -444,9 +441,7 @@ speechSynthesis.onvoiceschanged = () => {
   voices = speechSynthesis.getVoices();
   voices.forEach(function (elm) {
     var selectedT = "";
-    if (config && elm.name == config.notice.voice_parameter.voice) {
-      selectedT = " selected";
-    }
+    if (config && elm.name == config.notice.voice_parameter.voice) selectedT = " selected";
 
     opts += "<option" + selectedT + " value='" + elm.name + "'>" + elm.name + "</option>";
   });

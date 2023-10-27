@@ -27,7 +27,6 @@ var shindo_lastUpDate = 0;
 var hinanjoLayers = [];
 var hinanjoCheck = document.getElementById("hinanjo");
 
-
 fetch("Resource/PointSeismicIntensityLocation.json")
   .then(function (res) {
     return res.json();
@@ -35,12 +34,12 @@ fetch("Resource/PointSeismicIntensityLocation.json")
   .then(function (data) {
     pointList = data;
     fetch("https://files.nakn.jp/earthquake/code/PointSeismicIntensityLocation.json")
-    .then(function (res2) {
-      return res2.json();
-    })
-    .then(function (data2) {
-      pointList = data2;
-    });
+      .then(function (res2) {
+        return res2.json();
+      })
+      .then(function (data2) {
+        pointList = data2;
+      });
   });
 
 var EEWData;
@@ -528,7 +527,7 @@ function Mapinit() {
     },
   });
   map.on("sourcedataloading", (e) => {
-    if (e.sourceId == "hinanjo" && hinanjoCheck.checked&&e.tile != undefined) {
+    if (e.sourceId == "hinanjo" && hinanjoCheck.checked && e.tile != undefined) {
       var ca = e.tile.tileID.canonical;
       if (map.getLayer("hinanjo_eq_" + ca.x + ca.y + ca.z)) map.removeLayer("hinanjo_eq_" + ca.x + ca.y + ca.z);
       if (map.getSource("hinanjo_eq_" + ca.x + ca.y + ca.z)) map.removeSource("hinanjo_eq_" + ca.x + ca.y + ca.z);
@@ -762,7 +761,7 @@ function overlaySelect(layerName, checked) {
         map.setLayoutProperty(elm, "visibility", visibility);
       });
     } else {
-      overlayCount+=checked?1:-1;
+      overlayCount += checked ? 1 : -1;
       map.setLayoutProperty(layerName, "visibility", visibility);
     }
 

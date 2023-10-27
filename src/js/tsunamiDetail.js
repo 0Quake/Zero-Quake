@@ -9,16 +9,14 @@ window.electronAPI.messageSend((event, request) => {
 
 var mySectElm;
 function tsunamiUpdate(dataTmp) {
-  console.log(dataTmp);
   var Tsunami_MajorWarning = (Tsunami_Warning = Tsunami_Watch = Tsunami_Yoho = false);
   document.getElementById("dateTime").style.display = "block";
   document.getElementById("revocation").style.display = "none";
   document.getElementById("no-data").style.display = "none";
 
   document.getElementById("dateTime").innerText = dateEncode(3, new Date(dataTmp.issue.time));
-  if (dataTmp.revocation) {
-    document.getElementById("revocation").style.display = "block";
-  } else if (!dataTmp || dataTmp.areas.length == 0) {
+  if (dataTmp.revocation) document.getElementById("revocation").style.display = "block";
+  else if (!dataTmp || dataTmp.areas.length == 0) {
     document.getElementById("no-data").style.display = "table-row";
     document.getElementById("dateTime").style.display = "none";
   }
@@ -44,26 +42,17 @@ function tsunamiUpdate(dataTmp) {
       var maxHeight = "";
       if (elm.firstHeight) {
         arrivalTime = dateEncode(5, elm.firstHeight);
-        if (elm.firstHeightCondition) {
-          condition = elm.firstHeightCondition;
-        }
+        if (elm.firstHeightCondition) condition = elm.firstHeightCondition;
       } else if (elm.firstHeightCondition) {
-        if (elm.firstHeightCondition == "第１波の到達を確認") {
-          arrivalTime = "到達";
-        } else if (elm.firstHeightCondition == "津波到達中と推測") {
-          arrivalTime = "到達中と推測";
-        } else {
-          arrivalTime = elm.firstHeightCondition;
-        }
+        if (elm.firstHeightCondition == "第１波の到達を確認") arrivalTime = "到達";
+        else if (elm.firstHeightCondition == "津波到達中と推測") arrivalTime = "到達中と推測";
+        else arrivalTime = elm.firstHeightCondition;
       }
 
       if (elm.maxHeight) {
         maxHeight = elm.maxHeight;
-        if (maxHeight.match(/未満/)) {
-          maxHeight = "<" + maxHeight.replace("未満", "");
-        } else if (maxHeight.match(/超/)) {
-          maxHeight = ">" + maxHeight.replace("超", "");
-        }
+        if (maxHeight.match(/未満/)) maxHeight = "<" + maxHeight.replace("未満", "");
+        else if (maxHeight.match(/超/)) maxHeight = ">" + maxHeight.replace("超", "");
       }
       var IconTxt = "";
       switch (elm.grade) {
@@ -84,9 +73,6 @@ function tsunamiUpdate(dataTmp) {
           arrivalTime = "<span class='disabled-wrap'>-</span>";
           if (!maxHeight) maxHeight = "若干の海面変動";
           IconTxt = "予";
-          break;
-
-        default:
           break;
       }
 
@@ -122,43 +108,28 @@ function tsunamiUpdate(dataTmp) {
           var omaxHeight = "";
           var maxHeightTime = "";
 
-          if (elm2.Conditions) {
-            condition = elm2.Conditions;
-          }
+          if (elm2.Conditions) condition = elm2.Conditions;
 
-          if (elm2.HighTideDateTime) {
-            HighTideDateTime = dateEncode(5, elm2.HighTideDateTime);
-          }
+          if (elm2.HighTideDateTime) HighTideDateTime = dateEncode(5, elm2.HighTideDateTime);
 
           if (elm2.omaxHeight) {
             omaxHeight = elm2.omaxHeight;
-            if (elm2.firstHeightInitial) {
-              omaxHeight = elm2.omaxHeight + " " + elm2.firstHeightInitial;
-            }
-          } else if (elm2.maxHeightCondition) {
-            omaxHeight = elm2.maxHeightCondition;
-          }
-          if (elm2.maxHeightTime) {
-            maxHeightTime = dateEncode(5, elm2.maxHeightTime);
-          }
+            if (elm2.firstHeightInitial) omaxHeight = elm2.omaxHeight + " " + elm2.firstHeightInitial;
+          } else if (elm2.maxHeightCondition) omaxHeight = elm2.maxHeightCondition;
 
-          if (elm2.ArrivedTime) {
-            arrivalTime = dateEncode(5, elm2.ArrivedTime);
-          } else if (elm2.Condition == "到達" || elm2.Condition == "到達中と推測") {
-            arrivalTime = elm2.Condition;
-          } else if (elm2.firstHeightCondition == "識別不能") {
-            arrivalTime = elm2.firstHeightCondition;
-          }
+          if (elm2.maxHeightTime) maxHeightTime = dateEncode(5, elm2.maxHeightTime);
+
+          if (elm2.ArrivedTime) arrivalTime = dateEncode(5, elm2.ArrivedTime);
+          else if (elm2.Condition == "到達" || elm2.Condition == "到達中と推測") arrivalTime = elm2.Condition;
+          else if (elm2.firstHeightCondition == "識別不能") arrivalTime = elm2.firstHeightCondition;
           if (elm2.firstHeightInitial) arrivalTime += " " + elm2.firstHeightInitial;
 
           var new_tr2 = document.createElement("tr");
-
           var ihtml = "";
           ihtml += "<td></td>";
           ihtml += "<td>" + elm2.name + "</td>";
           ihtml += "<td class='disabled-cell'>-</td>";
           ihtml += "<td class='disabled-cell'>-</td>";
-
           ihtml += "<td>" + arrivalTime + "</td>";
           ihtml += "<td>" + omaxHeight + "</td>";
           ihtml += "<td>" + maxHeightTime + "</td>";

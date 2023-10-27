@@ -27,14 +27,17 @@ workerThreads.parentPort.postMessage({
 });
 
 workerThreads.parentPort.on("message", (message) => {
-  if (message.action == "EQDetect") {
-    //観測点ごとのデータを毎秒受信
-    EQDetect(message.data, message.date, message.detect);
-  } else if (message.action == "EEWNow") {
-    EEWNow = message.data;
-  } else if (message.action == "Replay") {
-    Replay = message.data;
-    pointsData = {};
+  switch (message.action) {
+    case "EQDetect":
+      EQDetect(message.data, message.date, message.detect); //観測点ごとのデータを毎秒受信
+      break;
+    case "EEWNow":
+      EEWNow = message.data;
+      break;
+    case "Replay":
+      Replay = message.data;
+      pointsData = {};
+      break;
   }
 });
 
@@ -43,12 +46,10 @@ function EQDetect(data, date, detect) {
 
   if (!EEWNow) {
     var ptDataTmp;
-
     var detect0;
     var pgaAvr;
     for (const elm of data) {
       //ポイントごとの処理
-
       ptDataTmp = pointsData[elm.Code];
       if (!ptDataTmp) {
         //都会かどうか
@@ -78,22 +79,16 @@ function EQDetect(data, date, detect) {
           elm.detect2 = elm.detect && ((elm.pga - pgaAvr >= thresholds.threshold03 && ptDataTmp.UpCount > 0) || elm.shindo > thresholds.threshold04);
 
           //連続上昇回数（変化なし含む）
-          if (elm.pga - ptDataTmp.SUMTmp[ptDataTmp.SUMTmp.length - 1] >= 0) {
-            ptDataTmp.UpCount++;
-          } else {
-            ptDataTmp.UpCount = 0;
-          }
+          if (elm.pga - ptDataTmp.SUMTmp[ptDataTmp.SUMTmp.length - 1] >= 0) ptDataTmp.UpCount++;
+          else ptDataTmp.UpCount = 0;
+
           //連続検出回数（elm.detectは連続検出回数を指標に含むため、detect0で判定）
-          if (detect0) {
-            ptDataTmp.detectCount++;
-          } else {
-            ptDataTmp.detectCount = 0;
-          }
+          if (detect0) ptDataTmp.detectCount++;
+          else ptDataTmp.detectCount = 0;
         }
 
         //前回からの変化の有無（描画時の負荷軽減のため）
         elm.changed = elm.pga != ptDataTmp.SUMTmp[ptDataTmp.SUMTmp.length - 1];
-
         //PGA平均を求めるためのデータ追加
         ptDataTmp.SUMTmp = ptDataTmp.SUMTmp.slice(0, thresholds.historyCount - 1);
         ptDataTmp.SUMTmp.push(elm.pga);
@@ -149,12 +144,10 @@ function EQDetect(data, date, detect) {
           if (EQD_ItemTmp) {
             //最終検知時間（解除時に使用）を更新
             EQD_ItemTmp.last_Detect = new Date() - Replay;
-
             threshold01Tmp = EQD_ItemTmp.isCity ? thresholds.threshold01C : thresholds.threshold01;
 
             if (EQD_ItemTmp.Codes.length >= threshold01Tmp) {
               //地震アイテムに属する観測点数が閾値以上なら
-
               //情報をmainプロセスへ送信
               workerThreads.parentPort.postMessage({
                 action: "EQDetectAdd",

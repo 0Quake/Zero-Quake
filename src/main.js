@@ -575,65 +575,64 @@ ipcMain.on("message", (_event, response) => {
       kmoniControl(response.data, response.date);
       break;
     case "SnetReturn":
-        SnetControl(response.data, response.date);
+      SnetControl(response.data, response.date);
       break;
     case "kmoniEstShindoReturn":
-        estShindoControl(response);
+      estShindoControl(response);
       break;
     case "settingWindowOpen":
-        setting_createWindow();
+      setting_createWindow();
       break;
     case "TsunamiWindowOpen":
-        tsunami_createWindow();
+      tsunami_createWindow();
       break;
     case "EQInfoWindowOpen":
-        EQInfo_createWindow(response);
+      EQInfo_createWindow(response);
       break;
     case "EQInfoWindowOpen_website":
-        EQInfo_createWindow(response, true);
+      EQInfo_createWindow(response, true);
       break;
     case "openAtLogin":
-        app.setLoginItemSettings({
-          openAtLogin: response.data,
-        });
+      app.setLoginItemSettings({
+        openAtLogin: response.data,
+      });
       break;
     case "settingReturn":
-        config = response.data;
-        store.set("config", config);
+      config = response.data;
+      store.set("config", config);
 
-        if (settingWindow) {
-          settingWindow.webContents.send("message2", {
-            action: "setting",
-            data: config,
-          });
-        }
+      if (settingWindow) {
+        settingWindow.webContents.send("message2", {
+          action: "setting",
+          data: config,
+        });
+      }
       break;
     case "EEWSimulation":
-        EEWcontrol(response.data);
+      EEWcontrol(response.data);
       break;
     case "checkForUpdate":
-        checkUpdate();
+      checkUpdate();
       break;
     case "tsunamiReqest":
-        if (tsunamiData){
-          messageToMainWindow({
-            action: "tsunamiUpdate",
-            data: tsunamiData,
-          });
-        }
+      if (tsunamiData) {
+        messageToMainWindow({
+          action: "tsunamiUpdate",
+          data: tsunamiData,
+        });
+      }
       break;
     case "mapLoaded":
-        if (kmoniPointsDataTmp) messageToMainWindow(kmoniPointsDataTmp);
-        if (SnetPointsDataTmp) messageToMainWindow(SnetPointsDataTmp);
+      if (kmoniPointsDataTmp) messageToMainWindow(kmoniPointsDataTmp);
+      if (SnetPointsDataTmp) messageToMainWindow(SnetPointsDataTmp);
       break;
     case "replay":
-        replay(response.date);
+      replay(response.date);
       break;
     case "startInstall":
-        if (downloadURL) doUpdate(downloadURL);
+      if (downloadURL) doUpdate(downloadURL);
       break;
   }
- 
 });
 
 const unresponsiveMsg = {
@@ -716,7 +715,7 @@ function createWindow() {
       });
 
       EQDetect_List.forEach(function (elm) {
-        threshold01Tmp = elm.isCity?thresholds.threshold01C:thresholds.threshold01;
+        threshold01Tmp = elm.isCity ? thresholds.threshold01C : thresholds.threshold01;
         if (elm.Codes.length >= threshold01Tmp) {
           messageToMainWindow({
             action: "EQDetect",
@@ -754,7 +753,7 @@ function createWindow() {
     });
 
     mainWindow.on("close", (event) => {
-      if(!mainWindow.isDestroyed()){
+      if (!mainWindow.isDestroyed()) {
         event.preventDefault();
         mainWindow.hide();
       }
@@ -787,9 +786,9 @@ function worker_createWindow() {
   kmoniWorker.loadFile("src/kmoniWorker.html");
   kmoniWorker.on("unresponsive", () => {
     kmoniWorker.responsive = true;
-    setTimeout(function(){
-      if(mainWindow.responsive) worker_createWindow();
-    },5000)
+    setTimeout(function () {
+      if (mainWindow.responsive) worker_createWindow();
+    }, 5000);
   });
   kmoniWorker.on("responsive", () => {
     kmoniWorker.responsive = false;
@@ -809,7 +808,7 @@ function setting_createWindow(update) {
     webPreferences: {
       preload: path.join(__dirname, "js/preload.js"),
       title: "設定 - Zero Quake",
-      parent: mainWindow?mainWindow:null,
+      parent: mainWindow ? mainWindow : null,
       center: true,
       icon: path.join(__dirname, "img/icon.ico"),
     },
@@ -828,9 +827,9 @@ function setting_createWindow(update) {
     settingWindow.webContents.send("message2", {
       action: "initialData",
       config: config,
-      softVersion: soft_version, 
+      softVersion: soft_version,
       openAtLogin: app.getLoginItemSettings().openAtLogin,
-      updatePanelMode:update,
+      updatePanelMode: update,
     });
     if (update_data) {
       settingWindow.webContents.send("message2", {
@@ -838,7 +837,6 @@ function setting_createWindow(update) {
         data: update_data,
       });
     }
-
   });
   settingWindow.on("closed", () => {
     settingWindow = null;
@@ -883,8 +881,8 @@ function tsunami_createWindow() {
     tsunamiWindow = null;
   });
 }
-function messageToMainWindow(message){
-  if(mainWindow) mainWindow.webContents.send("message2", message);
+function messageToMainWindow(message) {
+  if (mainWindow) mainWindow.webContents.send("message2", message);
 }
 
 //地震情報ウィンドウ表示処理
@@ -895,7 +893,7 @@ const handleUrlOpen = (e, url) => {
     shell.openExternal(url);
   }
 };
-function EQInfo_createWindow(response,webSite) {
+function EQInfo_createWindow(response, webSite) {
   var EQInfoWindowT = EQI_Window[response.eid];
   if (EQInfoWindowT) {
     if (EQInfoWindowT.window.isMinimized()) EQInfoWindowT.window.restore();
@@ -915,7 +913,7 @@ function EQInfo_createWindow(response,webSite) {
     alwaysOnTop: config.system.alwaysOnTop,
   });
 
-  if(!webSite){
+  if (!webSite) {
     var EEWDataItem = EEW_Data.find(function (elm) {
       return elm.EQ_id == response.eid;
     });
@@ -942,7 +940,7 @@ function EQInfo_createWindow(response,webSite) {
     });
   }
 
-  if(webSite) EQInfoWindow.loadURL(response.url);
+  if (webSite) EQInfoWindow.loadURL(response.url);
   else EQInfoWindow.loadFile(response.url);
   EQInfoWindow.webContents.on("will-navigate", handleUrlOpen);
   EQInfoWindow.webContents.on("new-window", handleUrlOpen);
@@ -960,16 +958,15 @@ function start() {
   SnetRequest();
   kmoniRequest();
   yoyuSetK(kmoniRequest);
-  eqInfoUpdate();  //地震情報定期取得 着火
+  eqInfoUpdate(); //地震情報定期取得 着火
   earlyEstReq();
 
-  wolfxRequest();//EEW現状取得（HTTP/1回きり）
-  EQI_JMAXMLList_Req(true);//防災情報XML 長期フィード取得(１回きり)
+  wolfxRequest(); //EEW現状取得（HTTP/1回きり）
+  EQI_JMAXMLList_Req(true); //防災情報XML 長期フィード取得(１回きり)
 
   //定期実行 着火
   RegularExecution();
 }
-
 
 function earlyEstReq() {
   if (config.Source.EarlyEst.GetData) {
@@ -987,7 +984,7 @@ function earlyEstReq() {
             kmoniTimeUpdate(new Date() - Replay, "Early-est", "success");
             var latitude = Number(elm.querySelector("origin latitude value").textContent);
             var longitude = Number(elm.querySelector("origin longitude value").textContent);
-            if(!latitude ||  !longitude)return;
+            if (!latitude || !longitude) return;
             var request2 = net.request("https://earthquake.usgs.gov/ws/geoserve/regions.json?latitude=" + latitude + "&longitude=" + longitude + "&type=fe");
             request2.on("response", (res) => {
               var dataTmp2 = "";
@@ -1004,7 +1001,7 @@ function earlyEstReq() {
                     FE_ID = json.fe.features[i].properties.number;
                     i++;
                   }
-                  if (FE_ID)var jpName = FERegions[FE_ID];
+                  if (FE_ID) var jpName = FERegions[FE_ID];
                   else jpName = elm.querySelector("origin region").textConten;
                   let parser = new new JSDOM().window.DOMParser();
                   let doc = parser.parseFromString(dataTmp, "text/xml");
@@ -1053,12 +1050,12 @@ worker.on("message", (message) => {
     case "EQDetectAdd":
       var EQD_ItemTmp = message.data;
 
-      var LvTmp = EQD_ItemTmp.maxPGA > 1.3 ? 2:1;
+      var LvTmp = EQD_ItemTmp.maxPGA > 1.3 ? 2 : 1;
 
       if (EQD_ItemTmp.showed) {
-        if (LvTmp == 2 && EQD_ItemTmp.Lv == 1)  soundPlay("EQDetectLv2");//既存イベントのレベルが上がったときの通知音
+        if (LvTmp == 2 && EQD_ItemTmp.Lv == 1) soundPlay("EQDetectLv2"); //既存イベントのレベルが上がったときの通知音
       } else {
-        soundPlay(LvTmp == 2?"EQDetectLv2":"EQDetectLv1");
+        soundPlay(LvTmp == 2 ? "EQDetectLv2" : "EQDetectLv1");
         createWindow();
       }
       EQD_ItemTmp.Lv = LvTmp;
@@ -1300,7 +1297,7 @@ function P2P_WS() {
               break;
           }
         }
-      }catch(e){
+      } catch (e) {
         kmoniTimeUpdate(new Date() - Replay, "P2P_EEW", "Error");
       }
     });
@@ -1383,7 +1380,7 @@ function AXIS_WS() {
               break;
           }
         }
-      }catch(e){
+      } catch (e) {
         kmoniTimeUpdate(new Date() - Replay, "axis", "Error");
       }
     });
@@ -1427,7 +1424,7 @@ function ProjectBS_WS() {
       try {
         var dataStr = message.utf8Data;
         EEWdetect(1, jsonParse(dataStr));
-      }catch(e){
+      } catch (e) {
         kmoniTimeUpdate(new Date() - Replay, "ProjectBS", "Error");
       }
     });
@@ -1519,29 +1516,29 @@ async function yoyuSetK(func) {
   var resTimeTmp;
   while (!yoyuK) {
     await new Promise((resolve) => {
-        if (net.online) {
-          var dataTmp = "";
-          var request = net.request("http://www.kmoni.bosai.go.jp/webservice/server/pros/latest.json?_=" + Number(new Date()));
-          request.on("response", (res) => {
-            res.on("data", (chunk) => {
-              dataTmp += chunk;
-            });
-            res.on("end", function () {
-              try {
-                var json = jsonParse(dataTmp);
-                if (json) {
-                  var resTime = new Date(json.latest_time);
-                  if (resTimeTmp !== resTime && 0 < index) yoyuK = new Date() - resTime;
-                  resTimeTmp = resTime;
-                }
-                resolve();
-              } catch (err) {
-                return;
-              }
-            });
+      if (net.online) {
+        var dataTmp = "";
+        var request = net.request("http://www.kmoni.bosai.go.jp/webservice/server/pros/latest.json?_=" + Number(new Date()));
+        request.on("response", (res) => {
+          res.on("data", (chunk) => {
+            dataTmp += chunk;
           });
-          request.end();
-        }
+          res.on("end", function () {
+            try {
+              var json = jsonParse(dataTmp);
+              if (json) {
+                var resTime = new Date(json.latest_time);
+                if (resTimeTmp !== resTime && 0 < index) yoyuK = new Date() - resTime;
+                resTimeTmp = resTime;
+              }
+              resolve();
+            } catch (err) {
+              return;
+            }
+          });
+        });
+        request.end();
+      }
     });
     if (index > 25) {
       yoyuK = 2500;
@@ -1875,7 +1872,7 @@ function EEWcontrol(data) {
               return elm.Name == elm2.Name;
             });
             if (SectData) {
-              elm = Object.assign(SectData, elm);//データをマージ
+              elm = Object.assign(SectData, elm); //データをマージ
               changed = true;
             }
           });
@@ -2014,7 +2011,7 @@ function EEWAlert(data, first, update) {
   } else {
     //第１報
     if (first) createWindow();
-    soundPlay(data.alertflg == "警報"?"EEW1":"EEW2");
+    soundPlay(data.alertflg == "警報" ? "EEW1" : "EEW2");
     speak(EEWTextGenerate(data), !first);
 
     messageToMainWindow({
@@ -2216,7 +2213,7 @@ function EQI_JMAXML_Req(url) {
             };
           } else {
             var ValidDateTimeElm = xml.querySelector("ValidDateTime");
-            if (ValidDateTimeElm)  var ValidDateTimeTmp = new Date(ValidDateTimeElm.textContent);
+            if (ValidDateTimeElm) var ValidDateTimeTmp = new Date(ValidDateTimeElm.textContent);
             else var ValidDateTimeTmp = new Date(xml.querySelector("ReportDateTime").textContent).setHours(ValidDateTimeTmp.getHours() + 12);
             if (ValidDateTimeTmp < new Date()) return;
             tsunamiDataTmp = {
@@ -2336,7 +2333,7 @@ function EQI_JMAXML_Req(url) {
                           }
 
                           var maxheightTimeElm = elm2.querySelector("MaxHeight").getElementsByTagName("DateTime");
-                          if (maxheightTimeElm)  maxheightTime = new Date(maxheightTimeElm.textContent);
+                          if (maxheightTimeElm) maxheightTime = new Date(maxheightTimeElm.textContent);
 
                           var maxheightConditionElm = elm2.querySelector("MaxHeight").getElementsByTagName("Condition");
                           if (maxheightConditionElm) maxHeightCondition = elm2.querySelector("MaxHeight").getElementsByTagName("Condition").textContent;
@@ -2485,7 +2482,7 @@ function EQI_narikakunList_Req(url, num, first) {
             monthTmp = 1;
           }
           EQI_narikakunList_Req("https://ntool.online/api/earthquakeList?year=" + yearTmp + "&month=" + monthTmp, config.Info.EQInfo.ItemCount - json.lists.length, false);
-        } 
+        }
         for (let elm of narikakun_URLs) {
           var eidTmp = String(elm).split("_")[2];
           if (nakn_Fetched.indexOf(url) === -1) {
@@ -2498,7 +2495,7 @@ function EQI_narikakunList_Req(url, num, first) {
           }
         }
 
-        if(narikakun_URLs.length > config.Info.EQInfo.ItemCount) {
+        if (narikakun_URLs.length > config.Info.EQInfo.ItemCount) {
           narikakun_URLs = [];
           narikakun_EIDs = [];
         }
