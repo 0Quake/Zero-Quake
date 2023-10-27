@@ -28,18 +28,18 @@ var hinanjoLayers = [];
 var hinanjoCheck = document.getElementById("hinanjo");
 
 
-fetch("../Resource/PointSeismicIntensityLocation.json")
+fetch("Resource/PointSeismicIntensityLocation.json")
   .then(function (res) {
     return res.json();
   })
   .then(function (data) {
     pointList = data;
     fetch("https://files.nakn.jp/earthquake/code/PointSeismicIntensityLocation.json")
-    .then(function (res) {
-      return res.json();
+    .then(function (res2) {
+      return res2.json();
     })
-    .then(function (data) {
-      pointList = data;
+    .then(function (data2) {
+      pointList = data2;
     });
   });
 
@@ -59,30 +59,24 @@ window.electronAPI.messageSend((event, request) => {
         return String(elm).indexOf("dev.narikakun.net") != -1;
       });
     }
-    if (request.axisData && Array.isArray(request.axisData)) {
-      axisDatas = request.axisData;
-    }
+    if (request.axisData && Array.isArray(request.axisData)) axisDatas = request.axisData;
 
-    if (request.eew) {
-      if (request.eew.canceled) {
-        //EEWキャンセル
-      } else {
-        var eewItem = request.eew.data[request.eew.data.length - 1];
+    if (request.eew && !request.eew.canceled) {
+      var eewItem = request.eew.data[request.eew.data.length - 1];
 
-        EEWData = {
-          reportTime: eewItem.report_time,
-          originTime: eewItem.origin_time,
-          maxI: eewItem.calcintensity,
-          mag: eewItem.magnitude,
-          lat: eewItem.latitude,
-          lng: eewItem.longitude,
-          depth: eewItem.depth,
-          epiCenter: eewItem.region_name,
-          comment: "",
-          cancel: false,
-          eew: true,
-        };
-      }
+      EEWData = {
+        reportTime: eewItem.report_time,
+        originTime: eewItem.origin_time,
+        maxI: eewItem.calcintensity,
+        mag: eewItem.magnitude,
+        lat: eewItem.latitude,
+        lng: eewItem.longitude,
+        depth: eewItem.depth,
+        epiCenter: eewItem.region_name,
+        comment: "",
+        cancel: false,
+        eew: true,
+      };
     }
     Mapinit();
     InfoFetch();
@@ -534,59 +528,56 @@ function Mapinit() {
     },
   });
   map.on("sourcedataloading", (e) => {
-    if (e.sourceId == "hinanjo" && hinanjoCheck.checked) {
-      if (e.tile != undefined) {
-        var ca = e.tile.tileID.canonical;
-        console.log("a");
-        if (map.getLayer("hinanjo_eq_" + ca.x + ca.y + ca.z)) map.removeLayer("hinanjo_eq_" + ca.x + ca.y + ca.z);
-        if (map.getSource("hinanjo_eq_" + ca.x + ca.y + ca.z)) map.removeSource("hinanjo_eq_" + ca.x + ca.y + ca.z);
-        if (map.getLayer("hinanjo_ts_" + ca.x + ca.y + ca.z)) map.removeLayer("hinanjo_ts_" + ca.x + ca.y + ca.z);
-        if (map.getSource("hinanjo_ts_" + ca.x + ca.y + ca.z)) map.removeSource("hinanjo_ts_" + ca.x + ca.y + ca.z);
+    if (e.sourceId == "hinanjo" && hinanjoCheck.checked&&e.tile != undefined) {
+      var ca = e.tile.tileID.canonical;
+      if (map.getLayer("hinanjo_eq_" + ca.x + ca.y + ca.z)) map.removeLayer("hinanjo_eq_" + ca.x + ca.y + ca.z);
+      if (map.getSource("hinanjo_eq_" + ca.x + ca.y + ca.z)) map.removeSource("hinanjo_eq_" + ca.x + ca.y + ca.z);
+      if (map.getLayer("hinanjo_ts_" + ca.x + ca.y + ca.z)) map.removeLayer("hinanjo_ts_" + ca.x + ca.y + ca.z);
+      if (map.getSource("hinanjo_ts_" + ca.x + ca.y + ca.z)) map.removeSource("hinanjo_ts_" + ca.x + ca.y + ca.z);
 
-        map.addSource("hinanjo_eq_" + ca.x + ca.y + ca.z, {
-          type: "geojson",
-          data: "https://cyberjapandata.gsi.go.jp/xyz/skhb04/" + ca.z + "/" + ca.x + "/" + ca.y + ".geojson",
-        });
+      map.addSource("hinanjo_eq_" + ca.x + ca.y + ca.z, {
+        type: "geojson",
+        data: "https://cyberjapandata.gsi.go.jp/xyz/skhb04/" + ca.z + "/" + ca.x + "/" + ca.y + ".geojson",
+      });
 
-        map.addLayer({
-          id: "hinanjo_eq_" + ca.x + ca.y + ca.z,
-          type: "circle",
-          source: "hinanjo_eq_" + ca.x + ca.y + ca.z,
-          layout: { visibility: hinanjoCheck.checked ? "visible" : "none" },
-          paint: {
-            "circle-color": "#bf8715",
-            "circle-radius": 6,
-            "circle-stroke-width": 1,
-            "circle-stroke-color": "#222",
-          },
-          minzoom: 10,
-          maxzoom: 22,
-        });
+      map.addLayer({
+        id: "hinanjo_eq_" + ca.x + ca.y + ca.z,
+        type: "circle",
+        source: "hinanjo_eq_" + ca.x + ca.y + ca.z,
+        layout: { visibility: hinanjoCheck.checked ? "visible" : "none" },
+        paint: {
+          "circle-color": "#bf8715",
+          "circle-radius": 6,
+          "circle-stroke-width": 1,
+          "circle-stroke-color": "#222",
+        },
+        minzoom: 10,
+        maxzoom: 22,
+      });
 
-        map.addSource("hinanjo_ts_" + ca.x + ca.y + ca.z, {
-          type: "geojson",
-          data: "https://cyberjapandata.gsi.go.jp/xyz/skhb05/" + ca.z + "/" + ca.x + "/" + ca.y + ".geojson",
-        });
+      map.addSource("hinanjo_ts_" + ca.x + ca.y + ca.z, {
+        type: "geojson",
+        data: "https://cyberjapandata.gsi.go.jp/xyz/skhb05/" + ca.z + "/" + ca.x + "/" + ca.y + ".geojson",
+      });
 
-        map.addLayer({
-          id: "hinanjo_ts_" + ca.x + ca.y + ca.z,
-          type: "circle",
-          source: "hinanjo_ts_" + ca.x + ca.y + ca.z,
-          layout: { visibility: hinanjoCheck.checked ? "visible" : "none" },
-          paint: {
-            "circle-color": "#2488c7",
-            "circle-radius": 6,
-            "circle-stroke-width": 1,
-            "circle-stroke-color": "#222",
-          },
-          minzoom: 10,
-          maxzoom: 22,
-        });
+      map.addLayer({
+        id: "hinanjo_ts_" + ca.x + ca.y + ca.z,
+        type: "circle",
+        source: "hinanjo_ts_" + ca.x + ca.y + ca.z,
+        layout: { visibility: hinanjoCheck.checked ? "visible" : "none" },
+        paint: {
+          "circle-color": "#2488c7",
+          "circle-radius": 6,
+          "circle-stroke-width": 1,
+          "circle-stroke-color": "#222",
+        },
+        minzoom: 10,
+        maxzoom: 22,
+      });
 
-        map.on("click", "hinanjo_eq_" + ca.x + ca.y + ca.z, hinanjoPopup);
-        map.on("click", "hinanjo_ts_" + ca.x + ca.y + ca.z, hinanjoPopup);
-        hinanjoLayers.push("hinanjo_eq_" + ca.x + ca.y + ca.z, "hinanjo_ts_" + ca.x + ca.y + ca.z);
-      }
+      map.on("click", "hinanjo_eq_" + ca.x + ca.y + ca.z, hinanjoPopup);
+      map.on("click", "hinanjo_ts_" + ca.x + ca.y + ca.z, hinanjoPopup);
+      hinanjoLayers.push("hinanjo_eq_" + ca.x + ca.y + ca.z, "hinanjo_ts_" + ca.x + ca.y + ca.z);
     }
   });
 
@@ -697,9 +688,6 @@ function Mapinit() {
     } else {
       document.getElementById("mapcontainer").classList.add("zoomLevel_4");
     }
-    if (currentZoom > 11) {
-      document.getElementById("mapcontainer").classList.add("popup_show");
-    }
   };
   zoomLevelContinue();
   map.on("zoom", zoomLevelContinue);
@@ -744,9 +732,7 @@ function layerSelect(layerName) {
   if (layerName) {
     tilemapActive = true;
     map.setLayoutProperty(layerName, "visibility", "visible");
-  } else {
-    tilemapActive = false;
-  }
+  } else tilemapActive = false;
   if (!tilemapActive && overlayCount == 0) {
     map.setLayoutProperty("basemap_fill", "visibility", "visible");
     map.setLayoutProperty("worldmap_fill", "visibility", "visible");
@@ -769,7 +755,6 @@ mapSelect.forEach(function (elm) {
 var overlayCount = 0;
 function overlaySelect(layerName, checked) {
   if (layerName == "kmoni_points") return;
-  console.log(layerName);
   var visibility = checked ? "visible" : "none";
   if (layerName !== "hinanjo" && layerName !== "kmoni_points") {
     if (layerName == "gsi_vector") {
@@ -777,12 +762,7 @@ function overlaySelect(layerName, checked) {
         map.setLayoutProperty(elm, "visibility", visibility);
       });
     } else {
-      if (checked) {
-        overlayCount++;
-      } else {
-        overlayCount--;
-      }
-
+      overlayCount+=checked?1:-1;
       map.setLayoutProperty(layerName, "visibility", visibility);
     }
 
@@ -876,9 +856,7 @@ function estimated_intensity_mapReq() {
       });
       if (ItemTmp) {
         InfoType_add("type-6");
-
         idTmp = ItemTmp.url;
-
         ItemTmp.mesh_num.forEach(function (elm, index) {
           var latTmp = Number(elm.substring(0, 2)) / 1.5;
           var lngTmp = Number(elm.substring(2, 4)) + 100;
@@ -937,7 +915,6 @@ function jma_ListReq() {
           jmaURL.push(urlTmp);
         }
       });
-
       mapDraw();
     })
     .catch(function () {});
@@ -952,7 +929,6 @@ function jma_ListReq() {
           jmaLURL.push(urlTmp);
         }
       });
-
       mapDraw();
     })
     .catch(function () {});
@@ -966,8 +942,7 @@ function narikakun_ListReq(year, month, retry) {
     .then(function (data) {
       var nakn_detected = false;
       data.lists.forEach(function (elm) {
-        var eidTmp = elm.split("/");
-        eidTmp = eidTmp[eidTmp.length - 1];
+        var eidTmp = elm.split("/")[eidTmp.length - 1];
         if (eidTmp.indexOf(eid) !== -1 && !narikakunURL.includes(elm)) {
           narikakunURL.push(elm);
           nakn_detected = true;
@@ -981,7 +956,6 @@ function narikakun_ListReq(year, month, retry) {
           yearTmp = new Date().getFullYear() - 1;
           monthTmp = 1;
         }
-
         narikakun_ListReq(yearTmp, monthTmp, true);
       }
       mapDraw();
@@ -996,9 +970,7 @@ function jma_Fetch(url) {
       return res.json();
     })
     .then(function (json) {
-      if (json.Body.Earthquake) {
-        var LatLngDepth = json.Body.Earthquake.Hypocenter.Area.Coordinate.replaceAll("+", "｜+").replaceAll("-", "｜-").replaceAll("/", "").split("｜");
-      }
+      if (json.Body.Earthquake) var LatLngDepth = json.Body.Earthquake.Hypocenter.Area.Coordinate.replaceAll("+", "｜+").replaceAll("-", "｜-").replaceAll("/", "").split("｜");
 
       if (json.Body.Earthquake) {
         if (json.Body.Earthquake.OriginTime) var originTimeTmp = new Date(json.Body.Earthquake.OriginTime);
@@ -1072,9 +1044,7 @@ function jmaL_Fetch(url) {
       InfoType_add("type-7");
 
       document.getElementById("LgInt_radioWrap").style.display = "block";
-      if (json.Body.Earthquake) {
-        var LatLngDepth = json.Body.Earthquake.Hypocenter.Area.Coordinate.replaceAll("+", "｜+").replaceAll("-", "｜-").replaceAll("/", "").split("｜");
-      }
+      if (json.Body.Earthquake) var LatLngDepth = json.Body.Earthquake.Hypocenter.Area.Coordinate.replaceAll("+", "｜+").replaceAll("-", "｜-").replaceAll("/", "").split("｜");
 
       if (json.Body.Earthquake) {
         if (json.Body.Earthquake.OriginTime) var originTimeTmp = new Date(json.Body.Earthquake.OriginTime);
@@ -1140,16 +1110,12 @@ function jmaXMLFetch(url) {
     .then((data) => {
       var parser = new DOMParser();
       var xml = parser.parseFromString(data, "application/xml");
-
       var cancelTmp = xml.querySelector("InfoType").textContent == "取消";
-
       var ReportTime = new Date(xml.querySelector("Head ReportDateTime").textContent);
-
       if (!newInfoDateTime || newInfoDateTime <= ReportTime) {
         newInfoDateTime = ReportTime;
       }
       var EarthquakeElm = xml.querySelector("Body Earthquake");
-
       var originTimeTmp;
       var epiCenterTmp;
       var magnitudeTmp;
@@ -1168,9 +1134,7 @@ function jmaXMLFetch(url) {
 
       var IntensityElm = xml.querySelector("Body Intensity");
       var maxIntTmp;
-      if (IntensityElm) {
-        maxIntTmp = shindoConvert(IntensityElm.querySelector("MaxInt").textContent, 4);
-      }
+      if (IntensityElm) maxIntTmp = shindoConvert(IntensityElm.querySelector("MaxInt").textContent, 4);
 
       if (xml.querySelector("Body Comments")) {
         var commentText = "";
@@ -1208,13 +1172,10 @@ function jmaXMLFetch(url) {
               if (elm2.querySelectorAll("City")) {
                 elm2.querySelectorAll("City").forEach(function (elm3) {
                   add_City_info(elm3.querySelector("Name").textContent, elm3.querySelector("MaxInt").textContent);
-
                   if (elm3.querySelectorAll("IntensityStation")) {
                     elm3.querySelectorAll("IntensityStation").forEach(function (elm4) {
                       var pointT = pointList[elm4.querySelector("Code").textContent];
-                      if (pointT) {
-                        add_IntensityStation_info(pointT.location[0], pointT.location[1], elm4.querySelector("Name").textContent, elm4.querySelector("Int").textContent);
-                      }
+                      if (pointT) add_IntensityStation_info(pointT.location[0], pointT.location[1], elm4.querySelector("Name").textContent, elm4.querySelector("Int").textContent);
                     });
                   }
                 });
@@ -1282,9 +1243,7 @@ function narikakun_Fetch(url) {
                     if (elm3.IntensityStation) {
                       elm3.IntensityStation.forEach(function (elm4) {
                         pointT = pointList[elm4.Code];
-                        if (pointT) {
-                          add_IntensityStation_info(pointT.location[0], pointT.location[1], elm4.Name, elm4.Int);
-                        }
+                        if (pointT) add_IntensityStation_info(pointT.location[0], pointT.location[1], elm4.Name, elm4.Int);
                       });
                     }
                   });
@@ -1614,7 +1573,6 @@ function add_Pref_infoL(name, lngInt) {
   document.getElementById("LngInt").appendChild(newDiv);
 
   document.getElementById("splash").style.display = "none";
-  console.log("a");
 }
 //細分区域ごとの情報描画（リスト・地図塗りつぶし・地図プロット）
 function add_Area_infoL(name, maxInt) {

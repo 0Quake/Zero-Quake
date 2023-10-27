@@ -298,11 +298,6 @@
   width: 25px;
   height: 25px;
 }
-
-.popup_show .PointPopup {
-  display: block;
-}
-
 .maplibregl-ctrl.maplibregl-ctrl-attrib {
   background: #444;
   color: #ccc;
