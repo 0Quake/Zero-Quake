@@ -27,12 +27,20 @@ var shindo_lastUpDate = 0;
 var hinanjoLayers = [];
 var hinanjoCheck = document.getElementById("hinanjo");
 
-fetch("https://files.nakn.jp/earthquake/code/PointSeismicIntensityLocation.json")
+
+fetch("../Resource/PointSeismicIntensityLocation.json")
   .then(function (res) {
     return res.json();
   })
   .then(function (data) {
     pointList = data;
+    fetch("https://files.nakn.jp/earthquake/code/PointSeismicIntensityLocation.json")
+    .then(function (res) {
+      return res.json();
+    })
+    .then(function (data) {
+      pointList = data;
+    });
   });
 
 var EEWData;
