@@ -41,6 +41,7 @@ window.electronAPI.messageSend((event, request) => {
       if (pointData.popup.isOpen()) pointData.popup.setHTML(pointData.popupContent);
     });
   } else if (request.action == "EQInfo") {
+    console.log(request.data)
     eqInfoDraw(request.data, request.source);
   } else if (request.action == "notification_Update") {
     show_errorMsg(request.data);

@@ -2175,7 +2175,7 @@ function EQI_JMAXML_Req(url) {
 
         if (title == "震度速報" || title == "震源に関する情報" || title == "震源・震度に関する情報" || title == "遠地地震に関する情報" || title == "顕著な地震の震源要素更新のお知らせ") {
           //地震情報
-          var EarthquakeElm = xml.querySelector("Body Earthquake");
+          var EarthquakeElm = xml.querySelector("Body").querySelector("Earthquake");
           var originTimeTmp;
           var epiCenterTmp;
           var magnitudeTmp;
@@ -2185,9 +2185,9 @@ function EQI_JMAXML_Req(url) {
             magnitudeTmp = Number(EarthquakeElm.getElementsByTagName("jmx_eb:Magnitude")[0].textContent);
           }
 
-          var IntensityElm = xml.querySelector("Body Intensity");
+          var IntensityElm = xml.querySelector("Body").querySelector("Intensity");
           var maxIntTmp;
-          if (IntensityElm) maxIntTmp = shindoConvert(IntensityElm.querySelector("Observation > MaxInt").textContent);
+          if (IntensityElm) maxIntTmp = shindoConvert(IntensityElm.querySelector("Observation").querySelector("MaxInt").textContent);
           if (maxIntTmp == "[objectHTMLUnknownElement]") maxIntTmp = null;
           eqInfoControl(
             [
@@ -2485,11 +2485,7 @@ function EQI_narikakunList_Req(url, num, first) {
             monthTmp = 1;
           }
           EQI_narikakunList_Req("https://ntool.online/api/earthquakeList?year=" + yearTmp + "&month=" + monthTmp, config.Info.EQInfo.ItemCount - json.lists.length, false);
-        } else {
-          narikakun_URLs = [];
-          narikakun_EIDs = [];
-        }
-      
+        } 
         for (let elm of narikakun_URLs) {
           var eidTmp = String(elm).split("_")[2];
           if (nakn_Fetched.indexOf(url) === -1) {
@@ -2502,6 +2498,10 @@ function EQI_narikakunList_Req(url, num, first) {
           }
         }
 
+        if(narikakun_URLs.length > config.Info.EQInfo.ItemCount) {
+          narikakun_URLs = [];
+          narikakun_EIDs = [];
+        }
         kmoniTimeUpdate(new Date() - Replay, "ntool", "success");
       } catch (err) {
         kmoniTimeUpdate(new Date() - Replay, "ntool", "Error");
