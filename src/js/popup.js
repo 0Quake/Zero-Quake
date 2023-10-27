@@ -19,45 +19,53 @@ document.body.addEventListener("mouseover", function () {
 });
 
 window.electronAPI.messageSend((event, request) => {
-  if (request.action == "EEWAlertUpdate") {
-    EEWAlertUpdate(request.data);
-  } else if (request.action == "kmoniTimeUpdate") {
-    kmoniTimeUpdate(request.Updatetime, request.LocalTime, request.type, request.condition, request.vendor);
-  } else if (request.action == "kmoniUpdate") {
-    kmoniTimeUpdate(request.Updatetime, request.LocalTime, "kmoniImg", "success");
-  } else if (request.action == "SnetUpdate") {
-    kmoniTimeUpdate(request.Updatetime, request.LocalTime, "msilImg", "success");
-  } else if (request.action == "setting") {
-    config = request.data;
-  } else if (request.action == "Replay") {
-    Replay = request.data;
-    document.getElementById("replayFrame").style.display = Replay == 0 ? "none" : "block";
-    Object.keys(points).forEach(function (elm) {
-      pointData = points[elm];
-      pointData.markerElm.style.background = "rgba(128,128,128,0.5)";
-      pointData.markerElm.classList.remove("strongDetectingMarker", "detectingMarker", "marker_Int");
-
-      pointData.popupContent = "<h3 class='PointName' style='border-bottom:solid 2px rgba(128,128,128,0.5)'>" + (elm.Name ? elm.Name : "") + "<span>" + elm.Type + "_" + elm.Code + "</span></h3>";
-      if (pointData.popup.isOpen()) pointData.popup.setHTML(pointData.popupContent);
-    });
-  } else if (request.action == "EQInfo") {
-    console.log(request.data)
-    eqInfoDraw(request.data, request.source);
-  } else if (request.action == "notification_Update") {
-    show_errorMsg(request.data);
-  } else if (request.action == "EQDetect") {
-    EQDetect(request.data);
-  } else if (request.action == "EQDetectFinish") {
-    EQDetectFinish(request.data);
+  switch (request.action) {
+    case "EEWAlertUpdate":
+      EEWAlertUpdate(request.data);
+      break;
+    case "kmoniTimeUpdate":
+      kmoniTimeUpdate(request.Updatetime, request.LocalTime, request.type, request.condition, request.vendor);
+      break;
+    case "kmoniUpdate":
+      kmoniTimeUpdate(request.Updatetime, request.LocalTime, "kmoniImg", "success");
+      break;
+    case "SnetUpdate":
+      kmoniTimeUpdate(request.Updatetime, request.LocalTime, "msilImg", "success");
+      break;
+    case "setting":
+      config = request.data;
+      break;
+    case "Replay":
+      Replay = request.data;
+      document.getElementById("replayFrame").style.display = Replay == 0 ? "none" : "block";
+      Object.keys(points).forEach(function (elm) {
+        pointData = points[elm];
+        pointData.markerElm.style.background = "rgba(128,128,128,0.5)";
+        pointData.markerElm.classList.remove("strongDetectingMarker", "detectingMarker", "marker_Int");
+        pointData.popupContent = "<h3 class='PointName' style='border-bottom:solid 2px rgba(128,128,128,0.5)'>" + (elm.Name ? elm.Name : "") + "<span>" + elm.Type + "_" + elm.Code + "</span></h3>";
+        if (pointData.popup.isOpen()) pointData.popup.setHTML(pointData.popupContent);
+      });
+      break;
+    case "EQInfo":
+      eqInfoDraw(request.data, request.source);
+      break;
+    case "notification_Update":
+      show_errorMsg(request.data);
+      break;
+    case "EQDetect":
+      EQDetect(request.data);
+      break;
+    case "EQDetectFinish":
+      EQDetectFinish(request.data);
+      break;
   }
   return true;
 });
 
 window.addEventListener("load", () => {
   //オフライン警告表示・非表示
-  if (navigator.onLine) {
-    kmoniTimeUpdate(new Date(), new Date(), "Internet", "success");
-  } else {
+  if (navigator.onLine) kmoniTimeUpdate(new Date(), new Date(), "Internet", "success");
+  else {
     document.getElementById("offline").showModal();
     document.getElementById("offline2").style.display = "block";
     kmoniTimeUpdate(new Date(), new Date(), "Internet", "Error");
@@ -112,13 +120,9 @@ function EEWAlertUpdate(data) {
       var alertflgTmp = "(" + elm.alertflg + ")";
       if (elm.alertflg) clone.querySelector(".alertflg").textContent = alertflgTmp;
 
-      if (elm.alertflg == "警報") {
-        clone.querySelector(".EEWWrap").classList.add("keihou");
-      } else if (elm.alertflg == "予報") {
-        clone.querySelector(".EEWWrap").classList.add("yohou");
-      } else if (elm.alertflg == "EarlyEst") {
-        clone.querySelector(".EEWWrap").classList.add("EarlyEst");
-      }
+      if (elm.alertflg == "警報") clone.querySelector(".EEWWrap").classList.add("keihou");
+      else if (elm.alertflg == "予報") clone.querySelector(".EEWWrap").classList.add("yohou");
+      else if (elm.alertflg == "EarlyEst") clone.querySelector(".EEWWrap").classList.add("EarlyEst");
 
       EEWID++;
       EEW_LocalIDs[elm.EventID] = EEWID;
@@ -128,7 +132,6 @@ function EEWAlertUpdate(data) {
       clone.querySelector(".maxInt").textContent = elm.maxInt ? elm.maxInt : "?";
       clone.querySelector(".maxInt").style.background = shindoConvert(elm.maxInt, 2)[0];
       clone.querySelector(".maxInt").style.color = shindoConvert(elm.maxInt, 2)[1];
-
       clone.querySelector(".is_final").style.display = elm.is_final ? "inline" : "none";
       clone.querySelector(".canceled").style.display = elm.is_cancel ? "flex" : "none";
       clone.querySelector(".region_name").textContent = elm.region_name ? elm.region_name : "震源地域不明";
@@ -138,15 +141,12 @@ function EEWAlertUpdate(data) {
       clone.querySelector(".traning").style.display = elm.is_training ? "block" : "none";
       clone.querySelector(".EpicenterElement").style.display = !elm.isPlum ? "block" : "none";
       clone.querySelector(".NoEpicenterElement").style.display = elm.isPlum ? "block" : "none";
-
       clone.querySelector(".userIntensity").textContent = elm.userIntensity ? elm.userIntensity : "?";
       clone.querySelector(".userDataWrap").style.background = shindoConvert(elm.userIntensity, 2)[0];
       clone.querySelector(".userDataWrap").style.color = shindoConvert(elm.userIntensity, 2)[1];
-
       if (elm.distance < 10000) distanceTmp = Math.round(elm.distance);
       else distanceTmp = Math.round(elm.distance / 1000) / 10 + "万";
       clone.querySelector(".distance").textContent = elm.distance ? distanceTmp + "km" : "";
-
       clone.querySelector(".EEWWrap").setAttribute("id", "EEW-" + elm.EventID);
 
       document.getElementById("EEW-Panel").appendChild(clone);
@@ -172,17 +172,14 @@ function EEWAlertUpdate(data) {
         EQMenu.querySelector(".maxInt").textContent = elm.maxInt ? elm.maxInt : "?";
         EQMenu.querySelector(".maxInt").style.background = shindoConvert(elm.maxInt, 2)[0];
         EQMenu.querySelector(".maxInt").style.color = shindoConvert(elm.maxInt, 2)[1];
-
         EQMenu.querySelector(".is_final").style.display = elm.is_final ? "inline" : "none";
         EQMenu.querySelector(".canceled").style.display = elm.is_cancel ? "flex" : "none";
         EQMenu.querySelector(".region_name").textContent = elm.region_name ? elm.region_name : "震源地域不明";
         EQMenu.querySelector(".origin_time").textContent = dateEncode(3, elm.origin_time);
         EQMenu.querySelector(".magnitude").textContent = elm.magnitude ? Math.round(elm.magnitude * 10) / 10 : "不明";
         EQMenu.querySelector(".depth").textContent = elm.depth ? Math.round(elm.depth) : "不明";
-
         EQMenu.querySelector(".EpicenterElement").style.display = !elm.isPlum ? "block" : "none";
         EQMenu.querySelector(".NoEpicenterElement").style.display = elm.isPlum ? "block" : "none";
-
         EQMenu.querySelector(".userIntensity").textContent = elm.userIntensity ? elm.userIntensity : "?";
         EQMenu.querySelector(".userDataWrap").style.background = shindoConvert(elm.userIntensity, 2)[0];
         EQMenu.querySelector(".userDataWrap").style.color = shindoConvert(elm.userIntensity, 2)[1];
@@ -205,8 +202,8 @@ function EEWAlertUpdate(data) {
     });
     //終わった地震
     if (!stillEQ) {
-      document.getElementById("EEW-" + elm.EventID).remove();
       epiCenterClear(elm.EventID);
+      document.getElementById("EEW-" + elm.EventID).remove();
     } else if (elm.is_cancel) {
       epiCenterClear(elm.EventID);
       document.getElementById("EEW-" + elm.EventID).remove();
@@ -215,11 +212,8 @@ function EEWAlertUpdate(data) {
   });
   if (now_EEW.length == 0) EEWID = 0;
 
-  if (data.length == 0) {
-    document.body.classList.remove("EEWMode");
-  } else {
-    document.body.classList.add("EEWMode");
-  }
+  if (data.length == 0) document.body.classList.remove("EEWMode");
+  else document.body.classList.add("EEWMode");
 }
 
 var EEWID = 0;
@@ -266,7 +260,6 @@ function epiCenterUpdate(eid, latitude, longitude) {
       var pswaveFind = psWaveList.find(function (elm2) {
         return elm2.id == eid;
       });
-
       pswaveFind.data.latitude = latitude;
       pswaveFind.data.longitude = longitude;
     }
@@ -485,33 +478,34 @@ document.getElementById("setting").addEventListener("click", function () {
 var UpdateTime = [];
 function kmoniTimeUpdate(updateTime, LocalTime, type, condition, vendor) {
   if (updateTime > new Date() - Replay) return;
-
   UpdateTime[type] = { type: type, updateTime: updateTime, LocalTime: LocalTime, condition: condition, vendor: vendor };
-
-  if (UTDialogShow && !background) {
-    kmoniTimeRedraw(updateTime, LocalTime, type, condition, vendor);
-  }
+  if (UTDialogShow && !background) kmoniTimeRedraw(updateTime, LocalTime, type, condition, vendor);
 }
 function kmoniTimeRedraw(updateTime, LocalTime, type, condition) {
   document.getElementById(type + "_UT").textContent = dateEncode(3, updateTime);
   var iconElm = document.getElementById(type + "_ICN");
 
-  if (condition == "success") {
-    iconElm.classList.add("Success");
-    iconElm.classList.remove("Error");
-    if (!background) {
-      iconElm.classList.add("SuccessAnm");
-      iconElm.addEventListener("animationend", function () {
-        this.classList.remove("SuccessAnm");
-      });
-    }
-  } else if (condition == "Error") {
-    iconElm.classList.remove("Success");
-    iconElm.classList.add("Error");
-  } else if (condition == "Disconnect") {
-    iconElm.classList.remove("Success");
-    iconElm.classList.remove("Error");
+  switch (condition) {
+    case "success":
+      iconElm.classList.add("Success");
+      iconElm.classList.remove("Error");
+      if (!background) {
+        iconElm.classList.add("SuccessAnm");
+        iconElm.addEventListener("animationend", function () {
+          this.classList.remove("SuccessAnm");
+        });
+      }
+      break;
+    case "Error":
+      iconElm.classList.remove("Success");
+      iconElm.classList.add("Error");
+      break;
+    case "Disconnect":
+      iconElm.classList.remove("Success");
+      iconElm.classList.remove("Error");
+      break;
   }
+
 }
 
 var UTDialogShow = false;
