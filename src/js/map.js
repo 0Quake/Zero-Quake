@@ -30,8 +30,6 @@ window.electronAPI.messageSend((event, request) => {
     case "Replay":
       psWaveEntry();
       break;
-    default:
-      break;
   }
 
   document.getElementById("splash").style.display = "none";
@@ -53,9 +51,8 @@ function psWaveAnm() {
       psWaveCalc(elm.EventID);
     }
   }
-  if (background) {
-    setTimeout(psWaveAnm, 1000);
-  } else {
+  if (background) setTimeout(psWaveAnm, 1000);
+  else {
     setTimeout(function () {
       requestAnimationFrame(psWaveAnm);
     }, 200);
@@ -80,9 +77,8 @@ function layerSelect(layerName) {
   if (layerName) {
     tilemapActive = true;
     map.setLayoutProperty(layerName, "visibility", "visible");
-  } else {
-    tilemapActive = false;
-  }
+  } else tilemapActive = false;
+
   if (!tilemapActive && overlayCount == 0) {
     map.setLayoutProperty("basemap_fill", "visibility", "visible");
     map.setLayoutProperty("worldmap_fill", "visibility", "visible");
@@ -119,18 +115,12 @@ function overlaySelect(layerName, checked) {
         map.setLayoutProperty(elm, "visibility", visibility);
       });
     } else {
-      if (checked) {
-        overlayCount++;
-      } else {
-        overlayCount--;
-      }
-
+      overlayCount+=checked?1:-1;
       map.setLayoutProperty(layerName, "visibility", visibility);
     }
 
-    if (layerName == "over2") {
-      document.getElementById("legend1").style.display = checked ? "inline-block" : "none";
-    } else if (layerName == "over3") {
+    if (layerName == "over2") document.getElementById("legend1").style.display = checked ? "inline-block" : "none";
+    else if (layerName == "over3") {
       over3_visiblity = checked;
       document.getElementById("legend2").style.display = over3_visiblity || over4_visiblity ? "inline-block" : "none";
     } else if (layerName == "over4") {
@@ -588,8 +578,7 @@ function init() {
   });
 
   map.on("sourcedataloading", (e) => {
-    if (e.sourceId == "hinanjo" && hinanjoCheck.checked) {
-      if (e.tile != undefined) {
+    if (e.sourceId == "hinanjo" && hinanjoCheck.checked&&e.tile != undefined) {
         var ca = e.tile.tileID.canonical;
         if (map.getLayer("hinanjo_eq_" + ca.x + ca.y + ca.z)) map.removeLayer("hinanjo_eq_" + ca.x + ca.y + ca.z);
         if (map.getSource("hinanjo_eq_" + ca.x + ca.y + ca.z)) map.removeSource("hinanjo_eq_" + ca.x + ca.y + ca.z);
@@ -639,7 +628,6 @@ function init() {
         map.on("click", "hinanjo_eq_" + ca.x + ca.y + ca.z, hinanjoPopup);
         map.on("click", "hinanjo_ts_" + ca.x + ca.y + ca.z, hinanjoPopup);
         hinanjoLayers.push("hinanjo_eq_" + ca.x + ca.y + ca.z, "hinanjo_ts_" + ca.x + ca.y + ca.z);
-      }
     }
   });
 
@@ -721,7 +709,6 @@ function init() {
     const img = document.createElement("img");
     img.src = "./img/homePin.svg";
     img.classList.add("homeIcon");
-
     new maplibregl.Marker(img).setLngLat([config.home.longitude, config.home.latitude]).addTo(map);
   }
 }
@@ -732,7 +719,6 @@ fetch("./Resource/TimeTable_JMA2001.json")
   })
   .then(function (json) {
     TimeTable_JMA2001 = json;
-
     psWaveEntry();
   });
 
@@ -756,36 +742,25 @@ var pointData;
 var changed_bypass = false;
 function kmoniMapUpdate(dataTmp, type) {
   if (!dataTmp.data) return;
-  if (type == "knet") {
-    kmoniMapData = dataTmp.data;
-  }
+  if (type == "knet") kmoniMapData = dataTmp.data;
   //地図上マーカー
   if (becomeForeground || Object.keys(points).length == 0) {
     changed_bypass = true;
     becomeForeground = false;
-  } else {
-    changed_bypass = false;
-  }
+  } else changed_bypass = false;
 
-  if (changed_bypass) {
-    dataTmp = dataTmp.data;
-  } else {
-    dataTmp = dataTmp.changedData;
-  }
+  if (changed_bypass) dataTmp = dataTmp.data;
+  else dataTmp = dataTmp.changedData;
+
   for (elm of dataTmp) {
     pointData = points[elm.Code];
-
     if (elm.data) {
       if (!pointData) pointData = points[elm.Code] = addPointMarker(elm);
-
       pointData.markerElm.style.background = "rgb(" + elm.rgb.join(",") + ")";
-
       if (elm.detect) {
         pointData.markerElm.classList.add("detectingMarker");
         if (elm.detect2) pointData.markerElm.classList.add("strongDetectingMarker");
-      } else {
-        pointData.markerElm.classList.remove("strongDetectingMarker", "detectingMarker");
-      }
+      } else pointData.markerElm.classList.remove("strongDetectingMarker", "detectingMarker");
 
       pointData.popupContent = "<h3 class='PointName' style='border-bottom-color:rgb(" + elm.rgb.join(",") + ")'>" + (elm.Name ? elm.Name : "") + "<span>" + elm.Type + "_" + elm.Code + "</span></h3>" + (elm.detect ? "<h4 class='detecting'>地震検知中</h4>" : "");
       if (pointData.popup.isOpen()) pointData.popup.setHTML(pointData.popupContent);
@@ -905,15 +880,9 @@ function psWaveEntry() {
           if (countDown > 0) {
             var countDown_min = Math.floor(countDown / 60);
             var countDown_sec = Math.floor(countDown % 60);
-
-            if (countDown_min == 0) {
-              countDownElm.textContent = countDown_sec;
-            } else {
-              countDownElm.textContent = countDown_min + ":" + String(countDown_sec).padStart(2, "0");
-            }
-          } else {
-            countDownElm.textContent = "0";
-          }
+            if (countDown_min == 0) countDownElm.textContent = countDown_sec;
+            else countDownElm.textContent = countDown_min + ":" + String(countDown_sec).padStart(2, "0");
+          } else countDownElm.textContent = "0";
         }
       }
     }
@@ -969,9 +938,7 @@ function psWaveCalc(eid) {
 
     var i = 0;
     for (const elm of TimeTableTmp) {
-      if (i == 0) {
-        SWmin = elm.S;
-      }
+      if (i == 0) SWmin = elm.S;
       if (!PRadius) {
         if (elm.P == distance) {
           PRadius = elm.R;
@@ -980,7 +947,6 @@ function psWaveCalc(eid) {
           elm2 = TimeTableTmp[i - 1];
           if (!elm2) elm2 = elm;
           PRadius = elm.R + ((elm2.R - elm.R) * (distance - elm.P)) / (elm2.P - elm.P);
-          psWaveList;
           if (SRadius || SWmin > distance) break;
         }
       }
@@ -1091,12 +1057,8 @@ function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrive
     if (EQElm.SIElm) {
       if (SnotArrived) {
         var SWprogressValue = document.getElementById("SWprogressValue_" + EventID);
-        if (SWprogressValue) {
-          SWprogressValue.setAttribute("stroke-dashoffset", Number(138 - 138 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect))));
-        }
-      } else {
-        EQElm.SIElm.remove();
-      }
+        if (SWprogressValue) SWprogressValue.setAttribute("stroke-dashoffset", Number(138 - 138 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect))));
+      } else EQElm.SIElm.remove();
     } else if (SnotArrived) {
       var SIElm;
 
@@ -1125,14 +1087,9 @@ function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrive
         var countDown_min = Math.floor(countDown / 60);
         var countDown_sec = Math.floor(countDown % 60);
 
-        if (countDown_min == 0) {
-          countDownElm.textContent = countDown_sec;
-        } else {
-          countDownElm.textContent = countDown_min + ":" + String(countDown_sec).padStart(2, "0");
-        }
-      } else {
-        countDownElm.textContent = "到達";
-      }
+        if (countDown_min == 0) countDownElm.textContent = countDown_sec;
+        else countDownElm.textContent = countDown_min + ":" + String(countDown_sec).padStart(2, "0");
+      } else countDownElm.textContent = "到達";
       EEWPanelElm.querySelector(".arrived").style.display = "none";
       countDownElm.style.display = "block";
     } else {
@@ -1160,7 +1117,6 @@ function tsunamiDataUpdate(data) {
 
   if (data.cancelled) {
     document.getElementById("tsunamiWrap").style.display = "none";
-
     document.body.classList.remove("TsunamiMode");
   } else {
     EQInfoLink.style.display = "none";
@@ -1198,9 +1154,8 @@ function tsunamiDataUpdate(data) {
 
         var firstWave = "";
         var maxWave = "";
-        if (sectData.firstHeight) {
-          firstWave = "第1波予想<span>" + dateEncode(5, sectData.firstHeight) + "</span>";
-        } else {
+        if (sectData.firstHeight) firstWave = "第1波予想<span>" + dateEncode(5, sectData.firstHeight) + "</span>";
+        else {
           switch (sectData.firstHeightCondition) {
             case "津波到達中と推測":
               firstWave = "第1波予想<span>到達中</span>";
@@ -1212,11 +1167,8 @@ function tsunamiDataUpdate(data) {
               break;
           }
         }
-        if (sectData.maxHeight) {
-          maxWave = " 最大波<span>" + sectData.maxHeight + "</span>";
-        } else if (sectData.grade == "Yoho") {
-          maxWave = " 若干の海面変動";
-        }
+        if (sectData.maxHeight) maxWave = " 最大波<span>" + sectData.maxHeight + "</span>";
+        else if (sectData.grade == "Yoho") maxWave = " 若干の海面変動";
 
         document.getElementById("tsunamiSectTitle").innerText = sectData.name + " " + gradeJa;
         document.getElementById("firstHeightData").innerHTML = firstWave;
@@ -1225,9 +1177,7 @@ function tsunamiDataUpdate(data) {
 
         document.getElementById("TsunamiMySectData").style.border = "solid 1px " + tsunamiColorConv(sectData.grade);
         document.getElementById("TsunamiMySectData").style.display = "block";
-      } else {
-        document.getElementById("TsunamiMySectData").style.display = "none";
-      }
+      } else document.getElementById("TsunamiMySectData").style.display = "none";
     }
     document.getElementById("tsunamiWrap").style.display = "block";
 
@@ -1258,8 +1208,6 @@ function tsunamiDataUpdate(data) {
             YohoList.push(["==", "name", elm.name]);
             Tsunami_Yoho = true;
             break;
-          default:
-            break;
         }
       }
     });
@@ -1285,15 +1233,10 @@ function tsunamiDataUpdate(data) {
     document.getElementById("tsunami_Watch").style.display = Tsunami_Watch ? "inline-block" : "none";
     document.getElementById("tsunami_Yoho").style.display = Tsunami_Yoho ? "inline-block" : "none";
 
-    if (Tsunami_MajorWarning) {
-      document.getElementById("tsunamiTitle").style.borderColor = tsunamiColorConv("MajorWarning");
-    } else if (Tsunami_Warning) {
-      document.getElementById("tsunamiTitle").style.borderColor = tsunamiColorConv("Warning");
-    } else if (Tsunami_Watch) {
-      document.getElementById("tsunamiTitle").style.borderColor = tsunamiColorConv("Watch");
-    } else if (Tsunami_Yoho) {
-      document.getElementById("tsunamiTitle").style.borderColor = tsunamiColorConv("Yoho");
-    }
+    if (Tsunami_MajorWarning) document.getElementById("tsunamiTitle").style.borderColor = tsunamiColorConv("MajorWarning");
+    else if (Tsunami_Warning) document.getElementById("tsunamiTitle").style.borderColor = tsunamiColorConv("Warning");
+    else if (Tsunami_Watch) document.getElementById("tsunamiTitle").style.borderColor = tsunamiColorConv("Watch");
+    else if (Tsunami_Yoho) document.getElementById("tsunamiTitle").style.borderColor = tsunamiColorConv("Yoho");
   }
 }
 EQInfoLink.addEventListener("click", function (e) {
@@ -1376,17 +1319,12 @@ function tsunamiPopup(e) {
         var firstWave = "";
         var maxWave = "";
         var firstCondition = "";
-        if (elm.firstHeight) {
-          firstWave = "<div>第１波 予想到達時刻:" + dateEncode(5, elm.firstHeight) + "</div>";
-        }
-        if (elm.maxHeight) {
-          maxWave = "<div>最大波 予想高さ:" + elm.maxHeight + "</div>";
-        } else if (elm.grade == "Yoho") {
-          maxWave = "<div>予想される津波の高さ:若干の海面変動</div>";
-        }
-        if (elm.firstHeightCondition) {
-          firstCondition = "<div>" + elm.firstHeightCondition + "</div>";
-        }
+        if (elm.firstHeight) firstWave = "<div>第１波 予想到達時刻:" + dateEncode(5, elm.firstHeight) + "</div>";
+
+        if (elm.maxHeight) maxWave = "<div>最大波 予想高さ:" + elm.maxHeight + "</div>";
+        else if (elm.grade == "Yoho") maxWave = "<div>予想される津波の高さ:若干の海面変動</div>";
+
+        if (elm.firstHeightCondition) firstCondition = "<div>" + elm.firstHeightCondition + "</div>";
         var popupContent = "<h3 style='border-bottom:solid 2px " + tsunamiColorConv(elm.grade) + "'>" + elm.name + "</h3><p> " + gradeJa + " 発令中</p>" + firstWave + maxWave + firstCondition;
         new maplibregl.Popup().setLngLat(e.lngLat).setHTML(popupContent).addTo(map);
       }
