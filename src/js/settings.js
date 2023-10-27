@@ -12,68 +12,25 @@ window.addEventListener("load", function () {
   this.document.getElementById("EEWE_origin_time").value = dateEncode(3, new Date()).replaceAll("/", "-");
 });
 window.electronAPI.messageSend((event, request) => {
-  if (request.action == "updatePanel") {
-    document.querySelector(".active_tabcontent").classList.remove("active_tabcontent");
-    document.querySelector(".active_tabmenu").classList.remove("active_tabmenu");
-    document.getElementById("tab1_content2").classList.add("active_tabcontent");
-    document.getElementById("tab1_menu2").classList.add("active_tabmenu");
-  } else if (request.action == "softVersion") {
-    document.getElementById("softVersion").innerText = request.data;
-  } else if (request.action == "openAtLogin") {
-    openAtLogin = request.data;
-    document.getElementById("startup").checked = openAtLogin;
-  } else if (request.action == "Replay") {
+  if (request.action == "Replay") {
     Replay = request.data;
     offsetCalc();
-  } else if (request.action == "setting") {
+  } else if (request.action == "initialData") {
     document.getElementById("splash").style.display = "none";
+    document.getElementById("softVersion").innerText = request.softVersion;
+    openAtLogin = request.openAtLogin;
+    document.getElementById("startup").checked = openAtLogin;
+    if(request.updatePanelMode){
+      document.querySelector(".active_tabcontent").classList.remove("active_tabcontent");
+      document.querySelector(".active_tabmenu").classList.remove("active_tabmenu");
+      document.getElementById("tab1_content2").classList.add("active_tabcontent");
+      document.getElementById("tab1_menu2").classList.add("active_tabmenu");
+    }
 
-    config = request.data;
+    config = request.config;
 
-    document.getElementById("HomeName").value = config.home.name;
-    document.getElementById("latitude").value = config.home.latitude;
-    document.getElementById("longitude").value = config.home.longitude;
-    document.getElementById("EEW_Voice").value = config.notice.voice.EEW;
-    document.getElementById("EEW2_Voice").value = config.notice.voice.EEWUpdate;
-    document.getElementById("EEW3_Voice").value = config.notice.voice.EEWCancel;
-    document.getElementById("EQInfo_ItemCount").value = config.Info.EQInfo.ItemCount;
-    document.getElementById("EEW_traning").checked = config.Info.EEW.showTraning;
-    document.getElementById("EEW_IntQ").checked = config.Info.EEW.IntQuestion;
-    document.getElementById("EEW_userIntQ").checked = config.Info.EEW.userIntQuestion;
-    document.getElementById("EQInfoInterval").value = config.Info.EQInfo.Interval / 1000;
-
-    selectBoxSet(document.getElementById("EEW_IntFilter"), config.Info.EEW.IntThreshold);
-    selectBoxSet(document.getElementById("EEW_userIntFilter"), config.Info.EEW.userIntThreshold);
-    selectBoxSet(document.getElementById("saibun"), config.home.Section);
-    tsunamiSect = config.home.TsunamiSect;
-    selectBoxSet(document.getElementById("tsunamiSect"), tsunamiSect);
-    if (map) map.setFilter("tsunami_LINE_selected", ["==", "name", tsunamiSect]);
-
-    TTSvolumeSet(config.notice.voice_parameter.volume);
-    TTSpitchSet(config.notice.voice_parameter.pitch);
-    TTSspeedSet(config.notice.voice_parameter.rate);
-
-    selectBoxSet(document.getElementById("TTSvoiceSelect"), config.notice.voice_parameter.voice);
-
-    selectBoxSet(document.getElementById("BugReportAutoSend"), config.system.crashReportAutoSend);
-    selectBoxSet(document.getElementById("intType"), config.Info.EEW.IntType);
-    document.getElementById("EarthquakeDetect").checked = config.Info.RealTimeShake.DetectEarthquake;
-    document.getElementById("WindowAutoOpen").checked = config.system.WindowAutoOpen;
-    document.getElementById("alwaysOnTop").checked = config.system.alwaysOnTop;
-    document.getElementById("HomePinShow").checked = config.home.ShowPin;
-    document.getElementById("Tsunami_GetData").checked = config.Info.TsunamiInfo.GetData;
-    document.getElementById("Axis_GetData").checked = config.Source.axis.GetData;
-    document.getElementById("Wolfx_GetData").checked = config.Source.wolfx.GetData;
-    document.getElementById("ProjectBS_GetData").checked = config.Source.ProjectBS.GetData;
-    document.getElementById("EarlyEst_GetData").checked = config.Source.EarlyEst.GetData;
-    document.getElementById("msil_GetData").checked = config.Source.msil.GetData;
-    document.getElementById("kmoni_GetData").checked = config.Source.kmoni.kmoni.GetData;
-    document.getElementById("EarlyEstInterval").value = config.Source.EarlyEst.Interval / 1000;
-    document.getElementById("kmoniInterval").value = config.Source.kmoni.kmoni.Interval / 1000;
-    document.getElementById("msilInterval").value = config.Source.msil.Interval / 1000;
-    if (config.Source.axis.AccessToken) document.getElementById("Axis_AccessToken").value = config.Source.axis.AccessToken;
-
-    init();
+    configDataDraw()
+    mapInit();
   } else if (request.action == "Update_Data") {
     UpdateDataDraw(request.data);
   }
@@ -91,6 +48,51 @@ downloadLink.addEventListener("click", function () {
   lnk.href = this.dataset.href;
   lnk.click();
 });
+
+function  configDataDraw(){
+  document.getElementById("HomeName").value = config.home.name;
+  document.getElementById("latitude").value = config.home.latitude;
+  document.getElementById("longitude").value = config.home.longitude;
+  document.getElementById("EEW_Voice").value = config.notice.voice.EEW;
+  document.getElementById("EEW2_Voice").value = config.notice.voice.EEWUpdate;
+  document.getElementById("EEW3_Voice").value = config.notice.voice.EEWCancel;
+  document.getElementById("EQInfo_ItemCount").value = config.Info.EQInfo.ItemCount;
+  document.getElementById("EEW_traning").checked = config.Info.EEW.showTraning;
+  document.getElementById("EEW_IntQ").checked = config.Info.EEW.IntQuestion;
+  document.getElementById("EEW_userIntQ").checked = config.Info.EEW.userIntQuestion;
+  document.getElementById("EQInfoInterval").value = config.Info.EQInfo.Interval / 1000;
+
+  selectBoxSet(document.getElementById("EEW_IntFilter"), config.Info.EEW.IntThreshold);
+  selectBoxSet(document.getElementById("EEW_userIntFilter"), config.Info.EEW.userIntThreshold);
+  selectBoxSet(document.getElementById("saibun"), config.home.Section);
+  tsunamiSect = config.home.TsunamiSect;
+  selectBoxSet(document.getElementById("tsunamiSect"), tsunamiSect);
+  if (map) map.setFilter("tsunami_LINE_selected", ["==", "name", tsunamiSect]);
+
+  TTSvolumeSet(config.notice.voice_parameter.volume);
+  TTSpitchSet(config.notice.voice_parameter.pitch);
+  TTSspeedSet(config.notice.voice_parameter.rate);
+
+  selectBoxSet(document.getElementById("TTSvoiceSelect"), config.notice.voice_parameter.voice);
+
+  selectBoxSet(document.getElementById("BugReportAutoSend"), config.system.crashReportAutoSend);
+  selectBoxSet(document.getElementById("intType"), config.Info.EEW.IntType);
+  document.getElementById("EarthquakeDetect").checked = config.Info.RealTimeShake.DetectEarthquake;
+  document.getElementById("WindowAutoOpen").checked = config.system.WindowAutoOpen;
+  document.getElementById("alwaysOnTop").checked = config.system.alwaysOnTop;
+  document.getElementById("HomePinShow").checked = config.home.ShowPin;
+  document.getElementById("Tsunami_GetData").checked = config.Info.TsunamiInfo.GetData;
+  document.getElementById("Axis_GetData").checked = config.Source.axis.GetData;
+  document.getElementById("Wolfx_GetData").checked = config.Source.wolfx.GetData;
+  document.getElementById("ProjectBS_GetData").checked = config.Source.ProjectBS.GetData;
+  document.getElementById("EarlyEst_GetData").checked = config.Source.EarlyEst.GetData;
+  document.getElementById("msil_GetData").checked = config.Source.msil.GetData;
+  document.getElementById("kmoni_GetData").checked = config.Source.kmoni.kmoni.GetData;
+  document.getElementById("EarlyEstInterval").value = config.Source.EarlyEst.Interval / 1000;
+  document.getElementById("kmoniInterval").value = config.Source.kmoni.kmoni.Interval / 1000;
+  document.getElementById("msilInterval").value = config.Source.msil.Interval / 1000;
+  if (config.Source.axis.AccessToken) document.getElementById("Axis_AccessToken").value = config.Source.axis.AccessToken;
+}
 
 function UpdateDataDraw(data) {
   document.getElementById("update-check-date").innerText = dateEncode(3, data.check_date);
@@ -225,7 +227,7 @@ function offsetCalc() {
   }
 }
 
-function init() {
+function mapInit() {
   map = new maplibregl.Map({
     container: "mapcontainer",
     center: [config.home.longitude, config.home.latitude],
