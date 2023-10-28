@@ -909,7 +909,7 @@ function EQInfo_createWindow(response, webSite) {
       title: "地震詳細情報 - Zero Quake",
       icon: path.join(__dirname, "img/icon.ico"),
     },
-    backgroundColor: "#202227",
+    backgroundColor: webSite ? null : "#202227",
     alwaysOnTop: config.system.alwaysOnTop,
   });
 
