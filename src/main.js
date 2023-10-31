@@ -1072,13 +1072,11 @@ worker.on("message", (message) => {
         kmoniWorker.webContents.send("message2", message.data);
       }
       break;
-    case "EQDetect_List_Update":
-      EQDetect_List = message.data;
-      break;
     case "thresholds":
       thresholds = message.data;
       break;
     case "PointsData_Update":
+      EQDetect_List = message.EQDetect_List;
       kmoniPointsDataTmp = {
         action: "kmoniUpdate",
         Updatetime: new Date(message.date),
@@ -1451,7 +1449,7 @@ function Wolfx_WS() {
 
   WolfxWSclient.on("connectFailed", function () {
     kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
-    AXIS_WS_TryConnect();
+    Wolfx_WS_TryConnect();
   });
 
   WolfxWSclient.on("connect", function (connection) {
@@ -1686,7 +1684,7 @@ function EEWdetect(type, json) {
       warnZones: EBIData,
       source: "wolfx",
     };
-    EEWcontrol(EEWdata);
+    //EEWcontrol(EEWdata);
   } else if (type == 3) {
     //axis
     try {
@@ -1818,7 +1816,7 @@ function EEWcontrol(data) {
   if (!data.origin_time) return;
 
   //５分以上前の地震／未来の地震（リプレイ時）を除外
-  var pastTime = new Date() - Replay - origin_timeTmp;
+  var pastTime = new Date() - Replay - data.origin_time;
   if (pastTime > 300000 || pastTime < 0) return;
 
   //現在地との距離
