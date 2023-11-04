@@ -369,7 +369,7 @@
 .epicenterIcon {
   width: 30px;
   height: 30px;
-  z-index: 100;
+  z-index: 1000;
 }
 .homeIcon {
   width: 30px;
@@ -377,7 +377,8 @@
   z-index: 999;
   top: -15px;
 }
-.epiCenterTooltip {
+.epiCenterTooltip,
+.epiCenterTooltip2 {
   display: none;
   background: #222;
   color: #fff;
@@ -388,18 +389,29 @@
   padding: 0;
   text-align: center;
   border: none;
-  z-index: 100;
+  z-index: 1000;
 }
-.epiCenterTooltip .maplibregl-popup-content {
+.epiCenterTooltip .maplibregl-popup-content,
+.epiCenterTooltip2 .maplibregl-popup-content {
   padding: 0;
   min-width: 0;
 }
-.epiCenterTooltip .maplibregl-popup-tip {
+.epiCenterTooltip2 .maplibregl-popup-content {
+  padding: 0 5px;
+}
+.epiCenterTooltip .maplibregl-popup-tip,
+.epiCenterTooltip2 .maplibregl-popup-tip {
   display: none;
 }
-.epiCenterTooltip::before {
+.epiCenterTooltip::before,
+.epiCenterTooltip2::before {
   display: none;
 }
+.epiCenterTooltip2 {
+  display: block;
+  width: auto;
+}
+
 .EEWLocalID {
   width: 20px;
   height: 20px;

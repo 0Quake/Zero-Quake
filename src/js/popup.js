@@ -189,7 +189,7 @@ function EEWAlertUpdate(data) {
         EQMenu.querySelector(".distance").textContent = elm.distance ? distanceTmp + "km" : "";
       }
     }
-    epiCenterUpdate(elm.EventID, elm.latitude, elm.longitude);
+    epiCenterUpdate(elm);
 
     now_EEW = now_EEW.filter(function (elm2) {
       return elm2.EventID !== elm.EventID;
@@ -218,18 +218,27 @@ function EEWAlertUpdate(data) {
 
 var EEWID = 0;
 //震源更新
-function epiCenterUpdate(eid, latitude, longitude) {
-  eid = Number(eid);
+function epiCenterUpdate(elm) {
+  eid = Number(elm.EventID);
+  latitude = elm.latitude;
+  longitude = elm.longitude;
 
   if (map && latitude && longitude) {
     var epicenterElm = epiCenter.find(function (elm2) {
       return elm2.eid == eid;
     });
+    var tooltipContent;
+    if (elm.source == "simulation") tooltipContent = "再現";
+    else if (elm.is_training) tooltipContent = "訓練";
+    else if (elm.isPlum) tooltipContent = "仮定震源";
+
     if (epicenterElm && epicenterElm.markerElm) {
       //情報更新
       epicenterElm.markerElm.setLngLat([longitude, latitude]);
       epicenterElm.latitude = latitude;
       epicenterElm.longitude = longitude;
+      if (tooltipContent) epicenterElm.ESPopup2.setText(tooltipContent).addTo(map);
+      else epicenterElm.ESPopup2.remove();
     } else {
       //初報
       var EEWIDTmp = EEW_LocalIDs[eid];
@@ -242,9 +251,12 @@ function epiCenterUpdate(eid, latitude, longitude) {
       map.zoomTo(8, { animate: false });
 
       var ESPopup = new maplibregl.Popup({ closeButton: false, closeOnClick: false, className: "epiCenterTooltip", offset: [0, -17] }).setText(EEWIDTmp).addTo(map);
+      var ESPopup2 = new maplibregl.Popup({ closeButton: false, closeOnClick: false, className: "epiCenterTooltip2", offset: [0, 37] }).setLngLat([longitude, latitude]);
+      if (tooltipContent) ESPopup2.setText(tooltipContent).addTo(map);
+      else ESPopup2.remove();
       var ESMarker = new maplibregl.Marker(img).setLngLat([longitude, latitude]).setPopup(ESPopup).addTo(map).togglePopup();
 
-      epiCenter.push({ eid: eid, markerElm: ESMarker, latitude: latitude, longitude: longitude, EEWID: Number(EEWIDTmp) });
+      epiCenter.push({ eid: eid, markerElm: ESMarker, latitude: latitude, longitude: longitude, EEWID: Number(EEWIDTmp), ESPopup2: ESPopup2 });
       displayTmp = epiCenter.length > 1 ? "inline-block" : "none";
       document.querySelectorAll(".epiCenterTooltip,.EEWLocalID").forEach(function (elm3) {
         elm3.style.display = displayTmp;
