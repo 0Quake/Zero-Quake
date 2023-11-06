@@ -1836,19 +1836,26 @@ function EEWcontrol(data) {
     }
   }
 
-
-/*
-  if (!app.isPackaged) {
-
-      shindo(7,10,39.5,135,35.65859,139.74544)
-      
-    sesmicPoints.forEach(function(elm){
-      calcInt(data.magnitude,data.depth,data.latitude,data.longitude,elm.location[0],elm.location[1],elm.arv)
-    })
-
-  }*/
-
-
+  if (data.source == "simulation") {
+    var EBIData = [];
+    var estIntTmp = {};
+    Object.keys(sesmicPoints).forEach(function (key) {
+      elm = sesmicPoints[key];
+      if (elm.arv && elm.sect) {
+        estInt = calcInt(data.magnitude, data.depth, data.latitude, data.longitude, elm.location[0], elm.location[1], elm.arv);
+        if (!estIntTmp[elm.sect] || estInt > estIntTmp[elm.sect]) estIntTmp[elm.sect] = estInt;
+      }
+    });
+    Object.keys(estIntTmp).forEach(function (elm) {
+      shindo = shindoConvert(estIntTmp[elm]);
+      EBIData.push({
+        Name: elm,
+        IntTo: shindo,
+        IntFrom: shindo,
+      });
+    });
+    data.warnZones = EBIData;
+  }
 
   var EQJSON = EEW_Data.find(function (elm) {
     return elm.EQ_id == data.EventID;
@@ -1932,22 +1939,18 @@ function EEWcontrol(data) {
   }
 }
 
-function calcInt(magJMA,depth,epiLat,epiLng,pointLat,pointLng,arv) {
+function calcInt(magJMA, depth, epiLat, epiLng, pointLat, pointLng, arv) {
   const magW = magJMA - 0.171;
   const long = 10 ** (0.5 * magW - 1.85) / 2;
-  const epicenterDistance = geosailing(epiLat,epiLng,pointLat,pointLng);
+  const epicenterDistance = geosailing(epiLat, epiLng, pointLat, pointLng);
   const hypocenterDistance = (depth ** 2 + epicenterDistance ** 2) ** 0.5 - long;
   const x = Math.max(hypocenterDistance, 3);
-  const gpv600 = 10 ** (0.58 * magW + 0.0038 * depth - 1.29 -
-        Math.log10(x + 0.0028 * (10 ** (0.5 * magW))) -
-        0.002 * x
-  );
+  const gpv600 = 10 ** (0.58 * magW + 0.0038 * depth - 1.29 - Math.log10(x + 0.0028 * 10 ** (0.5 * magW)) - 0.002 * x);
 
-        // 最大速度を工学的基盤（Vs=600m/s）から工学的基盤（Vs=400m/s）へ変換を行う
-        const pgv400 = gpv600 * 1.31;
-        const pgv = pgv400 * arv;
-        console.log(2.68 + 1.72 * Math.log10(pgv))
-        return 2.68 + 1.72 * Math.log10(pgv);
+  // 最大速度を工学的基盤（Vs=600m/s）から工学的基盤（Vs=400m/s）へ変換を行う
+  const pgv400 = gpv600 * 1.31;
+  const pgv = pgv400 * arv;
+  return 2.68 + 1.72 * Math.log10(pgv);
 }
 
 //EarlyEst地震情報マージ
