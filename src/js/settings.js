@@ -48,6 +48,7 @@ downloadLink.addEventListener("click", function () {
 });
 
 function configDataDraw() {
+  document.getElementById("arv").value = config.home.arv;
   document.getElementById("HomeName").value = config.home.name;
   document.getElementById("latitude").value = config.home.latitude;
   document.getElementById("longitude").value = config.home.longitude;
@@ -141,6 +142,7 @@ document.getElementById("apply").addEventListener("click", function () {
   config.system.alwaysOnTop = document.getElementById("alwaysOnTop").checked;
   config.home.ShowPin = document.getElementById("HomePinShow").checked;
   config.Info.TsunamiInfo.GetData = document.getElementById("Tsunami_GetData").checked;
+  config.home.arv = Number(document.getElementById("arv").value);
   config.home.name = document.getElementById("HomeName").value;
   config.home.latitude = document.getElementById("latitude").value;
   config.home.longitude = document.getElementById("longitude").value;
@@ -386,7 +388,7 @@ function mapInit() {
   map.on("click", "basemap_fill", (e) => {
     document.getElementById("latitude").value = e.lngLat.lat;
     document.getElementById("longitude").value = e.lngLat.lng;
-    markerElm.setLngLat(e.lngLat);
+    MapReDraw()
 
     var minDistance = Infinity;
     var tsunamiSect;
@@ -425,6 +427,11 @@ function MapReDraw() {
   lat = document.getElementById("latitude").value;
   lng = document.getElementById("longitude").value;
   markerElm.setLngLat([lng, lat]);
+  fetch("https://www.j-shis.bosai.go.jp/map/api/sstrct/V4/meshinfo.geojson?position="+ lng + ","+ lat + "&epsg=4612&attr=ARV").then(function(res){
+    return res.json()
+  }).then(function(json){
+    document.getElementById("arv").value = json.features[0].properties.ARV;
+  })
 }
 document.getElementById("tsunamiSect").addEventListener("change", function () {
   tsunamiSect = this.value;

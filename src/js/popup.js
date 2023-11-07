@@ -141,7 +141,7 @@ function EEWAlertUpdate(data) {
       clone.querySelector(".traning").style.display = elm.is_training ? "block" : "none";
       clone.querySelector(".EpicenterElement").style.display = !elm.isPlum ? "block" : "none";
       clone.querySelector(".NoEpicenterElement").style.display = elm.isPlum ? "block" : "none";
-      clone.querySelector(".userIntensity").textContent = elm.userIntensity ? elm.userIntensity : "?";
+      clone.querySelector(".userIntensity").textContent = elm.userIntensity ? shindoConvert(elm.userIntensity) : "?";
       clone.querySelector(".userDataWrap").style.background = shindoConvert(elm.userIntensity, 2)[0];
       clone.querySelector(".userDataWrap").style.color = shindoConvert(elm.userIntensity, 2)[1];
       if (elm.distance < 10000) distanceTmp = Math.round(elm.distance);
@@ -180,7 +180,7 @@ function EEWAlertUpdate(data) {
         EQMenu.querySelector(".depth").textContent = elm.depth ? Math.round(elm.depth) : "不明";
         EQMenu.querySelector(".EpicenterElement").style.display = !elm.isPlum ? "block" : "none";
         EQMenu.querySelector(".NoEpicenterElement").style.display = elm.isPlum ? "block" : "none";
-        EQMenu.querySelector(".userIntensity").textContent = elm.userIntensity ? elm.userIntensity : "?";
+        EQMenu.querySelector(".userIntensity").textContent = elm.userIntensity ? shindoConvert(elm.userIntensity) : "?";
         EQMenu.querySelector(".userDataWrap").style.background = shindoConvert(elm.userIntensity, 2)[0];
         EQMenu.querySelector(".userDataWrap").style.color = shindoConvert(elm.userIntensity, 2)[1];
 

@@ -40,6 +40,7 @@ const Store = require("electron-store");
 var WebSocketClient = require("websocket").client;
 var soft_version = require("../package.json").version;
 var sesmicPoints = require("./Resource/PointSeismicIntensityLocation.json");
+var TimeTable_JMA2001 = require("./Resource/TimeTable_JMA2001.json")
 const store = new Store();
 var defaultConfigVal = {
   system: {
@@ -54,6 +55,7 @@ var defaultConfigVal = {
     Section: "東京都２３区",
     TsunamiSect: "東京湾内湾",
     ShowPin: true,
+    arv: 1.27,
   },
   Info: {
     EEW: {
@@ -1823,6 +1825,46 @@ function EEWcontrol(data) {
   //現在地との距離
   if (data.latitude && data.longitude) data.distance = geosailing(data.latitude, data.longitude, config.home.latitude, config.home.longitude);
 
+  if (data.source == "simulation") {
+    var EBIData = [];
+    var estIntTmp = {};
+    if(!data.userIntensity) data.userIntensity = calcInt(data.magnitude, data.depth, data.latitude, data.longitude, config.home.latitude, config.home.longitude, config.home.arv);
+    if(!data.arrivalTime) {
+      var TimeTable =TimeTable_JMA2001[depthFilter(data.depth)]
+
+      for (let index = 0; index < TimeTable.length; index++) {
+        elm = TimeTable[index];
+        if(elm.R > data.distance){
+          if(index > 0) {
+            elm2 = TimeTable[index - 1]
+            SSec = elm2.S + (elm.S - elm2.S) * (data.distance - elm2.R) / (elm2.S - elm2.R);
+          } else S = elm.S;
+          break;
+        }
+      }
+      data.arrivalTime = new Date(Number(data.origin_time) + SSec * 1000)
+    }
+
+    if(!data.warnZones){
+      Object.keys(sesmicPoints).forEach(function (key) {
+        elm = sesmicPoints[key];
+        if (elm.arv && elm.sect) {
+          estInt = calcInt(data.magnitude, data.depth, data.latitude, data.longitude, elm.location[0], elm.location[1], elm.arv);
+          if (!estIntTmp[elm.sect] || estInt > estIntTmp[elm.sect]) estIntTmp[elm.sect] = estInt;
+        }
+      });
+      Object.keys(estIntTmp).forEach(function (elm) {
+        shindo = shindoConvert(estIntTmp[elm]);
+        EBIData.push({
+          Name: elm,
+          IntTo: shindo,
+          IntFrom: shindo,
+        });
+      });
+      data.warnZones = EBIData;
+   }
+  }
+
   if (data.warnZones && data.warnZones.length) {
     //設定された細分区域のデータ参照
     var userSect = data.warnZones.find(function (elm2) {
@@ -1832,29 +1874,8 @@ function EEWcontrol(data) {
     //現在地の予想震度・到達予想時刻
     if (userSect) {
       data.userIntensity = config.Info.EEW.IntType == "max" ? userSect.IntTo : userSect.IntFrom;
-      data.arrivalTime = userSect.ArrivalTime;
+      if(userSect.ArrivalTime) data.arrivalTime = userSect.ArrivalTime;
     }
-  }
-
-  if (data.source == "simulation") {
-    var EBIData = [];
-    var estIntTmp = {};
-    Object.keys(sesmicPoints).forEach(function (key) {
-      elm = sesmicPoints[key];
-      if (elm.arv && elm.sect) {
-        estInt = calcInt(data.magnitude, data.depth, data.latitude, data.longitude, elm.location[0], elm.location[1], elm.arv);
-        if (!estIntTmp[elm.sect] || estInt > estIntTmp[elm.sect]) estIntTmp[elm.sect] = estInt;
-      }
-    });
-    Object.keys(estIntTmp).forEach(function (elm) {
-      shindo = shindoConvert(estIntTmp[elm]);
-      EBIData.push({
-        Name: elm,
-        IntTo: shindo,
-        IntFrom: shindo,
-      });
-    });
-    data.warnZones = EBIData;
   }
 
   var EQJSON = EEW_Data.find(function (elm) {
@@ -3022,4 +3043,17 @@ function mergeDeeply(target, source, opts) {
 }
 function ConvertJST(time) {
   return new Date(time.setHours(time.getHours() + 9));
+}
+function depthFilter(depth) {
+  if (!isFinite(depth) || depth < 0) {
+    return 0;
+  } else if (depth > 700) {
+    return 700;
+  } else if (200 <= depth) {
+    return Math.floor(depth / 10) * 10;
+  } else if (50 <= depth) {
+    return Math.floor(depth / 5) * 5;
+  } else {
+    return Math.floor(depth / 2) * 2;
+  }
 }

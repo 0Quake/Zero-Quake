@@ -448,7 +448,6 @@ function init() {
           minzoom: 6,
           maxzoom: 22,
         },
-        { id: "Int0", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["0"].background }, filter: ["==", "name", ""] },
         { id: "Int1", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["1"].background }, filter: ["==", "name", ""] },
         { id: "Int2", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["2"].background }, filter: ["==", "name", ""] },
         { id: "Int3", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["3"].background }, filter: ["==", "name", ""] },
@@ -853,7 +852,6 @@ function JMAEstShindoControl(data) {
 }
 
 function JMAEstShindoDraw() {
-  map.setFilter("Int0", Int0T);
   map.setFilter("Int1", Int1T);
   map.setFilter("Int2", Int2T);
   map.setFilter("Int3", Int3T);
