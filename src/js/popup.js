@@ -342,18 +342,21 @@ function eqInfoDraw(data, source) {
       clone.querySelector(".EQI_maxI").style.background = shindoColor[0];
       clone.querySelector(".EQI_maxI").style.color = shindoColor[1];
       clone.querySelector(".canceled").style.display = elm.cancel ? "flex" : "none";
-      if(elm.cancel) clone.querySelector(".EQItem").classList.add("EQI_canceled");
       clone.querySelector(".EEWNotes").style.display = elm.category == "EEW" ? "block" : "none";
 
-      clone.querySelector(".EQItem").addEventListener("click", function () {
-        window.electronAPI.messageReturn({
-          action: "EQInfoWindowOpen",
-          url: "src/EQDetail.html",
-          eid: elm.eventId,
-          urls: elm.DetailURL,
-          axisData: elm.axisData,
+      if(elm.cancel) clone.querySelector(".EQItem").classList.add("EQI_canceled");
+      else{
+        clone.querySelector(".EQItem").setAttribute("title", "クリックして詳細を表示");
+        clone.querySelector(".EQItem").addEventListener("click", function () {
+          window.electronAPI.messageReturn({
+            action: "EQInfoWindowOpen",
+            url: "src/EQDetail.html",
+            eid: elm.eventId,
+            urls: elm.DetailURL,
+            axisData: elm.axisData,
+          });
         });
-      });
+      }
     } else if (source == "usgs") {
       clone.querySelector(".EQItem").addEventListener("click", function () {
         window.electronAPI.messageReturn({
