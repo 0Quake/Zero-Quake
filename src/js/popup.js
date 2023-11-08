@@ -301,6 +301,8 @@ function epiCenterClear(eid) {
     if (epicenterElm && epicenterElm.markerElm) {
       epicenterElm.markerElm.remove();
       epicenterElm.markerElm = null;
+      epicenterElm.ESPopup2.remove();
+      epicenterElm.ESPopup2 = null;
     }
   }
 }

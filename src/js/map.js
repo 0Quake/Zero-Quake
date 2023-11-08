@@ -792,7 +792,13 @@ function JMAEstShindoControl(data) {
   data.forEach(function (elm) {
     if (elm.warnZones && Array.isArray(elm.warnZones)) {
       elm.warnZones.forEach(function (elm2) {
-        JMAEstShindoData[elm2.Name] = elm2;
+        console.log(JMAEstShindoData[elm2.Name] , elm2)
+        var old_int;
+        if(JMAEstShindoData[elm2.Name]) old_int = config.Info.EEW.IntType == "max" ? JMAEstShindoData[elm2.Name].IntTo : JMAEstShindoData[elm2.Name].IntFrom;
+        var new_int = config.Info.EEW.IntType == "max" ? elm2.IntTo : elm2.IntFrom;
+        if(!old_int || old_int < new_int) {
+          JMAEstShindoData[elm2.Name] = elm2;
+        }
       });
     }
   });
