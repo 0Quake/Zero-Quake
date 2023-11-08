@@ -734,6 +734,7 @@ td {
   background: #222;
   border-radius: 8px;
   overflow: hidden;
+  cursor: pointer;
 }
 .EQI_maxI {
   width: 50px;
@@ -769,9 +770,14 @@ td {
 .EQItem:hover {
   background: #111;
 }
-.EQItem:hover .EQItemOverlay {
-  display: block;
+.EQItem.EQI_canceled:hover {
+  cursor: default;
 }
+.EQItem.EQI_canceled:hover {
+  background: #222;
+  transition: 0.2s;
+}
+
 .EQItemOverlay button {
   float: right;
   display: block;
@@ -795,7 +801,7 @@ td {
   text-align: center;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(34, 34, 34, 0.4);
   color: #fff;
   font-size: 18px;
 }
@@ -817,32 +823,6 @@ td {
   margin-left: 5px;
 }
 
-/*.Wave_progress {
-  display: none;
-  position: relative;
-  width: 100%;
-  height: 3px;
-  background: #444;
-  font-size: 0;
-  overflow: hidden;
-  transition: height 100ms;
-  border-radius: 4px;
-}
-.EEWWrap:hover .Wave_progress {
-  position: relative;
-  height: 30px;
-  font-size: 14px;
-  line-height: 30px;
-}
-.Wave_progress .PWave_value,
-.Wave_progress .SWave_value {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  text-align: right;
-  transition: width linear 1s;
-}*/
 .infoOverlay {
   position: absolute;
   inset: 0;

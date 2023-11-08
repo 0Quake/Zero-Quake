@@ -1830,40 +1830,41 @@ function EEWcontrol(data) {
   if (data.source == "simulation") {
     var EBIData = [];
     var estIntTmp = {};
-    if(!data.userIntensity) data.userIntensity = calcInt(data.magnitude, data.depth, data.latitude, data.longitude, config.home.latitude, config.home.longitude, config.home.arv);
-    if(!data.arrivalTime) {
+    if(!data.is_cancel){
+      if(!data.userIntensity) data.userIntensity = calcInt(data.magnitude, data.depth, data.latitude, data.longitude, config.home.latitude, config.home.longitude, config.home.arv);
+      if(!data.arrivalTime) {
 
-      for (let index = 0; index < data.TimeTable.length; index++) {
-        elm = data.TimeTable[index];
-        if(elm.R > data.distance){
-          if(index > 0) {
-            elm2 = data.TimeTable[index - 1]
-            SSec = elm2.S + (elm.S - elm2.S) * (data.distance - elm2.R) / (elm2.S - elm2.R);
-          } else S = elm.S;
-          break;
+        for (let index = 0; index < data.TimeTable.length; index++) {
+          elm = data.TimeTable[index];
+          if(elm.R > data.distance){
+            if(index > 0) {
+              elm2 = data.TimeTable[index - 1]
+              SSec = elm2.S + (elm.S - elm2.S) * (data.distance - elm2.R) / (elm2.S - elm2.R);
+            } else S = elm.S;
+            break;
+          }
         }
+        data.arrivalTime = new Date(Number(data.origin_time) + SSec * 1000)
       }
-      data.arrivalTime = new Date(Number(data.origin_time) + SSec * 1000)
-    }
-
-    if(!data.warnZones){
-      Object.keys(sesmicPoints).forEach(function (key) {
-        elm = sesmicPoints[key];
-        if (elm.arv && elm.sect) {
-          estInt = calcInt(data.magnitude, data.depth, data.latitude, data.longitude, elm.location[0], elm.location[1], elm.arv);
-          if (!estIntTmp[elm.sect] || estInt > estIntTmp[elm.sect]) estIntTmp[elm.sect] = estInt;
-        }
-      });
-      Object.keys(estIntTmp).forEach(function (elm) {
-        shindo = shindoConvert(estIntTmp[elm]);
-        EBIData.push({
-          Name: elm,
-          IntTo: shindo,
-          IntFrom: shindo,
+      if(!data.warnZones){
+        Object.keys(sesmicPoints).forEach(function (key) {
+          elm = sesmicPoints[key];
+          if (elm.arv && elm.sect) {
+            estInt = calcInt(data.magnitude, data.depth, data.latitude, data.longitude, elm.location[0], elm.location[1], elm.arv);
+            if (!estIntTmp[elm.sect] || estInt > estIntTmp[elm.sect]) estIntTmp[elm.sect] = estInt;
+          }
         });
-      });
-      data.warnZones = EBIData;
-   }
+        Object.keys(estIntTmp).forEach(function (elm) {
+          shindo = shindoConvert(estIntTmp[elm]);
+          EBIData.push({
+            Name: elm,
+            IntTo: shindo,
+            IntFrom: shindo,
+          });
+        });
+        data.warnZones = EBIData;
+     }
+    }
   }
 
   if (data.warnZones && data.warnZones.length) {

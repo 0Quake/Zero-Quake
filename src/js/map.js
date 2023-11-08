@@ -47,7 +47,7 @@ window.addEventListener("load", function () {
 function psWaveAnm() {
   if (now_EEW.length > 0) {
     for (elm of now_EEW) {
-      psWaveCalc(elm.EventID);
+      if(!elm.is_cancel) psWaveCalc(elm.EventID);
     }
   }
   if (background) setTimeout(psWaveAnm, 1000);
@@ -792,10 +792,9 @@ function JMAEstShindoControl(data) {
   data.forEach(function (elm) {
     if (elm.warnZones && Array.isArray(elm.warnZones)) {
       elm.warnZones.forEach(function (elm2) {
-        console.log(JMAEstShindoData[elm2.Name] , elm2)
         var old_int;
         if(JMAEstShindoData[elm2.Name]) old_int = config.Info.EEW.IntType == "max" ? JMAEstShindoData[elm2.Name].IntTo : JMAEstShindoData[elm2.Name].IntFrom;
-        var new_int = config.Info.EEW.IntType == "max" ? elm2.IntTo : elm2.IntFrom;
+        var new_int = config.Info.EEW.IntType == "max" ? elm2.IntTo : elm2EEW.IntFrom;
         if(!old_int || old_int < new_int) {
           JMAEstShindoData[elm2.Name] = elm2;
         }
@@ -1269,20 +1268,6 @@ function tsunamiColorConv(str) {
       break;
   }
   return color;
-}
-
-function depthFilter(depth) {
-  if (!isFinite(depth) || depth < 0) {
-    return 0;
-  } else if (depth > 700) {
-    return 700;
-  } else if (200 <= depth) {
-    return Math.floor(depth / 10) * 10;
-  } else if (50 <= depth) {
-    return Math.floor(depth / 5) * 5;
-  } else {
-    return Math.floor(depth / 2) * 2;
-  }
 }
 
 function tsunamiPopup(e) {

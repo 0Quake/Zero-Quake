@@ -206,7 +206,9 @@ function EEWAlertUpdate(data) {
       document.getElementById("EEW-" + elm.EventID).remove();
     } else if (elm.is_cancel) {
       epiCenterClear(elm.EventID);
-      document.getElementById("EEW-" + elm.EventID).remove();
+      setTimeout(function(){
+        document.getElementById("EEW-" + elm.EventID).remove();
+      }, 10000);
     }
     return stillEQ;
   });
@@ -340,9 +342,10 @@ function eqInfoDraw(data, source) {
       clone.querySelector(".EQI_maxI").style.background = shindoColor[0];
       clone.querySelector(".EQI_maxI").style.color = shindoColor[1];
       clone.querySelector(".canceled").style.display = elm.cancel ? "flex" : "none";
+      if(elm.cancel) clone.querySelector(".EQItem").classList.add("EQI_canceled");
       clone.querySelector(".EEWNotes").style.display = elm.category == "EEW" ? "block" : "none";
 
-      clone.querySelector(".EQDetailButton").addEventListener("click", function () {
+      clone.querySelector(".EQItem").addEventListener("click", function () {
         window.electronAPI.messageReturn({
           action: "EQInfoWindowOpen",
           url: "src/EQDetail.html",
@@ -352,7 +355,7 @@ function eqInfoDraw(data, source) {
         });
       });
     } else if (source == "usgs") {
-      clone.querySelector(".EQDetailButton").addEventListener("click", function () {
+      clone.querySelector(".EQItem").addEventListener("click", function () {
         window.electronAPI.messageReturn({
           action: "EQInfoWindowOpen_website",
           url: String(elm.DetailURL),
