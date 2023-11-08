@@ -252,13 +252,13 @@ function epiCenterUpdate(elm) {
       map.panTo([longitude, latitude], { animate: false });
       map.zoomTo(8, { animate: false });
 
-      var ESPopup = new maplibregl.Popup({ closeButton: false, closeOnClick: false, className: "epiCenterTooltip", offset: [0, -17] }).setText(EEWIDTmp).addTo(map);
+      var ESPopup = new maplibregl.Popup({ closeButton: false, closeOnClick: false, className: "epiCenterTooltip", offset: [0, -17] }).setText(EEWIDTmp).setLngLat([longitude, latitude]).addTo(map);
       var ESPopup2 = new maplibregl.Popup({ closeButton: false, closeOnClick: false, className: "epiCenterTooltip2", offset: [0, 37] }).setLngLat([longitude, latitude]);
       if (tooltipContent) ESPopup2.setText(tooltipContent).addTo(map);
       else ESPopup2.remove();
       var ESMarker = new maplibregl.Marker(img).setLngLat([longitude, latitude]).setPopup(ESPopup).addTo(map).togglePopup();
 
-      epiCenter.push({ eid: eid, markerElm: ESMarker, latitude: latitude, longitude: longitude, EEWID: Number(EEWIDTmp), ESPopup2: ESPopup2 });
+      epiCenter.push({ eid: eid, markerElm: ESMarker, latitude: latitude, longitude: longitude, EEWID: Number(EEWIDTmp), ESPopup: ESPopup, ESPopup2: ESPopup2 });
       displayTmp = epiCenter.length > 1 ? "inline-block" : "none";
       document.querySelectorAll(".epiCenterTooltip,.EEWLocalID").forEach(function (elm3) {
         elm3.style.display = displayTmp;
@@ -303,6 +303,8 @@ function epiCenterClear(eid) {
     if (epicenterElm && epicenterElm.markerElm) {
       epicenterElm.markerElm.remove();
       epicenterElm.markerElm = null;
+      epicenterElm.ESPopup.remove();
+      epicenterElm.ESPopup = null;
       epicenterElm.ESPopup2.remove();
       epicenterElm.ESPopup2 = null;
     }
