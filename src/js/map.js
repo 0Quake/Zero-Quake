@@ -6,7 +6,6 @@ var psWaveList = [];
 var tsunamiAlertNow = false;
 var inited = false;
 var windowLoaded = false;
-var TimeTable_JMA2001;
 var hinanjoLayers = [];
 var hinanjoCheck = document.getElementById("hinanjo");
 window.electronAPI.messageSend((event, request) => {
@@ -712,15 +711,6 @@ function init() {
   }
 }
 
-fetch("./Resource/TimeTable_JMA2001.json")
-  .then(function (res) {
-    return res.json();
-  })
-  .then(function (json) {
-    TimeTable_JMA2001 = json;
-    psWaveEntry();
-  });
-
 //観測点マーカー追加
 function addPointMarker(elm) {
   var codeEscaped = elm.Code.replace(".", "_");
@@ -885,8 +875,7 @@ function psWaveEntry() {
       }
     }
 
-    if (!elm.is_cancel && elm.origin_time && elm.depth && elm.latitude && elm.longitude && elm.depth <= 700 && TimeTable_JMA2001) {
-      var TimeTableTmp = TimeTable_JMA2001[depthFilter(elm.depth)];
+    if (!elm.is_cancel && elm.origin_time && elm.depth && elm.latitude && elm.longitude && elm.depth <= 700) {
       var pswaveFind = psWaveList.find(function (elm2) {
         return elm2.id == elm.EventID;
       });
@@ -894,12 +883,12 @@ function psWaveEntry() {
       if (pswaveFind) {
         pswaveFind.data.longitude = elm.longitude;
         pswaveFind.data.latitude = elm.latitude;
-        pswaveFind.TimeTable = TimeTableTmp;
+        pswaveFind.TimeTable = elm.TimeTable;
       } else {
         psWaveList.push({
           id: elm.EventID,
           data: { latitude: elm.latitude, longitude: elm.longitude, originTime: elm.origin_time },
-          TimeTable: TimeTableTmp,
+          TimeTable: elm.TimeTable,
         });
       }
       psWaveCalc(elm.EventID);

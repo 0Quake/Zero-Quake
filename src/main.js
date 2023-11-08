@@ -1825,18 +1825,19 @@ function EEWcontrol(data) {
   //現在地との距離
   if (data.latitude && data.longitude) data.distance = geosailing(data.latitude, data.longitude, config.home.latitude, config.home.longitude);
 
+  data.TimeTable = TimeTable_JMA2001[depthFilter(data.depth)];
+  
   if (data.source == "simulation") {
     var EBIData = [];
     var estIntTmp = {};
     if(!data.userIntensity) data.userIntensity = calcInt(data.magnitude, data.depth, data.latitude, data.longitude, config.home.latitude, config.home.longitude, config.home.arv);
     if(!data.arrivalTime) {
-      var TimeTable =TimeTable_JMA2001[depthFilter(data.depth)]
 
-      for (let index = 0; index < TimeTable.length; index++) {
-        elm = TimeTable[index];
+      for (let index = 0; index < data.TimeTable.length; index++) {
+        elm = data.TimeTable[index];
         if(elm.R > data.distance){
           if(index > 0) {
-            elm2 = TimeTable[index - 1]
+            elm2 = data.TimeTable[index - 1]
             SSec = elm2.S + (elm.S - elm2.S) * (data.distance - elm2.R) / (elm2.S - elm2.R);
           } else S = elm.S;
           break;
