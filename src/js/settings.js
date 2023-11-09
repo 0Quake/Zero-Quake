@@ -517,7 +517,7 @@ document.getElementById("Start_simulation").addEventListener("click", function (
     region_name: document.getElementById("EEWE_region_name").value,
     origin_time: new Date(document.getElementById("EEWE_origin_time").value),
     isPlum: document.getElementById("EEWE_isPlum").checked,
-    source: "simulation",
+    source: a?"wolfx":"simulation",
   };
   window.electronAPI.messageReturn({
     action: "EEWSimulation",
