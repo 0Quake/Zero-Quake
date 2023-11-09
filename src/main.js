@@ -1828,6 +1828,10 @@ function EEWcontrol(data) {
   data.TimeTable = TimeTable_JMA2001[depthFilter(data.depth)];
 
   if (data.source == "simulation") {
+    var EEWdataTmp = EEW_Data.find(function(elm){
+      return !elm.simulation
+    });
+    if(EEWdataTmp) return;
     var EBIData = [];
     var estIntTmp = {};
     if (!data.is_cancel) {
@@ -1864,6 +1868,10 @@ function EEWcontrol(data) {
         data.warnZones = EBIData;
       }
     }
+  } else {
+    var EEWdataTmp = EEW_Data.forEach(function(elm){
+      if(elm.simulation) EEWClear(elm.EQ_id);
+    });
   }
 
   if (data.warnZones && data.warnZones.length) {
@@ -1954,6 +1962,7 @@ function EEWcontrol(data) {
     EEW_Data.push({
       EQ_id: data.EventID,
       canceled: false,
+      simulation: data.source == "simulation",
       data: [data],
     });
 
