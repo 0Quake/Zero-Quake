@@ -40,7 +40,7 @@ const Store = require("electron-store");
 var WebSocketClient = require("websocket").client;
 var soft_version = require("../package.json").version;
 var sesmicPoints = require("./Resource/PointSeismicIntensityLocation.json");
-var TimeTable_JMA2001 = require("./Resource/TimeTable_JMA2001.json")
+var TimeTable_JMA2001 = require("./Resource/TimeTable_JMA2001.json");
 const store = new Store();
 var defaultConfigVal = {
   system: {
@@ -1826,27 +1826,26 @@ function EEWcontrol(data) {
   if (data.latitude && data.longitude) data.distance = geosailing(data.latitude, data.longitude, config.home.latitude, config.home.longitude);
 
   data.TimeTable = TimeTable_JMA2001[depthFilter(data.depth)];
-  
+
   if (data.source == "simulation") {
     var EBIData = [];
     var estIntTmp = {};
-    if(!data.is_cancel){
-      if(!data.userIntensity) data.userIntensity = calcInt(data.magnitude, data.depth, data.latitude, data.longitude, config.home.latitude, config.home.longitude, config.home.arv);
-      if(!data.arrivalTime) {
-
+    if (!data.is_cancel) {
+      if (!data.userIntensity) data.userIntensity = calcInt(data.magnitude, data.depth, data.latitude, data.longitude, config.home.latitude, config.home.longitude, config.home.arv);
+      if (!data.arrivalTime) {
         for (let index = 0; index < data.TimeTable.length; index++) {
           elm = data.TimeTable[index];
-          if(elm.R > data.distance){
-            if(index > 0) {
-              elm2 = data.TimeTable[index - 1]
-              SSec = elm2.S + (elm.S - elm2.S) * (data.distance - elm2.R) / (elm2.S - elm2.R);
+          if (elm.R > data.distance) {
+            if (index > 0) {
+              elm2 = data.TimeTable[index - 1];
+              SSec = elm2.S + ((elm.S - elm2.S) * (data.distance - elm2.R)) / (elm2.S - elm2.R);
             } else S = elm.S;
             break;
           }
         }
-        data.arrivalTime = new Date(Number(data.origin_time) + SSec * 1000)
+        data.arrivalTime = new Date(Number(data.origin_time) + SSec * 1000);
       }
-      if(!data.warnZones){
+      if (!data.warnZones && data.depth <= 150) {
         Object.keys(sesmicPoints).forEach(function (key) {
           elm = sesmicPoints[key];
           if (elm.arv && elm.sect) {
@@ -1863,7 +1862,7 @@ function EEWcontrol(data) {
           });
         });
         data.warnZones = EBIData;
-     }
+      }
     }
   }
 
@@ -1876,7 +1875,7 @@ function EEWcontrol(data) {
     //現在地の予想震度・到達予想時刻
     if (userSect) {
       data.userIntensity = config.Info.EEW.IntType == "max" ? userSect.IntTo : userSect.IntFrom;
-      if(userSect.ArrivalTime) data.arrivalTime = userSect.ArrivalTime;
+      if (userSect.ArrivalTime) data.arrivalTime = userSect.ArrivalTime;
     }
   }
 
