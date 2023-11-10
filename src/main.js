@@ -1116,43 +1116,41 @@ function kmoniRequest() {
   if (net.online && config.Source.kmoni.kmoni.GetData) {
     var ReqTime = new Date() - yoyuK - Replay;
 
-    if (dateEncode(1, ReqTime) % 2 == 0) {
-      var urlTmp = ["https://smi.lmoniexp.bosai.go.jp/data/map_img/RealTimeImg/jma_s/" + dateEncode(2, ReqTime) + "/" + dateEncode(1, ReqTime) + ".jma_s.gif", "http://www.kmoni.bosai.go.jp/data/map_img/RealTimeImg/jma_s/" + dateEncode(2, ReqTime) + "/" + dateEncode(1, ReqTime) + ".jma_s.gif"][kmoniI_url];
+    var urlTmp = ["https://smi.lmoniexp.bosai.go.jp/data/map_img/RealTimeImg/jma_s/" + dateEncode(2, ReqTime) + "/" + dateEncode(1, ReqTime) + ".jma_s.gif", "http://www.kmoni.bosai.go.jp/data/map_img/RealTimeImg/jma_s/" + dateEncode(2, ReqTime) + "/" + dateEncode(1, ReqTime) + ".jma_s.gif"][kmoniI_url];
 
-      var request = net.request(urlTmp);
-      request.on("response", (res) => {
-        var dataTmp = [];
-        res.on("data", (chunk) => {
-          dataTmp.push(chunk);
-        });
-        res.on("end", () => {
-          try {
-            if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
-              errorCountkI++;
-              if (errorCountkI > 3) {
-                errorCountkI = 0;
-                kmoniI_url++;
-                if (kmoniI_url > urlTmp.length) kmoniI_url = 0;
-              }
-              kmoniTimeUpdate(new Date() - Replay, "kmoni", "Error");
-            } else {
-              errorCountkI = 0;
-              var bufTmp = Buffer.concat(dataTmp);
-              if (kmoniWorker) {
-                kmoniWorker.webContents.send("message2", {
-                  action: "KmoniImgUpdate",
-                  data: "data:image/gif;base64," + bufTmp.toString("base64"),
-                  date: ReqTime,
-                });
-              }
-            }
-          } catch (err) {
-            kmoniTimeUpdate(new Date() - Replay, "kmoni", "Error");
-          }
-        });
+    var request = net.request(urlTmp);
+    request.on("response", (res) => {
+      var dataTmp = [];
+      res.on("data", (chunk) => {
+        dataTmp.push(chunk);
       });
-      request.end();
-    }
+      res.on("end", () => {
+        try {
+          if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
+            errorCountkI++;
+            if (errorCountkI > 3) {
+              errorCountkI = 0;
+              kmoniI_url++;
+              if (kmoniI_url > urlTmp.length) kmoniI_url = 0;
+            }
+            kmoniTimeUpdate(new Date() - Replay, "kmoni", "Error");
+          } else {
+            errorCountkI = 0;
+            var bufTmp = Buffer.concat(dataTmp);
+            if (kmoniWorker) {
+              kmoniWorker.webContents.send("message2", {
+                action: "KmoniImgUpdate",
+                data: "data:image/gif;base64," + bufTmp.toString("base64"),
+                date: ReqTime,
+              });
+            }
+          }
+        } catch (err) {
+          kmoniTimeUpdate(new Date() - Replay, "kmoni", "Error");
+        }
+      });
+    });
+    request.end();
   }
 
   if (kmoniTimeout) clearTimeout(kmoniTimeout);
@@ -1814,24 +1812,30 @@ function EEWdetect(type, json) {
 
 //EEW情報マージ
 function EEWcontrol(data) {
+  console.log("EEW処理", 0);
   if (!data) return; //データがない場合、処理終了
   if (!config.Info.EEW.showTraning && data.is_training) return; //訓練法を受信するかどうか（設定に準拠）
   if (!data.origin_time) return;
+  console.log("EEW処理", 1);
 
   //５分以上前の地震／未来の地震（リプレイ時）を除外
   var pastTime = new Date() - Replay - data.origin_time;
   if (pastTime > 300000 || pastTime < 0) return;
+
+  console.log("EEW処理", 2);
 
   //現在地との距離
   if (data.latitude && data.longitude) data.distance = geosailing(data.latitude, data.longitude, config.home.latitude, config.home.longitude);
 
   data.TimeTable = TimeTable_JMA2001[depthFilter(data.depth)];
 
+  console.log("EEW処理", 3);
+
   if (data.source == "simulation") {
-    var EEWdataTmp = EEW_Data.find(function(elm){
-      return !elm.simulation
+    var EEWdataTmp = EEW_Data.find(function (elm) {
+      return !elm.simulation;
     });
-    if(EEWdataTmp) return;
+    if (EEWdataTmp) return;
     var EBIData = [];
     var estIntTmp = {};
     if (!data.is_cancel) {
@@ -1869,10 +1873,12 @@ function EEWcontrol(data) {
       }
     }
   } else {
-    var EEWdataTmp = EEW_Data.forEach(function(elm){
-      if(elm.simulation) EEWClear(elm.EQ_id);
+    var EEWdataTmp = EEW_Data.forEach(function (elm) {
+      if (elm.simulation) EEWClear(elm.EQ_id);
     });
   }
+
+  console.log("EEW処理", 4);
 
   if (data.warnZones && data.warnZones.length) {
     //設定された細分区域のデータ参照
@@ -1887,19 +1893,27 @@ function EEWcontrol(data) {
     }
   }
 
+  console.log("EEW処理", 5);
+
   var EQJSON = EEW_Data.find(function (elm) {
     return elm.EQ_id == data.EventID;
   });
   if (EQJSON) {
+    console.log("EEW処理", 60);
+
     //同一地震のデータが既に存在する場合
     var EEWJSON = EQJSON.data.find(function (elm2) {
       return elm2.serial == data.serial;
     });
     if (EEWJSON) {
+      console.log("EEW処理", 61);
+
       //同じ報数の情報が既に存在する（マージ処理へ）
       // prettier-ignore
       var oneBefore = data.serial == Math.max.apply(null, EQJSON.data.map(function(o){ return o.serial;}));
       if (oneBefore) {
+        console.log("EEW処理", 62);
+
         //最新報である場合
         var changed = false;
         //マージ元のデータ
@@ -1927,14 +1941,27 @@ function EEWcontrol(data) {
             }
           });
         }
+        console.log("EEW処理", 63);
         //データに変化があれば、警報処理へ
-        if (changed) EEWAlert(oneBeforeData, false, true);
+        if (changed) {
+          EEWAlert(oneBeforeData, false, true);
+          console.log("EEW処理", 64);
+        }
       }
     } else {
       //同じ報数の情報がない場合（データ登録）
       // prettier-ignore
-      var newest = data.serial > Math.max.apply(null,EQJSON.data.map(function(o){return o.serial;}));
+      console.log("EEW処理", 65);
+      var newest =
+        data.serial >
+        Math.max.apply(
+          null,
+          EQJSON.data.map(function (o) {
+            return o.serial;
+          })
+        );
       if (newest) {
+        console.log("EEW処理", 66);
         //最新の報である
         var EQJSON = EEW_Data.find(function (elm) {
           return elm.EQ_id == data.EventID;
@@ -1968,6 +1995,7 @@ function EEWcontrol(data) {
 
     EEWAlert(data, true); //警報処理
   }
+  console.log("EEW処理", "END");
 }
 
 function calcInt(magJMA, depth, epiLat, epiLng, pointLat, pointLng, arv) {
@@ -2056,6 +2084,7 @@ function EEWClear(EventID) {
 
 //EEW通知（音声・画面表示等）
 function EEWAlert(data, first, update) {
+  console.log("EEW処理完了");
   EEWNow = true;
   worker.postMessage({ action: "EEWNow", data: EEWNow });
 
