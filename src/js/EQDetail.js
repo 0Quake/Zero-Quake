@@ -46,6 +46,7 @@ var EEWData;
 var axisDatas;
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "metaData") {
+    a=request
     eid = request.eid;
     if (request.urls && Array.isArray(request.urls)) {
       jmaURL = request.urls.filter(function (elm) {
@@ -630,7 +631,7 @@ function Mapinit() {
     radioSet("mapSelect", config.data.layer);
     config.data.overlay.forEach(function (elm) {
       overlaySelect(elm, true);
-      document.getElementById(elm).checked = true;
+      if(document.getElementById(elm)) document.getElementById(elm).checked = true;
     });
   });
 
