@@ -148,7 +148,7 @@ function EQDetect(data, date, detect) {
           }
         }
 
-        if (ptDataTmp.Event && elm.detect2) {
+        if (!ptDataTmp.Event && elm.detect2) {
           //自観測点がどの地震アイテムにも属さず、検知レベルがLv.2以上の場合
           //自観測点を中心とした新規地震アイテム作成
           EQDetect_List.push({ id: EQDetectID, lat: elm.Location.Latitude, lng: elm.Location.Longitude, Codes: [elm], Codes_history: 1, Radius: 0, maxPGA: elm.pga, maxInt: elm.shindo, detectCount: 1, Up: false, Lv: 0, last_Detect: new Date() - Replay, origin_Time: new Date() - Replay, showed: false, isCity: ptDataTmp.isCity });
