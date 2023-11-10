@@ -64,13 +64,15 @@
 
 1. Earthquake Catalog（USGS）
 2. リアルタイム地震情報（Early-Est）
-<details>
-<summary>情報源</summary>
-<ol>
-  <li>FDSN Web Service <a href="https://earthquake.usgs.gov/fdsnws/event/1/">© USGS</a></li>
-  <li>Early-est <a href="http://early-est.rm.ingv.it">© イタリア国立地球物理学火山学研究所</a></li>
-</ol>
-</details>
+3. 地盤増幅率（緊急地震速報シミュレーション時の震度予想に使用）
+   <details>
+   <summary>情報源</summary>
+   <ol>
+     <li>FDSN Web Service <a href="https://earthquake.usgs.gov/fdsnws/event/1/">© USGS</a></li>
+     <li>Early-est <a href="http://early-est.rm.ingv.it">© イタリア国立地球物理学火山学研究所</a></li>
+     <li>表層地盤情報提供API <a href="https://www.j-shis.bosai.go.jp/api-sstruct-meshinfo">© 防災科学技術研究所</a></li>
+   </ol>
+   </details>
 
 ## 使用素材
 
