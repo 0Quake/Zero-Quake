@@ -5,6 +5,7 @@ var Replay;
 var openAtLogin = false;
 var tsunamiSect;
 var tsunamiFeatures;
+var EQSectFeatures;
 window.addEventListener("load", function () {
   this.document.getElementById("replay").value = dateEncode(3, new Date()).replaceAll("/", "-");
   this.document.getElementById("EEWE_EventID").value = dateEncode(1, new Date()).replaceAll("/", "-");
@@ -389,26 +390,6 @@ function mapInit() {
     document.getElementById("latitude").value = e.lngLat.lat;
     document.getElementById("longitude").value = e.lngLat.lng;
     MapReDraw()
-
-    var minDistance = Infinity;
-    var tsunamiSect;
-    tsunamiFeatures.forEach(function (elm) {
-      coordinates = turf.centroid(elm).geometry.coordinates;
-      // 距離を求める
-      var distance = turf.distance(turf.point([e.lngLat.lng, e.lngLat.lat]), coordinates);
-      if (minDistance > distance) {
-        minDistance = distance;
-        tsunamiSect = elm.properties.name;
-      }
-    });
-    map.setFilter("tsunami_LINE_selected", ["==", "name", tsunamiSect]);
-    selectBoxSet(document.getElementById("tsunamiSect"), tsunamiSect);
-
-    selectBoxSet(document.getElementById("saibun"), e.features[0].properties.name);
-
-    map.flyTo({
-      center: [e.lngLat.lng, e.lngLat.lat],
-    });
   });
 
   const img = document.createElement("img");
@@ -419,13 +400,46 @@ function mapInit() {
   map.on("load", function () {
     if (tsunamiSect) map.setFilter("tsunami_LINE_selected", ["==", "name", tsunamiSect]);
     tsunamiFeatures = map.querySourceFeatures("tsunami");
+    EQSectFeatures = map.querySourceFeatures("basemap");
   });
 }
 
-//eslint-disable-next-line
+var beforeCordinates = [0, 0]
 function MapReDraw() {
   lat = document.getElementById("latitude").value;
   lng = document.getElementById("longitude").value;
+  var inside_sect = EQSectFeatures.find(function (elm) {
+    return turf.booleanPointInPolygon([lng, lat], elm) 
+  });
+
+  if(inside_sect) selectBoxSet(document.getElementById("saibun"), inside_sect.properties.name);
+  else {
+    document.getElementById("longitude").value = lng = beforeCordinates[0];
+    document.getElementById("latitude").value = lat = beforeCordinates[1];
+    return;
+  }
+
+  beforeCordinates = [lng, lat];
+
+  var tsunamiSect;
+  var minDistance = Infinity;
+  tsunamiFeatures.forEach(function (elm) {
+    coordinates = turf.centroid(elm).geometry.coordinates;
+    // 距離を求める
+    var distance = turf.distance(turf.point([lng, lat]), coordinates);
+    if (minDistance > distance) {
+      minDistance = distance;
+      tsunamiSect = elm.properties.name;
+    }
+  });
+
+  map.setFilter("tsunami_LINE_selected", ["==", "name", tsunamiSect]);
+  selectBoxSet(document.getElementById("tsunamiSect"), tsunamiSect);
+
+  map.flyTo({
+    center: [lng, lat],
+  });
+
   markerElm.setLngLat([lng, lat]);
   fetch("https://www.j-shis.bosai.go.jp/map/api/sstrct/V4/meshinfo.geojson?position="+ lng + ","+ lat + "&epsg=4612&attr=ARV").then(function(res){
     return res.json()
