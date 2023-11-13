@@ -206,7 +206,7 @@ function EEWAlertUpdate(data) {
       document.getElementById("EEW-" + elm.EventID).remove();
     } else if (elm.is_cancel) {
       epiCenterClear(elm.EventID);
-      setTimeout(function(){
+      setTimeout(function () {
         document.getElementById("EEW-" + elm.EventID).remove();
       }, 10000);
     }
@@ -346,8 +346,8 @@ function eqInfoDraw(data, source) {
       clone.querySelector(".canceled").style.display = elm.cancel ? "flex" : "none";
       clone.querySelector(".EEWNotes").style.display = elm.category == "EEW" ? "block" : "none";
 
-      if(elm.cancel) clone.querySelector(".EQItem").classList.add("EQI_canceled");
-      else{
+      if (elm.cancel) clone.querySelector(".EQItem").classList.add("EQI_canceled");
+      else {
         clone.querySelector(".EQItem").setAttribute("title", "クリックして詳細を表示");
         clone.querySelector(".EQItem").addEventListener("click", function () {
           window.electronAPI.messageReturn({

@@ -47,7 +47,7 @@ window.addEventListener("load", function () {
 function psWaveAnm() {
   if (now_EEW.length > 0) {
     for (elm of now_EEW) {
-      if(!elm.is_cancel) psWaveCalc(elm.EventID);
+      if (!elm.is_cancel) psWaveCalc(elm.EventID);
     }
   }
   if (background) setTimeout(psWaveAnm, 1000);
@@ -448,6 +448,7 @@ function init() {
           maxzoom: 22,
         },
         { id: "Int1", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["1"].background }, filter: ["==", "name", ""] },
+        //{ id: "Int1", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["1"].background }, filter: ["==", "name", ""] },
         { id: "Int2", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["2"].background }, filter: ["==", "name", ""] },
         { id: "Int3", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["3"].background }, filter: ["==", "name", ""] },
         { id: "Int4", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["4"].background }, filter: ["==", "name", ""] },
@@ -793,9 +794,9 @@ function JMAEstShindoControl(data) {
     if (elm.warnZones && Array.isArray(elm.warnZones)) {
       elm.warnZones.forEach(function (elm2) {
         var old_int;
-        if(JMAEstShindoData[elm2.Name]) old_int = config.Info.EEW.IntType == "max" ? JMAEstShindoData[elm2.Name].IntTo : JMAEstShindoData[elm2.Name].IntFrom;
+        if (JMAEstShindoData[elm2.Name]) old_int = config.Info.EEW.IntType == "max" ? JMAEstShindoData[elm2.Name].IntTo : JMAEstShindoData[elm2.Name].IntFrom;
         var new_int = config.Info.EEW.IntType == "max" ? elm2.IntTo : elm2EEW.IntFrom;
-        if(!old_int || old_int < new_int) {
+        if (!old_int || old_int < new_int) {
           JMAEstShindoData[elm2.Name] = elm2;
         }
       });
