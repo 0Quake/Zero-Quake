@@ -43,7 +43,7 @@ workerThreads.parentPort.on("message", (message) => {
 function EQDetect(data, date, detect) {
   var changedData = [];
 
-  if (!EEWNow && detect) {
+
     var ptDataTmp, detect0, pgaAvr;
     for (const elm of data) {
       //ポイントごとの処理
@@ -55,7 +55,7 @@ function EQDetect(data, date, detect) {
       }
 
       if (elm.data) {
-        if (detect) {
+        if (!EEWNow && detect) {
           //PGAの10回平均を求める
           pgaAvr =
             ptDataTmp.SUMTmp.reduce(function (a, b) {
@@ -135,6 +135,7 @@ function EQDetect(data, date, detect) {
               EQD_ItemTmp.last_Detect = new Date() - Replay;
 
               threshold01Tmp = EQD_ItemTmp.isCity ? thresholds.threshold01C : thresholds.threshold01;
+              threshold01Tmp = Math.min(Math.max(elm.arroundPoints, 2), threshold01Tmp);//周囲の観測点数に応じて閾値を調整（離島対応）
               if (EQD_ItemTmp.Codes.length >= threshold01Tmp) {
                 //地震アイテムに属する観測点数が閾値以上なら
                 //情報をmainプロセスへ送信
@@ -156,7 +157,6 @@ function EQDetect(data, date, detect) {
         }
       }
     }
-  }
 
   //地震検知解除
   var index = 0;
@@ -174,7 +174,7 @@ function EQDetect(data, date, detect) {
     }
     index++;
   }
-
+ 
   //mainProcessへ情報送信
   workerThreads.parentPort.postMessage({
     action: "PointsData_Update",

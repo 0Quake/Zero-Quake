@@ -1398,7 +1398,7 @@ function add_Area_info(name, maxInt) {
     icon.innerHTML = '<div style="background:' + color[0] + ";color:" + color[1] + '">' + maxInt + "</div>";
 
     var maxIntStr = shindoConvert(maxInt, 1);
-    var AreaPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<h3 style='background:" + color[0] + ";color:" + color[1] + "'>震度 " + maxIntStr + "</h3><div>細分区域<br>" + name + "</div><div></div>");
+    var AreaPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<div class='popupContent'><div class='shindoItem' style='background:" + color[0] + ";color:" + color[1] + "'>震度 " + maxIntStr + "</div><div class='pointName'>" + name + "</div><div class='pointHead'>細分区域</div></div><div></div>");
     markerElm = new maplibregl.Marker(icon).setLngLat([pointLocation[1], pointLocation[0]]).setPopup(AreaPopup).addTo(map);
     ZoomBounds.extend([pointLocation[1], pointLocation[0]]);
   }
@@ -1480,7 +1480,7 @@ function add_IntensityStation_info(lat, lng, name, int) {
   icon.classList.add("ShindoIcon");
   icon.innerHTML = '<div style="background:' + color4[0] + ";color:" + color4[1] + '">' + int + "</div>";
 
-  var PtPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<h3 style='background:" + color4[0] + ";color:" + color4[1] + "'>震度 " + intStr + "</h3><div>震度観測点<br>" + name + "</div><div></div>");
+  var PtPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<div class='popupContent'><div class='shindoItem' style='background:" + color4[0] + ";color:" + color4[1] + "'>震度 " + intStr + "</div><div class='pointName'>" + name + "</div><div class='pointHead'>震度観測点</div></div><div></div>");
   markerElm = new maplibregl.Marker(icon).setLngLat([lng, lat]).setPopup(PtPopup).addTo(map);
 
   wrap3[wrap3.length - 1].appendChild(newDiv);
@@ -1541,7 +1541,7 @@ function add_Area_infoL(name, maxInt) {
     icon.classList.add("MaxLgIntIcon");
     icon.innerHTML = '<div style="background:' + color[0] + ";color:" + color[1] + '">' + maxInt + "</div>";
 
-    var AreaPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<h3 style='background:" + color[0] + ";color:" + color[1] + "'>長周期地震動階級 " + maxInt + "</h3><div>細分区域<br>" + name + "</div><div></div>");
+    var AreaPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<div class='popupContent'><div class='shindoItem' style='background:" + color[0] + ";color:" + color[1] + "'>長周期地震動階級 " + maxInt + "</div><div class='pointName'>" + name + "</div><div class='pointHead'>細分区域</div></div><div></div>");
     markerElm = new maplibregl.Marker(icon).setLngLat([pointLocation[1], pointLocation[0]]).setPopup(AreaPopup).addTo(map);
     ZoomBounds.extend([pointLocation[1], pointLocation[0]]);
   }
@@ -1580,7 +1580,7 @@ function add_IntensityStation_infoL(lat, lng, name, int) {
   icon.classList.add("LgIntIcon");
   icon.innerHTML = '<div style="background:' + color4[0] + ";color:" + color4[1] + '">' + int + "</div>";
 
-  var PtPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<h3 style='background:" + color4[0] + ";color:" + color4[1] + "'>長周期地震動階級 " + intStr + "</h3><div>観測点<br>" + name + "</div><div></div>");
+  var PtPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<div class='popupContent'><div class='shindoItem' style='background:" + color4[0] + ";color:" + color4[1] + "'>長周期地震動階級 " + intStr + "</div><div class='pointName'>" + name + "</div><div class='pointHead'>震度観測点</div></div><div></div>");
   markerElm = new maplibregl.Marker(icon).setLngLat([lng, lat]).setPopup(PtPopup).addTo(map);
 
   ZoomBounds.extend([lng, lat]);
@@ -1640,14 +1640,11 @@ function EQInfoControl(data) {
       img.src = "./img/epicenter.svg";
       img.classList.add("epicenterIcon");
 
-      var ESPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<h3 style='background: rgb(149, 46, 46);'>震央</h3><div>" + EQInfo.epiCenter + "</div>");
+      var ESPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<h3 style='background: rgb(149, 46, 46);'>震央</h3><div class='epicenterWrp'>" + EQInfo.epiCenter + "</div>");
       ESmarkerElm = new maplibregl.Marker(img).setLngLat([data.lng, data.lat]).setPopup(ESPopup).addTo(map);
     } else {
       ESmarkerElm.setLngLat([data.lng, data.lat]);
     }
-
-    //map.panTo([data.lng, data.lat], { animate: false });
-    //map.zoomTo(8, { animate: false });
   }
 
   switch (data.infoType) {
