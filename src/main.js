@@ -1466,6 +1466,7 @@ function Wolfx_WS() {
       if (Replay !== 0) return;
       kmoniTimeUpdate(new Date() - Replay, "wolfx", "success");
       try {
+        if (heartbeat.type == heartbeat) return;
         var json = jsonParse(message.utf8Data);
         EEWdetect(2, json);
       } catch (err) {
@@ -1686,7 +1687,8 @@ function EEWdetect(type, json) {
       warnZones: EBIData,
       source: "wolfx",
     };
-    //EEWcontrol(EEWdata);
+
+    EEWcontrol(EEWdata,json);
   } else if (type == 3) {
     //axis
     try {
