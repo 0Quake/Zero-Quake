@@ -456,7 +456,7 @@
 
 #sideBar.close #sokuho-Panel {
   display: block;
-  border-radius: 0 0 0 10px;
+  border-radius: 0 0 10px 10px;
   max-height: 50vh;
   position: absolute;
   top: 0;
@@ -489,7 +489,7 @@ body {
   }
   #sideBar.close #sokuho-Panel {
     display: block;
-    border-radius: 0 0 0 10px;
+    border-radius: 0 0 10px 10px;
     max-height: 50vh;
   }
   #sideBar.close {
