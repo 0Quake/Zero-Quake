@@ -521,6 +521,31 @@ td {
 #LgInt_radioWrap {
   display: none;
 }
+.popupContent {
+  padding: 4px;
+}
+.shindoItem {
+  display: inline-block;
+  font-family: "M PLUS 1p", sans-serif;
+  border-radius: 100px;
+  margin-right: 5px;
+  padding: 1px 5px;
+}
+.pointHead {
+  color: #999;
+  font-size: 12px;
+  text-align: center;
+}
+.pointName {
+  display: inline-block;
+  margin-right: 30px;
+}
+.maplibregl-popup-content {
+  min-width: 0;
+}
+.epicenterWrp {
+  padding: 4px;
+}
 @media (max-width: 600px) {
   #tableWrap {
     display: block;
