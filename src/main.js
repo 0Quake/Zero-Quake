@@ -1867,6 +1867,7 @@ function EEWcontrol(data) {
             Name: elm,
             IntTo: shindo,
             IntFrom: shindo,
+            Alert: shindoConvert(shindo, 5) >= 4,
           });
         });
         data.warnZones = EBIData;

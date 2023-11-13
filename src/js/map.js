@@ -448,7 +448,6 @@ function init() {
           maxzoom: 22,
         },
         { id: "Int1", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["1"].background }, filter: ["==", "name", ""] },
-        //{ id: "Int1", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["1"].background }, filter: ["==", "name", ""] },
         { id: "Int2", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["2"].background }, filter: ["==", "name", ""] },
         { id: "Int3", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["3"].background }, filter: ["==", "name", ""] },
         { id: "Int4", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["4"].background }, filter: ["==", "name", ""] },
@@ -574,6 +573,10 @@ function init() {
         },
       ],
     },
+  });
+  map.loadImage("img/AlertOverlay.png", (err, image) => {
+    map.addImage("pattern", image);
+    map.addLayer({ id: "Alert", type: "fill", source: "basemap", paint: { "fill-pattern": "pattern" }, filter: ["==", "name", ""] });
   });
 
   map.on("sourcedataloading", (e) => {
@@ -775,6 +778,7 @@ var Int6mT = ["any"];
 var Int6pT = ["any"];
 var Int7T = ["any"];
 var Int7pT = ["any"];
+var AlertT = ["any"];
 
 function JMAEstShindoControl(data) {
   JMAEstShindoData = {};
@@ -789,6 +793,7 @@ function JMAEstShindoControl(data) {
   Int6pT = ["any"];
   Int7T = ["any"];
   Int7pT = ["any"];
+  AlertT = ["any"];
 
   data.forEach(function (elm) {
     if (elm.warnZones && Array.isArray(elm.warnZones)) {
@@ -805,6 +810,10 @@ function JMAEstShindoControl(data) {
 
   Object.keys(JMAEstShindoData).forEach(function (elm) {
     var sectData = JMAEstShindoData[elm];
+    if (sectData.Alert) {
+      AlertT.push(["==", "name", elm]);
+    }
+
     IntData = config.Info.EEW.IntType == "max" ? sectData.IntTo : sectData.IntFrom;
     switch (IntData) {
       case "0":
@@ -858,6 +867,7 @@ function JMAEstShindoDraw() {
   map.setFilter("Int6+", Int6pT);
   map.setFilter("Int7", Int7T);
   map.setFilter("Int7+", Int7pT);
+  map.setFilter("Alert", AlertT);
 }
 
 //🔴予報円🔴
