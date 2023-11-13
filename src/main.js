@@ -830,6 +830,7 @@ function setting_createWindow(update) {
     settingWindow.webContents.send("message2", {
       action: "initialData",
       config: config,
+      defaultConfigVal: defaultConfigVal,
       softVersion: soft_version,
       openAtLogin: app.getLoginItemSettings().openAtLogin,
       updatePanelMode: update,

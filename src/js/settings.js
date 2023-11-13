@@ -6,6 +6,7 @@ var openAtLogin = false;
 var tsunamiSect;
 var tsunamiFeatures;
 var EQSectFeatures;
+var defaultConfigVal;
 window.addEventListener("load", function () {
   this.document.getElementById("replay").value = dateEncode(3, new Date()).replaceAll("/", "-");
   this.document.getElementById("EEWE_EventID").value = dateEncode(1, new Date()).replaceAll("/", "-");
@@ -29,6 +30,7 @@ window.electronAPI.messageSend((event, request) => {
     }
 
     config = request.config;
+    defaultConfigVal = request.defaultConfigVal;
 
     configDataDraw();
     mapInit();
@@ -135,6 +137,25 @@ document.getElementById("InstallBtn").addEventListener("click", function () {
 });
 
 document.getElementById("apply").addEventListener("click", function () {
+  apply();
+});
+document.getElementById("apply2").addEventListener("click", function () {
+  apply();
+  window.close();
+});
+document.getElementById("resetConfig").addEventListener("click", function () {
+  window.electronAPI.messageReturn({
+    action: "settingReturn",
+    data: defaultConfigVal,
+  });
+  window.electronAPI.messageReturn({
+    action: "openAtLogin",
+    data: false,
+  });
+  location.reload();
+});
+
+function apply() {
   config.system.crashReportAutoSend = document.getElementById("BugReportAutoSend").value;
   config.Info.EEW.IntType = document.getElementById("intType").value;
 
@@ -187,9 +208,7 @@ document.getElementById("apply").addEventListener("click", function () {
       data: document.getElementById("startup").checked,
     });
   }
-
-  window.close();
-});
+}
 
 document.getElementById("cancel").addEventListener("click", function () {
   window.close();
@@ -389,7 +408,7 @@ function mapInit() {
   map.on("click", "basemap_fill", (e) => {
     document.getElementById("latitude").value = e.lngLat.lat;
     document.getElementById("longitude").value = e.lngLat.lng;
-    MapReDraw()
+    MapReDraw();
   });
 
   const img = document.createElement("img");
@@ -404,15 +423,15 @@ function mapInit() {
   });
 }
 
-var beforeCordinates = [0, 0]
+var beforeCordinates = [0, 0];
 function MapReDraw() {
   lat = document.getElementById("latitude").value;
   lng = document.getElementById("longitude").value;
   var inside_sect = EQSectFeatures.find(function (elm) {
-    return turf.booleanPointInPolygon([lng, lat], elm) 
+    return turf.booleanPointInPolygon([lng, lat], elm);
   });
 
-  if(inside_sect) selectBoxSet(document.getElementById("saibun"), inside_sect.properties.name);
+  if (inside_sect) selectBoxSet(document.getElementById("saibun"), inside_sect.properties.name);
   else {
     document.getElementById("longitude").value = lng = beforeCordinates[0];
     document.getElementById("latitude").value = lat = beforeCordinates[1];
@@ -441,11 +460,13 @@ function MapReDraw() {
   });
 
   markerElm.setLngLat([lng, lat]);
-  fetch("https://www.j-shis.bosai.go.jp/map/api/sstrct/V4/meshinfo.geojson?position="+ lng + ","+ lat + "&epsg=4612&attr=ARV").then(function(res){
-    return res.json()
-  }).then(function(json){
-    document.getElementById("arv").value = json.features[0].properties.ARV;
-  })
+  fetch("https://www.j-shis.bosai.go.jp/map/api/sstrct/V4/meshinfo.geojson?position=" + lng + "," + lat + "&epsg=4612&attr=ARV")
+    .then(function (res) {
+      return res.json();
+    })
+    .then(function (json) {
+      document.getElementById("arv").value = json.features[0].properties.ARV;
+    });
 }
 document.getElementById("tsunamiSect").addEventListener("change", function () {
   tsunamiSect = this.value;
