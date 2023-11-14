@@ -349,16 +349,16 @@ function checkUpdate() {
 function doUpdate(url) {
   var request = net.request(url);
   request.on("response", (res) => {
-    res.pipe(fs.createWriteStream("ZeroQuakeInstaller.exe")).on("close", function () {
-      try {
+    try {
+      res.pipe(fs.createWriteStream("ZeroQuakeInstaller.exe")).on("close", function () {
         var COMMAND = "start ZeroQuakeInstaller.exe";
         var spawn = require("child_process").spawn;
         spawn(COMMAND, [], { shell: true, detached: true, stdio: "inherit" });
         app.exit(0);
-      } catch (err) {
-        throw new Error("インストーラーの起動に失敗しました。エラーメッセージは以下の通りです。" + err);
-      }
-    });
+      });
+    } catch (err) {
+      throw new Error("インストーラーの起動に失敗しました。エラーメッセージは以下の通りです。\n" + err);
+    }
   });
   request.end();
 }
@@ -455,78 +455,84 @@ var relaunchTimer;
 var errorMsgBox = false;
 //エラーイベント
 process.on("uncaughtException", function (err) {
-  if (!errorMsgBox && app.isReady()) {
-    if (String(err.stack).startsWith("Error: net::ERR_")) return false;
-    errorMsgBox = true;
-    options.detail = "動作を選択してください。\n10秒で自動的に再起動します。\nエラーコードは以下の通りです。\n" + err.stack;
+  try {
+    if (!errorMsgBox && app.isReady()) {
+      if (String(err.stack).startsWith("Error: net::ERR_")) return false;
+      errorMsgBox = true;
+      options.detail = "動作を選択してください。\n10秒で自動的に再起動します。\nエラーコードは以下の通りです。\n" + err.stack;
 
-    dialog.showMessageBox(mainWindow, options).then(function (result) {
+      dialog.showMessageBox(mainWindow, options).then(function (result) {
+        clearTimeout(relaunchTimer);
+        if (config.system.crashReportAutoSend == "yes") {
+          crashReportSend(err.stack, result);
+          errorMsgBox = false;
+        } else if (config.system.crashReportAutoSend == "no") {
+          errorResolve(result.response);
+          errorMsgBox = false;
+        } else {
+          dialog.showMessageBox(mainWindow, options2).then(function (result2) {
+            if (result2.checkboxChecked) {
+              config.system.crashReportAutoSend = result2.response == 0 ? "yes" : "no";
+              store.set("config", config);
+            }
+            if (result2.response == 0) {
+              crashReportSend(err.stack, result);
+              errorMsgBox = false;
+            } else {
+              errorResolve(result.response);
+            }
+          });
+        }
+      });
       clearTimeout(relaunchTimer);
-      if (config.system.crashReportAutoSend == "yes") {
-        crashReportSend(err.stack, result);
-        errorMsgBox = false;
-      } else if (config.system.crashReportAutoSend == "no") {
-        errorResolve(result.response);
-        errorMsgBox = false;
-      } else {
-        dialog.showMessageBox(mainWindow, options2).then(function (result2) {
-          if (result2.checkboxChecked) {
-            config.system.crashReportAutoSend = result2.response == 0 ? "yes" : "no";
-            store.set("config", config);
-          }
-          if (result2.response == 0) {
-            crashReportSend(err.stack, result);
-            errorMsgBox = false;
-          } else {
-            errorResolve(result.response);
-          }
-        });
-      }
-    });
-    clearTimeout(relaunchTimer);
-    relaunchTimer = setTimeout(function () {
-      app.relaunch();
-      app.exit(0);
-    }, 10000);
+      relaunchTimer = setTimeout(function () {
+        app.relaunch();
+        app.exit(0);
+      }, 10000);
 
-    Window_notification("予期しないエラーが発生しました。", "error");
-  }
+      Window_notification("予期しないエラーが発生しました。", "error");
+    }
+  } catch(err) {return;}
 });
 //エラー処理
 function errorResolve(response) {
-  switch (response) {
-    case 0:
-      app.relaunch();
-      app.exit(0);
-      break;
-    case 1:
-      app.exit(0);
-      break;
-    case 2:
-      clearTimeout(relaunchTimer);
-      break;
-  }
+  try {
+    switch (response) {
+      case 0:
+        app.relaunch();
+        app.exit(0);
+        break;
+      case 1:
+        app.exit(0);
+        break;
+      case 2:
+        clearTimeout(relaunchTimer);
+        break;
+    }
+  } catch(err) {return;}
 }
 //クラッシュレポートの送信
 function crashReportSend(errMsg, result) {
-  let request = net.request("https://zeroquake.wwww.jp/crashReport/?errorMsg=" + encodeURI(errMsg) + "&soft_version=" + encodeURI(soft_version));
+  try {
+    let request = net.request("https://zeroquake.wwww.jp/crashReport/?errorMsg=" + encodeURI(errMsg) + "&soft_version=" + encodeURI(soft_version));
 
-  request.on("error", () => {
-    dialog.showMessageBox(mainWindow, options3).then(function () {
-      errorResolve(result.response);
-    });
-  });
-  request.on("response", (res) => {
-    if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
+    request.on("error", () => {
       dialog.showMessageBox(mainWindow, options3).then(function () {
         errorResolve(result.response);
       });
-    } else {
-      errorResolve(result.response);
-    }
-  });
-  // リクエストの送信
-  request.end();
+    });
+    request.on("response", (res) => {
+      if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
+        dialog.showMessageBox(mainWindow, options3).then(function () {
+          errorResolve(result.response);
+        });
+      } else {
+        errorResolve(result.response);
+      }
+    });
+    // リクエストの送信
+    request.end();
+  } catch(err) {return;}
 }
 
 //アプリのロード完了イベント
@@ -647,35 +653,26 @@ const unresponsiveMsg = {
 };
 //メインウィンドウ表示処理
 function createWindow() {
-  if (mainWindow && !mainWindow.isDestroyed()) {
-    if (mainWindow.isMinimized()) mainWindow.restore();
-    if (!mainWindow.isFocused()) mainWindow.focus();
-    if (!mainWindow.isVisible()) {
-      mainWindow.show();
-    }
-  } else {
-    mainWindow = new BrowserWindow({
-      minWidth: 450,
-      minHeight: 400,
-      webPreferences: {
-        preload: path.join(__dirname, "js/preload.js"),
-        title: "Zero Quake",
-        icon: path.join(__dirname, "img/icon.ico"),
-        backgroundThrottling: false,
-      },
-      backgroundColor: "#202227",
-      alwaysOnTop: config.system.alwaysOnTop,
-    });
-    if (Replay !== 0) {
-      messageToMainWindow({
-        action: "Replay",
-        data: Replay,
+  try {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      if (!mainWindow.isFocused()) mainWindow.focus();
+      if (!mainWindow.isVisible()) {
+        mainWindow.show();
+      }
+    } else {
+      mainWindow = new BrowserWindow({
+        minWidth: 450,
+        minHeight: 400,
+        webPreferences: {
+          preload: path.join(__dirname, "js/preload.js"),
+          title: "Zero Quake",
+          icon: path.join(__dirname, "img/icon.ico"),
+          backgroundThrottling: false,
+        },
+        backgroundColor: "#202227",
+        alwaysOnTop: config.system.alwaysOnTop,
       });
-    }
-
-    mainWindow.webContents.on("did-finish-load", () => {
-      if (notifyData) messageToMainWindow(notifyData);
-
       if (Replay !== 0) {
         messageToMainWindow({
           action: "Replay",
@@ -683,88 +680,101 @@ function createWindow() {
         });
       }
 
-      Object.keys(kmoniTimeTmp).forEach(function (key) {
-        elm = kmoniTimeTmp[key];
-        messageToMainWindow({
-          action: "kmoniTimeUpdate",
-          Updatetime: elm.Updatetime,
-          LocalTime: elm.LocalTime,
-          type: elm.type,
-          condition: elm.condition,
-        });
-      });
+      mainWindow.webContents.on("did-finish-load", () => {
+        if (notifyData) messageToMainWindow(notifyData);
 
-      messageToMainWindow({
-        action: "setting",
-        data: config,
-      });
-
-      if (EEWNow) {
-        messageToMainWindow({
-          action: "EEWAlertUpdate",
-          data: EEW_nowList,
-        });
-      }
-
-      messageToMainWindow({
-        action: "EQInfo",
-        source: "jma",
-        data: eqInfo.jma.slice(0, config.Info.EQInfo.ItemCount),
-      });
-      messageToMainWindow({
-        action: "EQInfo",
-        source: "usgs",
-        data: eqInfo.usgs.slice(0, config.Info.EQInfo.ItemCount),
-      });
-
-      EQDetect_List.forEach(function (elm) {
-        threshold01Tmp = elm.isCity ? thresholds.threshold01C : thresholds.threshold01;
-        if (elm.Codes.length >= threshold01Tmp) {
+        if (Replay !== 0) {
           messageToMainWindow({
-            action: "EQDetect",
-            data: elm,
+            action: "Replay",
+            data: Replay,
           });
+        }
+
+        Object.keys(kmoniTimeTmp).forEach(function (key) {
+          elm = kmoniTimeTmp[key];
+          messageToMainWindow({
+            action: "kmoniTimeUpdate",
+            Updatetime: elm.Updatetime,
+            LocalTime: elm.LocalTime,
+            type: elm.type,
+            condition: elm.condition,
+          });
+        });
+
+        messageToMainWindow({
+          action: "setting",
+          data: config,
+        });
+
+        if (EEWNow) {
+          messageToMainWindow({
+            action: "EEWAlertUpdate",
+            data: EEW_nowList,
+          });
+        }
+
+        messageToMainWindow({
+          action: "EQInfo",
+          source: "jma",
+          data: eqInfo.jma.slice(0, config.Info.EQInfo.ItemCount),
+        });
+        messageToMainWindow({
+          action: "EQInfo",
+          source: "usgs",
+          data: eqInfo.usgs.slice(0, config.Info.EQInfo.ItemCount),
+        });
+
+        EQDetect_List.forEach(function (elm) {
+          threshold01Tmp = elm.isCity ? thresholds.threshold01C : thresholds.threshold01;
+          if (elm.Codes.length >= threshold01Tmp) {
+            messageToMainWindow({
+              action: "EQDetect",
+              data: elm,
+            });
+          }
+        });
+
+        if (kmoniPointsDataTmp) messageToMainWindow(kmoniPointsDataTmp);
+        if (SnetPointsDataTmp) messageToMainWindow(SnetPointsDataTmp);
+      });
+
+      mainWindow.loadFile("src/index.html");
+
+      mainWindow.on("unresponsive", () => {
+        mainWindow.responsive = true;
+        setTimeout(function () {
+          if (mainWindow.responsive) {
+            dialog.showMessageBox(mainWindow, unresponsiveMsg).then(function (result) {
+              switch (result.response) {
+                case 0:
+                  mainWindow.loadFile("src/index.html");
+                  break;
+                case 1:
+                  app.relaunch();
+                  app.exit(0);
+                  break;
+              }
+            });
+          }
+        }, 5000);
+      });
+      mainWindow.on("responsive", () => {
+        mainWindow.responsive = false;
+      });
+
+      mainWindow.on("close", (event) => {
+        if (!mainWindow.isDestroyed()) {
+          event.preventDefault();
+          mainWindow.hide();
         }
       });
 
-      if (kmoniPointsDataTmp) messageToMainWindow(kmoniPointsDataTmp);
-      if (SnetPointsDataTmp) messageToMainWindow(SnetPointsDataTmp);
-    });
-
-    mainWindow.loadFile("src/index.html");
-
-    mainWindow.on("unresponsive", () => {
-      mainWindow.responsive = true;
-      setTimeout(function () {
-        if (mainWindow.responsive) {
-          dialog.showMessageBox(mainWindow, unresponsiveMsg).then(function (result) {
-            switch (result.response) {
-              case 0:
-                mainWindow.loadFile("src/index.html");
-                break;
-              case 1:
-                app.relaunch();
-                app.exit(0);
-                break;
-            }
-          });
-        }
-      }, 5000);
-    });
-    mainWindow.on("responsive", () => {
-      mainWindow.responsive = false;
-    });
-
-    mainWindow.on("close", (event) => {
-      if (!mainWindow.isDestroyed()) {
-        event.preventDefault();
-        mainWindow.hide();
-      }
-    });
-
-    mainWindow.on("closed", () => {
-      mainWindow = null;
-    });
+      mainWindow.on("closed", () => {
+        mainWindow = null;
+      });
+    }
+  } catch(err) {
+    throw new Error("メインウィンドウの作成でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
   }
 }
 //ワーカーウィンドウ表示処理
@@ -799,91 +809,99 @@ function worker_createWindow() {
 }
 //設定ウィンドウ表示処理
 function setting_createWindow(update) {
-  if (settingWindow) {
-    if (settingWindow.isMinimized()) settingWindow.restore();
-    if (!settingWindow.isFocused()) settingWindow.focus();
-    return false;
-  }
-
-  settingWindow = new BrowserWindow({
-    minWidth: 600,
-    minHeight: 300,
-    webPreferences: {
-      preload: path.join(__dirname, "js/preload.js"),
-      title: "設定 - Zero Quake",
-      parent: mainWindow ? mainWindow : null,
-      center: true,
-      icon: path.join(__dirname, "img/icon.ico"),
-    },
-    backgroundColor: "#202227",
-    alwaysOnTop: config.system.alwaysOnTop,
-  });
-
-  settingWindow.webContents.on("did-finish-load", () => {
-    if (Replay !== 0) {
-      settingWindow.webContents.send("message2", {
-        action: "Replay",
-        data: Replay,
-      });
+  try {
+    if (settingWindow) {
+      if (settingWindow.isMinimized()) settingWindow.restore();
+      if (!settingWindow.isFocused()) settingWindow.focus();
+      return false;
     }
 
-    settingWindow.webContents.send("message2", {
-      action: "initialData",
-      config: config,
-      defaultConfigVal: defaultConfigVal,
-      softVersion: soft_version,
-      openAtLogin: app.getLoginItemSettings().openAtLogin,
-      updatePanelMode: update,
+    settingWindow = new BrowserWindow({
+      minWidth: 600,
+      minHeight: 300,
+      webPreferences: {
+        preload: path.join(__dirname, "js/preload.js"),
+        title: "設定 - Zero Quake",
+        parent: mainWindow ? mainWindow : null,
+        center: true,
+        icon: path.join(__dirname, "img/icon.ico"),
+      },
+      backgroundColor: "#202227",
+      alwaysOnTop: config.system.alwaysOnTop,
     });
-    if (update_data) {
-      settingWindow.webContents.send("message2", {
-        action: "Update_Data",
-        data: update_data,
-      });
-    }
-  });
-  settingWindow.on("closed", () => {
-    settingWindow = null;
-  });
 
-  settingWindow.loadFile("src/settings.html");
-  settingWindow.webContents.on("will-navigate", handleUrlOpen);
-  settingWindow.webContents.on("new-window", handleUrlOpen);
+    settingWindow.webContents.on("did-finish-load", () => {
+      if (Replay !== 0) {
+        settingWindow.webContents.send("message2", {
+          action: "Replay",
+          data: Replay,
+        });
+      }
+
+      settingWindow.webContents.send("message2", {
+        action: "initialData",
+        config: config,
+        defaultConfigVal: defaultConfigVal,
+        softVersion: soft_version,
+        openAtLogin: app.getLoginItemSettings().openAtLogin,
+        updatePanelMode: update,
+      });
+      if (update_data) {
+        settingWindow.webContents.send("message2", {
+          action: "Update_Data",
+          data: update_data,
+        });
+      }
+    });
+    settingWindow.on("closed", () => {
+      settingWindow = null;
+    });
+
+    settingWindow.loadFile("src/settings.html");
+    settingWindow.webContents.on("will-navigate", handleUrlOpen);
+    settingWindow.webContents.on("new-window", handleUrlOpen);
+  } catch(err) {
+    throw new Error("設定ウィンドウの作成でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
+  }
 }
 //津波情報ウィンドウ表示処理
 function tsunami_createWindow() {
-  if (tsunamiWindow) {
-    if (tsunamiWindow.isMinimized()) tsunamiWindow.restore();
-    if (!tsunamiWindow.isFocused()) tsunamiWindow.focus();
-    return false;
+  try {
+    if (tsunamiWindow) {
+      if (tsunamiWindow.isMinimized()) tsunamiWindow.restore();
+      if (!tsunamiWindow.isFocused()) tsunamiWindow.focus();
+      return false;
+    }
+    tsunamiWindow = new BrowserWindow({
+      minWidth: 600,
+      minHeight: 300,
+      webPreferences: {
+        preload: path.join(__dirname, "js/preload.js"),
+        title: "津波詳細情報 - Zero Quake",
+        icon: path.join(__dirname, "img/icon.ico"),
+      },
+      backgroundColor: "#202227",
+      alwaysOnTop: config.system.alwaysOnTop,
+    });
+
+    tsunamiWindow.webContents.on("did-finish-load", () => {
+      tsunamiWindow.webContents.send("message2", {
+        action: "setting",
+        data: config,
+      });
+      tsunamiWindow.webContents.send("message2", {
+        action: "tsunamiUpdate",
+        data: tsunamiData,
+      });
+    });
+    tsunamiWindow.loadFile("src/TsunamiDetail.html");
+
+    tsunamiWindow.on("closed", () => {
+      tsunamiWindow = null;
+    });
+  } catch(err) {
+    throw new Error("津波情報ウィンドウの作成でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
   }
-  tsunamiWindow = new BrowserWindow({
-    minWidth: 600,
-    minHeight: 300,
-    webPreferences: {
-      preload: path.join(__dirname, "js/preload.js"),
-      title: "津波詳細情報 - Zero Quake",
-      icon: path.join(__dirname, "img/icon.ico"),
-    },
-    backgroundColor: "#202227",
-    alwaysOnTop: config.system.alwaysOnTop,
-  });
-
-  tsunamiWindow.webContents.on("did-finish-load", () => {
-    tsunamiWindow.webContents.send("message2", {
-      action: "setting",
-      data: config,
-    });
-    tsunamiWindow.webContents.send("message2", {
-      action: "tsunamiUpdate",
-      data: tsunamiData,
-    });
-  });
-  tsunamiWindow.loadFile("src/TsunamiDetail.html");
-
-  tsunamiWindow.on("closed", () => {
-    tsunamiWindow = null;
-  });
 }
 function messageToMainWindow(message) {
   if (mainWindow) mainWindow.webContents.send("message2", message);
@@ -898,56 +916,60 @@ const handleUrlOpen = (e, url) => {
   }
 };
 function EQInfo_createWindow(response, webSite) {
-  var EQInfoWindowT = EQI_Window[response.eid];
-  if (EQInfoWindowT) {
-    if (EQInfoWindowT.window.isMinimized()) EQInfoWindowT.window.restore();
-    if (!EQInfoWindowT.window.isFocused()) EQInfoWindowT.window.focus();
-    return;
-  }
+  try {
+    var EQInfoWindowT = EQI_Window[response.eid];
+    if (EQInfoWindowT) {
+      if (EQInfoWindowT.window.isMinimized()) EQInfoWindowT.window.restore();
+      if (!EQInfoWindowT.window.isFocused()) EQInfoWindowT.window.focus();
+      return;
+    }
 
-  var EQInfoWindow = new BrowserWindow({
-    minWidth: 600,
-    minHeight: 300,
-    webPreferences: {
-      preload: path.join(__dirname, "js/preload.js"),
-      title: "地震詳細情報 - Zero Quake",
-      icon: path.join(__dirname, "img/icon.ico"),
-    },
-    backgroundColor: webSite ? null : "#202227",
-    alwaysOnTop: config.system.alwaysOnTop,
-  });
-
-  if (!webSite) {
-    var EEWDataItem = EEW_Data.find(function (elm) {
-      return elm.EQ_id == response.eid;
+    var EQInfoWindow = new BrowserWindow({
+      minWidth: 600,
+      minHeight: 300,
+      webPreferences: {
+        preload: path.join(__dirname, "js/preload.js"),
+        title: "地震詳細情報 - Zero Quake",
+        icon: path.join(__dirname, "img/icon.ico"),
+      },
+      backgroundColor: webSite ? null : "#202227",
+      alwaysOnTop: config.system.alwaysOnTop,
     });
-    var metadata = {
-      action: "metaData",
-      eid: response.eid,
-      urls: response.urls,
-      eew: EEWDataItem,
-      axisData: response.axisData,
-    };
-    EQI_Window[response.eid] = { window: EQInfoWindow, metadata: metadata };
 
-    EQInfoWindow.webContents.on("did-finish-load", () => {
-      EQInfoWindow.webContents.send("message2", {
-        action: "setting",
-        data: config,
+    if (!webSite) {
+      var EEWDataItem = EEW_Data.find(function (elm) {
+        return elm.EQ_id == response.eid;
+      });
+      var metadata = {
+        action: "metaData",
+        eid: response.eid,
+        urls: response.urls,
+        eew: EEWDataItem,
+        axisData: response.axisData,
+      };
+      EQI_Window[response.eid] = { window: EQInfoWindow, metadata: metadata };
+
+      EQInfoWindow.webContents.on("did-finish-load", () => {
+        EQInfoWindow.webContents.send("message2", {
+          action: "setting",
+          data: config,
+        });
+
+        EQInfoWindow.webContents.send("message2", metadata);
       });
 
-      EQInfoWindow.webContents.send("message2", metadata);
-    });
+      EQInfoWindow.on("closed", () => {
+        EQI_Window[response.eid] = null;
+      });
+    }
 
-    EQInfoWindow.on("closed", () => {
-      EQI_Window[response.eid] = null;
-    });
+    if (webSite) EQInfoWindow.loadURL(response.url);
+    else EQInfoWindow.loadFile(response.url);
+    EQInfoWindow.webContents.on("will-navigate", handleUrlOpen);
+    EQInfoWindow.webContents.on("new-window", handleUrlOpen);
+  } catch(err) {
+    throw new Error("地震情報ウィンドウの作成でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
   }
-
-  if (webSite) EQInfoWindow.loadURL(response.url);
-  else EQInfoWindow.loadFile(response.url);
-  EQInfoWindow.webContents.on("will-navigate", handleUrlOpen);
-  EQInfoWindow.webContents.on("new-window", handleUrlOpen);
 }
 
 //開始処理
@@ -1092,7 +1114,7 @@ worker.on("message", (message) => {
   }
 });
 worker.on("error", (error) => {
-  throw new Error("地震検知ワーカーでエラー発生:\n" + error);
+  throw new Error("地震検知処理でエラーが発生しました。エラーメッセージは以下の通りです。\n" + error);
 });
 
 //強震モニタリアルタイム揺れ情報処理（地震検知など）
@@ -1495,65 +1517,73 @@ function Wolfx_WS_Connect() {
 
 //定期実行
 function RegularExecution() {
-  //EEW解除
-  EEW_nowList.forEach(function (elm) {
-    if (new Date() - Replay - new Date(elm.origin_time) > 300000) {
-      EEWClear(elm.EventID);
-    }
-  });
-
-  //津波情報解除
-  if (tsunamiData && tsunamiData.ValidDateTime <= new Date()) {
-    TsunamiInfoControl({
-      issue: { time: tsunamiData.ValidDateTime },
-      revocation: true,
-      cancelled: false,
-      areas: [],
+  try {
+    //EEW解除
+    EEW_nowList.forEach(function (elm) {
+      if (new Date() - Replay - new Date(elm.origin_time) > 300000) {
+        EEWClear(elm.EventID);
+      }
     });
-  }
 
-  setTimeout(RegularExecution, 1000);
+    //津波情報解除
+    if (tsunamiData && tsunamiData.ValidDateTime <= new Date()) {
+      TsunamiInfoControl({
+        issue: { time: tsunamiData.ValidDateTime },
+        revocation: true,
+        cancelled: false,
+        areas: [],
+      });
+    }
+
+    setTimeout(RegularExecution, 1000);
+  } catch(err) {
+    throw new Error("内部の情報処理でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
+  }
 }
 
 //強震モニタの取得オフセット設定
 async function yoyuSetK(func) {
-  var index = 0;
-  var resTimeTmp;
-  while (!yoyuK) {
-    await new Promise((resolve) => {
-      if (net.online) {
-        var dataTmp = "";
-        var request = net.request("http://www.kmoni.bosai.go.jp/webservice/server/pros/latest.json?_=" + Number(new Date()));
-        request.on("response", (res) => {
-          res.on("data", (chunk) => {
-            dataTmp += chunk;
-          });
-          res.on("end", function () {
-            try {
-              var json = jsonParse(dataTmp);
-              if (json) {
-                var resTime = new Date(json.latest_time);
-                if (resTimeTmp !== resTime && 0 < index) yoyuK = new Date() - resTime;
-                resTimeTmp = resTime;
+  try {
+    var index = 0;
+    var resTimeTmp;
+    while (!yoyuK) {
+      await new Promise((resolve) => {
+        if (net.online) {
+          var dataTmp = "";
+          var request = net.request("http://www.kmoni.bosai.go.jp/webservice/server/pros/latest.json?_=" + Number(new Date()));
+          request.on("response", (res) => {
+            res.on("data", (chunk) => {
+              dataTmp += chunk;
+            });
+            res.on("end", function () {
+              try {
+                var json = jsonParse(dataTmp);
+                if (json) {
+                  var resTime = new Date(json.latest_time);
+                  if (resTimeTmp !== resTime && 0 < index) yoyuK = new Date() - resTime;
+                  resTimeTmp = resTime;
+                }
+                resolve();
+              } catch (err) {
+                return;
               }
-              resolve();
-            } catch (err) {
-              return;
-            }
+            });
           });
-        });
-        request.end();
+          request.end();
+        }
+      });
+      if (index > 25) {
+        yoyuK = 2500;
+        break;
       }
-    });
-    if (index > 25) {
-      yoyuK = 2500;
-      break;
-    }
 
-    loopCount++;
+      loopCount++;
+    }
+    func();
+    return true;
+  } catch(err) {
+    throw new Error("強震モニタの遅延量の取得でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
   }
-  func();
-  return true;
 }
 
 //情報最終更新時刻を更新
@@ -1578,6 +1608,7 @@ function kmoniTimeUpdate(Updatetime, type, condition, vendor) {
 //情報フォーマット変更・新報検知→EEWcontrol
 function EEWdetect(type, json) {
   if (!json) return;
+  try {
   if (type == 1) {
     //ProjectBS
     var EBIData = [];
@@ -1610,7 +1641,7 @@ function EEWdetect(type, json) {
             Arrived: arrived,
           });
         }
-      } else throw new Error("予想震度等のデコードでエラー");
+      }
     }
 
     var EEWdata = {
@@ -1667,7 +1698,7 @@ function EEWdetect(type, json) {
             Arrived: arrived,
           });
         }
-      } else throw new Error("予想震度等のデコードでエラー");
+      }
     }
     var EEWdata = {
       alertflg: json.isWarn ? "警報" : "予報",
@@ -1815,195 +1846,202 @@ function EEWdetect(type, json) {
       kmoniTimeUpdate(new Date() - Replay, "P2P_EEW", "Error");
     }
   }
+  } catch(err) {
+    return;
+  }
 }
 
 //EEW情報マージ
 function EEWcontrol(data) {
   console.log("EEW処理", 0);
   if (!data) return; //データがない場合、処理終了
-  if (!config.Info.EEW.showTraning && data.is_training) return; //訓練法を受信するかどうか（設定に準拠）
-  if (!data.origin_time || !data.EventID || !data.serial || !data.latitude || !data.longitude) return;
-  console.log("EEW処理", 1);
+  try{
+    if (!config.Info.EEW.showTraning && data.is_training) return; //訓練法を受信するかどうか（設定に準拠）
+    if (!data.origin_time || !data.EventID || !data.serial || !data.latitude || !data.longitude) return;
+    console.log("EEW処理", 1);
 
-  //５分以上前の地震／未来の地震（リプレイ時）を除外
-  var pastTime = new Date() - Replay - data.origin_time;
-  if (pastTime > 300000 || pastTime < 0) return;
+    //５分以上前の地震／未来の地震（リプレイ時）を除外
+    var pastTime = new Date() - Replay - data.origin_time;
+    if (pastTime > 300000 || pastTime < 0) return;
 
-  console.log("EEW処理", 2);
+    console.log("EEW処理", 2);
 
-  //現在地との距離
-  if (data.latitude && data.longitude) data.distance = geosailing(data.latitude, data.longitude, config.home.latitude, config.home.longitude);
+    //現在地との距離
+    if (data.latitude && data.longitude) data.distance = geosailing(data.latitude, data.longitude, config.home.latitude, config.home.longitude);
 
-  data.TimeTable = TimeTable_JMA2001[depthFilter(data.depth)];
+    data.TimeTable = TimeTable_JMA2001[depthFilter(data.depth)];
 
-  console.log("EEW処理", 3);
+    console.log("EEW処理", 3);
 
-  if (data.source == "simulation") {
-    var EEWdataTmp = EEW_Data.find(function (elm) {
-      return !elm.simulation;
-    });
-    if (EEWdataTmp) return;
-    var EBIData = [];
-    var estIntTmp = {};
-    if (!data.is_cancel) {
-      if (!data.userIntensity) data.userIntensity = calcInt(data.magnitude, data.depth, data.latitude, data.longitude, config.home.latitude, config.home.longitude, config.home.arv);
-      if (!data.arrivalTime) {
-        for (let index = 0; index < data.TimeTable.length; index++) {
-          elm = data.TimeTable[index];
-          if (elm.R > data.distance) {
-            if (index > 0) {
-              elm2 = data.TimeTable[index - 1];
-              SSec = elm2.S + ((elm.S - elm2.S) * (data.distance - elm2.R)) / (elm2.S - elm2.R);
-            } else S = elm.S;
-            break;
+    if (data.source == "simulation") {
+      var EEWdataTmp = EEW_Data.find(function (elm) {
+        return !elm.simulation;
+      });
+      if (EEWdataTmp) return;
+      var EBIData = [];
+      var estIntTmp = {};
+      if (!data.is_cancel) {
+        if (!data.userIntensity) data.userIntensity = calcInt(data.magnitude, data.depth, data.latitude, data.longitude, config.home.latitude, config.home.longitude, config.home.arv);
+        if (!data.arrivalTime) {
+          for (let index = 0; index < data.TimeTable.length; index++) {
+            elm = data.TimeTable[index];
+            if (elm.R > data.distance) {
+              if (index > 0) {
+                elm2 = data.TimeTable[index - 1];
+                SSec = elm2.S + ((elm.S - elm2.S) * (data.distance - elm2.R)) / (elm2.S - elm2.R);
+              } else S = elm.S;
+              break;
+            }
           }
+          data.arrivalTime = new Date(Number(data.origin_time) + SSec * 1000);
         }
-        data.arrivalTime = new Date(Number(data.origin_time) + SSec * 1000);
-      }
-      if (!data.warnZones && data.depth <= 150) {
-        Object.keys(sesmicPoints).forEach(function (key) {
-          elm = sesmicPoints[key];
-          if (elm.arv && elm.sect) {
-            estInt = calcInt(data.magnitude, data.depth, data.latitude, data.longitude, elm.location[0], elm.location[1], elm.arv);
-            if (!estIntTmp[elm.sect] || estInt > estIntTmp[elm.sect]) estIntTmp[elm.sect] = estInt;
-          }
-        });
-        Object.keys(estIntTmp).forEach(function (elm) {
-          shindo = shindoConvert(estIntTmp[elm]);
-          EBIData.push({
-            Name: elm,
-            IntTo: shindo,
-            IntFrom: shindo,
-            Alert: shindoConvert(shindo, 5) >= 4,
-          });
-        });
-        data.warnZones = EBIData;
-      }
-    }
-  } else {
-    var EEWdataTmp = EEW_Data.forEach(function (elm) {
-      if (elm.simulation) EEWClear(elm.EQ_id);
-    });
-  }
-
-  console.log("EEW処理", 4);
-
-  if (data.warnZones && data.warnZones.length) {
-    //設定された細分区域のデータ参照
-    var userSect = data.warnZones.find(function (elm2) {
-      return elm2.Name == config.home.Section;
-    });
-
-    //現在地の予想震度・到達予想時刻
-    if (userSect) {
-      data.userIntensity = config.Info.EEW.IntType == "max" ? userSect.IntTo : userSect.IntFrom;
-      if (userSect.ArrivalTime) data.arrivalTime = userSect.ArrivalTime;
-    }
-  }
-
-  console.log("EEW処理", 5);
-
-  var EQJSON = EEW_Data.find(function (elm) {
-    return elm.EQ_id == data.EventID;
-  });
-  if (EQJSON) {
-    console.log("EEW処理", 60);
-
-    //同一地震のデータが既に存在する場合
-    var EEWJSON = EQJSON.data.find(function (elm2) {
-      return elm2.serial == data.serial;
-    });
-    if (EEWJSON) {
-      console.log("EEW処理", 61);
-
-      //同じ報数の情報が既に存在する（マージ処理へ）
-      // prettier-ignore
-      var oneBefore = data.serial == Math.max.apply(null, EQJSON.data.map(function(o){ return o.serial;}));
-      if (oneBefore) {
-        console.log("EEW処理", 62);
-
-        //最新報である場合
-        var changed = false;
-        //マージ元のデータ
-        oneBeforeData = EQJSON.data.find(function (elm) {
-          return elm.serial == data.serial;
-        });
-
-        //キーごとにマージ
-        Object.keys(oneBeforeData).forEach(function (elm) {
-          if (data[elm] && (!oneBeforeData[elm] || oneBeforeData[elm].length == 0)) {
-            oneBeforeData[elm] = data[elm];
-            changed = true;
-          }
-        });
-
-        if (Array.isArray(data.warnZones)) {
-          data.warnZones.forEach(function (elm) {
-            //一致する細分区域のデータを検索
-            SectData = oneBeforeData.warnZones.find(function (elm2) {
-              return elm.Name == elm2.Name;
-            });
-            if (SectData) {
-              elm = Object.assign(SectData, elm); //データをマージ
-              changed = true;
+        if (!data.warnZones && data.depth <= 150) {
+          Object.keys(sesmicPoints).forEach(function (key) {
+            elm = sesmicPoints[key];
+            if (elm.arv && elm.sect) {
+              estInt = calcInt(data.magnitude, data.depth, data.latitude, data.longitude, elm.location[0], elm.location[1], elm.arv);
+              if (!estIntTmp[elm.sect] || estInt > estIntTmp[elm.sect]) estIntTmp[elm.sect] = estInt;
             }
           });
-        }
-        console.log("EEW処理", 63);
-        //データに変化があれば、警報処理へ
-        if (changed) {
-          EEWAlert(oneBeforeData, false, true);
-          console.log("EEW処理", 64);
+          Object.keys(estIntTmp).forEach(function (elm) {
+            shindo = shindoConvert(estIntTmp[elm]);
+            EBIData.push({
+              Name: elm,
+              IntTo: shindo,
+              IntFrom: shindo,
+              Alert: shindoConvert(shindo, 5) >= 4,
+            });
+          });
+          data.warnZones = EBIData;
         }
       }
     } else {
-      //同じ報数の情報がない場合（データ登録）
-      // prettier-ignore
-      console.log("EEW処理", 65);
-      var newest =
-        data.serial >
-        Math.max.apply(
-          null,
-          EQJSON.data.map(function (o) {
-            return o.serial;
-          })
-        );
-      if (newest) {
-        console.log("EEW処理", 66);
-        //最新の報である
-        var EQJSON = EEW_Data.find(function (elm) {
-          return elm.EQ_id == data.EventID;
-        });
-        EQJSON.data.push(data); //データ追加
-        if (data.is_cancel) EQJSON.canceled = true;
-        EEWAlert(data, false); //警報処理
+      var EEWdataTmp = EEW_Data.forEach(function (elm) {
+        if (elm.simulation) EEWClear(elm.EQ_id);
+      });
+    }
+
+    console.log("EEW処理", 4);
+
+    if (data.warnZones && data.warnZones.length) {
+      //設定された細分区域のデータ参照
+      var userSect = data.warnZones.find(function (elm2) {
+        return elm2.Name == config.home.Section;
+      });
+
+      //現在地の予想震度・到達予想時刻
+      if (userSect) {
+        data.userIntensity = config.Info.EEW.IntType == "max" ? userSect.IntTo : userSect.IntFrom;
+        if (userSect.ArrivalTime) data.arrivalTime = userSect.ArrivalTime;
       }
     }
-  } else {
-    //第１報
-    if (!data.maxInt) {
-      if (!config.Info.EEW.IntQuestion) return; //予想最大震度不明を無視するか（設定に準拠）
-    } else if (shindoConvert(config.Info.EEW.IntThreshold, 5) > shindoConvert(data.maxInt, 5) && shindoConvert(data.maxInt) !== "?") {
-      return; //予想最大震度通知条件（設定に準拠）
-    }
 
-    if (!data.userIntensity) {
-      if (!config.Info.EEW.userIntQuestion) return; //予想震度不明を無視するか（設定に準拠）
-    } else if (shindoConvert(config.Info.EEW.userIntThreshold, 5) > shindoConvert(data.userIntensity, 5) && shindoConvert(data.userIntensity) !== "?") {
-      return; //予想震度（細分区域）通知条件（設定に準拠）
-    }
+    console.log("EEW処理", 5);
 
-    //データ追加
-    EEW_Data.push({
-      EQ_id: data.EventID,
-      canceled: false,
-      simulation: data.source == "simulation",
-      data: [data],
+    var EQJSON = EEW_Data.find(function (elm) {
+      return elm.EQ_id == data.EventID;
     });
+    if (EQJSON) {
+      console.log("EEW処理", 60);
 
-    EEWAlert(data, true); //警報処理
+      //同一地震のデータが既に存在する場合
+      var EEWJSON = EQJSON.data.find(function (elm2) {
+        return elm2.serial == data.serial;
+      });
+      if (EEWJSON) {
+        console.log("EEW処理", 61);
+
+        //同じ報数の情報が既に存在する（マージ処理へ）
+        // prettier-ignore
+        var oneBefore = data.serial == Math.max.apply(null, EQJSON.data.map(function(o){ return o.serial;}));
+        if (oneBefore) {
+          console.log("EEW処理", 62);
+
+          //最新報である場合
+          var changed = false;
+          //マージ元のデータ
+          oneBeforeData = EQJSON.data.find(function (elm) {
+            return elm.serial == data.serial;
+          });
+
+          //キーごとにマージ
+          Object.keys(oneBeforeData).forEach(function (elm) {
+            if (data[elm] && (!oneBeforeData[elm] || oneBeforeData[elm].length == 0)) {
+              oneBeforeData[elm] = data[elm];
+              changed = true;
+            }
+          });
+
+          if (Array.isArray(data.warnZones)) {
+            data.warnZones.forEach(function (elm) {
+              //一致する細分区域のデータを検索
+              SectData = oneBeforeData.warnZones.find(function (elm2) {
+                return elm.Name == elm2.Name;
+              });
+              if (SectData) {
+                elm = Object.assign(SectData, elm); //データをマージ
+                changed = true;
+              }
+            });
+          }
+          console.log("EEW処理", 63);
+          //データに変化があれば、警報処理へ
+          if (changed) {
+            EEWAlert(oneBeforeData, false, true);
+            console.log("EEW処理", 64);
+          }
+        }
+      } else {
+        //同じ報数の情報がない場合（データ登録）
+        // prettier-ignore
+        console.log("EEW処理", 65);
+        var newest =
+          data.serial >
+          Math.max.apply(
+            null,
+            EQJSON.data.map(function (o) {
+              return o.serial;
+            })
+          );
+        if (newest) {
+          console.log("EEW処理", 66);
+          //最新の報である
+          var EQJSON = EEW_Data.find(function (elm) {
+            return elm.EQ_id == data.EventID;
+          });
+          EQJSON.data.push(data); //データ追加
+          if (data.is_cancel) EQJSON.canceled = true;
+          EEWAlert(data, false); //警報処理
+        }
+      }
+    } else {
+      //第１報
+      if (!data.maxInt) {
+        if (!config.Info.EEW.IntQuestion) return; //予想最大震度不明を無視するか（設定に準拠）
+      } else if (shindoConvert(config.Info.EEW.IntThreshold, 5) > shindoConvert(data.maxInt, 5) && shindoConvert(data.maxInt) !== "?") {
+        return; //予想最大震度通知条件（設定に準拠）
+      }
+
+      if (!data.userIntensity) {
+        if (!config.Info.EEW.userIntQuestion) return; //予想震度不明を無視するか（設定に準拠）
+      } else if (shindoConvert(config.Info.EEW.userIntThreshold, 5) > shindoConvert(data.userIntensity, 5) && shindoConvert(data.userIntensity) !== "?") {
+        return; //予想震度（細分区域）通知条件（設定に準拠）
+      }
+
+      //データ追加
+      EEW_Data.push({
+        EQ_id: data.EventID,
+        canceled: false,
+        simulation: data.source == "simulation",
+        data: [data],
+      });
+
+      EEWAlert(data, true); //警報処理
+    }
+    console.log("EEW処理", "END");
+  } catch(err) {
+    throw new Error("緊急地震速報データの処理（マージ）に失敗しました。エラーメッセージは以下の通りです。\n" + err);
   }
-  console.log("EEW処理", "END");
 }
 
 function calcInt(magJMA, depth, epiLat, epiLng, pointLat, pointLng, arv) {
@@ -2022,196 +2060,216 @@ function calcInt(magJMA, depth, epiLat, epiLng, pointLat, pointLng, arv) {
 
 //EarlyEst地震情報マージ
 function EarlyEstControl(data) {
-  if (!data) return;
-  if (!data.origin_time) return;
+  try {
+    if (!data) return;
+    if (!data.origin_time) return;
 
-  var pastTime = new Date() - Replay - origin_timeTmp;
-  if (pastTime > 300000 || pastTime < 0) return;
+    var pastTime = new Date() - Replay - origin_timeTmp;
+    if (pastTime > 300000 || pastTime < 0) return;
 
-  if (data.latitude && data.longitude) data.distance = geosailing(data.latitude, data.longitude, config.home.latitude, config.home.longitude);
+    if (data.latitude && data.longitude) data.distance = geosailing(data.latitude, data.longitude, config.home.latitude, config.home.longitude);
 
-  var EQJSON = EarlyEst_Data.find(function (elm) {
-    return elm.EQ_id == data.EventID;
-  });
-  if (EQJSON) {
-    //ID・報の両方一致した情報が存在するか
-    var EEWJSON = EQJSON.data.find(function (elm2) {
-      return elm2.serial == data.serial;
+    var EQJSON = EarlyEst_Data.find(function (elm) {
+      return elm.EQ_id == data.EventID;
     });
-    if (!EEWJSON) {
-      //最新の報かどうか
-      var newest =
-        data.serial >
-        Math.max.apply(
-          null,
-          EQJSON.data.map(function (o) {
-            return o.serial;
-          })
-        );
+    if (EQJSON) {
+      //ID・報の両方一致した情報が存在するか
+      var EEWJSON = EQJSON.data.find(function (elm2) {
+        return elm2.serial == data.serial;
+      });
+      if (!EEWJSON) {
+        //最新の報かどうか
+        var newest =
+          data.serial >
+          Math.max.apply(
+            null,
+            EQJSON.data.map(function (o) {
+              return o.serial;
+            })
+          );
 
-      if (newest) {
-        //第２報以降
-        var EQJSON = EarlyEst_Data.find(function (elm) {
-          return elm.EQ_id == data.EventID;
-        });
-        EarlyEstAlert(data, false);
-        EQJSON.data.push(data);
-        if (data.is_cancel) {
-          EQJSON.canceled = true;
+        if (newest) {
+          //第２報以降
+          var EQJSON = EarlyEst_Data.find(function (elm) {
+            return elm.EQ_id == data.EventID;
+          });
+          EarlyEstAlert(data, false);
+          EQJSON.data.push(data);
+          if (data.is_cancel) {
+            EQJSON.canceled = true;
+          }
         }
       }
+    } else {
+      //第１報
+      EarlyEstAlert(data, true);
+      EarlyEst_Data.push({
+        EQ_id: data.EventID,
+        canceled: false,
+        data: [data],
+      });
     }
-  } else {
-    //第１報
-    EarlyEstAlert(data, true);
-    EarlyEst_Data.push({
-      EQ_id: data.EventID,
-      canceled: false,
-      data: [data],
-    });
+  } catch(err) {
+    throw new Error("Early-Est データの処理（マージ）に失敗しました。エラーメッセージは以下の通りです。\n" + err);
   }
 }
 
 //EEW解除処理
 function EEWClear(EventID) {
-  EEW_nowList = EEW_nowList.filter(function (elm) {
-    return elm.EventID !== EventID;
-  });
-  messageToMainWindow({
-    action: "EEWAlertUpdate",
-    data: EEW_nowList,
-  });
+  try {
+    EEW_nowList = EEW_nowList.filter(function (elm) {
+      return elm.EventID !== EventID;
+    });
+    messageToMainWindow({
+      action: "EEWAlertUpdate",
+      data: EEW_nowList,
+    });
 
-  if (EEW_nowList.length == 0) {
-    EEWNow = false;
-    //パワーセーブ再開
-    if (psBlock && powerSaveBlocker.isStarted(psBlock)) powerSaveBlocker.stop(psBlock);
-    worker.postMessage({ action: "EEWNow", data: EEWNow });
+    if (EEW_nowList.length == 0) {
+      EEWNow = false;
+      //パワーセーブ再開
+      if (psBlock && powerSaveBlocker.isStarted(psBlock)) powerSaveBlocker.stop(psBlock);
+      worker.postMessage({ action: "EEWNow", data: EEWNow });
+    }
+  } catch(err) {
+    throw new Error("緊急地震速報の解除処理でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
   }
 }
 
 //EEW通知（音声・画面表示等）
 function EEWAlert(data, first, update) {
-  console.log("EEW処理完了");
-  EEWNow = true;
-  worker.postMessage({ action: "EEWNow", data: EEWNow });
+  try {
+    console.log("EEW処理完了");
+    EEWNow = true;
+    worker.postMessage({ action: "EEWNow", data: EEWNow });
 
-  //【現在のEEW】から同一地震、古い報を削除
-  EEW_nowList = EEW_nowList.filter(function (elm) {
-    return elm.EventID !== data.EventID;
-  });
-  //【現在のEEW】配列に追加
-  EEW_nowList.push(data);
-
-  if (update) {
-    //第２報以降
-    messageToMainWindow({
-      action: "EEWAlertUpdate",
-      data: EEW_nowList,
-      update: true,
+    //【現在のEEW】から同一地震、古い報を削除
+    EEW_nowList = EEW_nowList.filter(function (elm) {
+      return elm.EventID !== data.EventID;
     });
-  } else {
-    //第１報
-    if (first) createWindow();
-    soundPlay(data.alertflg == "警報" ? "EEW1" : "EEW2");
-    speak(EEWTextGenerate(data), !first);
+    //【現在のEEW】配列に追加
+    EEW_nowList.push(data);
 
-    messageToMainWindow({
-      action: "EEWAlertUpdate",
-      data: EEW_nowList,
-      update: false,
-    });
-    if (!mainWindow) {
-      var alertFlg = "";
-      if (data.alertflg) alertFlg = "（" + data.alertflg + "）";
-      var EEWNotification = new Notification({
-        title: "緊急地震速報" + alertFlg + "#" + data.serial,
-        body: data.region_name + "\n推定震度：" + data.maxInt + "  M" + data.magnitude + "  深さ：" + data.depth,
-        icon: path.join(__dirname, "img/icon.ico"),
+    if (update) {
+      //第２報以降
+      messageToMainWindow({
+        action: "EEWAlertUpdate",
+        data: EEW_nowList,
+        update: true,
       });
-      EEWNotification.show();
-      EEWNotification.on("click", function () {
-        createWindow();
+    } else {
+      //第１報
+      if (first) createWindow();
+      soundPlay(data.alertflg == "警報" ? "EEW1" : "EEW2");
+      speak(EEWTextGenerate(data), !first);
+
+      messageToMainWindow({
+        action: "EEWAlertUpdate",
+        data: EEW_nowList,
+        update: false,
       });
+      if (!mainWindow) {
+        var alertFlg = "";
+        if (data.alertflg) alertFlg = "（" + data.alertflg + "）";
+        var EEWNotification = new Notification({
+          title: "緊急地震速報" + alertFlg + "#" + data.serial,
+          body: data.region_name + "\n推定震度：" + data.maxInt + "  M" + data.magnitude + "  深さ：" + data.depth,
+          icon: path.join(__dirname, "img/icon.ico"),
+        });
+        EEWNotification.show();
+        EEWNotification.on("click", function () {
+          createWindow();
+        });
+      }
     }
+
+    eqInfoControl(
+      [
+        {
+          eventId: data.EventID,
+          category: "EEW",
+          reportDateTime: data.report_time,
+          OriginTime: data.origin_time,
+          epiCenter: data.region_name,
+          M: data.magnitude,
+          maxI: data.maxInt,
+          cancel: data.is_cancel,
+          DetailURL: [],
+        },
+      ],
+      "jma",
+      true
+    );
+
+    //スリープ回避開始
+    if (!psBlock || !powerSaveBlocker.isStarted(psBlock)) psBlock = powerSaveBlocker.start("prevent-display-sleep");
+  } catch(err) {
+    throw new Error("緊急地震速報の通知処理でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
   }
-
-  eqInfoControl(
-    [
-      {
-        eventId: data.EventID,
-        category: "EEW",
-        reportDateTime: data.report_time,
-        OriginTime: data.origin_time,
-        epiCenter: data.region_name,
-        M: data.magnitude,
-        maxI: data.maxInt,
-        cancel: data.is_cancel,
-        DetailURL: [],
-      },
-    ],
-    "jma",
-    true
-  );
-
-  //スリープ回避開始
-  if (!psBlock || !powerSaveBlocker.isStarted(psBlock)) psBlock = powerSaveBlocker.start("prevent-display-sleep");
 }
 
 //EarlyEst通知（音声・画面表示等）
 function EarlyEstAlert(data, first, update) {
-  EEWNow = true;
+  try {
+    EEWNow = true;
 
-  //【現在のEEW】から同一地震、古い報を削除
-  EEW_nowList = EEW_nowList.filter(function (elm) {
-    return elm.EventID !== data.EventID;
-  });
-  //【現在のEEW】配列に追加
-  EEW_nowList.push(data);
-
-  if (!update) {
-    if (first) {
-      createWindow();
-      soundPlay("EEW2");
-    }
-    messageToMainWindow({
-      action: "EEWAlertUpdate",
-      data: EEW_nowList,
-      update: false,
+    //【現在のEEW】から同一地震、古い報を削除
+    EEW_nowList = EEW_nowList.filter(function (elm) {
+      return elm.EventID !== data.EventID;
     });
-    if (!mainWindow) {
-      var EEWNotification = new Notification({
-        title: "Early-Est 地震情報" + " #" + data.serial,
-        body: data.region_name + "\n M" + data.magnitude + "  深さ：" + data.depth,
-        icon: path.join(__dirname, "img/icon.ico"),
-      });
-      EEWNotification.show();
-      EEWNotification.on("click", function () {
+    //【現在のEEW】配列に追加
+    EEW_nowList.push(data);
+
+    if (!update) {
+      if (first) {
         createWindow();
+        soundPlay("EEW2");
+      }
+      messageToMainWindow({
+        action: "EEWAlertUpdate",
+        data: EEW_nowList,
+        update: false,
+      });
+      if (!mainWindow) {
+        var EEWNotification = new Notification({
+          title: "Early-Est 地震情報" + " #" + data.serial,
+          body: data.region_name + "\n M" + data.magnitude + "  深さ：" + data.depth,
+          icon: path.join(__dirname, "img/icon.ico"),
+        });
+        EEWNotification.show();
+        EEWNotification.on("click", function () {
+          createWindow();
+        });
+      }
+    } else {
+      messageToMainWindow({
+        action: "EEWAlertUpdate",
+        data: EEW_nowList,
+        update: true,
       });
     }
-  } else {
-    messageToMainWindow({
-      action: "EEWAlertUpdate",
-      data: EEW_nowList,
-      update: true,
-    });
-  }
 
-  //スリープ回避開始
-  if (!psBlock || !powerSaveBlocker.isStarted(psBlock)) psBlock = powerSaveBlocker.start("prevent-display-sleep");
+    //スリープ回避開始
+    if (!psBlock || !powerSaveBlocker.isStarted(psBlock)) psBlock = powerSaveBlocker.start("prevent-display-sleep");
+  } catch(err) {
+    throw new Error("Early-Est地震情報の通知処理でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
+  }
 }
 
 //🔴地震情報🔴
 
 //地震情報更新処理
 function eqInfoUpdate(disableRepeat) {
-  EQInfoFetchIndex++;
-  EQI_JMAXMLList_Req();
-  EQI_narikakunList_Req("https://ntool.online/api/earthquakeList?year=" + new Date().getFullYear() + "&month=" + (new Date().getMonth() + 1), 10, true);
-  EQI_USGS_Req();
+  try {
+    EQInfoFetchIndex++;
+    EQI_JMAXMLList_Req();
+    EQI_narikakunList_Req("https://ntool.online/api/earthquakeList?year=" + new Date().getFullYear() + "&month=" + (new Date().getMonth() + 1), 10, true);
+    EQI_USGS_Req();
 
-  if (!disableRepeat) setTimeout(eqInfoUpdate, config.Info.EQInfo.Interval);
+    if (!disableRepeat) setTimeout(eqInfoUpdate, config.Info.EQInfo.Interval);
+  } catch(err) {
+    throw new Error("地震情報の処理でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
+  }
 }
 
 //気象庁XMLリスト取得→EQI_JMAXML_Req
@@ -2756,72 +2814,80 @@ function eqInfoControl(dataList, type, EEW) {
 
 //地震情報通知（音声・画面表示等）
 function eqInfoAlert(data, source, update, audioPlay) {
-  if (source == "jma") {
-    data = data.filter(function (elm) {
-      return elm.OriginTime;
-    });
-    if (!update) eqInfo.jma = eqInfo.jma.concat(data);
-    if (audioPlay && EQInfoFetchIndex > 0) soundPlay("EQInfo");
+  try {
+    if (source == "jma") {
+      data = data.filter(function (elm) {
+        return elm.OriginTime;
+      });
+      if (!update) eqInfo.jma = eqInfo.jma.concat(data);
+      if (audioPlay && EQInfoFetchIndex > 0) soundPlay("EQInfo");
 
-    eqInfo.jma = eqInfo.jma.sort(function (a, b) {
-      return a.OriginTime > b.OriginTime ? -1 : 1;
-    });
+      eqInfo.jma = eqInfo.jma.sort(function (a, b) {
+        return a.OriginTime > b.OriginTime ? -1 : 1;
+      });
 
-    messageToMainWindow({
-      action: "EQInfo",
-      source: "jma",
-      data: eqInfo.jma.slice(0, config.Info.EQInfo.ItemCount),
-    });
-    data.forEach(function (elm) {
-      if (EQI_Window[elm.eventId]) {
-        var metadata = EQI_Window[elm.eventId].metadata;
-        var EEWDataItem = EEW_Data.find(function (elm2) {
-          return elm2.EQ_id == elm.eventId;
-        });
+      messageToMainWindow({
+        action: "EQInfo",
+        source: "jma",
+        data: eqInfo.jma.slice(0, config.Info.EQInfo.ItemCount),
+      });
+      data.forEach(function (elm) {
+        if (EQI_Window[elm.eventId]) {
+          var metadata = EQI_Window[elm.eventId].metadata;
+          var EEWDataItem = EEW_Data.find(function (elm2) {
+            return elm2.EQ_id == elm.eventId;
+          });
 
-        metadata.urls = elm.urls;
-        metadata.eew = EEWDataItem;
-        metadata.axisData = elm.axisData;
-        EQI_Window[elm.eventId].window.webContents.send("message2", metadata);
-      }
-    });
-  } else if (source == "usgs") {
-    eqInfo.usgs = eqInfo.usgs.filter((item) => {
-      return item.eventId !== data.eventId;
-    });
-    eqInfo.usgs = eqInfo.usgs.concat(data);
+          metadata.urls = elm.urls;
+          metadata.eew = EEWDataItem;
+          metadata.axisData = elm.axisData;
+          EQI_Window[elm.eventId].window.webContents.send("message2", metadata);
+        }
+      });
+    } else if (source == "usgs") {
+      eqInfo.usgs = eqInfo.usgs.filter((item) => {
+        return item.eventId !== data.eventId;
+      });
+      eqInfo.usgs = eqInfo.usgs.concat(data);
 
-    messageToMainWindow({
-      action: "EQInfo",
-      source: "usgs",
-      data: eqInfo.usgs.slice(0, config.Info.EQInfo.ItemCount),
-    });
+      messageToMainWindow({
+        action: "EQInfo",
+        source: "usgs",
+        data: eqInfo.usgs.slice(0, config.Info.EQInfo.ItemCount),
+      });
+    }
+  } catch(err) {
+    throw new Error("地震情報の通知処理でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
   }
 }
 
 //🔴津波情報🔴
 function TsunamiInfoControl(data) {
-  if (!config.Info.TsunamiInfo.GetData) return;
-  var newInfo = !tsunamiData || !tsunamiData.issue || tsunamiData.issue.time < data.issue.time;
-  if (newInfo) {
-    //情報の有効期限
-    if (data.ValidDateTime && data.ValidDateTime < new Date()) return;
-    soundPlay("TsunamiInfo");
-    tsunamiData = data;
+  try {
+    if (!config.Info.TsunamiInfo.GetData) return;
+    var newInfo = !tsunamiData || !tsunamiData.issue || tsunamiData.issue.time < data.issue.time;
+    if (newInfo) {
+      //情報の有効期限
+      if (data.ValidDateTime && data.ValidDateTime < new Date()) return;
+      soundPlay("TsunamiInfo");
+      tsunamiData = data;
 
-    if (newInfo) createWindow(); //アラート
-    messageToMainWindow({
-      action: "tsunamiUpdate",
-      data: data,
-      new: newInfo,
-    });
-    if (tsunamiWindow) {
-      tsunamiWindow.webContents.send("message2", {
+      if (newInfo) createWindow(); //アラート
+      messageToMainWindow({
         action: "tsunamiUpdate",
         data: data,
         new: newInfo,
       });
+      if (tsunamiWindow) {
+        tsunamiWindow.webContents.send("message2", {
+          action: "tsunamiUpdate",
+          data: data,
+          new: newInfo,
+        });
+      }
     }
+  } catch(err) {
+    throw new Error("津波情報の処理（マージ）でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
   }
 }
 
@@ -3070,37 +3136,35 @@ function geosailing(latA, lngA, latB, lngB) {
 
 //連想配列オブジェクトのマージ
 function mergeDeeply(target, source, opts) {
-  const isObject = (obj) => obj && typeof obj === "object" && !Array.isArray(obj);
-  const isConcatArray = opts && opts.concatArray;
-  let result = Object.assign({}, target);
-  if (isObject(target) && isObject(source)) {
-    for (const [sourceKey, sourceValue] of Object.entries(source)) {
-      const targetValue = target[sourceKey];
-      if (isConcatArray && Array.isArray(sourceValue) && Array.isArray(targetValue)) {
-        result[sourceKey] = targetValue.concat(...sourceValue);
-        //eslint-disable-next-line
-      } else if (isObject(sourceValue) && target.hasOwnProperty(sourceKey)) {
-        result[sourceKey] = mergeDeeply(targetValue, sourceValue, opts);
-      } else {
-        Object.assign(result, { [sourceKey]: sourceValue });
+  try {
+    const isObject = (obj) => obj && typeof obj === "object" && !Array.isArray(obj);
+    const isConcatArray = opts && opts.concatArray;
+    let result = Object.assign({}, target);
+    if (isObject(target) && isObject(source)) {
+      for (const [sourceKey, sourceValue] of Object.entries(source)) {
+        const targetValue = target[sourceKey];
+        if (isConcatArray && Array.isArray(sourceValue) && Array.isArray(targetValue)) {
+          result[sourceKey] = targetValue.concat(...sourceValue);
+          //eslint-disable-next-line
+        } else if (isObject(sourceValue) && target.hasOwnProperty(sourceKey)) {
+          result[sourceKey] = mergeDeeply(targetValue, sourceValue, opts);
+        } else {
+          Object.assign(result, { [sourceKey]: sourceValue });
+        }
       }
     }
+    return result;
+  } catch(err) {
+    throw new Error("JSONのマージでエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
   }
-  return result;
 }
 function ConvertJST(time) {
   return new Date(time.setHours(time.getHours() + 9));
 }
 function depthFilter(depth) {
-  if (!isFinite(depth) || depth < 0) {
-    return 0;
-  } else if (depth > 700) {
-    return 700;
-  } else if (200 <= depth) {
-    return Math.floor(depth / 10) * 10;
-  } else if (50 <= depth) {
-    return Math.floor(depth / 5) * 5;
-  } else {
-    return Math.floor(depth / 2) * 2;
-  }
+  if (!isFinite(depth) || depth < 0) return 0;
+  else if (depth > 700) return 700;
+  else if (200 <= depth) return Math.floor(depth / 10) * 10;
+  else if (50 <= depth) return Math.floor(depth / 5) * 5;
+  else return Math.floor(depth / 2) * 2;
 }
