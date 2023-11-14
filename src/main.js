@@ -1423,12 +1423,16 @@ function ProjectBS_WS() {
       kmoniTimeUpdate(new Date() - Replay, "ProjectBS", "success");
       try {
         var dataStr = message.utf8Data;
-        EEWdetect(1, jsonParse(dataStr));
+        if(dataStr !== "pong") EEWdetect(1, jsonParse(dataStr));
       } catch (e) {
         kmoniTimeUpdate(new Date() - Replay, "ProjectBS", "Error");
       }
     });
     kmoniTimeUpdate(new Date() - Replay, "ProjectBS", "success");
+
+    setInterval(function(){
+      connection.sendUTF("ping");
+    },600000)
   });
 
   PBS_WS_Connect();
@@ -1818,7 +1822,7 @@ function EEWcontrol(data) {
   console.log("EEW処理", 0);
   if (!data) return; //データがない場合、処理終了
   if (!config.Info.EEW.showTraning && data.is_training) return; //訓練法を受信するかどうか（設定に準拠）
-  if (!data.origin_time) return;
+  if (!data.origin_time || !data.EventID || !data.serial || !data.latitude || !data.longitude) return;
   console.log("EEW処理", 1);
 
   //５分以上前の地震／未来の地震（リプレイ時）を除外
