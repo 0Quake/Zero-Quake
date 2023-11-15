@@ -5,21 +5,19 @@ var background = false;
 var background;
 var becomeForeground = false;
 /* eslint-enable */
-document.addEventListener("visibilitychange", () => {
-  background = document.visibilityState == "visible";
-  if (document.visibilityState == "visible") {
-    background = false;
-  } else {
-    background = true;
-    becomeForeground = true;
-  }
-});
 document.body.addEventListener("mouseover", function () {
   background = false;
 });
 
 window.electronAPI.messageSend((event, request) => {
   switch (request.action) {
+    case "activate":
+      background = false;
+      break;
+    case "unactivate":
+      background = true;
+      becomeForeground = true;
+      break;
     case "EEWAlertUpdate":
       EEWAlertUpdate(request.data);
       break;
@@ -217,7 +215,7 @@ function EEWAlertUpdate(data) {
   if (data.length == 0) document.body.classList.remove("EEWMode");
   else document.body.classList.add("EEWMode");
 
-  document.getElementById("noEEW").style.display = (now_EEW.length == 0 && !now_tsunami && EQDetectItem.length == 0) ? "block" : "none";
+  document.getElementById("noEEW").style.display = now_EEW.length == 0 && !now_tsunami && EQDetectItem.length == 0 ? "block" : "none";
 }
 
 var EEWID = 0;
@@ -458,8 +456,8 @@ function EQDetect(data) {
       maxzoom: 22,
     });
   }
-  document.getElementById("noEEW").style.display = (now_EEW.length == 0 && !now_tsunami && EQDetectItem.length == 0) ? "block" : "none";
-  if(now_EEW.length == 0) document.body.classList.remove("EQDetecting");
+  document.getElementById("noEEW").style.display = now_EEW.length == 0 && !now_tsunami && EQDetectItem.length == 0 ? "block" : "none";
+  if (now_EEW.length == 0) document.body.classList.remove("EQDetecting");
   else document.body.classList.add("EQDetecting");
 }
 //地震検知情報更新
@@ -560,9 +558,9 @@ document.getElementById("errorMsg_close").addEventListener("click", function () 
   errorMsgBox.style.display = "none";
 });
 
-document.getElementById("CloseTsunamiCancel").addEventListener("click", function(){
+document.getElementById("CloseTsunamiCancel").addEventListener("click", function () {
   document.getElementById("tsunamiCancel").style.display = "none";
 });
-document.getElementById("CloseTsunamiRevocation").addEventListener("click", function(){
+document.getElementById("CloseTsunamiRevocation").addEventListener("click", function () {
   document.getElementById("tsunamiRevocation").style.display = "none";
 });

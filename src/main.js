@@ -492,7 +492,9 @@ process.on("uncaughtException", function (err) {
 
       Window_notification("予期しないエラーが発生しました。", "error");
     }
-  } catch(err) {return;}
+  } catch (err) {
+    return;
+  }
 });
 //エラー処理
 function errorResolve(response) {
@@ -509,7 +511,9 @@ function errorResolve(response) {
         clearTimeout(relaunchTimer);
         break;
     }
-  } catch(err) {return;}
+  } catch (err) {
+    return;
+  }
 }
 //クラッシュレポートの送信
 function crashReportSend(errMsg, result) {
@@ -532,7 +536,9 @@ function crashReportSend(errMsg, result) {
     });
     // リクエストの送信
     request.end();
-  } catch(err) {return;}
+  } catch (err) {
+    return;
+  }
 }
 
 //アプリのロード完了イベント
@@ -758,6 +764,31 @@ function createWindow() {
           }
         }, 5000);
       });
+      mainWindow.on("focus", () => {
+        messageToMainWindow({
+          action: "activate",
+        });
+      });
+      mainWindow.on("show", () => {
+        messageToMainWindow({
+          action: "activate",
+        });
+      });
+      mainWindow.on("hide", () => {
+        messageToMainWindow({
+          action: "unactivate",
+        });
+      });
+      mainWindow.on("restore", () => {
+        messageToMainWindow({
+          action: "activate",
+        });
+      });
+      mainWindow.on("minimize", () => {
+        messageToMainWindow({
+          action: "unactivate",
+        });
+      });
       mainWindow.on("responsive", () => {
         mainWindow.responsive = false;
       });
@@ -773,7 +804,7 @@ function createWindow() {
         mainWindow = null;
       });
     }
-  } catch(err) {
+  } catch (err) {
     throw new Error("メインウィンドウの作成でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
   }
 }
@@ -860,7 +891,7 @@ function setting_createWindow(update) {
     settingWindow.loadFile("src/settings.html");
     settingWindow.webContents.on("will-navigate", handleUrlOpen);
     settingWindow.webContents.on("new-window", handleUrlOpen);
-  } catch(err) {
+  } catch (err) {
     throw new Error("設定ウィンドウの作成でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
   }
 }
@@ -899,7 +930,7 @@ function tsunami_createWindow() {
     tsunamiWindow.on("closed", () => {
       tsunamiWindow = null;
     });
-  } catch(err) {
+  } catch (err) {
     throw new Error("津波情報ウィンドウの作成でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
   }
 }
@@ -967,7 +998,7 @@ function EQInfo_createWindow(response, webSite) {
     else EQInfoWindow.loadFile(response.url);
     EQInfoWindow.webContents.on("will-navigate", handleUrlOpen);
     EQInfoWindow.webContents.on("new-window", handleUrlOpen);
-  } catch(err) {
+  } catch (err) {
     throw new Error("地震情報ウィンドウの作成でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
   }
 }
@@ -1445,16 +1476,16 @@ function ProjectBS_WS() {
       kmoniTimeUpdate(new Date() - Replay, "ProjectBS", "success");
       try {
         var dataStr = message.utf8Data;
-        if(dataStr !== "pong") EEWdetect(1, jsonParse(dataStr));
+        if (dataStr !== "pong") EEWdetect(1, jsonParse(dataStr));
       } catch (e) {
         kmoniTimeUpdate(new Date() - Replay, "ProjectBS", "Error");
       }
     });
     kmoniTimeUpdate(new Date() - Replay, "ProjectBS", "success");
 
-    setInterval(function(){
+    setInterval(function () {
       connection.sendUTF("ping");
-    },600000)
+    }, 600000);
   });
 
   PBS_WS_Connect();
@@ -1536,7 +1567,7 @@ function RegularExecution() {
     }
 
     setTimeout(RegularExecution, 1000);
-  } catch(err) {
+  } catch (err) {
     throw new Error("内部の情報処理でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
   }
 }
@@ -1581,7 +1612,7 @@ async function yoyuSetK(func) {
     }
     func();
     return true;
-  } catch(err) {
+  } catch (err) {
     throw new Error("強震モニタの遅延量の取得でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
   }
 }
@@ -1609,269 +1640,263 @@ function kmoniTimeUpdate(Updatetime, type, condition, vendor) {
 function EEWdetect(type, json) {
   if (!json) return;
   try {
-  if (type == 1) {
-    //ProjectBS
-    var EBIData = [];
-    EBIStr = String(json.originalTelegram).split("EBI ")[1];
-    codeData = String(json.originalTelegram).split(" ");
-    if (EBIStr) {
-      EBIStr = EBIStr.split("ECI")[0].split("EII")[0].split(" 9999=")[0];
-      EBIStr = EBIStr.split(" ");
-      if (EBIStr.length % 4 == 0) {
-        for (let i = 0; i < EBIStr.length; i += 4) {
-          var sectName = EEWSectName[EBIStr[i]];
-          var maxInt = EBIStr[i + 1].substring(1, 3);
-          var minInt = EBIStr[i + 1].substring(3, 5);
-          minInt = minInt == "//" ? null : shindoConvert(minInt, 0);
-          maxInt = maxInt == "//" ? null : shindoConvert(maxInt, 0);
-          var arrivalTime = EBIStr[i + 2];
-          arrivalTime = arrivalTime.substring(0, 2) + ":" + arrivalTime.substring(2, 4) + ":" + arrivalTime.substring(4, 6);
-          arrivalTime = new Date(dateEncode(4, null) + " " + arrivalTime);
-
-          var alertFlg = EBIStr[i + 3].substring(0, 1) == "1";
-          var arrived = EBIStr[i + 3].substring(1, 2) == "1";
-
-          EBIData.push({
-            Code: Number(EBIStr[i]),
-            Name: sectName,
-            Alert: alertFlg,
-            IntTo: maxInt,
-            IntFrom: minInt,
-            ArrivalTime: arrivalTime,
-            Arrived: arrived,
-          });
-        }
-      }
-    }
-
-    var EEWdata = {
-      alertflg: json.isWarn ? "警報" : "予報",
-      EventID: Number(json.eventID),
-      serial: json.serial,
-      report_time: new Date(json.issue.time),
-      magnitude: json.hypocenter.magnitude,
-      maxInt: shindoConvert(json.maxIntensity, 0),
-      depth: json.hypocenter.location.depth,
-      is_cancel: json.isCancel,
-      is_final: json.isFinal,
-      is_training: codeData[2] == "01" || codeData[2] == "30",
-      latitude: json.hypocenter.location.lat,
-      longitude: json.hypocenter.location.lng,
-      region_name: json.hypocenter.name,
-      origin_time: new Date(json.originTime),
-      isPlum: json.hypocenter.isEstimate,
-      userIntensity: null,
-      arrivalTime: null,
-      intensityAreas: null,
-      warnZones: EBIData,
-      source: "ProjectBS",
-    };
-    EEWcontrol(EEWdata);
-  } else if (type == 2) {
-    //wolfx
-    var EBIData = [];
-    EBIStr = String(json.OriginalText).split("EBI ")[1];
-    if (EBIStr) {
-      EBIStr = EBIStr.split("ECI")[0].split("EII")[0].split(" 9999=")[0];
-      EBIStr = EBIStr.split(" ");
-      if (EBIStr.length % 4 == 0) {
-        for (let i = 0; i < EBIStr.length; i += 4) {
-          var sectName = EEWSectName[EBIStr[i]];
-          var maxInt = EBIStr[i + 1].substring(1, 3);
-          var minInt = EBIStr[i + 1].substring(3, 5);
-          minInt = minInt == "//" ? null : shindoConvert(minInt, 0);
-          maxInt = maxInt == "//" ? null : shindoConvert(maxInt, 0);
-          var arrivalTime = EBIStr[i + 2];
-          arrivalTime = arrivalTime.substring(0, 2) + ":" + arrivalTime.substring(2, 4) + ":" + arrivalTime.substring(4, 6);
-          arrivalTime = new Date(dateEncode(4, null) + " " + arrivalTime);
-
-          var alertFlg = EBIStr[i + 3].substring(0, 1) == "1";
-          var arrived = EBIStr[i + 3].substring(1, 2) == "1";
-
-          EBIData.push({
-            Code: Number(EBIStr[i]),
-            Name: sectName,
-            Alert: alertFlg,
-            IntTo: maxInt,
-            IntFrom: minInt,
-            ArrivalTime: arrivalTime,
-            Arrived: arrived,
-          });
-        }
-      }
-    }
-    var EEWdata = {
-      alertflg: json.isWarn ? "警報" : "予報",
-      EventID: Number(json.EventID),
-      serial: json.Serial,
-      report_time: new Date(json.AnnouncedTime),
-      magnitude: json.Magunitude,
-      maxInt: shindoConvert(json.MaxIntensity, 0),
-      depth: json.Depth,
-      is_cancel: json.isCancel,
-      is_final: json.isFinal,
-      is_training: json.isTraining,
-      latitude: json.Latitude,
-      longitude: json.Longitude,
-      region_name: json.Hypocenter,
-      origin_time: new Date(json.OriginTime),
-      isPlum: json.isAssumption,
-      userIntensity: null,
-      arrivalTime: null,
-      intensityAreas: null,
-      warnZones: EBIData,
-      source: "wolfx",
-    };
-
-    EEWcontrol(EEWdata,json);
-  } else if (type == 3) {
-    //axis
-    try {
-      var alertflgTmp = json.Title == "緊急地震速報（予報）" ? "予報" : "警報";
+    if (type == 1) {
+      //ProjectBS
       var EBIData = [];
-      json.Forecast.forEach(function (elm) {
-        EBIData.push({
-          Code: elm.Code,
-          Name: elm.Name,
-          Alert: null,
-          IntTo: elm.Intensity.To,
-          IntFrom: elm.Intensity.From,
-          ArrivalTime: null,
-          Arrived: null,
-        });
-      });
+      EBIStr = String(json.originalTelegram).split("EBI ")[1];
+      codeData = String(json.originalTelegram).split(" ");
+      if (EBIStr) {
+        EBIStr = EBIStr.split("ECI")[0].split("EII")[0].split(" 9999=")[0];
+        EBIStr = EBIStr.split(" ");
+        if (EBIStr.length % 4 == 0) {
+          for (let i = 0; i < EBIStr.length; i += 4) {
+            var sectName = EEWSectName[EBIStr[i]];
+            var maxInt = EBIStr[i + 1].substring(1, 3);
+            var minInt = EBIStr[i + 1].substring(3, 5);
+            minInt = minInt == "//" ? null : shindoConvert(minInt, 0);
+            maxInt = maxInt == "//" ? null : shindoConvert(maxInt, 0);
+            var arrivalTime = EBIStr[i + 2];
+            arrivalTime = arrivalTime.substring(0, 2) + ":" + arrivalTime.substring(2, 4) + ":" + arrivalTime.substring(4, 6);
+            arrivalTime = new Date(dateEncode(4, null) + " " + arrivalTime);
+
+            var alertFlg = EBIStr[i + 3].substring(0, 1) == "1";
+            var arrived = EBIStr[i + 3].substring(1, 2) == "1";
+
+            EBIData.push({
+              Code: Number(EBIStr[i]),
+              Name: sectName,
+              Alert: alertFlg,
+              IntTo: maxInt,
+              IntFrom: minInt,
+              ArrivalTime: arrivalTime,
+              Arrived: arrived,
+            });
+          }
+        }
+      }
+
       var EEWdata = {
-        alertflg: alertflgTmp,
-        EventID: Number(json.EventID),
-        serial: json.Serial,
-        report_time: new Date(json.ReportDateTime),
-        magnitude: Number(json.Magnitude),
-        maxInt: shindoConvert(json.Intensity),
-        depth: Number(json.Hypocenter.Depth.replace("km", "")),
-        is_cancel: json.Flag.is_cancel,
-        is_final: json.Flag.is_final,
-        is_training: json.Flag.is_training,
-        latitude: json.Hypocenter.Coordinate[1],
-        longitude: json.Hypocenter.Coordinate[0],
-        region_name: json.Hypocenter.Name,
-        origin_time: new Date(json.OriginDateTime),
-        isPlum: null,
+        alertflg: json.isWarn ? "警報" : "予報",
+        EventID: Number(json.eventID),
+        serial: json.serial,
+        report_time: new Date(json.issue.time),
+        magnitude: json.hypocenter.magnitude,
+        maxInt: shindoConvert(json.maxIntensity, 0),
+        depth: json.hypocenter.location.depth,
+        is_cancel: json.isCancel,
+        is_final: json.isFinal,
+        is_training: codeData[2] == "01" || codeData[2] == "30",
+        latitude: json.hypocenter.location.lat,
+        longitude: json.hypocenter.location.lng,
+        region_name: json.hypocenter.name,
+        origin_time: new Date(json.originTime),
+        isPlum: json.hypocenter.isEstimate,
         userIntensity: null,
         arrivalTime: null,
         intensityAreas: null,
         warnZones: EBIData,
-        source: "axis",
+        source: "ProjectBS",
       };
       EEWcontrol(EEWdata);
-    } catch (err) {
-      kmoniTimeUpdate(new Date() - Replay, "axis", "Error");
-    }
-  } else if (type == 4) {
-    //P2P
-    try {
-      var maxIntTmp = Math.floor(
-        Math.max.apply(
-          null,
-          json.areas.map(function (p) {
-            return p.scaleTo;
-          })
-        )
-      );
-
-      var latitudeTmp;
-      var longitudeTmp;
-      var depthTmp;
-      var magnitudeTmp;
-      var region_nameTmp;
-      var origin_timeTmp;
-      var conditionTmp = false;
-      if (json.earthquake) {
-        latitudeTmp = json.earthquake.hypocenter.latitude;
-        longitudeTmp = json.earthquake.hypocenter.longitude;
-        depthTmp = json.earthquake.hypocenter.depth;
-        magnitudeTmp = json.earthquake.hypocenter.magnitude;
-        region_nameTmp = json.earthquake.hypocenter.name;
-        origin_timeTmp = new Date(json.earthquake.originTime);
-        conditionTmp = json.earthquake.condition == "仮定震源要素";
-      }
+    } else if (type == 2) {
+      //wolfx
       var EBIData = [];
-      json.areas.forEach(function (elm) {
-        EBIData.push({
-          Code: null,
-          Name: elm.name,
-          Alert: alertFlg,
-          IntTo: shindoConvert(elm.scaleTo, 0),
-          IntFrom: shindoConvert(elm.scaleFrom, 0),
-          ArrivalTime: elm.arrivalTime,
-          Arrived: elm.kindCode == 11,
-        });
-      });
-      if (!json.issue) return;
+      EBIStr = String(json.OriginalText).split("EBI ")[1];
+      if (EBIStr) {
+        EBIStr = EBIStr.split("ECI")[0].split("EII")[0].split(" 9999=")[0];
+        EBIStr = EBIStr.split(" ");
+        if (EBIStr.length % 4 == 0) {
+          for (let i = 0; i < EBIStr.length; i += 4) {
+            var sectName = EEWSectName[EBIStr[i]];
+            var maxInt = EBIStr[i + 1].substring(1, 3);
+            var minInt = EBIStr[i + 1].substring(3, 5);
+            minInt = minInt == "//" ? null : shindoConvert(minInt, 0);
+            maxInt = maxInt == "//" ? null : shindoConvert(maxInt, 0);
+            var arrivalTime = EBIStr[i + 2];
+            arrivalTime = arrivalTime.substring(0, 2) + ":" + arrivalTime.substring(2, 4) + ":" + arrivalTime.substring(4, 6);
+            arrivalTime = new Date(dateEncode(4, null) + " " + arrivalTime);
+
+            var alertFlg = EBIStr[i + 3].substring(0, 1) == "1";
+            var arrived = EBIStr[i + 3].substring(1, 2) == "1";
+
+            EBIData.push({
+              Code: Number(EBIStr[i]),
+              Name: sectName,
+              Alert: alertFlg,
+              IntTo: maxInt,
+              IntFrom: minInt,
+              ArrivalTime: arrivalTime,
+              Arrived: arrived,
+            });
+          }
+        }
+      }
       var EEWdata = {
-        alertflg: "警報",
-        EventID: Number(json.issue.eventId),
-        serial: Number(json.issue.serial),
-        report_time: new Date(json.issue.time),
-        magnitude: magnitudeTmp,
-        maxInt: shindoConvert(maxIntTmp, 0),
-        depth: depthTmp,
-        is_cancel: Boolean(json.canceled),
-        is_final: null,
-        is_training: Boolean(json.test),
-        latitude: latitudeTmp,
-        longitude: longitudeTmp,
-        region_name: region_nameTmp,
-        origin_time: origin_timeTmp,
-        isPlum: conditionTmp,
-        warnZones: [],
-        source: "P2P_EEW",
+        alertflg: json.isWarn ? "警報" : "予報",
+        EventID: Number(json.EventID),
+        serial: json.Serial,
+        report_time: new Date(json.AnnouncedTime),
+        magnitude: json.Magunitude,
+        maxInt: shindoConvert(json.MaxIntensity, 0),
+        depth: json.Depth,
+        is_cancel: json.isCancel,
+        is_final: json.isFinal,
+        is_training: json.isTraining,
+        latitude: json.Latitude,
+        longitude: json.Longitude,
+        region_name: json.Hypocenter,
+        origin_time: new Date(json.OriginTime),
+        isPlum: json.isAssumption,
+        userIntensity: null,
+        arrivalTime: null,
+        intensityAreas: null,
+        warnZones: EBIData,
+        source: "wolfx",
       };
 
-      var areaTmp = [];
-      json.areas.forEach(function (elm) {
-        areaTmp.push({
-          Code: null,
-          Name: elm.name,
-          Alert: elm.kindCode == 10 || elm.kindCode == 11 || elm.kindCode == 19,
-          IntTo: shindoConvert(elm.scaleTo),
-          IntFrom: shindoConvert(elm.scaleFrom),
-          ArrivalTime: new Date(elm.arrivalTime),
-          Arrived: elm.kindCode == 11,
+      EEWcontrol(EEWdata, json);
+    } else if (type == 3) {
+      //axis
+      try {
+        var alertflgTmp = json.Title == "緊急地震速報（予報）" ? "予報" : "警報";
+        var EBIData = [];
+        json.Forecast.forEach(function (elm) {
+          EBIData.push({
+            Code: elm.Code,
+            Name: elm.Name,
+            Alert: null,
+            IntTo: elm.Intensity.To,
+            IntFrom: elm.Intensity.From,
+            ArrivalTime: null,
+            Arrived: null,
+          });
         });
-      });
-      EEWdata.warnZones = areaTmp;
+        var EEWdata = {
+          alertflg: alertflgTmp,
+          EventID: Number(json.EventID),
+          serial: json.Serial,
+          report_time: new Date(json.ReportDateTime),
+          magnitude: Number(json.Magnitude),
+          maxInt: shindoConvert(json.Intensity),
+          depth: Number(json.Hypocenter.Depth.replace("km", "")),
+          is_cancel: json.Flag.is_cancel,
+          is_final: json.Flag.is_final,
+          is_training: json.Flag.is_training,
+          latitude: json.Hypocenter.Coordinate[1],
+          longitude: json.Hypocenter.Coordinate[0],
+          region_name: json.Hypocenter.Name,
+          origin_time: new Date(json.OriginDateTime),
+          isPlum: null,
+          userIntensity: null,
+          arrivalTime: null,
+          intensityAreas: null,
+          warnZones: EBIData,
+          source: "axis",
+        };
+        EEWcontrol(EEWdata);
+      } catch (err) {
+        kmoniTimeUpdate(new Date() - Replay, "axis", "Error");
+      }
+    } else if (type == 4) {
+      //P2P
+      try {
+        var maxIntTmp = Math.floor(
+          Math.max.apply(
+            null,
+            json.areas.map(function (p) {
+              return p.scaleTo;
+            })
+          )
+        );
 
-      EEWcontrol(EEWdata);
-    } catch (err) {
-      kmoniTimeUpdate(new Date() - Replay, "P2P_EEW", "Error");
+        var latitudeTmp;
+        var longitudeTmp;
+        var depthTmp;
+        var magnitudeTmp;
+        var region_nameTmp;
+        var origin_timeTmp;
+        var conditionTmp = false;
+        if (json.earthquake) {
+          latitudeTmp = json.earthquake.hypocenter.latitude;
+          longitudeTmp = json.earthquake.hypocenter.longitude;
+          depthTmp = json.earthquake.hypocenter.depth;
+          magnitudeTmp = json.earthquake.hypocenter.magnitude;
+          region_nameTmp = json.earthquake.hypocenter.name;
+          origin_timeTmp = new Date(json.earthquake.originTime);
+          conditionTmp = json.earthquake.condition == "仮定震源要素";
+        }
+        var EBIData = [];
+        json.areas.forEach(function (elm) {
+          EBIData.push({
+            Code: null,
+            Name: elm.name,
+            Alert: alertFlg,
+            IntTo: shindoConvert(elm.scaleTo, 0),
+            IntFrom: shindoConvert(elm.scaleFrom, 0),
+            ArrivalTime: elm.arrivalTime,
+            Arrived: elm.kindCode == 11,
+          });
+        });
+        if (!json.issue) return;
+        var EEWdata = {
+          alertflg: "警報",
+          EventID: Number(json.issue.eventId),
+          serial: Number(json.issue.serial),
+          report_time: new Date(json.issue.time),
+          magnitude: magnitudeTmp,
+          maxInt: shindoConvert(maxIntTmp, 0),
+          depth: depthTmp,
+          is_cancel: Boolean(json.canceled),
+          is_final: null,
+          is_training: Boolean(json.test),
+          latitude: latitudeTmp,
+          longitude: longitudeTmp,
+          region_name: region_nameTmp,
+          origin_time: origin_timeTmp,
+          isPlum: conditionTmp,
+          warnZones: [],
+          source: "P2P_EEW",
+        };
+
+        var areaTmp = [];
+        json.areas.forEach(function (elm) {
+          areaTmp.push({
+            Code: null,
+            Name: elm.name,
+            Alert: elm.kindCode == 10 || elm.kindCode == 11 || elm.kindCode == 19,
+            IntTo: shindoConvert(elm.scaleTo),
+            IntFrom: shindoConvert(elm.scaleFrom),
+            ArrivalTime: new Date(elm.arrivalTime),
+            Arrived: elm.kindCode == 11,
+          });
+        });
+        EEWdata.warnZones = areaTmp;
+
+        EEWcontrol(EEWdata);
+      } catch (err) {
+        kmoniTimeUpdate(new Date() - Replay, "P2P_EEW", "Error");
+      }
     }
-  }
-  } catch(err) {
+  } catch (err) {
     return;
   }
 }
 
 //EEW情報マージ
 function EEWcontrol(data) {
-  console.log("EEW処理", 0);
   if (!data) return; //データがない場合、処理終了
-  try{
+  try {
     if (!config.Info.EEW.showTraning && data.is_training) return; //訓練法を受信するかどうか（設定に準拠）
     if (!data.origin_time || !data.EventID || !data.serial || !data.latitude || !data.longitude) return;
-    console.log("EEW処理", 1);
 
     //５分以上前の地震／未来の地震（リプレイ時）を除外
     var pastTime = new Date() - Replay - data.origin_time;
     if (pastTime > 300000 || pastTime < 0) return;
 
-    console.log("EEW処理", 2);
-
     //現在地との距離
     if (data.latitude && data.longitude) data.distance = geosailing(data.latitude, data.longitude, config.home.latitude, config.home.longitude);
 
     data.TimeTable = TimeTable_JMA2001[depthFilter(data.depth)];
-
-    console.log("EEW処理", 3);
 
     if (data.source == "simulation") {
       var EEWdataTmp = EEW_Data.find(function (elm) {
@@ -1921,8 +1946,6 @@ function EEWcontrol(data) {
       });
     }
 
-    console.log("EEW処理", 4);
-
     if (data.warnZones && data.warnZones.length) {
       //設定された細分区域のデータ参照
       var userSect = data.warnZones.find(function (elm2) {
@@ -1936,27 +1959,19 @@ function EEWcontrol(data) {
       }
     }
 
-    console.log("EEW処理", 5);
-
     var EQJSON = EEW_Data.find(function (elm) {
       return elm.EQ_id == data.EventID;
     });
     if (EQJSON) {
-      console.log("EEW処理", 60);
-
       //同一地震のデータが既に存在する場合
       var EEWJSON = EQJSON.data.find(function (elm2) {
         return elm2.serial == data.serial;
       });
       if (EEWJSON) {
-        console.log("EEW処理", 61);
-
         //同じ報数の情報が既に存在する（マージ処理へ）
         // prettier-ignore
         var oneBefore = data.serial == Math.max.apply(null, EQJSON.data.map(function(o){ return o.serial;}));
         if (oneBefore) {
-          console.log("EEW処理", 62);
-
           //最新報である場合
           var changed = false;
           //マージ元のデータ
@@ -1984,17 +1999,12 @@ function EEWcontrol(data) {
               }
             });
           }
-          console.log("EEW処理", 63);
           //データに変化があれば、警報処理へ
-          if (changed) {
-            EEWAlert(oneBeforeData, false, true);
-            console.log("EEW処理", 64);
-          }
+          if (changed) EEWAlert(oneBeforeData, false, true);
         }
       } else {
         //同じ報数の情報がない場合（データ登録）
         // prettier-ignore
-        console.log("EEW処理", 65);
         var newest =
           data.serial >
           Math.max.apply(
@@ -2004,7 +2014,6 @@ function EEWcontrol(data) {
             })
           );
         if (newest) {
-          console.log("EEW処理", 66);
           //最新の報である
           var EQJSON = EEW_Data.find(function (elm) {
             return elm.EQ_id == data.EventID;
@@ -2038,8 +2047,7 @@ function EEWcontrol(data) {
 
       EEWAlert(data, true); //警報処理
     }
-    console.log("EEW処理", "END");
-  } catch(err) {
+  } catch (err) {
     throw new Error("緊急地震速報データの処理（マージ）に失敗しました。エラーメッセージは以下の通りです。\n" + err);
   }
 }
@@ -2109,7 +2117,7 @@ function EarlyEstControl(data) {
         data: [data],
       });
     }
-  } catch(err) {
+  } catch (err) {
     throw new Error("Early-Est データの処理（マージ）に失敗しました。エラーメッセージは以下の通りです。\n" + err);
   }
 }
@@ -2131,7 +2139,7 @@ function EEWClear(EventID) {
       if (psBlock && powerSaveBlocker.isStarted(psBlock)) powerSaveBlocker.stop(psBlock);
       worker.postMessage({ action: "EEWNow", data: EEWNow });
     }
-  } catch(err) {
+  } catch (err) {
     throw new Error("緊急地震速報の解除処理でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
   }
 }
@@ -2139,7 +2147,6 @@ function EEWClear(EventID) {
 //EEW通知（音声・画面表示等）
 function EEWAlert(data, first, update) {
   try {
-    console.log("EEW処理完了");
     EEWNow = true;
     worker.postMessage({ action: "EEWNow", data: EEWNow });
 
@@ -2203,7 +2210,7 @@ function EEWAlert(data, first, update) {
 
     //スリープ回避開始
     if (!psBlock || !powerSaveBlocker.isStarted(psBlock)) psBlock = powerSaveBlocker.start("prevent-display-sleep");
-  } catch(err) {
+  } catch (err) {
     throw new Error("緊急地震速報の通知処理でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
   }
 }
@@ -2251,7 +2258,7 @@ function EarlyEstAlert(data, first, update) {
 
     //スリープ回避開始
     if (!psBlock || !powerSaveBlocker.isStarted(psBlock)) psBlock = powerSaveBlocker.start("prevent-display-sleep");
-  } catch(err) {
+  } catch (err) {
     throw new Error("Early-Est地震情報の通知処理でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
   }
 }
@@ -2267,7 +2274,7 @@ function eqInfoUpdate(disableRepeat) {
     EQI_USGS_Req();
 
     if (!disableRepeat) setTimeout(eqInfoUpdate, config.Info.EQInfo.Interval);
-  } catch(err) {
+  } catch (err) {
     throw new Error("地震情報の処理でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
   }
 }
@@ -2856,7 +2863,7 @@ function eqInfoAlert(data, source, update, audioPlay) {
         data: eqInfo.usgs.slice(0, config.Info.EQInfo.ItemCount),
       });
     }
-  } catch(err) {
+  } catch (err) {
     throw new Error("地震情報の通知処理でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
   }
 }
@@ -2886,7 +2893,7 @@ function TsunamiInfoControl(data) {
         });
       }
     }
-  } catch(err) {
+  } catch (err) {
     throw new Error("津波情報の処理（マージ）でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
   }
 }
@@ -3140,7 +3147,7 @@ function mergeDeeply(target, source, opts) {
       }
     }
     return result;
-  } catch(err) {
+  } catch (err) {
     throw new Error("JSONのマージでエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
   }
 }
