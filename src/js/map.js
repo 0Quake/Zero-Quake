@@ -853,6 +853,7 @@ function JMAEstShindoControl(data) {
         break;
     }
   });
+  document.getElementById("fillLegend").style.display = Object.keys(JMAEstShindoData) == 0 ? "none" : "inline-block";
   JMAEstShindoDraw();
 }
 
@@ -1107,6 +1108,7 @@ function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrive
 //津波情報更新
 var EQInfoLink = document.getElementById("EQInfoLink");
 var tsunamiData;
+var now_tsunami = false;
 function tsunamiDataUpdate(data) {
   tsunamiData = data;
   map.setFilter("tsunami_MajorWarn", ["==", "name", ""]);
@@ -1117,10 +1119,11 @@ function tsunamiDataUpdate(data) {
 
   document.getElementById("tsunamiCancel").style.display = data.cancelled ? "block" : "none";
   document.getElementById("tsunamiRevocation").style.display = data.revocation ? "block" : "none";
-
+  now_tsunami = true;
   if (data.cancelled) {
     document.getElementById("tsunamiWrap").style.display = "none";
     document.body.classList.remove("TsunamiMode");
+    now_tsunami = false;
   } else {
     EQInfoLink.style.display = "none";
     if (data.issue.EventID) {
@@ -1224,9 +1227,11 @@ function tsunamiDataUpdate(data) {
       document.getElementById("tsunamiWrap").style.display = "none";
       document.body.classList.remove("TsunamiMode");
       Tsunami_MajorWarning = Tsunami_Warning = Tsunami_Watch = false;
+      now_tsunami = false;
     } else if (!alertNowTmp && tsunamiAlertNow) {
       document.getElementById("tsunamiWrap").style.display = "none";
       document.body.classList.remove("TsunamiMode");
+      now_tsunami = false
       Tsunami_MajorWarning = Tsunami_Warning = Tsunami_Watch = false;
     }
     tsunamiAlertNow = alertNowTmp;
@@ -1241,6 +1246,7 @@ function tsunamiDataUpdate(data) {
     else if (Tsunami_Watch) document.getElementById("tsunamiTitle").style.borderColor = tsunamiColorConv("Watch");
     else if (Tsunami_Yoho) document.getElementById("tsunamiTitle").style.borderColor = tsunamiColorConv("Yoho");
   }
+  document.getElementById("noEEW").style.display = (now_EEW.length == 0 && !now_tsunami && EQDetectItem.length == 0) ? "block" : "none";
 }
 EQInfoLink.addEventListener("click", function (e) {
   e.preventDefault();

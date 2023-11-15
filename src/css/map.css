@@ -14,7 +14,7 @@
 #layerSwitch_toggle {
   border-radius: 5px;
   background: #444;
-  border: solid 1px #999;
+  border: solid 1px #777;
   font-family: "Material Icons Round";
   font-size: 22px;
   width: 45px;
@@ -28,7 +28,7 @@
   position: absolute;
   padding: 10px 5px;
   background: #333;
-  border: solid 1px #999;
+  border: solid 1px #777;
   border-radius: 10px;
   max-height: calc(100% - 40px);
   overflow-y: auto;
@@ -107,7 +107,7 @@
 .maplibregl-ctrl {
   background: #444;
   color: #fff;
-  border: solid 1px #999;
+  border: solid 1px #777;
 }
 .transparent-ctrl {
   background: transparent;
@@ -438,11 +438,12 @@
 }
 .legend {
   display: inline-block;
-  background: #444444;
+  background: #444;
   border-radius: 5px;
   overflow: hidden;
   padding: 8px;
   width: fit-content;
+  border: solid 1px #777;
 }
 
 .legend img {
@@ -463,10 +464,102 @@
   right: 60px;
   min-width: 300px;
   z-index: 999;
+  height:auto;
+  border: solid 1px #777;
+  border-top: none;
 }
 
 body {
   min-width: 450px;
+}
+
+#ShindoSample0 {
+  background: var(--IntTheme_0_BgColor);
+  color: var(--IntTheme_0_color);
+}
+
+#ShindoSample1 {
+  background: var(--IntTheme_1_BgColor);
+  color: var(--IntTheme_1_color);
+}
+
+#ShindoSample2 {
+  background: var(--IntTheme_2_BgColor);
+  color: var(--IntTheme_2_color);
+}
+
+#ShindoSample3 {
+  background: var(--IntTheme_3_BgColor);
+  color: var(--IntTheme_3_color);
+}
+
+#ShindoSample4 {
+  background: var(--IntTheme_4_BgColor);
+  color: var(--IntTheme_4_color);
+}
+
+#ShindoSample5m {
+  background: var(--IntTheme_5m_BgColor);
+  color: var(--IntTheme_5m_color);
+}
+
+#ShindoSample5p {
+  background: var(--IntTheme_5p_BgColor);
+  color: var(--IntTheme_5p_color);
+}
+
+#ShindoSample6m {
+  background: var(--IntTheme_6m_BgColor);
+  color: var(--IntTheme_6m_color);
+}
+
+#ShindoSample6p {
+  background: var(--IntTheme_6p_BgColor);
+  color: var(--IntTheme_6p_color);
+}
+
+#ShindoSample7 {
+  background: var(--IntTheme_7_BgColor);
+  color: var(--IntTheme_7_color);
+}
+
+#AlertArea {
+  background: url(../img/AlertOverlay.png);
+  background-size: 10px;
+}
+#fillLegend {
+  display: none;
+  text-align: left;
+  font-size: 0;
+}
+#fillLegend p {
+  font-size: 14px;
+  display: inline-block;
+  padding: 0;
+  margin: 0 2px;
+  line-height: 30px;
+  vertical-align: middle;
+}
+#fillLegend hr {
+  margin: 2px 0;
+  border: solid 1px #666;
+}
+.IntLegend {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  line-height: 24px;
+  text-align: center;
+  font-size: 14px;
+  margin: 2px;
+  font-family: "M PLUS 1p";
+  vertical-align: middle;
+  outline: solid 1px #777;
+}
+.IntLegend span {
+  font-size: 12px;
+  font-family: inherit;
 }
 
 @media (max-width: 600px) {
@@ -489,7 +582,6 @@ body {
   }
   #sideBar.close #sokuho-Panel {
     display: block;
-    border-radius: 0 0 10px 10px;
     max-height: 50vh;
   }
   #sideBar.close {

@@ -252,7 +252,7 @@ main {
 
 #sokuho-Panel {
   padding: 5px;
-  min-height: 110px;
+  min-height: 60px;
   height: auto;
   max-height: 300px;
   overflow: auto;
@@ -260,7 +260,8 @@ main {
 }
 
 .EEWMode #sokuho-Panel,
-.TsunamiMode #sokuho-Panel {
+.TsunamiMode #sokuho-Panel,
+.EQDetecting #sokuho-Panel {
   height: 50vh;
   max-height: none;
 }
@@ -278,11 +279,7 @@ main {
 }
 #noEEW {
   text-align: center;
-  line-height: 100px;
-}
-.EEWMode #noEEW,
-.TsunamiMode #noEEW {
-  display: none;
+  line-height: 50px;
 }
 
 .list-item {
@@ -309,6 +306,25 @@ main {
 #tsunamiRevocation {
   text-align: center;
   font-family: "M PLUS 1p", sans-serif;
+  padding:0;
+  font-size: 14px;
+  line-height: 25px;
+}
+#tsunamiCancel button,
+#tsunamiRevocation button {
+  width: 25px;
+  height: 25px;
+  border-radius: 50% 0 0 50%;
+  font-family: "Material Icons Round";
+  border: none;
+  float: right;
+  margin: 0;
+  padding: 0;
+  background: #444;
+}
+#tsunamiCancel button:hover,
+#tsunamiRevocation button:hover {
+  background-color: rgb(149, 46, 46);
 }
 h2 {
   font-size: 20px;
@@ -490,11 +506,12 @@ td {
 
 #tab1_wrap {
   display: flex;
-  height: calc(100% - 110px);
+  height: calc(100% - 60px);
 }
 
 .EEWMode #tab1_wrap,
-.TsunamiMode #tab1_wrap {
+.TsunamiMode #tab1_wrap,
+.EQDetecting #tab1_wrap {
   height: 50vh;
 }
 
@@ -938,6 +955,7 @@ td {
 }
 dialog {
   user-select: none;
+  outline: solid 1px #777;
 }
 dialog::backdrop {
   background: rgba(0, 0, 0, 0.4);

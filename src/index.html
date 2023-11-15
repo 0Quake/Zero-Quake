@@ -127,6 +127,24 @@
                     <div class="legend">
                         <img src="./img/nied_jma_s_w_scale.svg">
                     </div>
+                    <div class="legend" id="fillLegend">
+                        <div><div class="IntLegend" id="AlertArea"></div><p>警報</p></div>
+                        <hr>
+                        <div><div class="IntLegend" id="ShindoSample7">7</div></div>
+                        <div>
+                            <div class="IntLegend" id="ShindoSample6p">6<span>強</span></div>
+                            <div class="IntLegend" id="ShindoSample6m">6<span>弱</span></div>
+                        </div>
+                        <div>
+                            <div class="IntLegend" id="ShindoSample5p">5<span>強</span></div>
+                            <div class="IntLegend" id="ShindoSample5m">5<span>弱</span></div>
+                        </div>
+                        <div><div class="IntLegend" id="ShindoSample4">4</div></div>
+                        <div><div class="IntLegend" id="ShindoSample3">3</div></div>
+                        <div><div class="IntLegend" id="ShindoSample2">2</div></div>
+                        <div><div class="IntLegend" id="ShindoSample1">1</div></div>
+                        <div><div class="IntLegend" id="ShindoSample0">0</div></div>
+                    </div>
                 </div>
             </div>
             <div id="sideBar">
@@ -134,9 +152,11 @@
                 <div id="sokuho-Panel">
                     <div id="tsunamiRevocation" class="list-item">
                         すべての津波情報が解除されました。
+                        <button id="CloseTsunamiRevocation">close</button>
                     </div>
                     <div id="tsunamiCancel" class="list-item">
                         津波情報が取り消されました。
+                        <button id="CloseTsunamiCancel">close</button>
                     </div>
                     <div id="tsunamiWrap" class="list-item">
                         <h2 id="tsunamiTitle">津波情報
@@ -218,7 +238,7 @@
                     </div>
 
                     <div id="noEEW">
-                        緊急地震速報は発令されていません
+                        現在発表中の情報はありません
                     </div>
 
                 </div>

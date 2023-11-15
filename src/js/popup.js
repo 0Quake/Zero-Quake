@@ -216,6 +216,8 @@ function EEWAlertUpdate(data) {
 
   if (data.length == 0) document.body.classList.remove("EEWMode");
   else document.body.classList.add("EEWMode");
+
+  document.getElementById("noEEW").style.display = (now_EEW.length == 0 && !now_tsunami && EQDetectItem.length == 0) ? "block" : "none";
 }
 
 var EEWID = 0;
@@ -456,6 +458,9 @@ function EQDetect(data) {
       maxzoom: 22,
     });
   }
+  document.getElementById("noEEW").style.display = (now_EEW.length == 0 && !now_tsunami && EQDetectItem.length == 0) ? "block" : "none";
+  if(now_EEW.length == 0) document.body.classList.remove("EQDetecting");
+  else document.body.classList.add("EQDetecting");
 }
 //地震検知情報更新
 function EQDetectFinish(id) {
@@ -553,4 +558,11 @@ function show_errorMsg(data) {
 }
 document.getElementById("errorMsg_close").addEventListener("click", function () {
   errorMsgBox.style.display = "none";
+});
+
+document.getElementById("CloseTsunamiCancel").addEventListener("click", function(){
+  document.getElementById("tsunamiCancel").style.display = "none";
+});
+document.getElementById("CloseTsunamiRevocation").addEventListener("click", function(){
+  document.getElementById("tsunamiRevocation").style.display = "none";
 });
