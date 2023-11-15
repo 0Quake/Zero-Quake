@@ -144,15 +144,18 @@ document.getElementById("apply2").addEventListener("click", function () {
   window.close();
 });
 document.getElementById("resetConfig").addEventListener("click", function () {
-  window.electronAPI.messageReturn({
-    action: "settingReturn",
-    data: defaultConfigVal,
-  });
-  window.electronAPI.messageReturn({
-    action: "openAtLogin",
-    data: false,
-  });
-  location.reload();
+  var conf = confirm("本当に設定を初期化しますか？");
+  if (conf) {
+    window.electronAPI.messageReturn({
+      action: "settingReturn",
+      data: defaultConfigVal,
+    });
+    window.electronAPI.messageReturn({
+      action: "openAtLogin",
+      data: false,
+    });
+    location.reload();
+  }
 });
 
 function apply() {

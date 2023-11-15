@@ -8,6 +8,10 @@ hr {
   margin: 20px 0;
 }
 
+button {
+  margin: 6px 9px 6px 0;
+}
+
 .smalltext {
   font-size: 13px;
   color: #ccc;
@@ -21,6 +25,7 @@ hr {
 
 #tab1_content {
   background: #333;
+  overflow: auto;
 }
 
 #tab1_content2 h2 {
@@ -126,9 +131,9 @@ hr {
 }
 
 div .tabcontent {
-  height: 100%;
-  overflow: auto;
-  padding: 20px 20px 60px 20px !important;
+  height: auto;
+  overflow: visible;
+  padding: 20px!important;
   max-width: 600px;
 }
 #tab1_content2 {
@@ -148,6 +153,10 @@ div .tabcontent {
 
 #BtnWrap button {
   margin: 5px;
+}
+
+#apply2 {
+  background: rgb(149, 46, 46);
 }
 
 #mapcontainer {
@@ -258,7 +267,7 @@ h4 {
 }
 label {
   display: block;
-  padding: 0.2em 0;
+  padding: 7px 0;
 }
 label input[type="text"],
 label input[type="number"],
@@ -358,6 +367,7 @@ summary {
   border: solid 2px transparent;
   background: #333;
   border: solid 2px rgb(149, 46, 46);
+  width: fit-content;
 }
 summary:hover {
   background: rgb(149, 46, 46);
