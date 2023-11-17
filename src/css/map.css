@@ -464,7 +464,7 @@
   right: 60px;
   min-width: 300px;
   z-index: 999;
-  height:auto;
+  height: auto;
   border: solid 1px #777;
   border-top: none;
 }
@@ -561,7 +561,9 @@ body {
   font-size: 12px;
   font-family: inherit;
 }
-
+.tsunamidetailwrap {
+  padding: 5px;
+}
 @media (max-width: 600px) {
   #sideBar.close #sokuho-Panel {
     max-height: max(200px, 50vh);

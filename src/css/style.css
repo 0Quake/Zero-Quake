@@ -306,7 +306,7 @@ main {
 #tsunamiRevocation {
   text-align: center;
   font-family: "M PLUS 1p", sans-serif;
-  padding:0;
+  padding: 0;
   font-size: 14px;
   line-height: 25px;
 }
@@ -1063,6 +1063,7 @@ button:focus {
   font-size: 13px;
   color: #ccc;
   margin: 0 5px;
+  display: inline-block;
 }
 #firstHeightData span,
 #maxHeightData span {

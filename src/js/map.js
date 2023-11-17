@@ -1173,8 +1173,9 @@ function tsunamiDataUpdate(data) {
               break;
           }
         }
-        if (sectData.maxHeight) maxWave = " 最大波<span>" + sectData.maxHeight + "</span>";
-        else if (sectData.grade == "Yoho") maxWave = " 若干の海面変動";
+
+        if (sectData.maxHeight) maxWave = "<div>最大波予想<span>" + sectData.maxHeight + "</span></div>";
+        else if (sectData.grade == "Yoho") maxWave = "<div>最大波予想<span>若干の海面変動</span></div>";
 
         document.getElementById("tsunamiSectTitle").innerText = sectData.name + " " + gradeJa;
         document.getElementById("firstHeightData").innerHTML = firstWave;
@@ -1231,7 +1232,7 @@ function tsunamiDataUpdate(data) {
     } else if (!alertNowTmp && tsunamiAlertNow) {
       document.getElementById("tsunamiWrap").style.display = "none";
       document.body.classList.remove("TsunamiMode");
-      now_tsunami = false
+      now_tsunami = false;
       Tsunami_MajorWarning = Tsunami_Warning = Tsunami_Watch = false;
     }
     tsunamiAlertNow = alertNowTmp;
@@ -1246,7 +1247,7 @@ function tsunamiDataUpdate(data) {
     else if (Tsunami_Watch) document.getElementById("tsunamiTitle").style.borderColor = tsunamiColorConv("Watch");
     else if (Tsunami_Yoho) document.getElementById("tsunamiTitle").style.borderColor = tsunamiColorConv("Yoho");
   }
-  document.getElementById("noEEW").style.display = (now_EEW.length == 0 && !now_tsunami && EQDetectItem.length == 0) ? "block" : "none";
+  document.getElementById("noEEW").style.display = now_EEW.length == 0 && !now_tsunami && EQDetectItem.length == 0 ? "block" : "none";
 }
 EQInfoLink.addEventListener("click", function (e) {
   e.preventDefault();
@@ -1314,13 +1315,13 @@ function tsunamiPopup(e) {
         var firstWave = "";
         var maxWave = "";
         var firstCondition = "";
-        if (elm.firstHeight) firstWave = "<div>第１波 予想到達時刻:" + dateEncode(5, elm.firstHeight) + "</div>";
+        if (elm.firstHeight) firstWave = "<div>第１波予想:" + dateEncode(5, elm.firstHeight) + "</div>";
 
-        if (elm.maxHeight) maxWave = "<div>最大波 予想高さ:" + elm.maxHeight + "</div>";
-        else if (elm.grade == "Yoho") maxWave = "<div>予想される津波の高さ:若干の海面変動</div>";
+        if (elm.maxHeight) maxWave = "<div>最大波予想:" + elm.maxHeight + "</div>";
+        else if (elm.grade == "Yoho") maxWave = "<div>最大波予想:若干の海面変動</div>";
 
         if (elm.firstHeightCondition) firstCondition = "<div>" + elm.firstHeightCondition + "</div>";
-        var popupContent = "<h3 style='border-bottom:solid 2px " + tsunamiColorConv(elm.grade) + "'>" + elm.name + "</h3><p> " + gradeJa + " 発令中</p>" + firstWave + maxWave + firstCondition;
+        var popupContent = "<h3 style='border-bottom:solid 2px " + tsunamiColorConv(elm.grade) + "'>" + elm.name + "</h3><div class='tsunamidetailwrap'><p> " + gradeJa + " 発令中</p>" + firstWave + maxWave + firstCondition + "</div>";
         new maplibregl.Popup().setLngLat(e.lngLat).setHTML(popupContent).addTo(map);
       }
     }
