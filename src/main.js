@@ -1038,30 +1038,30 @@ function earlyEstReq() {
         res.on("end", function () {
           try {
             kmoniTimeUpdate(new Date() - Replay, "Early-est", "success");
-            var latitude = Number(elm.querySelector("origin latitude value").textContent);
-            var longitude = Number(elm.querySelector("origin longitude value").textContent);
-            if (!latitude || !longitude) return;
-            var request2 = net.request("https://earthquake.usgs.gov/ws/geoserve/regions.json?latitude=" + latitude + "&longitude=" + longitude + "&type=fe");
-            request2.on("response", (res) => {
-              var dataTmp2 = "";
-              res.on("data", (chunk) => {
-                dataTmp2 += chunk;
-              });
-              res.on("end", function () {
-                try {
-                  var json = jsonParse(dataTmp2);
-                  var FE_ID;
-                  var i = 0;
-                  if (!json.fe) return;
-                  while (!FE_ID && i < json.fe.features.length) {
-                    FE_ID = json.fe.features[i].properties.number;
-                    i++;
-                  }
-                  if (FE_ID) var jpName = FERegions[FE_ID];
-                  else jpName = elm.querySelector("origin region").textConten;
-                  let parser = new new JSDOM().window.DOMParser();
-                  let doc = parser.parseFromString(dataTmp, "text/xml");
-                  doc.querySelectorAll("eventParameters event").forEach(function (elm) {
+            let parser = new new JSDOM().window.DOMParser();
+            let doc = parser.parseFromString(dataTmp, "text/xml");
+            doc.querySelectorAll("eventParameters event").forEach(function (elm) {
+              var latitude = Number(elm.querySelector("origin latitude value").textContent);
+              var longitude = Number(elm.querySelector("origin longitude value").textContent);
+              if (!latitude || !longitude) return;
+              var request2 = net.request("https://earthquake.usgs.gov/ws/geoserve/regions.json?latitude=" + latitude + "&longitude=" + longitude + "&type=fe");
+              request2.on("response", (res) => {
+                var dataTmp2 = "";
+                res.on("data", (chunk) => {
+                  dataTmp2 += chunk;
+                });
+                res.on("end", function () {
+                  try {
+                    var json = jsonParse(dataTmp2);
+                    var FE_ID;
+                    var i = 0;
+                    if (!json.fe) return;
+                    while (!FE_ID && i < json.fe.features.length) {
+                      FE_ID = json.fe.features[i].properties.number;
+                      i++;
+                    }
+                    if (FE_ID) var jpName = FERegions[FE_ID];
+                    else jpName = elm.querySelector("origin region").textConten;
                     var data = {
                       alertflg: "EarlyEst",
                       EventID: 901471985000000000000 + Number(String(elm.getAttribute("publicID")).slice(-12)), //気象庁EIDと確実に区別するため、EarlyEstのIPアドレスと連結,
@@ -1076,13 +1076,13 @@ function earlyEstReq() {
                       source: "EarlyEst",
                     };
                     EarlyEstControl(data);
-                  });
-                } catch (err) {
-                  kmoniTimeUpdate(new Date() - Replay, "Early-est", "Error");
-                }
+                  } catch (err) {
+                    kmoniTimeUpdate(new Date() - Replay, "Early-est", "Error");
+                  }
+                });
               });
+              request2.end();
             });
-            request2.end();
           } catch (err) {
             kmoniTimeUpdate(new Date() - Replay, "Early-est", "Error");
           }
@@ -1481,14 +1481,12 @@ function Wolfx_WS() {
 
   WolfxWSclient.on("connectFailed", function () {
     kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
-    console.log(1);
     Wolfx_WS_TryConnect();
   });
 
   WolfxWSclient.on("connect", function (connection) {
     connection.on("error", function () {
       kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
-      console.log(2);
     });
     connection.on("close", function () {
       kmoniTimeUpdate(new Date() - Replay, "wolfx", "Disconnect");
