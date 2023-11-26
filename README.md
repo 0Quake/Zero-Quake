@@ -28,6 +28,7 @@
   <details>
   <summary>情報源</summary>
   <ul>
+    <li>Wolfx <a href="https://api.wolfx.jp/">© Wolfx Studio.</a></li>
     <li>気象庁防災情報 XML <a href="https://xml.kishou.go.jp/xmlpull.html">© 気象庁</a></li>
     <li>nTool Earthquake API<a href="https://ntool.online/apidoc/earthquakeapi">© Narikakun Network</a></li>
     <li>Axis <a href="https://axis.prioris.jp/">© Prioris</a>（無料登録必須）</li>
