@@ -113,6 +113,11 @@
   background: transparent;
   border: none;
 }
+.maplibregl-ctrl-group button {
+  margin: 0;
+  width: 40px;
+  height: 35px;
+}
 .maplibregl-ctrl-group button + button {
   border-top: none;
 }

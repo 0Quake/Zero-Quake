@@ -1500,12 +1500,36 @@ function Wolfx_WS() {
       try {
         var json = jsonParse(message.utf8Data);
         if (message.type == "heartbeat") return;
-        EEWdetect(2, json);
+        switch (message.type) {
+          case "jma_eew":
+            EEWdetect(2, json);
+            break;
+          case "jma_eqlist":
+            Object.keys(json).forEach(function (elm) {
+              eqInfoControl(
+                [
+                  {
+                    eventId: json[elm].EventID,
+                    category: null,
+                    reportDateTime: null,
+                    OriginTime: null,
+                    epiCenter: json[elm].location,
+                    M: Number(json[elm].magnitude),
+                    maxI: shindoConvert(json[elm].shindo),
+                    DetailURL: [],
+                  },
+                ],
+                "jma"
+              );
+            });
+            break;
+        }
       } catch (err) {
         kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
       }
     });
     connection.sendUTF("query_jmaeew");
+    connection.sendUTF("query_jmaeqlist");
     kmoniTimeUpdate(new Date() - Replay, "wolfx", "success");
   });
 
@@ -1517,7 +1541,7 @@ function Wolfx_WS_TryConnect() {
   setTimeout(Wolfx_WS_Connect, timeoutTmp);
 }
 function Wolfx_WS_Connect() {
-  if (WolfxWSclient) WolfxWSclient.connect("wss://ws-api.wolfx.jp/jma_eew");
+  if (WolfxWSclient) WolfxWSclient.connect("wss://ws-api.wolfx.jp/all_eew");
   WolfxlastConnectDate = new Date();
 }
 
