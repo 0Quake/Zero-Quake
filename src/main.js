@@ -555,7 +555,7 @@ electron.app.on("ready", () => {
         },
       },
       {
-        label: "設定画面標準",
+        label: "設定画面表示",
         click: () => {
           setting_createWindow();
         },
@@ -1018,7 +1018,6 @@ function start() {
   eqInfoUpdate(); //地震情報定期取得 着火
   earlyEstReq();
 
-  wolfxRequest(); //EEW現状取得（HTTP/1回きり）
   EQI_JMAXMLList_Req(true); //防災情報XML 長期フィード取得(１回きり)
 
   //定期実行 着火
@@ -1272,33 +1271,6 @@ function SnetRequest() {
   setTimeout(SnetRequest, config.Source.msil.Interval);
 }
 
-//wolfxへのHTTPリクエスト処理
-function wolfxRequest() {
-  if (config.Source.wolfx.GetData && net.isOnline) {
-    var request = net.request("https://api.wolfx.jp/jma_eew.json?_=" + new Date());
-    request.on("response", (res) => {
-      var dataTmp = "";
-      res.on("data", (chunk) => {
-        dataTmp += chunk;
-      });
-      res.on("end", function () {
-        try {
-          var json = jsonParse(dataTmp);
-          EEWdetect(2, json);
-          kmoniTimeUpdate(new Date() - Replay, "wolfx", "success");
-        } catch (err) {
-          kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
-        }
-      });
-    });
-    request.on("error", () => {
-      kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
-    });
-
-    request.end();
-  }
-}
-
 //P2P地震情報API WebSocket接続・受信処理
 var P2PWSclient;
 function P2P_WS() {
@@ -1481,8 +1453,9 @@ function ProjectBS_WS() {
         kmoniTimeUpdate(new Date() - Replay, "ProjectBS", "Error");
       }
     });
-    kmoniTimeUpdate(new Date() - Replay, "ProjectBS", "success");
+    connection.sendUTF("queryjson");
 
+    kmoniTimeUpdate(new Date() - Replay, "ProjectBS", "success");
     setInterval(function () {
       connection.sendUTF("ping");
     }, 600000);
@@ -1508,12 +1481,14 @@ function Wolfx_WS() {
 
   WolfxWSclient.on("connectFailed", function () {
     kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
+    console.log(1);
     Wolfx_WS_TryConnect();
   });
 
   WolfxWSclient.on("connect", function (connection) {
     connection.on("error", function () {
       kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
+      console.log(2);
     });
     connection.on("close", function () {
       kmoniTimeUpdate(new Date() - Replay, "wolfx", "Disconnect");
@@ -1523,14 +1498,14 @@ function Wolfx_WS() {
       if (Replay !== 0) return;
       kmoniTimeUpdate(new Date() - Replay, "wolfx", "success");
       try {
-        if (heartbeat.type == heartbeat) return;
         var json = jsonParse(message.utf8Data);
+        if (message.type == "heartbeat") return;
         EEWdetect(2, json);
       } catch (err) {
         kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
       }
     });
-    connection.sendUTF("queryjson");
+    connection.sendUTF("query_jmaeew");
     kmoniTimeUpdate(new Date() - Replay, "wolfx", "success");
   });
 

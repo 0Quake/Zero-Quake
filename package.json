@@ -4,8 +4,10 @@
   "version": "0.6.8",
   "description": "地震に関する情報を即座に受信できるアプリケーションです。緊急地震速報に加え、津波情報や地震情報の受信に対応しています。このアプリ一つで、様々な種類の情報を、迅速に、分かりやすく表示します。",
   "scripts": {
-    "start": "electron . --develop --debug-mode",
-    "lint": "eslint src"
+    "start": "electron-forge start",
+    "lint": "eslint src",
+    "package": "electron-forge package",
+    "make": "electron-forge make"
   },
   "build": {
     "win": {
@@ -35,6 +37,7 @@
   "author": "benidate",
   "license": "GPL-2.0",
   "dependencies": {
+    "electron-squirrel-startup": "^1.0.0",
     "electron-store": "^8.1.0",
     "fs": "^0.0.1-security",
     "jsdom": "^22.1.0",
@@ -44,8 +47,13 @@
     "websocket": "^1.0.34"
   },
   "devDependencies": {
+    "@electron-forge/cli": "^7.1.0",
+    "@electron-forge/maker-deb": "^7.1.0",
+    "@electron-forge/maker-rpm": "^7.1.0",
+    "@electron-forge/maker-squirrel": "^7.1.0",
+    "@electron-forge/maker-zip": "^7.1.0",
+    "@electron-forge/plugin-auto-unpack-natives": "^7.1.0",
     "electron": "^27.0.2",
-    "electron-builder": "^24.6.4",
     "eslint": "^8.52.0"
   },
   "repository": {
