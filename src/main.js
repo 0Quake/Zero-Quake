@@ -2378,7 +2378,10 @@ function EQI_JMAXML_Req(url) {
           } else {
             var ValidDateTimeElm = xml.querySelector("ValidDateTime");
             if (ValidDateTimeElm) var ValidDateTimeTmp = new Date(ValidDateTimeElm.textContent);
-            else var ValidDateTimeTmp = new Date(xml.querySelector("ReportDateTime").textContent).setHours(ValidDateTimeTmp.getHours() + 12);
+            else {
+              var ValidDateTimeTmp = new Date(xml.querySelector("ReportDateTime").textContent);
+              ValidDateTimeTmp.setHours(ValidDateTimeTmp.getHours() + 12);
+            }
             if (ValidDateTimeTmp < new Date()) return;
             tsunamiDataTmp = {
               issue: { time: new Date(xml.querySelector("ReportDateTime").textContent), EventID: Number(xml.querySelector("EventID").textContent) },
