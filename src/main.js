@@ -2383,8 +2383,10 @@ function EQI_JMAXML_Req(url) {
               ValidDateTimeTmp.setHours(ValidDateTimeTmp.getHours() + 12);
             }
             if (ValidDateTimeTmp < new Date()) return;
+            var EventID = xml.querySelector("EventID").textContent.split(" ").map(Number);
+
             tsunamiDataTmp = {
-              issue: { time: new Date(xml.querySelector("ReportDateTime").textContent), EventID: Number(xml.querySelector("EventID").textContent) },
+              issue: { time: new Date(xml.querySelector("ReportDateTime").textContent), EventID: EventID },
               areas: [],
               revocation: false,
               source: "jmaXML",

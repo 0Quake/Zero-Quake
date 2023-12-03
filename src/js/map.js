@@ -639,16 +639,18 @@ function init() {
   map.on("click", "tsunami_MajorWarn", tsunamiPopup);
 
   setInterval(function () {
-    map.setPaintProperty("tsunami_Yoho", "line-opacity", 0);
-    map.setPaintProperty("tsunami_Watch", "line-opacity", 0);
-    map.setPaintProperty("tsunami_Warn", "line-opacity", 0);
-    map.setPaintProperty("tsunami_MajorWarn", "line-opacity", 0);
-    setTimeout(function () {
-      map.setPaintProperty("tsunami_Yoho", "line-opacity", 1);
-      map.setPaintProperty("tsunami_Watch", "line-opacity", 1);
-      map.setPaintProperty("tsunami_Warn", "line-opacity", 1);
-      map.setPaintProperty("tsunami_MajorWarn", "line-opacity", 1);
-    }, 300);
+    if (tsunamiData) {
+      map.setPaintProperty("tsunami_Yoho", "line-opacity", 0);
+      map.setPaintProperty("tsunami_Watch", "line-opacity", 0);
+      map.setPaintProperty("tsunami_Warn", "line-opacity", 0);
+      map.setPaintProperty("tsunami_MajorWarn", "line-opacity", 0);
+      setTimeout(function () {
+        map.setPaintProperty("tsunami_Yoho", "line-opacity", 1);
+        map.setPaintProperty("tsunami_Watch", "line-opacity", 1);
+        map.setPaintProperty("tsunami_Warn", "line-opacity", 1);
+        map.setPaintProperty("tsunami_MajorWarn", "line-opacity", 1);
+      }, 300);
+    }
   }, 2500);
 
   map.addControl(new maplibregl.NavigationControl(), "top-right");
@@ -1126,13 +1128,18 @@ function tsunamiDataUpdate(data) {
     now_tsunami = false;
   } else {
     EQInfoLink.style.display = "none";
-    if (data.issue.EventID) {
-      var EQdata = eqInfoDataJMA.find(function (elm) {
-        return elm.eventId == data.issue.EventID;
+    if (Array.isArray(data.issue.EventID) && data.issue.EventID.length) {
+      if (data.issue.EventID.length > 1) var link = [];
+      EQinfo_Index = 0;
+      document.getElementById("EQCount").innerText = data.issue.EventID.length > 1 ? "(" + data.issue.EventID.length + ")" : "";
+      eqInfoDataJMA.forEach(function (elm) {
+        if (data.issue.EventID.includes(Number(elm.eventId))) {
+          link.push("#EQItem_" + elm.eventId);
+        }
       });
-      if (EQdata) {
+      if (link.length) {
         EQInfoLink.style.display = "inline-block";
-        EQInfoLink.dataset.eventid = "#EQItem_" + data.issue.EventID;
+        EQInfoLink.dataset.eventid = link.join(",");
       }
     }
     if (config.home.TsunamiSect) {
@@ -1249,20 +1256,29 @@ function tsunamiDataUpdate(data) {
   }
   document.getElementById("noEEW").style.display = now_EEW.length == 0 && !now_tsunami && EQDetectItem.length == 0 ? "block" : "none";
 }
+
+var EQinfo_Index = 0;
 EQInfoLink.addEventListener("click", function (e) {
   e.preventDefault();
-  var EQItemElm = document.querySelector(EQInfoLink.dataset.eventid);
-  if (EQItemElm) {
-    EQItemElm.scrollIntoView({
-      block: "center",
-    });
-    EQItemElm.animate(
-      {
-        boxShadow: ["0 0 0 0 rgba(203, 27, 27, 1)", "0 0 0 15px rgba(203, 27, 27, 0)"],
-      },
-      500
-    );
-  }
+  var EIDs = EQInfoLink.dataset.eventid.split(",");
+  EIDs.forEach(function (elm, index) {
+    var EQItemElm = document.querySelector(elm);
+    if (EQItemElm) {
+      if (index == EQinfo_Index) {
+        EQItemElm.scrollIntoView({
+          block: "center",
+        });
+      }
+      EQItemElm.animate(
+        {
+          boxShadow: ["0 0 0 0 rgba(203, 27, 27, 1)", "0 0 0 15px rgba(203, 27, 27, 0)"],
+        },
+        500
+      );
+    }
+  });
+  EQinfo_Index++;
+  if (EQinfo_Index >= EIDs.length) EQinfo_Index = 0;
 });
 
 //津波情報色変換
