@@ -272,8 +272,8 @@ function checkUpdate() {
           var latest_verTmp = String(json[0].tag_name.replace("v", ""));
           var p = require("../package.json");
           var current_verTmp = p.version;
-          var latest_v = String(latest_verTmp).split(".");
-          var current_v = String(current_verTmp).split(".");
+          var latest_v = String(latest_verTmp).split(".").map(Number);
+          var current_v = String(current_verTmp).split(".").map(Number);
           var dl_page = json[0].html_url;
           var update_detail = json[0].body;
           downloadURL = json[0].assets[0];
@@ -288,6 +288,7 @@ function checkUpdate() {
             }
           }
 
+          console.log(latest_v,current_v)
           var update_available = false;
           if (latest_v[0] > current_v[0]) {
             update_available = true;
