@@ -287,8 +287,6 @@ function checkUpdate() {
               });
             }
           }
-
-          console.log(latest_v,current_v)
           var update_available = false;
           if (latest_v[0] > current_v[0]) {
             update_available = true;
