@@ -1129,7 +1129,7 @@ function tsunamiDataUpdate(data) {
   } else {
     EQInfoLink.style.display = "none";
     if (Array.isArray(data.issue.EventID) && data.issue.EventID.length) {
-      if (data.issue.EventID.length > 1) var link = [];
+      var link = [];
       EQinfo_Index = 0;
       document.getElementById("EQCount").innerText = data.issue.EventID.length > 1 ? "(" + data.issue.EventID.length + ")" : "";
       eqInfoDataJMA.forEach(function (elm) {

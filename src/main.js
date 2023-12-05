@@ -1553,7 +1553,7 @@ function RegularExecution() {
     });
 
     //津波情報解除
-    if (tsunamiData && tsunamiData.ValidDateTime <= new Date()) {
+    if (tsunamiData && tsunamiData.ValidDateTime <= new Date() && false) {
       TsunamiInfoControl({
         issue: { time: tsunamiData.ValidDateTime },
         revocation: true,
@@ -2880,7 +2880,7 @@ function TsunamiInfoControl(data) {
       soundPlay("TsunamiInfo");
       tsunamiData = data;
 
-      if (newInfo) createWindow(); //アラート
+      createWindow(); //アラート
       messageToMainWindow({
         action: "tsunamiUpdate",
         data: data,
