@@ -198,21 +198,26 @@ function EEWAlertUpdate(data) {
     var stillEQ = data.find(function (elm2) {
       return elm.EventID == elm2.EventID;
     });
+    var EEWItem = document.getElementById("EEW-" + elm.EventID);
+
     //終わった地震
     if (!stillEQ) {
       epiCenterClear(elm.EventID);
-      document.getElementById("EEW-" + elm.EventID).remove();
+      if (EEWItem) EEWItem.remove();
     } else if (elm.is_cancel) {
       epiCenterClear(elm.EventID);
       setTimeout(function () {
-        document.getElementById("EEW-" + elm.EventID).remove();
+        if (EEWItem) EEWItem.remove();
       }, 10000);
     }
     return stillEQ;
   });
   if (now_EEW.length == 0) EEWID = 0;
 
-  if (data.length == 0) document.body.classList.remove("EEWMode");
+  var EEWData = data.filter((elm) => {
+    return !elm.is_cancel;
+  });
+  if (EEWData.length == 0) document.body.classList.remove("EEWMode");
   else document.body.classList.add("EEWMode");
 
   document.getElementById("noEEW").style.display = now_EEW.length == 0 && !now_tsunami && EQDetectItem.length == 0 ? "block" : "none";

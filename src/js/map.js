@@ -1005,13 +1005,16 @@ function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrive
     let _center = turf.point([longitude, latitude]);
 
     if (map.getSource("PCircle_" + EventID)) {
-      if (pRadius) {
+      var PCircleElm = map.getSource("PCircle_" + EventID);
+      if (pRadius && PCircleElm) {
         var pcircle = turf.circle(_center, pRadius / 1000, circle_options);
-        map.getSource("PCircle_" + EventID).setData(pcircle);
+        PCircleElm.setData(pcircle);
       }
-      if (sRadius) {
+
+      var SCircleElm = map.getSource("SCircle_" + EventID);
+      if (sRadius && SCircleElm) {
         var scircle = turf.circle(_center, sRadius / 1000, circle_options);
-        map.getSource("SCircle_" + EventID).setData(scircle);
+        SCircleElm.setData(scircle);
         map.setPaintProperty("SCircle_" + EventID, "line-width", SnotArrived ? 0 : 2);
       }
     } else {
