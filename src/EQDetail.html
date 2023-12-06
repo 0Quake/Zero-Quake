@@ -93,6 +93,7 @@
 
   <canvas id="estimated_intensity_map_canvas" width="800" height="800"></canvas>
 
+
   <div id="mapcontainer_Wrap">
     <div id="mapcontainer" class="kmoni_hide"></div>
 
@@ -135,8 +136,9 @@
     </div>
 
   </div>
-  <main>
+  <div id="TsunamiShortMsg">震源付近で津波の恐れ</div>
 
+  <main>
     <div id="ShindoSample"><span>震度：</span>
       <div id="ShindoSample0">0</div>
       <div id="ShindoSample1">1</div>
@@ -157,7 +159,7 @@
     </div>
 
     <div id="infoKind">
-      <div>受信した情報種別：</div>
+      <div>受信した情報：</div>
       <span id="type-1">緊急地震速報</span>
       <span id="type-2">震度速報</span>
       <span id="type-3">震源に関する情報</span>
@@ -167,8 +169,6 @@
       <span id="type-7">長周期地震動に関する観測情報</span>
       <span id="type-6">推計震度分布</span>
     </div>
-
-
 
     <div id="tableWrap">
 
@@ -198,7 +198,7 @@
           </tr>
         </table>
         <h2>付加文</h2>
-        <ul id="data_comment">なし</ul>
+        <div id="data_comment">なし</div>
       </div>
 
       <div id="ShindoWrap">
@@ -214,7 +214,7 @@
           <button id="AllClose" class="material-icons-round" title="すべて折り畳み">unfold_less</button>
         </h2>
         <div id="Shindo">
-          <div>情報がありません</div>
+          <div class="NODataCaption">情報がありません</div>
         </div>
         <div id="lngintListWrap">
           <h2>
@@ -223,13 +223,14 @@
             <button id="AllCloseL" class="material-icons-round" title="すべて折り畳み">unfold_less</button>
           </h2>
           <div id="LngInt">
-            <div>情報がありません</div>
+            <div class="NODataCaption">情報がありません</div>
           </div>
 
         </div>
       </div>
 
     </div>
+
   </main>
 
   <div id="canceled">情報がキャンセルされました</div>

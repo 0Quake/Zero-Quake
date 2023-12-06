@@ -917,9 +917,10 @@ function jma_Fetch(url) {
       var cancelTmp = json.Head.InfoType == "取消";
 
       if (json.Body.Comments) {
-        var commentText = "";
-        if (json.Body.Comments.ForecastComment && json.Body.Comments.ForecastComment.Text) commentText += json.Body.Comments.ForecastComment.Text;
-        if (json.Body.Comments.FreeFormComment) commentText += json.Body.Comments.FreeFormComment;
+        var commentText = { ForecastComment: "", VarComment: "", FreeFormComment: "" };
+        if (json.Body.Comments.ForecastComment && json.Body.Comments.ForecastComment.Text) commentText.ForecastComment = json.Body.Comments.ForecastComment.Text;
+        if (json.Body.Comments.VarComment && json.Body.Comments.VarComment.Text) commentText.VarComment = json.Body.Comments.VarComment.Text;
+        if (json.Body.Comments.FreeFormComment) commentText.FreeFormComment = json.Body.Comments.FreeFormComment;
       }
       EQInfoControl({
         infoType: json.Head.Title,
@@ -991,9 +992,10 @@ function jmaL_Fetch(url) {
       var cancelTmp = json.Head.InfoType == "取消";
 
       if (json.Body.Comments) {
-        var commentText = "";
-        if (json.Body.Comments.ForecastComment && json.Body.Comments.ForecastComment.Text) commentText += json.Body.Comments.ForecastComment.Text;
-        if (json.Body.Comments.FreeFormComment) commentText += json.Body.Comments.FreeFormComment;
+        var commentText = { ForecastComment: "", VarComment: "", FreeFormComment: "" };
+        if (json.Body.Comments.ForecastComment && json.Body.Comments.ForecastComment.Text) commentText.ForecastComment = json.Body.Comments.ForecastComment.Text;
+        if (json.Body.Comments.VarComment && json.Body.Comments.VarComment.Text) commentText.VarComment = json.Body.Comments.VarComment.Text;
+        if (json.Body.Comments.FreeFormComment && json.Body.Comments.FreeFormComment) commentText.FreeFormComment = json.Body.Comments.FreeFormComment;
       }
       EQInfoControl({
         infoType: json.Head.Title,
@@ -1069,9 +1071,10 @@ function jmaXMLFetch(url) {
       if (IntensityElm) maxIntTmp = shindoConvert(IntensityElm.querySelector("MaxInt").textContent, 4);
 
       if (xml.querySelector("Body Comments")) {
-        var commentText = "";
-        if (xml.querySelector("Body Comments ForecastComment")) commentText += xml.querySelector("Body Comments ForecastComment Text").textContent;
-        if (xml.querySelector("Body Comments FreeFormComment")) commentText += xml.querySelector("Body Comments FreeFormComment").textContent;
+        var commentText = { ForecastComment: "", VarComment: "", FreeFormComment: "" };
+        if (xml.querySelector("Body Comments ForecastComment")) commentText.ForecastComment = xml.querySelector("Body Comments ForecastComment Text").textContent;
+        if (xml.querySelector("Body Comments VarComment")) commentText.VarComment = xml.querySelector("Body Comments VarComment Text").textContent;
+        if (xml.querySelector("Body Comments FreeFormComment")) commentText.FreeFormComment = xml.querySelector("Body Comments FreeFormComment").textContent;
       }
 
       EQInfoControl({
@@ -1205,9 +1208,10 @@ function axisInfoCtrl(json) {
   var cancelTmp = json.Head.InfoType == "取消";
 
   if (json.Body.Comments) {
-    var commentText = "";
-    if (json.Body.Comments.ForecastComment && json.Body.Comments.ForecastComment.Text) commentText += json.Body.Comments.ForecastComment.Text;
-    if (json.Body.Comments.FreeFormComment) commentText += json.Body.Comments.FreeFormComment;
+    var commentText = { ForecastComment: "", VarComment: "", FreeFormComment: "" };
+    if (json.Body.Comments.ForecastComment && json.Body.Comments.ForecastComment.Text) commentText.ForecastComment = json.Body.Comments.ForecastComment.Text;
+    if (json.Body.Comments.VarComment && json.Body.Comments.VarComment.Text) commentText.VarComment = json.Body.Comments.FreeFormComment;
+    if (json.Body.Comments.FreeFormComment) commentText.FreeFormComment = json.Body.Comments.FreeFormComment;
   }
   EQInfoControl({
     infoType: json.Head.Title,
@@ -1398,7 +1402,7 @@ function add_Area_info(name, maxInt) {
     icon.innerHTML = '<div style="background:' + color[0] + ";color:" + color[1] + '">' + maxInt + "</div>";
 
     var maxIntStr = shindoConvert(maxInt, 1);
-    var AreaPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<div class='popupContent'><div class='shindoItem' style='background:" + color[0] + ";color:" + color[1] + "'>震度 " + maxIntStr + "</div><div class='pointName'>" + name + "</div><div class='pointHead'>細分区域</div></div><div></div>");
+    var AreaPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<div class='popupContent'><div class='shindoItem_S' style='background:" + color[0] + ";color:" + color[1] + "'>震度 " + maxIntStr + "</div><div class='pointName'>" + name + "</div><div class='pointHead'>細分区域</div></div><div></div>");
     markerElm = new maplibregl.Marker(icon).setLngLat([pointLocation[1], pointLocation[0]]).setPopup(AreaPopup).addTo(map);
     ZoomBounds.extend([pointLocation[1], pointLocation[0]]);
   }
@@ -1466,8 +1470,6 @@ var ZoomBounds = new maplibregl.LngLatBounds();
 
 //観測点ごとの情報描画（リスト・地図プロット）
 function add_IntensityStation_info(lat, lng, name, int) {
-  name = name.replace("＊", "");
-
   var wrap3 = document.querySelectorAll(".WrapLevel3");
 
   var intStr = shindoConvert(int, 1);
@@ -1541,7 +1543,7 @@ function add_Area_infoL(name, maxInt) {
     icon.classList.add("MaxLgIntIcon");
     icon.innerHTML = '<div style="background:' + color[0] + ";color:" + color[1] + '">' + maxInt + "</div>";
 
-    var AreaPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<div class='popupContent'><div class='shindoItem' style='background:" + color[0] + ";color:" + color[1] + "'>長周期地震動階級 " + maxInt + "</div><div class='pointName'>" + name + "</div><div class='pointHead'>細分区域</div></div><div></div>");
+    var AreaPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<div class='popupContent'><div class='shindoItem_S' style='background:" + color[0] + ";color:" + color[1] + "'>長周期地震動階級 " + maxInt + "</div><div class='pointName'>" + name + "</div><div class='pointHead'>細分区域</div></div><div></div>");
     markerElm = new maplibregl.Marker(icon).setLngLat([pointLocation[1], pointLocation[0]]).setPopup(AreaPopup).addTo(map);
     ZoomBounds.extend([pointLocation[1], pointLocation[0]]);
   }
@@ -1566,7 +1568,6 @@ function add_Area_infoL(name, maxInt) {
 //観測点ごとの情報描画（リスト・地図プロット）
 function add_IntensityStation_infoL(lat, lng, name, int) {
   var wrap3 = document.querySelectorAll(".WrapLevel2L");
-  name = name.replace("＊", "");
 
   var color4 = LgIntConvert(int, 2);
   var intStr = int;
@@ -1606,13 +1607,6 @@ function EQInfoControl(data) {
   if (data.mag && mostNew) data_MT.innerText = "M";
   if ((data.depth || data.depth === 0) && (mostNew || !EQInfo.depth)) EQInfo.depth = Math.abs(data.depth);
   if (data.epiCenter && (mostNew || !EQInfo.epiCenter)) EQInfo.epiCenter = data.epiCenter;
-  if (data.comment) {
-    if (!EQInfo.comment) EQInfo.comment = [];
-    var commentTmp = "<li><time>" + dateEncode(4, data.reportTime) + "</time>" + data.comment + "</li>";
-    if (!EQInfo.comment.includes(commentTmp)) {
-      EQInfo.comment.push(commentTmp);
-    }
-  }
 
   if (EQInfo.originTime) data_time.innerText = dateEncode(4, EQInfo.originTime);
   if (EQInfo.maxI) data_maxI.innerText = shindoConvert(EQInfo.maxI, 1);
@@ -1630,7 +1624,51 @@ function EQInfoControl(data) {
 
   if (EQInfo.epiCenter) data_center.innerText = EQInfo.epiCenter;
 
-  if (EQInfo.comment) data_comment.innerHTML = EQInfo.comment.join("\n");
+  if (data.comment) {
+    var comments = data.comment.ForecastComment.split("\n").concat(data.comment.VarComment.split("\n"), data.comment.FreeFormComment.split("\n"));
+
+    var TsunamiShortMsg;
+    for (const elm of comments) {
+      switch (elm) {
+        case "この地震による津波の心配はありません。":
+        case "この地震による日本への津波の影響はありません。":
+        case "震源の近傍で小さな津波発生の可能性がありますが、被害をもたらす津波の心配はありません。":
+        case "この地震により、日本の沿岸では若干の海面変動があるかもしれませんが、被害の心配はありません。":
+          TsunamiShortMsg = "津波の心配 なし";
+          break;
+        case "津波警報等（大津波警報・津波警報あるいは津波注意報）を発表中です。":
+          TsunamiShortMsg = "津波警報等 発表";
+          break;
+        case "震源が海底の場合、津波が発生するおそれがあります。":
+        case "一般的に、この規模の地震が海域の浅い領域で発生すると、津波が発生することがあります。":
+          TsunamiShortMsg = "場合により津波の恐れ";
+          break;
+        case "震源の近傍で津波発生の可能性があります。":
+          TsunamiShortMsg = "震源付近で津波の恐れ";
+          break;
+        case "今後の情報に注意してください。":
+        case "日本への津波の有無については現在調査中です。":
+          TsunamiShortMsg = "今後の情報に注意";
+          break;
+        case "太平洋の広域に津波発生の可能性があります。":
+        case "太平洋で津波発生の可能性があります。":
+        case "北西太平洋で津波発生の可能性があります。":
+          TsunamiShortMsg = "太平洋で津波の恐れ";
+          break;
+        case "インド洋の広域に津波発生の可能性があります。":
+        case "インド洋で津波発生の可能性があります。":
+          TsunamiShortMsg = "インド洋で津波の恐れ";
+          break;
+      }
+    }
+    console.log(TsunamiShortMsg);
+    if (TsunamiShortMsg) {
+      document.getElementById("TsunamiShortMsg").style.display = "block";
+      document.getElementById("TsunamiShortMsg").innerText = TsunamiShortMsg;
+    }
+
+    data_comment.innerHTML = data.comment.ForecastComment + "\n" + data.comment.VarComment + "\n" + data.comment.FreeFormComment;
+  }
 
   if (data.lat && data.lng) {
     ZoomBounds.extend([data.lng, data.lat]);

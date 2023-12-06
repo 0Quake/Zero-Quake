@@ -33,6 +33,7 @@ main {
   display: block;
   border-top: solid 1px #666;
   height: fit-content;
+  text-align: center;
 }
 
 main h2,
@@ -71,7 +72,9 @@ td {
   text-align: left;
 }
 #tableWrap {
-  display: flex;
+  display: inline-flex;
+  max-width: 1000px;
+  text-align: left;
 }
 #leftSide,
 #ShindoWrap {
@@ -458,15 +461,7 @@ td {
 #data_comment {
   margin: 10px;
 }
-#data_comment li {
-  margin-top: 5px;
-}
-#data_comment li time {
-  font-size: 14px;
-  margin-right: 5px;
-  color: #ccc;
-  font-family: "AzeretMono-Regular", ui-monospace, sans-serif;
-}
+
 #homeShindoWrap {
   display: none;
 }
@@ -524,12 +519,16 @@ td {
 .popupContent {
   padding: 4px;
 }
-.shindoItem {
+.shindoItem,
+.shindoItem_S {
   display: inline-block;
   font-family: "M PLUS 1p", sans-serif;
   border-radius: 100px;
   margin-right: 5px;
   padding: 1px 5px;
+}
+.shindoItem_S {
+  border-radius: 4px;
 }
 .pointHead {
   color: #999;
@@ -545,6 +544,33 @@ td {
 }
 .epicenterWrp {
   padding: 4px;
+}
+.NODataCaption {
+  text-align: center;
+  color: #999;
+}
+#TsunamiShortMsg {
+  display: none;
+  position: absolute;
+  top: 5px;
+  right: 0;
+  left: 0;
+  background: #444;
+  border: solid 1px #ccc;
+  color: #ccc;
+  height: 35px;
+  line-height: 35px;
+  width: 220px;
+  margin: auto;
+  text-align: center;
+  font-size: 18px;
+  border-radius: 10px;
+}
+#TsunamiShortMsg::before {
+  content: "tsunami";
+  font-family: "Material Icons Round";
+  vertical-align: middle;
+  margin-right: 5px;
 }
 @media (max-width: 600px) {
   #tableWrap {
