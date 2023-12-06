@@ -352,7 +352,8 @@ function doUpdate(url) {
       res.pipe(fs.createWriteStream("ZeroQuakeInstaller.exe")).on("close", function () {
         var COMMAND = "start ZeroQuakeInstaller.exe";
         var spawn = require("child_process").spawn;
-        spawn(COMMAND, [], { shell: true, detached: true, stdio: "inherit" });
+        var Installer = spawn(COMMAND, [], { shell: true, detached: true, stdio: "inherit" });
+        Installer.unref();
         app.exit(0);
       });
     } catch (err) {
@@ -1632,7 +1633,7 @@ function EEWdetect(type, json) {
   if (!json) return;
   if (type == 1) {
     //ProjectBS
-    try{
+    try {
       var EBIData = [];
       var EBIStr = String(json.originalTelegram).split("EBI ")[1];
       var codeData = String(json.originalTelegram).split(" ");
@@ -1689,10 +1690,12 @@ function EEWdetect(type, json) {
         source: "ProjectBS",
       };
       EEWcontrol(EEWdata);
-    } catch (err) { return; }
+    } catch (err) {
+      return;
+    }
   } else if (type == 2) {
-      //wolfx
-    try{
+    //wolfx
+    try {
       var EBIData = [];
       var EBIStr = String(json.OriginalText).split("EBI ")[1];
       if (EBIStr) {
@@ -1748,129 +1751,131 @@ function EEWdetect(type, json) {
       };
 
       EEWcontrol(EEWdata, json);
-    }catch(err){return;}
+    } catch (err) {
+      return;
+    }
   } else if (type == 3) {
     //axis
     try {
-        var alertflgTmp = json.Title == "緊急地震速報（予報）" ? "予報" : "警報";
-        var EBIData = [];
-        json.Forecast.forEach(function (elm) {
-          EBIData.push({
-            Code: elm.Code,
-            Name: elm.Name,
-            Alert: null,
-            IntTo: elm.Intensity.To,
-            IntFrom: elm.Intensity.From,
-            ArrivalTime: null,
-            Arrived: null,
-          });
+      var alertflgTmp = json.Title == "緊急地震速報（予報）" ? "予報" : "警報";
+      var EBIData = [];
+      json.Forecast.forEach(function (elm) {
+        EBIData.push({
+          Code: elm.Code,
+          Name: elm.Name,
+          Alert: null,
+          IntTo: elm.Intensity.To,
+          IntFrom: elm.Intensity.From,
+          ArrivalTime: null,
+          Arrived: null,
         });
-        var EEWdata = {
-          alertflg: alertflgTmp,
-          EventID: Number(json.EventID),
-          serial: json.Serial,
-          report_time: new Date(json.ReportDateTime),
-          magnitude: Number(json.Magnitude),
-          maxInt: shindoConvert(json.Intensity),
-          depth: Number(json.Hypocenter.Depth.replace("km", "")),
-          is_cancel: json.Flag.is_cancel,
-          is_final: json.Flag.is_final,
-          is_training: json.Flag.is_training,
-          latitude: json.Hypocenter.Coordinate[1],
-          longitude: json.Hypocenter.Coordinate[0],
-          region_name: json.Hypocenter.Name,
-          origin_time: new Date(json.OriginDateTime),
-          isPlum: null,
-          userIntensity: null,
-          arrivalTime: null,
-          intensityAreas: null,
-          warnZones: EBIData,
-          source: "axis",
-        };
-        EEWcontrol(EEWdata);
-      } catch (err) {
-        kmoniTimeUpdate(new Date() - Replay, "axis", "Error");
-      }
-    } else if (type == 4) {
-      //P2P
-      try {
-        var maxIntTmp = Math.floor(
-          Math.max.apply(
-            null,
-            json.areas.map(function (p) {
-              return p.scaleTo;
-            })
-          )
-        );
-
-        var latitudeTmp;
-        var longitudeTmp;
-        var depthTmp;
-        var magnitudeTmp;
-        var region_nameTmp;
-        var origin_timeTmp;
-        var conditionTmp = false;
-        if (json.earthquake) {
-          latitudeTmp = json.earthquake.hypocenter.latitude;
-          longitudeTmp = json.earthquake.hypocenter.longitude;
-          depthTmp = json.earthquake.hypocenter.depth;
-          magnitudeTmp = json.earthquake.hypocenter.magnitude;
-          region_nameTmp = json.earthquake.hypocenter.name;
-          origin_timeTmp = new Date(json.earthquake.originTime);
-          conditionTmp = json.earthquake.condition == "仮定震源要素";
-        }
-        var EBIData = [];
-        json.areas.forEach(function (elm) {
-          EBIData.push({
-            Code: null,
-            Name: elm.name,
-            Alert: alertFlg,
-            IntTo: shindoConvert(elm.scaleTo, 0),
-            IntFrom: shindoConvert(elm.scaleFrom, 0),
-            ArrivalTime: elm.arrivalTime,
-            Arrived: elm.kindCode == 11,
-          });
-        });
-        if (!json.issue) return;
-        var EEWdata = {
-          alertflg: "警報",
-          EventID: Number(json.issue.eventId),
-          serial: Number(json.issue.serial),
-          report_time: new Date(json.issue.time),
-          magnitude: magnitudeTmp,
-          maxInt: shindoConvert(maxIntTmp, 0),
-          depth: depthTmp,
-          is_cancel: Boolean(json.canceled),
-          is_final: null,
-          is_training: Boolean(json.test),
-          latitude: latitudeTmp,
-          longitude: longitudeTmp,
-          region_name: region_nameTmp,
-          origin_time: origin_timeTmp,
-          isPlum: conditionTmp,
-          warnZones: [],
-          source: "P2P_EEW",
-        };
-
-        var areaTmp = [];
-        json.areas.forEach(function (elm) {
-          areaTmp.push({
-            Code: null,
-            Name: elm.name,
-            Alert: elm.kindCode == 10 || elm.kindCode == 11 || elm.kindCode == 19,
-            IntTo: shindoConvert(elm.scaleTo),
-            IntFrom: shindoConvert(elm.scaleFrom),
-            ArrivalTime: new Date(elm.arrivalTime),
-            Arrived: elm.kindCode == 11,
-          });
-        });
-        EEWdata.warnZones = areaTmp;
-
-        EEWcontrol(EEWdata);
-      } catch (err) {
-        kmoniTimeUpdate(new Date() - Replay, "P2P_EEW", "Error");
-      }
+      });
+      var EEWdata = {
+        alertflg: alertflgTmp,
+        EventID: Number(json.EventID),
+        serial: json.Serial,
+        report_time: new Date(json.ReportDateTime),
+        magnitude: Number(json.Magnitude),
+        maxInt: shindoConvert(json.Intensity),
+        depth: Number(json.Hypocenter.Depth.replace("km", "")),
+        is_cancel: json.Flag.is_cancel,
+        is_final: json.Flag.is_final,
+        is_training: json.Flag.is_training,
+        latitude: json.Hypocenter.Coordinate[1],
+        longitude: json.Hypocenter.Coordinate[0],
+        region_name: json.Hypocenter.Name,
+        origin_time: new Date(json.OriginDateTime),
+        isPlum: null,
+        userIntensity: null,
+        arrivalTime: null,
+        intensityAreas: null,
+        warnZones: EBIData,
+        source: "axis",
+      };
+      EEWcontrol(EEWdata);
+    } catch (err) {
+      kmoniTimeUpdate(new Date() - Replay, "axis", "Error");
     }
+  } else if (type == 4) {
+    //P2P
+    try {
+      var maxIntTmp = Math.floor(
+        Math.max.apply(
+          null,
+          json.areas.map(function (p) {
+            return p.scaleTo;
+          })
+        )
+      );
+
+      var latitudeTmp;
+      var longitudeTmp;
+      var depthTmp;
+      var magnitudeTmp;
+      var region_nameTmp;
+      var origin_timeTmp;
+      var conditionTmp = false;
+      if (json.earthquake) {
+        latitudeTmp = json.earthquake.hypocenter.latitude;
+        longitudeTmp = json.earthquake.hypocenter.longitude;
+        depthTmp = json.earthquake.hypocenter.depth;
+        magnitudeTmp = json.earthquake.hypocenter.magnitude;
+        region_nameTmp = json.earthquake.hypocenter.name;
+        origin_timeTmp = new Date(json.earthquake.originTime);
+        conditionTmp = json.earthquake.condition == "仮定震源要素";
+      }
+      var EBIData = [];
+      json.areas.forEach(function (elm) {
+        EBIData.push({
+          Code: null,
+          Name: elm.name,
+          Alert: alertFlg,
+          IntTo: shindoConvert(elm.scaleTo, 0),
+          IntFrom: shindoConvert(elm.scaleFrom, 0),
+          ArrivalTime: elm.arrivalTime,
+          Arrived: elm.kindCode == 11,
+        });
+      });
+      if (!json.issue) return;
+      var EEWdata = {
+        alertflg: "警報",
+        EventID: Number(json.issue.eventId),
+        serial: Number(json.issue.serial),
+        report_time: new Date(json.issue.time),
+        magnitude: magnitudeTmp,
+        maxInt: shindoConvert(maxIntTmp, 0),
+        depth: depthTmp,
+        is_cancel: Boolean(json.canceled),
+        is_final: null,
+        is_training: Boolean(json.test),
+        latitude: latitudeTmp,
+        longitude: longitudeTmp,
+        region_name: region_nameTmp,
+        origin_time: origin_timeTmp,
+        isPlum: conditionTmp,
+        warnZones: [],
+        source: "P2P_EEW",
+      };
+
+      var areaTmp = [];
+      json.areas.forEach(function (elm) {
+        areaTmp.push({
+          Code: null,
+          Name: elm.name,
+          Alert: elm.kindCode == 10 || elm.kindCode == 11 || elm.kindCode == 19,
+          IntTo: shindoConvert(elm.scaleTo),
+          IntFrom: shindoConvert(elm.scaleFrom),
+          ArrivalTime: new Date(elm.arrivalTime),
+          Arrived: elm.kindCode == 11,
+        });
+      });
+      EEWdata.warnZones = areaTmp;
+
+      EEWcontrol(EEWdata);
+    } catch (err) {
+      kmoniTimeUpdate(new Date() - Replay, "P2P_EEW", "Error");
+    }
+  }
 }
 
 //EEW情報マージ
