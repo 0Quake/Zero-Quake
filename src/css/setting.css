@@ -133,7 +133,7 @@ button {
 div .tabcontent {
   height: auto;
   overflow: visible;
-  padding: 20px!important;
+  padding: 20px !important;
   max-width: 600px;
 }
 #tab1_content2 {
@@ -144,7 +144,6 @@ div .tabcontent {
   left: 0;
   bottom: 0;
   right: 0;
-  height: 40px;
   line-height: 40px;
   border-top: solid 1px #666;
   text-align: center;
@@ -154,7 +153,13 @@ div .tabcontent {
 #BtnWrap button {
   margin: 5px;
 }
-
+#BtnWrap span {
+  font-size: 12px;
+  display: block;
+  height: auto;
+  line-height: 20px;
+  color: #ccc;
+}
 #apply2 {
   background: rgb(149, 46, 46);
 }

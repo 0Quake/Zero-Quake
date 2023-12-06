@@ -1661,7 +1661,6 @@ function EQInfoControl(data) {
           break;
       }
     }
-    console.log(TsunamiShortMsg);
     if (TsunamiShortMsg) {
       document.getElementById("TsunamiShortMsg").style.display = "block";
       document.getElementById("TsunamiShortMsg").innerText = TsunamiShortMsg;
