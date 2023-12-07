@@ -119,34 +119,34 @@ function Mapinit() {
           minzoom: 4,
           maxzoom: 16,
         },
-        basemap: {
-          type: "geojson",
-          data: "./Resource/basemap.json",
-          attribution: "気象庁",
-        },
         worldmap: {
           type: "geojson",
           data: "./Resource/World.json",
+          tolerance:2,
           attribution: "Natural Earth",
+        },
+        basemap: {
+          type: "geojson",
+          data: "./Resource/basemap.json",
+          tolerance:0.7,
+          attribution: "気象庁",
         },
         prefmap: {
           type: "geojson",
           data: "./Resource/prefectures.json",
+          tolerance:0.7,
           attribution: "気象庁",
         },
         lake: {
           type: "geojson",
           data: "./Resource/lake.json",
+          tolerance:1.7,
           attribution: "国土数値情報",
-        },
-        tsunami: {
-          type: "geojson",
-          data: "./Resource/tsunami.json",
-          attribution: "気象庁",
         },
         plate: {
           type: "geojson",
           data: "./Resource/plate.json",
+          tolerance:2,
         },
         tile0: {
           type: "raster",

@@ -271,24 +271,22 @@ function mapInit() {
           minzoom: 4,
           maxzoom: 16,
         },
-        basemap: {
-          type: "geojson",
-          data: "./Resource/basemap.json",
-          attribution: "気象庁",
-        },
         worldmap: {
           type: "geojson",
           data: "./Resource/World.json",
+          tolerance:2,
           attribution: "Natural Earth",
+        },
+        basemap: {
+          type: "geojson",
+          data: "./Resource/basemap.json",
+          tolerance:0.7,
+          attribution: "気象庁",
         },
         prefmap: {
           type: "geojson",
           data: "./Resource/prefectures.json",
-          attribution: "気象庁",
-        },
-        tsunami: {
-          type: "geojson",
-          data: "./Resource/tsunami.json",
+          tolerance:0.7,
           attribution: "気象庁",
         },
       },
