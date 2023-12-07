@@ -261,7 +261,7 @@ function epiCenterUpdate(elm) {
       var ESPopup2 = new maplibregl.Popup({ closeButton: false, closeOnClick: false, className: "epiCenterTooltip2", offset: [0, 37] }).setLngLat([longitude, latitude]);
       if (tooltipContent) ESPopup2.setText(tooltipContent).addTo(map);
       else ESPopup2.remove();
-      var ESMarker = new maplibregl.Marker(img).setLngLat([longitude, latitude]).setPopup(ESPopup).addTo(map).togglePopup();
+      var ESMarker = new maplibregl.Marker({ element: img }).setLngLat([longitude, latitude]).setPopup(ESPopup).addTo(map).togglePopup();
 
       epiCenter.push({ eid: eid, markerElm: ESMarker, latitude: latitude, longitude: longitude, EEWID: Number(EEWIDTmp), ESPopup: ESPopup, ESPopup2: ESPopup2 });
       displayTmp = epiCenter.length > 1 ? "inline-block" : "none";

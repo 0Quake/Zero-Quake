@@ -122,31 +122,31 @@ function Mapinit() {
         worldmap: {
           type: "geojson",
           data: "./Resource/World.json",
-          tolerance:2,
+          tolerance: 2,
           attribution: "Natural Earth",
         },
         basemap: {
           type: "geojson",
           data: "./Resource/basemap.json",
-          tolerance:0.7,
+          tolerance: 0.7,
           attribution: "気象庁",
         },
         prefmap: {
           type: "geojson",
           data: "./Resource/prefectures.json",
-          tolerance:0.7,
+          tolerance: 0.7,
           attribution: "気象庁",
         },
         lake: {
           type: "geojson",
           data: "./Resource/lake.json",
-          tolerance:1.7,
+          tolerance: 1.7,
           attribution: "国土数値情報",
         },
         plate: {
           type: "geojson",
           data: "./Resource/plate.json",
-          tolerance:2,
+          tolerance: 2,
         },
         tile0: {
           type: "raster",
@@ -611,15 +611,10 @@ function Mapinit() {
     var currentZoom = map.getZoom();
     document.getElementById("mapcontainer").classList.remove("zoomLevel_1", "zoomLevel_2", "zoomLevel_3", "zoomLevel_4", "popup_show");
 
-    if (currentZoom < 4.5) {
-      document.getElementById("mapcontainer").classList.add("zoomLevel_1");
-    } else if (currentZoom < 6) {
-      document.getElementById("mapcontainer").classList.add("zoomLevel_2");
-    } else if (currentZoom < 8) {
-      document.getElementById("mapcontainer").classList.add("zoomLevel_3");
-    } else {
-      document.getElementById("mapcontainer").classList.add("zoomLevel_4");
-    }
+    if (currentZoom < 4.5) document.getElementById("mapcontainer").classList.add("zoomLevel_1");
+    else if (currentZoom < 6) document.getElementById("mapcontainer").classList.add("zoomLevel_2");
+    else if (currentZoom < 8) document.getElementById("mapcontainer").classList.add("zoomLevel_3");
+    else document.getElementById("mapcontainer").classList.add("zoomLevel_4");
   };
   zoomLevelContinue();
   map.on("zoom", zoomLevelContinue);
@@ -639,7 +634,7 @@ function Mapinit() {
     img.src = "./img/homePin.svg";
     img.classList.add("homeIcon");
 
-    new maplibregl.Marker(img).setLngLat([config.home.longitude, config.home.latitude]).addTo(map);
+    new maplibregl.Marker({ element: img }).setLngLat([config.home.longitude, config.home.latitude]).addTo(map);
   }
 }
 
@@ -698,9 +693,8 @@ function overlaySelect(layerName, checked) {
       map.setLayoutProperty(layerName, "visibility", visibility);
     }
 
-    if (layerName == "over2") {
-      document.getElementById("legend1").style.display = checked ? "inline-block" : "none";
-    } else if (layerName == "over3") {
+    if (layerName == "over2") document.getElementById("legend1").style.display = checked ? "inline-block" : "none";
+    else if (layerName == "over3") {
       over3_visiblity = checked;
       document.getElementById("legend2").style.display = over3_visiblity || over4_visiblity ? "inline-block" : "none";
     } else if (layerName == "over4") {
@@ -843,9 +837,7 @@ function jma_ListReq() {
     .then(function (data) {
       data.forEach(function (elm) {
         var urlTmp = "https://www.jma.go.jp/bosai/quake/data/" + elm.json;
-        if (elm.eid == eid && !jmaURL.includes(urlTmp)) {
-          jmaURL.push(urlTmp);
-        }
+        if (elm.eid == eid && !jmaURL.includes(urlTmp)) jmaURL.push(urlTmp);
       });
       mapDraw();
     })
@@ -857,9 +849,7 @@ function jma_ListReq() {
     .then(function (data) {
       data.forEach(function (elm) {
         var urlTmp = "https://www.jma.go.jp/bosai/ltpgm/data/" + elm.json;
-        if (elm.eid == eid && !jmaLURL.includes(urlTmp)) {
-          jmaLURL.push(urlTmp);
-        }
+        if (elm.eid == eid && !jmaLURL.includes(urlTmp)) jmaLURL.push(urlTmp);
       });
       mapDraw();
     })
@@ -1403,7 +1393,7 @@ function add_Area_info(name, maxInt) {
 
     var maxIntStr = shindoConvert(maxInt, 1);
     var AreaPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<div class='popupContent'><div class='shindoItem_S' style='background:" + color[0] + ";color:" + color[1] + "'>震度 " + maxIntStr + "</div><div class='pointName'>" + name + "</div><div class='pointHead'>細分区域</div></div><div></div>");
-    markerElm = new maplibregl.Marker(icon).setLngLat([pointLocation[1], pointLocation[0]]).setPopup(AreaPopup).addTo(map);
+    markerElm = new maplibregl.Marker({ element: icon }).setLngLat([pointLocation[1], pointLocation[0]]).setPopup(AreaPopup).addTo(map);
     ZoomBounds.extend([pointLocation[1], pointLocation[0]]);
   }
 
@@ -1483,7 +1473,7 @@ function add_IntensityStation_info(lat, lng, name, int) {
   icon.innerHTML = '<div style="background:' + color4[0] + ";color:" + color4[1] + '">' + int + "</div>";
 
   var PtPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<div class='popupContent'><div class='shindoItem' style='background:" + color4[0] + ";color:" + color4[1] + "'>震度 " + intStr + "</div><div class='pointName'>" + name + "</div><div class='pointHead'>震度観測点</div></div><div></div>");
-  markerElm = new maplibregl.Marker(icon).setLngLat([lng, lat]).setPopup(PtPopup).addTo(map);
+  markerElm = new maplibregl.Marker({ element: icon }).setLngLat([lng, lat]).setPopup(PtPopup).addTo(map);
 
   wrap3[wrap3.length - 1].appendChild(newDiv);
   ZoomBounds.extend([lng, lat]);
@@ -1544,7 +1534,7 @@ function add_Area_infoL(name, maxInt) {
     icon.innerHTML = '<div style="background:' + color[0] + ";color:" + color[1] + '">' + maxInt + "</div>";
 
     var AreaPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<div class='popupContent'><div class='shindoItem_S' style='background:" + color[0] + ";color:" + color[1] + "'>長周期地震動階級 " + maxInt + "</div><div class='pointName'>" + name + "</div><div class='pointHead'>細分区域</div></div><div></div>");
-    markerElm = new maplibregl.Marker(icon).setLngLat([pointLocation[1], pointLocation[0]]).setPopup(AreaPopup).addTo(map);
+    markerElm = new maplibregl.Marker({ element: icon }).setLngLat([pointLocation[1], pointLocation[0]]).setPopup(AreaPopup).addTo(map);
     ZoomBounds.extend([pointLocation[1], pointLocation[0]]);
   }
 
@@ -1582,7 +1572,7 @@ function add_IntensityStation_infoL(lat, lng, name, int) {
   icon.innerHTML = '<div style="background:' + color4[0] + ";color:" + color4[1] + '">' + int + "</div>";
 
   var PtPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<div class='popupContent'><div class='shindoItem' style='background:" + color4[0] + ";color:" + color4[1] + "'>長周期地震動階級 " + intStr + "</div><div class='pointName'>" + name + "</div><div class='pointHead'>震度観測点</div></div><div></div>");
-  markerElm = new maplibregl.Marker(icon).setLngLat([lng, lat]).setPopup(PtPopup).addTo(map);
+  markerElm = new maplibregl.Marker({ element: icon }).setLngLat([lng, lat]).setPopup(PtPopup).addTo(map);
 
   ZoomBounds.extend([lng, lat]);
 }
@@ -1595,9 +1585,7 @@ function EQInfoControl(data) {
     newInfoDateTime = data.reportTime;
     mostNew = true;
   }
-  if (data.eew) {
-    InfoType_add("type-1");
-  }
+  if (data.eew) InfoType_add("type-1");
   EQInfo.eew = data.eew;
   if (data.cancel) document.getElementById("canceled").style.display = "flex";
 
@@ -1614,13 +1602,9 @@ function EQInfoControl(data) {
   if (EQInfo.mag) data_M.innerText = EQInfo.mag;
   if (data.magType) data_MT.innerText = data.magType;
 
-  if (EQInfo.depth == 0) {
-    data_depth.innerText = "ごく浅い";
-  } else if (EQInfo.depth == 700) {
-    data_depth.innerText = "700km以上";
-  } else if (EQInfo.depth) {
-    data_depth.innerText = Math.round(EQInfo.depth) + "km";
-  }
+  if (EQInfo.depth == 0) data_depth.innerText = "ごく浅い";
+  else if (EQInfo.depth == 700) data_depth.innerText = "700km以上";
+  else if (EQInfo.depth) data_depth.innerText = Math.round(EQInfo.depth) + "km";
 
   if (EQInfo.epiCenter) data_center.innerText = EQInfo.epiCenter;
 
@@ -1678,10 +1662,8 @@ function EQInfoControl(data) {
       img.classList.add("epicenterIcon");
 
       var ESPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<h3 style='background: rgb(149, 46, 46);'>震央</h3><div class='epicenterWrp'>" + EQInfo.epiCenter + "</div>");
-      ESmarkerElm = new maplibregl.Marker(img).setLngLat([data.lng, data.lat]).setPopup(ESPopup).addTo(map);
-    } else {
-      ESmarkerElm.setLngLat([data.lng, data.lat]);
-    }
+      ESmarkerElm = new maplibregl.Marker({ element: img }).setLngLat([data.lng, data.lat]).setPopup(ESPopup).addTo(map);
+    } else ESmarkerElm.setLngLat([data.lng, data.lat]);
   }
 
   switch (data.infoType) {
@@ -1788,12 +1770,10 @@ function InfoType_add(type) {
       document.getElementById("type-1").classList.add("disabled");
       document.getElementById("type-3").classList.add("disabled");
       break;
-
     case "type-2":
     case "type-3":
       document.getElementById("type-1").classList.add("disabled");
       break;
-
     default:
       break;
   }
