@@ -183,31 +183,37 @@ function init() {
         basemap: {
           type: "geojson",
           data: "./Resource/basemap.json",
+          tolerance:0.7,
           attribution: "気象庁",
         },
         worldmap: {
           type: "geojson",
           data: "./Resource/World.json",
+          tolerance:2,
           attribution: "Natural Earth",
         },
         prefmap: {
           type: "geojson",
           data: "./Resource/prefectures.json",
+          tolerance:0.7,
           attribution: "気象庁",
         },
         lake: {
           type: "geojson",
           data: "./Resource/lake.json",
+          tolerance:1.7,
           attribution: "国土数値情報",
         },
         tsunami: {
           type: "geojson",
           data: "./Resource/tsunami.json",
+          tolerance:1.6,
           attribution: "気象庁",
         },
         plate: {
           type: "geojson",
           data: "./Resource/plate.json",
+          tolerance:2,
         },
         tile0: {
           type: "raster",
@@ -364,7 +370,7 @@ function init() {
           source: "tsunami",
           layout: {
             "line-join": "round",
-            "line-cap": "butt",
+            "line-cap": "round",
           },
           paint: {
             "line-color": config.color.Tsunami.TsunamiYohoColor,
@@ -381,7 +387,7 @@ function init() {
           source: "tsunami",
           layout: {
             "line-join": "round",
-            "line-cap": "butt",
+            "line-cap": "round",
           },
           paint: {
             "line-color": config.color.Tsunami.TsunamiWatchColor,
@@ -397,7 +403,7 @@ function init() {
           source: "tsunami",
           layout: {
             "line-join": "round",
-            "line-cap": "butt",
+            "line-cap": "round",
           },
           paint: {
             "line-color": config.color.Tsunami.TsunamiWarningColor,
@@ -414,7 +420,7 @@ function init() {
           source: "tsunami",
           layout: {
             "line-join": "round",
-            "line-cap": "butt",
+            "line-cap": "round",
           },
           paint: {
             "line-color": config.color.Tsunami.TsunamiMajorWarningColor,
