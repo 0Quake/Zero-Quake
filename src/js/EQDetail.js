@@ -26,6 +26,7 @@ var EQInfo = { originTime: null, maxI: null, mag: null, lat: null, lng: null, de
 var shindo_lastUpDate = 0;
 var hinanjoLayers = [];
 var hinanjoCheck = document.getElementById("hinanjo");
+var ZoomBounds;
 
 fetch("Resource/PointSeismicIntensityLocation.json")
   .then(function (res) {
@@ -47,6 +48,7 @@ var axisDatas;
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "metaData") {
     eid = request.eid;
+    eid = 20230505144200;
     if (request.urls && Array.isArray(request.urls)) {
       jmaURL = request.urls.filter(function (elm) {
         return String(elm).indexOf("www.jma.go.jp") != -1;
@@ -459,6 +461,8 @@ function Mapinit() {
       ],
     },
   });
+  ZoomBounds = new maplibregl.LngLatBounds();
+
   map.on("sourcedataloading", (e) => {
     if (e.sourceId == "hinanjo" && hinanjoCheck.checked && e.tile != undefined) {
       var ca = e.tile.tileID.canonical;
@@ -771,7 +775,12 @@ document.getElementById("over4").addEventListener("change", function () {
 
 //推計震度分布リスト取得→描画
 var estimated_intensity_map_layers = [];
+
 function estimated_intensity_mapReq() {
+  var ESMap_canvas = document.createElement("canvas");
+  ESMap_canvas.width = ESMap_canvas.height = 800;
+  var context = ESMap_canvas.getContext("2d");
+
   fetch("https://www.jma.go.jp/bosai/estimated_intensity_map/data/list.json")
     .then(function (res) {
       return res.json();
@@ -784,41 +793,112 @@ function estimated_intensity_mapReq() {
         InfoType_add("type-6");
         idTmp = ItemTmp.url;
         ItemTmp.mesh_num.forEach(function (elm, index) {
-          var latTmp = Number(elm.substring(0, 2)) / 1.5;
-          var lngTmp = Number(elm.substring(2, 4)) + 100;
-          var lat2Tmp = latTmp + 2 / 3;
-          var lng2Tmp = lngTmp + 1;
+          var lat = Number(elm.substring(0, 2)) / 1.5;
+          var lng = Number(elm.substring(2, 4)) + 100;
+          var lat2 = lat + 2 / 3;
+          var lng2 = lng + 1;
 
-          if (map.getSource("estimated_intensity_map_" + index)) {
-            map.removeLayer("estimated_intensity_map_layer_" + index);
-            map.removeSource("estimated_intensity_map_" + index);
-          }
+          ZoomBounds.extend([lng, lat2]);
+          ZoomBounds.extend([lng2, lat]);
 
-          map.addSource("estimated_intensity_map_" + index, {
-            type: "image",
-            url: "https://www.jma.go.jp/bosai/estimated_intensity_map/data/" + idTmp + "/" + elm + ".png",
-            coordinates: [
-              [lngTmp, lat2Tmp],
-              [lng2Tmp, lat2Tmp],
-              [lng2Tmp, latTmp],
-              [lngTmp, latTmp],
-            ],
-          });
-
-          ZoomBounds.extend([lngTmp, lat2Tmp]);
-          ZoomBounds.extend([lng2Tmp, latTmp]);
-
-          map.addLayer({
-            id: "estimated_intensity_map_layer_" + index,
-            type: "raster",
-            source: "estimated_intensity_map_" + index,
-            paint: {
-              "raster-fade-duration": 0,
-              "raster-resampling": "nearest",
-            },
-          });
           estimated_intensity_map_layers.push("estimated_intensity_map_layer_" + index);
+
+          var EstimateShindoData = [];
+          var img = new Image();
+          img.onload = function () {
+            context.clearRect(0, 0, 800, 800);
+            context.drawImage(img, 0, 0, 800, 800);
+
+            var y = 1;
+            var imgData = context.getImageData(0, 0, 800, 800).data;
+            for (let i = 0; i < 320; i++) {
+              var x = 1;
+
+              for (let j = 0; j < 320; j++) {
+                var imagedata = (y * 800 + x) * 4;
+                imagedata = [imgData[imagedata], imgData[imagedata + 1], imgData[imagedata + 2], imgData[imagedata + 3]];
+
+                var int;
+                if (imagedata[3] > 50) {
+                  if (Math.abs(imagedata[0] - 250) < 16 && Math.abs(imagedata[1] - 230) < 16 && Math.abs(imagedata[2] - 150) < 16) int = "4";
+                  else if (Math.abs(imagedata[0] - 255) < 16 && Math.abs(imagedata[1] - 230) < 16 && Math.abs(imagedata[2] - 0) < 16) int = "5-";
+                  else if (Math.abs(imagedata[0] - 255) < 16 && Math.abs(imagedata[1] - 153) < 16 && Math.abs(imagedata[2] - 0) < 16) int = "5+";
+                  else if (Math.abs(imagedata[0] - 255) < 16 && Math.abs(imagedata[1] - 40) < 16 && Math.abs(imagedata[2] - 0) < 16) int = "6-";
+                  else if (Math.abs(imagedata[0] - 165) < 16 && Math.abs(imagedata[1] - 0) < 16 && Math.abs(imagedata[2] - 33) < 16) int = "6+";
+                  else if (Math.abs(imagedata[0] - 180) < 16 && Math.abs(imagedata[1] - 0) < 16 && Math.abs(imagedata[2] - 104) < 16) int = "7";
+
+                  var North = lat2 + ((lat - lat2) / 320) * i;
+                  var South = lat2 + ((lat - lat2) / 320) * (i + 1);
+                  var West = lng + ((lng2 - lng) / 320) * j;
+                  var East = lng + ((lng2 - lng) / 320) * (j + 1);
+
+                  EstimateShindoData.push({
+                    type: "Feature",
+                    properties: { rgb: [imagedata[0], imagedata[1], imagedata[2]], Intensity: int },
+                    geometry: {
+                      type: "Polygon",
+                      coordinates: [
+                        [
+                          [West, North],
+                          [East, North],
+                          [East, South],
+                          [West, South],
+                          [West, North],
+                        ],
+                      ],
+                    },
+                  });
+                }
+                if (j % 2 == 0) x += 3;
+                else x += 2;
+              }
+
+              if (i % 2 == 0) y += 2;
+              else y += 3;
+            }
+            if (map.getSource("estimated_intensity_map_" + index)) {
+              map.removeLayer("estimated_intensity_map_layer_" + index);
+              map.removeSource("estimated_intensity_map_" + index);
+            }
+            map.addSource("estimated_intensity_map_" + index, {
+              type: "geojson",
+              data: {
+                type: "FeatureCollection",
+                features: EstimateShindoData,
+              },
+              tolerance: 0,
+            });
+
+            var estInt_colorList = [
+              ["4", shindoConvert("4", 2)[0]],
+              ["5-", shindoConvert("5-", 2)[0]],
+              ["5+", shindoConvert("5+", 2)[0]],
+              ["6-", shindoConvert("6-", 2)[0]],
+              ["6+", shindoConvert("6+", 2)[0]],
+              ["7", shindoConvert("7", 2)[0]],
+            ];
+            map.addLayer({
+              id: "estimated_intensity_map_layer_" + index,
+              type: "fill",
+              source: "estimated_intensity_map_" + index,
+              paint: {
+                "fill-color": {
+                  property: "Intensity",
+                  type: "categorical",
+                  stops: estInt_colorList,
+                },
+              },
+              minzoom: 0,
+              maxzoom: 22,
+            });
+
+            ZoomBounds.extend([lng, lat2]);
+            ZoomBounds.extend([lng2, lat]);
+          };
+
+          img.src = "https://www.jma.go.jp/bosai/estimated_intensity_map/data/" + idTmp + "/" + elm + ".png";
         });
+
         document.getElementById("estshindomap_radio").setAttribute("checked", true);
         estShindoMapDraw = true;
         ShindoMapDraw = false;
@@ -1455,8 +1535,6 @@ function add_City_info(name, maxInt) {
   newDiv.classList.add("WrapLevel3", "close");
   wrap2[wrap2.length - 1].appendChild(newDiv);
 }
-
-var ZoomBounds = new maplibregl.LngLatBounds();
 
 //観測点ごとの情報描画（リスト・地図プロット）
 function add_IntensityStation_info(lat, lng, name, int) {
