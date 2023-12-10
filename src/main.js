@@ -1310,7 +1310,7 @@ function P2P_WS() {
                 if (elm.maxHeight && elm.maxHeight.description) {
                   elm.maxHeight = elm.maxHeight.description;
                 }
-              });
+              });             
               TsunamiInfoControl(data);
               break;
             case 556:
@@ -2383,6 +2383,23 @@ function EQI_JMAXML_Req(url) {
             }
             if (ValidDateTimeTmp < new Date()) return;
             var EventID = xml.querySelector("EventID").textContent.split(" ").map(Number);
+
+            var EQData = []
+            xml.querySelectorAll("Earthquake").forEach(function(elm, index){
+              var magTmp = elm.querySelector("jmx_eb:Magnitude").textContent;
+              if(magTmp == "NaN") magTmp = null;
+              
+              EQData.push({
+                eventId: EventID[index],
+                category: "Tsunami",
+                OriginTime: new Date(elm.querySelector("OriginTime").textContent),
+                epiCenter: elm.querySelector("Hypocenter　Area Name").textContent,
+                M: magTmp,
+                maxI: null,
+                DetailURL: [url],
+              });
+            });
+            eqInfoControl(EQData, "jma");
 
             tsunamiDataTmp = {
               issue: { time: new Date(xml.querySelector("ReportDateTime").textContent), EventID: EventID },
