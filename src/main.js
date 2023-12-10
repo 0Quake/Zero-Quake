@@ -2395,7 +2395,7 @@ function EQI_JMAXML_Req(url) {
                 eventId: EventID[index],
                 category: "Tsunami",
                 OriginTime: new Date(elm.querySelector("OriginTime").textContent),
-                epiCenter: elm.querySelector("Hypocenter　Area Name").textContent,
+                epiCenter: elm.querySelector("Hypocenter Area Name").textContent,
                 M: magTmp,
                 maxI: null,
                 DetailURL: [url],
