@@ -941,6 +941,7 @@ function psWaveCalc(eid) {
     return elm2.id == eid;
   });
   if (pswaveFind) {
+    console.log(pswaveFind);
     var TimeTableTmp = pswaveFind.TimeTable;
     var SWmin;
     var distance = (new Date() - Replay - pswaveFind.data.originTime) / 1000;
