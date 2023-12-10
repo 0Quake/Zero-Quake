@@ -96,8 +96,6 @@ function InfoFetch() {
     });
   }
   estimated_intensity_mapReq();
-  mapFillDraw();
-  mapFillSwitch();
 }
 
 //地図初期化
@@ -624,7 +622,7 @@ function Mapinit() {
   map.on("zoom", zoomLevelContinue);
   map.on("load", function () {
     zoomLevelContinue();
-    mapFillDraw();
+    mapFillSwitch();
     layerSelect(config.data.layer);
     radioSet("mapSelect", config.data.layer);
     InfoFetch();
@@ -1374,7 +1372,6 @@ function mapFillResetL() {
 }
 
 function mapFillDraw() {
-  if (!map.loaded()) return;
   map.setFilter("Int0", Int0T);
   map.setFilter("Int1", Int1T);
   map.setFilter("Int2", Int2T);
@@ -1405,7 +1402,7 @@ function mapFillDraw() {
 }
 
 function mapZoomReset() {
-  map.fitBounds(ZoomBounds, { padding: 40, maxZoom: 7, animate: false });
+  map.fitBounds(ZoomBounds, { padding: 60, maxZoom: 7, animate: false });
 }
 
 //都道府県ごとの情報描画（リスト）
