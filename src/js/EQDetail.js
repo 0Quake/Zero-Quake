@@ -79,7 +79,6 @@ window.electronAPI.messageSend((event, request) => {
       };
     }
     Mapinit();
-    InfoFetch();
   } else if (request.action == "setting") {
     config = request.data;
     document.getElementById("areaName").textContent = config.home.name;
@@ -315,28 +314,6 @@ function Mapinit() {
             "fill-color": "#333",
             "fill-opacity": 1,
           },
-          minzoom: 0,
-          maxzoom: 22,
-        },
-        {
-          id: "estimated_intensity_map_layer",
-          type: "fill",
-          source: "estimated_intensity_map",
-          paint: {
-            "fill-color": {
-              property: "Intensity",
-              type: "categorical",
-              stops: [
-                ["4", shindoConvert("4", 2)[0]],
-                ["5-", shindoConvert("5-", 2)[0]],
-                ["5+", shindoConvert("5+", 2)[0]],
-                ["6-", shindoConvert("6-", 2)[0]],
-                ["6+", shindoConvert("6+", 2)[0]],
-                ["7", shindoConvert("7", 2)[0]],
-              ],
-            },
-          },
-          layout: { visibility: "none" },
           minzoom: 0,
           maxzoom: 22,
         },
@@ -650,6 +627,8 @@ function Mapinit() {
     mapFillDraw();
     layerSelect(config.data.layer);
     radioSet("mapSelect", config.data.layer);
+    InfoFetch();
+
     config.data.overlay.forEach(function (elm) {
       overlaySelect(elm, true);
       if (document.getElementById(elm)) document.getElementById(elm).checked = true;
@@ -797,6 +776,7 @@ document.getElementById("over4").addEventListener("change", function () {
 });
 
 //推計震度分布リスト取得→描画
+var estimated_intensity_map_layers = [];
 function estimated_intensity_mapReq() {
   fetch("https://www.jma.go.jp/bosai/estimated_intensity_map/data/list.json")
     .then(function (res) {
@@ -823,12 +803,6 @@ function estimated_intensity_mapReq() {
 
         InfoType_add("type-6");
         idTmp = ItemTmp.url;
-        var geojson = {
-          type: "FeatureCollection",
-          features: [],
-        };
-
-        map.setLayoutProperty("estimated_intensity_map_layer", "visibility", "visible");
 
         ItemTmp.mesh_num.forEach(function (elm, index) {
           var lat = Number(elm.substring(0, 2)) / 1.5;
@@ -843,11 +817,16 @@ function estimated_intensity_mapReq() {
           ESMap_canvas.width = ESMap_canvas.height = 800;
           var ESMap_context = ESMap_canvas.getContext("2d");
 
+          var ESMap_canvas_out = document.createElement("canvas");
+          ESMap_canvas_out.width = ESMap_canvas_out.height = 320;
+          var ESMap_context_out = ESMap_canvas_out.getContext("2d");
+
           var img = new Image();
           img.onload = function () {
             ESMap_context.clearRect(0, 0, 800, 800);
             ESMap_context.drawImage(img, 0, 0, 800, 800);
             var imgData = ESMap_context.getImageData(0, 0, 800, 800).data;
+            ESMap_context_out.clearRect(0, 0, 320, 320);
 
             var y = 1;
             for (let i = 0; i < 320; i++) {
@@ -866,27 +845,11 @@ function estimated_intensity_mapReq() {
                   else if (Math.abs(r - 165) < 16 && Math.abs(g - 0) < 16 && Math.abs(b - 33) < 16) int = "6+";
                   else if (Math.abs(r - 180) < 16 && Math.abs(g - 0) < 16 && Math.abs(b - 104) < 16) int = "7";
 
-                  var North = lat2 + ((lat - lat2) / 320) * i;
-                  var South = lat2 + ((lat - lat2) / 320) * (i + 1);
-                  var West = lng + ((lng2 - lng) / 320) * j;
-                  var East = lng + ((lng2 - lng) / 320) * (j + 1);
+                  ESMap_context_out.beginPath();
 
-                  geojson.features.push({
-                    type: "Feature",
-                    properties: { Intensity: int },
-                    geometry: {
-                      type: "Polygon",
-                      coordinates: [
-                        [
-                          [West, North],
-                          [East, North],
-                          [East, South],
-                          [West, South],
-                          [West, North],
-                        ],
-                      ],
-                    },
-                  });
+                  ESMap_context_out.rect(j, i, 1, 1);
+                  ESMap_context_out.fillStyle = shindoConvert(int, 2)[0];
+                  ESMap_context_out.fill();
                 }
                 if (j % 2 == 0) x += 3;
                 else x += 2;
@@ -896,13 +859,34 @@ function estimated_intensity_mapReq() {
               else y += 3;
             }
 
-            if (map.getSource("estimated_intensity_map") && index + 1 == ItemTmp.mesh_num.length) {
-              map.getSource("estimated_intensity_map").setData(geojson);
+            if (map.getSource("estimated_intensity_map_" + index)) {
+              map.removeLayer("estimated_intensity_map_layer_" + index);
+              map.removeSource("estimated_intensity_map_" + index);
             }
+            map.addSource("estimated_intensity_map_" + index, {
+              type: "image",
+              url: ESMap_canvas_out.toDataURL("image/png"),
+              coordinates: [
+                [lng, lat2],
+                [lng2, lat2],
+                [lng2, lat],
+                [lng, lat],
+              ],
+            });
+            map.addLayer(
+              {
+                id: "estimated_intensity_map_layer_" + index,
+                type: "raster",
+                source: "estimated_intensity_map_" + index,
+                paint: {
+                  "raster-fade-duration": 0,
+                  "raster-resampling": "nearest",
+                },
+              },
+              "basemap_LINE"
+            );
+            estimated_intensity_map_layers.push("estimated_intensity_map_layer_" + index);
           };
-
-          ZoomBounds.extend([lng, lat2]);
-          ZoomBounds.extend([lng2, lat]);
 
           img.src = "https://www.jma.go.jp/bosai/estimated_intensity_map/data/" + idTmp + "/" + elm + ".png";
         });
@@ -1408,7 +1392,9 @@ function mapFillDraw() {
   map.setFilter("LgInt3", LgInt3T);
   map.setFilter("LgInt4", LgInt4T);
 
-  if (map.getLayer("estimated_intensity_map_layer")) map.setLayoutProperty("estimated_intensity_map_layer", "visibility", estShindoMapDraw && MapFill ? "visible" : "none");
+  estimated_intensity_map_layers.forEach(function (elm2) {
+    if (map.getLayer(elm2)) map.setLayoutProperty(elm2, "visibility", estShindoMapDraw ? "visible" : "none");
+  });
 
   ["Int0", "Int1", "Int2", "Int3", "Int4", "Int5-", "Int5+", "Int6-", "Int6+", "Int7", "Int7+"].forEach(function (elm2) {
     map.setLayoutProperty(elm2, "visibility", ShindoMapDraw && MapFill ? "visible" : "none");
