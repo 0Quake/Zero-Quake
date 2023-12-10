@@ -48,6 +48,7 @@ var axisDatas;
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "metaData") {
     eid = request.eid;
+    eid = 20230505144203;
     if (request.urls && Array.isArray(request.urls)) {
       jmaURL = request.urls.filter(function (elm) {
         return String(elm).indexOf("www.jma.go.jp") != -1;
@@ -100,6 +101,7 @@ function InfoFetch() {
   mapFillDraw();
   mapFillSwitch();
 }
+
 //地図初期化
 function Mapinit() {
   if (map) return;
@@ -148,6 +150,14 @@ function Mapinit() {
           type: "geojson",
           data: "./Resource/plate.json",
           tolerance: 2,
+        },
+        estimated_intensity_map: {
+          type: "geojson",
+          data: {
+            type: "FeatureCollection",
+            features: [],
+          },
+          tolerance: 0,
         },
         tile0: {
           type: "raster",
@@ -306,6 +316,28 @@ function Mapinit() {
             "fill-color": "#333",
             "fill-opacity": 1,
           },
+          minzoom: 0,
+          maxzoom: 22,
+        },
+        {
+          id: "estimated_intensity_map_layer",
+          type: "fill",
+          source: "estimated_intensity_map",
+          paint: {
+            "fill-color": {
+              property: "Intensity",
+              type: "categorical",
+              stops: [
+                ["4", shindoConvert("4", 2)[0]],
+                ["5-", shindoConvert("5-", 2)[0]],
+                ["5+", shindoConvert("5+", 2)[0]],
+                ["6-", shindoConvert("6-", 2)[0]],
+                ["6+", shindoConvert("6+", 2)[0]],
+                ["7", shindoConvert("7", 2)[0]],
+              ],
+            },
+          },
+          layout: { visibility: "none" },
           minzoom: 0,
           maxzoom: 22,
         },
@@ -792,42 +824,14 @@ function estimated_intensity_mapReq() {
 
         InfoType_add("type-6");
         idTmp = ItemTmp.url;
-        var EstimateShindoData = [];
+        var geojson = {
+          type: "FeatureCollection",
+          features: [],
+        };
 
-        var estInt_colorList = [
-          ["4", shindoConvert("4", 2)[0]],
-          ["5-", shindoConvert("5-", 2)[0]],
-          ["5+", shindoConvert("5+", 2)[0]],
-          ["6-", shindoConvert("6-", 2)[0]],
-          ["6+", shindoConvert("6+", 2)[0]],
-          ["7", shindoConvert("7", 2)[0]],
-        ];
+        map.setLayoutProperty("estimated_intensity_map_layer", "visibility", "visible");
 
-        map.addSource("estimated_intensity_map", {
-          type: "geojson",
-          data: {
-            type: "FeatureCollection",
-            features: [],
-          },
-          tolerance: 0,
-        });
-
-        map.addLayer({
-          id: "estimated_intensity_map_layer",
-          type: "fill",
-          source: "estimated_intensity_map",
-          paint: {
-            "fill-color": {
-              property: "Intensity",
-              type: "categorical",
-              stops: estInt_colorList,
-            },
-          },
-          minzoom: 0,
-          maxzoom: 22,
-        });
-
-        ItemTmp.mesh_num.forEach(function (elm) {
+        ItemTmp.mesh_num.forEach(function (elm, index) {
           var lat = Number(elm.substring(0, 2)) / 1.5;
           var lng = Number(elm.substring(2, 4)) + 100;
           var lat2 = lat + 2 / 3;
@@ -868,9 +872,9 @@ function estimated_intensity_mapReq() {
                   var West = lng + ((lng2 - lng) / 320) * j;
                   var East = lng + ((lng2 - lng) / 320) * (j + 1);
 
-                  EstimateShindoData.push({
+                  geojson.features.push({
                     type: "Feature",
-                    properties: { rgb: [r, g, b], Intensity: int },
+                    properties: { Intensity: int },
                     geometry: {
                       type: "Polygon",
                       coordinates: [
@@ -893,12 +897,7 @@ function estimated_intensity_mapReq() {
               else y += 3;
             }
 
-            var geojson = {
-              type: "FeatureCollection",
-              features: EstimateShindoData,
-            };
-
-            if (map.getSource("estimated_intensity_map")) {
+            if (map.getSource("estimated_intensity_map") && index + 1 == ItemTmp.mesh_num.length) {
               map.getSource("estimated_intensity_map").setData(geojson);
             }
           };
