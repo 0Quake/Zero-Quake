@@ -274,19 +274,19 @@ function mapInit() {
         worldmap: {
           type: "geojson",
           data: "./Resource/World.json",
-          tolerance:2,
+          tolerance: 2,
           attribution: "Natural Earth",
         },
         basemap: {
           type: "geojson",
           data: "./Resource/basemap.json",
-          tolerance:0.7,
+          tolerance: 0.7,
           attribution: "気象庁",
         },
         prefmap: {
           type: "geojson",
           data: "./Resource/prefectures.json",
-          tolerance:0.7,
+          tolerance: 0.7,
           attribution: "気象庁",
         },
       },
@@ -416,7 +416,7 @@ function mapInit() {
   img.src = "./img/homePin.svg";
   img.classList.add("homeIcon");
 
-  markerElm = new maplibregl.Marker(img).setLngLat([config.home.longitude, config.home.latitude]).addTo(map);
+  markerElm = new maplibregl.Marker({ element: img }).setLngLat([config.home.longitude, config.home.latitude]).addTo(map);
   map.on("load", function () {
     if (tsunamiSect) map.setFilter("tsunami_LINE_selected", ["==", "name", tsunamiSect]);
     tsunamiFeatures = map.querySourceFeatures("tsunami");

@@ -54,7 +54,7 @@ function psWaveAnm() {
   else {
     setTimeout(function () {
       requestAnimationFrame(psWaveAnm);
-    }, 200);
+    }, 100);
   }
 }
 
@@ -183,37 +183,37 @@ function init() {
         worldmap: {
           type: "geojson",
           data: "./Resource/World.json",
-          tolerance:2,
+          tolerance: 2,
           attribution: "Natural Earth",
         },
         basemap: {
           type: "geojson",
           data: "./Resource/basemap.json",
-          tolerance:0.7,
+          tolerance: 0.7,
           attribution: "気象庁",
         },
         prefmap: {
           type: "geojson",
           data: "./Resource/prefectures.json",
-          tolerance:0.7,
+          tolerance: 0.7,
           attribution: "気象庁",
         },
         lake: {
           type: "geojson",
           data: "./Resource/lake.json",
-          tolerance:1.7,
+          tolerance: 1.7,
           attribution: "国土数値情報",
         },
         tsunami: {
           type: "geojson",
           data: "./Resource/tsunami.json",
-          tolerance:1.6,
+          tolerance: 1.6,
           attribution: "気象庁",
         },
         plate: {
           type: "geojson",
           data: "./Resource/plate.json",
-          tolerance:2,
+          tolerance: 2,
         },
         tile0: {
           type: "raster",
@@ -719,7 +719,7 @@ function init() {
     const img = document.createElement("img");
     img.src = "./img/homePin.svg";
     img.classList.add("homeIcon");
-    new maplibregl.Marker(img).setLngLat([config.home.longitude, config.home.latitude]).addTo(map);
+    new maplibregl.Marker({ element: img }).setLngLat([config.home.longitude, config.home.latitude]).addTo(map);
   }
 }
 
@@ -734,7 +734,7 @@ function addPointMarker(elm) {
   elm.popup = new maplibregl.Popup({ offset: 10 }).on("open", () => {
     elm.popup.setHTML(elm.popupContent);
   });
-  elm.marker = new maplibregl.Marker(el).setLngLat([elm.Location.Longitude, elm.Location.Latitude]).setPopup(elm.popup).addTo(map);
+  elm.marker = new maplibregl.Marker({ element: el }).setLngLat([elm.Location.Longitude, elm.Location.Latitude]).setPopup(elm.popup).addTo(map);
   elm.markerElm = el;
   return elm;
 }
@@ -1083,7 +1083,7 @@ function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrive
       el.classList.add("SWaveProgress");
       el.innerHTML = '<svg width="50" height="50"><circle cx="25" cy="25" r="22" fill="none" stroke-width="5px" stroke="#777"/><circle id="SWprogressValue_' + EventID + '" class="SWprogressValue" cx="25" cy="25" r="22" fill="none" stroke-width="5px" stroke-linecap="round" stroke-dasharray="138" stroke-dashoffset="' + Number(138 - 138 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect))) + '"/></svg>';
 
-      SIElm = new maplibregl.Marker(el).setLngLat([longitude, latitude]).addTo(map);
+      SIElm = new maplibregl.Marker({ element: el }).setLngLat([longitude, latitude]).addTo(map);
 
       EQElm.SIElm = SIElm;
     }
