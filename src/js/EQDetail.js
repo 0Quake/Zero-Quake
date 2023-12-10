@@ -48,7 +48,6 @@ var axisDatas;
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "metaData") {
     eid = request.eid;
-    eid = 20230505144203;
     if (request.urls && Array.isArray(request.urls)) {
       jmaURL = request.urls.filter(function (elm) {
         return String(elm).indexOf("www.jma.go.jp") != -1;
