@@ -2073,6 +2073,8 @@ function EarlyEstControl(data) {
 
     if (data.latitude && data.longitude) data.distance = geosailing(data.latitude, data.longitude, config.home.latitude, config.home.longitude);
 
+    data.TimeTable = TimeTable_JMA2001[depthFilter(data.depth)];
+
     var EQJSON = EarlyEst_Data.find(function (elm) {
       return elm.EQ_id == data.EventID;
     });
