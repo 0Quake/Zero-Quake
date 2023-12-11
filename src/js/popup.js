@@ -3,7 +3,10 @@ var now_EEW = [];
 var Replay = 0;
 var background = false;
 var background;
-var becomeForeground = false;
+var becomeForeground = true;
+var becomeForeground_S = true;
+var knetMapData;
+var snetMapData;
 /* eslint-enable */
 document.body.addEventListener("mouseover", function () {
   background = false;
@@ -13,10 +16,14 @@ window.electronAPI.messageSend((event, request) => {
   switch (request.action) {
     case "activate":
       background = false;
+      if(knetMapData) kmoniMapUpdate(knetMapData, "knet");
+      if(snetMapData) kmoniMapUpdate(snetMapData, "snet");
+
       break;
     case "unactivate":
       background = true;
       becomeForeground = true;
+      becomeForeground_S = true;
       break;
     case "EEWAlertUpdate":
       EEWAlertUpdate(request.data);

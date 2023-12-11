@@ -8,10 +8,12 @@ var inited = false;
 var windowLoaded = false;
 var hinanjoLayers = [];
 var hinanjoCheck = document.getElementById("hinanjo");
+var knet_already_draw = false;
 window.electronAPI.messageSend((event, request) => {
   switch (request.action) {
     case "kmoniUpdate":
-      if (!background) kmoniMapUpdate(request.data, "knet");
+      console.log(request.data)
+      if (!background || !knet_already_draw) kmoniMapUpdate(request.data, "knet");
       break;
     case "SnetUpdate":
       kmoniMapUpdate(request.data, "snet");
@@ -743,12 +745,20 @@ var pointData;
 var changed_bypass = false;
 function kmoniMapUpdate(dataTmp, type) {
   if (!dataTmp.data) return;
-  if (type == "knet") kmoniMapData = dataTmp.data;
-  //地図上マーカー
-  if (becomeForeground || Object.keys(points).length == 0) {
-    changed_bypass = true;
-    becomeForeground = false;
-  } else changed_bypass = false;
+  if (type == "knet") {
+    knetMapData = dataTmp;
+    if (becomeForeground || Object.keys(points).length == 0) {
+      changed_bypass = true;
+      becomeForeground = false;
+    } else changed_bypass = false;
+    knet_already_draw = true;
+  }else{
+    snetMapData = dataTmp;
+    if (becomeForeground_S || Object.keys(points).length == 0) {
+      changed_bypass = true;
+      becomeForegroundS = false;
+    } else changed_bypass = false;
+  }
 
   if (changed_bypass) dataTmp = dataTmp.data;
   else dataTmp = dataTmp.changedData;
