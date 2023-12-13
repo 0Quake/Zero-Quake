@@ -50,13 +50,13 @@ window.electronAPI.messageSend((event, request) => {
     eid = request.eid;
     if (request.urls && Array.isArray(request.urls)) {
       jmaURL = request.urls.filter(function (elm) {
-        return String(elm).indexOf("www.jma.go.jp") != -1;
+        return elm.includes("www.jma.go.jp");
       });
       jmaXMLURL = request.urls.filter(function (elm) {
-        return String(elm).indexOf("www.data.jma.go.jp") != -1;
+        return elm.includes("www.data.jma.go.jp")||elm.includes("mk-mode");
       });
       narikakunURL = request.urls.filter(function (elm) {
-        return String(elm).indexOf("dev.narikakun.net") != -1;
+        return elm.includes("dev.narikakun.net");
       });
     }
     if (request.axisData && Array.isArray(request.axisData)) axisDatas = request.axisData;
@@ -1137,8 +1137,10 @@ function jmaXMLFetch(url) {
         if (xml.querySelector("Body Comments FreeFormComment")) commentText.FreeFormComment = xml.querySelector("Body Comments FreeFormComment").textContent;
       }
 
+      var infoType = xml.querySelector("Head Title").textContent;
+      if(xml.querySelector("Control Title").textContent == "津波情報a" || xml.querySelector("Control Title").textContent == "津波警報・注意報・予報a") infoType = "津波"
       EQInfoControl({
-        infoType: xml.querySelector("Head Title").textContent,
+        infoType: infoType,
         reportTime: new Date(xml.querySelector("Head ReportDateTime").textContent),
         originTime: originTimeTmp,
         maxI: maxIntTmp,
@@ -1748,7 +1750,8 @@ function EQInfoControl(data) {
     case "顕著な地震の震源要素更新のお知らせ":
       InfoType_add("type-5");
       break;
-    default:
+    case "津波":
+      InfoType_add("type-8");
       break;
   }
 

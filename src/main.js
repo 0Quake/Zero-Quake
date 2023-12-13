@@ -1563,10 +1563,12 @@ function RegularExecution() {
     //津波情報解除
     if (tsunamiData && tsunamiData.ValidDateTime <= new Date()) {
       TsunamiInfoControl({
-        issue: { time: tsunamiData.ValidDateTime },
+        issue: { time: tsunamiData.ValidDateTime, EventID: null, EarthQuake: null },
         revocation: true,
         cancelled: false,
         areas: [],
+        source: null,
+        ValidDateTime: null,
       });
     }
 
@@ -2311,7 +2313,7 @@ function EQI_JMAXMLList_Req(LongPeriodFeed) {
           if (title == "震度速報" || title == "震源に関する情報" || title == "震源・震度に関する情報" || title == "遠地地震に関する情報" || title == "顕著な地震の震源要素更新のお知らせ") {
             if (EQInfoCount <= config.Info.EQInfo.ItemCount) EQI_JMAXML_Req(url);
             EQInfoCount++;
-          } else if (title == "津波情報a" || /大津波警報|津波警報|津波注意報|津波予報/.test(title)) EQI_JMAXML_Req(url);
+          } else if (title == "津波情報a" || title == "津波警報・注意報・予報a") EQI_JMAXML_Req(url);
         });
         kmoniTimeUpdate(new Date() - Replay, "JMAXML", "success");
       } catch (err) {
@@ -2378,15 +2380,16 @@ function EQI_JMAXML_Req(url) {
             ],
             "jma"
           );
-        } else if (title == "津波情報a" || /大津波警報|津波警報|津波注意報|津波予報/.test(title)) {
+        } else if (title == "津波情報a" || title == "津波警報・注意報・予報a") {
           //津波予報
-
           var tsunamiDataTmp;
           if (cancel) {
             tsunamiDataTmp = {
-              issue: { time: new Date(xml.querySelector("ReportDateTime").textContent) },
+              issue: { time: new Date(xml.querySelector("ReportDateTime").textContent), EventID: null, EarthQuake: null },
               areas: [],
               revocation: true,
+              source: "jmaXML",
+              ValidDateTime: null,
             };
           } else {
             var ValidDateTimeElm = xml.querySelector("ValidDateTime");
