@@ -2380,6 +2380,7 @@ function EQI_JMAXML_Req(url) {
           );
         } else if (title == "津波情報a" || /大津波警報|津波警報|津波注意報|津波予報/.test(title)) {
           //津波予報
+
           var tsunamiDataTmp;
           if (cancel) {
             tsunamiDataTmp = {
@@ -2399,14 +2400,16 @@ function EQI_JMAXML_Req(url) {
 
             var EQData = []
             xml.querySelectorAll("Earthquake").forEach(function(elm, index){
-              var magTmp = elm.querySelector("jmx_eb:Magnitude").textContent;
-              if(magTmp == "NaN") magTmp = null;
-              
+              var magTmp = elm.getElementsByTagName("jmx_eb:Magnitude")[0];
+              magTmp = magTmp !== "NaN" && magTmp ? magTmp.textContent : null;
+              var ECTmp = elm.querySelector("Name");
+              ECTmp = ECTmp ? ECTmp.textContent : null;
+
               EQData.push({
                 eventId: EventID[index],
                 category: "Tsunami",
-                OriginTime: new Date(elm.querySelector("OriginTime").textContent),
-                epiCenter: elm.querySelector("Hypocenter Area Name").textContent,
+                OriginTime: elm.querySelector("OriginTime") ? new Date(elm.querySelector("OriginTime").textContent) : new Date(),
+                epiCenter: ECTmp,
                 M: magTmp,
                 maxI: null,
                 DetailURL: [url],
@@ -2415,16 +2418,17 @@ function EQI_JMAXML_Req(url) {
             eqInfoControl(EQData, "jma");
 
             tsunamiDataTmp = {
-              issue: { time: new Date(xml.querySelector("ReportDateTime").textContent), EventID: EventID },
+              issue: { time: new Date(xml.querySelector("ReportDateTime").textContent), EventID: EventID, EarthQuake: EQData },
               areas: [],
               revocation: false,
               source: "jmaXML",
               ValidDateTime: ValidDateTimeTmp,
             };
 
-            if (xml.querySelector("Body").querySelector("Tsunami")) {
-              var tsunamiElm = xml.querySelector("Body").querySelector("Tsunami");
+            var tsunamiElm = xml.querySelector("Body").querySelector("Tsunami");
+            if (tsunamiElm) {
               if (tsunamiElm.querySelector("Forecast")) {
+
                 tsunamiElm
                   .querySelector("Forecast")
                   .querySelectorAll("Item")
