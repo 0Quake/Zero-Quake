@@ -569,6 +569,36 @@ body {
 .tsunamidetailwrap {
   padding: 5px;
 }
+
+.tsunami_st {
+  font-size: 12px;
+  color: #000;
+  text-align: center;
+  z-index: 221;
+  line-height: 20px;
+}
+.tsunami_st div {
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: solid 2px #fff;
+}
+.tsunami_st span {
+  display: none;
+  position: absolute;
+  left: 18px;
+  line-height: 15px;
+  color: #fff;
+  filter: drop-shadow(0px 0px 2px black);
+}
+
+.zoomLevel_2 .tsunami_st span,
+.zoomLevel_3 .tsunami_st span,
+.zoomLevel_4 .tsunami_st span {
+  display: inline-block;
+}
+
 @media (max-width: 600px) {
   #sideBar.close #sokuho-Panel {
     max-height: max(200px, 50vh);

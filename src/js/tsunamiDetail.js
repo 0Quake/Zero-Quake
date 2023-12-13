@@ -103,7 +103,8 @@ function tsunamiUpdate(dataTmp) {
       if (elm.stations && Array.isArray(elm.stations)) {
         elm.stations.forEach(function (elm2) {
           var condition = "";
-          var arrivalTime = "";
+          var arrivalTime = "-";
+          var ArrivedTime = "";
           var HighTideDateTime = "";
           var omaxHeight = "";
           var maxHeightTime = "";
@@ -119,18 +120,20 @@ function tsunamiUpdate(dataTmp) {
 
           if (elm2.maxHeightTime) maxHeightTime = dateEncode(5, elm2.maxHeightTime);
 
-          if (elm2.ArrivedTime) arrivalTime = dateEncode(5, elm2.ArrivedTime);
-          else if (elm2.Condition == "到達" || elm2.Condition == "到達中と推測") arrivalTime = elm2.Condition;
-          else if (elm2.firstHeightCondition == "識別不能") arrivalTime = elm2.firstHeightCondition;
-          if (elm2.firstHeightInitial) arrivalTime += " " + elm2.firstHeightInitial;
+          if (elm2.ArrivedTime) ArrivedTime = dateEncode(5, elm2.ArrivedTime);
+          else if (elm2.Condition == "第１波の到達を確認") ArrivedTime = "到達";
+          else if (elm2.Condition == "津波到達中と推測") ArrivedTime = "到達と推測";
+          else if (elm2.firstHeightCondition == "第１波識別不能") ArrivedTime = elm2.firstHeightCondition;
+          if (elm2.firstHeightInitial) ArrivedTime += " " + elm2.firstHeightInitial;
+          if (elm2.ArrivalTime) arrivalTime = dateEncode(5, elm2.ArrivalTime);
 
           var new_tr2 = document.createElement("tr");
           var ihtml = "";
           ihtml += "<td></td>";
           ihtml += "<td>" + elm2.name + "</td>";
+          ihtml += "<td" + (arrivalTime ? " class='disabled-cell'" : "") + ">" + arrivalTime + "</td>";
           ihtml += "<td class='disabled-cell'>-</td>";
-          ihtml += "<td class='disabled-cell'>-</td>";
-          ihtml += "<td>" + arrivalTime + "</td>";
+          ihtml += "<td>" + ArrivedTime + "</td>";
           ihtml += "<td>" + omaxHeight + "</td>";
           ihtml += "<td>" + maxHeightTime + "</td>";
           ihtml += "<td>" + HighTideDateTime + "</td>";

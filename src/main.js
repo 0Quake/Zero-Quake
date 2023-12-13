@@ -349,7 +349,7 @@ function doUpdate(url) {
   var request = net.request(url);
   request.on("response", (res) => {
     try {
-      if(!fs) fs = require("fs");
+      if (!fs) fs = require("fs");
       res.pipe(fs.createWriteStream("ZeroQuakeInstaller.exe")).on("close", function () {
         var COMMAND = "start ZeroQuakeInstaller.exe";
         var spawn = require("child_process").spawn;
@@ -1320,7 +1320,7 @@ function P2P_WS() {
                 if (elm.maxHeight && elm.maxHeight.description) {
                   elm.maxHeight = elm.maxHeight.description;
                 }
-              });             
+              });
               TsunamiInfoControl(data);
               break;
             case 556:
@@ -1929,7 +1929,7 @@ function EEWcontrol(data) {
           data.arrivalTime = new Date(Number(data.origin_time) + SSec * 1000);
         }
         if (!data.warnZones && data.depth <= 150) {
-          if(!sesmicPoints) sesmicPoints = require("./Resource/PointSeismicIntensityLocation.json");
+          if (!sesmicPoints) sesmicPoints = require("./Resource/PointSeismicIntensityLocation.json");
           Object.keys(sesmicPoints).forEach(function (key) {
             elm = sesmicPoints[key];
             if (elm.arv && elm.sect) {
@@ -2401,8 +2401,8 @@ function EQI_JMAXML_Req(url) {
             if (ValidDateTimeTmp < new Date()) return;
             var EventID = xml.querySelector("EventID").textContent.split(" ").map(Number);
 
-            var EQData = []
-            xml.querySelectorAll("Earthquake").forEach(function(elm, index){
+            var EQData = [];
+            xml.querySelectorAll("Earthquake").forEach(function (elm, index) {
               var magTmp = elm.getElementsByTagName("jmx_eb:Magnitude")[0];
               magTmp = magTmp !== "NaN" && magTmp ? magTmp.textContent : null;
               var ECTmp = elm.querySelector("Name");
@@ -2431,7 +2431,6 @@ function EQI_JMAXML_Req(url) {
             var tsunamiElm = xml.querySelector("Body").querySelector("Tsunami");
             if (tsunamiElm) {
               if (tsunamiElm.querySelector("Forecast")) {
-
                 tsunamiElm
                   .querySelector("Forecast")
                   .querySelectorAll("Item")
@@ -2484,11 +2483,13 @@ function EQI_JMAXML_Req(url) {
                         var ArrivalTimeTmp;
                         var ConditionTmp;
                         var nameTmp = elm2.querySelector("Name").textContent;
+                        var codeTmp = elm2.querySelector("Code").textContent;
                         var highTideTimeTmp = new Date(elm2.querySelector("HighTideDateTime").textContent);
                         if (elm2.querySelector("FirstHeight").querySelector("ArrivalTime")) ArrivalTimeTmp = new Date(elm2.querySelector("FirstHeight").querySelector("ArrivalTime").textContent);
                         if (elm2.querySelector("Condition")) ConditionTmp = elm2.querySelector("Condition").textContent;
                         stations.push({
                           name: nameTmp,
+                          code: codeTmp,
                           HighTideDateTime: highTideTimeTmp,
                           ArrivalTime: ArrivalTimeTmp,
                           Condition: ConditionTmp,
@@ -2537,15 +2538,18 @@ function EQI_JMAXML_Req(url) {
                             });
                           }
 
-                          var maxheightTimeElm = elm2.querySelector("MaxHeight").getElementsByTagName("DateTime");
+                          var maxheightTimeElm = elm2.querySelector("MaxHeight").querySelector("DateTime");
                           if (maxheightTimeElm) maxheightTime = new Date(maxheightTimeElm.textContent);
 
-                          var maxheightConditionElm = elm2.querySelector("MaxHeight").getElementsByTagName("Condition");
-                          if (maxheightConditionElm) maxHeightCondition = elm2.querySelector("MaxHeight").getElementsByTagName("Condition").textContent;
+                          var maxheightConditionElm = elm2.querySelector("MaxHeight").querySelector("Condition");
+                          if (maxheightConditionElm) maxHeightCondition = elm2.querySelector("MaxHeight").querySelector("Condition").textContent;
                         }
+
+                        var codeTmp = elm2.querySelector("Code").textContent;
 
                         stations.push({
                           name: nameTmp,
+                          code: codeTmp,
                           ArrivedTime: ArrivalTimeTmp,
                           firstHeightCondition: firstHeightConditionTmp,
                           firstHeightInitial: firstHeightInitialTmp,
@@ -2571,6 +2575,8 @@ function EQI_JMAXML_Req(url) {
                           stationElm.omaxHeight = elm2.omaxHeight;
                           stationElm.maxheightTime = elm2.ArrivedTime;
                           stationElm.maxHeightCondition = elm2.maxHeightCondition;
+                        } else {
+                          tsunamiItem.stations.push(elm2);
                         }
                       });
                     } else {

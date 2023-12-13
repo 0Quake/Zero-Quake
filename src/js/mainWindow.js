@@ -21,13 +21,22 @@ var snetMapData;
 document.body.addEventListener("mouseover", function () {
   background = false;
 });
+var tsunamiStations = [];
+
+fetch("./Resource/TsunamiStations.json")
+  .then(function (res) {
+    return res.json();
+  })
+  .then(function (data) {
+    tsunamiStations = data;
+  });
 
 window.electronAPI.messageSend((event, request) => {
   switch (request.action) {
     case "activate":
       background = false;
-      if(knetMapData) kmoniMapUpdate(knetMapData, "knet");
-      if(snetMapData) kmoniMapUpdate(snetMapData, "snet");
+      if (knetMapData) kmoniMapUpdate(knetMapData, "knet");
+      if (snetMapData) kmoniMapUpdate(snetMapData, "snet");
 
       break;
     case "unactivate":
@@ -79,10 +88,9 @@ window.electronAPI.messageSend((event, request) => {
     case "EQDetectFinish":
       EQDetectFinish(request.data);
       break;
-      case "tsunamiUpdate":
-        tsunamiDataUpdate(request.data);
-        break;
-
+    case "tsunamiUpdate":
+      tsunamiDataUpdate(request.data);
+      break;
   }
   document.getElementById("splash").style.display = "none";
   return true;
@@ -106,14 +114,14 @@ window.addEventListener("load", () => {
       document.getElementById("kmoni_Message").innerHTML = json.message;
     });
 
-    windowLoaded = true;
-    init();
-    psWaveAnm();//予報円描画着火
-    setInterval(function () {
-      //時計（ローカル時刻）更新
-      if (UTDialogShow && !background) document.getElementById("PC_TIME").textContent = dateEncode(3, new Date() - Replay);
-      document.getElementById("all_UpdateTime").textContent = dateEncode(3, new Date() - Replay);
-    }, 500);  
+  windowLoaded = true;
+  init();
+  psWaveAnm(); //予報円描画着火
+  setInterval(function () {
+    //時計（ローカル時刻）更新
+    if (UTDialogShow && !background) document.getElementById("PC_TIME").textContent = dateEncode(3, new Date() - Replay);
+    document.getElementById("all_UpdateTime").textContent = dateEncode(3, new Date() - Replay);
+  }, 500);
 });
 //オフライン警告非表示
 window.addEventListener("online", () => {
@@ -606,7 +614,6 @@ document.getElementById("CloseTsunamiCancel").addEventListener("click", function
 document.getElementById("CloseTsunamiRevocation").addEventListener("click", function () {
   document.getElementById("tsunamiRevocation").style.display = "none";
 });
-
 
 function psWaveAnm() {
   if (now_EEW.length > 0) {
@@ -1314,7 +1321,7 @@ function kmoniMapUpdate(dataTmp, type) {
       becomeForeground = false;
     } else changed_bypass = false;
     knet_already_draw = true;
-  }else{
+  } else {
     snetMapData = dataTmp;
     if (becomeForeground_S || Object.keys(points).length == 0) {
       changed_bypass = true;
@@ -1805,6 +1812,64 @@ function tsunamiDataUpdate(data) {
             break;
         }
       }
+
+      elm.stations.forEach(function (elm2) {
+        var st = tsunamiStations[elm2.code];
+        if (st) {
+          console.log(elm2.omaxHeight);
+          if (elm2.omaxHeight) {
+            var omaxHeight = elm2.omaxHeight.replace("m", "");
+
+            if (omaxHeight < 0.2) color = config.color.Tsunami.TsunamiYohoColor;
+            else if (omaxHeight <= 1) color = config.color.Tsunami.TsunamiWatchColor;
+            else if (omaxHeight <= 3) color = config.color.Tsunami.TsunamiWarningColor;
+            else if (omaxHeight > 3) color = config.color.Tsunami.TsunamiMajorWarningColor;
+
+            var tsunamiST = document.createElement("div");
+            tsunamiST.classList.add("tsunami_st");
+
+            var tsunamiSTMarker = document.createElement("div");
+            tsunamiSTMarker.style.background = color;
+            tsunamiST.appendChild(tsunamiSTMarker);
+
+            var tsunamiSTCap = document.createElement("span");
+            tsunamiSTCap.innerText = omaxHeight + "m";
+            tsunamiST.appendChild(tsunamiSTCap);
+
+            var condition = "";
+            var arrivalTime = "";
+            var ArrivedTime = "";
+            var HighTideDateTime = "";
+            var omaxHeight = "";
+            var maxHeightTime = "";
+
+            if (elm2.Conditions) condition = elm2.Conditions;
+
+            if (elm2.HighTideDateTime) HighTideDateTime = "満潮 : " + dateEncode(5, elm2.HighTideDateTime);
+
+            if (elm2.omaxHeight) {
+              omaxHeight = "観測最大波 : " + elm2.omaxHeight;
+              if (elm2.firstHeightInitial) omaxHeight = "観測最大波 : " + elm2.omaxHeight + " " + elm2.firstHeightInitial;
+            } else if (elm2.maxHeightCondition) omaxHeight = "観測最大波 : " + elm2.maxHeightCondition;
+
+            if (elm2.maxHeightTime) maxHeightTime = "最大波時刻 : " + dateEncode(5, elm2.maxHeightTime);
+
+            if (elm2.ArrivedTime) ArrivedTime = dateEncode(5, elm2.ArrivedTime);
+            else if (elm2.Condition == "第１波の到達を確認") ArrivedTime = "第1波到達";
+            else if (elm2.Condition == "津波到達中と推測") ArrivedTime = "第1波到達と推測";
+            else if (elm2.firstHeightCondition == "第１波識別不能") ArrivedTime = "第1波識別不能";
+            if (elm2.firstHeightInitial) ArrivedTime += " " + elm2.firstHeightInitial;
+            if (elm2.ArrivalTime) arrivalTime = "第1波予想到達時刻 :" + dateEncode(5, elm2.ArrivalTime);
+
+            var content = [arrivalTime, ArrivedTime, omaxHeight, maxHeightTime, HighTideDateTime, condition].join("<br>");
+            var popupContent = "<h3 style='border-bottom:solid 2px " + color + "'>" + elm2.name + "</h3><div class='tsunamidetailwrap'>" + content + "</div>";
+
+            var TsunamiPopup = new maplibregl.Popup().setHTML(popupContent).addTo(map);
+
+            new maplibregl.Marker({ element: tsunamiST }).setLngLat([st.lng, st.lat]).setPopup(TsunamiPopup).addTo(map);
+          }
+        }
+      });
     });
 
     map.setFilter("tsunami_MajorWarn", MajorWarningList);
