@@ -829,7 +829,7 @@ function worker_createWindow() {
   kmoniWorker.on("unresponsive", () => {
     kmoniWorker.responsive = true;
     setTimeout(function () {
-      if (mainWindow.responsive) worker_createWindow();
+      if (kmoniWorker.responsive) worker_createWindow();
     }, 5000);
   });
   kmoniWorker.on("responsive", () => {
