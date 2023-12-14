@@ -432,8 +432,8 @@ let options = {
   type: "error",
   title: "エラー",
   message: "予期しないエラーが発生しました",
-  detail: "動作を選択してください。\n10秒で自動的に再起動します。",
-  buttons: ["今すぐ再起動", "終了", "キャンセル"],
+  detail: "動作を選択してください。",
+  buttons: ["今すぐ再起動", "終了", "無視"],
   noLink: true,
 };
 const options2 = {
@@ -452,7 +452,6 @@ const options3 = {
   detail: "",
   buttons: ["OK"],
 };
-var relaunchTimer;
 var errorMsgBox = false;
 //エラーイベント
 process.on("uncaughtException", function (err) {
@@ -460,10 +459,9 @@ process.on("uncaughtException", function (err) {
     if (!errorMsgBox && app.isReady()) {
       if (String(err.stack).startsWith("Error: net::ERR_")) return false;
       errorMsgBox = true;
-      options.detail = "動作を選択してください。\n10秒で自動的に再起動します。\nエラーコードは以下の通りです。\n" + err.stack;
+      options.detail = "動作を選択してください。\nエラーコードは以下の通りです。\n" + err.stack;
 
       dialog.showMessageBox(mainWindow, options).then(function (result) {
-        clearTimeout(relaunchTimer);
         if (config.system.crashReportAutoSend == "yes") {
           crashReportSend(err.stack, result);
           errorMsgBox = false;
@@ -485,11 +483,6 @@ process.on("uncaughtException", function (err) {
           });
         }
       });
-      clearTimeout(relaunchTimer);
-      relaunchTimer = setTimeout(function () {
-        app.relaunch();
-        app.exit(0);
-      }, 10000);
 
       Window_notification("予期しないエラーが発生しました。", "error");
     }
@@ -507,9 +500,6 @@ function errorResolve(response) {
         break;
       case 1:
         app.exit(0);
-        break;
-      case 2:
-        clearTimeout(relaunchTimer);
         break;
     }
   } catch (err) {
