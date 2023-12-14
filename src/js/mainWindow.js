@@ -1699,6 +1699,7 @@ function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrive
 var EQInfoLink = document.getElementById("EQInfoLink");
 var tsunamiData;
 var now_tsunami = false;
+var tsunamiSTMarkers = [];
 function tsunamiDataUpdate(data) {
   tsunamiData = data;
   map.setFilter("tsunami_MajorWarn", ["==", "name", ""]);
@@ -1710,6 +1711,11 @@ function tsunamiDataUpdate(data) {
   document.getElementById("tsunamiCancel").style.display = data.cancelled ? "block" : "none";
   document.getElementById("tsunamiRevocation").style.display = data.revocation ? "block" : "none";
   now_tsunami = true;
+
+  tsunamiSTMarkers.forEach(function(elm){
+    elm.remove()
+  });
+
   if (data.cancelled) {
     document.getElementById("tsunamiWrap").style.display = "none";
     document.body.classList.remove("TsunamiMode");
@@ -1790,6 +1796,7 @@ function tsunamiDataUpdate(data) {
     var WarningList = ["any"];
     var WatchList = ["any"];
     var YohoList = ["any"];
+
     data.areas.forEach(function (elm) {
       if (!elm.cancelled) {
         alertNowTmp = true;
@@ -1816,25 +1823,32 @@ function tsunamiDataUpdate(data) {
       elm.stations.forEach(function (elm2) {
         var st = tsunamiStations[elm2.code];
         if (st) {
-          console.log(elm2.omaxHeight);
           if (elm2.omaxHeight) {
             var omaxHeight = elm2.omaxHeight.replace("m", "");
 
-            if (omaxHeight < 0.2) color = config.color.Tsunami.TsunamiYohoColor;
-            else if (omaxHeight <= 1) color = config.color.Tsunami.TsunamiWatchColor;
-            else if (omaxHeight <= 3) color = config.color.Tsunami.TsunamiWarningColor;
-            else if (omaxHeight > 3) color = config.color.Tsunami.TsunamiMajorWarningColor;
+            if (omaxHeight < 0.2) {
+              classname = "TsunamiST02";
+              color = config.color.Tsunami.TsunamiYohoColor;
+            } else if (omaxHeight <= 1) {
+              classname = "TsunamiST10";
+              color = config.color.Tsunami.TsunamiWatchColor;
+            } else if (omaxHeight <= 3) {
+              classname = "TsunamiST30"
+              color = config.color.Tsunami.TsunamiWarningColor;
+            } else {
+              classname = "TsunamiST99"
+              color = config.color.Tsunami.TsunamiMajorWarningColor;
+            }
 
             var tsunamiST = document.createElement("div");
-            tsunamiST.classList.add("tsunami_st");
-
-            var tsunamiSTMarker = document.createElement("div");
-            tsunamiSTMarker.style.background = color;
-            tsunamiST.appendChild(tsunamiSTMarker);
+            tsunamiST.classList.add("tsunami_st", classname);
 
             var tsunamiSTCap = document.createElement("span");
             tsunamiSTCap.innerText = omaxHeight + "m";
             tsunamiST.appendChild(tsunamiSTCap);
+
+            var tsunamiSTMarker = document.createElement("div");
+            tsunamiST.appendChild(tsunamiSTMarker);
 
             var condition = "";
             var arrivalTime = "";
@@ -1845,28 +1859,27 @@ function tsunamiDataUpdate(data) {
 
             if (elm2.Conditions) condition = elm2.Conditions;
 
-            if (elm2.HighTideDateTime) HighTideDateTime = "満潮 : " + dateEncode(5, elm2.HighTideDateTime);
+            if (elm2.HighTideDateTime) HighTideDateTime = "満潮：" + dateEncode(5, elm2.HighTideDateTime);
 
             if (elm2.omaxHeight) {
-              omaxHeight = "観測最大波 : " + elm2.omaxHeight;
-              if (elm2.firstHeightInitial) omaxHeight = "観測最大波 : " + elm2.omaxHeight + " " + elm2.firstHeightInitial;
-            } else if (elm2.maxHeightCondition) omaxHeight = "観測最大波 : " + elm2.maxHeightCondition;
+              omaxHeight = "観測最大波：" + elm2.omaxHeight;
+              if (elm2.firstHeightInitial) omaxHeight = "観測最大波：" + elm2.omaxHeight + " " + elm2.firstHeightInitial;
+            } else if (elm2.maxHeightCondition) omaxHeight = "観測最大波：" + elm2.maxHeightCondition;
 
-            if (elm2.maxHeightTime) maxHeightTime = "最大波時刻 : " + dateEncode(5, elm2.maxHeightTime);
+            if (elm2.maxHeightTime) maxHeightTime = "最大波時刻：" + dateEncode(5, elm2.maxHeightTime);
 
             if (elm2.ArrivedTime) ArrivedTime = dateEncode(5, elm2.ArrivedTime);
             else if (elm2.Condition == "第１波の到達を確認") ArrivedTime = "第1波到達";
             else if (elm2.Condition == "津波到達中と推測") ArrivedTime = "第1波到達と推測";
             else if (elm2.firstHeightCondition == "第１波識別不能") ArrivedTime = "第1波識別不能";
             if (elm2.firstHeightInitial) ArrivedTime += " " + elm2.firstHeightInitial;
-            if (elm2.ArrivalTime) arrivalTime = "第1波予想到達時刻 :" + dateEncode(5, elm2.ArrivalTime);
+            if (elm2.ArrivalTime) arrivalTime = "第1波予想到達時刻：" + dateEncode(5, elm2.ArrivalTime);
 
             var content = [arrivalTime, ArrivedTime, omaxHeight, maxHeightTime, HighTideDateTime, condition].join("<br>");
             var popupContent = "<h3 style='border-bottom:solid 2px " + color + "'>" + elm2.name + "</h3><div class='tsunamidetailwrap'>" + content + "</div>";
 
-            var TsunamiPopup = new maplibregl.Popup().setHTML(popupContent).addTo(map);
-
-            new maplibregl.Marker({ element: tsunamiST }).setLngLat([st.lng, st.lat]).setPopup(TsunamiPopup).addTo(map);
+            var TsunamiPopup = new maplibregl.Popup().setHTML(popupContent);
+            tsunamiSTMarkers.push(new maplibregl.Marker({ element: tsunamiST }).setLngLat([st.lng, st.lat]).setPopup(TsunamiPopup).addTo(map))
           }
         }
       });

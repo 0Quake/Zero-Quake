@@ -982,10 +982,6 @@ button:focus {
   outline-offset: 3px;
 }
 
-#TsunamiDetail {
-  float: right;
-}
-
 @keyframes SuccessAnm {
   0% {
     box-shadow: 0 0 0 0px rgb(16, 243, 0);
@@ -1033,6 +1029,10 @@ button:focus {
 }
 #errorContent {
   padding: 0 10px;
+}
+#tsunami_button_wrap {
+  display: flex;
+  justify-content: center;
 }
 #tsunami_button_wrap button {
   display: inline-block;
