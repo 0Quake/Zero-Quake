@@ -1,240 +1,208 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Worker For Kmoni Image</title>
-</head>
-<body>
-    <script src="./js/UIcommon.js"></script>
+  </head>
+  <body>
     <script>
-        var config;
-        var points;
-        var Spoints;
-        var Svoice;
-        var Rate;
-        var Pitch;
-        var Volume;
-        window.electronAPI.messageSend((event, request) => {
-            if (request.action == "setting") {
-                config = request.data;
-                if (!Svoice) {
-                    if (config.notice.voice_parameter.voice) {
-                        Svoice = speechSynthesis.getVoices().find(function (elm) {
-                            return elm.name == config.notice.voice_parameter.voice;
-                        });
-                    }
-                }
-                Rate = config.notice.voice_parameter.rate;
-                Pitch = config.notice.voice_parameter.pitch;
-                Volume = config.notice.voice_parameter.volume
-            }
+      var config;
+      var points, Spoints;
+      var Svoice, Rate, Pitch, Volume;
+
+      fetch("./Resource/Knet_Points.json")
+        .then(function (res) {
+          return res.json();
+        })
+        .then(function (json) {
+          points = json.filter(function (elm) {
+            return elm.Point && !elm.IsSuspended;
+          });
+        });
+      fetch("./Resource/Snet_Points.json")
+        .then(function (res) {
+          return res.json();
+        })
+        .then(function (json) {
+          Spoints = json.filter(function (elm) {
+            return elm.Point && !elm.IsSuspended;
+          });
         });
 
-        fetch("./Resource/Knet_Points.json").then(function (res) {
-            return res.json()
-        }).then(function (json) {
-            points = json.filter(function (elm) { return elm.Point && !elm.IsSuspended })
-        })
-        fetch("./Resource/Snet_Points.json").then(function (res) {
-            return res.json()
-        }).then(function (json) {
-            Spoints = json.filter(function (elm) { return elm.Point && !elm.IsSuspended })
-        })
+      var canvas = new OffscreenCanvas(352, 400);
+      var Scanvas = new OffscreenCanvas(400, 400)
+      var context = canvas.getContext("2d",{ willReadFrequently: true });
+      var Scontext = Scanvas.getContext("2d",{ willReadFrequently: true });
 
-        var canvas = document.createElement("canvas");
-        var Scanvas = document.createElement("canvas");
-        canvas.width = 352; canvas.height = 400;
-        Scanvas.width = 400; Scanvas.height = 400;
-        var context = canvas.getContext("2d");
-        var Scontext = Scanvas.getContext("2d");
+      var AudioElms = {
+        EQDetectLv1: new Audio("audio/EQDetectLv1.mp3"),
+        EQDetectLv2: new Audio("audio/EQDetectLv2.mp3"),
+        EEW1: new Audio("audio/EEW1.mp3"),
+        EEW2: new Audio("audio/EEW2.mp3"),
+        EQInfo: new Audio("audio/EQInfo.mp3"),
+        TsunamiInfo: new Audio("audio/TsunamiInfo.mp3"),
+      };
+      var kmoni_date;
+      var kmoni_date2;
+      var image = new Image();
+      image.onload = function () {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(image, 0, 0);
+        kmoniRedraw();
+      };
+      var image2 = new Image();
+      image2.onload = function () {
+        Scontext.clearRect(0, 0, Scanvas.width, Scanvas.height);
+        Scontext.drawImage(image, 0, 0);
+        SnetRedraw();
+      };
 
-        var AudioElms = {
-            "EQDetectLv1": new Audio("audio/EQDetectLv1.mp3"),
-            "EQDetectLv2": new Audio("audio/EQDetectLv2.mp3"),
-            "EEW1": new Audio("audio/EEW1.mp3"),
-            "EEW2": new Audio("audio/EEW2.mp3"),
-            "EQInfo": new Audio("audio/EQInfo.mp3"),
-            "TsunamiInfo": new Audio("audio/TsunamiInfo.mp3")
+      window.electronAPI.messageSend((event, request) => {
+        if (request.action == "setting") {
+          config = request.data;
+          if (!Svoice) {
+            if (config.notice.voice_parameter.voice) {
+              Svoice = speechSynthesis.getVoices().find(function (elm) {
+                return elm.name == config.notice.voice_parameter.voice;
+              });
+            }
+          }
+          Rate = config.notice.voice_parameter.rate;
+          Pitch = config.notice.voice_parameter.pitch;
+          Volume = config.notice.voice_parameter.volume;
+        } else if (request.action == "KmoniImgUpdate") {
+          kmoni_date = request.date
+          image.src = request.data;
+        } else if (request.action == "SnetImgUpdate") {
+          kmoni_date2 = request.date
+          image2.src = request.data;
+        } else if (request.action == "speak") {
+          speechSynthesis.cancel();
+          // 発言を作成
+          const uttr = new SpeechSynthesisUtterance();
+          uttr.text = request.data;
+          uttr.lang = "ja-JP";
+          if (!Svoice) {
+            if (config.notice.voice_parameter.voice) {
+              Svoice = speechSynthesis.getVoices().find(function (elm) {
+                return elm.name == config.notice.voice_parameter.voice;
+              });
+            }
+          }
+          uttr.voice = Svoice;
+          uttr.rate = Rate;
+          uttr.pitch = Pitch;
+          uttr.volume = Volume;
+          speechSynthesis.speak(uttr);
+        } else if (request.action == "soundPlay") {
+          var AudioElm = AudioElms[request.data];
+          if (AudioElm) {
+            AudioElm.currentTime = 0;
+            if (AudioElm.paused) AudioElm.play();
+          }
+        }
+      });
+
+      function kmoniRedraw() {
+        var imagedata = context.getImageData(0, 0, 352, 400).data;
+        points.forEach(function (elm) {
+          var index = elm.Point.Y * 352 + elm.Point.X;
+          var rgb = [
+            imagedata[4 * index],
+            imagedata[4 * index + 1],
+            imagedata[4 * index + 2],
+            imagedata[4 * index + 3],
+          ];
+          if (rgb[3] > 0) {
+            //リアルタイム震度画像を、無理やり[最大加速度画像を求める手法（@NoneType1様）]で解析
+            var tmpNum = 10 ** (5 * RGBtoP(rgb[0], rgb[1], rgb[2]) - 2); //無理やり求めた最大加速度（誤りの値・意味を持たない）
+            elm.data = true;
+            elm.rgb = rgb;
+            elm.shindo = 0.868589 * Math.log(tmpNum) + 1; //"正しい"震度に換算（対数を利用）
+            p = (elm.shindo + 3) / 10; //正しいPに換算
+            elm.pga = 10 ** (5 * p - 2); //"正しい"PGAを算出
+          } else elm.data = false;
+        });
+        window.electronAPI.messageReturn({
+          action: "kmoniReturn",
+          data: points,
+          date: kmoni_date,
+        });
+      }
+
+      function SnetRedraw() {
+        var imagedata = Scontext.getImageData(0, 0, 400, 400).data;
+
+        Spoints.forEach(function (elm, index) {
+          var index = elm.Point.Y * 352 + elm.Point.X;
+          var rgb = [
+            imagedata[4 * index],
+            imagedata[4 * index + 1],
+            imagedata[4 * index + 2],
+            imagedata[4 * index + 3],
+          ];
+          if (rgb[3]) {
+            //リアルタイム震度画像を、無理やり[最大加速度画像を求める手法（@NoneType1様）]で解析
+            var tmpNum = 10 ** (5 * RGBtoP(rgb[0], rgb[1], rgb[2]) - 2); //無理やり求めた最大加速度（誤りの値・意味を持たない）
+            elm.data = true;
+            elm.rgb = rgb;
+            elm.shindo = 0.868589 * Math.log(tmpNum) + 1; //"正しい"震度に換算（対数を利用）
+            elm.pga = 10 ** (5 * ((elm.shindo + 3) / 10) - 2); //"正しい"PGAを算出
+          } else elm.data = false;
+        });
+        window.electronAPI.messageReturn({
+          action: "SnetReturn",
+          data: Spoints,
+          date: kmoni_date2,
+        });
+      }
+
+      function RGBtoP(r, g, b) {
+        var max = Math.max(r, g, b);
+        var min = Math.min(r, g, b);
+
+        var h = 0;
+        var s = 0;
+        var v = max;
+
+        if (max != min) {
+          if (max == r) h = (60 * (g - b)) / (max - min);
+          if (max == g) h = (60 * (b - r)) / (max - min) + 120;
+          if (max == b) h = (60 * (r - g)) / (max - min) + 240;
+          s = (max - min) / max;
         }
 
-        window.electronAPI.messageSend((event, request) => {
-            if (request.action == "KmoniImgUpdate") {
-                var image = new Image();
-                image.src = request.data;
+        if (h < 0) h = h + 360;
 
-                image.onload = function () {
-                    context.clearRect(0, 0, canvas.width, canvas.height);
-                    context.drawImage(image, 0, 0);
-                    kmoniRedraw(request.date)
-                };
-            } else if (request.action == "SnetImgUpdate") {
-                var image = new Image();
-                image.src = request.data;
+        h = h / 360;
+        s = s;
+        v = v / 255;
 
-                image.onload = function () {
-                    Scontext.clearRect(0, 0, Scanvas.width, Scanvas.height);
-                    Scontext.drawImage(image, 0, 0);
-                    SnetRedraw(request.date)
-                };
-            } else if (request.action == "speak") {
-                speechSynthesis.cancel()
-                // 発言を作成
-                const uttr = new SpeechSynthesisUtterance()
-                uttr.text = request.data
-                uttr.lang = "ja-JP"
-                if (!Svoice) {
-                    if (config.notice.voice_parameter.voice) {
-                        Svoice = speechSynthesis.getVoices().find(function (elm) {
-                            return elm.name == config.notice.voice_parameter.voice;
-                        });
-                    }
-                }
-                uttr.voice = Svoice;
-                uttr.rate = Rate
-                uttr.pitch = Pitch;
-                uttr.volume = Volume;
-                speechSynthesis.speak(uttr)
-            } else if (request.action == "soundPlay") {
-                var AudioElm = AudioElms[request.data]
-                if (AudioElm) {
-                    AudioElm.currentTime = 0;
-                    if (AudioElm.paused) AudioElm.play()
-                }
-            }
+        var p = 0;
 
-
-        })
-
-        function kmoniRedraw(dateTmp) {
-            points.forEach(function (elm) {
-                elm.data = false
-
-                var rgb = point2RGB(elm.Point.X, elm.Point.Y, context);
-                if (rgb[0] + rgb[1] + rgb[2] !== 0) {
-                    //リアルタイム震度画像を、無理やり[最大加速度画像を求める手法（@NoneType1様）]で解析
-                    var p = RGBtoP(rgb[0], rgb[1], rgb[2]);
-                    var tmpNum = 10 ** (5 * p - 2);//無理やり求めた最大加速度（誤りの値・意味を持たない）
-                    var shindo = 0.868589 * Math.log(tmpNum) + 1//"正しい"震度に換算（対数を利用）
-                    p2 = (shindo + 3) / 10//正しいPに換算
-                    var pga = 10 ** (5 * p2 - 2);//"正しい"PGAを算出
-                    elm.data = true
-                    elm.rgb = rgb
-                    elm.shindo = shindo
-                    elm.pga = pga
-                }
-            });
-            window.electronAPI.messageReturn({
-                action: "kmoniReturn",
-                data: points,
-                date: dateTmp
-            })
+        if (v > 0.1 && s > 0.75) {
+          if (h > 0.1476) {
+            p =
+              280.31 * Math.pow(h, 6) -
+              916.05 * Math.pow(h, 5) +
+              1142.6 * Math.pow(h, 4) -
+              709.95 * Math.pow(h, 3) +
+              234.65 * Math.pow(h, 2) -
+              40.27 * h +
+              3.2217;
+          } else if (h > 0.001) {
+            p =
+              151.4 * Math.pow(h, 4) -
+              49.32 * Math.pow(h, 3) +
+              6.753 * Math.pow(h, 2) -
+              2.481 * h +
+              0.9033;
+          } else p = -0.005171 * Math.pow(v, 2) - 0.3282 * v + 1.2236;
         }
 
-
-        function SnetRedraw(dateTmp) {
-            Spoints.forEach(function (elm, index) {
-                elm.data = false
-
-                var rgb = point2RGB(elm.Point.X, elm.Point.Y, Scontext);
-                if (rgb[0] + rgb[1] + rgb[2] !== 0) {
-                    var p = RGBtoP(rgb[0], rgb[1], rgb[2]);
-                    var tmpNum = 10 ** (5 * p - 2);
-                    var shindo = 0.868589 * Math.log(tmpNum) + 1
-                    p2 = (shindo + 3) / 10
-                    var pga = 10 ** (5 * p2 - 2);
-
-                    elm.data = true
-                    elm.rgb = rgb
-                    elm.shindo = shindo
-                    elm.pga = pga
-                }
-            });
-            window.electronAPI.messageReturn({
-                action: "SnetReturn",
-                data: Spoints,
-                date: dateTmp
-            })
-
-        }
-
-        var oneBeforeData = {}
-
-        function point2RGB(x, y, ctxTmp) {
-            var imagedata = ctxTmp.getImageData(x, y, 1, 1);
-            return [imagedata.data[0], imagedata.data[1], imagedata.data[2]];
-        }
-
-        function RGBtoP(r, g, b) {
-            var max = Math.max(r, g, b);
-            var min = Math.min(r, g, b);
-
-            var h = 0;
-            var s = 0;
-            var v = max
-
-
-            if (max != min) {
-                if (max == r) h = 60 * (g - b) / (max - min);
-                if (max == g) h = 60 * (b - r) / (max - min) + 120;
-                if (max == b) h = 60 * (r - g) / (max - min) + 240;
-
-                s = (max - min) / max;
-            }
-
-            if (h < 0) {
-                h = h + 360;
-            }
-
-            h = h / 360;
-            s = s;
-            v = v / 255;
-
-            var p = 0;
-
-            if (v > 0.1 && s > 0.75) {
-                if (h > 0.1476) {
-                    p = 280.31 * Math.pow(h, 6) - 916.05 * Math.pow(h, 5) + 1142.6 * Math.pow(h, 4) - 709.95 * Math.pow(h, 3) + 234.65 * Math.pow(h, 2) - 40.27 * h + 3.2217;
-                } else if (h > 0.001) {
-                    p = 151.4 * Math.pow(h, 4) - 49.32 * Math.pow(h, 3) + 6.753 * Math.pow(h, 2) - 2.481 * h + 0.9033;
-                } else {
-                    p = -0.005171 * Math.pow(v, 2) - 0.3282 * v + 1.2236;
-                }
-            }
-
-            if (p < 0) {
-                p = 0;
-            }
-            return p;
-        }
-
-        function shindoConvert(str) {
-            if (str < 0.5) {
-                return [80, 86, 102]
-            } else if (str < 1.5) {
-                return [121, 168, 179]
-            } else if (str < 2.5) {
-                return [54, 133, 224]
-            } else if (str < 3.5) {
-                return [77, 176, 81]
-            } else if (str < 4.5) {
-                return [191, 184, 55]
-            } else if (str < 5) {
-                return [240, 150, 41]
-            } else if (str < 5.5) {
-                return [245, 113, 61]
-            } else if (str < 6) {
-                return [230, 0, 0]
-            } else if (str < 6.5) {
-                return [138, 10, 10]
-            } else if (6.5 <= str) {
-                return [196, 0, 222]
-            } else if (7.5 <= str) {
-                return [196, 0, 222]
-            } else {
-                return [191, 191, 191]
-            }
-        }
+        if (p < 0) p = 0;
+        return p;
+      }
     </script>
-</body>
-
+  </body>
 </html>
