@@ -1655,7 +1655,7 @@ function EQInfoControl(data) {
   }
   if (data.eew) InfoType_add("type-1");
   EQInfo.eew = data.eew;
-  if (data.cancel) document.getElementById("canceled").style.display = "flex";
+  if (mostNew) document.getElementById("canceled").style.display = data.cancel ? "flex" : "none";
 
   if (data.originTime && (mostNew || !EQInfo.originTime)) EQInfo.originTime = data.originTime;
   if (data.maxI && (mostNew || !EQInfo.maxI)) EQInfo.maxI = data.maxI;

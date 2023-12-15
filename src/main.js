@@ -1392,7 +1392,7 @@ function AXIS_WS() {
                     epiCenter: EarthquakeElm.Hypocenter.Area.Name,
                     M: EarthquakeElm.Magnitude,
                     maxI: IntensityElm.Observation.MaxInt,
-                    cancel: null,
+                    cancel: data.message.Head.InfoType == "取消",
                     DetailURL: [],
                     axisData: data,
                   },
@@ -2336,7 +2336,7 @@ function EQI_JMAXML_Req(url) {
         var title = xml.title;
         var cancel = false;
         var cancelElm = xml.querySelector("InfoType");
-        if (cancelElm) cancel = cancelElm.textContent == "取り消し";
+        if (cancelElm) cancel = cancelElm.textContent == "取消";
 
         if (title == "震度速報" || title == "震源に関する情報" || title == "震源・震度に関する情報" || title == "遠地地震に関する情報" || title == "顕著な地震の震源要素更新のお知らせ") {
           //地震情報
