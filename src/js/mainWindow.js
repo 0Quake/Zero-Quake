@@ -306,9 +306,9 @@ function epiCenterUpdate(elm) {
       var ESPopup2 = new maplibregl.Popup({ closeButton: false, closeOnClick: false, className: "epiCenterTooltip2", offset: [0, 37] }).setLngLat([longitude, latitude]);
       if (tooltipContent) ESPopup2.setText(tooltipContent).addTo(map);
       else ESPopup2.remove();
-      var ESMarker = new maplibregl.Marker({ element: img }).setLngLat([longitude, latitude]).setPopup(ESPopup).addTo(map).togglePopup();
+      var ECMarker = new maplibregl.Marker({ element: img }).setLngLat([longitude, latitude]).setPopup(ESPopup).addTo(map).togglePopup();
 
-      epiCenter.push({ eid: eid, markerElm: ESMarker, latitude: latitude, longitude: longitude, EEWID: Number(EEWIDTmp), ESPopup: ESPopup, ESPopup2: ESPopup2 });
+      epiCenter.push({ eid: eid, markerElm: ECMarker, latitude: latitude, longitude: longitude, EEWID: Number(EEWIDTmp), ESPopup: ESPopup, ESPopup2: ESPopup2 });
       displayTmp = epiCenter.length > 1 ? "inline-block" : "none";
       document.querySelectorAll(".epiCenterTooltip,.EEWLocalID").forEach(function (elm3) {
         elm3.style.display = displayTmp;
@@ -435,11 +435,11 @@ function EQDetect(data) {
 
   if (EQD_Item) {
     //情報更新
-    EQD_Item.lat = data.lat;
-    EQD_Item.lng = data.lng;
+    EQD_Item.lat = data.lat2;
+    EQD_Item.lng = data.lng2;
 
-    let _center = turf.point([data.lng, data.lat]);
-    let _radius = data.Radius + 5;
+    let _center = turf.point([data.lng2, data.lat2]);
+    let _radius = data.Radius2 + 5;
     let _options = {
       steps: 80,
       units: "kilometers",
@@ -448,17 +448,14 @@ function EQDetect(data) {
     let _circle = turf.circle(_center, _radius, _options);
     map.getSource("EQDItem_" + data.id).setData(_circle);
 
+    EQD_Item.ECMarker.setLngLat([data.lng2, data.lat2]);
+
     var EQDItem = document.getElementById("EQDItem_" + data.id);
     EQDItem.classList.remove("lv1", "lv2");
     EQDItem.classList.add("lv" + data.Lv);
     EQDItem.querySelector(".EQD_Regions").innerText = regions.join(" ");
   } else {
     //初回検知
-    EQDetectItem.push({
-      id: data.id,
-      lat: data.lat,
-      lng: data.lng,
-    });
 
     var clone = EQDetectTemplate.content.cloneNode(true);
     var EQDItem = clone.querySelector(".EQDItem");
@@ -469,8 +466,22 @@ function EQDetect(data) {
 
     map.panTo([data.lng, data.lat], { animate: false });
     map.zoomTo(8, { animate: false });
-    let _center = turf.point([data.lng, data.lat]);
-    let _radius = data.Radius + 5;
+
+    const img = document.createElement("img");
+    img.src = "./img/epicenter.svg";
+    img.classList.add("epicenterIcon");
+
+    var ECMarker = new maplibregl.Marker({ element: img }).setLngLat([data.lng2, data.lat2]).addTo(map);
+
+    EQDetectItem.push({
+      id: data.id,
+      lat: data.lat,
+      lng: data.lng,
+      ECMarker: ECMarker,
+    });
+
+    let _center = turf.point([data.lng2, data.lat2]);
+    let _radius = data.Radius2 + 5;
     let _options = {
       steps: 80,
       units: "kilometers",
@@ -517,6 +528,8 @@ function EQDetectFinish(id) {
       map.removeLayer("EQDItem_" + id);
       map.removeLayer("EQDItemF_" + id);
       map.removeSource("EQDItem_" + id);
+      elmA.ECMarker.remove();
+
       EQDetectItem.splice(index, 1);
     }
   });
@@ -1712,8 +1725,8 @@ function tsunamiDataUpdate(data) {
   document.getElementById("tsunamiRevocation").style.display = data.revocation ? "block" : "none";
   now_tsunami = true;
 
-  tsunamiSTMarkers.forEach(function(elm){
-    elm.remove()
+  tsunamiSTMarkers.forEach(function (elm) {
+    elm.remove();
   });
 
   if (data.cancelled) {
@@ -1833,10 +1846,10 @@ function tsunamiDataUpdate(data) {
               classname = "TsunamiST10";
               color = config.color.Tsunami.TsunamiWatchColor;
             } else if (omaxHeight <= 3) {
-              classname = "TsunamiST30"
+              classname = "TsunamiST30";
               color = config.color.Tsunami.TsunamiWarningColor;
             } else {
-              classname = "TsunamiST99"
+              classname = "TsunamiST99";
               color = config.color.Tsunami.TsunamiMajorWarningColor;
             }
 
@@ -1879,7 +1892,7 @@ function tsunamiDataUpdate(data) {
             var popupContent = "<h3 style='border-bottom:solid 2px " + color + "'>" + elm2.name + "</h3><div class='tsunamidetailwrap'>" + content + "</div>";
 
             var TsunamiPopup = new maplibregl.Popup().setHTML(popupContent);
-            tsunamiSTMarkers.push(new maplibregl.Marker({ element: tsunamiST }).setLngLat([st.lng, st.lat]).setPopup(TsunamiPopup).addTo(map))
+            tsunamiSTMarkers.push(new maplibregl.Marker({ element: tsunamiST }).setLngLat([st.lng, st.lat]).setPopup(TsunamiPopup).addTo(map));
           }
         }
       });

@@ -47,7 +47,6 @@ var EEWData;
 var axisDatas;
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "metaData") {
-    console.log(request);
     eid = request.eid;
     if (request.urls && Array.isArray(request.urls)) {
       jmaURL = request.urls.filter(function (elm) {
@@ -1275,7 +1274,6 @@ function axisInfoCtrl(json) {
         if (json.Body.Comments.ForecastComment && json.Body.Comments.ForecastComment.Text) commentText.ForecastComment = json.Body.Comments.ForecastComment.Text;
         if (json.Body.Comments.VarComment && json.Body.Comments.VarComment.Text) commentText.VarComment = json.Body.Comments.VarComment.Text;
         if (json.Body.Comments.FreeFormComment) commentText.FreeFormComment = json.Body.Comments.FreeFormComment;
-        console.log(commentText);
       }
       EQInfoControl({
         infoType: json.Head.Title,
@@ -1683,7 +1681,6 @@ function EQInfoControl(data) {
   if (EQInfo.epiCenter) data_center.innerText = EQInfo.epiCenter;
 
   if (data.comment) {
-    console.log(data.comment);
     var comments = data.comment.ForecastComment.split("\n").concat(data.comment.VarComment.split("\n"), data.comment.FreeFormComment.split("\n"));
 
     var TsunamiShortMsg;
