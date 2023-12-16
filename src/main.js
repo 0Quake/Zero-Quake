@@ -118,6 +118,9 @@ var defaultConfigVal = {
       EEWUpdate: "緊急地震速報が更新されました。",
       EEWCancel: "緊急地震速報が取り消されました。",
     },
+    window: {
+      EEW: "openWindow",
+    },
   },
   color: {
     psWave: {
@@ -651,9 +654,7 @@ function createWindow() {
     if (mainWindow && !mainWindow.isDestroyed()) {
       if (mainWindow.isMinimized()) mainWindow.restore();
       if (!mainWindow.isFocused()) mainWindow.focus();
-      if (!mainWindow.isVisible()) {
-        mainWindow.show();
-      }
+      if (!mainWindow.isVisible()) mainWindow.show();
     } else {
       mainWindow = new BrowserWindow({
         minWidth: 450,
@@ -2167,7 +2168,7 @@ function EEWAlert(data, first, update) {
       });
     } else {
       //第１報
-      if (first) createWindow();
+
       soundPlay(data.alertflg == "警報" ? "EEW1" : "EEW2");
       speak(EEWTextGenerate(data), !first);
 
@@ -2176,19 +2177,17 @@ function EEWAlert(data, first, update) {
         data: EEW_nowList,
         update: false,
       });
-      if (!mainWindow) {
-        var alertFlg = "";
-        if (data.alertflg) alertFlg = "（" + data.alertflg + "）";
+      if (config.notice.window.EEW == "push" && (!mainWindow || mainWindow.isMinimized() || !mainWindow.isFocused() || !mainWindow.isVisible())) {
         var EEWNotification = new Notification({
-          title: "緊急地震速報" + alertFlg + "#" + data.serial,
-          body: data.region_name + "\n推定震度：" + data.maxInt + "  M" + data.magnitude + "  深さ：" + data.depth,
+          title: "緊急地震速報" + data.alertflg + "#" + data.serial,
+          body: data.region_name + "\n予想最大震度：" + shindoConvert(data.maxInt, 1) + "  M" + (data.magnitude ? data.magnitude : "不明") + "  深さ：" + (data.depth ? data.depth : "不明") + (data.userIntensity ? "\n現在地の予想震度：" + data.userIntensity : ""),
           icon: path.join(__dirname, "img/icon.ico"),
         });
         EEWNotification.show();
         EEWNotification.on("click", function () {
           createWindow();
         });
-      }
+      } else if (config.notice.window.EEW == "openWindow") createWindow();
     }
 
     eqInfoControl(

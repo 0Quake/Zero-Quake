@@ -47,13 +47,14 @@ var EEWData;
 var axisDatas;
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "metaData") {
+    console.log(request);
     eid = request.eid;
     if (request.urls && Array.isArray(request.urls)) {
       jmaURL = request.urls.filter(function (elm) {
         return elm.includes("www.jma.go.jp");
       });
       jmaXMLURL = request.urls.filter(function (elm) {
-        return elm.includes("www.data.jma.go.jp")||elm.includes("mk-mode");
+        return elm.includes("www.data.jma.go.jp") || elm.includes("mk-mode");
       });
       narikakunURL = request.urls.filter(function (elm) {
         return elm.includes("dev.narikakun.net");
@@ -1138,7 +1139,7 @@ function jmaXMLFetch(url) {
       }
 
       var infoType = xml.querySelector("Head Title").textContent;
-      if(xml.querySelector("Control Title").textContent == "津波情報a" || xml.querySelector("Control Title").textContent == "津波警報・注意報・予報a") infoType = "津波"
+      if (xml.querySelector("Control Title").textContent == "津波情報a" || xml.querySelector("Control Title").textContent == "津波警報・注意報・予報a") infoType = "津波";
       EQInfoControl({
         infoType: infoType,
         reportTime: new Date(xml.querySelector("Head ReportDateTime").textContent),
@@ -1256,38 +1257,41 @@ function narikakun_Fetch(url) {
 }
 
 function axisInfoCtrl(json) {
-  if (json.Body.Earthquake && json.Body.Earthquake.length) {
-    var LatLngDepth = json.Body.Earthquake.Hypocenter.Area.Coordinate.replaceAll("+", "｜+").replaceAll("-", "｜-").replaceAll("/", "").split("｜");
-    if (json.Body.Earthquake.OriginTime) var originTimeTmp = new Date(json.Body.Earthquake.OriginTime);
-    if (json.Body.Earthquake.Hypocenter.Area.Name) var epiCenterTmp = json.Body.Earthquake.Hypocenter.Area.Name;
-    if (json.Body.Earthquake.Magnitude) var magnitudeTmp = Number(json.Body.Earthquake.Magnitude);
-  }
-  if (json.Body.Intensity && json.Body.Intensity.Observation.MaxInt) var maxIntTmp = json.Body.Intensity.Observation.MaxInt;
-  if (LatLngDepth && !isNaN(LatLngDepth[1]) && LatLngDepth[1]) var LatTmp = Number(LatLngDepth[1]);
-  if (LatLngDepth && !isNaN(LatLngDepth[2]) && LatLngDepth[2]) var LngTmp = Number(LatLngDepth[2]);
-  if (LatLngDepth && !isNaN(LatLngDepth[3]) && LatLngDepth[3]) var depthTmp = Math.abs(Number(LatLngDepth[3]) / 1000);
+  if (json.Body.Earthquake && Array.isArray(json.Body.Earthquake)) {
+    json.Body.Earthquake.forEach(function (Earthquake) {
+      var LatLngDepth = Earthquake.Hypocenter.Area.Coordinate[0].valueOf_.replaceAll("+", "｜+").replaceAll("-", "｜-").replaceAll("/", "").split("｜");
+      if (Earthquake.OriginTime) var originTimeTmp = new Date(Earthquake.OriginTime);
+      if (Earthquake.Hypocenter.Area.Name) var epiCenterTmp = Earthquake.Hypocenter.Area.Name;
+      if (Earthquake.Magnitude) var magnitudeTmp = Number(Earthquake.Magnitude);
+      if (json.Body.Intensity && json.Body.Intensity.Observation.MaxInt) var maxIntTmp = json.Body.Intensity.Observation.MaxInt;
+      if (LatLngDepth && !isNaN(LatLngDepth[1]) && LatLngDepth[1]) var LatTmp = Number(LatLngDepth[1]);
+      if (LatLngDepth && !isNaN(LatLngDepth[2]) && LatLngDepth[2]) var LngTmp = Number(LatLngDepth[2]);
+      if (LatLngDepth && !isNaN(LatLngDepth[3]) && LatLngDepth[3]) var depthTmp = Math.abs(Number(LatLngDepth[3]) / 1000);
 
-  var cancelTmp = json.Head.InfoType == "取消";
+      var cancelTmp = json.Head.InfoType == "取消";
 
-  if (json.Body.Comments) {
-    var commentText = { ForecastComment: "", VarComment: "", FreeFormComment: "" };
-    if (json.Body.Comments.ForecastComment && json.Body.Comments.ForecastComment.Text) commentText.ForecastComment = json.Body.Comments.ForecastComment.Text;
-    if (json.Body.Comments.VarComment && json.Body.Comments.VarComment.Text) commentText.VarComment = json.Body.Comments.FreeFormComment;
-    if (json.Body.Comments.FreeFormComment) commentText.FreeFormComment = json.Body.Comments.FreeFormComment;
+      if (json.Body.Comments) {
+        var commentText = { ForecastComment: "", VarComment: "", FreeFormComment: "" };
+        if (json.Body.Comments.ForecastComment && json.Body.Comments.ForecastComment.Text) commentText.ForecastComment = json.Body.Comments.ForecastComment.Text;
+        if (json.Body.Comments.VarComment && json.Body.Comments.VarComment.Text) commentText.VarComment = json.Body.Comments.FreeFormComment;
+        if (json.Body.Comments.FreeFormComment) commentText.FreeFormComment = json.Body.Comments.FreeFormComment;
+      }
+      EQInfoControl({
+        infoType: json.Head.Title,
+        reportTime: json.Head.ReportDateTime,
+        originTime: originTimeTmp,
+        maxI: maxIntTmp,
+        mag: magnitudeTmp,
+        lat: LatTmp,
+        lng: LngTmp,
+        depth: depthTmp,
+        epiCenter: epiCenterTmp,
+        comment: commentText,
+        cancel: cancelTmp,
+      });
+    });
   }
-  EQInfoControl({
-    infoType: json.Head.Title,
-    reportTime: json.Head.ReportDateTime,
-    originTime: originTimeTmp,
-    maxI: maxIntTmp,
-    mag: magnitudeTmp,
-    lat: LatTmp,
-    lng: LngTmp,
-    depth: depthTmp,
-    epiCenter: epiCenterTmp,
-    comment: commentText,
-    cancel: cancelTmp,
-  });
+
   if (json.Body.Intensity && json.Body.Intensity.Observation.Pref) {
     var newestshindo = shindo_lastUpDate < new Date(json.Head.ReportDateTime);
     if (newestshindo) shindo_lastUpDate = new Date(json.Head.ReportDateTime);
@@ -1306,7 +1310,8 @@ function axisInfoCtrl(json) {
               add_City_info(elm3.Name, elm3.MaxInt);
               if (elm3.IntensityStation) {
                 elm3.IntensityStation.forEach(function (elm4) {
-                  add_IntensityStation_info(elm4.latlon.lat, elm4.latlon.lon, elm4.Name, elm4.Int);
+                  var pointT = pointList[elm4.Code];
+                  add_IntensityStation_info(pointT.location[0], pointT.location[1], elm4.Name, elm4.Int);
                 });
               }
             });

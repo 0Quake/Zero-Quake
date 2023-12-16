@@ -76,7 +76,7 @@
             <div id="tab1_group4" class="tabgroup" data-contentid="tab1_group4_content"><span class="material-icons-round">notifications</span>通知と音声</div>
             <div id="tab1_group4_content" class="tabgroupContent">
                 <div id="tab1_menu3" class="tabmenu" data-contentid="tab1_content3"><span class="material-icons-round">volume_up</span>音声</div>
-                <div id="tab1_menu10" class="tabmenu" data-contentid="tab1_content10"><span class="material-icons-round">chat</span>プッシュ通知</div>
+                <div id="tab1_menu10" class="tabmenu" data-contentid="tab1_content10"><span class="material-icons-round">chat</span>画面表示</div>
             </div>
 
             <div id="tab1_menu2" class="tabmenu" data-contentid="tab1_content2">
@@ -787,8 +787,16 @@
                 <p class="smalltext">WebSocketで随時情報を受け取ります。 </p>
             </div>
             <div id="tab1_content10" class="tabcontent">
-                <h3><span>通知と音声</span>プッシュ通知</h3>
-                <p>製作中</p>
+                <h3><span>通知と音声</span>画面表示</h3>
+                <label>
+                    緊急地震速報
+                    <select id="EEW_Window">
+                        <option value="">なし</option>
+                        <option value="push">プッシュ通知</option>
+                        <option value="openWindow">メイン画面表示</option>
+                    </select>
+                </label>
+                <p class="smalltext">設定にかかわらず、メイン画面表示時、プッシュ通知は表示されません。 </p>
             </div>
             <div id="tab1_content11" class="tabcontent  active_tabcontent">
                 <h3><span>全般</span>システム設定</h3>
