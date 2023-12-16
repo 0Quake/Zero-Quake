@@ -19,6 +19,7 @@
       .then(function (json) {
         points = json.filter(function (elm) {
           return elm.Point && !elm.IsSuspended;
+          if (image2_loaded) kmoniRedraw();
         });
       });
     fetch("./Resource/Snet_Points.json")
@@ -28,6 +29,7 @@
       .then(function (json) {
         Spoints = json.filter(function (elm) {
           return elm.Point && !elm.IsSuspended;
+          if (image_loaded) SnetRedraw();
         });
       });
 
@@ -46,16 +48,20 @@
     };
     var kmoni_date;
     var kmoni_date2;
+    var image_loaded = false;
+    var image2_loaded = false;
     var image = new Image();
     image.onload = function () {
       context.clearRect(0, 0, canvas.width, canvas.height);
       context.drawImage(image, 0, 0);
+      image_loaded = true
       kmoniRedraw();
     };
     var image2 = new Image();
     image2.onload = function () {
       Scontext.clearRect(0, 0, Scanvas.width, Scanvas.height);
-      Scontext.drawImage(image, 0, 0);
+      Scontext.drawImage(image2, 0, 0);
+      image2_loaded = true
       SnetRedraw();
     };
 
@@ -106,6 +112,7 @@
     });
 
     function kmoniRedraw() {
+      if (!points) return
       var imagedata = context.getImageData(0, 0, 352, 400).data;
       points.forEach(function (elm) {
         var index = elm.Point.Y * 352 + elm.Point.X;
@@ -133,6 +140,7 @@
     }
 
     function SnetRedraw() {
+      if (!Spoints) return;
       var imagedata = Scontext.getImageData(0, 0, 400, 400).data;
 
       Spoints.forEach(function (elm, index) {
