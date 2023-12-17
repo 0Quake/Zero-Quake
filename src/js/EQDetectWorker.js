@@ -76,7 +76,7 @@ function EQDetect(data, date, detect) {
         else ptData.UpCount = 0;
 
         if (ptData.detectCount == 0 && detect0) {
-          ptData.o_arrivalTime = new Date() - Replay;
+          elm.o_arrivalTime = new Date() - Replay;
         }
 
         //連続検出回数（elm.detectは連続検出回数を指標に含むため、detect0で判定）
@@ -162,9 +162,28 @@ function EQDetect(data, date, detect) {
     if (EQD_ItemTmp.Codes.length >= threshold01Tmp) {
       //地震アイテムに属する観測点数が閾値以上なら
       var result = GuessHypocenter(EQD_ItemTmp, data);
-      if (Math.abs(EQD_ItemTmp.lat - result.lat) > 0.2) EQD_ItemTmp.lat = result.lat;
-      if (Math.abs(EQD_ItemTmp.lng - result.lng) > 0.2) EQD_ItemTmp.lng = result.lng;
-      EQD_ItemTmp.Radius = result.rad;
+      if (Math.abs(EQD_ItemTmp.lat - result[0].lat) > 0.2) EQD_ItemTmp.lat = result[0].lat;
+      if (Math.abs(EQD_ItemTmp.lng - result[0].lng) > 0.2) EQD_ItemTmp.lng = result[0].lng;
+      EQD_ItemTmp.Radius = result[0].rad;
+
+      var sec = (new Date() - Replay - new Date(result[1])) / 1000;
+
+      var depTmp;
+      var minDis = Infinity;
+      Object.keys(TimeTable_JMA2001).forEach(function (elm) {
+        tableElm = TimeTable_JMA2001[elm].find(function (elm2) {
+          return elm2.S > sec;
+        });
+        if (tableElm) {
+          dis = Math.abs(tableElm.R - result[0].rad);
+          if (dis < minDis) {
+            minDis = dis;
+            depTmp = elm;
+          }
+        }
+      });
+      console.log(depTmp);
+      EQD_ItemTmp.depth = depTmp;
 
       //情報をmainプロセスへ送信
       workerThreads.parentPort.postMessage({
@@ -203,13 +222,22 @@ function EQDetect(data, date, detect) {
 }
 
 function GuessHypocenter(EQElm, data) {
+  var o_arrivalTime_min = Infinity;
+  for (const station of EQElm.Codes) {
+    if (o_arrivalTime_min > pointsData[station.Code].o_arrivalTime) o_arrivalTime_min = pointsData[station.Code].o_arrivalTime;
+  }
+  if (EQElm.origin_Time - o_arrivalTime_min < 10000) originTime = new Date(o_arrivalTime_min - 2000);
+  else originTime = new Date(EQElm.origin_Time - 6000);
+
   var Tmp = { dif: Infinity };
   for (let lat = Math.floor(EQElm.lat2) - 3; lat <= Math.floor(EQElm.lat2) + 3; lat++) {
     for (let lng = Math.floor(EQElm.lng2) - 3; lng <= Math.floor(EQElm.lng2) + 3; lng++) {
-      res = calcDifference(lat, lng, EQElm, data);
-      if (res) {
-        item = { lat: lat, lng: lng, dif: res[0], rad: res[1] };
-        if (Tmp.dif > item.dif) Tmp = item;
+      for (depth of [0, 10, 30, 70, 100, 300, 700]) {
+        res = calcDifference(lat, lng, EQElm, data, originTime, depth);
+        if (res) {
+          item = { lat: lat, lng: lng, dif: res[0], rad: res[1] };
+          if (Tmp.dif > item.dif) Tmp = item;
+        }
       }
     }
   }
@@ -217,27 +245,22 @@ function GuessHypocenter(EQElm, data) {
   var result = { dif: Infinity };
   for (let lat = Tmp.lat - 0.5; lat <= Tmp.lat + 0.5; lat += 0.2) {
     for (let lng = Tmp.lng - 0.5; lng <= Tmp.lng + 0.5; lng += 0.2) {
-      res = calcDifference(lat, lng, EQElm, data);
-      if (res) {
-        item = { lat: lat, lng: lng, dif: res[0], rad: res[1] };
-        if (Tmp.dif > item.dif) result = item;
+      for (depth of [0, 10, 30, 70, 100, 300, 700]) {
+        res = calcDifference(lat, lng, EQElm, data, originTime, depth);
+        if (res) {
+          item = { lat: lat, lng: lng, dif: res[0], rad: res[1] };
+          if (Tmp.dif > item.dif) result = item;
+        }
       }
     }
   }
 
-  var o_arrivalTime_min = Infinity;
-  for (const station of EQElm.Codes) {
-    if (o_arrivalTime_min > station.o_arrivalTime) o_arrivalTime_min = station.o_arrivalTime;
-  }
-  if (EQElm.origin_Time - o_arrivalTime_min < 10000) originTime = new Date(o_arrivalTime_min - 2000);
-  else originTime = new Date(EQElm.origin_Time - 6000);
-
-  return result;
+  return [result, originTime];
 }
 
-var TimeTable_JMA2001 = require("../Resource/TimeTable_JMA2001.json")[10];
-function calcDifference(lat, lng, stations, data) {
-  var o_arrivalTime_min = Infinity;
+var TimeTable_JMA2001 = require("../Resource/TimeTable_JMA2001.json");
+function calcDifference(lat, lng, stations, data, originTime, dep) {
+  var TimeTable = TimeTable_JMA2001[dep];
   var f_arrivalTime_min = Infinity;
   var radius = 0;
 
@@ -245,24 +268,23 @@ function calcDifference(lat, lng, stations, data) {
     station.distance = geosailing(lat, lng, station.Location.Latitude, station.Location.Longitude);
 
     if (radius < station.distance) radius = station.distance;
-    var index = TimeTable_JMA2001.findIndex(function (elm) {
+    var index = TimeTable.findIndex(function (elm) {
       return elm.R >= station.distance;
     });
     if (index >= 0) {
-      var elm0 = TimeTable_JMA2001[Math.max(index - 1, 0)];
-      var elm2 = TimeTable_JMA2001[index];
+      var elm0 = TimeTable[Math.max(index - 1, 0)];
+      var elm2 = TimeTable[index];
       if (elm0.R == station.distance) station.f_arrivalTime = elm0.S;
       else station.f_arrivalTime = elm0.S + ((elm2.S - elm0.S) * (station.distance - elm0.R)) / (elm2.R - elm0.R);
       station.o_arrivalTime = pointsData[station.Code].o_arrivalTime;
 
-      if (o_arrivalTime_min > station.o_arrivalTime) o_arrivalTime_min = station.o_arrivalTime;
       if (f_arrivalTime_min > station.f_arrivalTime) f_arrivalTime_min = station.f_arrivalTime;
     } else return null;
   }
 
   var Difference = 0;
   stations.Codes.forEach((station) => {
-    Difference += Math.abs((station.o_arrivalTime - o_arrivalTime_min) / 1000 - station.f_arrivalTime - f_arrivalTime_min);
+    Difference += Math.abs((station.o_arrivalTime - originTime) / 1000 - station.f_arrivalTime - f_arrivalTime_min);
   });
 
   var ArroundPoints = data.filter(function (station) {

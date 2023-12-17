@@ -425,6 +425,7 @@ function eqInfoDraw(data, source) {
 var EQDetectItem = [];
 var EQDetectTemplate = document.getElementById("EQDetectTemplate");
 function EQDetect(data) {
+  console.log(data.Radius);
   var EQD_Item = EQDetectItem.find(function (elm) {
     return elm.id == data.id;
   });
@@ -434,11 +435,16 @@ function EQDetect(data) {
   });
 
   if (EQD_Item) {
+    console.log(data, data.Radius);
+
     //情報更新
     EQD_Item.lat = data.lat;
     EQD_Item.lng = data.lng;
+    console.log(data, data.Radius);
 
     let _center = turf.point([data.lng, data.lat]);
+    console.log(data, data.Radius);
+
     let _radius = data.Radius + 5;
     let _options = {
       steps: 80,
@@ -468,7 +474,7 @@ function EQDetect(data) {
     map.zoomTo(8, { animate: false });
 
     const img = document.createElement("img");
-    img.src = "./img/epicenter.svg";
+    img.src = "./img/epicenter_EQDetect.svg";
     img.classList.add("epicenterIcon");
 
     var ECMarker = new maplibregl.Marker({ element: img }).setLngLat([data.lng, data.lat]).addTo(map);
@@ -486,12 +492,16 @@ function EQDetect(data) {
       steps: 80,
       units: "kilometers",
     };
+    console.log(2, data);
 
     let _circle = turf.circle(_center, _radius, _options);
+    console.log(3);
+
     map.addSource("EQDItem_" + data.id, {
       type: "geojson",
       data: _circle,
     });
+    console.log(4);
 
     map.addLayer({
       id: "EQDItemF_" + data.id,
@@ -634,6 +644,53 @@ function psWaveAnm() {
       if (!elm.is_cancel) psWaveCalc(elm.EventID);
     }
   }
+  EQDetectItem.forEach(function (elm) {
+    return;
+    var TimeTableTmp = pswaveFind.TimeTable;
+    var SWmin;
+    var distance = (new Date() - Replay - elm.originTime) / 1000;
+
+    var PRadius = null;
+    var SRadius = null;
+
+    var i = 0;
+    for (const elm of TimeTableTmp) {
+      if (i == 0) SWmin = elm.S;
+      if (!PRadius) {
+        if (elm.P == distance) {
+          PRadius = elm.R;
+          if (SRadius || SWmin > distance) break;
+        } else if (elm.P > distance) {
+          elm2 = TimeTableTmp[i - 1];
+          if (!elm2) elm2 = elm;
+          PRadius = elm.R + ((elm2.R - elm.R) * (distance - elm.P)) / (elm2.P - elm.P);
+          if (SRadius || SWmin > distance) break;
+        }
+      }
+      if (!SRadius && SWmin < distance) {
+        if (elm.S == distance) {
+          SRadius = elm.R;
+          if (PRadius) break;
+        } else if (elm.S > distance) {
+          elm2 = TimeTableTmp[i - 1];
+          SRadius = elm.R + ((elm2.R - elm.R) * (distance - elm.S)) / (elm2.S - elm.S);
+          if (PRadius) break;
+        }
+      }
+      i++;
+    }
+    if (SWmin > distance) {
+      let _center = turf.point([elm.lng, elm.lat]);
+      let _radius = SRadius * 1000;
+      let _options = {
+        steps: 80,
+        units: "kilometers",
+      };
+
+      let _circle = turf.circle(_center, _radius, _options);
+      map.getSource("EQDItem_" + elm.id).setData(_circle);
+    }
+  });
   if (background) setTimeout(psWaveAnm, 1000);
   else {
     setTimeout(function () {
