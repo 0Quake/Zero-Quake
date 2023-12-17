@@ -14,10 +14,10 @@ var eid;
 var ESmarkerElm;
 var newInfoDateTime = 0;
 var map;
-var jmaURL;
+var jmaURL = [];
 var jmaLURL = [];
-var jmaXMLURL;
-var narikakunURL;
+var jmaXMLURL = [];
+var narikakunURL = [];
 var config;
 var jmaURLHis = [];
 var jmaXMLURLHis = [];
@@ -48,6 +48,7 @@ var axisDatas;
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "metaData") {
     eid = request.eid;
+    console.log(request);
     if (request.urls && Array.isArray(request.urls)) {
       jmaURL = request.urls.filter(function (elm) {
         return elm && elm.includes("www.jma.go.jp");
@@ -934,8 +935,7 @@ function narikakun_ListReq(year, month, retry) {
     .then(function (data) {
       var nakn_detected = false;
       data.lists.forEach(function (elm) {
-        var eidTmp = elm.split("/")[eidTmp.length - 1];
-        if (eidTmp.indexOf(eid) !== -1 && !narikakunURL.includes(elm)) {
+        if (elm.includes(eid) && !narikakunURL.includes(elm)) {
           narikakunURL.push(elm);
           nakn_detected = true;
         }
@@ -951,8 +951,7 @@ function narikakun_ListReq(year, month, retry) {
         narikakun_ListReq(yearTmp, monthTmp, true);
       }
       mapDraw();
-    })
-    .catch(function () {});
+    });
 }
 
 //気象庁 取得・フォーマット変更→ EQInfoControl
@@ -1202,7 +1201,7 @@ function narikakun_Fetch(url) {
           if (json.Body.Earthquake.Hypocenter.Longitude) var LngTmp = json.Body.Earthquake.Hypocenter.Longitude;
         }
         if (json.Body.Intensity && json.Body.Intensity.Observation.MaxInt) var maxIntTmp = json.Body.Intensity.Observation.MaxInt;
-        if (json.Body.Comments && json.Body.Comments.Observation) commentTmp = json.Body.Comments.Observation;
+        if (json.Body.Comments && json.Body.Comments.Observation) commentTmp = { ForecastComment: json.Body.Comments.Observation, VarComment: "", FreeFormComment: "" };
 
         var cancelTmp = json.Head.InfoType == "取消";
 
@@ -1681,6 +1680,7 @@ function EQInfoControl(data) {
   if (EQInfo.epiCenter) data_center.innerText = EQInfo.epiCenter;
 
   if (data.comment) {
+    console.log(data.comment);
     var comments = data.comment.ForecastComment.split("\n").concat(data.comment.VarComment.split("\n"), data.comment.FreeFormComment.split("\n"));
 
     var TsunamiShortMsg;
