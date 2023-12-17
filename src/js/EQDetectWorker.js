@@ -31,7 +31,7 @@ workerThreads.parentPort.on("message", (message) => {
       EQDetect(message.data, message.date, message.detect); //観測点ごとのデータを毎秒受信
       break;
     case "EEWNow":
-      //EEWNow = message.data;
+      EEWNow = message.data;
       break;
     case "Replay":
       Replay = message.data;
@@ -76,7 +76,7 @@ function EQDetect(data, date, detect) {
         else ptData.UpCount = 0;
 
         if (ptData.detectCount == 0 && detect0) {
-          ptData.o_arrivalTime = new Date();
+          ptData.o_arrivalTime = new Date() - Replay;
         }
 
         //連続検出回数（elm.detectは連続検出回数を指標に含むため、detect0で判定）
@@ -107,7 +107,7 @@ function EQDetect(data, date, detect) {
     }
   }
 
-  var MargeRangeTmp, threshold01Tmp, ptData, EQD_ItemTmp, radiusTmp;
+  var MargeRangeTmp, threshold01Tmp, ptData, EQD_ItemTmp;
   //単独点の検知情報をグルーピング
   for (const elm of data) {
     if (elm.detect) {
@@ -124,55 +124,61 @@ function EQDetect(data, date, detect) {
         });
         if (EQD_ItemTmp) {
           //EQD_ItemTmpに属する観測点から、自観測点からの距離が閾値以下の観測点があるか確認
-          var CodesTmp = EQD_ItemTmp.Codes.find(function (elm3) {
+          /*var CodesTmp = EQD_ItemTmp.Codes.find(function (elm3) {
             return geosailing(elm.Location.Latitude, elm.Location.Longitude, elm3.Location.Latitude, elm3.Location.Longitude) <= MargeRangeTmp;
-          });
+          });*/
 
-          if (CodesTmp) {
-            //地震アイテムに自観測点を追加
-            EQD_ItemTmp.Codes.push(elm);
-            EQD_ItemTmp.Codes_history++;
-            ptData.Event = true;
-            //地震アイテムの「半径」を更新
-            radiusTmp = geosailing(elm.Location.Latitude, elm.Location.Longitude, EQD_ItemTmp.lat, EQD_ItemTmp.lng);
-            if (EQD_ItemTmp.Radius < radiusTmp) EQD_ItemTmp.Radius = radiusTmp;
-            //最終検知時間（解除時に使用）を更新
-            EQD_ItemTmp.last_Detect = new Date() - Replay;
+          //if (CodesTmp) {
+          //地震アイテムに自観測点を追加
+          EQD_ItemTmp.Codes.push(elm);
+          if (!EQD_ItemTmp.Codes_history.includes(elm.Code)) EQD_ItemTmp.Codes_history.push(elm.Code);
+          ptData.Event = true;
+          //地震アイテムの「半径」を更新
+          //radiusTmp = geosailing(elm.Location.Latitude, elm.Location.Longitude, EQD_ItemTmp.lat, EQD_ItemTmp.lng);
+          //if (EQD_ItemTmp.Radius < radiusTmp) EQD_ItemTmp.Radius = radiusTmp;
 
-            threshold01Tmp = EQD_ItemTmp.isCity ? thresholds.threshold01C : thresholds.threshold01;
-            threshold01Tmp = Math.min(Math.max(elm.arroundPoints, 2), threshold01Tmp); //周囲の観測点数に応じて閾値を調整（離島対応）
-            if (EQD_ItemTmp.Codes.length >= threshold01Tmp) {
-              //地震アイテムに属する観測点数が閾値以上なら
-
-              var result = GuessHypocenter(EQD_ItemTmp, data);
-              EQD_ItemTmp.lat2 = result.lat;
-              EQD_ItemTmp.lng2 = result.lng;
-              EQD_ItemTmp.Radius2 = result.rad;
-
-              //情報をmainプロセスへ送信
-              workerThreads.parentPort.postMessage({
-                action: "EQDetectAdd",
-                data: EQD_ItemTmp,
-              });
-              EQD_ItemTmp.showed = true; //新地震アイテムかどうかの判別用
-            }
-          }
+          //最終検知時間（解除時に使用）を更新
+          EQD_ItemTmp.last_Detect = new Date() - Replay;
+          //}
         }
       }
 
       if (!ptData.Event && elm.detect2) {
         //自観測点がどの地震アイテムにも属さず、検知レベルがLv.2以上の場合
         //自観測点を中心とした新規地震アイテム作成
-        EQDetect_List.push({ id: EQDetectID, lat: elm.Location.Latitude, lng: elm.Location.Longitude, Codes: [elm], Codes_history: 1, Radius: 0, maxPGA: elm.pga, maxInt: elm.shindo, detectCount: 1, Up: false, Lv: 0, last_Detect: new Date() - Replay, origin_Time: new Date() - Replay, showed: false, isCity: ptData.isCity });
+        EQDetect_List.push({ id: EQDetectID, lat: elm.Location.Latitude, lng: elm.Location.Longitude, lat2: elm.Location.Latitude, lng2: elm.Location.Longitude, Codes: [elm], Codes_history: [elm.Code], Radius: 0, maxPGA: elm.pga, maxInt: elm.shindo, detectCount: 1, Up: false, Lv: 0, last_Detect: new Date() - Replay, origin_Time: new Date() - Replay, showed: false, isCity: ptData.isCity });
         EQDetectID++;
       }
+    }
+  }
+
+  for (const EQD_ItemTmp of EQDetect_List) {
+    threshold01Tmp = EQD_ItemTmp.isCity ? thresholds.threshold01C : thresholds.threshold01;
+    MargeRangeTmp = ptData.isCity ? thresholds.MargeRangeC : thresholds.MargeRange;
+    var ArroundPoints = data.filter(function (station) {
+      return geosailing(station.Location.Latitude, station.Location.Longitude, EQD_ItemTmp.lat, EQD_ItemTmp.lng) - EQD_ItemTmp.Radius <= Math.max(MargeRangeTmp, EQD_ItemTmp.Radius * 0);
+    });
+    threshold01Tmp = Math.min(Math.max(ArroundPoints.length, 2), threshold01Tmp); //周囲の観測点数に応じて閾値を調整（離島対応）
+    if (EQD_ItemTmp.Codes.length >= threshold01Tmp) {
+      //地震アイテムに属する観測点数が閾値以上なら
+      var result = GuessHypocenter(EQD_ItemTmp, data);
+      if (Math.abs(EQD_ItemTmp.lat - result.lat) > 0.2) EQD_ItemTmp.lat = result.lat;
+      if (Math.abs(EQD_ItemTmp.lng - result.lng) > 0.2) EQD_ItemTmp.lng = result.lng;
+      EQD_ItemTmp.Radius = result.rad;
+
+      //情報をmainプロセスへ送信
+      workerThreads.parentPort.postMessage({
+        action: "EQDetectAdd",
+        data: EQD_ItemTmp,
+      });
+      EQD_ItemTmp.showed = true; //新地震アイテムかどうかの判別用
     }
   }
 
   //地震検知解除
   var index = 0;
   for (const elm of EQDetect_List) {
-    if (EEWNow || new Date() - Replay - elm.origin_Time > thresholds.time00 || new Date() - Replay - elm.last_Detect > thresholds.time01 || elm.Codes.length < elm.Codes_history * thresholds.threshold05) {
+    if (EEWNow || new Date() - Replay - elm.origin_Time > thresholds.time00 || new Date() - Replay - elm.last_Detect > thresholds.time01 || elm.Codes.length < elm.Codes_history.length * thresholds.threshold05) {
       //EEW発令中・発生から閾値以上経過・最後の検知から閾値以上経過・観測点数が最大時より一定割合減少
       EQDetect_List.splice(index, 1);
       workerThreads.parentPort.postMessage({
@@ -197,65 +203,58 @@ function EQDetect(data, date, detect) {
 }
 
 function GuessHypocenter(EQElm, data) {
-  var mindif = Infinity;
-  var difs = [];
-  for (let lat = EQElm.lat - 3; lat <= EQElm.lat + 3; lat++) {
-    for (let lng = EQElm.lng - 3; lng <= EQElm.lng + 3; lng++) {
-      result = calcDifference(lat, lng, EQElm, data);
-      if (result) {
-        dif = result[0];
-        rad = result[1];
-        if (mindif > dif) mindif = dif;
-        difs.push({ lat: lat, lng: lng, dif: dif });
-      }
-    }
-  }
-  var Tmp = difs.find(function (elm) {
-    return mindif == elm.dif;
-  });
-
-  mindif = Infinity;
-  difs = [];
-  for (let lat = Tmp.lat - 0.5; lat <= Tmp.lat + 0.5; lat += 0.1) {
-    for (let lng = Tmp.lng - 0.5; lng <= Tmp.lng + 0.5; lng++) {
-      result = calcDifference(lat, lng, EQElm, data);
-      if (result) {
-        dif = result[0];
-        rad = result[1];
-        if (mindif > dif) mindif = dif;
-        difs.push({ lat: lat, lng: lng, dif: dif, rad: rad });
+  var Tmp = { dif: Infinity };
+  for (let lat = Math.floor(EQElm.lat2) - 3; lat <= Math.floor(EQElm.lat2) + 3; lat++) {
+    for (let lng = Math.floor(EQElm.lng2) - 3; lng <= Math.floor(EQElm.lng2) + 3; lng++) {
+      res = calcDifference(lat, lng, EQElm, data);
+      if (res) {
+        item = { lat: lat, lng: lng, dif: res[0], rad: res[1] };
+        if (Tmp.dif > item.dif) Tmp = item;
       }
     }
   }
 
-  result = difs.find(function (elm) {
-    return mindif == elm.dif;
-  });
+  var result = { dif: Infinity };
+  for (let lat = Tmp.lat - 0.5; lat <= Tmp.lat + 0.5; lat += 0.2) {
+    for (let lng = Tmp.lng - 0.5; lng <= Tmp.lng + 0.5; lng += 0.2) {
+      res = calcDifference(lat, lng, EQElm, data);
+      if (res) {
+        item = { lat: lat, lng: lng, dif: res[0], rad: res[1] };
+        if (Tmp.dif > item.dif) result = item;
+      }
+    }
+  }
 
-  console.log("ccc", result);
+  var o_arrivalTime_min = Infinity;
+  for (const station of EQElm.Codes) {
+    if (o_arrivalTime_min > station.o_arrivalTime) o_arrivalTime_min = station.o_arrivalTime;
+  }
+  if (EQElm.origin_Time - o_arrivalTime_min < 10000) originTime = new Date(o_arrivalTime_min - 2000);
+  else originTime = new Date(EQElm.origin_Time - 6000);
+
   return result;
 }
 
 var TimeTable_JMA2001 = require("../Resource/TimeTable_JMA2001.json")[10];
 function calcDifference(lat, lng, stations, data) {
   var o_arrivalTime_min = Infinity;
-  var o_arrivalTime_max = 0;
   var f_arrivalTime_min = Infinity;
-  var distance_max = 0;
+  var radius = 0;
+
   for (const station of stations.Codes) {
-    distance = station.distance = geosailing(lat, lng, station.Location.Latitude, station.Location.Longitude);
-    if (distance_max < distance) distance_max = distance;
+    station.distance = geosailing(lat, lng, station.Location.Latitude, station.Location.Longitude);
+
+    if (radius < station.distance) radius = station.distance;
     var index = TimeTable_JMA2001.findIndex(function (elm) {
-      return elm.R >= distance;
+      return elm.R >= station.distance;
     });
     if (index >= 0) {
       var elm0 = TimeTable_JMA2001[Math.max(index - 1, 0)];
       var elm2 = TimeTable_JMA2001[index];
-      if (elm0.R == distance) station.f_arrivalTime = elm0.S;
-      else station.f_arrivalTime = elm0.S + ((elm2.S - elm0.S) * (distance - elm0.R)) / (elm2.R - elm0.R);
+      if (elm0.R == station.distance) station.f_arrivalTime = elm0.S;
+      else station.f_arrivalTime = elm0.S + ((elm2.S - elm0.S) * (station.distance - elm0.R)) / (elm2.R - elm0.R);
       station.o_arrivalTime = pointsData[station.Code].o_arrivalTime;
 
-      if (o_arrivalTime_max < station.o_arrivalTime) o_arrivalTime_max = station.o_arrivalTime;
       if (o_arrivalTime_min > station.o_arrivalTime) o_arrivalTime_min = station.o_arrivalTime;
       if (f_arrivalTime_min > station.f_arrivalTime) f_arrivalTime_min = station.f_arrivalTime;
     } else return null;
@@ -263,20 +262,17 @@ function calcDifference(lat, lng, stations, data) {
 
   var Difference = 0;
   stations.Codes.forEach((station) => {
-    o_dif = (station.o_arrivalTime - o_arrivalTime_min) / 1000;
-    f_dif = station.f_arrivalTime - f_arrivalTime_min;
-    Difference += Math.abs(o_dif - f_dif) * (1 / 250) * station.distance + 0.5;
+    Difference += Math.abs((station.o_arrivalTime - o_arrivalTime_min) / 1000 - station.f_arrivalTime - f_arrivalTime_min);
   });
 
-  new Date() - o_arrivalTime_min;
-
-  var PointsNotDetecting = data.filter(function (station) {
-    return geosailing(station.Location.Latitude, station.Location.Longitude, lat, lng) < distance_max;
+  var ArroundPoints = data.filter(function (station) {
+    return station.data && geosailing(station.Location.Latitude, station.Location.Longitude, lat, lng) <= radius;
   });
 
   Difference = Difference / stations.Codes.length;
-  Difference = Difference * Math.abs((PointsNotDetecting.length * 1.5) / stations.Codes.length);
-  return [Difference, distance_max];
+  Difference = Difference / (stations.Codes.length / ArroundPoints.length) ** 2;
+
+  return [Difference, radius];
 }
 
 //緯度・経度から2地点間の距離を産出

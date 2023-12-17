@@ -435,11 +435,11 @@ function EQDetect(data) {
 
   if (EQD_Item) {
     //情報更新
-    EQD_Item.lat = data.lat2;
-    EQD_Item.lng = data.lng2;
+    EQD_Item.lat = data.lat;
+    EQD_Item.lng = data.lng;
 
-    let _center = turf.point([data.lng2, data.lat2]);
-    let _radius = data.Radius2 + 5;
+    let _center = turf.point([data.lng, data.lat]);
+    let _radius = data.Radius + 5;
     let _options = {
       steps: 80,
       units: "kilometers",
@@ -448,7 +448,7 @@ function EQDetect(data) {
     let _circle = turf.circle(_center, _radius, _options);
     map.getSource("EQDItem_" + data.id).setData(_circle);
 
-    EQD_Item.ECMarker.setLngLat([data.lng2, data.lat2]);
+    EQD_Item.ECMarker.setLngLat([data.lng, data.lat]);
 
     var EQDItem = document.getElementById("EQDItem_" + data.id);
     EQDItem.classList.remove("lv1", "lv2");
@@ -471,7 +471,7 @@ function EQDetect(data) {
     img.src = "./img/epicenter.svg";
     img.classList.add("epicenterIcon");
 
-    var ECMarker = new maplibregl.Marker({ element: img }).setLngLat([data.lng2, data.lat2]).addTo(map);
+    var ECMarker = new maplibregl.Marker({ element: img }).setLngLat([data.lng, data.lat]).addTo(map);
 
     EQDetectItem.push({
       id: data.id,
@@ -480,8 +480,8 @@ function EQDetect(data) {
       ECMarker: ECMarker,
     });
 
-    let _center = turf.point([data.lng2, data.lat2]);
-    let _radius = data.Radius2 + 5;
+    let _center = turf.point([data.lng, data.lat]);
+    let _radius = data.Radius + 5;
     let _options = {
       steps: 80,
       units: "kilometers",
