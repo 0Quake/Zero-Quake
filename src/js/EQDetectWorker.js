@@ -121,25 +121,28 @@ function EQDetect(data, date, detect) {
         //自観測点が地震アイテムの半径+閾値の範囲内に入っている地震アイテムを探す
         EQD_ItemTmp = EQDetect_List.find(function (elm2) {
           return geosailing(elm.Location.Latitude, elm.Location.Longitude, elm2.lat, elm2.lng) - elm2.Radius <= MargeRangeTmp;
-        });
+        });        
+
         if (EQD_ItemTmp) {
           //EQD_ItemTmpに属する観測点から、自観測点からの距離が閾値以下の観測点があるか確認
-          /*var CodesTmp = EQD_ItemTmp.Codes.find(function (elm3) {
+          var includes = geosailing(elm.Location.Latitude, elm.Location.Longitude, EQD_ItemTmp.lat, EQD_ItemTmp.lng) < EQD_ItemTmp.Radius;
+
+          var CodesTmp = EQD_ItemTmp.Codes.find(function (elm3) {
             return geosailing(elm.Location.Latitude, elm.Location.Longitude, elm3.Location.Latitude, elm3.Location.Longitude) <= MargeRangeTmp;
-          });*/
+          });
 
-          //if (CodesTmp) {
+          if (CodesTmp || includes) {
           //地震アイテムに自観測点を追加
-          EQD_ItemTmp.Codes.push(elm);
-          if (!EQD_ItemTmp.Codes_history.includes(elm.Code)) EQD_ItemTmp.Codes_history.push(elm.Code);
-          ptData.Event = true;
-          //地震アイテムの「半径」を更新
-          //radiusTmp = geosailing(elm.Location.Latitude, elm.Location.Longitude, EQD_ItemTmp.lat, EQD_ItemTmp.lng);
-          //if (EQD_ItemTmp.Radius < radiusTmp) EQD_ItemTmp.Radius = radiusTmp;
+          var SameST = EQD_ItemTmp.Codes.find(function(elm2){return elm.Code == elm2.Code})
+          if(!SameST){
+            EQD_ItemTmp.Codes.push(elm);
+            if (!EQD_ItemTmp.Codes_history.includes(elm.Code)) EQD_ItemTmp.Codes_history.push(elm.Code);
+            ptData.Event = true;
 
-          //最終検知時間（解除時に使用）を更新
-          EQD_ItemTmp.last_Detect = new Date() - Replay;
-          //}
+            //最終検知時間（解除時に使用）を更新
+            EQD_ItemTmp.last_Detect = new Date() - Replay;
+          }
+          }
         }
       }
 
@@ -164,26 +167,7 @@ function EQDetect(data, date, detect) {
       var result = GuessHypocenter(EQD_ItemTmp, data);
       if (Math.abs(EQD_ItemTmp.lat - result[0].lat) > 0.2) EQD_ItemTmp.lat = result[0].lat;
       if (Math.abs(EQD_ItemTmp.lng - result[0].lng) > 0.2) EQD_ItemTmp.lng = result[0].lng;
-      EQD_ItemTmp.Radius = result[0].rad;
-
-      var sec = (new Date() - Replay - new Date(result[1])) / 1000;
-
-      var depTmp;
-      var minDis = Infinity;
-      Object.keys(TimeTable_JMA2001).forEach(function (elm) {
-        tableElm = TimeTable_JMA2001[elm].find(function (elm2) {
-          return elm2.S > sec;
-        });
-        if (tableElm) {
-          dis = Math.abs(tableElm.R - result[0].rad);
-          if (dis < minDis) {
-            minDis = dis;
-            depTmp = elm;
-          }
-        }
-      });
-      console.log(depTmp);
-      EQD_ItemTmp.depth = depTmp;
+      if(result[0].rad) EQD_ItemTmp.Radius = result[0].rad;
 
       //情報をmainプロセスへ送信
       workerThreads.parentPort.postMessage({
@@ -207,6 +191,9 @@ function EQDetect(data, date, detect) {
           data: elm.id,
         },
       });
+      elm.Codes.forEach(function(elm2){
+        pointsData[elm2.Code].Event = false;
+      })
     }
     index++;
   }
@@ -264,8 +251,10 @@ function calcDifference(lat, lng, stations, data, originTime, dep) {
   var f_arrivalTime_min = Infinity;
   var radius = 0;
 
+  var distance = []
   for (const station of stations.Codes) {
     station.distance = geosailing(lat, lng, station.Location.Latitude, station.Location.Longitude);
+    distance.push(station.distance)
 
     if (radius < station.distance) radius = station.distance;
     var index = TimeTable.findIndex(function (elm) {
@@ -281,6 +270,9 @@ function calcDifference(lat, lng, stations, data, originTime, dep) {
       if (f_arrivalTime_min > station.f_arrivalTime) f_arrivalTime_min = station.f_arrivalTime;
     } else return null;
   }
+  /*radius = distance.sort((a, b) => {
+    return (a < b) ? -1 : 1;
+  })[Math.abs(distance.length*0.8)];*/
 
   var Difference = 0;
   stations.Codes.forEach((station) => {
@@ -293,6 +285,7 @@ function calcDifference(lat, lng, stations, data, originTime, dep) {
 
   Difference = Difference / stations.Codes.length;
   Difference = Difference / (stations.Codes.length / ArroundPoints.length) ** 2;
+  if((stations.Codes.length / ArroundPoints.length)<0.5 ) Difference*=10;
 
   return [Difference, radius];
 }
