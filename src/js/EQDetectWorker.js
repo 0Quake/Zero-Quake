@@ -13,11 +13,11 @@ var thresholds = {
   threshold02: null, //1次フラグ条件のPGA増加量[gal]
   threshold03: null, //2次フラグ条件のPGA増加量[gal]
   threshold04: 3, //1次フラグ条件の震度
-  threshold05: 0.3, //イベントの観測点数が最大時のn倍未満で解除
+  threshold05: 0.1, //イベントの観測点数が最大時のn倍未満で解除
   MargeRange: 30, //地震の同定範囲[km]
   MargeRangeC: 20, //地震の同定範囲[km]【都会】
   time00: 300000, //最初の検出~解除[ms](優先)
-  time01: 10000, //最後の検出~解除[ms]
+  time01: 30000, //最後の検出~解除[ms]
 };
 
 workerThreads.parentPort.postMessage({
@@ -121,7 +121,7 @@ function EQDetect(data, date, detect) {
         //自観測点が地震アイテムの半径+閾値の範囲内に入っている地震アイテムを探す
         EQD_ItemTmp = EQDetect_List.find(function (elm2) {
           return geosailing(elm.Location.Latitude, elm.Location.Longitude, elm2.lat, elm2.lng) - elm2.Radius <= MargeRangeTmp;
-        });        
+        });
 
         if (EQD_ItemTmp) {
           //EQD_ItemTmpに属する観測点から、自観測点からの距離が閾値以下の観測点があるか確認
@@ -132,16 +132,18 @@ function EQDetect(data, date, detect) {
           });
 
           if (CodesTmp || includes) {
-          //地震アイテムに自観測点を追加
-          var SameST = EQD_ItemTmp.Codes.find(function(elm2){return elm.Code == elm2.Code})
-          if(!SameST){
-            EQD_ItemTmp.Codes.push(elm);
-            if (!EQD_ItemTmp.Codes_history.includes(elm.Code)) EQD_ItemTmp.Codes_history.push(elm.Code);
-            ptData.Event = true;
+            //地震アイテムに自観測点を追加
+            var SameST = EQD_ItemTmp.Codes.find(function (elm2) {
+              return elm2.Code == elm.Code;
+            });
+            if (!SameST) {
+              EQD_ItemTmp.Codes.push(elm);
+              if (!EQD_ItemTmp.Codes_history.includes(elm.Code)) EQD_ItemTmp.Codes_history.push(elm.Code);
+              ptData.Event = true;
 
-            //最終検知時間（解除時に使用）を更新
-            EQD_ItemTmp.last_Detect = new Date() - Replay;
-          }
+              //最終検知時間（解除時に使用）を更新
+              EQD_ItemTmp.last_Detect = new Date() - Replay;
+            }
           }
         }
       }
@@ -167,7 +169,7 @@ function EQDetect(data, date, detect) {
       var result = GuessHypocenter(EQD_ItemTmp, data);
       if (Math.abs(EQD_ItemTmp.lat - result[0].lat) > 0.2) EQD_ItemTmp.lat = result[0].lat;
       if (Math.abs(EQD_ItemTmp.lng - result[0].lng) > 0.2) EQD_ItemTmp.lng = result[0].lng;
-      if(result[0].rad) EQD_ItemTmp.Radius = result[0].rad;
+      if (result[0].rad) EQD_ItemTmp.Radius = result[0].rad;
 
       //情報をmainプロセスへ送信
       workerThreads.parentPort.postMessage({
@@ -182,6 +184,7 @@ function EQDetect(data, date, detect) {
   var index = 0;
   for (const elm of EQDetect_List) {
     if (EEWNow || new Date() - Replay - elm.origin_Time > thresholds.time00 || new Date() - Replay - elm.last_Detect > thresholds.time01 || elm.Codes.length < elm.Codes_history.length * thresholds.threshold05) {
+      if (elm.Codes.length < elm.Codes_history.length * thresholds.threshold05);
       //EEW発令中・発生から閾値以上経過・最後の検知から閾値以上経過・観測点数が最大時より一定割合減少
       EQDetect_List.splice(index, 1);
       workerThreads.parentPort.postMessage({
@@ -191,9 +194,9 @@ function EQDetect(data, date, detect) {
           data: elm.id,
         },
       });
-      elm.Codes.forEach(function(elm2){
+      elm.Codes.forEach(function (elm2) {
         pointsData[elm2.Code].Event = false;
-      })
+      });
     }
     index++;
   }
@@ -251,10 +254,10 @@ function calcDifference(lat, lng, stations, data, originTime, dep) {
   var f_arrivalTime_min = Infinity;
   var radius = 0;
 
-  var distance = []
+  var distance = [];
   for (const station of stations.Codes) {
     station.distance = geosailing(lat, lng, station.Location.Latitude, station.Location.Longitude);
-    distance.push(station.distance)
+    distance.push(station.distance);
 
     if (radius < station.distance) radius = station.distance;
     var index = TimeTable.findIndex(function (elm) {
@@ -285,7 +288,7 @@ function calcDifference(lat, lng, stations, data, originTime, dep) {
 
   Difference = Difference / stations.Codes.length;
   Difference = Difference / (stations.Codes.length / ArroundPoints.length) ** 2;
-  if((stations.Codes.length / ArroundPoints.length)<0.5 ) Difference*=10;
+  if (stations.Codes.length / ArroundPoints.length < 0.5) Difference *= 10;
 
   return [Difference, radius];
 }

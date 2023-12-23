@@ -463,9 +463,6 @@ function EQDetect(data) {
     EQDItem.querySelector(".EQD_Regions").innerText = regions.join(" ");
     document.getElementById("EQDetect-Panel").prepend(clone);
 
-    map.panTo([data.lng, data.lat], { animate: false });
-    map.zoomTo(8, { animate: false });
-
     const img = document.createElement("img");
     img.src = "./img/epicenter_EQDetect.svg";
     img.classList.add("epicenterIcon");
@@ -516,6 +513,9 @@ function EQDetect(data) {
       minzoom: 0,
       maxzoom: 22,
     });
+
+    map.panTo([data.lng, data.lat], { animate: false });
+    map.fitBounds(turf.bbox(_circle), { animate: false, padding: 100 });
   }
   document.getElementById("noEEW").style.display = now_EEW.length == 0 && !now_tsunami && EQDetectItem.length == 0 ? "block" : "none";
   if (now_EEW.length == 0) document.body.classList.remove("EQDetecting");
