@@ -38,11 +38,12 @@
   },
   "homepage": "https://zeroquake.wwww.jp/",
   "devDependencies": {
-    "electron": "^27.1.3",
+    "electron": "^28.1.0",
     "electron-builder": "^24.9.1",
-    "eslint": "^8.55.0"
+    "eslint": "^8.56.0"
   },
   "dependencies": {
+    "@turf/turf": "^6.5.0",
     "electron-squirrel-startup": "^1.0.0",
     "electron-store": "^8.1.0",
     "fs": "^0.0.1-security",
