@@ -573,6 +573,12 @@ td {
   vertical-align: middle;
   margin-right: 5px;
 }
+#EEWLink {
+  display: none;
+}
+#LinkWrap {
+  margin-top: 20px;
+}
 @media (max-width: 600px) {
   #tableWrap {
     display: block;

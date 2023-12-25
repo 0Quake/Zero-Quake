@@ -23,7 +23,7 @@ table td {
 .ListItem_detail * {
   font-size: 14px;
   line-height: 1.2em;
-  padding: 5px 10px;
+  padding: 5px 7px;
   color: #ccc;
 }
 
@@ -41,7 +41,7 @@ table thead {
   text-align: center;
   position: -webkit-sticky;
   position: sticky;
-  top: 170px;
+  top: 100px;
   z-index: 1;
   background: #222;
   height: 50px;
@@ -83,16 +83,25 @@ table thead th {
 }
 
 table thead {
-  top: 70px;
+  top: 0;
 }
 
 table td {
   padding: 9px 10px;
-  font-size: 18px;
+  font-size: 16px;
 }
 
 table tr:nth-child(2n) {
   background: #333;
+}
+table tr:nth-child(2) {
+  font-size: 13px;
+}
+#tablerow2 div {
+  display: inline-block;
+  max-height: 50px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 #MajorWarningInfo::after {
@@ -139,6 +148,8 @@ table tr:nth-child(2n) {
 #DTWrap {
   font-size: 20px;
   padding: 20px;
+}
+#revocation {
   display: none;
 }
 
@@ -158,21 +169,27 @@ table tr:nth-child(2n) {
   background: var(--TsunamiYohoColor);
 }
 
-h1#title {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+header {
   height: 70px;
-  margin: 0;
   line-height: 70px;
-  z-index: 1000;
   background: #333;
   border-bottom: solid 1px #666;
 }
+h1 {
+  display: inline-block;
+  margin: 0;
+}
 
-#tableWrap {
-  margin-top: 70px;
+header div.TraningNotes,
+header div.TestNotes {
+  display: inline-block;
+  height: 30px;
+  line-height: 30px;
+  width: auto;
+  padding: 0 10px;
+  border-radius: 40px;
+  margin: 20px 5px;
+  vertical-align: top;
 }
 
 #no-data {

@@ -554,6 +554,7 @@ td {
   color: #999;
   margin: 0;
   padding: 0;
+  writing-mode: horizontal-tb;
 }
 #setting:hover {
   background: #555;
@@ -764,7 +765,9 @@ td {
   margin: auto 5px auto 0;
   font-family: "M PLUS 1p";
 }
-.EEWNotes {
+.EEWNotes,
+.TraningNotes,
+.TestNotes {
   display: none;
   width: 100%;
   font-size: 14px;
@@ -773,6 +776,17 @@ td {
   border: solid 1px #f00;
   border-radius: 3px;
 }
+.TraningNotes,
+.TestNotes {
+  border: solid 1px rgb(51, 142, 222);
+}
+
+#tsunamiWrap .TraningNotes,
+#tsunamiWrap .TestNotes {
+  width: calc(100% - 10px);
+  margin: 5px;
+}
+
 .EQItemOverlay {
   position: absolute;
   display: none;

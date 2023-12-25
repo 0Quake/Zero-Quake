@@ -395,6 +395,8 @@ function eqInfoDraw(data, source) {
       clone.querySelector(".EQI_maxI").style.color = shindoColor[1];
       clone.querySelector(".canceled").style.display = elm.cancel ? "flex" : "none";
       clone.querySelector(".EEWNotes").style.display = elm.category == "EEW" ? "block" : "none";
+      clone.querySelector(".TestNotes").style.display = elm.status == "試験" ? "block" : "none";
+      clone.querySelector(".TraningNotes").style.display = elm.status == "訓練" ? "block" : "none";
 
       if (elm.cancel) clone.querySelector(".EQItem").classList.add("EQI_canceled");
       else {
@@ -1724,6 +1726,10 @@ function tsunamiDataUpdate(data) {
 
   document.getElementById("tsunamiCancel").style.display = data.cancelled ? "block" : "none";
   document.getElementById("tsunamiRevocation").style.display = data.revocation ? "block" : "none";
+
+  document.querySelector("#tsunamiWrap .TestNotes").style.display = data.status == "試験" ? "block" : "none";
+  document.querySelector("#tsunamiWrap .TraningNotes").style.display = data.status == "訓練" ? "block" : "none";
+
   now_tsunami = true;
 
   tsunamiSTMarkers.forEach(function (elm) {
