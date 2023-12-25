@@ -24,10 +24,15 @@
   </div>
 
 
-  <h1 id="title">津波情報</h1>
+  <header>
+    <h1 id="title">津波情報</h1>
+    <div class="TraningNotes">訓練報</div>
+    <div class="TestNotes">試験報</div>
+  </header>
+
   <div id="tableWrap">
     <div id="revocation">津波情報は解除されました。</div>
-    <div id="DTWrap">発表日時：<span id="dateTime">不明</span></div>
+    <div id="DTWrap">発表日時：<span id="dateTime">不明</span>　情報期限：<span id="validdateTime">不明</span></div>
 
     <table>
       <thead>
@@ -36,16 +41,16 @@
           <th rowspan="2">津波予報区<br>津波観測点</th>
           <th colspan="2">予想</th>
           <th colspan="3">観測</th>
-          <th rowspan="2">満潮時刻</th>
+          <th rowspan="2">満潮<br>時刻</th>
           <th rowspan="2"></th>
         </tr>
 
-        <tr>
-          <th>第１波<br>到達時刻</th>
-          <th>最大波<br>高さ</th>
-          <th>第１波<br>到達時刻</th>
-          <th>最大波<br>高さ</th>
-          <th>最大波<br>到達時刻</th>
+        <tr id="tablerow2">
+          <th><div>第１波<br>時刻</div></th>
+          <th><div>最大波<br>高さ</div></th>
+          <th><div>第１波<br>時刻</div></th>
+          <th><div>最大波<br>高さ</div></th>
+          <th><div>最大波<br>時刻</div></th>
         </tr>
       </thead>
       <tbody>

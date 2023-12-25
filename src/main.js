@@ -1365,6 +1365,7 @@ function AXIS_WS() {
               eqInfoControl(
                 [
                   {
+                    status: data.message.Control.Status,
                     eventId: data.message.Head.EventID,
                     category: data.message.Head.Title,
                     reportDateTime: data.message.Head.ReportDateTime,
@@ -2171,6 +2172,7 @@ function EEWAlert(data, first, update) {
     eqInfoControl(
       [
         {
+          status: data.is_training ? "訓練" : "通常",
           eventId: data.EventID,
           category: "EEW",
           reportDateTime: data.report_time,
@@ -2334,6 +2336,7 @@ function EQI_JMAXML_Req(url) {
           eqInfoControl(
             [
               {
+                status: xml.querySelector("Status").textContent,
                 eventId: xml.querySelector("EventID").textContent,
                 category: xml.title,
                 OriginTime: originTimeTmp,
@@ -2352,6 +2355,7 @@ function EQI_JMAXML_Req(url) {
           var tsunamiDataTmp;
           if (cancel) {
             tsunamiDataTmp = {
+              status: xml.querySelector("Status").textContent,
               issue: { time: new Date(xml.querySelector("ReportDateTime").textContent), EventID: null, EarthQuake: null },
               areas: [],
               revocation: true,
@@ -2376,6 +2380,7 @@ function EQI_JMAXML_Req(url) {
               ECTmp = ECTmp ? ECTmp.textContent : null;
 
               EQData.push({
+                status: xml.querySelector("Status").textContent,
                 eventId: EventID[index],
                 category: "Tsunami",
                 OriginTime: elm.querySelector("OriginTime") ? new Date(elm.querySelector("OriginTime").textContent) : new Date(),
@@ -2388,6 +2393,7 @@ function EQI_JMAXML_Req(url) {
             eqInfoControl(EQData, "jma");
 
             tsunamiDataTmp = {
+              status: xml.querySelector("Status").textContent,
               issue: { time: new Date(xml.querySelector("ReportDateTime").textContent), EventID: EventID, EarthQuake: EQData },
               areas: [],
               revocation: false,
@@ -2688,6 +2694,7 @@ function EQI_narikakun_Req(url) {
         var cancel = json.Head.InfoType == "取消";
         var dataTmp2 = [
           {
+            status: data.Control.Status,
             eventId: json.Head.EventID,
             category: json.Head.Title,
             OriginTime: originTimeTmp,
@@ -2746,6 +2753,11 @@ function eqInfoControl(dataList, type, EEW) {
             };
             changed = true;
             audioPlay = true;
+          }
+
+          if (data.status && (!EQElm.status || newer)) {
+            EQElm.status = data.status;
+            changed = true;
           }
 
           if (data.OriginTime && (!EQElm.OriginTime || newer)) {
@@ -2999,7 +3011,7 @@ function dateEncode(type, dateTmp) {
 //震度の形式変換
 function shindoConvert(str, responseType) {
   var ShindoTmp;
-  if (!str) ShindoTmp = 0;
+  if (str === null || str === undefined) ShindoTmp = 0;
   else if (isNaN(str)) {
     str = String(str)
       .replace(/[０-９]/g, function (s) {

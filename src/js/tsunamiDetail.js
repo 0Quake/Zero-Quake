@@ -1,5 +1,3 @@
-var RevocationTimer;
-
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "tsunamiUpdate") {
     tsunamiUpdate(request.data);
@@ -10,11 +8,11 @@ window.electronAPI.messageSend((event, request) => {
 var mySectElm;
 function tsunamiUpdate(dataTmp) {
   var Tsunami_MajorWarning = (Tsunami_Warning = Tsunami_Watch = Tsunami_Yoho = false);
-  document.getElementById("dateTime").style.display = "block";
   document.getElementById("revocation").style.display = "none";
   document.getElementById("no-data").style.display = "none";
 
-  document.getElementById("dateTime").innerText = dateEncode(3, new Date(dataTmp.issue.time));
+  document.getElementById("dateTime").innerText = dateEncode(5, new Date(dataTmp.issue.time));
+  document.getElementById("validdateTime").innerText = dateEncode(5, new Date(dataTmp.ValidDateTime));
   if (dataTmp.revocation) document.getElementById("revocation").style.display = "block";
   else if (!dataTmp || dataTmp.areas.length == 0) {
     document.getElementById("no-data").style.display = "table-row";
@@ -24,16 +22,6 @@ function tsunamiUpdate(dataTmp) {
     elm.remove();
   });
 
-  //情報の有効期限
-  if (dataTmp.ValidDateTime) {
-    clearTimeout(RevocationTimer);
-    RevocationTimer = setTimeout(function () {
-      document.getElementById("revocation").style.display = "block";
-      document.querySelectorAll(".add-content").forEach(function (elm) {
-        elm.remove();
-      });
-    }, dataTmp.ValidDateTime - new Date());
-  }
   dataTmp.areas.reverse();
   dataTmp.areas.forEach((elm) => {
     if (!elm.canceled) {
@@ -152,4 +140,7 @@ function tsunamiUpdate(dataTmp) {
   document.getElementById("WarningInfo").style.display = Tsunami_Warning ? "table-row" : "none";
   document.getElementById("WatchInfo").style.display = Tsunami_Watch ? "table-row" : "none";
   document.getElementById("YohoInfo").style.display = Tsunami_Yoho ? "table-row" : "none";
+
+  document.querySelector(".TestNotes").style.display = dataTmp.status == "試験" ? "inline-block" : "none";
+  document.querySelector(".TraningNotes").style.display = dataTmp.status == "訓練" ? "inline-block" : "none";
 }
