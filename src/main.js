@@ -2176,7 +2176,7 @@ function EEWAlert(data, first, update) {
           reportDateTime: data.report_time,
           OriginTime: data.origin_time,
           epiCenter: data.region_name,
-          M: data.magnitude,
+          M: data.isPlum ? null : data.magnitude,
           maxI: data.maxInt,
           cancel: data.is_cancel,
           DetailURL: [],
