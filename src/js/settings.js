@@ -261,6 +261,9 @@ function mapInit() {
       [115, 15],
       [155, 52],
     ],
+    pitchWithRotate: false,
+    dragRotate: false,
+    touchZoomRotate: false,
     style: {
       version: 8,
       glyphs: "https://gsi-cyberjapan.github.io/optimal_bvmap/glyphs/{fontstack}/{range}.pbf",

@@ -586,7 +586,7 @@ body {
   height: 15px;
   border-radius: 50%;
   border: solid 2px #fff;
-  left:0;
+  left: 0;
 }
 .tsunami_st span {
   display: none;
@@ -594,7 +594,7 @@ body {
   left: 7.5px;
   line-height: 15px;
   color: #fff;
-  height:15px;
+  height: 15px;
   border-radius: 0 7.5px 7.5px 0;
   padding: 0 3px 0 10.5px;
   background: rgba(0, 0, 0, 0.5);
@@ -605,7 +605,6 @@ body {
 .zoomLevel_4 .tsunami_st span {
   display: inline-block;
 }
-
 
 .TsunamiST99 {
   z-index: 224;
@@ -631,6 +630,9 @@ body {
 }
 .TsunamiST02 div {
   background: var(--TsunamiYohoColor);
+}
+.maplibregl-ctrl-compass {
+  display: none !important;
 }
 
 @media (max-width: 600px) {

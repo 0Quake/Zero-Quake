@@ -117,6 +117,9 @@ function Mapinit() {
     center: [138.46, 32.99125],
     zoom: 4,
     attributionControl: true,
+    pitchWithRotate: false,
+    dragRotate: false,
+    touchZoomRotate: false,
     style: {
       version: 8,
       glyphs: "https://gsi-cyberjapan.github.io/optimal_bvmap/glyphs/{fontstack}/{range}.pbf",
