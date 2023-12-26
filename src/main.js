@@ -2722,7 +2722,6 @@ function eqInfoControl(dataList, type, EEW) {
     case "jma":
       var eqInfoTmp = [];
       var eqInfoUpdateTmp = [];
-      var audioPlay = false;
 
       dataList.forEach(function (data) {
         if (new Date(data.reportDateTime) > new Date() - Replay) return;
@@ -2750,7 +2749,6 @@ function eqInfoControl(dataList, type, EEW) {
               axisData: [],
             };
             changed = true;
-            audioPlay = true;
           }
 
           if (data.status && (!EQElm.status || newer)) {
@@ -2804,8 +2802,8 @@ function eqInfoControl(dataList, type, EEW) {
           }
         } else eqInfoTmp.push(data);
       });
-      if (eqInfoTmp.length > 0) eqInfoAlert(eqInfoTmp, "jma", false, audioPlay);
-      if (eqInfoUpdateTmp.length > 0) eqInfoAlert(eqInfoUpdateTmp, "jma", true, audioPlay);
+      if (eqInfoTmp.length > 0) eqInfoAlert(eqInfoTmp, "jma", false, EQInfoFetchIndex > 1);
+      if (eqInfoUpdateTmp.length > 0) eqInfoAlert(eqInfoUpdateTmp, "jma", true, false);
       break;
     case "usgs":
       dataList
@@ -2827,7 +2825,7 @@ function eqInfoAlert(data, source, update, audioPlay) {
         return elm.OriginTime;
       });
       if (!update) eqInfo.jma = eqInfo.jma.concat(data);
-      if (audioPlay && EQInfoFetchIndex > 0) soundPlay("EQInfo");
+      if (audioPlay) soundPlay("EQInfo");
 
       eqInfo.jma = eqInfo.jma.sort(function (a, b) {
         return a.OriginTime > b.OriginTime ? -1 : 1;
