@@ -279,6 +279,12 @@ function mapInit() {
           tolerance: 2,
           attribution: "Natural Earth",
         },
+        tsunami: {
+          type: "geojson",
+          data: "./Resource/tsunami.json",
+          tolerance: 1.6,
+          attribution: "気象庁",
+        },
         basemap: {
           type: "geojson",
           data: "./Resource/basemap.json",
