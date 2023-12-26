@@ -234,7 +234,6 @@ var nakn_Fetched = [];
 var narikakun_URLs = [];
 var narikakun_EIDs = [];
 var eqInfo = { jma: [], usgs: [] };
-var EQInfoFetchIndex = 0;
 var tsunamiData;
 var kmoniTimeout;
 var msil_lastTime = 0;
@@ -2246,7 +2245,6 @@ function EarlyEstAlert(data, first, update) {
 //地震情報更新処理
 function eqInfoUpdate(disableRepeat) {
   try {
-    EQInfoFetchIndex++;
     EQI_JMAXMLList_Req();
     EQI_narikakunList_Req("https://ntool.online/api/earthquakeList?year=" + new Date().getFullYear() + "&month=" + (new Date().getMonth() + 1), 10, true);
     EQI_USGS_Req();
@@ -2723,6 +2721,7 @@ function eqInfoControl(dataList, type, EEW) {
       var eqInfoTmp = [];
       var eqInfoUpdateTmp = [];
 
+      var playAudio = false;
       dataList.forEach(function (data) {
         if (new Date(data.reportDateTime) > new Date() - Replay) return;
         var EQElm = eqInfo.jma.concat(eqInfoTmp).find(function (elm) {
@@ -2795,14 +2794,17 @@ function eqInfoControl(dataList, type, EEW) {
           }
           if (changed) {
             eqInfoUpdateTmp.push(EQElm);
-            var EQElm2 = eqInfo.jma.findIndex(function (elm) {
+            var EQElm2 = eqInfo.jma.find(function (elm) {
               return elm.eventId == data.eventId;
             });
-            if (EQElm2 !== -1) eqInfo.jma[EQElm2] = EQElm;
+            if (!EQElm2) eqInfo.jma[EQElm2] = EQElm;
           }
-        } else eqInfoTmp.push(data);
+        } else {
+          eqInfoTmp.push(data);
+          if (data.reportDateTime && new Date() - data.reportDateTime < 60000) playAudio = true;
+        }
       });
-      if (eqInfoTmp.length > 0) eqInfoAlert(eqInfoTmp, "jma", false, EQInfoFetchIndex > 1);
+      if (eqInfoTmp.length > 0) eqInfoAlert(eqInfoTmp, "jma", false, playAudio);
       if (eqInfoUpdateTmp.length > 0) eqInfoAlert(eqInfoUpdateTmp, "jma", true, false);
       break;
     case "usgs":
