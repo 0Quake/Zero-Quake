@@ -1369,7 +1369,7 @@ function AXIS_WS() {
                     reportDateTime: data.message.Head.ReportDateTime,
                     OriginTime: data.message.Head.TargetDateTime,
                     epiCenter: EarthquakeElm.Hypocenter.Area.Name,
-                    M: EarthquakeElm.Magnitude,
+                    M: EarthquakeElm.Magnitude[0].valueOf_,
                     maxI: IntensityElm.Observation.MaxInt,
                     cancel: data.message.Head.InfoType == "取消",
                     DetailURL: [],
