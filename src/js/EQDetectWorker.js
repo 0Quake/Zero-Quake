@@ -101,6 +101,7 @@ function EQDetect(data, date, detect) {
       ptData.Event = false;
       for (const elm2 of EQDetect_List) {
         elm2.Codes = elm2.Codes.filter(function (elm3) {
+          if (elm3.Code == elm.Code) elm2.last_changed = new Date() - Replay;
           return elm3.Code !== elm.Code;
         });
       }
@@ -143,6 +144,7 @@ function EQDetect(data, date, detect) {
 
               //最終検知時間（解除時に使用）を更新
               EQD_ItemTmp.last_Detect = new Date() - Replay;
+              EQD_ItemTmp.last_changed = new Date() - Replay;
             }
           }
         }
@@ -151,7 +153,7 @@ function EQDetect(data, date, detect) {
       if (!ptData.Event && elm.detect2) {
         //自観測点がどの地震アイテムにも属さず、検知レベルがLv.2以上の場合
         //自観測点を中心とした新規地震アイテム作成
-        EQDetect_List.push({ id: EQDetectID, lat: elm.Location.Latitude, lng: elm.Location.Longitude, lat2: elm.Location.Latitude, lng2: elm.Location.Longitude, Codes: [elm], Codes_history: [elm.Code], Radius: 0, maxPGA: elm.pga, maxInt: elm.shindo, detectCount: 1, Up: false, Lv: 0, last_Detect: new Date() - Replay, origin_Time: new Date() - Replay, showed: false, isCity: ptData.isCity });
+        EQDetect_List.push({ id: EQDetectID, lat: elm.Location.Latitude, lng: elm.Location.Longitude, lat2: elm.Location.Latitude, lng2: elm.Location.Longitude, Codes: [elm], Codes_history: [elm.Code], Radius: 0, maxPGA: elm.pga, maxInt: elm.shindo, detectCount: 1, Up: false, Lv: 0, last_Detect: new Date() - Replay, last_changed: new Date() - Replay, origin_Time: new Date() - Replay, showed: false, isCity: ptData.isCity });
         EQDetectID++;
       }
     }
@@ -166,10 +168,12 @@ function EQDetect(data, date, detect) {
     threshold01Tmp = Math.min(Math.max(ArroundPoints.length, 2), threshold01Tmp); //周囲の観測点数に応じて閾値を調整（離島対応）
     if (EQD_ItemTmp.Codes.length >= threshold01Tmp) {
       //地震アイテムに属する観測点数が閾値以上なら
-      var result = GuessHypocenter(EQD_ItemTmp, data);
-      if (Math.abs(EQD_ItemTmp.lat - result[0].lat) > 0.2) EQD_ItemTmp.lat = result[0].lat;
-      if (Math.abs(EQD_ItemTmp.lng - result[0].lng) > 0.2) EQD_ItemTmp.lng = result[0].lng;
-      if (result[0].rad) EQD_ItemTmp.Radius = result[0].rad;
+      if (Math.abs(EQD_ItemTmp.last_Detect - (new Date() - Replay)) < 500) {
+        var result = GuessHypocenter(EQD_ItemTmp, data);
+        if (Math.abs(EQD_ItemTmp.lat - result[0].lat) > 0.2) EQD_ItemTmp.lat = result[0].lat;
+        if (Math.abs(EQD_ItemTmp.lng - result[0].lng) > 0.2) EQD_ItemTmp.lng = result[0].lng;
+        if (result[0].rad) EQD_ItemTmp.Radius = result[0].rad;
+      }
 
       //情報をmainプロセスへ送信
       workerThreads.parentPort.postMessage({
