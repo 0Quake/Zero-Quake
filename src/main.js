@@ -2801,7 +2801,7 @@ function eqInfoControl(dataList, type, EEW) {
           }
         } else {
           eqInfoTmp.push(data);
-          if (data.reportDateTime && new Date() - data.reportDateTime < 60000) playAudio = true;
+          if (data.reportDateTime && new Date() - data.reportDateTime < 60000 && data.category !== "EEW") playAudio = true;
         }
       });
       if (eqInfoTmp.length > 0) eqInfoAlert(eqInfoTmp, "jma", false, playAudio);
