@@ -66,9 +66,13 @@ var defaultConfigVal = {
     EQInfo: {
       ItemCount: 15,
       Interval: 60000,
+      showTraning: false,
+      showTest: false,
     },
     TsunamiInfo: {
       GetData: true,
+      showTraning: false,
+      showTest: false,
     },
     RealTimeShake: {
       List: {
@@ -2723,6 +2727,9 @@ function eqInfoControl(dataList, type, EEW) {
 
       var playAudio = false;
       dataList.forEach(function (data) {
+        if (!config.Info.EQInfo.showTraning && data.status == "訓練") return;
+        if (!config.Info.EQInfo.showTest && data.status == "試験") return;
+
         if (new Date(data.reportDateTime) > new Date() - Replay) return;
         var EQElm = eqInfo.jma.concat(eqInfoTmp).find(function (elm) {
           return elm.eventId == data.eventId;
@@ -2872,6 +2879,9 @@ function eqInfoAlert(data, source, update, audioPlay) {
 function TsunamiInfoControl(data) {
   try {
     if (!config.Info.TsunamiInfo.GetData) return;
+    if (!config.Info.TsunamiInfo.showTraning && data.status == "訓練") return;
+    if (!config.Info.TsunamiInfo.showTest && data.status == "試験") return;
+
     var newInfo = !tsunamiData || !tsunamiData.issue || tsunamiData.issue.time < data.issue.time;
     if (newInfo) {
       //情報の有効期限

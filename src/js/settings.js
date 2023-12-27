@@ -95,6 +95,9 @@ function configDataDraw() {
   document.getElementById("kmoniInterval").value = config.Source.kmoni.kmoni.Interval / 1000;
   document.getElementById("msilInterval").value = config.Source.msil.Interval / 1000;
   if (config.Source.axis.AccessToken) document.getElementById("Axis_AccessToken").value = config.Source.axis.AccessToken;
+
+  document.getElementById("Tsunami_Test").checked = config.Info.TsunamiInfo.showTest;
+  document.getElementById("Tsunami_Traning").checked = config.Info.TsunamiInfo.showTraning;
 }
 
 function UpdateDataDraw(data) {
@@ -201,6 +204,9 @@ function apply() {
   config.notice.voice_parameter.pitch = TTSpitch;
   config.notice.voice_parameter.volume = TTSvolume;
   config.notice.voice_parameter.voice = TTSVoiceSelect.value;
+
+  config.Info.TsunamiInfo.showTest = document.getElementById("Tsunami_Test").checked;
+  config.Info.TsunamiInfo.showTraning = document.getElementById("Tsunami_Traning").checked;
 
   window.electronAPI.messageReturn({
     action: "settingReturn",
