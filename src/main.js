@@ -1371,7 +1371,7 @@ function AXIS_WS() {
                     eventId: data.message.Head.EventID,
                     category: data.message.Head.Title,
                     reportDateTime: new Date(data.message.Head.ReportDateTime),
-                    OriginTime: new Date(data.message.Head.TargetDateTime),
+                    OriginTime: new Date(data.message.Body.Earthquake[0].OriginTime),
                     epiCenter: EarthquakeElm.Hypocenter.Area.Name,
                     M: Number(EarthquakeElm.Magnitude[0].valueOf_),
                     maxI: shindoConvert(IntensityElm.Observation.MaxInt),
