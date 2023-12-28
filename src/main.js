@@ -2247,13 +2247,13 @@ function EarlyEstAlert(data, first, update) {
 //🔴地震情報🔴
 
 //地震情報更新処理
-function eqInfoUpdate(disableRepeat) {
+function eqInfoUpdate() {
   try {
     EQI_JMAXMLList_Req();
     EQI_narikakunList_Req("https://ntool.online/api/earthquakeList?year=" + new Date().getFullYear() + "&month=" + (new Date().getMonth() + 1), 10, true);
     EQI_USGS_Req();
 
-    if (!disableRepeat) setTimeout(eqInfoUpdate, config.Info.EQInfo.Interval);
+    setTimeout(eqInfoUpdate, config.Info.EQInfo.Interval);
   } catch (err) {
     throw new Error("地震情報の処理でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
   }
@@ -2727,88 +2727,91 @@ function eqInfoControl(dataList, type, EEW) {
 
       var playAudio = false;
       dataList.forEach(function (data) {
-        if (!config.Info.EQInfo.showTraning && data.status == "訓練") return;
-        if (!config.Info.EQInfo.showTest && data.status == "試験") return;
+        if (!EEW || EQElm.category == "EEW") {
+          //EEW以外の情報が入っているとき、EEWによる情報を破棄
 
-        if (new Date(data.reportDateTime) > new Date() - Replay) return;
-        var EQElm = eqInfo.jma.concat(eqInfoTmp).find(function (elm) {
-          return elm.eventId == data.eventId;
-        });
+          if (!config.Info.EQInfo.showTraning && data.status == "訓練") return;
+          if (!config.Info.EQInfo.showTest && data.status == "試験") return;
 
-        if (!data.maxI) data.maxI = null;
-        if (EQElm) {
-          var newer = EQElm.reportDateTime < data.reportDateTime;
-          var changed = false;
-          if (EEW && EQElm.category !== "EEW") return; //EEW以外の情報が入っているとき、EEWによる情報を破棄
-          if (!EEW && EQElm.category == "EEW") {
-            //EEWによらない情報が入ったら、EEWによる情報をクリアー
-            newer = true;
-            EQElm = {
-              eventId: EQElm.eventId,
-              category: null,
-              reportDateTime: null,
-              OriginTime: null,
-              epiCenter: null,
-              M: null,
-              maxI: null,
-              DetailURL: [],
-              axisData: [],
-            };
-            changed = true;
-          }
+          if (new Date(data.reportDateTime) > new Date() - Replay) return;
+          var EQElm = eqInfo.jma.concat(eqInfoTmp).find(function (elm) {
+            return elm.eventId == data.eventId;
+          });
 
-          if (data.status && (!EQElm.status || newer)) {
-            EQElm.status = data.status;
-            changed = true;
-          }
-
-          if (data.OriginTime && (!EQElm.OriginTime || newer)) {
-            EQElm.OriginTime = data.OriginTime;
-            changed = true;
-          }
-          if (data.epiCenter && (!EQElm.epiCenter || newer)) {
-            EQElm.epiCenter = data.epiCenter;
-            changed = true;
-          }
-          if (data.M && (!EQElm.M || newer)) {
-            EQElm.M = data.M;
-            changed = true;
-          }
-          if (data.M == "Ｍ不明" || data.M == "NaN") EQElm.M = null;
-
-          if (data.maxI && (!EQElm.maxI || newer)) {
-            EQElm.maxI = data.maxI;
-            changed = true;
-          }
-
-          if (data.cancel && (!EEW || EQElm.category == "EEW")) {
-            //EEWによるキャンセル報の場合、EEWによる情報以外取り消さない
-            if (data.cancel && (!EQElm.cancel || newer)) {
-              EQElm.cancel = data.cancel;
+          if (!data.maxI) data.maxI = null;
+          if (EQElm) {
+            var newer = EQElm.reportDateTime < data.reportDateTime;
+            var changed = false;
+            if (!EEW && EQElm.category == "EEW") {
+              //EEWによらない情報が入ったら、EEWによる情報をクリアー
+              newer = true;
+              EQElm = {
+                eventId: EQElm.eventId,
+                category: null,
+                reportDateTime: null,
+                OriginTime: null,
+                epiCenter: null,
+                M: null,
+                maxI: null,
+                DetailURL: [],
+                axisData: [],
+              };
               changed = true;
             }
-          }
-          EQElm.category = data.category;
 
-          if (data.DetailURL && data.DetailURL[0] !== "" && !EQElm.DetailURL.includes(data.DetailURL[0])) {
-            EQElm.DetailURL.push(data.DetailURL[0]);
-            changed = true;
+            if (data.status && (!EQElm.status || newer)) {
+              EQElm.status = data.status;
+              changed = true;
+            }
+
+            if (data.OriginTime && (!EQElm.OriginTime || newer)) {
+              EQElm.OriginTime = data.OriginTime;
+              changed = true;
+            }
+            if (data.epiCenter && (!EQElm.epiCenter || newer)) {
+              EQElm.epiCenter = data.epiCenter;
+              changed = true;
+            }
+            if (data.M && (!EQElm.M || newer)) {
+              EQElm.M = data.M;
+              changed = true;
+            }
+            if (data.M == "Ｍ不明" || data.M == "NaN") EQElm.M = null;
+
+            if (data.maxI && (!EQElm.maxI || newer)) {
+              EQElm.maxI = data.maxI;
+              changed = true;
+            }
+
+            if (data.cancel && (!EEW || EQElm.category == "EEW")) {
+              //EEWによるキャンセル報の場合、EEWによる情報以外取り消さない
+              if (data.cancel && (!EQElm.cancel || newer)) {
+                EQElm.cancel = data.cancel;
+                changed = true;
+              }
+            }
+            EQElm.category = data.category;
+
+            if (data.DetailURL && data.DetailURL[0] !== "" && !EQElm.DetailURL.includes(data.DetailURL[0])) {
+              EQElm.DetailURL.push(data.DetailURL[0]);
+              changed = true;
+            }
+            if (data.axisData) {
+              if (!EQElm.axisData || EQElm.axisData.length) EQElm.axisData = [];
+              EQElm.axisData.push(data.axisData);
+              changed = true;
+            }
+            if (changed) {
+              eqInfoUpdateTmp.push(EQElm);
+              var EQElm2 = eqInfo.jma.find(function (elm) {
+                return elm.eventId == data.eventId;
+              });
+              if (!EQElm2) eqInfo.jma[EQElm2] = EQElm;
+            }
+          } else {
+            eqInfoTmp.push(data);
+            if (data.reportDateTime && new Date() - data.reportDateTime < 600000 && data.category !== "EEW") playAudio = true;
           }
-          if (data.axisData) {
-            if (!EQElm.axisData || EQElm.axisData.length) EQElm.axisData = [];
-            EQElm.axisData.push(data.axisData);
-            changed = true;
-          }
-          if (changed) {
-            eqInfoUpdateTmp.push(EQElm);
-            var EQElm2 = eqInfo.jma.find(function (elm) {
-              return elm.eventId == data.eventId;
-            });
-            if (!EQElm2) eqInfo.jma[EQElm2] = EQElm;
-          }
-        } else {
-          eqInfoTmp.push(data);
-          if (data.reportDateTime && new Date() - data.reportDateTime < 600000 && data.category !== "EEW") playAudio = true;
         }
       });
       if (eqInfoTmp.length > 0) eqInfoAlert(eqInfoTmp, "jma", false, playAudio);
