@@ -14,7 +14,7 @@ var thresholds = {
   threshold03: null, //2次フラグ条件のPGA増加量[gal]
   threshold04: 3, //1次フラグ条件の震度
   threshold05: 0.1, //イベントの観測点数が最大時のn倍未満で解除
-  MargeRange: 30, //地震の同定範囲[km]
+  MargeRange: 40, //地震の同定範囲[km]
   MargeRangeC: 20, //地震の同定範囲[km]【都会】
   time00: 300000, //最初の検出~解除[ms](優先)
   time01: 30000, //最後の検出~解除[ms]
@@ -150,7 +150,11 @@ function EQDetect(data, date, detect) {
         }
       }
 
-      if (!ptData.Event && elm.detect2) {
+      MargeRangeTmp = elm.isCity ? thresholds.MargeRangeC : thresholds.MargeRange;
+      var nearEvent = EQDetect_List.find(function (EQD_ItemTmp) {
+        return geosailing(elm.Location.Latitude, elm.Location.Longitude, EQD_ItemTmp.lat, EQD_ItemTmp.lng) <= MargeRangeTmp;
+      });
+      if (!ptData.Event && elm.detect2 && !nearEvent) {
         //自観測点がどの地震アイテムにも属さず、検知レベルがLv.2以上の場合
         //自観測点を中心とした新規地震アイテム作成
         EQDetect_List.push({ id: EQDetectID, lat: elm.Location.Latitude, lng: elm.Location.Longitude, lat2: elm.Location.Latitude, lng2: elm.Location.Longitude, Codes: [elm], Codes_history: [elm.Code], Radius: 0, maxPGA: elm.pga, maxInt: elm.shindo, detectCount: 1, Up: false, Lv: 0, last_Detect: new Date() - Replay, last_changed: new Date() - Replay, origin_Time: new Date() - Replay, showed: false, isCity: ptData.isCity });
@@ -160,11 +164,11 @@ function EQDetect(data, date, detect) {
   }
 
   for (const EQD_ItemTmp of EQDetect_List) {
-    threshold01Tmp = EQD_ItemTmp.isCity ? thresholds.threshold01C : thresholds.threshold01;
-    MargeRangeTmp = ptData.isCity ? thresholds.MargeRangeC : thresholds.MargeRange;
     var ArroundPoints = data.filter(function (station) {
-      return geosailing(station.Location.Latitude, station.Location.Longitude, EQD_ItemTmp.lat, EQD_ItemTmp.lng) - EQD_ItemTmp.Radius <= Math.max(MargeRangeTmp, EQD_ItemTmp.Radius * 0);
+      MargeRangeTmp = station.isCity ? thresholds.MargeRangeC : thresholds.MargeRange;
+      return geosailing(station.Location.Latitude, station.Location.Longitude, EQD_ItemTmp.lat, EQD_ItemTmp.lng) <= MargeRangeTmp;
     });
+    threshold01Tmp = EQD_ItemTmp.isCity ? thresholds.threshold01C : thresholds.threshold01;
     threshold01Tmp = Math.min(Math.max(ArroundPoints.length, 2), threshold01Tmp); //周囲の観測点数に応じて閾値を調整（離島対応）
     if (EQD_ItemTmp.Codes.length >= threshold01Tmp) {
       //地震アイテムに属する観測点数が閾値以上なら
