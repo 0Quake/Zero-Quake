@@ -1017,6 +1017,27 @@ function start() {
 
   //地震検知ワーカー作成
   createWorker();
+
+  setTimeout(function () {
+    eqInfoControl(
+      [
+        {
+          status: "発表",
+          eventId: "20231229150000",
+          category: "震度速報",
+          reportDateTime: new Date(),
+          OriginTime: new Date(),
+          epiCenter: "そこ",
+          M: Number(5),
+          maxI: "5+",
+          cancel: false,
+          DetailURL: [],
+          axisData: null,
+        },
+      ],
+      "jma"
+    );
+  }, 10000);
 }
 
 function earlyEstReq() {
@@ -2727,16 +2748,17 @@ function eqInfoControl(dataList, type, EEW) {
 
       var playAudio = false;
       dataList.forEach(function (data) {
-        if (!EEW || EQElm.category == "EEW") {
+        var EQElm = eqInfo.jma.concat(eqInfoTmp).find(function (elm) {
+          return elm.eventId == data.eventId;
+        });
+
+        if (!EEW || (EQElm && EQElm.category == "EEW")) {
           //EEW以外の情報が入っているとき、EEWによる情報を破棄
 
           if (!config.Info.EQInfo.showTraning && data.status == "訓練") return;
           if (!config.Info.EQInfo.showTest && data.status == "試験") return;
 
           if (new Date(data.reportDateTime) > new Date() - Replay) return;
-          var EQElm = eqInfo.jma.concat(eqInfoTmp).find(function (elm) {
-            return elm.eventId == data.eventId;
-          });
 
           if (!data.maxI) data.maxI = null;
           if (EQElm) {
