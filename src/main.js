@@ -1017,27 +1017,6 @@ function start() {
 
   //地震検知ワーカー作成
   createWorker();
-
-  setTimeout(function () {
-    eqInfoControl(
-      [
-        {
-          status: "発表",
-          eventId: "20231229150000",
-          category: "震度速報",
-          reportDateTime: new Date(),
-          OriginTime: new Date(),
-          epiCenter: "そこ",
-          M: Number(5),
-          maxI: "5+",
-          cancel: false,
-          DetailURL: [],
-          axisData: null,
-        },
-      ],
-      "jma"
-    );
-  }, 10000);
 }
 
 function earlyEstReq() {
