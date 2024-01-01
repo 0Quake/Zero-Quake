@@ -2701,7 +2701,7 @@ function EQI_narikakun_Req(url) {
         var cancel = json.Head.InfoType == "取消";
         var dataTmp2 = [
           {
-            status: data.Control.Status,
+            status: json.Control.Status,
             eventId: json.Head.EventID,
             category: json.Head.Title,
             OriginTime: new Date(originTimeTmp),
