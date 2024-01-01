@@ -753,7 +753,6 @@ function init() {
     attributionControl: true,
     pitchWithRotate: false,
     dragRotate: false,
-    touchZoomRotate: false,
     style: {
       version: 8,
       glyphs: "https://gsi-cyberjapan.github.io/optimal_bvmap/glyphs/{fontstack}/{range}.pbf",
@@ -1169,6 +1168,7 @@ function init() {
       ],
     },
   });
+  map.touchZoomRotate.disableRotation();
   map.loadImage("img/AlertOverlay.png", (err, image) => {
     map.addImage("pattern", image);
     map.addLayer({ id: "Alert", type: "fill", source: "basemap", paint: { "fill-pattern": "pattern" }, filter: ["==", "name", ""] });

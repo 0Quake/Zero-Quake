@@ -275,7 +275,6 @@ function mapInit() {
     ],
     pitchWithRotate: false,
     dragRotate: false,
-    touchZoomRotate: false,
     style: {
       version: 8,
       glyphs: "https://gsi-cyberjapan.github.io/optimal_bvmap/glyphs/{fontstack}/{range}.pbf",
@@ -426,7 +425,7 @@ function mapInit() {
       ],
     },
   });
-
+  map.touchZoomRotate.disableRotation();
   map.addControl(new maplibregl.NavigationControl(), "top-right");
 
   map.on("click", "basemap_fill", (e) => {

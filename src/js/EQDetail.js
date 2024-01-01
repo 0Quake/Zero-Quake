@@ -119,7 +119,6 @@ function Mapinit() {
     attributionControl: true,
     pitchWithRotate: false,
     dragRotate: false,
-    touchZoomRotate: false,
     style: {
       version: 8,
       glyphs: "https://gsi-cyberjapan.github.io/optimal_bvmap/glyphs/{fontstack}/{range}.pbf",
@@ -473,6 +472,7 @@ function Mapinit() {
       ],
     },
   });
+  map.touchZoomRotate.disableRotation();
   ZoomBounds = new maplibregl.LngLatBounds();
 
   map.on("sourcedataloading", (e) => {
