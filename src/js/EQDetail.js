@@ -107,7 +107,7 @@ function InfoFetch() {
       axisInfoCtrl(elm.message);
     });
   }
-  estimated_intensity_mapReq();
+    estimated_intensity_mapReq();
 }
 
 //地図初期化
@@ -1400,7 +1400,7 @@ function mapFillDraw() {
   map.setFilter("LgInt4", LgInt4T);
 
   estimated_intensity_map_layers.forEach(function (elm2) {
-    if (map.getLayer(elm2)) map.setLayoutProperty(elm2, "visibility", estShindoMapDraw ? "visible" : "none");
+    if (map.getLayer(elm2)) map.setLayoutProperty(elm2, "visibility", estShindoMapDraw && MapFill ? "visible" : "none");
   });
 
   ["Int0", "Int1", "Int2", "Int3", "Int4", "Int5-", "Int5+", "Int6-", "Int6+", "Int7", "Int7+"].forEach(function (elm2) {
