@@ -1692,7 +1692,11 @@ function EQInfoControl(data) {
 
   if (EQInfo.epiCenter) data_center.innerText = EQInfo.epiCenter;
 
-  if (data.comment) {
+  if (data.comment && mostNew) {
+    EQInfo.comment = data.comment;
+
+    data_comment.innerHTML = (data.comment.ForecastComment + "\n" + data.comment.VarComment + "\n" + data.comment.FreeFormComment).replaceAll("\n", "<br>");
+
     var comments = data.comment.ForecastComment.split("\n").concat(data.comment.VarComment.split("\n"), data.comment.FreeFormComment.split("\n"));
 
     var TsunamiShortMsg;
@@ -1733,8 +1737,6 @@ function EQInfoControl(data) {
       document.getElementById("TsunamiShortMsg").style.display = "block";
       document.getElementById("TsunamiShortMsg").innerText = TsunamiShortMsg;
     }
-
-    data_comment.innerHTML = data.comment.ForecastComment + "\n" + data.comment.VarComment + "\n" + data.comment.FreeFormComment;
   }
 
   if (data.lat && data.lng) {
