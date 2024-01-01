@@ -1847,7 +1847,7 @@ function tsunamiDataUpdate(data) {
           var st = tsunamiStations[elm2.code];
           if (st) {
             if (elm2.omaxHeight) {
-              var omaxHeight = elm2.omaxHeight.replace("m", "");
+              var omaxHeight = Number(elm2.omaxHeight.replace("m", "").replace("以上", ""));
 
               if (omaxHeight < 0.2) {
                 classname = "TsunamiST02";
@@ -1867,7 +1867,7 @@ function tsunamiDataUpdate(data) {
               tsunamiST.classList.add("tsunami_st", classname);
 
               var tsunamiSTCap = document.createElement("span");
-              tsunamiSTCap.innerText = omaxHeight + "m";
+              tsunamiSTCap.innerText = elm2.omaxHeight.replace("以上", "↑");
               tsunamiST.appendChild(tsunamiSTCap);
 
               var tsunamiSTMarker = document.createElement("div");
