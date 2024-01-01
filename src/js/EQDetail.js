@@ -1547,7 +1547,6 @@ function add_IntensityStation_info(lat, lng, name, int) {
   var wrap3 = document.querySelectorAll(".WrapLevel3");
 
   var intStr = shindoConvert(int);
-  console.log(intStr);
 
   var newDiv = document.createElement("div");
   var color4 = shindoConvert(int, 2);
