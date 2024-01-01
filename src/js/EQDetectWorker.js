@@ -297,6 +297,7 @@ function calcDifference(lat, lng, stations, data, originTime, dep) {
   Difference = Difference / stations.Codes.length;
   Difference = Difference / (stations.Codes.length / ArroundPoints.length) ** 2;
   if (stations.Codes.length / ArroundPoints.length < 0.5) Difference *= 10;
+  if (stations.Codes.length / ArroundPoints.length < 0.3) Difference *= 1000;
 
   return [Difference, radius];
 }
