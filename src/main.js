@@ -2767,11 +2767,9 @@ function eqInfoControl(dataList, type, EEW) {
               changed = true;
             }
 
-            console.log(data.OriginTime, EQElm.OriginTime);
             if (data.OriginTime && (!EQElm.OriginTime || Number.isNaN(new Date(EQElm.OriginTime).getTime()) || newer)) {
               EQElm.OriginTime = data.OriginTime;
               changed = true;
-              console.log(222222);
             }
             if (data.epiCenter && (!EQElm.epiCenter || newer)) {
               EQElm.epiCenter = data.epiCenter;

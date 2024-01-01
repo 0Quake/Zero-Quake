@@ -208,6 +208,9 @@ function apply() {
   config.Info.TsunamiInfo.showTest = document.getElementById("Tsunami_Test").checked;
   config.Info.TsunamiInfo.showTraning = document.getElementById("Tsunami_Traning").checked;
 
+  config.Info.EQInfo.showTest = document.getElementById("EQInfo_Test").checked;
+  config.Info.EQInfo.showTraning = document.getElementById("EQInfo_Traning").checked;
+
   window.electronAPI.messageReturn({
     action: "settingReturn",
     data: config,
