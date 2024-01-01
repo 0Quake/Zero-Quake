@@ -1884,7 +1884,6 @@ function EEWcontrol(data) {
     }
 
     if (data.source == "simulation") {
-      var EBIData = [];
       var estIntTmp = {};
       if (!data.is_cancel) {
         if (!data.userIntensity) data.userIntensity = calcInt(data.magnitude, data.depth, data.latitude, data.longitude, config.home.latitude, config.home.longitude, config.home.arv);
@@ -1912,11 +1911,11 @@ function EEWcontrol(data) {
           });
           Object.keys(estIntTmp).forEach(function (elm) {
             var shindo = shindoConvert(estIntTmp[elm]);
-            var sectData = EBIData.find(function (elm2) {
+            var sectData = data.warnZones.find(function (elm2) {
               return elm2.Name == elm;
             });
             if (!sectData) {
-              EBIData.push({
+              data.warnZones.push({
                 Name: elm,
                 IntTo: shindo,
                 IntFrom: shindo,
@@ -1924,7 +1923,6 @@ function EEWcontrol(data) {
               });
             }
           });
-          data.warnZones = EBIData;
         }
       }
     } else {
