@@ -3079,7 +3079,7 @@ function shindoConvert(str, responseType) {
       case "99":
         ShindoTmp = 10;
         break;
-      case "震度５弱以上未入電":
+      case "震度5-以上未入電":
       case "5+?":
         ShindoTmp = 11;
         break;
