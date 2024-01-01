@@ -1083,7 +1083,6 @@ function createWorker() {
     switch (message.action) {
       case "EQDetectAdd":
         var EQD_ItemTmp = message.data;
-
         var LvTmp = EQD_ItemTmp.maxPGA > 1.3 ? 2 : 1;
 
         if (EQD_ItemTmp.showed) {
@@ -2731,12 +2730,11 @@ function eqInfoControl(dataList, type, EEW) {
           return elm.eventId == data.eventId;
         });
 
-        if (!EEW || (EQElm && EQElm.category == "EEW")) {
+        if (!EEW || !EQElm || EQElm.category == "EEW") {
           //EEW以外の情報が入っているとき、EEWによる情報を破棄
 
           if (!config.Info.EQInfo.showTraning && data.status == "訓練") return;
           if (!config.Info.EQInfo.showTest && data.status == "試験") return;
-
           if (new Date(data.reportDateTime) > new Date() - Replay) return;
 
           if (!data.maxI) data.maxI = null;
