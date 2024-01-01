@@ -2768,7 +2768,7 @@ function eqInfoControl(dataList, type, EEW) {
               changed = true;
             }
 
-            if (data.OriginTime && (!EQElm.OriginTime || newer)) {
+            if (data.OriginTime && (!EQElm.OriginTime || Number.isNaN(new Date(EQElm.OriginTime).getTime()) || newer)) {
               EQElm.OriginTime = data.OriginTime;
               changed = true;
             }
