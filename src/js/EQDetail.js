@@ -1663,15 +1663,21 @@ function EQInfoControl(data) {
   if (!newInfoDateTime || newInfoDateTime <= data.reportTime || (EQInfo.eew && !data.eew)) {
     newInfoDateTime = data.reportTime;
     mostNew = true;
-  }
+  } else if (newInfoDateTime > data.reportTime) return;
   if (data.eew) InfoType_add("type-1");
   EQInfo.eew = data.eew;
   if (mostNew) document.getElementById("canceled").style.display = data.cancel ? "flex" : "none";
 
   if (data.originTime && (mostNew || !EQInfo.originTime)) EQInfo.originTime = data.originTime;
   if (data.maxI && (mostNew || !EQInfo.maxI)) EQInfo.maxI = data.maxI;
-  if (data.mag && (mostNew || !EQInfo.mag)) EQInfo.mag = data.mag;
-  if (data.mag && mostNew) data_MT.innerText = "M";
+  if (data.mag && (mostNew || !EQInfo.mag)) {
+    EQInfo.mag = data.mag;
+  }
+
+  if (data.magType) EQInfo.magType = data.magType;
+  else if (!EQInfo.magType) EQInfo.magType = "M";
+  data_MT.innerText = EQInfo.magType;
+
   if ((data.depth || data.depth === 0) && (mostNew || !EQInfo.depth)) EQInfo.depth = Math.abs(data.depth);
   if (data.epiCenter && (mostNew || !EQInfo.epiCenter)) EQInfo.epiCenter = data.epiCenter;
 
@@ -1679,7 +1685,6 @@ function EQInfoControl(data) {
   if (EQInfo.maxI) data_maxI.innerText = shindoConvert(EQInfo.maxI, 1);
   if (EQInfo.maxI) data_maxI.style.borderBottom = "solid 2px " + shindoConvert(EQInfo.maxI, 2)[0];
   if (EQInfo.mag) data_M.innerText = EQInfo.mag;
-  if (data.magType) data_MT.innerText = data.magType;
 
   if (EQInfo.depth == 0) data_depth.innerText = "ごく浅い";
   else if (EQInfo.depth == 700) data_depth.innerText = "700km以上";
