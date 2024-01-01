@@ -12,6 +12,7 @@ function tsunamiUpdate(dataTmp) {
   document.getElementById("no-data").style.display = "none";
 
   document.getElementById("dateTime").innerText = dateEncode(5, new Date(dataTmp.issue.time));
+  document.getElementById("validdateTime_Wrap").style.display = dataTmp.ValidDateTime ? "inline" : "none";
   document.getElementById("validdateTime").innerText = dateEncode(5, new Date(dataTmp.ValidDateTime));
   if (dataTmp.revocation) document.getElementById("revocation").style.display = "block";
   else if (!dataTmp || dataTmp.areas.length == 0) {
