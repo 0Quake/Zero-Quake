@@ -1928,7 +1928,8 @@ function EEWcontrol(data) {
           });
         }
       }
-    } else {
+    } 
+    if (data.source != "simulation") {{
       var EEWdataTmp = EEW_Data.forEach(function (elm) {
         if (elm.simulation) EEWClear(elm.EQ_id);
       });
