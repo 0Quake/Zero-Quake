@@ -2812,13 +2812,7 @@ function eqInfoControl(dataList, type, EEW) {
               var EQElm2 = eqInfo.jma.findIndex(function (elm) {
                 return elm.eventId == data.eventId;
               });
-              if (EQElm2 > -1) {
-                eqInfo.jma[EQElm2] = EQElm;
-                var EQElm3 = eqInfo.jma.find(function (elm) {
-                  return elm.eventId == data.eventId;
-                });
-                console.log("asdf", EQElm3);
-              }
+              if (EQElm2 > -1) eqInfo.jma[EQElm2] = EQElm;
             }
           } else {
             eqInfoTmp.push(data);
