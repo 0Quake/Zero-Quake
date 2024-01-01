@@ -98,6 +98,9 @@ function configDataDraw() {
 
   document.getElementById("Tsunami_Test").checked = config.Info.TsunamiInfo.showTest;
   document.getElementById("Tsunami_Traning").checked = config.Info.TsunamiInfo.showTraning;
+
+  document.getElementById("EQInfo_Test").checked = config.Info.EQInfo.showTest;
+  document.getElementById("EQInfo_Traning").checked = config.Info.EQInfo.showTraning;
 }
 
 function UpdateDataDraw(data) {
