@@ -2785,7 +2785,7 @@ function eqInfoControl(dataList, type, EEW) {
             }
             if (data.M == "Ｍ不明" || data.M == "NaN") EQElm.M = null;
 
-            if (data.maxI && (!EQElm.maxI || newer)) {
+            if (data.maxI && (!EQElm.maxI || EQElm.maxI == "?" || newer)) {
               EQElm.maxI = data.maxI;
               changed = true;
             }
