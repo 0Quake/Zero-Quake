@@ -1911,9 +1911,12 @@ function EEWcontrol(data) {
           });
           Object.keys(estIntTmp).forEach(function (elm) {
             var shindo = shindoConvert(estIntTmp[elm]);
-            var sectData = data.warnZones.find(function (elm2) {
-              return elm2.Name == elm;
-            });
+            var sectData;
+            if (data.warnZones) {
+              var sectData = data.warnZones.find(function (elm2) {
+                return elm2.Name == elm;
+              });
+            }
             if (!sectData) {
               data.warnZones.push({
                 Name: elm,
@@ -2806,10 +2809,16 @@ function eqInfoControl(dataList, type, EEW) {
             }
             if (changed) {
               eqInfoUpdateTmp.push(EQElm);
-              var EQElm2 = eqInfo.jma.find(function (elm) {
+              var EQElm2 = eqInfo.jma.findIndex(function (elm) {
                 return elm.eventId == data.eventId;
               });
-              if (!EQElm2) eqInfo.jma[EQElm2] = EQElm;
+              if (EQElm2 > -1) {
+                eqInfo.jma[EQElm2] = EQElm;
+                var EQElm3 = eqInfo.jma.find(function (elm) {
+                  return elm.eventId == data.eventId;
+                });
+                console.log("asdf", EQElm3);
+              }
             }
           } else {
             eqInfoTmp.push(data);
@@ -3025,7 +3034,7 @@ function dateEncode(type, dateTmp) {
 //震度の形式変換
 function shindoConvert(str, responseType) {
   var ShindoTmp;
-  if (str === null || str === undefined) ShindoTmp = "?";
+  if (str === null || str === undefined) ShindoTmp = 12;
   else if (isNaN(str)) {
     str = String(str)
       .replace(/[０-９]/g, function (s) {
