@@ -2785,18 +2785,21 @@ function eqInfoControl(dataList, type, EEW) {
             }
             if (data.M == "Ｍ不明" || data.M == "NaN") EQElm.M = null;
 
-            if (data.maxI && (!EQElm.maxI || EQElm.maxI == "?" || newer)) {
+            if (data.maxI && data.maxI !== "?" && (!EQElm.maxI || EQElm.maxI == "?")) {
               EQElm.maxI = data.maxI;
               changed = true;
             }
 
-            if (data.cancel && (!EEW || EQElm.category == "EEW")) {
-              //EEWによるキャンセル報の場合、EEWによる情報以外取り消さない
-              if (data.cancel && (!EQElm.cancel || newer)) {
+            if (EEW) {
+              if (data.cancel && EQElm.category == "EEW") {
                 EQElm.cancel = data.cancel;
                 changed = true;
               }
+            } else if (newer && EQElm.cancel != data.cancel) {
+              EQElm.cancel = data.cancel;
+              changed = true;
             }
+
             EQElm.category = data.category;
 
             if (data.DetailURL && data.DetailURL[0] !== "" && !EQElm.DetailURL.includes(data.DetailURL[0])) {
