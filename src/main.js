@@ -2252,12 +2252,11 @@ function EarlyEstAlert(data, first, update) {
 
 //地震情報更新処理
 function eqInfoUpdate() {
+  setTimeout(eqInfoUpdate, config.Info.EQInfo.Interval);
   try {
     EQI_JMAXMLList_Req();
     EQI_narikakunList_Req("https://ntool.online/api/earthquakeList?year=" + new Date().getFullYear() + "&month=" + (new Date().getMonth() + 1), 10, true);
     EQI_USGS_Req();
-
-    setTimeout(eqInfoUpdate, config.Info.EQInfo.Interval);
   } catch (err) {
     throw new Error("地震情報の処理でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
   }
@@ -2343,7 +2342,7 @@ function EQI_JMAXML_Req(url) {
                 status: xml.querySelector("Status").textContent,
                 eventId: xml.querySelector("EventID").textContent,
                 category: xml.title,
-                OriginTime: new Date(originTimeTmp),
+                OriginTime: originTimeTmp,
                 epiCenter: epiCenterTmp,
                 M: Number(magnitudeTmp),
                 maxI: shindoConvert(maxIntTmp),
@@ -2768,9 +2767,11 @@ function eqInfoControl(dataList, type, EEW) {
               changed = true;
             }
 
+            console.log(data.OriginTime, EQElm.OriginTime);
             if (data.OriginTime && (!EQElm.OriginTime || Number.isNaN(new Date(EQElm.OriginTime).getTime()) || newer)) {
               EQElm.OriginTime = data.OriginTime;
               changed = true;
+              console.log(222222);
             }
             if (data.epiCenter && (!EQElm.epiCenter || newer)) {
               EQElm.epiCenter = data.epiCenter;
@@ -3026,7 +3027,7 @@ function dateEncode(type, dateTmp) {
 //震度の形式変換
 function shindoConvert(str, responseType) {
   var ShindoTmp;
-  if (str === null || str === undefined) ShindoTmp = 0;
+  if (str === null || str === undefined) ShindoTmp = "?";
   else if (isNaN(str)) {
     str = String(str)
       .replace(/[０-９]/g, function (s) {

@@ -83,7 +83,7 @@ document.querySelectorAll(".tabgroup").forEach(function (elm) {
 //eslint-disable-next-line
 function shindoConvert(str, responseType) {
   var ShindoTmp;
-  if (str === null || str === undefined) ShindoTmp = 0;
+  if (str === null || str === undefined) ShindoTmp = "?";
   else if (isNaN(str)) {
     str = String(str)
       .replace(/[０-９]/g, function (s) {
