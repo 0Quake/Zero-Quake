@@ -1876,12 +1876,14 @@ function EEWcontrol(data) {
     if (data.latitude && data.longitude) data.distance = geosailing(data.latitude, data.longitude, config.home.latitude, config.home.longitude);
 
     data.TimeTable = TimeTable_JMA2001[depthFilter(data.depth)];
-
     if (data.source == "simulation") {
       var EEWdataTmp = EEW_Data.find(function (elm) {
         return !elm.simulation;
       });
       if (EEWdataTmp) return;
+    }
+
+    if (data.source == "simulation") {
       var EBIData = [];
       var estIntTmp = {};
       if (!data.is_cancel) {
@@ -1899,7 +1901,7 @@ function EEWcontrol(data) {
           }
           data.arrivalTime = new Date(Number(data.origin_time) + SSec * 1000);
         }
-        if (!data.warnZones && data.depth <= 150) {
+        if (data.depth <= 150) {
           if (!sesmicPoints) sesmicPoints = require("./Resource/PointSeismicIntensityLocation.json");
           Object.keys(sesmicPoints).forEach(function (key) {
             elm = sesmicPoints[key];
@@ -1910,12 +1912,17 @@ function EEWcontrol(data) {
           });
           Object.keys(estIntTmp).forEach(function (elm) {
             var shindo = shindoConvert(estIntTmp[elm]);
-            EBIData.push({
-              Name: elm,
-              IntTo: shindo,
-              IntFrom: shindo,
-              Alert: shindoConvert(shindo, 5) >= 4,
+            var sectData = EBIData.find(function (elm2) {
+              return elm2.Name == elm;
             });
+            if (!sectData) {
+              EBIData.push({
+                Name: elm,
+                IntTo: shindo,
+                IntFrom: shindo,
+                Alert: data.source == "simulation" ? shindoConvert(shindo, 5) >= 4 : null,
+              });
+            }
           });
           data.warnZones = EBIData;
         }
