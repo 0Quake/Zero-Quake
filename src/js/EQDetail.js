@@ -107,7 +107,7 @@ function InfoFetch() {
       axisInfoCtrl(elm.message);
     });
   }
-    estimated_intensity_mapReq();
+  estimated_intensity_mapReq();
 }
 
 //地図初期化
@@ -898,6 +898,7 @@ function estimated_intensity_mapReq() {
         document.getElementById("estshindomap_radio").setAttribute("checked", true);
         estShindoMapDraw = true;
         ShindoMapDraw = false;
+        LgIntMapDraw = false;
         mapFillDraw();
         document.getElementById("estshindomap_radioWrap").style.display = "block";
       }
