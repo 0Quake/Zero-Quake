@@ -24,6 +24,7 @@ var jmaXMLURLHis = [];
 var narikakunURLHis = [];
 var EQInfo = { originTime: null, maxI: null, mag: null, lat: null, lng: null, depth: null, epiCenter: null, comment: null };
 var shindo_lastUpDate = 0;
+var lgint_lastUpDate = 0;
 var hinanjoLayers = [];
 var hinanjoCheck = document.getElementById("hinanjo");
 var ZoomBounds;
@@ -789,7 +790,65 @@ document.getElementById("over4").addEventListener("change", function () {
 
 //推計震度分布リスト取得→描画
 var estimated_intensity_map_layers = [];
+var ESMap_Worker;
 function estimated_intensity_mapReq() {
+  ESMap_Worker = new Worker("js/ESMap_Worker.js");
+  ESMap_Worker.addEventListener("message", (e) => {
+    if (map.getSource("estimated_intensity_map_" + e.data.index)) {
+      map.removeLayer("estimated_intensity_map_layer_" + e.data.index);
+      map.removeSource("estimated_intensity_map_" + e.data.index);
+    }
+    map.addSource("estimated_intensity_map_" + e.data.index, {
+      type: "image",
+      url: e.data.data,
+      coordinates: [
+        [e.data.lng, e.data.lat2],
+        [e.data.lng2, e.data.lat2],
+        [e.data.lng2, e.data.lat],
+        [e.data.lng, e.data.lat],
+      ],
+    });
+    map.addLayer(
+      {
+        id: "estimated_intensity_map_layer_" + e.data.index,
+        type: "raster",
+        source: "estimated_intensity_map_" + e.data.index,
+        paint: {
+          "raster-fade-duration": 0,
+          "raster-resampling": "nearest",
+        },
+      },
+      "basemap_LINE"
+    );
+    estimated_intensity_map_layers.push("estimated_intensity_map_layer_" + e.data.index);
+  });
+
+  ESMap_Worker.postMessage({
+    action: "config",
+    config: config,
+  });
+
+  var ESMap_canvas = document.createElement("canvas");
+  ESMap_canvas.width = ESMap_canvas.height = 800;
+  var ESMap_offscreen = ESMap_canvas.transferControlToOffscreen();
+  var ESMap_canvas_out = document.createElement("canvas");
+  ESMap_canvas_out.width = ESMap_canvas_out.height = 320;
+  var ESMapO_offscreen = ESMap_canvas_out.transferControlToOffscreen();
+  ESMap_Worker.postMessage(
+    {
+      action: "ESMap_canvas",
+      canvas: ESMap_offscreen,
+    },
+    [ESMap_offscreen]
+  );
+  ESMap_Worker.postMessage(
+    {
+      action: "ESMapO_canvas",
+      canvas: ESMapO_offscreen,
+    },
+    [ESMapO_offscreen]
+  );
+
   fetch("https://www.jma.go.jp/bosai/estimated_intensity_map/data/list.json")
     .then(function (res) {
       return res.json();
@@ -825,82 +884,15 @@ function estimated_intensity_mapReq() {
           ZoomBounds.extend([lng, lat2]);
           ZoomBounds.extend([lng2, lat]);
 
-          var ESMap_canvas = document.createElement("canvas");
-          ESMap_canvas.width = ESMap_canvas.height = 800;
-          var ESMap_context = ESMap_canvas.getContext("2d");
-
-          var ESMap_canvas_out = document.createElement("canvas");
-          ESMap_canvas_out.width = ESMap_canvas_out.height = 320;
-          var ESMap_context_out = ESMap_canvas_out.getContext("2d");
-
-          var img = new Image();
-          img.onload = function () {
-            ESMap_context.clearRect(0, 0, 800, 800);
-            ESMap_context.drawImage(img, 0, 0, 800, 800);
-            var imgData = ESMap_context.getImageData(0, 0, 800, 800).data;
-            ESMap_context_out.clearRect(0, 0, 320, 320);
-
-            var y = 1;
-            for (let i = 0; i < 320; i++) {
-              var x = 1;
-              for (let j = 0; j < 320; j++) {
-                var r = imgData[(y * 800 + x) * 4];
-                var g = imgData[(y * 800 + x) * 4 + 1];
-                var b = imgData[(y * 800 + x) * 4 + 2];
-
-                var int;
-                if (imgData[(y * 800 + x) * 4 + 3] > 50) {
-                  if (Math.abs(r - 250) < 16 && Math.abs(g - 230) < 16 && Math.abs(b - 150) < 16) int = "4";
-                  else if (Math.abs(r - 255) < 16 && Math.abs(g - 230) < 16 && Math.abs(b - 0) < 16) int = "5-";
-                  else if (Math.abs(r - 255) < 16 && Math.abs(g - 153) < 16 && Math.abs(b - 0) < 16) int = "5+";
-                  else if (Math.abs(r - 255) < 16 && Math.abs(g - 40) < 16 && Math.abs(b - 0) < 16) int = "6-";
-                  else if (Math.abs(r - 165) < 16 && Math.abs(g - 0) < 16 && Math.abs(b - 33) < 16) int = "6+";
-                  else if (Math.abs(r - 180) < 16 && Math.abs(g - 0) < 16 && Math.abs(b - 104) < 16) int = "7";
-
-                  ESMap_context_out.beginPath();
-
-                  ESMap_context_out.rect(j, i, 1, 1);
-                  ESMap_context_out.fillStyle = shindoConvert(int, 2)[0];
-                  ESMap_context_out.fill();
-                }
-                if (j % 2 == 0) x += 3;
-                else x += 2;
-              }
-
-              if (i % 2 == 0) y += 2;
-              else y += 3;
-            }
-
-            if (map.getSource("estimated_intensity_map_" + index)) {
-              map.removeLayer("estimated_intensity_map_layer_" + index);
-              map.removeSource("estimated_intensity_map_" + index);
-            }
-            map.addSource("estimated_intensity_map_" + index, {
-              type: "image",
-              url: ESMap_canvas_out.toDataURL("image/png"),
-              coordinates: [
-                [lng, lat2],
-                [lng2, lat2],
-                [lng2, lat],
-                [lng, lat],
-              ],
-            });
-            map.addLayer(
-              {
-                id: "estimated_intensity_map_layer_" + index,
-                type: "raster",
-                source: "estimated_intensity_map_" + index,
-                paint: {
-                  "raster-fade-duration": 0,
-                  "raster-resampling": "nearest",
-                },
-              },
-              "basemap_LINE"
-            );
-            estimated_intensity_map_layers.push("estimated_intensity_map_layer_" + index);
-          };
-
-          img.src = "https://www.jma.go.jp/bosai/estimated_intensity_map/data/" + idTmp + "/" + elm + ".png";
+          ESMap_Worker.postMessage({
+            action: "URL",
+            url: "https://www.jma.go.jp/bosai/estimated_intensity_map/data/" + idTmp + "/" + elm + ".png",
+            index: index,
+            lat: lat,
+            lng: lng,
+            lat2: lat2,
+            lng2: lng2,
+          });
         });
 
         document.getElementById("estshindomap_radio").setAttribute("checked", true);
@@ -1084,8 +1076,8 @@ function jmaL_Fetch(url) {
       });
 
       if (json.Body.Intensity && json.Body.Intensity.Observation.Pref) {
-        var newestshindo = shindo_lastUpDate < new Date(json.Head.ReportDateTime);
-        if (newestshindo) shindo_lastUpDate = new Date(json.Head.ReportDateTime);
+        var newestlgint = lgint_lastUpDate < new Date(json.Head.ReportDateTime);
+        if (newestlgint) lgint_lastUpDate = new Date(json.Head.ReportDateTime);
         else return;
         removeChild(document.getElementById("LngInt"));
         mapFillResetL();
@@ -1547,6 +1539,7 @@ function add_IntensityStation_info(lat, lng, name, int) {
   var wrap3 = document.querySelectorAll(".WrapLevel3");
 
   var intStr = shindoConvert(int);
+  var intStrLong = shindoConvert(int, 1);
 
   var newDiv = document.createElement("div");
   var color4 = shindoConvert(int, 2);
@@ -1556,7 +1549,8 @@ function add_IntensityStation_info(lat, lng, name, int) {
   icon.classList.add("ShindoIcon");
   icon.innerHTML = '<div style="background:' + color4[0] + ";color:" + color4[1] + '">' + intStr + "</div>";
 
-  var PtPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<div class='popupContent'><div class='shindoItem' style='background:" + color4[0] + ";color:" + color4[1] + "'>震度 " + intStr + "</div><div class='pointName'>" + name + "</div><div class='pointHead'>震度観測点</div></div><div></div>");
+  var mi_description = intStr == "未" ? "<div class = 'description'>震度5弱以上と考えられるが<br>現在震度を入手していない。</div>" : "";
+  var PtPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<div class='popupContent'><div class='shindoItem' style='background:" + color4[0] + ";color:" + color4[1] + "'>震度 " + intStrLong + "</div><div class='pointName'>" + name + "</div>" + mi_description + "<div class='pointHead'>震度観測点</div></div><div></div>");
   markerElm = new maplibregl.Marker({ element: icon }).setLngLat([lng, lat]).setPopup(PtPopup).addTo(map);
 
   wrap3[wrap3.length - 1].appendChild(newDiv);

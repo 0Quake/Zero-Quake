@@ -536,9 +536,16 @@ td {
   font-size: 12px;
   text-align: center;
 }
+.description {
+  color: #999;
+  font-size: 12px;
+}
 .pointName {
   display: inline-block;
   margin-right: 30px;
+}
+.maplibregl-popup {
+  max-width: unset !important;
 }
 .maplibregl-popup-content {
   min-width: 0;
@@ -566,6 +573,7 @@ td {
   text-align: center;
   font-size: 18px;
   border-radius: 10px;
+  z-index: 1000;
 }
 #TsunamiShortMsg::before {
   content: "tsunami";
