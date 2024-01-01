@@ -1546,15 +1546,16 @@ function add_City_info(name, maxInt) {
 function add_IntensityStation_info(lat, lng, name, int) {
   var wrap3 = document.querySelectorAll(".WrapLevel3");
 
-  var intStr = shindoConvert(int, 1);
+  var intStr = shindoConvert(int);
+  console.log(intStr);
 
   var newDiv = document.createElement("div");
   var color4 = shindoConvert(int, 2);
-  newDiv.innerHTML = "<span style='background:" + color4[0] + ";color:" + color4[1] + ";'>" + int + "</span>" + name;
+  newDiv.innerHTML = "<span style='background:" + color4[0] + ";color:" + color4[1] + ";'>" + intStr + "</span>" + name;
   newDiv.classList.add("ShindoItem", "ShindoItem4");
   const icon = document.createElement("div");
   icon.classList.add("ShindoIcon");
-  icon.innerHTML = '<div style="background:' + color4[0] + ";color:" + color4[1] + '">' + int + "</div>";
+  icon.innerHTML = '<div style="background:' + color4[0] + ";color:" + color4[1] + '">' + intStr + "</div>";
 
   var PtPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<div class='popupContent'><div class='shindoItem' style='background:" + color4[0] + ";color:" + color4[1] + "'>震度 " + intStr + "</div><div class='pointName'>" + name + "</div><div class='pointHead'>震度観測点</div></div><div></div>");
   markerElm = new maplibregl.Marker({ element: icon }).setLngLat([lng, lat]).setPopup(PtPopup).addTo(map);
