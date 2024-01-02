@@ -429,6 +429,7 @@ function eqInfoDraw(data, source) {
 var EQDetectItem = [];
 var EQDetectTemplate = document.getElementById("EQDetectTemplate");
 function EQDetect(data) {
+  if (!map.loaded()) return;
   var EQD_Item = EQDetectItem.find(function (elm) {
     return elm.id == data.id;
   });
@@ -450,7 +451,7 @@ function EQDetect(data) {
     };
 
     let _circle = turf.circle(_center, _radius, _options);
-    map.getSource("EQDItem_" + data.id).setData(_circle);
+    if (map.getSource("EQDItem_" + data.id)) map.getSource("EQDItem_" + data.id).setData(_circle);
 
     EQD_Item.ECMarker.setLngLat([data.lng, data.lat]);
 
