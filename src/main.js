@@ -1504,7 +1504,6 @@ function PBS_WS_Connect() {
 
 //Wolfx WebSocket接続・受信処理
 var WolfxWSclient;
-var wolfx_EQList_first = true;
 function Wolfx_WS() {
   if (!config.Source.wolfx.GetData) return;
   WolfxWSclient = new WebSocketClient();
@@ -1532,26 +1531,7 @@ function Wolfx_WS() {
             EEWdetect(2, json);
             break;
           case "jma_eqlist":
-            Object.keys(json).forEach(function (elm) {
-              eqInfoControl(
-                [
-                  {
-                    eventId: json[elm].EventID,
-                    category: null,
-                    reportDateTime: new Date(json[elm].time_full),
-                    OriginTime: null,
-                    epiCenter: json[elm].location,
-                    M: Number(json[elm].magnitude),
-                    maxI: shindoConvert(json[elm].shindo),
-                    DetailURL: [],
-                  },
-                ],
-                "jma",
-                false,
-                wolfx_EQList_first ? 0 : 1
-              );
-            });
-            wolfx_EQList_first = false;
+            eqInfoUpdate();
             break;
         }
       } catch (err) {
@@ -1973,7 +1953,7 @@ function EEWcontrol(data) {
               var sectData = data.warnZones.find(function (elm2) {
                 return elm2.Name == elm;
               });
-            }
+            } else data.warnZones = [];
             if (!sectData) {
               data.warnZones.push({
                 Name: elm,
@@ -2879,7 +2859,8 @@ function eqInfoControl(dataList, type, EEW, count) {
 
       var playAudio = false;
       dataList.forEach(function (data) {
-        var EQElm = eqInfo.jma.concat(eqInfoTmp).find(function (elm) {
+        if (!data.eventId) return;
+        var EQElm = eqInfo.jma.find(function (elm) {
           return elm.eventId == data.eventId;
         });
 
@@ -2968,7 +2949,9 @@ function eqInfoControl(dataList, type, EEW, count) {
             }
           } else {
             eqInfoTmp.push(data);
-            if ((Number.isNaN(count) || count > 0) && data.category !== "EEW") playAudio = true;
+            eqInfo.jma.push(data);
+
+            if ((!Boolean2(count) || count > 0) && data.category !== "EEW") playAudio = true;
           }
         }
       });
@@ -2994,7 +2977,6 @@ function eqInfoAlert(data, source, update, audioPlay) {
       data = data.filter(function (elm) {
         return elm.OriginTime;
       });
-      if (!update) eqInfo.jma = eqInfo.jma.concat(data);
       if (audioPlay) soundPlay("EQInfo");
 
       eqInfo.jma = eqInfo.jma.sort(function (a, b) {
