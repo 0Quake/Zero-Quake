@@ -1057,8 +1057,6 @@ function start() {
   eqInfoUpdate(); //地震情報定期取得 着火
   earlyEstReq();
 
-  EQI_JMAXMLList_Req(true); //防災情報XML 長期フィード取得(１回きり)
-
   //定期実行 着火
   RegularExecution();
 
@@ -1506,7 +1504,7 @@ function PBS_WS_Connect() {
 
 //Wolfx WebSocket接続・受信処理
 var WolfxWSclient;
-var wolfx_EQList_first = false;
+var wolfx_EQList_first = true;
 function Wolfx_WS() {
   if (!config.Source.wolfx.GetData) return;
   WolfxWSclient = new WebSocketClient();
@@ -1562,7 +1560,6 @@ function Wolfx_WS() {
     });
     connection.sendUTF("query_jmaeew");
     connection.sendUTF("query_jmaeqlist");
-    wolfx_EQList_first = true;
     kmoniTimeUpdate(new Date() - Replay, "wolfx", "success");
   });
 
@@ -2313,7 +2310,7 @@ function EarlyEstAlert(data, first, update) {
 function eqInfoUpdate() {
   setTimeout(eqInfoUpdate, config.Info.EQInfo.Interval);
   try {
-    EQI_JMAXMLList_Req(EQInfoFetchCount);
+    EQI_JMAXMLList_Req(EQInfoFetchCount == 0, EQInfoFetchCount);
     EQI_narikakunList_Req("https://ntool.online/api/earthquakeList?year=" + new Date().getFullYear() + "&month=" + (new Date().getMonth() + 1), 10, true, EQInfoFetchCount);
     EQI_USGS_Req();
     EQI_JMAHPList_Req();
@@ -2346,7 +2343,7 @@ function EQI_JMAXMLList_Req(LongPeriodFeed, count) {
           if (title == "震度速報" || title == "震源に関する情報" || title == "震源・震度に関する情報" || title == "遠地地震に関する情報" || title == "顕著な地震の震源要素更新のお知らせ") {
             if (EQInfoCount <= config.Info.EQInfo.ItemCount) EQI_JMAXML_Req(url, count);
             EQInfoCount++;
-          } else if (title == "津波情報a" || title == "津波警報・注意報・予報a") EQI_JMAXML_Req(url);
+          } else if (title == "津波情報a" || title == "津波警報・注意報・予報a") EQI_JMAXML_Req(url, count);
         });
         kmoniTimeUpdate(new Date() - Replay, "JMAXML", "success");
       } catch (err) {
@@ -2456,7 +2453,7 @@ function EQI_JMAXML_Req(url, count) {
                 DetailURL: [url],
               });
             });
-            eqInfoControl(EQData, "jma");
+            eqInfoControl(EQData, "jma", false, count);
 
             tsunamiDataTmp = {
               status: xml.querySelector("Status").textContent,
@@ -2896,7 +2893,9 @@ function eqInfoControl(dataList, type, EEW, count) {
           if (!data.maxI) data.maxI = null;
           if (EQElm) {
             var newer = EQElm.reportDateTime < data.reportDateTime;
-            var changed = false;
+            var changed = newer;
+            if (newer) EQElm.reportDateTime = data.reportDateTime;
+
             if (!EEW && EQElm.category == "EEW") {
               //EEWによらない情報が入ったら、EEWによる情報をクリアー
               playAudio = true;
@@ -2915,26 +2914,26 @@ function eqInfoControl(dataList, type, EEW, count) {
               changed = true;
             }
 
-            if (data.status && (!EQElm.status || newer)) {
+            if (Boolean2(data.status) && (!EQElm.status || newer)) {
               EQElm.status = data.status;
               changed = true;
             }
 
-            if (data.OriginTime && (!EQElm.OriginTime || Number.isNaN(new Date(EQElm.OriginTime).getTime()) || newer)) {
+            if (Boolean2(data.OriginTime) && (!EQElm.OriginTime || Number.isNaN(new Date(EQElm.OriginTime).getTime()) || newer)) {
               EQElm.OriginTime = data.OriginTime;
               changed = true;
             }
-            if (data.epiCenter && (!EQElm.epiCenter || newer)) {
+            if (Boolean2(data.epiCenter) && (!EQElm.epiCenter || newer)) {
               EQElm.epiCenter = data.epiCenter;
               changed = true;
             }
-            if (data.M && (!EQElm.M || newer)) {
+            if (Boolean2(data.M) && (!EQElm.M || newer)) {
               EQElm.M = data.M;
               changed = true;
             }
             if (data.M == "Ｍ不明" || data.M == "NaN") EQElm.M = null;
 
-            if (data.maxI && data.maxI !== "?" && (!EQElm.maxI || EQElm.maxI == "?")) {
+            if (Boolean2(data.maxI) && data.maxI !== "?" && (!EQElm.maxI || EQElm.maxI == "?" || newer)) {
               EQElm.maxI = data.maxI;
               changed = true;
             }
@@ -2969,7 +2968,7 @@ function eqInfoControl(dataList, type, EEW, count) {
             }
           } else {
             eqInfoTmp.push(data);
-            if (count > 0 && data.category !== "EEW") playAudio = true;
+            if ((Number.isNaN(count) || count > 0) && data.category !== "EEW") playAudio = true;
           }
         }
       });
@@ -3331,4 +3330,7 @@ function depthFilter(depth) {
   else if (200 <= depth) return Math.floor(depth / 10) * 10;
   else if (50 <= depth) return Math.floor(depth / 5) * 5;
   else return Math.floor(depth / 2) * 2;
+}
+function Boolean2(elm) {
+  return (elm !== null) & (elm !== undefined) && elm !== "";
 }
