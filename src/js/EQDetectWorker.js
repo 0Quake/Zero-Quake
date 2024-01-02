@@ -7,7 +7,7 @@ var pointsData = {}; //毎秒クリアされない、観測点のデータ
 var Replay = 0;
 
 var thresholds = {
-  historyCount: 40, //比較する件数
+  historyCount: 30, //比較する件数
   threshold01: 5, //検出とする観測点数
   threshold01C: 5, //検出とする観測点数【都会】
   threshold02: null, //1次フラグ条件のPGA増加量[gal]
@@ -17,7 +17,7 @@ var thresholds = {
   MargeRange: 40, //地震の同定範囲[km]
   MargeRangeC: 20, //地震の同定範囲[km]【都会】
   time00: 300000, //最初の検出~解除[ms](優先)
-  time01: 30000, //最後の検出~解除[ms]
+  time01: 60000, //最後の検出~解除[ms]
 };
 
 workerThreads.parentPort.postMessage({
@@ -90,8 +90,8 @@ function EQDetect(data, date, detect) {
       //PGA平均を求めるためのデータ追加
       ptData.SUMTmp = ptData.SUMTmp.slice(1);
       ptData.SUMTmp.push(elm.pga);
-      if (ptData.SUMTmp.length >= 30) {
-        ptData.SUM += ptData.SUMTmp[ptData.SUMTmp.length - 30];
+      if (ptData.SUMTmp.length >= thresholds.historyCount) {
+        ptData.SUM += ptData.SUMTmp[ptData.SUMTmp.length - thresholds.historyCount];
         ptData.SUM -= ptData.SUMTmp[0];
       }
     }
@@ -192,7 +192,6 @@ function EQDetect(data, date, detect) {
   var index = 0;
   for (const elm of EQDetect_List) {
     if (EEWNow || new Date() - Replay - elm.origin_Time > thresholds.time00 || new Date() - Replay - elm.last_Detect > thresholds.time01 || elm.Codes.length < elm.Codes_history.length * thresholds.threshold05) {
-      if (elm.Codes.length < elm.Codes_history.length * thresholds.threshold05);
       //EEW発令中・発生から閾値以上経過・最後の検知から閾値以上経過・観測点数が最大時より一定割合減少
       EQDetect_List.splice(index, 1);
       workerThreads.parentPort.postMessage({
