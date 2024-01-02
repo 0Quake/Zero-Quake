@@ -530,9 +530,9 @@ function EQDetect(data) {
 function EQDetectFinish(id) {
   EQDetectItem.forEach(function (elmA, index) {
     if (elmA.id == id) {
-      map.removeLayer("EQDItem_" + id);
-      map.removeLayer("EQDItemF_" + id);
-      map.removeSource("EQDItem_" + id);
+      if (map.getLayer("EQDItem_" + id)) map.removeLayer("EQDItem_" + id);
+      if (map.getLayer("EQDItemF_" + id)) map.removeLayer("EQDItemF_" + id);
+      if (map.getSource("EQDItem_" + id)) map.removeSource("EQDItem_" + id);
       elmA.ECMarker.remove();
 
       EQDetectItem.splice(index, 1);
