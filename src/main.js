@@ -1,6 +1,6 @@
 //リプレイ
 var Replay = 0;
-var mainWindow, settingWindow, tsunamiWindow, kmoniWorker;
+var mainWindow, settingWindow, tsunamiWindow, kmoniWorker, nankaiWindow;
 var worker;
 function replay(ReplayDate) {
   if (ReplayDate) {
@@ -638,6 +638,9 @@ ipcMain.on("message", (_event, response) => {
     case "startInstall":
       if (downloadURL) doUpdate(downloadURL);
       break;
+    case "nankaiWIndowOpen":
+      nankai_createWindow();
+      break;
   }
 });
 
@@ -731,6 +734,12 @@ function createWindow() {
 
         if (kmoniPointsDataTmp) messageToMainWindow(kmoniPointsDataTmp);
         if (SnetPointsDataTmp) messageToMainWindow(SnetPointsDataTmp);
+        if (NankaiTroughInfo) {
+          messageToMainWindow({
+            action: "NankaiTroughInfo",
+            data: NankaiTroughInfo,
+          });
+        }
       });
 
       mainWindow.loadFile("src/index.html");
@@ -921,6 +930,43 @@ function tsunami_createWindow() {
     });
   } catch (err) {
     throw new Error("津波情報ウィンドウの作成でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
+  }
+}
+//南海トラフ関連情報ウィンドウの作成
+function nankai_createWindow() {
+  try {
+    if (nankaiWindow) {
+      if (nankaiWindow.isMinimized()) nankaiWindow.restore();
+      if (!nankaiWindow.isFocused()) nankaiWindow.focus();
+      return false;
+    }
+    nankaiWindow = new BrowserWindow({
+      minWidth: 600,
+      minHeight: 300,
+      webPreferences: {
+        preload: path.join(__dirname, "js/preload.js"),
+        title: "南海トラフ地震に関連する情報 - Zero Quake",
+        icon: path.join(__dirname, "img/icon.ico"),
+      },
+      backgroundColor: "#202227",
+      alwaysOnTop: config.system.alwaysOnTop,
+    });
+
+    nankaiWindow.webContents.on("did-finish-load", () => {
+      if (NankaiTroughInfo) {
+        nankaiWindow.webContents.send("message2", {
+          action: "NankaiTroughInfo",
+          data: NankaiTroughInfo,
+        });
+      }
+    });
+    nankaiWindow.loadFile("src/NankaiTrough.html");
+
+    nankaiWindow.on("closed", () => {
+      nankaiWindow = null;
+    });
+  } catch (err) {
+    throw new Error("南海トラフ関連情報ウィンドウの作成でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
   }
 }
 function messageToMainWindow(message) {
@@ -2261,6 +2307,7 @@ function eqInfoUpdate() {
     EQI_JMAXMLList_Req();
     EQI_narikakunList_Req("https://ntool.online/api/earthquakeList?year=" + new Date().getFullYear() + "&month=" + (new Date().getMonth() + 1), 10, true);
     EQI_USGS_Req();
+    EQI_JMAHPList_Req();
   } catch (err) {
     throw new Error("地震情報の処理でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
   }
@@ -2579,6 +2626,98 @@ function EQI_JMAXML_Req(url) {
   });
   request.on("error", () => {
     kmoniTimeUpdate(new Date() - Replay, "JMAXML", "Error");
+  });
+  request.end();
+}
+
+var NankaiTroughInfo;
+
+//気象庁HPリクエスト
+function EQI_JMAHPList_Req() {
+  var request = net.request("https://www.jma.go.jp/bosai/quake/data/list.json");
+  request.on("response", (res) => {
+    var dataTmp = "";
+    res.on("data", (chunk) => {
+      dataTmp += chunk;
+    });
+    res.on("end", function () {
+      try {
+        var json = jsonParse(dataTmp);
+        if (!json) return false;
+        var nankai = json.find(function (elm) {
+          return elm.ttl == "南海トラフ地震関連解説情報";
+        });
+        if (nankai) EQI_JMAHP_Req("https://www.jma.go.jp/bosai/quake/data/" + nankai.json);
+
+        kmoniTimeUpdate(new Date() - Replay, "JMAHP", "success");
+      } catch (err) {
+        kmoniTimeUpdate(new Date() - Replay, "JMAHP", "Error");
+        console.log(err);
+      }
+    });
+  });
+  request.on("error", () => {
+    kmoniTimeUpdate(new Date() - Replay, "JMAHP", "Error");
+  });
+  request.end();
+}
+
+//気象庁HPリクエスト
+function EQI_JMAHP_Req(url) {
+  var request = net.request(url);
+  request.on("response", (res) => {
+    var dataTmp = "";
+    res.on("data", (chunk) => {
+      dataTmp += chunk;
+    });
+    res.on("end", function () {
+      try {
+        var json = jsonParse(dataTmp);
+        if (!json) return false;
+
+        var data = {
+          title: json.Control.Title, //南海トラフ地震関連解説情報など
+          kind: null, //定例など
+          reportDate: new Date(json.Head.ReportDateTime), //時刻
+          HeadLine: json.Head.Headline.Text, //要約
+          Text: "",
+          Appendix: "",
+          NextAdvisory: "",
+          Text2: "",
+        };
+        if (json.Body.EarthquakeInfo) {
+          if (json.Body.EarthquakeInfo.InfoSerial) data.kind = json.Body.EarthquakeInfo.InfoSerial.Name;
+          data.Text = json.Body.EarthquakeInfo.Text;
+          if (json.Body.EarthquakeInfo.Appendix) data.Appendix = json.Body.EarthquakeInfo.Appendix;
+        }
+        if (json.Body.NextAdvisory) data.NextAdvisory = json.Body.NextAdvisory;
+        if (json.Body.Text) data.Text2 = json.Body.Text.reportDate;
+
+        if (!NankaiTroughInfo || NankaiTroughInfo.reportDate < data.reportDate) {
+          NankaiTroughInfo = data;
+          console.log("aaaaaaaaa");
+
+          messageToMainWindow({
+            action: "NankaiTroughInfo",
+            data: NankaiTroughInfo,
+          });
+
+          if (nankaiWindow) {
+            nankaiWindow.webContents.send("message2", {
+              action: "NankaiTroughInfo",
+              data: NankaiTroughInfo,
+            });
+          }
+        }
+        kmoniTimeUpdate(new Date() - Replay, "JMAHP", "success");
+      } catch (err) {
+        console.log(err);
+        kmoniTimeUpdate(new Date() - Replay, "JMAHP", "Error");
+      }
+    });
+  });
+  request.on("error", () => {
+    kmoniTimeUpdate(new Date() - Replay, "JMAHP", "Error");
   });
   request.end();
 }

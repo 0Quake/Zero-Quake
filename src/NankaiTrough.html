@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>南海トラフ地震に関連する情報 - Zero Quake</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel='stylesheet' href='./js/maplibre/maplibre-gl.css'>
+    <link rel="stylesheet" href="./css/map.css">
+    <link rel="stylesheet" href="./css/setting.css">
+    <meta name="color-scheme" content="dark">
+
+</head>
+
+<body>
+    <div id="splash">
+        <img src="./img/icon.svg" width="256" height="256">
+        <div id="loading-wrap"></div>
+    </div>
+
+    <h1 id="title"> </h1>
+    <div id="headline"></div>
+    <hr>
+    <div id="Text"></div>
+    <div id="Appendix"></div>
+    <div id="NextAdvisory"></div>
+    <div id="Text2"></div>
+
+    <script>
+
+        window.electronAPI.messageSend((event, request) => {
+            if (request.action == "NankaiTroughInfo") {
+                /*var data = {
+                    title: json.Control.Title, //南海トラフ地震関連解説情報など
+                    kind: null, //定例など
+                    reportDate: new Date(json.Head.ReportDateTime), //時刻
+                    HeadLine: json.Head.Headline.Text, //要約
+                    Text: "",
+                    Appendix: "",
+                    NextAdvisory: "",
+                    Text2: "",
+                }*/
+
+
+                document.getElementById("title").innerText = request.data.title + " (" + request.data.kind + ")"
+                document.getElementById("headline").innerText = request.data.HeadLine
+                document.getElementById("Text").innerText = request.data.Text
+                document.getElementById("Appendix").innerText = request.data.Appendix
+                document.getElementById("NextAdvisory").innerText = request.data.NextAdvisory
+                document.getElementById("Text2").innerText = request.data.Text2;
+
+                if (request.data.Text) document.getElementById("Text").style.display = "block"
+                if (request.data.Appendix) document.getElementById("Appendix").style.display = "block"
+                if (request.data.NextAdvisory) document.getElementById("NextAdvisory").style.display = "block"
+                if (request.data.Text2) document.getElementById("Text2").style.display = "block"
+
+                document.getElementById("splash").style.display = "none";
+
+            }
+        });
+    </script>
+
+    <style>
+        h1 {
+            text-align: center;
+        }
+
+        #headline {
+            color: #CCC;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        body {
+            overflow: auto;
+            font-size: 16px;
+            letter-spacing: .8px;
+            line-height: 1.7;
+            padding: 15px;
+        }
+
+        #Text,
+        #Appendix,
+        #NextAdvisory,
+        #Text2 {
+            display: none;
+            padding: 1em;
+        }
+    </style>
+
+</body>
+
+</html>

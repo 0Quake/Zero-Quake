@@ -741,7 +741,8 @@ td {
   font-size: 14px;
   font-family: "AzeretMono-Regular", ui-monospace;
 }
-.EQItem {
+.EQItem,
+#NankaiTroughInfo {
   position: relative;
   display: flex;
   flex-wrap: wrap;
@@ -753,6 +754,31 @@ td {
   border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
+}
+#NankaiTroughInfo {
+  display: none;
+  font-size: 14px;
+  color: #ccc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-align: center;
+}
+#Nankai_Title {
+  font-family: inherit;
+}
+#NankaiTroughInfo.nankaiAlert {
+  border: solid 2px var(--TsunamiWarningColor);
+  color: #fff;
+  font-family: "M PLUS 1p";
+}
+#NankaiTroughInfo.nankaiWarn {
+  border: solid 2px var(--TsunamiWatchColor);
+  color: #fff;
+  font-family: "M PLUS 1p";
+}
+#NankaiTroughInfo.nankaiInfo {
+  border: solid 1px var(--TsunamiYohoColor);
+  color: #fff;
 }
 .EQI_maxI {
   width: 50px;
@@ -798,7 +824,8 @@ td {
 .EQItemOverlay:focus-within {
   display: block;
 }
-.EQItem:hover {
+.EQItem:hover,
+#NankaiTroughInfo:hover {
   background: #111;
 }
 .EQItem.EQI_canceled:hover {

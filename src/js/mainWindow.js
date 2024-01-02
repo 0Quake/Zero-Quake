@@ -91,6 +91,9 @@ window.electronAPI.messageSend((event, request) => {
     case "tsunamiUpdate":
       tsunamiDataUpdate(request.data);
       break;
+    case "NankaiTroughInfo":
+      NankaiTroughInfo(request.data);
+      break;
   }
   document.getElementById("splash").style.display = "none";
   return true;
@@ -2026,6 +2029,32 @@ function tsunamiPopup(e) {
     }
   }
 }
+
+//🔴南海トラフ情報🔴
+function NankaiTroughInfo(data) {
+  document.getElementById("NankaiTroughInfo").addEventListener("click", function () {
+    window.electronAPI.messageReturn({
+      action: "nankaiWIndowOpen",
+    });
+  });
+  document.getElementById("NankaiTroughInfo").style.display = "block";
+  document.getElementById("NankaiTroughInfo").setAttribute("title", "クリックして詳細を表示\n" + data.HeadLine);
+  document.getElementById("Nankai_Title").innerText = data.title + " (" + data.kind + ")";
+  document.getElementById("NankaiTroughInfo").classList.remove("nankaiAlert", "nankaiWarn", "nankaiInfo");
+  switch (data.kind) {
+    case "巨大地震警戒":
+      document.getElementById("NankaiTroughInfo").classList.add("nankaiAlert");
+      break;
+    case "巨大地震注意":
+    case "臨時解説":
+      document.getElementById("NankaiTroughInfo").classList.add("nankaiWarn");
+      break;
+    case "調査終了":
+      document.getElementById("NankaiTroughInfo").classList.add("nankaiInfo");
+      break;
+  }
+}
+
 function hinanjoPopup(e) {
   var DataTmp = e.features[0].properties;
   var supportType = [];
