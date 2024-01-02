@@ -2312,7 +2312,6 @@ function eqInfoUpdate(roop) {
   } catch (err) {
     throw new Error("地震情報の処理でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
   }
-  console.log(EQInfoFetchCount);
   EQInfoFetchCount++;
 }
 
