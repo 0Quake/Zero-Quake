@@ -37,6 +37,7 @@ var FERegion = require("./Resource/feRegion.json");
 var sesmicPoints;
 var TimeTable_JMA2001;
 var soft_version;
+var EQInfoFetchCount = 0;
 
 const store = new Store();
 var defaultConfigVal = {
@@ -1505,6 +1506,7 @@ function PBS_WS_Connect() {
 
 //Wolfx WebSocket接続・受信処理
 var WolfxWSclient;
+var wolfx_EQList_first = false;
 function Wolfx_WS() {
   if (!config.Source.wolfx.GetData) return;
   WolfxWSclient = new WebSocketClient();
@@ -1546,9 +1548,12 @@ function Wolfx_WS() {
                     DetailURL: [],
                   },
                 ],
-                "jma"
+                "jma",
+                false,
+                wolfx_EQList_first ? 0 : 1
               );
             });
+            wolfx_EQList_first = false;
             break;
         }
       } catch (err) {
@@ -1557,6 +1562,7 @@ function Wolfx_WS() {
     });
     connection.sendUTF("query_jmaeew");
     connection.sendUTF("query_jmaeqlist");
+    wolfx_EQList_first = true;
     kmoniTimeUpdate(new Date() - Replay, "wolfx", "success");
   });
 
@@ -2307,17 +2313,18 @@ function EarlyEstAlert(data, first, update) {
 function eqInfoUpdate() {
   setTimeout(eqInfoUpdate, config.Info.EQInfo.Interval);
   try {
-    EQI_JMAXMLList_Req();
-    EQI_narikakunList_Req("https://ntool.online/api/earthquakeList?year=" + new Date().getFullYear() + "&month=" + (new Date().getMonth() + 1), 10, true);
+    EQI_JMAXMLList_Req(EQInfoFetchCount);
+    EQI_narikakunList_Req("https://ntool.online/api/earthquakeList?year=" + new Date().getFullYear() + "&month=" + (new Date().getMonth() + 1), 10, true, EQInfoFetchCount);
     EQI_USGS_Req();
     EQI_JMAHPList_Req();
   } catch (err) {
     throw new Error("地震情報の処理でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
   }
+  EQInfoFetchCount++;
 }
 
 //気象庁XMLリスト取得→EQI_JMAXML_Req
-function EQI_JMAXMLList_Req(LongPeriodFeed) {
+function EQI_JMAXMLList_Req(LongPeriodFeed, count) {
   var request = net.request(LongPeriodFeed ? "https://www.data.jma.go.jp/developer/xml/feed/eqvol_l.xml" : "https://www.data.jma.go.jp/developer/xml/feed/eqvol.xml");
   request.on("response", (res) => {
     var dataTmp = "";
@@ -2337,7 +2344,7 @@ function EQI_JMAXMLList_Req(LongPeriodFeed) {
           if (!url) return;
           var title = elm.querySelector("title").textContent;
           if (title == "震度速報" || title == "震源に関する情報" || title == "震源・震度に関する情報" || title == "遠地地震に関する情報" || title == "顕著な地震の震源要素更新のお知らせ") {
-            if (EQInfoCount <= config.Info.EQInfo.ItemCount) EQI_JMAXML_Req(url);
+            if (EQInfoCount <= config.Info.EQInfo.ItemCount) EQI_JMAXML_Req(url, count);
             EQInfoCount++;
           } else if (title == "津波情報a" || title == "津波警報・注意報・予報a") EQI_JMAXML_Req(url);
         });
@@ -2354,7 +2361,7 @@ function EQI_JMAXMLList_Req(LongPeriodFeed) {
 }
 
 //気象庁XML 取得・フォーマット変更→eqInfoControl
-function EQI_JMAXML_Req(url) {
+function EQI_JMAXML_Req(url, count) {
   if (!url || jmaXML_Fetched.includes(url)) return;
   jmaXML_Fetched.push(url);
   var request = net.request(url);
@@ -2405,7 +2412,9 @@ function EQI_JMAXML_Req(url) {
                 DetailURL: [url],
               },
             ],
-            "jma"
+            "jma",
+            false,
+            count
           );
         } else if (title == "津波情報a" || title == "津波警報・注意報・予報a") {
           //津波予報
@@ -2770,7 +2779,7 @@ function EQI_USGS_Req() {
 }
 
 //narikakun地震情報API リスト取得→EQI_narikakun_Req
-function EQI_narikakunList_Req(url, num, first) {
+function EQI_narikakunList_Req(url, num, first, count) {
   var request = net.request(url);
   request.on("response", (res) => {
     var dataTmp = "";
@@ -2796,7 +2805,7 @@ function EQI_narikakunList_Req(url, num, first) {
           var eidTmp = String(elm).split("_")[2];
           if (nakn_Fetched.indexOf(url) === -1) {
             nakn_Fetched.push(elm);
-            EQI_narikakun_Req(elm);
+            EQI_narikakun_Req(elm, count);
           }
           if (!narikakun_EIDs.includes(eidTmp)) {
             narikakun_EIDs.push(eidTmp);
@@ -2821,7 +2830,7 @@ function EQI_narikakunList_Req(url, num, first) {
 }
 
 //narikakun地震情報API 取得・フォーマット変更→eqInfoControl
-function EQI_narikakun_Req(url) {
+function EQI_narikakun_Req(url, count) {
   var request = net.request(url);
   request.on("response", (res) => {
     var dataTmp = "";
@@ -2852,7 +2861,7 @@ function EQI_narikakun_Req(url) {
             DetailURL: [url],
           },
         ];
-        eqInfoControl(dataTmp2, "jma");
+        eqInfoControl(dataTmp2, "jma", false, count);
         kmoniTimeUpdate(new Date() - Replay, "ntool", "success");
       } catch (err) {
         kmoniTimeUpdate(new Date() - Replay, "ntool", "Error");
@@ -2865,7 +2874,7 @@ function EQI_narikakun_Req(url) {
   request.end();
 }
 //地震情報マージ→eqInfoAlert
-function eqInfoControl(dataList, type, EEW) {
+function eqInfoControl(dataList, type, EEW, count) {
   switch (type) {
     case "jma":
       var eqInfoTmp = [];
@@ -2890,6 +2899,7 @@ function eqInfoControl(dataList, type, EEW) {
             var changed = false;
             if (!EEW && EQElm.category == "EEW") {
               //EEWによらない情報が入ったら、EEWによる情報をクリアー
+              playAudio = true;
               newer = true;
               EQElm = {
                 eventId: EQElm.eventId,
@@ -2959,12 +2969,12 @@ function eqInfoControl(dataList, type, EEW) {
             }
           } else {
             eqInfoTmp.push(data);
-            if (data.reportDateTime && new Date() - data.reportDateTime < 600000 && data.category !== "EEW") playAudio = true;
+            if (count > 0 && data.category !== "EEW") playAudio = true;
           }
         }
       });
       if (eqInfoTmp.length > 0) eqInfoAlert(eqInfoTmp, "jma", false, playAudio);
-      if (eqInfoUpdateTmp.length > 0) eqInfoAlert(eqInfoUpdateTmp, "jma", true, false);
+      if (eqInfoUpdateTmp.length > 0) eqInfoAlert(eqInfoUpdateTmp, "jma", true, playAudio);
       break;
     case "usgs":
       dataList
