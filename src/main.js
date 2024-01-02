@@ -2655,7 +2655,6 @@ function EQI_JMAHPList_Req() {
         kmoniTimeUpdate(new Date() - Replay, "JMAHP", "success");
       } catch (err) {
         kmoniTimeUpdate(new Date() - Replay, "JMAHP", "Error");
-        console.log(err);
       }
     });
   });
@@ -2698,7 +2697,6 @@ function EQI_JMAHP_Req(url) {
 
         if (!NankaiTroughInfo || NankaiTroughInfo.reportDate < data.reportDate) {
           NankaiTroughInfo = data;
-          console.log("aaaaaaaaa");
 
           messageToMainWindow({
             action: "NankaiTroughInfo",
@@ -2714,7 +2712,6 @@ function EQI_JMAHP_Req(url) {
         }
         kmoniTimeUpdate(new Date() - Replay, "JMAHP", "success");
       } catch (err) {
-        console.log(err);
         kmoniTimeUpdate(new Date() - Replay, "JMAHP", "Error");
       }
     });
