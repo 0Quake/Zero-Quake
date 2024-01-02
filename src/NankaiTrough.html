@@ -32,17 +32,7 @@
 
         window.electronAPI.messageSend((event, request) => {
             if (request.action == "NankaiTroughInfo") {
-                /*var data = {
-                    title: json.Control.Title, //南海トラフ地震関連解説情報など
-                    kind: null, //定例など
-                    reportDate: new Date(json.Head.ReportDateTime), //時刻
-                    HeadLine: json.Head.Headline.Text, //要約
-                    Text: "",
-                    Appendix: "",
-                    NextAdvisory: "",
-                    Text2: "",
-                }*/
-
+                document.title = request.data.title + " (" + request.data.kind + ") - Zero Quake"
 
                 document.getElementById("title").innerText = request.data.title + " (" + request.data.kind + ")"
                 document.getElementById("headline").innerText = request.data.HeadLine
