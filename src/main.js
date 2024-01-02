@@ -1932,9 +1932,12 @@ function EEWcontrol(data) {
         return !elm.simulation;
       });
       if (EEWdataTmp) return;
+    } else {
+      var EEWdataTmp = EEW_Data.forEach(function (elm) {
+        if (elm.simulation) EEWClear(elm.EQ_id);
+      });
     }
-
-    if (data.source == "simulation") {
+    if (data.source == "simulation" && !data.isPlum) {
       var estIntTmp = {};
       if (!data.is_cancel) {
         if (!data.userIntensity) data.userIntensity = calcInt(data.magnitude, data.depth, data.latitude, data.longitude, config.home.latitude, config.home.longitude, config.home.arv);
@@ -1979,11 +1982,6 @@ function EEWcontrol(data) {
           });
         }
       }
-    }
-    if (data.source != "simulation") {
-      var EEWdataTmp = EEW_Data.forEach(function (elm) {
-        if (elm.simulation) EEWClear(elm.EQ_id);
-      });
     }
 
     if (data.warnZones && data.warnZones.length) {
