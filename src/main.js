@@ -1319,6 +1319,11 @@ function P2P_WS() {
           else kmoniTimeUpdate(new Date(), "P2P_EEW", "success");
 
           switch (data.code) {
+            case 551:
+              eqInfoUpdate();
+              setTimeout(eqInfoUpdate, 1000);
+              setTimeout(eqInfoUpdate, 10000);
+              break;
             case 552:
               //津波情報
               if (data.canceled) {
