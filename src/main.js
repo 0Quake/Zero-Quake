@@ -576,6 +576,13 @@ electron.app.on("ready", () => {
   tray.on("double-click", function () {
     createWindow();
   });
+
+  electron.powerMonitor.on("resume", () => {
+    eqInfoUpdate();
+    RegularExecution();
+    if (wolfxConnection) wolfxConnection.sendUTF("query_jmaeew");
+    if (PBSConnection) PBSConnection.sendUTF("queryjson");
+  });
 });
 
 //レンダラープロセスからのメッセージ
@@ -1054,11 +1061,11 @@ function start() {
   SnetRequest();
   kmoniRequest();
   yoyuSetK(kmoniRequest);
-  eqInfoUpdate(); //地震情報定期取得 着火
+  eqInfoUpdate(true); //地震情報定期取得 着火
   earlyEstReq();
 
   //定期実行 着火
-  RegularExecution();
+  RegularExecution(true);
 
   //地震検知ワーカー作成
   createWorker();
@@ -1455,6 +1462,7 @@ function AXIS_WS_Connect() {
 
 //ProjectBS WebSocket接続・受信処理
 var PBSWSclient;
+var PBSConnection;
 function ProjectBS_WS() {
   if (!config.Source.ProjectBS.GetData) return;
   PBSWSclient = new WebSocketClient();
@@ -1465,6 +1473,7 @@ function ProjectBS_WS() {
   });
 
   PBSWSclient.on("connect", function (connection) {
+    PBSConnection = connection;
     connection.on("error", function () {
       kmoniTimeUpdate(new Date() - Replay, "ProjectBS", "Error");
     });
@@ -1504,6 +1513,7 @@ function PBS_WS_Connect() {
 
 //Wolfx WebSocket接続・受信処理
 var WolfxWSclient;
+var wolfxConnection;
 function Wolfx_WS() {
   if (!config.Source.wolfx.GetData) return;
   WolfxWSclient = new WebSocketClient();
@@ -1514,6 +1524,7 @@ function Wolfx_WS() {
   });
 
   WolfxWSclient.on("connect", function (connection) {
+    wolfxConnection = connection;
     connection.on("error", function () {
       kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
     });
@@ -1539,7 +1550,6 @@ function Wolfx_WS() {
       }
     });
     connection.sendUTF("query_jmaeew");
-    connection.sendUTF("query_jmaeqlist");
     kmoniTimeUpdate(new Date() - Replay, "wolfx", "success");
   });
 
@@ -1556,7 +1566,11 @@ function Wolfx_WS_Connect() {
 }
 
 //定期実行
-function RegularExecution() {
+function RegularExecution(roop) {
+  if (roop)
+    setTimeout(function () {
+      RegularExecution(true);
+    }, 1000);
   try {
     //EEW解除
     EEW_nowList.forEach(function (elm) {
@@ -1576,8 +1590,6 @@ function RegularExecution() {
         ValidDateTime: null,
       });
     }
-
-    setTimeout(RegularExecution, 1000);
   } catch (err) {
     throw new Error("内部の情報処理でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
   }
@@ -2287,8 +2299,11 @@ function EarlyEstAlert(data, first, update) {
 //🔴地震情報🔴
 
 //地震情報更新処理
-function eqInfoUpdate() {
-  setTimeout(eqInfoUpdate, config.Info.EQInfo.Interval);
+function eqInfoUpdate(roop) {
+  if (roop)
+    setTimeout(function () {
+      eqInfoUpdate(true);
+    }, config.Info.EQInfo.Interval);
   try {
     EQI_JMAXMLList_Req(EQInfoFetchCount == 0, EQInfoFetchCount);
     EQI_narikakunList_Req("https://ntool.online/api/earthquakeList?year=" + new Date().getFullYear() + "&month=" + (new Date().getMonth() + 1), 10, true, EQInfoFetchCount);
@@ -2297,6 +2312,7 @@ function eqInfoUpdate() {
   } catch (err) {
     throw new Error("地震情報の処理でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
   }
+  console.log(EQInfoFetchCount);
   EQInfoFetchCount++;
 }
 
