@@ -164,9 +164,9 @@ function EQDetect(data, date, detect) {
   }
 
   for (const EQD_ItemTmp of EQDetect_List) {
+    MargeRangeTmp = EQD_ItemTmp.isCity ? thresholds.MargeRangeC : thresholds.MargeRange;
     var ArroundPoints = data.filter(function (station) {
-      MargeRangeTmp = station.isCity ? thresholds.MargeRangeC : thresholds.MargeRange;
-      return geosailing(station.Location.Latitude, station.Location.Longitude, EQD_ItemTmp.lat, EQD_ItemTmp.lng) <= MargeRangeTmp;
+      return station.data && geosailing(station.Location.Latitude, station.Location.Longitude, EQD_ItemTmp.lat2, EQD_ItemTmp.lng2) <= MargeRangeTmp;
     });
     threshold01Tmp = EQD_ItemTmp.isCity ? thresholds.threshold01C : thresholds.threshold01;
     threshold01Tmp = Math.min(Math.max(ArroundPoints.length, 2), threshold01Tmp); //周囲の観測点数に応じて閾値を調整（離島対応）
