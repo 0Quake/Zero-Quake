@@ -1419,12 +1419,10 @@ function JMAEstShindoControl(data) {
 
   Object.keys(JMAEstShindoData).forEach(function (elm) {
     var sectData = JMAEstShindoData[elm];
-    if (sectData.Alert) {
-      AlertT.push(["==", "name", elm]);
-    }
+    if (sectData.Alert) AlertT.push(["==", "name", elm]);
 
     IntData = config.Info.EEW.IntType == "max" ? sectData.IntTo : sectData.IntFrom;
-    switch (IntData) {
+    switch (shindoConvert(IntData)) {
       case "0":
         Int0T.push(["==", "name", elm]);
         break;

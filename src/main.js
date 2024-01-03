@@ -1089,8 +1089,8 @@ function earlyEstReq() {
             let parser = new new JSDOM().window.DOMParser();
             let doc = parser.parseFromString(dataTmp, "text/xml");
             doc.querySelectorAll("eventParameters event").forEach(function (elm) {
-              var latitude = Number(elm.querySelector("origin latitude value").textContent);
-              var longitude = Number(elm.querySelector("origin longitude value").textContent);
+              var latitude = elm.querySelector("origin latitude value") ? Number(elm.querySelector("origin latitude value").textContent) : null;
+              var longitude = elm.querySelector("origin longitude value") ? Number(elm.querySelector("origin longitude value").textContent) : null;
               if (!latitude || !longitude) return;
 
               var FECode = FERegion.features.find(function (elm2) {
@@ -1679,8 +1679,8 @@ function EEWdetect(type, json) {
             var sectName = EEWSectName[EBIStr[i]];
             var maxInt = EBIStr[i + 1].substring(1, 3);
             var minInt = EBIStr[i + 1].substring(3, 5);
-            minInt = minInt == "//" ? null : shindoConvert(minInt, 0);
-            maxInt = maxInt == "//" ? null : shindoConvert(maxInt, 0);
+            minInt = minInt == "//" ? null : shindoConvert(minInt);
+            maxInt = maxInt == "//" ? null : shindoConvert(maxInt);
             var arrivalTime = EBIStr[i + 2];
             arrivalTime = arrivalTime.substring(0, 2) + ":" + arrivalTime.substring(2, 4) + ":" + arrivalTime.substring(4, 6);
             arrivalTime = new Date(dateEncode(4, null) + " " + arrivalTime);
@@ -1740,8 +1740,9 @@ function EEWdetect(type, json) {
             var sectName = EEWSectName[EBIStr[i]];
             var maxInt = EBIStr[i + 1].substring(1, 3);
             var minInt = EBIStr[i + 1].substring(3, 5);
-            minInt = minInt == "//" ? null : shindoConvert(minInt, 0);
-            maxInt = maxInt == "//" ? null : shindoConvert(maxInt, 0);
+            minInt = minInt == "//" ? null : minInt;
+            maxInt = maxInt == "//" ? null : maxInt;
+            if (maxInt == 99) maxInt = minInt;
             var arrivalTime = EBIStr[i + 2];
             arrivalTime = arrivalTime.substring(0, 2) + ":" + arrivalTime.substring(2, 4) + ":" + arrivalTime.substring(4, 6);
             arrivalTime = new Date(dateEncode(4, null) + " " + arrivalTime);
@@ -1753,8 +1754,8 @@ function EEWdetect(type, json) {
               Code: Number(EBIStr[i]),
               Name: sectName,
               Alert: alertFlg,
-              IntTo: maxInt,
-              IntFrom: minInt,
+              IntTo: shindoConvert(maxInt),
+              IntFrom: shindoConvert(minInt),
               ArrivalTime: arrivalTime,
               Arrived: arrived,
             });
@@ -1798,8 +1799,8 @@ function EEWdetect(type, json) {
           Code: elm.Code,
           Name: elm.Name,
           Alert: null,
-          IntTo: elm.Intensity.To,
-          IntFrom: elm.Intensity.From,
+          IntTo: shindoConvert(elm.Intensity.To),
+          IntFrom: shindoConvert(elm.Intensity.From),
           ArrivalTime: null,
           Arrived: null,
         });
@@ -1863,10 +1864,10 @@ function EEWdetect(type, json) {
         EBIData.push({
           Code: null,
           Name: elm.name,
-          Alert: alertFlg,
-          IntTo: shindoConvert(elm.scaleTo, 0),
-          IntFrom: shindoConvert(elm.scaleFrom, 0),
-          ArrivalTime: elm.arrivalTime,
+          Alert: elm.kindCode == 10 || elm.kindCode == 11 || elm.kindCode == 19,
+          IntTo: shindoConvert(elm.scaleTo),
+          IntFrom: shindoConvert(elm.scaleFrom),
+          ArrivalTime: new Date(elm.arrivalTime),
           Arrived: elm.kindCode == 11,
         });
       });
@@ -1887,23 +1888,9 @@ function EEWdetect(type, json) {
         region_name: region_nameTmp,
         origin_time: origin_timeTmp,
         isPlum: conditionTmp,
-        warnZones: [],
+        warnZones: EBIData,
         source: "P2P_EEW",
       };
-
-      var areaTmp = [];
-      json.areas.forEach(function (elm) {
-        areaTmp.push({
-          Code: null,
-          Name: elm.name,
-          Alert: elm.kindCode == 10 || elm.kindCode == 11 || elm.kindCode == 19,
-          IntTo: shindoConvert(elm.scaleTo),
-          IntFrom: shindoConvert(elm.scaleFrom),
-          ArrivalTime: new Date(elm.arrivalTime),
-          Arrived: elm.kindCode == 11,
-        });
-      });
-      EEWdata.warnZones = areaTmp;
 
       EEWcontrol(EEWdata);
     } catch (err) {
