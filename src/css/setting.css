@@ -200,6 +200,11 @@ section {
 h4 {
   margin: 1.7em 0 0.5em 0;
   font-size: 18px;
+  border-bottom: solid 1px #777;
+  line-height: 28px;
+}
+#tab1_content2 h4 {
+  border: none;
 }
 
 h5 {

@@ -122,6 +122,7 @@ var defaultConfigVal = {
     },
     window: {
       EEW: "openWindow",
+      EEW_Update: "openWindow",
     },
   },
   color: {
@@ -1326,8 +1327,6 @@ function P2P_WS() {
 
           switch (data.code) {
             case 551:
-              eqInfoUpdate();
-              setTimeout(eqInfoUpdate, 1000);
               setTimeout(eqInfoUpdate, 10000);
               break;
             case 552:
@@ -1438,6 +1437,9 @@ function AXIS_WS() {
                 ],
                 "jma"
               );
+              break;
+            case "breaking-news":
+              console.log(data.message);
               break;
           }
         }
@@ -2209,17 +2211,19 @@ function EEWAlert(data, first, update) {
         data: EEW_nowList,
         update: false,
       });
-      if (config.notice.window.EEW == "push" && (!mainWindow || mainWindow.isMinimized() || !mainWindow.isFocused() || !mainWindow.isVisible())) {
+
+      var notice_setting = first ? config.notice.window.EEW : config.notice.window.EEW_Update;
+      if (notice_setting == "push" && (!mainWindow || mainWindow.isMinimized() || !mainWindow.isFocused() || !mainWindow.isVisible())) {
         var EEWNotification = new Notification({
           title: "緊急地震速報" + data.alertflg + "#" + data.serial,
-          body: data.region_name + "\n予想最大震度：" + shindoConvert(data.maxInt, 1) + "  M" + (data.magnitude ? data.magnitude : "不明") + "  深さ：" + (data.depth ? data.depth : "不明") + (data.userIntensity ? "\n現在地の予想震度：" + data.userIntensity : ""),
+          body: data.region_name + "\n予想最大震度：" + shindoConvert(data.maxInt, 1) + "  M" + (data.magnitude ? data.magnitude : "不明") + "  深さ：" + (data.depth ? data.depth + "km" : "不明") + (data.userIntensity ? "\n現在地の予想震度：" + data.userIntensity : ""),
           icon: path.join(__dirname, "img/icon.ico"),
         });
         EEWNotification.show();
         EEWNotification.on("click", function () {
           createWindow();
         });
-      } else if (config.notice.window.EEW == "openWindow") createWindow();
+      } else if (notice_setting == "openWindow") createWindow();
     }
 
     eqInfoControl(
@@ -2965,7 +2969,6 @@ function eqInfoControl(dataList, type, EEW, count) {
           } else {
             eqInfoTmp.push(data);
             eqInfo.jma.push(data);
-
             if ((!Boolean2(count) || count > 0) && data.category !== "EEW") playAudio = true;
           }
         }

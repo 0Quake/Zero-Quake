@@ -65,6 +65,7 @@ function configDataDraw() {
   document.getElementById("EQInfoInterval").value = config.Info.EQInfo.Interval / 1000;
 
   selectBoxSet(document.getElementById("EEW_Window"), config.notice.window.EEW);
+  selectBoxSet(document.getElementById("EEW_Window_Update"), config.notice.window.EEW_Update);
   selectBoxSet(document.getElementById("EEW_IntFilter"), config.Info.EEW.IntThreshold);
   selectBoxSet(document.getElementById("EEW_userIntFilter"), config.Info.EEW.userIntThreshold);
   selectBoxSet(document.getElementById("saibun"), config.home.Section);
@@ -190,6 +191,7 @@ function apply() {
   config.Info.EEW.IntThreshold = document.getElementById("EEW_IntFilter").value;
   config.Info.EEW.userIntThreshold = document.getElementById("EEW_userIntFilter").value;
   config.notice.window.EEW = document.getElementById("EEW_Window").value;
+  config.notice.window.EEW_Update = document.getElementById("EEW_Window_Update").value;
 
   config.Info.EQInfo.Interval = Number(document.getElementById("EQInfoInterval").value) * 1000;
   config.Source.axis.GetData = document.getElementById("Axis_GetData").checked;
