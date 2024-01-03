@@ -105,7 +105,7 @@ var defaultConfigVal = {
     },
     EarlyEst: {
       GetData: true,
-      Interval: 20000,
+      Interval: 60000,
     },
   },
   notice: {
