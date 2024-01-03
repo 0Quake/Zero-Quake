@@ -350,7 +350,6 @@ function Mapinit() {
         { id: "Int6-", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["6m"].background }, filter: ["==", "name", ""] },
         { id: "Int6+", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["6p"].background }, filter: ["==", "name", ""] },
         { id: "Int7", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["7"].background }, filter: ["==", "name", ""] },
-        { id: "Int7+", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["7p"].background }, filter: ["==", "name", ""] },
         { id: "LgInt1", type: "fill", source: "basemap", paint: { "fill-color": config.color.LgInt["1"].background }, filter: ["==", "name", ""] },
         { id: "LgInt2", type: "fill", source: "basemap", paint: { "fill-color": config.color.LgInt["2"].background }, filter: ["==", "name", ""] },
         { id: "LgInt3", type: "fill", source: "basemap", paint: { "fill-color": config.color.LgInt["3"].background }, filter: ["==", "name", ""] },
@@ -1368,7 +1367,6 @@ function mapFillReset() {
   map.setFilter("Int6-", ["==", "name", ""]);
   map.setFilter("Int6+", ["==", "name", ""]);
   map.setFilter("Int7", ["==", "name", ""]);
-  map.setFilter("Int7+", ["==", "name", ""]);
 }
 function mapFillResetL() {
   LgInt1T = ["any"];
@@ -1393,7 +1391,6 @@ function mapFillDraw() {
   map.setFilter("Int6-", Int6mT);
   map.setFilter("Int6+", Int6pT);
   map.setFilter("Int7", Int7T);
-  map.setFilter("Int7+", Int7pT);
 
   map.setFilter("LgInt1", LgInt1T);
   map.setFilter("LgInt2", LgInt2T);
@@ -1404,7 +1401,7 @@ function mapFillDraw() {
     if (map.getLayer(elm2)) map.setLayoutProperty(elm2, "visibility", estShindoMapDraw && MapFill ? "visible" : "none");
   });
 
-  ["Int0", "Int1", "Int2", "Int3", "Int4", "Int5-", "Int5+", "Int6-", "Int6+", "Int7", "Int7+"].forEach(function (elm2) {
+  ["Int0", "Int1", "Int2", "Int3", "Int4", "Int5-", "Int5+", "Int6-", "Int6+", "Int7"].forEach(function (elm2) {
     map.setLayoutProperty(elm2, "visibility", ShindoMapDraw && MapFill ? "visible" : "none");
   });
   ["LgInt1", "LgInt2", "LgInt3", "LgInt4"].forEach(function (elm2) {
@@ -1507,9 +1504,6 @@ function add_Area_info(name, maxInt) {
       break;
     case "7":
       Int7T.push(["==", "name", name]);
-      break;
-    case "7+":
-      Int7pT.push(["==", "name", name]);
       break;
     default:
       break;

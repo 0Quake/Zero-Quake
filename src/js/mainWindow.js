@@ -1054,7 +1054,6 @@ function init() {
         { id: "Int6-", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["6m"].background }, filter: ["==", "name", ""] },
         { id: "Int6+", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["6p"].background }, filter: ["==", "name", ""] },
         { id: "Int7", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["7"].background }, filter: ["==", "name", ""] },
-        { id: "Int7+", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["7p"].background }, filter: ["==", "name", ""] },
         {
           id: "prefmap_LINE",
           type: "line",
@@ -1386,7 +1385,6 @@ var Int5pT = ["any"];
 var Int6mT = ["any"];
 var Int6pT = ["any"];
 var Int7T = ["any"];
-var Int7pT = ["any"];
 var AlertT = ["any"];
 
 function JMAEstShindoControl(data) {
@@ -1401,7 +1399,6 @@ function JMAEstShindoControl(data) {
   Int6mT = ["any"];
   Int6pT = ["any"];
   Int7T = ["any"];
-  Int7pT = ["any"];
   AlertT = ["any"];
 
   data.forEach(function (elm) {
@@ -1453,9 +1450,6 @@ function JMAEstShindoControl(data) {
       case "7":
         Int7T.push(["==", "name", elm]);
         break;
-      case "7+":
-        Int7pT.push(["==", "name", elm]);
-        break;
       default:
         break;
     }
@@ -1474,7 +1468,6 @@ function JMAEstShindoDraw() {
   map.setFilter("Int6-", Int6mT);
   map.setFilter("Int6+", Int6pT);
   map.setFilter("Int7", Int7T);
-  map.setFilter("Int7+", Int7pT);
   map.setFilter("Alert", AlertT);
 }
 
