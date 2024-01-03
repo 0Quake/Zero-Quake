@@ -1102,20 +1102,19 @@ function earlyEstReq() {
                   alertflg: "EarlyEst",
                   EventID: 901471985000000000000 + Number(String(elm.getAttribute("publicID")).slice(-12)), //気象庁EIDと確実に区別するため、EarlyEstのIPアドレスと連結,
                   serial: Number(elm.querySelector("origin quality").getElementsByTagName("ee:report_count")[0].textContent) + 1,
-                  report_time: ConvertJST(new Date(elm.querySelector("creationInfo creationTime").textContent)),
-                  magnitude: Number(elm.querySelector("magnitude mag value").textContent),
-                  depth: Number(elm.querySelector("origin depth value").textContent) / 1000,
+                  report_time: elm.querySelector("creationInfo creationTime") ? ConvertJST(new Date(elm.querySelector("creationInfo creationTime").textContent)) : null,
+                  magnitude: elm.querySelector("magnitude mag value") ? Number(elm.querySelector("magnitude mag value").textContent) : null,
+                  depth: elm.querySelector("origin depth value") ? Number(elm.querySelector("origin depth value").textContent) / 1000 : null,
                   latitude: latitude,
                   longitude: longitude,
                   region_name: FECode.properties.nameJA,
-                  origin_time: ConvertJST(new Date(elm.querySelector("origin time value").textContent)),
+                  origin_time: elm.querySelector("origin time value") ? ConvertJST(new Date(elm.querySelector("origin time value").textContent)) : null,
                   source: "EarlyEst",
                 };
                 EarlyEstControl(data);
               }
             });
           } catch (err) {
-            console.log(err);
             kmoniTimeUpdate(new Date() - Replay, "Early-est", "Error");
           }
         });
