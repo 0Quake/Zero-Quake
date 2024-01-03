@@ -1094,25 +1094,28 @@ function earlyEstReq() {
               if (!latitude || !longitude) return;
 
               var FECode = FERegion.features.find(function (elm2) {
-                return turf.booleanPointInPolygon([latitude, longitude], elm2);
+                return turf.booleanPointInPolygon([longitude, latitude], elm2);
               });
 
-              var data = {
-                alertflg: "EarlyEst",
-                EventID: 901471985000000000000 + Number(String(elm.getAttribute("publicID")).slice(-12)), //気象庁EIDと確実に区別するため、EarlyEstのIPアドレスと連結,
-                serial: Number(elm.querySelector("origin quality").getElementsByTagName("ee:report_count")[0].textContent) + 1,
-                report_time: ConvertJST(new Date(elm.querySelector("creationInfo creationTime").textContent)),
-                magnitude: Number(elm.querySelector("magnitude mag value").textContent),
-                depth: Number(elm.querySelector("origin depth value").textContent) / 1000,
-                latitude: latitude,
-                longitude: longitude,
-                region_name: FECode.properties.nameJA,
-                origin_time: ConvertJST(new Date(elm.querySelector("origin time value").textContent)),
-                source: "EarlyEst",
-              };
-              EarlyEstControl(data);
+              if (FECode) {
+                var data = {
+                  alertflg: "EarlyEst",
+                  EventID: 901471985000000000000 + Number(String(elm.getAttribute("publicID")).slice(-12)), //気象庁EIDと確実に区別するため、EarlyEstのIPアドレスと連結,
+                  serial: Number(elm.querySelector("origin quality").getElementsByTagName("ee:report_count")[0].textContent) + 1,
+                  report_time: ConvertJST(new Date(elm.querySelector("creationInfo creationTime").textContent)),
+                  magnitude: Number(elm.querySelector("magnitude mag value").textContent),
+                  depth: Number(elm.querySelector("origin depth value").textContent) / 1000,
+                  latitude: latitude,
+                  longitude: longitude,
+                  region_name: FECode.properties.nameJA,
+                  origin_time: ConvertJST(new Date(elm.querySelector("origin time value").textContent)),
+                  source: "EarlyEst",
+                };
+                EarlyEstControl(data);
+              }
             });
           } catch (err) {
+            console.log(err);
             kmoniTimeUpdate(new Date() - Replay, "Early-est", "Error");
           }
         });
