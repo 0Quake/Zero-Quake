@@ -2751,8 +2751,8 @@ function EQI_USGS_Req() {
               maxI: null,
               DetailURL: [elm.properties.url],
             });
-            if (dataTmp2.length <= config.Info.EQInfo.ItemCount) eqInfoControl(dataTmp2, "usgs");
           });
+          eqInfoControl(dataTmp2, "usgs");
         }
         kmoniTimeUpdate(new Date() - Replay, "USGS", "success");
       } catch (err) {
@@ -2985,16 +2985,12 @@ function eqInfoControl(dataList, type, EEW, count) {
       });
       if (eqInfoTmp.length > 0) eqInfoAlert(eqInfoTmp, "jma", false, playAudio);
       if (eqInfoUpdateTmp.length > 0) eqInfoAlert(eqInfoUpdateTmp, "jma", true, playAudio);
-
       break;
     case "usgs":
-      dataList
-        .sort(function (a, b) {
-          return a.OriginTime > b.OriginTime ? -1 : 1;
-        })
-        .forEach(function (elm) {
-          eqInfoAlert(elm, "usgs");
-        });
+      dataList = dataList.sort(function (a, b) {
+        return a.OriginTime > b.OriginTime ? -1 : 1;
+      });
+      eqInfoAlert(dataList, "usgs");
       break;
   }
 }
@@ -3032,10 +3028,7 @@ function eqInfoAlert(data, source, update, audioPlay) {
         }
       });
     } else if (source == "usgs") {
-      eqInfo.usgs = eqInfo.usgs.filter((item) => {
-        return item.eventId !== data.eventId;
-      });
-      eqInfo.usgs = eqInfo.usgs.concat(data);
+      eqInfo.usgs = data;
 
       messageToMainWindow({
         action: "EQInfo",
