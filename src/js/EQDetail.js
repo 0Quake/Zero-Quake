@@ -49,6 +49,7 @@ var axisDatas;
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "metaData") {
     eid = request.eid;
+    eid = 20240101230402;
 
     var EEWURL = "https://www.data.jma.go.jp/svd/eew/data/nc/fc_hist/" + String(eid).slice(0, 4) + "/" + String(eid).slice(4, 6) + "/" + eid + "/index.html";
     fetch(EEWURL).then(function (res) {
@@ -59,7 +60,7 @@ window.electronAPI.messageSend((event, request) => {
         });
       }
     });
-
+    /*
     if (request.urls && Array.isArray(request.urls)) {
       jmaURL = request.urls.filter(function (elm) {
         return elm && elm.includes("www.jma.go.jp");
@@ -89,7 +90,7 @@ window.electronAPI.messageSend((event, request) => {
         cancel: false,
         eew: true,
       };
-    }
+    }*/
     Mapinit();
   } else if (request.action == "setting") {
     config = request.data;
@@ -966,22 +967,23 @@ function jma_Fetch(url) {
       return res.json();
     })
     .then(function (json) {
-      if (json.Body.Earthquake) var LatLngDepth = json.Body.Earthquake.Hypocenter.Area.Coordinate.replaceAll("+", "｜+").replaceAll("-", "｜-").replaceAll("/", "").split("｜");
+      var LatLngDepth, originTimeTmp, epiCenterTmp, magnitudeTmp, maxIntTmp, LatTmp, LngTmp, depthTmp;
+      if (json.Body.Earthquake) LatLngDepth = json.Body.Earthquake.Hypocenter.Area.Coordinate.replaceAll("+", "｜+").replaceAll("-", "｜-").replaceAll("/", "").split("｜");
 
       if (json.Body.Earthquake) {
-        if (json.Body.Earthquake.OriginTime) var originTimeTmp = new Date(json.Body.Earthquake.OriginTime);
-        if (json.Body.Earthquake.Hypocenter.Area.Name) var epiCenterTmp = json.Body.Earthquake.Hypocenter.Area.Name;
-        if (json.Body.Earthquake.Magnitude) var magnitudeTmp = Number(json.Body.Earthquake.Magnitude);
+        if (json.Body.Earthquake.OriginTime) originTimeTmp = new Date(json.Body.Earthquake.OriginTime);
+        if (json.Body.Earthquake.Hypocenter.Area.Name) epiCenterTmp = json.Body.Earthquake.Hypocenter.Area.Name;
+        if (json.Body.Earthquake.Magnitude) magnitudeTmp = Number(json.Body.Earthquake.Magnitude);
       }
-      if (json.Body.Intensity && json.Body.Intensity.Observation.MaxInt) var maxIntTmp = json.Body.Intensity.Observation.MaxInt;
-      if (LatLngDepth && !isNaN(LatLngDepth[1]) && LatLngDepth[1]) var LatTmp = Number(LatLngDepth[1]);
-      if (LatLngDepth && !isNaN(LatLngDepth[2]) && LatLngDepth[2]) var LngTmp = Number(LatLngDepth[2]);
-      if (LatLngDepth && !isNaN(LatLngDepth[3]) && LatLngDepth[3]) var depthTmp = Math.abs(Number(LatLngDepth[3]) / 1000);
+      if (json.Body.Intensity && json.Body.Intensity.Observation.MaxInt) maxIntTmp = json.Body.Intensity.Observation.MaxInt;
+      if (LatLngDepth && !isNaN(LatLngDepth[1]) && LatLngDepth[1]) LatTmp = Number(LatLngDepth[1]);
+      if (LatLngDepth && !isNaN(LatLngDepth[2]) && LatLngDepth[2]) LngTmp = Number(LatLngDepth[2]);
+      if (LatLngDepth && !isNaN(LatLngDepth[3]) && LatLngDepth[3]) depthTmp = Math.abs(Number(LatLngDepth[3]) / 1000);
 
       var cancelTmp = json.Head.InfoType == "取消";
 
+      var commentText = { ForecastComment: "", VarComment: "", FreeFormComment: "" };
       if (json.Body.Comments) {
-        var commentText = { ForecastComment: "", VarComment: "", FreeFormComment: "" };
         if (json.Body.Comments.ForecastComment && json.Body.Comments.ForecastComment.Text) commentText.ForecastComment = json.Body.Comments.ForecastComment.Text;
         if (json.Body.Comments.VarComment && json.Body.Comments.VarComment.Text) commentText.VarComment = json.Body.Comments.VarComment.Text;
         if (json.Body.Comments.FreeFormComment) commentText.FreeFormComment = json.Body.Comments.FreeFormComment;
@@ -1004,30 +1006,29 @@ function jma_Fetch(url) {
         var newestshindo = shindo_lastUpDate < new Date(json.Head.ReportDateTime);
         if (newestshindo) shindo_lastUpDate = new Date(json.Head.ReportDateTime);
         else return;
-        removeChild(document.getElementById("Shindo"));
-
-        document.getElementById("ShindoWrap").style.display = "inline-block";
-        mapFillReset();
+        var IntData = [];
         json.Body.Intensity.Observation.Pref.forEach(function (elm) {
-          add_Pref_info(elm.Name, elm.MaxInt);
+          var areaData = [];
           if (elm.Area) {
             elm.Area.forEach(function (elm2) {
-              add_Area_info(elm2.Name, elm2.MaxInt);
+              var cityData = [];
               if (elm2.City) {
                 elm2.City.forEach(function (elm3) {
-                  add_City_info(elm3.Name, elm3.MaxInt);
+                  var stData = [];
                   if (elm3.IntensityStation) {
                     elm3.IntensityStation.forEach(function (elm4) {
-                      add_IntensityStation_info(elm4.latlon.lat, elm4.latlon.lon, elm4.Name, elm4.Int);
+                      stData.push({ lat: elm4.latlon.lat, lng: elm4.latlon.lon, name: elm4.Name, int: elm4.Int });
                     });
                   }
+                  cityData.push({ name: elm3.Name, int: elm3.MaxInt, station: stData });
                 });
               }
+              areaData.push({ name: elm2.Name, int: elm2.MaxInt, city: cityData });
             });
           }
+          IntData.push({ name: elm.Name, int: elm.MaxInt, area: areaData });
         });
-        mapFillDraw();
-        mapZoomReset();
+        DrawIntensity(IntData);
       }
     });
 }
@@ -1114,28 +1115,24 @@ function jmaXMLFetch(url) {
         newInfoDateTime = ReportTime;
       }
       var EarthquakeElm = xml.querySelector("Body Earthquake");
-      var originTimeTmp;
-      var epiCenterTmp;
-      var magnitudeTmp;
-      var LatLngDepth;
-      var magnitudeTypeTmp;
+      var originTimeTmp, epiCenterTmp, magnitudeTmp, LatLngDepth, magnitudeTypeTmp, LatTmp, LngTmp, DepthTmp, maxIntTmp;
+
       if (EarthquakeElm) {
         originTimeTmp = new Date(EarthquakeElm.querySelector("OriginTime").textContent);
         epiCenterTmp = EarthquakeElm.querySelector("Name").textContent;
         magnitudeTmp = Number(EarthquakeElm.getElementsByTagName("jmx_eb:Magnitude")[0].textContent);
         magnitudeTypeTmp = EarthquakeElm.getElementsByTagName("jmx_eb:Magnitude")[0].getAttribute("type");
         LatLngDepth = xml.querySelector("Body Earthquake Hypocenter").getElementsByTagName("jmx_eb:Coordinate")[0].textContent.replaceAll("+", "｜+").replaceAll("-", "｜-").replaceAll("/", "").split("｜");
-        var LatTmp = Number(LatLngDepth[1]);
-        var LngTmp = Number(LatLngDepth[2]);
-        var DepthTmp = Number(LatLngDepth[3] / 1000);
+        LatTmp = Number(LatLngDepth[1]);
+        LngTmp = Number(LatLngDepth[2]);
+        DepthTmp = Number(LatLngDepth[3] / 1000);
       }
 
       var IntensityElm = xml.querySelector("Body Intensity");
-      var maxIntTmp;
       if (IntensityElm) maxIntTmp = shindoConvert(IntensityElm.querySelector("MaxInt").textContent, 4);
 
+      var commentText = { ForecastComment: "", VarComment: "", FreeFormComment: "" };
       if (xml.querySelector("Body Comments")) {
-        var commentText = { ForecastComment: "", VarComment: "", FreeFormComment: "" };
         if (xml.querySelector("Body Comments ForecastComment")) commentText.ForecastComment = xml.querySelector("Body Comments ForecastComment Text").textContent;
         if (xml.querySelector("Body Comments VarComment")) commentText.VarComment = xml.querySelector("Body Comments VarComment Text").textContent;
         if (xml.querySelector("Body Comments FreeFormComment")) commentText.FreeFormComment = xml.querySelector("Body Comments FreeFormComment").textContent;
@@ -1162,30 +1159,30 @@ function jmaXMLFetch(url) {
         var newestshindo = shindo_lastUpDate < new Date(xml.querySelector("Head ReportDateTime").textContent);
         if (newestshindo) shindo_lastUpDate = new Date(xml.querySelector("Head ReportDateTime").textContent);
         else return;
-        document.getElementById("ShindoWrap").style.display = "inline-block";
-        removeChild(document.getElementById("Shindo"));
-        mapFillReset();
+        var IntData = [];
         xml.querySelectorAll("Body Intensity Observation Pref").forEach(function (elm) {
-          add_Pref_info(elm.querySelector("Name").textContent, elm.querySelector("MaxInt").textContent);
+          var areaData = [];
           if (elm.querySelectorAll("Area")) {
             elm.querySelectorAll("Area").forEach(function (elm2) {
-              add_Area_info(elm2.querySelector("Name").textContent, elm2.querySelector("MaxInt").textContent);
+              var cityData = [];
               if (elm2.querySelectorAll("City")) {
                 elm2.querySelectorAll("City").forEach(function (elm3) {
-                  add_City_info(elm3.querySelector("Name").textContent, elm3.querySelector("MaxInt").textContent);
+                  var stData = [];
                   if (elm3.querySelectorAll("IntensityStation")) {
                     elm3.querySelectorAll("IntensityStation").forEach(function (elm4) {
                       var pointT = pointList[elm4.querySelector("Code").textContent];
-                      if (pointT) add_IntensityStation_info(pointT.location[0], pointT.location[1], elm4.querySelector("Name").textContent, elm4.querySelector("Int").textContent);
+                      if (pointT) stData.push({ lat: pointT.location[0], lng: pointT.location[1], name: elm4.querySelector("Name").textContent, int: elm4.querySelector("Int").textContent });
                     });
                   }
+                  cityData.push({ name: elm3.querySelector("Name").textContent, int: elm3.querySelector("MaxInt").textContent, station: stData });
                 });
               }
+              areaData.push({ name: elm2.querySelector("Name").textContent, int: elm2.querySelector("MaxInt").textContent, city: cityData });
             });
           }
+          IntData.push({ name: elm.querySelector("Name").textContent, int: elm.querySelector("MaxInt").textContent, area: areaData });
         });
-        mapFillDraw();
-        mapZoomReset();
+        DrawIntensity(IntData);
       }
     });
 }
@@ -1197,15 +1194,16 @@ function narikakun_Fetch(url) {
     })
     .then(function (json) {
       if (json.Head.EventID == eid) {
+        var originTimeTmp, magnitudeTmp, depthTmp, epiCenterTmp, LatTmp, LngTmp, maxIntTmp, commentTmp;
         if (json.Body.Earthquake) {
-          if (json.Body.Earthquake.OriginTime) var originTimeTmp = new Date(json.Body.Earthquake.OriginTime);
-          if (json.Body.Earthquake.Magnitude) var magnitudeTmp = Number(json.Body.Earthquake.Magnitude);
-          if (json.Body.Earthquake.Hypocenter.Depth) var depthTmp = Number(json.Body.Earthquake.Hypocenter.Depth);
-          if (json.Body.Earthquake.Hypocenter.Name) var epiCenterTmp = json.Body.Earthquake.Hypocenter.Name;
-          if (json.Body.Earthquake.Hypocenter.Latitude) var LatTmp = json.Body.Earthquake.Hypocenter.Latitude;
-          if (json.Body.Earthquake.Hypocenter.Longitude) var LngTmp = json.Body.Earthquake.Hypocenter.Longitude;
+          if (json.Body.Earthquake.OriginTime) originTimeTmp = new Date(json.Body.Earthquake.OriginTime);
+          if (json.Body.Earthquake.Magnitude) magnitudeTmp = Number(json.Body.Earthquake.Magnitude);
+          if (json.Body.Earthquake.Hypocenter.Depth) depthTmp = Number(json.Body.Earthquake.Hypocenter.Depth);
+          if (json.Body.Earthquake.Hypocenter.Name) epiCenterTmp = json.Body.Earthquake.Hypocenter.Name;
+          if (json.Body.Earthquake.Hypocenter.Latitude) LatTmp = json.Body.Earthquake.Hypocenter.Latitude;
+          if (json.Body.Earthquake.Hypocenter.Longitude) LngTmp = json.Body.Earthquake.Hypocenter.Longitude;
         }
-        if (json.Body.Intensity && json.Body.Intensity.Observation.MaxInt) var maxIntTmp = json.Body.Intensity.Observation.MaxInt;
+        if (json.Body.Intensity && json.Body.Intensity.Observation.MaxInt) maxIntTmp = json.Body.Intensity.Observation.MaxInt;
         if (json.Body.Comments && json.Body.Comments.Observation) commentTmp = { ForecastComment: json.Body.Comments.Observation, VarComment: "", FreeFormComment: "" };
 
         var cancelTmp = json.Head.InfoType == "取消";
@@ -1229,101 +1227,98 @@ function narikakun_Fetch(url) {
           if (newestshindo) shindo_lastUpDate = new Date(json.Head.ReportDateTime);
           else return;
 
-          document.getElementById("ShindoWrap").style.display = "inline-block";
-          removeChild(document.getElementById("Shindo"));
-          mapFillReset();
+          var IntData = [];
           json.Body.Intensity.Observation.Pref.forEach(function (elm) {
-            add_Pref_info(elm.Name, elm.MaxInt);
-
+            var areaData = [];
             if (elm.Area) {
               elm.Area.forEach(function (elm2) {
-                add_Area_info(elm2.Name, elm2.MaxInt);
+                var cityData = [];
                 if (elm2.City) {
                   elm2.City.forEach(function (elm3) {
-                    add_City_info(elm3.Name, elm3.MaxInt);
+                    var stData = [];
                     if (elm3.IntensityStation) {
                       elm3.IntensityStation.forEach(function (elm4) {
                         pointT = pointList[elm4.Code];
-                        if (pointT) add_IntensityStation_info(pointT.location[0], pointT.location[1], elm4.Name, elm4.Int);
+                        if (pointT) stData.push({ lat: pointT.location[0], lng: pointT.location[1], name: elm4.Name, int: elm4.Int });
                       });
                     }
+                    cityData.push({ name: elm3.Name, int: elm3.MaxInt, station: stData });
                   });
                 }
+                areaData.push({ name: elm2.Name, int: elm2.MaxInt, city: cityData });
               });
             }
+            IntData.push({ name: elm.Name, int: elm.MaxInt, area: areaData });
           });
-          mapFillDraw();
-          mapZoomReset();
+          DrawIntensity(IntData);
         }
       }
     });
 }
 
 function axisInfoCtrl(json) {
-  if (json.Body.Earthquake && Array.isArray(json.Body.Earthquake)) {
-    json.Body.Earthquake.forEach(function (Earthquake) {
-      var LatLngDepth = Earthquake.Hypocenter.Area.Coordinate[0].valueOf_.replaceAll("+", "｜+").replaceAll("-", "｜-").replaceAll("/", "").split("｜");
-      if (Earthquake.OriginTime) var originTimeTmp = new Date(Earthquake.OriginTime);
-      if (Earthquake.Hypocenter.Area.Name) var epiCenterTmp = Earthquake.Hypocenter.Area.Name;
-      if (Earthquake.Magnitude) var magnitudeTmp = Number(Earthquake.Magnitude);
-      if (json.Body.Intensity && json.Body.Intensity.Observation.MaxInt) var maxIntTmp = json.Body.Intensity.Observation.MaxInt;
-      if (LatLngDepth && !isNaN(LatLngDepth[1]) && LatLngDepth[1]) var LatTmp = Number(LatLngDepth[1]);
-      if (LatLngDepth && !isNaN(LatLngDepth[2]) && LatLngDepth[2]) var LngTmp = Number(LatLngDepth[2]);
-      if (LatLngDepth && !isNaN(LatLngDepth[3]) && LatLngDepth[3]) var depthTmp = Math.abs(Number(LatLngDepth[3]) / 1000);
+  Earthquake = json.Body.Earthquake[0];
+  var LatLngDepth = Earthquake.Hypocenter.Area.Coordinate[0].valueOf_.replaceAll("+", "｜+").replaceAll("-", "｜-").replaceAll("/", "").split("｜");
 
-      var cancelTmp = json.Head.InfoType == "取消";
+  var originTimeTmp, epiCenterTmp, magnitudeTmp, maxIntTmp, LatTmp, LngTmp, depthTmp;
+  if (Earthquake.OriginTime) originTimeTmp = new Date(Earthquake.OriginTime);
+  if (Earthquake.Hypocenter.Area.Name) epiCenterTmp = Earthquake.Hypocenter.Area.Name;
+  if (Earthquake.Magnitude) magnitudeTmp = Number(Earthquake.Magnitude);
+  if (json.Body.Intensity && json.Body.Intensity.Observation.MaxInt) maxIntTmp = json.Body.Intensity.Observation.MaxInt;
+  if (LatLngDepth && !isNaN(LatLngDepth[1]) && LatLngDepth[1]) LatTmp = Number(LatLngDepth[1]);
+  if (LatLngDepth && !isNaN(LatLngDepth[2]) && LatLngDepth[2]) LngTmp = Number(LatLngDepth[2]);
+  if (LatLngDepth && !isNaN(LatLngDepth[3]) && LatLngDepth[3]) depthTmp = Math.abs(Number(LatLngDepth[3]) / 1000);
 
-      if (json.Body.Comments) {
-        var commentText = { ForecastComment: "", VarComment: "", FreeFormComment: "" };
-        if (json.Body.Comments.ForecastComment && json.Body.Comments.ForecastComment.Text) commentText.ForecastComment = json.Body.Comments.ForecastComment.Text;
-        if (json.Body.Comments.VarComment && json.Body.Comments.VarComment.Text) commentText.VarComment = json.Body.Comments.VarComment.Text;
-        if (json.Body.Comments.FreeFormComment) commentText.FreeFormComment = json.Body.Comments.FreeFormComment;
-      }
-      EQInfoControl({
-        infoType: json.Head.Title,
-        reportTime: json.Head.ReportDateTime,
-        originTime: originTimeTmp,
-        maxI: maxIntTmp,
-        mag: magnitudeTmp,
-        lat: LatTmp,
-        lng: LngTmp,
-        depth: depthTmp,
-        epiCenter: epiCenterTmp,
-        comment: commentText,
-        cancel: cancelTmp,
-      });
-    });
+  var cancelTmp = json.Head.InfoType == "取消";
+
+  var commentText = { ForecastComment: "", VarComment: "", FreeFormComment: "" };
+  if (json.Body.Comments) {
+    if (json.Body.Comments.ForecastComment && json.Body.Comments.ForecastComment.Text) commentText.ForecastComment = json.Body.Comments.ForecastComment.Text;
+    if (json.Body.Comments.VarComment && json.Body.Comments.VarComment.Text) commentText.VarComment = json.Body.Comments.VarComment.Text;
+    if (json.Body.Comments.FreeFormComment) commentText.FreeFormComment = json.Body.Comments.FreeFormComment;
   }
+  EQInfoControl({
+    infoType: json.Head.Title,
+    reportTime: json.Head.ReportDateTime,
+    originTime: originTimeTmp,
+    maxI: maxIntTmp,
+    mag: magnitudeTmp,
+    lat: LatTmp,
+    lng: LngTmp,
+    depth: depthTmp,
+    epiCenter: epiCenterTmp,
+    comment: commentText,
+    cancel: cancelTmp,
+  });
 
   if (json.Body.Intensity && json.Body.Intensity.Observation.Pref) {
     var newestshindo = shindo_lastUpDate < new Date(json.Head.ReportDateTime);
     if (newestshindo) shindo_lastUpDate = new Date(json.Head.ReportDateTime);
     else return;
-    removeChild(document.getElementById("Shindo"));
-
-    document.getElementById("ShindoWrap").style.display = "inline-block";
-    mapFillReset();
+    var IntData = [];
     json.Body.Intensity.Observation.Pref.forEach(function (elm) {
-      add_Pref_info(elm.Name, elm.MaxInt);
+      var areaData = [];
       if (elm.Area) {
         elm.Area.forEach(function (elm2) {
-          add_Area_info(elm2.Name, elm2.MaxInt);
+          var cityData = [];
           if (elm2.City) {
             elm2.City.forEach(function (elm3) {
-              add_City_info(elm3.Name, elm3.MaxInt);
+              var stData = [];
               if (elm3.IntensityStation) {
                 elm3.IntensityStation.forEach(function (elm4) {
                   var pointT = pointList[elm4.Code];
-                  add_IntensityStation_info(pointT.location[0], pointT.location[1], elm4.Name, elm4.Int);
+                  if (pointT) stData.push({ lat: pointT.location[0], lng: pointT.location[1], name: elm4.Name, int: elm4.Int });
                 });
               }
+              cityData.push({ name: elm3.Name, int: elm3.MaxInt, station: stData });
             });
           }
+          areaData.push({ name: elm2.Name, int: elm2.MaxInt, city: cityData });
         });
       }
+      IntData.push({ name: elm.Name, int: elm.MaxInt, area: areaData });
     });
-    mapFillDraw();
-    mapZoomReset();
+    DrawIntensity(IntData);
   }
 }
 
@@ -1337,7 +1332,6 @@ var Int5pT = ["any"];
 var Int6mT = ["any"];
 var Int6pT = ["any"];
 var Int7T = ["any"];
-var Int7pT = ["any"];
 
 var LgInt1T = ["any"];
 var LgInt2T = ["any"];
@@ -1528,7 +1522,6 @@ function add_City_info(name, maxInt) {
   newDiv.classList.add("WrapLevel3", "close");
   wrap2[wrap2.length - 1].appendChild(newDiv);
 }
-
 //観測点ごとの情報描画（リスト・地図プロット）
 function add_IntensityStation_info(lat, lng, name, int) {
   var wrap3 = document.querySelectorAll(".WrapLevel3");
@@ -1551,6 +1544,33 @@ function add_IntensityStation_info(lat, lng, name, int) {
   wrap3[wrap3.length - 1].appendChild(newDiv);
   ZoomBounds.extend([lng, lat]);
 }
+
+function DrawIntensity(data) {
+  removeChild(document.getElementById("Shindo"));
+  document.getElementById("ShindoWrap").style.display = "inline-block";
+  mapFillReset();
+  data.forEach(function (elm) {
+    add_Pref_info(elm.name, elm.int);
+    if (elm.area) {
+      elm.area.forEach(function (elm2) {
+        add_Area_info(elm2.name, elm2.int);
+        if (elm2.city) {
+          elm2.city.forEach(function (elm3) {
+            add_City_info(elm3.name, elm3.int);
+            if (elm3.station) {
+              elm3.station.forEach(function (elm4) {
+                add_IntensityStation_info(elm4.lat, elm4.lng, elm4.name, elm4.int);
+              });
+            }
+          });
+        }
+      });
+    }
+  });
+  mapFillDraw();
+  mapZoomReset();
+}
+
 //都道府県ごとの情報描画（リスト）
 function add_Pref_infoL(name, lngInt) {
   var newDiv = document.createElement("div");

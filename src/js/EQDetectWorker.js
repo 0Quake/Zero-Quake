@@ -126,26 +126,18 @@ function EQDetect(data, date, detect) {
 
         if (EQD_ItemTmp) {
           //EQD_ItemTmpに属する観測点から、自観測点からの距離が閾値以下の観測点があるか確認
-          var includes = geosailing(elm.Location.Latitude, elm.Location.Longitude, EQD_ItemTmp.lat, EQD_ItemTmp.lng) < EQD_ItemTmp.Radius;
-
-          var CodesTmp = EQD_ItemTmp.Codes.find(function (elm3) {
-            return geosailing(elm.Location.Latitude, elm.Location.Longitude, elm3.Location.Latitude, elm3.Location.Longitude) <= MargeRangeTmp;
+          //地震アイテムに自観測点を追加
+          var SameST = EQD_ItemTmp.Codes.find(function (elm2) {
+            return elm2.Code == elm.Code;
           });
+          if (!SameST) {
+            EQD_ItemTmp.Codes.push(elm);
+            if (!EQD_ItemTmp.Codes_history.includes(elm.Code)) EQD_ItemTmp.Codes_history.push(elm.Code);
+            ptData.Event = true;
 
-          if (CodesTmp || includes) {
-            //地震アイテムに自観測点を追加
-            var SameST = EQD_ItemTmp.Codes.find(function (elm2) {
-              return elm2.Code == elm.Code;
-            });
-            if (!SameST) {
-              EQD_ItemTmp.Codes.push(elm);
-              if (!EQD_ItemTmp.Codes_history.includes(elm.Code)) EQD_ItemTmp.Codes_history.push(elm.Code);
-              ptData.Event = true;
-
-              //最終検知時間（解除時に使用）を更新
-              EQD_ItemTmp.last_Detect = new Date() - Replay;
-              EQD_ItemTmp.last_changed = new Date() - Replay;
-            }
+            //最終検知時間（解除時に使用）を更新
+            EQD_ItemTmp.last_Detect = new Date() - Replay;
+            EQD_ItemTmp.last_changed = new Date() - Replay;
           }
         }
       }
