@@ -2228,6 +2228,7 @@ function EEWAlert(data, first, update) {
           maxI: shindoConvert(data.maxInt),
           cancel: Boolean(data.is_cancel),
           DetailURL: [],
+          axisData: null,
         },
       ],
       "jma",
@@ -2395,6 +2396,7 @@ function EQI_JMAXML_Req(url, count) {
                 cancel: Boolean(cancel),
                 reportDateTime: new Date(xml.querySelector("ReportDateTime").textContent),
                 DetailURL: [url],
+                axisData: null,
               },
             ],
             "jma",
@@ -2404,6 +2406,29 @@ function EQI_JMAXML_Req(url, count) {
         } else if (title == "津波情報a" || title == "津波警報・注意報・予報a") {
           //津波予報
           var tsunamiDataTmp;
+          var EventID = xml.querySelector("EventID").textContent.split(" ").map(Number);
+          var EQData = [];
+          xml.querySelectorAll("Earthquake").forEach(function (elm, index) {
+            var magTmp = elm.getElementsByTagName("jmx_eb:Magnitude")[0];
+            magTmp = magTmp !== "NaN" && magTmp ? magTmp.textContent : null;
+            var ECTmp = elm.querySelector("Name");
+            ECTmp = ECTmp ? ECTmp.textContent : null;
+
+            EQData.push({
+              status: xml.querySelector("Status").textContent,
+              eventId: EventID[index],
+              category: "Tsunami",
+              OriginTime: elm.querySelector("OriginTime") ? new Date(elm.querySelector("OriginTime").textContent) : new Date(),
+              epiCenter: ECTmp,
+              M: Number(magTmp),
+              maxI: null,
+              cancel: Boolean(cancel),
+              DetailURL: [url],
+              axisData: null,
+            });
+          });
+          eqInfoControl(EQData, "jma", false, count);
+
           if (cancel) {
             tsunamiDataTmp = {
               status: xml.querySelector("Status").textContent,
@@ -2421,27 +2446,6 @@ function EQI_JMAXML_Req(url, count) {
               ValidDateTimeTmp.setHours(ValidDateTimeTmp.getHours() + 12);
             }
             if (ValidDateTimeTmp < new Date()) return;
-            var EventID = xml.querySelector("EventID").textContent.split(" ").map(Number);
-
-            var EQData = [];
-            xml.querySelectorAll("Earthquake").forEach(function (elm, index) {
-              var magTmp = elm.getElementsByTagName("jmx_eb:Magnitude")[0];
-              magTmp = magTmp !== "NaN" && magTmp ? magTmp.textContent : null;
-              var ECTmp = elm.querySelector("Name");
-              ECTmp = ECTmp ? ECTmp.textContent : null;
-
-              EQData.push({
-                status: xml.querySelector("Status").textContent,
-                eventId: EventID[index],
-                category: "Tsunami",
-                OriginTime: elm.querySelector("OriginTime") ? new Date(elm.querySelector("OriginTime").textContent) : new Date(),
-                epiCenter: ECTmp,
-                M: Number(magTmp),
-                maxI: null,
-                DetailURL: [url],
-              });
-            });
-            eqInfoControl(EQData, "jma", false, count);
 
             tsunamiDataTmp = {
               status: xml.querySelector("Status").textContent,
@@ -2844,6 +2848,7 @@ function EQI_narikakun_Req(url, count) {
             cancel: Boolean(cancel),
             reportDateTime: new Date(json.Head.ReportDateTime),
             DetailURL: [url],
+            axisData: null,
           },
         ];
         eqInfoControl(dataTmp2, "jma", false, count);
@@ -2858,6 +2863,8 @@ function EQI_narikakun_Req(url, count) {
   });
   request.end();
 }
+
+var EQInfoData = {};
 //地震情報マージ→eqInfoAlert
 function eqInfoControl(dataList, type, EEW, count) {
   switch (type) {
@@ -2866,32 +2873,50 @@ function eqInfoControl(dataList, type, EEW, count) {
       var eqInfoUpdateTmp = [];
 
       var playAudio = false;
+      var changed = false;
+
       dataList.forEach(function (data) {
         if (!data.eventId) return;
-        var EQElm = eqInfo.jma.find(function (elm) {
-          return elm.eventId == data.eventId;
-        });
+        EQElm = EQInfoData[data.eventId];
+        if (EQElm) {
+          var EQInfo_Item = {
+            eventId: EQElm.eventId,
+            category: null,
+            EEW: null,
+            reportDateTime: null,
+            OriginTime: null,
+            epiCenter: null,
+            M: null,
+            maxI: null,
+            DetailURL: [],
+            axisData: [],
+          };
+          EQElm.raw_data.push(data);
+          var rawData = EQElm.raw_data.sort(function (a, b) {
+            return a.reportDateTime < b.reportDateTime ? -1 : 1;
+          });
+          rawData.forEach(function (elm, index) {
+            if (elm.cancel) {
+              rawData.slice(0, index).forEach(function (elm2, index2) {
+                if (elm2.category == elm.category) rawData[index2].cancel = true;
+              });
+            }
+          });
+          rawData.forEach(function (elm) {
+            if (!config.Info.EQInfo.showTraning && elm.status == "訓練") return;
+            if (!config.Info.EQInfo.showTest && elm.status == "試験") return;
+            if (new Date(elm.reportDateTime) > new Date() - Replay) return;
 
-        if (!EEW || !EQElm || EQElm.category == "EEW") {
-          //EEW以外の情報が入っているとき、EEWによる情報を破棄
-
-          if (!config.Info.EQInfo.showTraning && data.status == "訓練") return;
-          if (!config.Info.EQInfo.showTest && data.status == "試験") return;
-          if (new Date(data.reportDateTime) > new Date() - Replay) return;
-
-          if (!data.maxI) data.maxI = null;
-          if (EQElm) {
-            var newer = EQElm.reportDateTime < data.reportDateTime;
-            var changed = newer;
-            if (newer) EQElm.reportDateTime = data.reportDateTime;
-
-            if (!EEW && EQElm.category == "EEW") {
-              //EEWによらない情報が入ったら、EEWによる情報をクリアー
+            if (elm.category == "EEW" && EQElm.EEW == false) return; //EEW以外の情報が既に入っているとき、EEWによる情報を破棄
+            else if (elm.category == "EEW") EQElm.EEW = true;
+            else if (elm.category != "EEW" && EQElm.EEW == true) {
+              //EEW以外の情報が入ってきたとき、EEWによる情報を破棄
               playAudio = true;
-              newer = true;
-              EQElm = {
+              EQElm.EEW == false;
+              EQInfo_Item = {
                 eventId: EQElm.eventId,
                 category: null,
+                EEW: false,
                 reportDateTime: null,
                 OriginTime: null,
                 epiCenter: null,
@@ -2900,70 +2925,67 @@ function eqInfoControl(dataList, type, EEW, count) {
                 DetailURL: [],
                 axisData: [],
               };
-              changed = true;
             }
 
-            if (Boolean2(data.status) && (!EQElm.status || newer)) {
-              EQElm.status = data.status;
-              changed = true;
-            }
+            EQInfo_Item.category = elm.category;
+            if (!elm.maxI) elm.maxI = null;
+            if (Boolean2(elm.OriginTime)) EQInfo_Item.OriginTime = elm.OriginTime;
+            if (Boolean2(elm.epiCenter)) EQInfo_Item.epiCenter = elm.epiCenter;
+            if (Boolean2(elm.M) && elm.M != "Ｍ不明" && elm.M != "NaN") EQInfo_Item.M = elm.M;
+            if (Boolean2(elm.maxI) && elm.maxI !== "?") EQInfo_Item.maxI = elm.maxI;
 
-            if (Boolean2(data.OriginTime) && (!EQElm.OriginTime || Number.isNaN(new Date(EQElm.OriginTime).getTime()) || newer)) {
-              EQElm.OriginTime = data.OriginTime;
-              changed = true;
-            }
-            if (Boolean2(data.epiCenter) && (!EQElm.epiCenter || newer)) {
-              EQElm.epiCenter = data.epiCenter;
-              changed = true;
-            }
-            if (Boolean2(data.M) && (!EQElm.M || newer)) {
-              EQElm.M = data.M;
-              changed = true;
-            }
-            if (data.M == "Ｍ不明" || data.M == "NaN") EQElm.M = null;
-
-            if (Boolean2(data.maxI) && data.maxI !== "?" && (!EQElm.maxI || EQElm.maxI == "?" || newer)) {
-              EQElm.maxI = data.maxI;
-              changed = true;
-            }
-
-            if (EEW) {
-              if (data.cancel && EQElm.category == "EEW") {
-                EQElm.cancel = data.cancel;
-                changed = true;
-              }
-            } else if (newer && EQElm.cancel != data.cancel) {
-              EQElm.cancel = data.cancel;
-              changed = true;
-            }
-
-            EQElm.category = data.category;
-
-            if (data.DetailURL && data.DetailURL[0] !== "" && !EQElm.DetailURL.includes(data.DetailURL[0])) {
-              EQElm.DetailURL.push(data.DetailURL[0]);
-              changed = true;
-            }
-            if (data.axisData) {
-              if (!EQElm.axisData || EQElm.axisData.length) EQElm.axisData = [];
-              EQElm.axisData.push(data.axisData);
-              changed = true;
-            }
-            if (changed) {
-              eqInfoUpdateTmp.push(EQElm);
-              var EQElm2 = eqInfo.jma.findIndex(function (elm) {
-                return elm.eventId == data.eventId;
+            if (Array.isArray(elm.DetailURL)) {
+              elm.DetailURL.forEach(function (elm2) {
+                if (elm2 && !EQInfo_Item.DetailURL.includes(elm2)) {
+                  EQInfo_Item.DetailURL.push(elm2);
+                }
               });
-              if (EQElm2 > -1) eqInfo.jma[EQElm2] = EQElm;
             }
-          } else {
-            eqInfoTmp.push(data);
-            eqInfo.jma.push(data);
-            if ((!Boolean2(count) || count > 0) && data.category !== "EEW") playAudio = true;
+            if (elm.axisData) EQInfo_Item.axisData.push(elm.axisData);
+          });
+
+          EQElm.cancel = !rawData.find(function (elm) {
+            return !elm.cancel;
+          });
+
+          if (EQElm.category !== EQInfo_Item.category) changed = true;
+          if (EQElm.EEW !== EQInfo_Item.EEW) changed = true;
+          if (EQElm.OriginTime !== EQInfo_Item.OriginTime) changed = true;
+          if (EQElm.epiCenter !== EQInfo_Item.epiCenter) changed = true;
+          if (EQElm.M !== EQInfo_Item.M) changed = true;
+          if (EQElm.maxI !== EQInfo_Item.maxI) changed = true;
+          if (EQElm.DetailURL.length !== EQInfo_Item.DetailURL.length) changed = true;
+          if (EQInfo_Item.axisData) changed = true;
+
+          EQElm.category = EQInfo_Item.category;
+          EQElm.EEW = EQInfo_Item.EEW;
+          EQElm.reportDateTime = EQInfo_Item.reportDateTime;
+          EQElm.OriginTime = EQInfo_Item.OriginTime;
+          EQElm.epiCenter = EQInfo_Item.epiCenter;
+          EQElm.M = EQInfo_Item.M;
+          EQElm.maxI = EQInfo_Item.maxI;
+          EQElm.DetailURL = EQElm.DetailURL.concat(EQInfo_Item.DetailURL);
+          if (EQInfo_Item.axisData) EQElm.axisData = EQInfo_Item.axisData;
+
+          if (changed) {
+            eqInfoUpdateTmp.push(EQElm);
+            var i = eqInfo.jma.findIndex(function (elm2) {
+              return elm2.eventId == EQElm.eventId;
+            });
+            eqInfo.jma[i] = EQElm;
           }
+        } else {
+          EQInfoData[data.eventId] = Object.assign({}, data);
+          EQInfoData[data.eventId].raw_data = [Object.assign({}, data)];
+
+          eqInfoTmp.push(data);
+          eqInfo.jma.push(data);
+          if ((!Boolean2(count) || count > 0) && data.category !== "EEW") playAudio = true;
         }
       });
       if (eqInfoTmp.length > 0) eqInfoAlert(eqInfoTmp, "jma", false, playAudio);
       if (eqInfoUpdateTmp.length > 0) eqInfoAlert(eqInfoUpdateTmp, "jma", true, playAudio);
+
       break;
     case "usgs":
       dataList
@@ -2981,14 +3003,15 @@ function eqInfoControl(dataList, type, EEW, count) {
 function eqInfoAlert(data, source, update, audioPlay) {
   try {
     if (source == "jma") {
-      data = data.filter(function (elm) {
-        return elm.OriginTime;
-      });
       if (audioPlay) soundPlay("EQInfo");
 
-      eqInfo.jma = eqInfo.jma.sort(function (a, b) {
-        return a.OriginTime > b.OriginTime ? -1 : 1;
-      });
+      eqInfo.jma = eqInfo.jma
+        .filter(function (elm) {
+          return elm.OriginTime;
+        })
+        .sort(function (a, b) {
+          return a.OriginTime > b.OriginTime ? -1 : 1;
+        });
 
       messageToMainWindow({
         action: "EQInfo",
@@ -3303,5 +3326,5 @@ function depthFilter(depth) {
   else return Math.floor(depth / 2) * 2;
 }
 function Boolean2(elm) {
-  return (elm !== null) & (elm !== undefined) && elm !== "";
+  return (elm !== null) & (elm !== undefined) && elm !== "" && elm !== false && !Number.isNaN(elm) && elm !== "Invalid Date";
 }
