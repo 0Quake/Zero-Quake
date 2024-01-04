@@ -587,6 +587,10 @@ td {
 #LinkWrap {
   margin-top: 20px;
 }
+#Shindo,
+#lngintListWrap {
+  display: none;
+}
 @media (max-width: 600px) {
   #tableWrap {
     display: block;

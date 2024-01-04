@@ -1080,23 +1080,26 @@ function jmaL_Fetch(url) {
         var newestlgint = lgint_lastUpDate < new Date(json.Head.ReportDateTime);
         if (newestlgint) lgint_lastUpDate = new Date(json.Head.ReportDateTime);
         else return;
-        removeChild(document.getElementById("LngInt"));
-        mapFillResetL();
+        var LngIntData = [];
         json.Body.Intensity.Observation.Pref.forEach(function (elm) {
           add_Pref_infoL(elm.Name, elm.MaxLgInt);
+          var areaData = [];
           if (elm.Area) {
             elm.Area.forEach(function (elm2) {
               add_Area_infoL(elm2.Name, elm2.MaxLgInt);
+              var stData = [];
               if (elm2.IntensityStation) {
                 elm2.IntensityStation.forEach(function (elm4) {
                   add_IntensityStation_infoL(elm4.latlon.lat, elm4.latlon.lon, elm4.Name, elm4.LgInt);
+                  stData.push({ lat: elm4.latlon.lat, lng: elm4.latlon.lon, name: elm4.Name, lgint: elm4.LgInt });
                 });
               }
+              areaData.push({ name: elm2.Name, lgint: elm2.MaxLgInt, station: stData });
             });
           }
+          LngIntData.push({ name: elm.Name, lgint: elm2.MaxLgInt, area: areaData });
         });
-        mapFillDraw();
-        mapZoomReset();
+        DrawLgIntensity(LngIntData);
       }
     });
 }
@@ -1548,6 +1551,7 @@ function add_IntensityStation_info(lat, lng, name, int) {
 function DrawIntensity(data) {
   removeChild(document.getElementById("Shindo"));
   document.getElementById("ShindoWrap").style.display = "inline-block";
+  document.getElementById("Shindo").style.display = "block";
   mapFillReset();
   data.forEach(function (elm) {
     add_Pref_info(elm.name, elm.int);
@@ -1562,6 +1566,28 @@ function DrawIntensity(data) {
                 add_IntensityStation_info(elm4.lat, elm4.lng, elm4.name, elm4.int);
               });
             }
+          });
+        }
+      });
+    }
+  });
+  mapFillDraw();
+  mapZoomReset();
+}
+
+function DrawLgIntensity(data) {
+  removeChild(document.getElementById("LngInt"));
+  document.getElementById("ShindoWrap").style.display = "inline-block";
+  document.getElementById("lngintListWrap").style.display = "block";
+  mapFillResetL();
+  data.forEach(function (elm) {
+    add_Pref_info(elm.name, elm.int);
+    if (elm.area) {
+      elm.area.forEach(function (elm2) {
+        add_Area_info(elm2.name, elm2.int);
+        if (elm3.station) {
+          elm3.station.forEach(function (elm4) {
+            add_IntensityStation_info(elm4.lat, elm4.lng, elm4.name, elm4.int);
           });
         }
       });
