@@ -47,7 +47,6 @@ var axisDatas;
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "metaData") {
     eid = request.eid;
-    eid = 20240101230402;
 
     var EEWURL = "https://www.data.jma.go.jp/svd/eew/data/nc/fc_hist/" + String(eid).slice(0, 4) + "/" + String(eid).slice(4, 6) + "/" + eid + "/index.html";
     fetch(EEWURL).then(function (res) {
@@ -76,9 +75,11 @@ window.electronAPI.messageSend((event, request) => {
       var eewItem = request.eew.data[request.eew.data.length - 1];
 
       EEWData = {
+        category: "EEW",
+        status: eewItem.is_training ? "訓練" : "通常",
         reportTime: eewItem.report_time,
         originTime: eewItem.origin_time,
-        maxI: eewItem.calcintensity,
+        maxI: eewItem.maxInt,
         mag: eewItem.magnitude,
         lat: eewItem.latitude,
         lng: eewItem.longitude,
@@ -100,10 +101,8 @@ window.electronAPI.messageSend((event, request) => {
 function InfoFetch() {
   jma_ListReq();
   narikakun_ListReq(new Date().getFullYear(), new Date().getMonth() + 1);
-  if (EEWData) {
-    EEWData.status = EEWData.is_training ? "通常" : "訓練";
-    EQInfoControl(EEWData);
-  }
+  if (EEWData) EQInfoControl(EEWData);
+
   if (axisDatas) {
     axisDatas.forEach(function (elm) {
       axisInfoCtrl(elm.message);
@@ -1722,6 +1721,7 @@ function EQInfoControl(data) {
 
   EQInfoTmp = {};
   EQInfoData.forEach(function (elm) {
+    if (elm.category !== "EEW") return;
     if (elm.cancel) {
       if (elm.category == "EEW") InfoType_remove("type-1");
       else if (elm.category == "震度速報") InfoType_remove("type-2");

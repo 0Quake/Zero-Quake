@@ -1440,9 +1440,6 @@ function AXIS_WS() {
                 "jma"
               );
               break;
-            case "breaking-news":
-              console.log(data.message);
-              break;
           }
         }
       } catch (e) {
