@@ -59,7 +59,7 @@ function configDataDraw() {
   document.getElementById("EEW2_Voice").value = config.notice.voice.EEWUpdate;
   document.getElementById("EEW3_Voice").value = config.notice.voice.EEWCancel;
   document.getElementById("EQInfo_ItemCount").value = config.Info.EQInfo.ItemCount;
-  document.getElementById("EEW_traning").checked = config.Info.EEW.showTraning;
+  document.getElementById("EEW_training").checked = config.Info.EEW.showtraining;
   document.getElementById("EEW_IntQ").checked = config.Info.EEW.IntQuestion;
   document.getElementById("EEW_userIntQ").checked = config.Info.EEW.userIntQuestion;
   document.getElementById("EQInfoInterval").value = config.Info.EQInfo.Interval / 1000;
@@ -98,10 +98,10 @@ function configDataDraw() {
   if (config.Source.axis.AccessToken) document.getElementById("Axis_AccessToken").value = config.Source.axis.AccessToken;
 
   document.getElementById("Tsunami_Test").checked = config.Info.TsunamiInfo.showTest;
-  document.getElementById("Tsunami_Traning").checked = config.Info.TsunamiInfo.showTraning;
+  document.getElementById("Tsunami_training").checked = config.Info.TsunamiInfo.showtraining;
 
   document.getElementById("EQInfo_Test").checked = config.Info.EQInfo.showTest;
-  document.getElementById("EQInfo_Traning").checked = config.Info.EQInfo.showTraning;
+  document.getElementById("EQInfo_training").checked = config.Info.EQInfo.showtraining;
 }
 
 function UpdateDataDraw(data) {
@@ -185,7 +185,7 @@ function apply() {
   config.notice.voice.EEWUpdate = document.getElementById("EEW2_Voice").value;
   config.notice.voice.EEWCancel = document.getElementById("EEW3_Voice").value;
   config.Info.EQInfo.ItemCount = Number(document.getElementById("EQInfo_ItemCount").value);
-  config.Info.EEW.showTraning = document.getElementById("EEW_traning").checked;
+  config.Info.EEW.showtraining = document.getElementById("EEW_training").checked;
   config.Info.EEW.IntQuestion = document.getElementById("EEW_IntQ").checked;
   config.Info.EEW.userIntQuestion = document.getElementById("EEW_userIntQ").checked;
   config.Info.EEW.IntThreshold = document.getElementById("EEW_IntFilter").value;
@@ -211,10 +211,10 @@ function apply() {
   config.notice.voice_parameter.voice = TTSVoiceSelect.value;
 
   config.Info.TsunamiInfo.showTest = document.getElementById("Tsunami_Test").checked;
-  config.Info.TsunamiInfo.showTraning = document.getElementById("Tsunami_Traning").checked;
+  config.Info.TsunamiInfo.showtraining = document.getElementById("Tsunami_training").checked;
 
   config.Info.EQInfo.showTest = document.getElementById("EQInfo_Test").checked;
-  config.Info.EQInfo.showTraning = document.getElementById("EQInfo_Traning").checked;
+  config.Info.EQInfo.showtraining = document.getElementById("EQInfo_training").checked;
 
   window.electronAPI.messageReturn({
     action: "settingReturn",

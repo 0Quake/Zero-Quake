@@ -143,5 +143,5 @@ function tsunamiUpdate(dataTmp) {
   document.getElementById("YohoInfo").style.display = Tsunami_Yoho ? "table-row" : "none";
 
   document.querySelector(".TestNotes").style.display = dataTmp.status == "試験" ? "inline-block" : "none";
-  document.querySelector(".TraningNotes").style.display = dataTmp.status == "訓練" ? "inline-block" : "none";
+  document.querySelector(".trainingNotes").style.display = dataTmp.status == "訓練" ? "inline-block" : "none";
 }

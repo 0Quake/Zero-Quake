@@ -57,7 +57,7 @@ var defaultConfigVal = {
   },
   Info: {
     EEW: {
-      showTraning: false,
+      showtraining: false,
       IntThreshold: 0,
       IntQuestion: true,
       userIntThreshold: 0,
@@ -67,12 +67,12 @@ var defaultConfigVal = {
     EQInfo: {
       ItemCount: 15,
       Interval: 60000,
-      showTraning: false,
+      showtraining: false,
       showTest: false,
     },
     TsunamiInfo: {
       GetData: true,
-      showTraning: false,
+      showtraining: false,
       showTest: false,
     },
     RealTimeShake: {
@@ -1902,7 +1902,7 @@ function EEWdetect(type, json) {
 function EEWcontrol(data) {
   if (!data) return; //データがない場合、処理終了
   try {
-    if (!config.Info.EEW.showTraning && data.is_training) return; //訓練法を受信するかどうか（設定に準拠）
+    if (!config.Info.EEW.showtraining && data.is_training) return; //訓練法を受信するかどうか（設定に準拠）
     if (!data.origin_time || !data.EventID || !data.serial || !data.latitude || !data.longitude) return;
 
     //５分以上前の地震／未来の地震（リプレイ時）を除外
@@ -2218,7 +2218,7 @@ function EEWAlert(data, first, update) {
     eqInfoControl(
       [
         {
-          status: data.is_training ? "訓練" : "通常",
+          status: data.is_training ? "訓練" : "発表",
           eventId: data.EventID,
           category: "EEW",
           reportDateTime: new Date(data.report_time),
@@ -2363,9 +2363,7 @@ function EQI_JMAXML_Req(url, count) {
         if (!xml) return false;
 
         var title = xml.title;
-        var cancel = false;
-        var cancelElm = xml.querySelector("InfoType");
-        if (cancelElm) cancel = cancelElm.textContent == "取消";
+        cancel = xml.querySelector("InfoType").textContent == "取消";
 
         if (title == "震度速報" || title == "震源に関する情報" || title == "震源・震度に関する情報" || title == "遠地地震に関する情報" || title == "顕著な地震の震源要素更新のお知らせ") {
           //地震情報
@@ -2903,7 +2901,7 @@ function eqInfoControl(dataList, type, EEW, count) {
             }
           });
           rawData.forEach(function (elm) {
-            if (!config.Info.EQInfo.showTraning && elm.status == "訓練") return;
+            if (!config.Info.EQInfo.showtraining && elm.status == "訓練") return;
             if (!config.Info.EQInfo.showTest && elm.status == "試験") return;
             if (new Date(elm.reportDateTime) > new Date() - Replay) return;
 
@@ -2911,7 +2909,6 @@ function eqInfoControl(dataList, type, EEW, count) {
             else if (elm.category == "EEW") EQElm.EEW = true;
             else if (elm.category != "EEW" && EQElm.EEW == true) {
               //EEW以外の情報が入ってきたとき、EEWによる情報を破棄
-              playAudio = true;
               EQElm.EEW == false;
               EQInfo_Item = {
                 eventId: EQElm.eventId,
@@ -2966,6 +2963,8 @@ function eqInfoControl(dataList, type, EEW, count) {
           EQElm.maxI = EQInfo_Item.maxI;
           EQElm.DetailURL = EQElm.DetailURL.concat(EQInfo_Item.DetailURL);
           if (EQInfo_Item.axisData) EQElm.axisData = EQInfo_Item.axisData;
+
+          if (EQElm.category == "EEW" && EQInfo_Item.category != "EEW") playAudio = true;
 
           if (changed) {
             eqInfoUpdateTmp.push(EQElm);
@@ -3045,7 +3044,7 @@ function eqInfoAlert(data, source, update, audioPlay) {
 function TsunamiInfoControl(data) {
   try {
     if (!config.Info.TsunamiInfo.GetData) return;
-    if (!config.Info.TsunamiInfo.showTraning && data.status == "訓練") return;
+    if (!config.Info.TsunamiInfo.showtraining && data.status == "訓練") return;
     if (!config.Info.TsunamiInfo.showTest && data.status == "試験") return;
 
     var newInfo = !tsunamiData || !tsunamiData.issue || tsunamiData.issue.time < data.issue.time;

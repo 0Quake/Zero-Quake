@@ -183,7 +183,7 @@ function EEWAlertUpdate(data) {
       clone.querySelector(".origin_time").textContent = dateEncode(3, elm.origin_time);
       clone.querySelector(".magnitude").textContent = elm.magnitude ? Math.round(elm.magnitude * 10) / 10 : "不明";
       clone.querySelector(".depth").textContent = elm.depth ? Math.round(elm.depth) : "不明";
-      clone.querySelector(".traning").style.display = elm.is_training ? "block" : "none";
+      clone.querySelector(".training").style.display = elm.is_training ? "block" : "none";
       clone.querySelector(".EpicenterElement").style.display = !elm.isPlum ? "block" : "none";
       clone.querySelector(".NoEpicenterElement").style.display = elm.isPlum ? "block" : "none";
       clone.querySelector(".userIntensity").textContent = elm.userIntensity ? shindoConvert(elm.userIntensity) : "?";
@@ -398,7 +398,7 @@ function eqInfoDraw(data, source) {
       clone.querySelector(".canceled").style.display = elm.cancel ? "flex" : "none";
       clone.querySelector(".EEWNotes").style.display = elm.category == "EEW" ? "block" : "none";
       clone.querySelector(".TestNotes").style.display = elm.status == "試験" ? "block" : "none";
-      clone.querySelector(".TraningNotes").style.display = elm.status == "訓練" ? "block" : "none";
+      clone.querySelector(".trainingNotes").style.display = elm.status == "訓練" ? "block" : "none";
 
       if (elm.cancel) clone.querySelector(".EQItem").classList.add("EQI_canceled");
       else {
@@ -1725,7 +1725,7 @@ function tsunamiDataUpdate(data) {
   document.getElementById("tsunamiRevocation").style.display = data.revocation ? "block" : "none";
 
   document.querySelector("#tsunamiWrap .TestNotes").style.display = data.status == "試験" ? "block" : "none";
-  document.querySelector("#tsunamiWrap .TraningNotes").style.display = data.status == "訓練" ? "block" : "none";
+  document.querySelector("#tsunamiWrap .trainingNotes").style.display = data.status == "訓練" ? "block" : "none";
 
   now_tsunami = true;
 

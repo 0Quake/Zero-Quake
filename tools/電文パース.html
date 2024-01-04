@@ -33,7 +33,7 @@
         codeData[0]//電文種別コード
         codeData[1]//発信官署
         data.Canceled = codeData[0] == 39
-        data.Traning = codeData[2] == "01" || codeData[2] == "30"
+        data.training = codeData[2] == "01" || codeData[2] == "30"
         data.ReportTime = dateDecode("20" + codeData[3])
         data.OriginTime = dateDecode("20" + codeData[5])
         data.EpiCenter.Code = Number(codeData[10])

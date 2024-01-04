@@ -485,7 +485,7 @@ h2 {
   align-items: center;
   backdrop-filter: blur(3px);
 }
-h2.traning {
+h2.training {
   display: none;
   text-align: center;
   background: rgb(66, 118, 186);
@@ -792,7 +792,7 @@ td {
   font-family: "M PLUS 1p";
 }
 .EEWNotes,
-.TraningNotes,
+.trainingNotes,
 .TestNotes {
   display: none;
   width: 100%;
@@ -802,12 +802,12 @@ td {
   border: solid 1px #f00;
   border-radius: 3px;
 }
-.TraningNotes,
+.trainingNotes,
 .TestNotes {
   border: solid 1px rgb(51, 142, 222);
 }
 
-#tsunamiWrap .TraningNotes,
+#tsunamiWrap .trainingNotes,
 #tsunamiWrap .TestNotes {
   width: calc(100% - 10px);
   margin: 5px;
