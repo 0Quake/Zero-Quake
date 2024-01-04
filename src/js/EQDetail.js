@@ -23,8 +23,6 @@ var jmaURLHis = [];
 var jmaXMLURLHis = [];
 var narikakunURLHis = [];
 var EQInfo = { originTime: null, maxI: null, mag: null, lat: null, lng: null, depth: null, epiCenter: null, comment: null };
-var shindo_lastUpDate = 0;
-var lgint_lastUpDate = 0;
 var hinanjoLayers = [];
 var hinanjoCheck = document.getElementById("hinanjo");
 var ZoomBounds;
@@ -60,7 +58,7 @@ window.electronAPI.messageSend((event, request) => {
         });
       }
     });
-    /*
+
     if (request.urls && Array.isArray(request.urls)) {
       jmaURL = request.urls.filter(function (elm) {
         return elm && elm.includes("www.jma.go.jp");
@@ -90,7 +88,7 @@ window.electronAPI.messageSend((event, request) => {
         cancel: false,
         eew: true,
       };
-    }*/
+    }
     Mapinit();
   } else if (request.action == "setting") {
     config = request.data;
@@ -102,7 +100,10 @@ window.electronAPI.messageSend((event, request) => {
 function InfoFetch() {
   jma_ListReq();
   narikakun_ListReq(new Date().getFullYear(), new Date().getMonth() + 1);
-  if (EEWData) EQInfoControl(EEWData);
+  if (EEWData) {
+    EEWData.status = EEWData.is_training ? "通常" : "訓練";
+    EQInfoControl(EEWData);
+  }
   if (axisDatas) {
     axisDatas.forEach(function (elm) {
       axisInfoCtrl(elm.message);
@@ -859,7 +860,8 @@ function estimated_intensity_mapReq() {
       });
       if (ItemTmp) {
         EQInfoControl({
-          infoType: "推計震度分布",
+          category: "推計震度分布",
+          status: "通常",
           reportTime: ItemTmp.hypo.it,
           originTime: ItemTmp.hypo.at,
           maxI: ItemTmp.hypo.maxi,
@@ -988,25 +990,9 @@ function jma_Fetch(url) {
         if (json.Body.Comments.VarComment && json.Body.Comments.VarComment.Text) commentText.VarComment = json.Body.Comments.VarComment.Text;
         if (json.Body.Comments.FreeFormComment) commentText.FreeFormComment = json.Body.Comments.FreeFormComment;
       }
-      EQInfoControl({
-        infoType: json.Head.Title,
-        reportTime: json.Head.ReportDateTime,
-        originTime: originTimeTmp,
-        maxI: maxIntTmp,
-        mag: magnitudeTmp,
-        lat: LatTmp,
-        lng: LngTmp,
-        depth: depthTmp,
-        epiCenter: epiCenterTmp,
-        comment: commentText,
-        cancel: cancelTmp,
-      });
 
+      var IntData = [];
       if (json.Body.Intensity && json.Body.Intensity.Observation.Pref) {
-        var newestshindo = shindo_lastUpDate < new Date(json.Head.ReportDateTime);
-        if (newestshindo) shindo_lastUpDate = new Date(json.Head.ReportDateTime);
-        else return;
-        var IntData = [];
         json.Body.Intensity.Observation.Pref.forEach(function (elm) {
           var areaData = [];
           if (elm.Area) {
@@ -1028,8 +1014,23 @@ function jma_Fetch(url) {
           }
           IntData.push({ name: elm.Name, int: elm.MaxInt, area: areaData });
         });
-        DrawIntensity(IntData);
       }
+
+      EQInfoControl({
+        category: json.Head.Title,
+        status: json.Control.Status,
+        reportTime: json.Head.ReportDateTime,
+        originTime: originTimeTmp,
+        maxI: maxIntTmp,
+        mag: magnitudeTmp,
+        lat: LatTmp,
+        lng: LngTmp,
+        depth: depthTmp,
+        epiCenter: epiCenterTmp,
+        comment: commentText,
+        cancel: cancelTmp,
+        IntData: IntData,
+      });
     });
 }
 
@@ -1062,25 +1063,9 @@ function jmaL_Fetch(url) {
         if (json.Body.Comments.VarComment && json.Body.Comments.VarComment.Text) commentText.VarComment = json.Body.Comments.VarComment.Text;
         if (json.Body.Comments.FreeFormComment && json.Body.Comments.FreeFormComment) commentText.FreeFormComment = json.Body.Comments.FreeFormComment;
       }
-      EQInfoControl({
-        infoType: json.Head.Title,
-        reportTime: 0,
-        originTime: originTimeTmp,
-        maxI: maxIntTmp,
-        mag: magnitudeTmp,
-        lat: LatTmp,
-        lng: LngTmp,
-        depth: depthTmp,
-        epiCenter: epiCenterTmp,
-        comment: commentText,
-        cancel: cancelTmp,
-      });
 
+      var LngIntData = [];
       if (json.Body.Intensity && json.Body.Intensity.Observation.Pref) {
-        var newestlgint = lgint_lastUpDate < new Date(json.Head.ReportDateTime);
-        if (newestlgint) lgint_lastUpDate = new Date(json.Head.ReportDateTime);
-        else return;
-        var LngIntData = [];
         json.Body.Intensity.Observation.Pref.forEach(function (elm) {
           add_Pref_infoL(elm.Name, elm.MaxLgInt);
           var areaData = [];
@@ -1099,8 +1084,23 @@ function jmaL_Fetch(url) {
           }
           LngIntData.push({ name: elm.Name, lgint: elm2.MaxLgInt, area: areaData });
         });
-        DrawLgIntensity(LngIntData);
       }
+
+      EQInfoControl({
+        category: json.Head.Title,
+        status: json.Control.Status,
+        reportTime: 0,
+        originTime: originTimeTmp,
+        maxI: maxIntTmp,
+        mag: magnitudeTmp,
+        lat: LatTmp,
+        lng: LngTmp,
+        depth: depthTmp,
+        epiCenter: epiCenterTmp,
+        comment: commentText,
+        cancel: cancelTmp,
+        LngIntData: LngIntData,
+      });
     });
 }
 //気象庁防災XML 取得・フォーマット変更→ EQInfoControl
@@ -1143,26 +1143,9 @@ function jmaXMLFetch(url) {
 
       var infoType = xml.querySelector("Head Title").textContent;
       if (xml.querySelector("Control Title").textContent == "津波情報a" || xml.querySelector("Control Title").textContent == "津波警報・注意報・予報a") infoType = "津波";
-      EQInfoControl({
-        infoType: infoType,
-        reportTime: new Date(xml.querySelector("Head ReportDateTime").textContent),
-        originTime: originTimeTmp,
-        maxI: maxIntTmp,
-        mag: magnitudeTmp,
-        magType: magnitudeTypeTmp,
-        lat: LatTmp,
-        lng: LngTmp,
-        depth: DepthTmp,
-        epiCenter: epiCenterTmp,
-        comment: commentText,
-        cancel: cancelTmp,
-      });
 
+      var IntData = [];
       if (xml.querySelector("Body Intensity") && xml.querySelector("Body Intensity Observation Pref")) {
-        var newestshindo = shindo_lastUpDate < new Date(xml.querySelector("Head ReportDateTime").textContent);
-        if (newestshindo) shindo_lastUpDate = new Date(xml.querySelector("Head ReportDateTime").textContent);
-        else return;
-        var IntData = [];
         xml.querySelectorAll("Body Intensity Observation Pref").forEach(function (elm) {
           var areaData = [];
           if (elm.querySelectorAll("Area")) {
@@ -1185,8 +1168,24 @@ function jmaXMLFetch(url) {
           }
           IntData.push({ name: elm.querySelector("Name").textContent, int: elm.querySelector("MaxInt").textContent, area: areaData });
         });
-        DrawIntensity(IntData);
       }
+
+      EQInfoControl({
+        category: infoType,
+        status: xml.querySelector("Control Status").textContent,
+        reportTime: new Date(xml.querySelector("Head ReportDateTime").textContent),
+        originTime: originTimeTmp,
+        maxI: maxIntTmp,
+        mag: magnitudeTmp,
+        magType: magnitudeTypeTmp,
+        lat: LatTmp,
+        lng: LngTmp,
+        depth: DepthTmp,
+        epiCenter: epiCenterTmp,
+        comment: commentText,
+        cancel: cancelTmp,
+        IntData: IntData,
+      });
     });
 }
 //narikakun地震情報API 取得・フォーマット変更→ EQInfoControl
@@ -1211,26 +1210,8 @@ function narikakun_Fetch(url) {
 
         var cancelTmp = json.Head.InfoType == "取消";
 
-        EQInfoControl({
-          infoType: json.Head.Title,
-          reportTime: json.Head.ReportDateTime,
-          originTime: originTimeTmp,
-          maxI: maxIntTmp,
-          mag: magnitudeTmp,
-          lat: LatTmp,
-          lng: LngTmp,
-          depth: depthTmp,
-          epiCenter: epiCenterTmp,
-          comment: commentTmp,
-          cancel: cancelTmp,
-        });
-
+        var IntData = [];
         if (json.Body.Intensity && json.Body.Intensity.Observation.Pref && json.Body.Intensity.Observation.Pref.length > 0) {
-          var newestshindo = shindo_lastUpDate < new Date(json.Head.ReportDateTime);
-          if (newestshindo) shindo_lastUpDate = new Date(json.Head.ReportDateTime);
-          else return;
-
-          var IntData = [];
           json.Body.Intensity.Observation.Pref.forEach(function (elm) {
             var areaData = [];
             if (elm.Area) {
@@ -1253,8 +1234,23 @@ function narikakun_Fetch(url) {
             }
             IntData.push({ name: elm.Name, int: elm.MaxInt, area: areaData });
           });
-          DrawIntensity(IntData);
         }
+
+        EQInfoControl({
+          category: json.Head.Title,
+          status: json.Control.Status,
+          reportTime: json.Head.ReportDateTime,
+          originTime: originTimeTmp,
+          maxI: maxIntTmp,
+          mag: magnitudeTmp,
+          lat: LatTmp,
+          lng: LngTmp,
+          depth: depthTmp,
+          epiCenter: epiCenterTmp,
+          comment: commentTmp,
+          cancel: cancelTmp,
+          IntData: IntData,
+        });
       }
     });
 }
@@ -1280,25 +1276,9 @@ function axisInfoCtrl(json) {
     if (json.Body.Comments.VarComment && json.Body.Comments.VarComment.Text) commentText.VarComment = json.Body.Comments.VarComment.Text;
     if (json.Body.Comments.FreeFormComment) commentText.FreeFormComment = json.Body.Comments.FreeFormComment;
   }
-  EQInfoControl({
-    infoType: json.Head.Title,
-    reportTime: json.Head.ReportDateTime,
-    originTime: originTimeTmp,
-    maxI: maxIntTmp,
-    mag: magnitudeTmp,
-    lat: LatTmp,
-    lng: LngTmp,
-    depth: depthTmp,
-    epiCenter: epiCenterTmp,
-    comment: commentText,
-    cancel: cancelTmp,
-  });
 
+  var IntData = [];
   if (json.Body.Intensity && json.Body.Intensity.Observation.Pref) {
-    var newestshindo = shindo_lastUpDate < new Date(json.Head.ReportDateTime);
-    if (newestshindo) shindo_lastUpDate = new Date(json.Head.ReportDateTime);
-    else return;
-    var IntData = [];
     json.Body.Intensity.Observation.Pref.forEach(function (elm) {
       var areaData = [];
       if (elm.Area) {
@@ -1321,8 +1301,23 @@ function axisInfoCtrl(json) {
       }
       IntData.push({ name: elm.Name, int: elm.MaxInt, area: areaData });
     });
-    DrawIntensity(IntData);
   }
+
+  EQInfoControl({
+    category: json.Head.Title,
+    status: json.Control.Status,
+    reportTime: json.Head.ReportDateTime,
+    originTime: originTimeTmp,
+    maxI: maxIntTmp,
+    mag: magnitudeTmp,
+    lat: LatTmp,
+    lng: LngTmp,
+    depth: depthTmp,
+    epiCenter: epiCenterTmp,
+    comment: commentText,
+    cancel: cancelTmp,
+    IntData: IntData,
+  });
 }
 
 var Int0T = ["any"];
@@ -1410,6 +1405,7 @@ function mapZoomReset() {
   map.fitBounds(ZoomBounds, { padding: 60, maxZoom: 7, animate: false });
 }
 
+var intensityIcons = [];
 //都道府県ごとの情報描画（リスト）
 function add_Pref_info(name, maxInt) {
   var newDiv = document.createElement("div");
@@ -1467,6 +1463,7 @@ function add_Area_info(name, maxInt) {
     var maxIntStr = shindoConvert(maxInt, 1);
     var AreaPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<div class='popupContent'><div class='shindoItem_S' style='background:" + color[0] + ";color:" + color[1] + "'>震度 " + maxIntStr + "</div><div class='pointName'>" + name + "</div><div class='pointHead'>細分区域</div></div><div></div>");
     markerElm = new maplibregl.Marker({ element: icon }).setLngLat([pointLocation[1], pointLocation[0]]).setPopup(AreaPopup).addTo(map);
+    intensityIcons.push(markerElm);
     ZoomBounds.extend([pointLocation[1], pointLocation[0]]);
   }
 
@@ -1543,12 +1540,16 @@ function add_IntensityStation_info(lat, lng, name, int) {
   var mi_description = intStr == "未" ? "<div class = 'description'>震度5弱以上と考えられるが<br>現在震度を入手していない。</div>" : "";
   var PtPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<div class='popupContent'><div class='shindoItem' style='background:" + color4[0] + ";color:" + color4[1] + "'>震度 " + intStrLong + "</div><div class='pointName'>" + name + "</div>" + mi_description + "<div class='pointHead'>震度観測点</div></div><div></div>");
   markerElm = new maplibregl.Marker({ element: icon }).setLngLat([lng, lat]).setPopup(PtPopup).addTo(map);
+  intensityIcons.push(markerElm);
 
   wrap3[wrap3.length - 1].appendChild(newDiv);
   ZoomBounds.extend([lng, lat]);
 }
 
 function DrawIntensity(data) {
+  intensityIcons.forEach(function (elm) {
+    elm.remove();
+  });
   removeChild(document.getElementById("Shindo"));
   document.getElementById("ShindoWrap").style.display = "inline-block";
   document.getElementById("Shindo").style.display = "block";
@@ -1576,6 +1577,9 @@ function DrawIntensity(data) {
 }
 
 function DrawLgIntensity(data) {
+  LgIntIcons.forEach(function (elm) {
+    elm.remove();
+  });
   removeChild(document.getElementById("LngInt"));
   document.getElementById("ShindoWrap").style.display = "inline-block";
   document.getElementById("lngintListWrap").style.display = "block";
@@ -1597,6 +1601,7 @@ function DrawLgIntensity(data) {
   mapZoomReset();
 }
 
+var LgIntIcons = [];
 //都道府県ごとの情報描画（リスト）
 function add_Pref_infoL(name, lngInt) {
   var newDiv = document.createElement("div");
@@ -1654,6 +1659,7 @@ function add_Area_infoL(name, maxInt) {
 
     var AreaPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<div class='popupContent'><div class='shindoItem_S' style='background:" + color[0] + ";color:" + color[1] + "'>長周期地震動階級 " + maxInt + "</div><div class='pointName'>" + name + "</div><div class='pointHead'>細分区域</div></div><div></div>");
     markerElm = new maplibregl.Marker({ element: icon }).setLngLat([pointLocation[1], pointLocation[0]]).setPopup(AreaPopup).addTo(map);
+    LgIntIcons.push(markerElm);
     ZoomBounds.extend([pointLocation[1], pointLocation[0]]);
   }
 
@@ -1692,34 +1698,97 @@ function add_IntensityStation_infoL(lat, lng, name, int) {
 
   var PtPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<div class='popupContent'><div class='shindoItem' style='background:" + color4[0] + ";color:" + color4[1] + "'>長周期地震動階級 " + intStr + "</div><div class='pointName'>" + name + "</div><div class='pointHead'>震度観測点</div></div><div></div>");
   markerElm = new maplibregl.Marker({ element: icon }).setLngLat([lng, lat]).setPopup(PtPopup).addTo(map);
+  LgIntIcons.push(markerElm);
 
   ZoomBounds.extend([lng, lat]);
 }
 
+var EQInfoMarged = {};
+var EQInfoData = [];
 //地震情報マージ
 function EQInfoControl(data) {
-  var mostNew = false;
+  EQInfoData.push(data);
 
-  if (!newInfoDateTime || newInfoDateTime <= data.reportTime || (EQInfo.eew && !data.eew)) {
-    newInfoDateTime = data.reportTime;
-    mostNew = true;
-  } else if (newInfoDateTime > data.reportTime) return;
-  if (data.eew) InfoType_add("type-1");
-  EQInfo.eew = data.eew;
-  if (mostNew) document.getElementById("canceled").style.display = data.cancel ? "flex" : "none";
+  EQInfoData = EQInfoData.sort(function (a, b) {
+    return a.reportTime < b.reportTime ? -1 : 1;
+  });
+  EQInfoData.forEach(function (elm, index) {
+    if (elm.cancel) {
+      EQInfoData.slice(0, index).forEach(function (elm2, index2) {
+        if (elm2.category == elm.category) EQInfoData[index2].cancel = true;
+      });
+    }
+  });
 
-  if (data.originTime && (mostNew || !EQInfo.originTime)) EQInfo.originTime = data.originTime;
-  if (data.maxI && (mostNew || !EQInfo.maxI)) EQInfo.maxI = data.maxI;
-  if (data.mag && (mostNew || !EQInfo.mag)) {
-    EQInfo.mag = data.mag;
-  }
+  EQInfoTmp = {};
+  EQInfoData.forEach(function (elm) {
+    if (elm.cancel) {
+      if (elm.category == "EEW") InfoType_remove("type-1");
+      else if (elm.category == "震度速報") InfoType_remove("type-2");
+      else if (elm.category == "震源に関する情報") InfoType_remove("type-3");
+      else if (elm.category == "震源・震度情報") InfoType_remove("type-4-1");
+      else if (elm.category == "遠地地震に関する情報") InfoType_remove("type-4-2");
+      else if (elm.category == "顕著な地震の震源要素更新のお知らせ") InfoType_remove("type-5");
+      else if (elm.category == "津波") InfoType_remove("type-8");
+    } else {
+      if (elm.category == "EEW") InfoType_add("type-1");
+      else if (elm.category == "震度速報") InfoType_add("type-2");
+      else if (elm.category == "震源に関する情報") InfoType_add("type-3");
+      else if (elm.category == "震源・震度情報") InfoType_add("type-4-1");
+      else if (elm.category == "遠地地震に関する情報") InfoType_add("type-4-2");
+      else if (elm.category == "顕著な地震の震源要素更新のお知らせ") InfoType_add("type-5");
+      else if (elm.category == "津波") InfoType_add("type-8");
+    }
 
-  if (data.magType) EQInfo.magType = data.magType;
+    if (!config.Info.EQInfo.showtraining && elm.status == "訓練") return;
+    if (!config.Info.EQInfo.showTest && elm.status == "試験") return;
+
+    if (elm.category == "EEW" && EQInfoTmp.EEW == false) return; //EEW以外の情報が既に入っているとき、EEWによる情報を破棄
+    else if (elm.category == "EEW") EQInfoTmp.EEW = true;
+    else if (elm.category != "EEW" && EQInfoTmp.EEW == true) {
+      //EEW以外の情報が入ってきたとき、EEWによる情報を破棄
+      EQElm.EEW == false;
+      EQInfoTmp = {};
+    }
+
+    if (!elm.cancel) {
+      if (Boolean2(elm.category)) EQInfoTmp.category = elm.category;
+      if (Boolean2(elm.status)) EQInfoTmp.status = elm.status;
+      if (Boolean2(elm.reportTime)) EQInfoTmp.reportTime = elm.reportTime;
+      if (Boolean2(elm.originTime)) EQInfoTmp.originTime = elm.originTime;
+      if (Boolean2(elm.maxI) && elm.maxI !== "?") EQInfoTmp.maxI = elm.maxI;
+      if (Boolean2(elm.mag) && elm.M != "Ｍ不明" && elm.M != "NaN") EQInfoTmp.mag = elm.mag;
+      if (Boolean2(elm.magType)) EQInfoTmp.magType = elm.magType;
+      if (Boolean2(elm.lat)) EQInfoTmp.lat = elm.lat;
+      if (Boolean2(elm.lng)) EQInfoTmp.lng = elm.lng;
+      if (Boolean2(elm.depth)) EQInfoTmp.depth = elm.depth;
+      if (Boolean2(elm.epiCenter)) EQInfoTmp.epiCenter = elm.epiCenter;
+      if (Boolean2(elm.comment)) EQInfoTmp.comment = elm.comment;
+      if (Boolean2(elm.IntData)) EQInfoTmp.IntData = elm.IntData;
+      if (Boolean2(elm.LngIntData)) EQInfoTmp.LngIntData = elm.LngIntData;
+    }
+  });
+
+  EQInfoTmp.cancel = !EQInfoData.find(function (elm) {
+    return !elm.cancel;
+  });
+
+  EQInfoMarged = EQInfoTmp;
+
+  if (EQInfoMarged.IntData) DrawIntensity(EQInfoMarged.IntData);
+  if (EQInfoMarged.LngIntData) DrawLgIntensity(EQInfoMarged.LngIntData);
+
+  document.getElementById("canceled").style.display = EQInfoMarged.cancel ? "flex" : "none";
+
+  if (EQInfoMarged.originTime) EQInfo.originTime = EQInfoMarged.originTime;
+  if (EQInfoMarged.maxI) EQInfo.maxI = EQInfoMarged.maxI;
+  if (EQInfoMarged.mag) EQInfo.mag = EQInfoMarged.mag;
+  if (EQInfoMarged.magType) EQInfo.magType = EQInfoMarged.magType;
   else if (!EQInfo.magType) EQInfo.magType = "M";
   data_MT.innerText = EQInfo.magType;
 
-  if ((data.depth || data.depth === 0) && (mostNew || !EQInfo.depth)) EQInfo.depth = Math.abs(data.depth);
-  if (data.epiCenter && (mostNew || !EQInfo.epiCenter)) EQInfo.epiCenter = data.epiCenter;
+  if (EQInfoMarged.depth || EQInfoMarged.depth === 0) EQInfo.depth = Math.abs(EQInfoMarged.depth);
+  if (EQInfoMarged.epiCenter) EQInfo.epiCenter = EQInfoMarged.epiCenter;
 
   if (EQInfo.originTime) data_time.innerText = dateEncode(4, EQInfo.originTime);
   if (EQInfo.maxI) data_maxI.innerText = shindoConvert(EQInfo.maxI, 1);
@@ -1732,12 +1801,12 @@ function EQInfoControl(data) {
 
   if (EQInfo.epiCenter) data_center.innerText = EQInfo.epiCenter;
 
-  if (data.comment && mostNew) {
-    EQInfo.comment = data.comment;
+  if (EQInfoMarged.comment) {
+    EQInfo.comment = EQInfoMarged.comment;
 
-    data_comment.innerHTML = (data.comment.ForecastComment + "\n" + data.comment.VarComment + "\n" + data.comment.FreeFormComment).replaceAll("\n", "<br>");
+    data_comment.innerHTML = (EQInfoMarged.comment.ForecastComment + "\n" + EQInfoMarged.comment.VarComment + "\n" + EQInfoMarged.comment.FreeFormComment).replaceAll("\n", "<br>");
 
-    var comments = data.comment.ForecastComment.split("\n").concat(data.comment.VarComment.split("\n"), data.comment.FreeFormComment.split("\n"));
+    var comments = EQInfoMarged.comment.ForecastComment.split("\n").concat(EQInfoMarged.comment.VarComment.split("\n"), EQInfoMarged.comment.FreeFormComment.split("\n"));
 
     var TsunamiShortMsg;
     for (const elm of comments) {
@@ -1779,8 +1848,8 @@ function EQInfoControl(data) {
     }
   }
 
-  if (data.lat && data.lng) {
-    ZoomBounds.extend([data.lng, data.lat]);
+  if (EQInfoMarged.lat && EQInfoMarged.lng) {
+    ZoomBounds.extend([EQInfoMarged.lng, EQInfoMarged.lat]);
 
     if (!ESmarkerElm) {
       const img = document.createElement("img");
@@ -1788,29 +1857,8 @@ function EQInfoControl(data) {
       img.classList.add("epicenterIcon");
 
       var ESPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<h3 style='background: rgb(149, 46, 46);'>震央</h3><div class='epicenterWrp'>" + EQInfo.epiCenter + "</div>");
-      ESmarkerElm = new maplibregl.Marker({ element: img }).setLngLat([data.lng, data.lat]).setPopup(ESPopup).addTo(map);
-    } else ESmarkerElm.setLngLat([data.lng, data.lat]);
-  }
-
-  switch (data.infoType) {
-    case "震度速報":
-      InfoType_add("type-2");
-      break;
-    case "震源に関する情報":
-      InfoType_add("type-3");
-      break;
-    case "震源・震度情報":
-      InfoType_add("type-4-1");
-      break;
-    case "遠地地震に関する情報":
-      InfoType_add("type-4-2");
-      break;
-    case "顕著な地震の震源要素更新のお知らせ":
-      InfoType_add("type-5");
-      break;
-    case "津波":
-      InfoType_add("type-8");
-      break;
+      ESmarkerElm = new maplibregl.Marker({ element: img }).setLngLat([EQInfoMarged.lng, EQInfoMarged.lat]).setPopup(ESPopup).addTo(map);
+    } else ESmarkerElm.setLngLat([EQInfoMarged.lng, EQInfoMarged.lat]);
   }
 
   document.getElementById("splash").style.display = "none";
@@ -1881,30 +1929,36 @@ document.getElementById("AllCloseL").addEventListener("click", function () {
 
 function InfoType_add(type) {
   document.getElementById(type).style.display = "inline-block";
+  document.getElementById(type).classList.remove("disabled");
   switch (type) {
     case "type-4-1":
-      document.getElementById("type-1").classList.add("disabled");
-      document.getElementById("type-2").classList.add("disabled");
-      document.getElementById("type-3").classList.add("disabled");
+      InfoType_remove("type-1");
+      InfoType_remove("type-2");
+      InfoType_remove("type-3");
       break;
     case "type-4-2":
-      document.getElementById("type-1").classList.add("disabled");
-      document.getElementById("type-2").classList.add("disabled");
-      document.getElementById("type-3").classList.add("disabled");
+      InfoType_remove("type-1");
+      InfoType_remove("type-2");
+      InfoType_remove("type-3");
       if (map) map.setZoom(2);
       break;
     case "type-5":
-      document.getElementById("type-1").classList.add("disabled");
-      document.getElementById("type-3").classList.add("disabled");
+      InfoType_remove("type-1");
+      InfoType_remove("type-3");
       break;
     case "type-2":
     case "type-3":
-      document.getElementById("type-1").classList.add("disabled");
+      InfoType_remove("type-1");
       break;
     default:
       break;
   }
 }
+
+function InfoType_remove(type) {
+  document.getElementById(type).classList.add("disabled");
+}
+
 function hinanjoPopup(e) {
   var DataTmp = e.features[0].properties;
   var supportType = [];
@@ -1927,4 +1981,7 @@ function radioSet(name, val) {
   document.getElementsByName(name).forEach(function (elm) {
     if (elm.value == val) elm.checked = true;
   });
+}
+function Boolean2(elm) {
+  return (elm !== null) & (elm !== undefined) && elm !== "" && elm !== false && !Number.isNaN(elm) && elm !== "Invalid Date";
 }
