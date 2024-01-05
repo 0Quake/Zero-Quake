@@ -1721,7 +1721,6 @@ function EQInfoControl(data) {
 
   EQInfoTmp = {};
   EQInfoData.forEach(function (elm) {
-    if (elm.category !== "EEW") return;
     if (elm.cancel) {
       if (elm.category == "EEW") InfoType_remove("type-1");
       else if (elm.category == "震度速報") InfoType_remove("type-2");
@@ -1747,7 +1746,7 @@ function EQInfoControl(data) {
     else if (elm.category == "EEW") EQInfoTmp.EEW = true;
     else if (elm.category != "EEW" && EQInfoTmp.EEW == true) {
       //EEW以外の情報が入ってきたとき、EEWによる情報を破棄
-      EQElm.EEW == false;
+      EQInfoTmp.EEW == false;
       EQInfoTmp = {};
     }
 
