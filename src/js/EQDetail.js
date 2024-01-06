@@ -1747,7 +1747,7 @@ function EQInfoControl(data) {
     else if (elm.category == "EEW") EQInfoTmp.EEW = true;
     else if (elm.category != "EEW" && EQInfoTmp.EEW == true) {
       //EEW以外の情報が入ってきたとき、EEWによる情報を破棄
-      EQElm.EEW == false;
+      EQInfoTmp.EEW == false;
       EQInfoTmp = {};
     }
 
