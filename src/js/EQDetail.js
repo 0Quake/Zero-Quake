@@ -1066,22 +1066,23 @@ function jmaL_Fetch(url) {
       var LngIntData = [];
       if (json.Body.Intensity && json.Body.Intensity.Observation.Pref) {
         json.Body.Intensity.Observation.Pref.forEach(function (elm) {
-          add_Pref_infoL(elm.Name, elm.MaxLgInt);
+          //add_Pref_infoL(elm.Name, elm.MaxLgInt);
           var areaData = [];
           if (elm.Area) {
             elm.Area.forEach(function (elm2) {
-              add_Area_infoL(elm2.Name, elm2.MaxLgInt);
+              //add_Area_infoL(elm2.Name, elm2.MaxLgInt);
               var stData = [];
               if (elm2.IntensityStation) {
                 elm2.IntensityStation.forEach(function (elm4) {
-                  add_IntensityStation_infoL(elm4.latlon.lat, elm4.latlon.lon, elm4.Name, elm4.LgInt);
+                  //add_IntensityStation_infoL(elm4.latlon.lat, elm4.latlon.lon, elm4.Name, elm4.LgInt);
                   stData.push({ lat: elm4.latlon.lat, lng: elm4.latlon.lon, name: elm4.Name, lgint: elm4.LgInt });
                 });
               }
               areaData.push({ name: elm2.Name, lgint: elm2.MaxLgInt, station: stData });
             });
           }
-          LngIntData.push({ name: elm.Name, lgint: elm2.MaxLgInt, area: areaData });
+          33;
+          LngIntData.push({ name: elm.Name, lgint: elm.MaxLgInt, area: areaData });
         });
       }
 
@@ -1457,7 +1458,7 @@ function add_Area_info(name, maxInt) {
   if (pointLocation) {
     const icon = document.createElement("div");
     icon.classList.add("MaxShindoIcon");
-    icon.innerHTML = '<div style="background:' + color[0] + ";color:" + color[1] + '">' + maxInt + "</div>";
+    icon.innerHTML = '<div style="background:' + color[0] + ";color:" + color[1] + '">' + shindoConvert(maxInt) + "</div>";
 
     var maxIntStr = shindoConvert(maxInt, 1);
     var AreaPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<div class='popupContent'><div class='shindoItem_S' style='background:" + color[0] + ";color:" + color[1] + "'>震度 " + maxIntStr + "</div><div class='pointName'>" + name + "</div><div class='pointHead'>細分区域</div></div><div></div>");
@@ -1584,13 +1585,13 @@ function DrawLgIntensity(data) {
   document.getElementById("lngintListWrap").style.display = "block";
   mapFillResetL();
   data.forEach(function (elm) {
-    add_Pref_info(elm.name, elm.int);
+    add_Pref_infoL(elm.name, elm.lgint);
     if (elm.area) {
       elm.area.forEach(function (elm2) {
-        add_Area_info(elm2.name, elm2.int);
-        if (elm3.station) {
-          elm3.station.forEach(function (elm4) {
-            add_IntensityStation_info(elm4.lat, elm4.lng, elm4.name, elm4.int);
+        add_Area_infoL(elm2.name, elm2.lgint);
+        if (elm2.station) {
+          elm2.station.forEach(function (elm4) {
+            add_IntensityStation_infoL(elm4.lat, elm4.lng, elm4.name, elm4.lgint);
           });
         }
       });
@@ -1721,7 +1722,6 @@ function EQInfoControl(data) {
 
   EQInfoTmp = {};
   EQInfoData.forEach(function (elm) {
-    if (elm.category !== "EEW") return;
     if (elm.cancel) {
       if (elm.category == "EEW") InfoType_remove("type-1");
       else if (elm.category == "震度速報") InfoType_remove("type-2");
