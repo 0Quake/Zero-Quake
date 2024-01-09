@@ -2033,10 +2033,10 @@ function EEWcontrol(data) {
               });
               if (SectData) {
                 Object.keys(SectData).forEach((key) => {
-                  if (!SectData[key]) delete SectData[key];
+                  if (SectData[key] === null) delete SectData[key];
                 });
                 Object.keys(elm).forEach((key) => {
-                  if (!elm[key]) delete elm[key];
+                  if (!elm[key] === null) delete elm[key];
                 });
                 elm = Object.assign(SectData, elm); //データをマージ
                 changed = true;
