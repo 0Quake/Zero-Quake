@@ -503,8 +503,6 @@ function EQDetect(data) {
         "fill-color": "#FFF",
         "fill-opacity": 0.3,
       },
-      minzoom: 0,
-      maxzoom: 22,
     });
 
     map.addLayer({
@@ -515,12 +513,10 @@ function EQDetect(data) {
         "line-color": "#FFF",
         "line-width": 3,
       },
-      minzoom: 0,
-      maxzoom: 22,
     });
 
     map.panTo([data.lng, data.lat], { animate: false });
-    map.fitBounds(turf.bbox(_circle), { animate: false, padding: 100 });
+    map.fitBounds(turf.bbox(_circle), { maxZoom: 7, animate: false, padding: 100 });
   }
   document.getElementById("noEEW").style.display = now_EEW.length == 0 && !now_tsunami && EQDetectItem.length == 0 ? "block" : "none";
   if (now_EEW.length == 0) document.body.classList.remove("EQDetecting");
