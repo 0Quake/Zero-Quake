@@ -1928,12 +1928,12 @@ function EEWcontrol(data) {
 
     data.TimeTable = TimeTable_JMA2001[depthFilter(data.depth)];
     if (data.source == "simulation") {
-      var EEWdataTmp = EEW_Data.find(function (elm) {
+      var EEWdataTmp = EEW_nowList.find(function (elm) {
         return !elm.simulation;
       });
       if (EEWdataTmp) return;
     } else {
-      var EEWdataTmp = EEW_Data.forEach(function (elm) {
+      var EEWdataTmp = EEW_nowList.forEach(function (elm) {
         if (elm.simulation) EEWClear(elm.EQ_id);
       });
     }
@@ -2032,6 +2032,12 @@ function EEWcontrol(data) {
                 return elm.Name == elm2.Name;
               });
               if (SectData) {
+                Object.keys(SectData).forEach((key) => {
+                  if (!SectData[key]) delete SectData[key];
+                });
+                Object.keys(elm).forEach((key) => {
+                  if (!elm[key]) delete elm[key];
+                });
                 elm = Object.assign(SectData, elm); //データをマージ
                 changed = true;
               }
