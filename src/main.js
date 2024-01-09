@@ -656,6 +656,14 @@ ipcMain.on("message", (_event, response) => {
     case "nankaiWIndowOpen":
       nankai_createWindow();
       break;
+    case "internetConnection":
+      if (response.internetConnection) {
+        eqInfoUpdate();
+        RegularExecution();
+        if (wolfxConnection) wolfxConnection.sendUTF("query_jmaeew");
+        if (PBSConnection) PBSConnection.sendUTF("queryjson");
+      }
+      break;
   }
 });
 

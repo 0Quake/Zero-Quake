@@ -11,6 +11,23 @@
     var config;
     var points, Spoints;
     var Svoice, Rate, Pitch, Volume;
+    var internetConnection = navigator.onLine
+    window.addEventListener("online", () => {
+      internetConnection = true
+      window.electronAPI.messageReturn({
+        action: "internetConnection",
+        internetConnection: internetConnection
+      });
+    });
+    //オフライン警告表示
+    window.addEventListener("offline", () => {
+      internetConnection = false
+      window.electronAPI.messageReturn({
+        action: "internetConnection",
+        internetConnection: internetConnection
+      });
+    });
+
 
     fetch("./Resource/Knet_Points.json")
       .then(function (res) {
