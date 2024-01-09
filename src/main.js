@@ -1231,7 +1231,7 @@ function kmoniRequest() {
                 kmoniI_url++;
                 if (kmoniI_url > urlTmp.length) kmoniI_url = 0;
               }
-              kmoniTimeUpdate(new Date() - Replay, "kmoni", "Error");
+              kmoniTimeUpdate(new Date() - Replay, "kmoniImg", "Error");
             } else {
               errorCountkI = 0;
               var bufTmp = Buffer.concat(dataTmp);
@@ -1244,12 +1244,12 @@ function kmoniRequest() {
               }
             }
           } catch (err) {
-            kmoniTimeUpdate(new Date() - Replay, "kmoni", "Error");
+            kmoniTimeUpdate(new Date() - Replay, "kmoniImg", "Error");
           }
         });
       });
       request.end();
-    } else kmoniTimeUpdate(new Date() - Replay, "kmoni", "Error");
+    } else kmoniTimeUpdate(new Date() - Replay, "kmoniImg", "Error");
   }
 
   if (kmoniTimeout) clearTimeout(kmoniTimeout);

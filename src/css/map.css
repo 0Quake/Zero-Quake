@@ -529,7 +529,8 @@ body {
 }
 
 #AlertArea {
-  background: url(../img/AlertOverlay.png);
+  background-image: url(../img/AlertOverlay.png);
+  background-color: #999;
   background-size: 10px;
 }
 #fillLegend {
