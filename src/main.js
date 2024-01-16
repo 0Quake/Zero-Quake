@@ -216,6 +216,7 @@ var defaultConfigVal = {
   data: {
     layer: "",
     overlay: [],
+    kmoni_points_show: true,
   },
 };
 var config = store.get("config", defaultConfigVal);
