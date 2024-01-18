@@ -1084,9 +1084,6 @@ function start() {
 
   //地震検知ワーカー作成
   createWorker();
-  setTimeout(function () {
-    console.log(yoyuK);
-  }, 5000);
 }
 
 function earlyEstReq() {

@@ -1884,7 +1884,7 @@ function tsunamiDataUpdate(data) {
 
               if (elm2.ArrivedTime) ArrivedTime = dateEncode(5, elm2.ArrivedTime);
               else if (elm2.Condition == "第１波の到達を確認") ArrivedTime = "第1波到達";
-              else if (elm2.Condition == "津波到達中と推測") ArrivedTime = "第1波到達と推測";
+              else if (elm2.Condition == "津波到達中と推測") ArrivedTime = "津波到達中と推測";
               else if (elm2.firstHeightCondition == "第１波識別不能") ArrivedTime = "第1波識別不能";
               if (elm2.firstHeightInitial) ArrivedTime += " " + elm2.firstHeightInitial;
               if (elm2.ArrivalTime) arrivalTime = "第1波予想到達時刻：" + dateEncode(5, elm2.ArrivalTime);
