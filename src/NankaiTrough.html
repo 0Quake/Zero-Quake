@@ -20,7 +20,7 @@
         <div id="loading-wrap"></div>
     </div>
 
-    <h1 id="title"> </h1>
+    <h1 id="title"></h1>
     <div id="headline"></div>
     <hr>
     <div id="Text"></div>
@@ -28,14 +28,15 @@
     <div id="NextAdvisory"></div>
     <div id="Text2"></div>
 
+    <script src="./js/UIcommon.js"></script>
     <script>
-
         window.electronAPI.messageSend((event, request) => {
             if (request.action == "NankaiTroughInfo") {
+                console.log(request)
                 document.title = request.data.title + " (" + request.data.kind + ") - Zero Quake"
 
                 document.getElementById("title").innerText = request.data.title + " (" + request.data.kind + ")"
-                document.getElementById("headline").innerText = request.data.HeadLine
+                document.getElementById("headline").innerText = request.data.HeadLine + " (" + dateEncode(4,request.data.reportDate) + ")"
                 document.getElementById("Text").innerText = request.data.Text
                 document.getElementById("Appendix").innerText = request.data.Appendix
                 document.getElementById("NextAdvisory").innerText = request.data.NextAdvisory
