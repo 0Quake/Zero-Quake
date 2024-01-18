@@ -216,6 +216,7 @@ var defaultConfigVal = {
   data: {
     layer: "",
     overlay: [],
+    kmoni_points_show: true,
   },
 };
 var config = store.get("config", defaultConfigVal);
@@ -2041,7 +2042,7 @@ function EEWcontrol(data) {
                   if (SectData[key] === null) delete SectData[key];
                 });
                 Object.keys(elm).forEach((key) => {
-                  if (!elm[key] === null) delete elm[key];
+                  if (elm[key] === null) delete elm[key];
                 });
                 elm = Object.assign(SectData, elm); //データをマージ
                 changed = true;

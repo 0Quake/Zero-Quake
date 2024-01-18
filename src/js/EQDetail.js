@@ -1930,6 +1930,9 @@ document.getElementById("AllCloseL").addEventListener("click", function () {
 function InfoType_add(type) {
   document.getElementById(type).style.display = "inline-block";
   document.getElementById(type).classList.remove("disabled");
+  if (type == "type-1") document.getElementById("EEWCaption").style.display = "block";
+  else document.getElementById("EEWCaption").style.display = "none";
+
   switch (type) {
     case "type-4-1":
       InfoType_remove("type-1");
