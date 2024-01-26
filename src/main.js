@@ -1935,7 +1935,7 @@ function EEWcontrol(data) {
     data.TimeTable = TimeTable_JMA2001[depthFilter(data.depth)];
     if (data.source == "simulation") {
       var EEWdataTmp = EEW_nowList.find(function (elm) {
-        return !elm.simulation;
+        return elm.source!== 'simulation';
       });
       if (EEWdataTmp) return;
     } else {
@@ -1982,7 +1982,7 @@ function EEWcontrol(data) {
                 Name: elm,
                 IntTo: shindo,
                 IntFrom: shindo,
-                Alert: data.source == "simulation" ? shindoConvert(shindo, 5) >= 4 : null,
+                Alert: data.source == "simulation" ? shindoConvert(shindo, 5) >= 5 : null,
               });
             }
           });
