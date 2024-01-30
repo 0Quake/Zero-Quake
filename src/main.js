@@ -1624,7 +1624,6 @@ async function yoyuSetK(func) {
         await new Promise((resolve) => {
           var dataTmp = "";
           var reqTime = new Date();
-          console.log(1);
           var request = net.request("http://www.kmoni.bosai.go.jp/webservice/server/pros/latest.json?_=" + Number(new Date()));
           request.on("response", (res) => {
             res.on("data", (chunk) => {
