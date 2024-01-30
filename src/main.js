@@ -1525,7 +1525,7 @@ function PBS_WS_TryConnect() {
   setTimeout(PBS_WS_Connect, timeoutTmp);
 }
 function PBS_WS_Connect() {
-  if (PBSWSclient) PBSWSclient.connect("wss://telegram.projectbs.cn/jmaeewws");
+  if (PBSWSclient) PBSWSclient.connect("wss://telegram-cf.projectbs.cn/jmaeewws/");
   PBSlastConnectDate = new Date();
 }
 
