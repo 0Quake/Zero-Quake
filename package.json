@@ -47,7 +47,7 @@
     "electron-squirrel-startup": "^1.0.0",
     "electron-store": "^8.1.0",
     "fs": "^0.0.1-security",
-    "jsdom": "^23.0.1",
+    "jsdom": "^24.0.0",
     "net": "^1.0.2",
     "path": "^0.12.7",
     "websocket": "^1.0.34"
