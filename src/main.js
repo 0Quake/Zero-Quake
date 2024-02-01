@@ -1063,6 +1063,9 @@ function start() {
   soft_version = require("../package.json").version;
   TimeTable_JMA2001 = require("./Resource/TimeTable_JMA2001.json");
 
+  //地震検知ワーカー作成
+  createWorker();
+
   //↓WebSocket接続処理
   P2P_WS();
   AXIS_WS();
@@ -1073,14 +1076,13 @@ function start() {
   SnetRequest();
   kmoniRequest();
   yoyuSetK(kmoniRequest);
+  console.log(0)
   eqInfoUpdate(true); //地震情報定期取得 着火
   earlyEstReq();
 
   //定期実行 着火
   RegularExecution(true);
 
-  //地震検知ワーカー作成
-  createWorker();
 }
 
 function earlyEstReq() {
@@ -1599,6 +1601,7 @@ function RegularExecution(roop) {
 
     //津波情報解除
     if (tsunamiData && tsunamiData.ValidDateTime <= new Date()) {
+    /*abcba
       TsunamiInfoControl({
         issue: { time: tsunamiData.ValidDateTime, EventID: null, EarthQuake: null },
         revocation: true,
@@ -1606,7 +1609,7 @@ function RegularExecution(roop) {
         areas: [],
         source: null,
         ValidDateTime: null,
-      });
+      });*/
     }
   } catch (err) {
     throw new Error("内部の情報処理でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
@@ -2384,6 +2387,7 @@ function EQI_JMAXML_Req(url, count) {
       res.on("end", function () {
         try {
           const parser = new new JSDOM().window.DOMParser();
+          dataTmp = '<?xml version="1.0" encoding="UTF-8"?><Report xmlns="http://xml.kishou.go.jp/jmaxml1/" xmlns:jmx="http://xml.kishou.go.jp/jmaxml1/"><Control><Title>津波情報a</Title><DateTime>2024-01-02T01:03:00Z</DateTime><Status>通常</Status><EditorialOffice>気象庁本庁</EditorialOffice><PublishingOffice>気象庁</PublishingOffice></Control><Head xmlns="http://xml.kishou.go.jp/jmaxml1/informationBasis1/"><Title>津波観測に関する情報</Title><ReportDateTime>2024-01-02T10:03:00+09:00</ReportDateTime><TargetDateTime>2024-01-02T10:00:00+09:00</TargetDateTime><EventID>20240101161010</EventID><InfoType>発表</InfoType><Serial>49</Serial><InfoKind>津波情報</InfoKind><InfoKindVersion>1.0_1</InfoKindVersion><Headline><Text>　２日１０時００分現在の、津波の観測値をお知らせします。</Text></Headline></Head><Body xmlns="http://xml.kishou.go.jp/jmaxml1/body/seismology1/" xmlns:jmx_eb="http://xml.kishou.go.jp/jmaxml1/elementBasis1/"><Tsunami><Observation><CodeDefine><Type xpath="Item/Area/Code">津波予報区</Type><Type xpath="Item/Station/Code">潮位観測点</Type></CodeDefine><Item><Area><Name>北海道日本海沿岸北部</Name><Code>110</Code></Area><Station><Name>留萌</Name><Code>11002</Code><FirstHeight><Condition>第１波識別不能</Condition></FirstHeight><MaxHeight><Condition>観測中</Condition></MaxHeight></Station><Station><Name>石狩湾新港</Name><Code>11022</Code><FirstHeight><ArrivalTime>2024-01-01T19:16:00+09:00</ArrivalTime><Initial>押し</Initial></FirstHeight><MaxHeight><DateTime>2024-01-02T01:35:00+09:00</DateTime><jmx_eb:TsunamiHeight type="これまでの最大波の高さ" unit="m" description="０．３m" condition="上昇中">0.3</jmx_eb:TsunamiHeight></MaxHeight></Station><Station><Name>利尻島沓形港</Name><Code>11023</Code><FirstHeight><ArrivalTime>2024-01-01T18:51:00+09:00</ArrivalTime><Initial>押し</Initial></FirstHeight><MaxHeight><DateTime>2024-01-01T23:45:00+09:00</DateTime><jmx_eb:TsunamiHeight type="これまでの最大波の高さ" unit="m" description="０．３m">0.3</jmx_eb:TsunamiHeight></MaxHeight></Station><Station><Name>小樽市忍路</Name><Code>11030</Code><FirstHeight><ArrivalTime>2024-01-01T18:37:00+09:00</ArrivalTime><Initial>引き</Initial></FirstHeight><MaxHeight><DateTime>2024-01-02T08:36:00+09:00</DateTime><jmx_eb:TsunamiHeight type="これまでの最大波の高さ" unit="m" description="０．２m">0.2</jmx_eb:TsunamiHeight><Revise>更新</Revise></MaxHeight></Station></Item><Item><Area><Name>北海道日本海沿岸南部</Name><Code>111</Code></Area><Station><Name>江差</Name><Code>11102</Code><FirstHeight><ArrivalTime>2024-01-01T17:55:00+09:00</ArrivalTime><Initial>押し</Initial></FirstHeight><MaxHeight><DateTime>2024-01-01T19:45:00+09:00</DateTime><jmx_eb:TsunamiHeight type="これまでの最大波の高さ" unit="m" description="０．３m">0.3</jmx_eb:TsunamiHeight></MaxHeight></Station><Station><Name>瀬棚港</Name><Code>11121</Code><FirstHeight><ArrivalTime>2024-01-01T17:54:00+09:00</ArrivalTime><Initial>押し</Initial></FirstHeight><MaxHeight><DateTime>2024-01-01T18:26:00+09:00</DateTime><jmx_eb:TsunamiHeight type="これまでの最大波の高さ" unit="m" description="０．６m">0.6</jmx_eb:TsunamiHeight></MaxHeight></Station><Station><Name>岩内港</Name><Code>11122</Code><FirstHeight><ArrivalTime>2024-01-01T17:18:00+09:00</ArrivalTime><Initial>押し</Initial></FirstHeight><MaxHeight><DateTime>2024-01-02T00:26:00+09:00</DateTime><jmx_eb:TsunamiHeight type="これまでの最大波の高さ" unit="m" description="０．５m">0.5</jmx_eb:TsunamiHeight></MaxHeight></Station><Station><Name>奥尻島奥尻港</Name><Code>11123</Code><FirstHeight><Condition>第１波識別不能</Condition></FirstHeight><MaxHeight><DateTime>2024-01-01T18:07:00+09:00</DateTime><jmx_eb:TsunamiHeight type="これまでの最大波の高さ" unit="m" description="０．５m">0.5</jmx_eb:TsunamiHeight></MaxHeight></Station><Station><Name>奥尻島松江</Name><Code>11130</Code><FirstHeight><ArrivalTime>2024-01-01T17:17:00+09:00</ArrivalTime><Initial>引き</Initial></FirstHeight><MaxHeight><DateTime>2024-01-01T18:01:00+09:00</DateTime><Condition>微弱</Condition></MaxHeight></Station></Item><Item><Area><Name>青森県日本海沿岸</Name><Code>200</Code></Area><Station><Name>深浦</Name><Code>20001</Code><FirstHeight><ArrivalTime>2024-01-01T17:02:00+09:00</ArrivalTime><Initial>押し</Initial></FirstHeight><MaxHeight><DateTime>2024-01-01T18:04:00+09:00</DateTime><jmx_eb:TsunamiHeight type="これまでの最大波の高さ" unit="m" description="０．３m">0.3</jmx_eb:TsunamiHeight></MaxHeight></Station></Item><Item><Area><Name>秋田県</Name><Code>230</Code></Area><Station><Name>秋田</Name><Code>23001</Code><FirstHeight><ArrivalTime>2024-01-01T17:23:00+09:00</ArrivalTime><Initial>押し</Initial></FirstHeight><MaxHeight><DateTime>2024-01-01T23:36:00+09:00</DateTime><jmx_eb:TsunamiHeight type="これまでの最大波の高さ" unit="m" description="０．３m">0.3</jmx_eb:TsunamiHeight></MaxHeight></Station></Item><Item><Area><Name>山形県</Name><Code>240</Code></Area><Station><Name>飛島</Name><Code>24030</Code><FirstHeight><ArrivalTime>2024-01-01T16:57:00+09:00</ArrivalTime><Initial>押し</Initial></FirstHeight><MaxHeight><DateTime>2024-01-01T17:52:00+09:00</DateTime><jmx_eb:TsunamiHeight type="これまでの最大波の高さ" unit="m" description="０．４m">0.4</jmx_eb:TsunamiHeight></MaxHeight></Station><Station><Name>酒田</Name><Code>24001</Code><FirstHeight><ArrivalTime>2024-01-01T17:12:00+09:00</ArrivalTime><Initial>押し</Initial></FirstHeight><MaxHeight><DateTime>2024-01-01T19:08:00+09:00</DateTime><jmx_eb:TsunamiHeight type="これまでの最大波の高さ" unit="m" description="０．８m">0.8</jmx_eb:TsunamiHeight></MaxHeight></Station></Item><Item><Area><Name>新潟県上中下越</Name><Code>340</Code></Area><Station><Name>新潟</Name><Code>34001</Code><FirstHeight><ArrivalTime>2024-01-01T16:56:00+09:00</ArrivalTime><Initial>押し</Initial></FirstHeight><MaxHeight><DateTime>2024-01-01T17:09:00+09:00</DateTime><jmx_eb:TsunamiHeight type="これまでの最大波の高さ" unit="m" description="０．３m">0.3</jmx_eb:TsunamiHeight></MaxHeight></Station><Station><Name>柏崎市鯨波</Name><Code>34030</Code><FirstHeight><ArrivalTime>2024-01-01T16:31:00+09:00</ArrivalTime><Initial>押し</Initial></FirstHeight><MaxHeight><DateTime>2024-01-01T16:36:00+09:00</DateTime><jmx_eb:TsunamiHeight type="これまでの最大波の高さ" unit="m" description="０．４m">0.4</jmx_eb:TsunamiHeight></MaxHeight></Station></Item><Item><Area><Name>佐渡</Name><Code>341</Code></Area><Station><Name>佐渡市鷲崎</Name><Code>34103</Code><FirstHeight><ArrivalTime>2024-01-01T16:32:00+09:00</ArrivalTime><Initial>押し</Initial></FirstHeight><MaxHeight><DateTime>2024-01-01T21:15:00+09:00</DateTime><jmx_eb:TsunamiHeight type="これまでの最大波の高さ" unit="m" description="０．３m">0.3</jmx_eb:TsunamiHeight></MaxHeight></Station></Item><Item><Area><Name>富山県</Name><Code>350</Code></Area><Station><Name>富山</Name><Code>35001</Code><FirstHeight><ArrivalTime>2024-01-01T16:13:00+09:00</ArrivalTime><Initial>引き</Initial></FirstHeight><MaxHeight><DateTime>2024-01-01T16:35:00+09:00</DateTime><jmx_eb:TsunamiHeight type="これまでの最大波の高さ" unit="m" description="０．８m">0.8</jmx_eb:TsunamiHeight></MaxHeight></Station></Item><Item><Area><Name>石川県能登</Name><Code>360</Code></Area><Station><Name>輪島港</Name><Code>36020</Code><FirstHeight><ArrivalTime>2024-01-01T16:10:00+09:00</ArrivalTime><Initial>押し</Initial></FirstHeight><MaxHeight><DateTime>2024-01-01T16:21:00+09:00</DateTime><jmx_eb:TsunamiHeight type="これまでの最大波の高さ" unit="m" description="１．２m以上">1.2</jmx_eb:TsunamiHeight></MaxHeight></Station><Station><Name>七尾港</Name><Code>36021</Code><FirstHeight><ArrivalTime>2024-01-01T16:37:00+09:00</ArrivalTime><Initial>押し</Initial></FirstHeight><MaxHeight><DateTime>2024-01-01T18:59:00+09:00</DateTime><jmx_eb:TsunamiHeight type="これまでの最大波の高さ" unit="m" description="０．５m">0.5</jmx_eb:TsunamiHeight></MaxHeight></Station></Item><Item><Area><Name>石川県加賀</Name><Code>361</Code></Area><Station><Name>金沢</Name><Code>36101</Code><FirstHeight><Condition>第１波識別不能</Condition></FirstHeight><MaxHeight><DateTime>2024-01-01T19:09:00+09:00</DateTime><jmx_eb:TsunamiHeight type="これまでの最大波の高さ" unit="m" description="０．９m">0.9</jmx_eb:TsunamiHeight></MaxHeight></Station></Item><Item><Area><Name>福井県</Name><Code>370</Code></Area><Station><Name>敦賀港</Name><Code>37020</Code><FirstHeight><ArrivalTime>2024-01-01T17:33:00+09:00</ArrivalTime><Initial>押し</Initial></FirstHeight><MaxHeight><DateTime>2024-01-01T20:28:00+09:00</DateTime><jmx_eb:TsunamiHeight type="これまでの最大波の高さ" unit="m" description="０．５m">0.5</jmx_eb:TsunamiHeight></MaxHeight></Station></Item><Item><Area><Name>京都府</Name><Code>500</Code></Area><Station><Name>舞鶴</Name><Code>50001</Code><FirstHeight><Condition>第１波識別不能</Condition></FirstHeight><MaxHeight><DateTime>2024-01-02T00:43:00+09:00</DateTime><jmx_eb:TsunamiHeight type="これまでの最大波の高さ" unit="m" description="０．４m">0.4</jmx_eb:TsunamiHeight></MaxHeight></Station></Item><Item><Area><Name>兵庫県北部</Name><Code>520</Code></Area><Station><Name>豊岡市津居山</Name><Code>52001</Code><FirstHeight><Condition>第１波識別不能</Condition></FirstHeight><MaxHeight><DateTime>2024-01-01T19:20:00+09:00</DateTime><jmx_eb:TsunamiHeight type="これまでの最大波の高さ" unit="m" description="０．４m">0.4</jmx_eb:TsunamiHeight></MaxHeight></Station></Item><Item><Area><Name>鳥取県</Name><Code>540</Code></Area><Station><Name>岩美町田後</Name><Code>54030</Code><FirstHeight><Condition>第１波識別不能</Condition></FirstHeight><MaxHeight><DateTime>2024-01-01T19:18:00+09:00</DateTime><jmx_eb:TsunamiHeight type="これまでの最大波の高さ" unit="m" description="０．２m">0.2</jmx_eb:TsunamiHeight></MaxHeight></Station><Station><Name>境港市境</Name><Code>54001</Code><FirstHeight><ArrivalTime>2024-01-01T18:14:00+09:00</ArrivalTime><Initial>押し</Initial></FirstHeight><MaxHeight><DateTime>2024-01-01T22:30:00+09:00</DateTime><jmx_eb:TsunamiHeight type="これまでの最大波の高さ" unit="m" description="０．６m">0.6</jmx_eb:TsunamiHeight></MaxHeight></Station></Item><Item><Area><Name>島根県出雲・石見</Name><Code>550</Code></Area><Station><Name>浜田</Name><Code>55001</Code><FirstHeight><ArrivalTime>2024-01-01T18:30:00+09:00</ArrivalTime><Initial>押し</Initial></FirstHeight><MaxHeight><DateTime>2024-01-01T21:46:00+09:00</DateTime><jmx_eb:TsunamiHeight type="これまでの最大波の高さ" unit="m" description="０．３m">0.3</jmx_eb:TsunamiHeight></MaxHeight></Station></Item><Item><Area><Name>隠岐</Name><Code>551</Code></Area><Station><Name>隠岐西郷</Name><Code>55101</Code><FirstHeight><Condition>第１波識別不能</Condition></FirstHeight><MaxHeight><DateTime>2024-01-01T17:50:00+09:00</DateTime><jmx_eb:TsunamiHeight type="これまでの最大波の高さ" unit="m" description="０．３m">0.3</jmx_eb:TsunamiHeight></MaxHeight></Station></Item><Item><Area><Name>佐賀県北部</Name><Code>720</Code></Area><Station><Name>唐津港</Name><Code>72020</Code><FirstHeight><Condition>第１波識別不能</Condition></FirstHeight><MaxHeight><DateTime>2024-01-02T06:55:00+09:00</DateTime><jmx_eb:TsunamiHeight type="これまでの最大波の高さ" unit="m" description="０．１m">0.1</jmx_eb:TsunamiHeight></MaxHeight></Station><Station><Name>玄海町仮屋</Name><Code>72030</Code><FirstHeight><Condition>第１波識別不能</Condition></FirstHeight><MaxHeight><DateTime>2024-01-02T06:23:00+09:00</DateTime><jmx_eb:TsunamiHeight type="これまでの最大波の高さ" unit="m" description="０．３m">0.3</jmx_eb:TsunamiHeight></MaxHeight></Station></Item><Item><Area><Name>壱岐・対馬</Name><Code>731</Code></Area><Station><Name>対馬比田勝</Name><Code>73102</Code><FirstHeight><ArrivalTime>2024-01-01T18:53:00+09:00</ArrivalTime><Initial>押し</Initial></FirstHeight><MaxHeight><DateTime>2024-01-02T00:01:00+09:00</DateTime><jmx_eb:TsunamiHeight type="これまでの最大波の高さ" unit="m" description="０．３m">0.3</jmx_eb:TsunamiHeight></MaxHeight></Station><Station><Name>壱岐島郷ノ浦港</Name><Code>73120</Code><FirstHeight><Condition>第１波識別不能</Condition></FirstHeight><MaxHeight><DateTime>2024-01-02T06:15:00+09:00</DateTime><jmx_eb:TsunamiHeight type="これまでの最大波の高さ" unit="m" description="０．２m">0.2</jmx_eb:TsunamiHeight></MaxHeight></Station></Item></Observation><Forecast><CodeDefine><Type xpath="Item/Area/Code">津波予報区</Type><Type xpath="Item/Category/Kind/Code">警報等情報要素／津波警報・注意報・予報</Type><Type xpath="Item/Category/LastKind/Code">警報等情報要素／津波警報・注意報・予報</Type><Type xpath="Item/Station/Code">潮位観測点</Type></CodeDefine><Item><Area><Name>北海道太平洋沿岸中部</Name><Code>101</Code></Area><Category><Kind><Name>津波予報（若干の海面変動）</Name><Code>71</Code></Kind><LastKind><Name>津波予報（若干の海面変動）</Name><Code>71</Code></LastKind></Category></Item><Item><Area><Name>北海道太平洋沿岸西部</Name><Code>102</Code></Area><Category><Kind><Name>津波予報（若干の海面変動）</Name><Code>72</Code></Kind><LastKind><Name>津波注意報</Name><Code>62</Code></LastKind></Category></Item><Item><Area><Name>北海道日本海沿岸北部</Name><Code>110</Code></Area><Category><Kind><Name>津波予報（若干の海面変動）</Name><Code>72</Code></Kind><LastKind><Name>津波注意報</Name><Code>62</Code></LastKind></Category></Item><Item><Area><Name>北海道日本海沿岸南部</Name><Code>111</Code></Area><Category><Kind><Name>津波予報（若干の海面変動）</Name><Code>72</Code></Kind><LastKind><Name>津波注意報</Name><Code>62</Code></LastKind></Category></Item><Item><Area><Name>オホーツク海沿岸</Name><Code>120</Code></Area><Category><Kind><Name>津波予報（若干の海面変動）</Name><Code>71</Code></Kind><LastKind><Name>津波予報（若干の海面変動）</Name><Code>71</Code></LastKind></Category></Item><Item><Area><Name>青森県日本海沿岸</Name><Code>200</Code></Area><Category><Kind><Name>津波予報（若干の海面変動）</Name><Code>72</Code></Kind><LastKind><Name>津波注意報</Name><Code>62</Code></LastKind></Category></Item><Item><Area><Name>青森県太平洋沿岸</Name><Code>201</Code></Area><Category><Kind><Name>津波予報（若干の海面変動）</Name><Code>71</Code></Kind><LastKind><Name>津波予報（若干の海面変動）</Name><Code>71</Code></LastKind></Category></Item><Item><Area><Name>陸奥湾</Name><Code>202</Code></Area><Category><Kind><Name>津波予報（若干の海面変動）</Name><Code>71</Code></Kind><LastKind><Name>津波予報（若干の海面変動）</Name><Code>71</Code></LastKind></Category></Item><Item><Area><Name>秋田県</Name><Code>230</Code></Area><Category><Kind><Name>津波予報（若干の海面変動）</Name><Code>72</Code></Kind><LastKind><Name>津波注意報</Name><Code>62</Code></LastKind></Category></Item><Item><Area><Name>山形県</Name><Code>240</Code></Area><Category><Kind><Name>津波予報（若干の海面変動）</Name><Code>72</Code></Kind><LastKind><Name>津波注意報</Name><Code>62</Code></LastKind></Category></Item><Item><Area><Name>新潟県上中下越</Name><Code>340</Code></Area><Category><Kind><Name>津波予報（若干の海面変動）</Name><Code>72</Code></Kind><LastKind><Name>津波注意報</Name><Code>62</Code></LastKind></Category></Item><Item><Area><Name>佐渡</Name><Code>341</Code></Area><Category><Kind><Name>津波予報（若干の海面変動）</Name><Code>72</Code></Kind><LastKind><Name>津波注意報</Name><Code>62</Code></LastKind></Category></Item><Item><Area><Name>富山県</Name><Code>350</Code></Area><Category><Kind><Name>津波予報（若干の海面変動）</Name><Code>72</Code></Kind><LastKind><Name>津波注意報</Name><Code>62</Code></LastKind></Category></Item><Item><Area><Name>石川県能登</Name><Code>360</Code></Area><Category><Kind><Name>津波予報（若干の海面変動）</Name><Code>72</Code></Kind><LastKind><Name>津波注意報</Name><Code>62</Code></LastKind></Category></Item><Item><Area><Name>石川県加賀</Name><Code>361</Code></Area><Category><Kind><Name>津波予報（若干の海面変動）</Name><Code>72</Code></Kind><LastKind><Name>津波注意報</Name><Code>62</Code></LastKind></Category></Item><Item><Area><Name>福井県</Name><Code>370</Code></Area><Category><Kind><Name>津波予報（若干の海面変動）</Name><Code>72</Code></Kind><LastKind><Name>津波注意報</Name><Code>62</Code></LastKind></Category></Item><Item><Area><Name>京都府</Name><Code>500</Code></Area><Category><Kind><Name>津波予報（若干の海面変動）</Name><Code>72</Code></Kind><LastKind><Name>津波注意報</Name><Code>62</Code></LastKind></Category></Item><Item><Area><Name>兵庫県北部</Name><Code>520</Code></Area><Category><Kind><Name>津波予報（若干の海面変動）</Name><Code>72</Code></Kind><LastKind><Name>津波注意報</Name><Code>62</Code></LastKind></Category></Item><Item><Area><Name>鳥取県</Name><Code>540</Code></Area><Category><Kind><Name>津波予報（若干の海面変動）</Name><Code>72</Code></Kind><LastKind><Name>津波注意報</Name><Code>62</Code></LastKind></Category></Item><Item><Area><Name>島根県出雲・石見</Name><Code>550</Code></Area><Category><Kind><Name>津波予報（若干の海面変動）</Name><Code>72</Code></Kind><LastKind><Name>津波注意報</Name><Code>62</Code></LastKind></Category></Item><Item><Area><Name>隠岐</Name><Code>551</Code></Area><Category><Kind><Name>津波予報（若干の海面変動）</Name><Code>71</Code></Kind><LastKind><Name>津波予報（若干の海面変動）</Name><Code>72</Code></LastKind></Category></Item><Item><Area><Name>山口県日本海沿岸</Name><Code>700</Code></Area><Category><Kind><Name>津波予報（若干の海面変動）</Name><Code>71</Code></Kind><LastKind><Name>津波予報（若干の海面変動）</Name><Code>72</Code></LastKind></Category></Item><Item><Area><Name>福岡県日本海沿岸</Name><Code>711</Code></Area><Category><Kind><Name>津波予報（若干の海面変動）</Name><Code>71</Code></Kind><LastKind><Name>津波予報（若干の海面変動）</Name><Code>71</Code></LastKind></Category></Item><Item><Area><Name>佐賀県北部</Name><Code>720</Code></Area><Category><Kind><Name>津波予報（若干の海面変動）</Name><Code>71</Code></Kind><LastKind><Name>津波予報（若干の海面変動）</Name><Code>71</Code></LastKind></Category></Item><Item><Area><Name>長崎県西方</Name><Code>730</Code></Area><Category><Kind><Name>津波予報（若干の海面変動）</Name><Code>71</Code></Kind><LastKind><Name>津波予報（若干の海面変動）</Name><Code>71</Code></LastKind></Category></Item><Item><Area><Name>壱岐・対馬</Name><Code>731</Code></Area><Category><Kind><Name>津波予報（若干の海面変動）</Name><Code>72</Code></Kind><LastKind><Name>津波注意報</Name><Code>62</Code></LastKind></Category></Item></Forecast></Tsunami><Earthquake><OriginTime>2024-01-01T16:10:00+09:00</OriginTime><ArrivalTime>2024-01-01T16:10:00+09:00</ArrivalTime><Hypocenter><Area><Name>石川県能登地方</Name><Code type="震央地名">390</Code><jmx_eb:Coordinate description="北緯３７．５度　東経１３７．３度　深さ　２０km" datum="日本測地系">+37.5+137.3-20000/</jmx_eb:Coordinate><NameFromMark>輪島の東北東３０km付近</NameFromMark><MarkCode type="震央補助">308</MarkCode><Direction>東北東</Direction><Distance unit="km">30</Distance></Area></Hypocenter><jmx_eb:Magnitude type="Mj" description="M７．６">7.6</jmx_eb:Magnitude></Earthquake><Comments><WarningComment codeType="固定付加文"><Text>場所によっては、観測した津波の高さよりさらに大きな津波が到達しているおそれがあります。現在、大津波警報・津波警報・津波注意報を発表している沿岸はありません。</Text><Code>0111 0107</Code></WarningComment></Comments></Body></Report>'
           const xml = parser.parseFromString(dataTmp, "text/html");
           if (!xml) return false;
 
@@ -2468,7 +2472,7 @@ function EQI_JMAXML_Req(url, count) {
                 var ValidDateTimeTmp = new Date(xml.querySelector("ReportDateTime").textContent);
                 ValidDateTimeTmp.setHours(ValidDateTimeTmp.getHours() + 12);
               }
-              if (ValidDateTimeTmp < new Date()) return;
+//abcba               if (ValidDateTimeTmp < new Date()) return;
 
               tsunamiDataTmp = {
                 status: xml.querySelector("Status").textContent,
@@ -2522,10 +2526,12 @@ function EQI_JMAXML_Req(url, count) {
                       }
                       if (elm.querySelector("MaxHeight")) {
                         var maxheightElm = elm.querySelector("MaxHeight").getElementsByTagName("jmx_eb:TsunamiHeight");
-                        if (maxheightElm) {
+                        if (maxheightElm[0]) {
                           maxHeightTmp = maxheightElm[0].getAttribute("description").replace(/[Ａ-Ｚａ-ｚ０-９．]/g, function (s) {
                             return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
                           });
+                        } else if(elm.querySelector("MaxHeight").getElementsByTagName("Condition")){
+                          maxHeightTmp = elm.querySelector("MaxHeight").getElementsByTagName("Condition")
                         }
                       }
                       var stations = [];
@@ -2573,7 +2579,7 @@ function EQI_JMAXML_Req(url, count) {
                           var firstHeightInitialTmp;
                           var maxheightTime;
                           var maxHeightCondition;
-                          var oMaxHeightTmp;
+                          var oMaxHeightTmp,maxheightRising;
                           var nameTmp = elm2.querySelector("Name").textContent;
                           if (elm2.querySelector("FirstHeight")) {
                             if (elm2.querySelector("FirstHeight").querySelector("ArrivalTime")) ArrivalTimeTmp = new Date(elm2.querySelector("FirstHeight").querySelector("ArrivalTime").textContent);
@@ -2587,6 +2593,7 @@ function EQI_JMAXML_Req(url, count) {
                               oMaxHeightTmp = oMaxHeightTmp.replace(/[Ａ-Ｚａ-ｚ０-９．]/g, function (s) {
                                 return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
                               });
+                              if(maxheightElm.getAttribute("condition")) maxheightRising = maxheightElm.getAttribute("condition") == "上昇中";
                             }
 
                             var maxheightTimeElm = elm2.querySelector("MaxHeight").querySelector("DateTime");
@@ -2605,6 +2612,7 @@ function EQI_JMAXML_Req(url, count) {
                             firstHeightCondition: firstHeightConditionTmp,
                             firstHeightInitial: firstHeightInitialTmp,
                             omaxHeight: oMaxHeightTmp,
+                            maxheightRising: maxheightRising,
                             maxHeightTime: maxheightTime,
                             maxHeightCondition: maxHeightCondition,
                           });
@@ -2644,6 +2652,7 @@ function EQI_JMAXML_Req(url, count) {
           }
           kmoniTimeUpdate(new Date() - Replay, "JMAXML", "success");
         } catch (err) {
+          console.log(err)
           kmoniTimeUpdate(new Date() - Replay, "JMAXML", "Error");
         }
       });
@@ -3086,7 +3095,7 @@ function TsunamiInfoControl(data) {
     var newInfo = !tsunamiData || !tsunamiData.issue || tsunamiData.issue.time < data.issue.time;
     if (newInfo) {
       //情報の有効期限
-      if (data.ValidDateTime && data.ValidDateTime < new Date()) return;
+      //abcba if (data.ValidDateTime && data.ValidDateTime < new Date()) return;
       soundPlay("TsunamiInfo");
       tsunamiData = data;
 

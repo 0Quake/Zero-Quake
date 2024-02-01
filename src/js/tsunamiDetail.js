@@ -7,6 +7,7 @@ window.electronAPI.messageSend((event, request) => {
 
 var mySectElm;
 function tsunamiUpdate(dataTmp) {
+  console.log(dataTmp)
   var Tsunami_MajorWarning = (Tsunami_Warning = Tsunami_Watch = Tsunami_Yoho = false);
   document.getElementById("revocation").style.display = "none";
   document.getElementById("no-data").style.display = "none";
@@ -106,6 +107,8 @@ function tsunamiUpdate(dataTmp) {
             omaxHeight = elm2.omaxHeight;
             if (elm2.firstHeightInitial) omaxHeight = elm2.omaxHeight + " " + elm2.firstHeightInitial;
           } else if (elm2.maxHeightCondition) omaxHeight = elm2.maxHeightCondition;
+
+          if(elm2.maxheightRising) omaxHeight += "↗";
 
           if (elm2.maxHeightTime) maxHeightTime = dateEncode(5, elm2.maxHeightTime);
 
