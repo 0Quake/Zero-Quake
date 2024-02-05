@@ -81,7 +81,8 @@ function tsunamiUpdate(dataTmp) {
       new_tr.classList.add("add-content");
       new_tr.classList.add("ListItem_" + elm.grade);
       new_tr.setAttribute("tabindex", "0");
-      document.getElementById(elm.grade + "Info").after(new_tr);
+      if(elm.grade) document.getElementById(elm.grade + "Info").after(new_tr);
+      else  document.getElementById("no-data").before(new_tr);
       if (config && config.home.TsunamiSect && elm.name == config.home.TsunamiSect) {
         mySectElm = new_tr;
         mySectElm.scrollIntoView({ behavior: "smooth", block: "center" });

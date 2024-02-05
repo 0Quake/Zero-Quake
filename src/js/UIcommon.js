@@ -160,7 +160,7 @@ function shindoConvert(str, responseType) {
       break;
     case 2:
       var ConvTable = [[config.color.Shindo["0"].background, config.color.Shindo["0"].color], [config.color.Shindo["1"].background, config.color.Shindo["1"].color], [config.color.Shindo["2"].background, config.color.Shindo["2"].color], [config.color.Shindo["3"].background, config.color.Shindo["3"].color], [config.color.Shindo["4"].background, config.color.Shindo["4"].color], [config.color.Shindo["5m"].background, config.color.Shindo["5m"].color], [config.color.Shindo["5p"].background, config.color.Shindo["5p"].color], [config.color.Shindo["6m"].background, config.color.Shindo["6m"].color], [config.color.Shindo["6p"].background, config.color.Shindo["6p"].color], [config.color.Shindo["7"].background, config.color.Shindo["7"].color], [config.color.Shindo["5p?"].background, config.color.Shindo["5p?"].color], [config.color.Shindo["?"].background, config.color.Shindo["?"].color]];
-ndoCon      break;
+      break;
     case 3:
       var ConvTable = [null, "1", "2", "3", "4", "5m", "5p", "6m", "6p", "7", "5p?", null];
       break;
