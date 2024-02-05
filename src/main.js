@@ -1600,7 +1600,6 @@ function RegularExecution(roop) {
 
     //津波情報解除
     if (tsunamiData && tsunamiData.ValidDateTime <= new Date()) {
-    /*abcba
       TsunamiInfoControl({
         issue: { time: tsunamiData.ValidDateTime, EventID: null, EarthQuake: null },
         revocation: true,
@@ -1608,7 +1607,7 @@ function RegularExecution(roop) {
         areas: [],
         source: null,
         ValidDateTime: null,
-      });*/
+      });
     }
   } catch (err) {
     throw new Error("内部の情報処理でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
@@ -2386,7 +2385,6 @@ function EQI_JMAXML_Req(url, count) {
       res.on("end", function () {
         try {
           const parser = new new JSDOM().window.DOMParser();
-          dataTmp = '<Report xmlns="http://xml.kishou.go.jp/jmaxml1/" xmlns:jmx="http://xml.kishou.go.jp/jmaxml1/"><Control><Title>沖合の津波観測に関する情報</Title><DateTime>2016-11-21T22:04:43Z</DateTime><Status>通常</Status><EditorialOffice>大阪管区気象台</EditorialOffice><PublishingOffice>気象庁</PublishingOffice></Control><Head xmlns="http://xml.kishou.go.jp/jmaxml1/informationBasis1/"><Title>沖合の津波観測に関する情報</Title><ReportDateTime>2016-11-22T07:04:00+09:00</ReportDateTime><TargetDateTime>2016-11-22T07:03:00+09:00</TargetDateTime><EventID>20161122055958</EventID><InfoType>発表</InfoType><Serial>2</Serial><InfoKind>津波情報</InfoKind><InfoKindVersion>1.0_1</InfoKindVersion><Headline><Text/></Headline></Head><Body xmlns="http://xml.kishou.go.jp/jmaxml1/body/seismology1/" xmlns:jmx_eb="http://xml.kishou.go.jp/jmaxml1/elementBasis1/"><Tsunami><Observation><CodeDefine><Type xpath="Item/Area/Code">津波予報区</Type><Type xpath="Item/Station/Code">潮位観測点</Type></CodeDefine><Item><Area><Name/><Code/></Area><Station><Name>福島小名浜沖</Name><Code>25090</Code><Sensor>GPS波浪計</Sensor><FirstHeight><ArrivalTime>2016-11-22T06:06:00+09:00</ArrivalTime><Initial>引き</Initial></FirstHeight><MaxHeight><Condition>観測中</Condition></MaxHeight></Station><Station><Name>茨城神栖沖</Name><Code>30095</Code><Sensor>水圧計</Sensor><FirstHeight><ArrivalTime>2016-11-22T06:30:00+09:00</ArrivalTime><Initial>引き</Initial><Revise>追加</Revise></FirstHeight><MaxHeight><DateTime>2016-11-22T06:40:00+09:00</DateTime><jmx_eb:TsunamiHeight type="これまでの最大波の高さ" unit="m" description="０．１m">0.1</jmx_eb:TsunamiHeight><Revise>追加</Revise></MaxHeight></Station></Item></Observation><Estimation><CodeDefine><Type xpath="Item/Area/Code">沿岸地域</Type></CodeDefine><Item><Area><Name>福島県</Name><Code>250</Code></Area><FirstHeight><ArrivalTime>2016-11-22T06:22:00+09:00</ArrivalTime><Condition>早いところでは既に津波到達と推定</Condition></FirstHeight><MaxHeight><Condition>推定中</Condition></MaxHeight></Item><Item><Area><Name>茨城県</Name><Code>300</Code></Area><FirstHeight><ArrivalTime>2016-11-22T06:50:00+09:00</ArrivalTime><Condition>早いところでは既に津波到達と推定</Condition><Revise>追加</Revise></FirstHeight><MaxHeight><DateTime>2016-11-22T07:00:00+09:00</DateTime><jmx_eb:TsunamiHeight type="津波の高さ" unit="m" description="　１m">1</jmx_eb:TsunamiHeight><Revise>追加</Revise></MaxHeight></Item></Estimation></Tsunami><Earthquake><OriginTime>2016-11-22T05:59:00+09:00</OriginTime><ArrivalTime>2016-11-22T05:59:00+09:00</ArrivalTime><Hypocenter><Area><Name>福島県沖</Name><Code type="震央地名">289</Code><jmx_eb:Coordinate description="北緯３７．３度　東経１４１．６度　深さ　１０km" datum="日本測地系">+37.3+141.6-10000/</jmx_eb:Coordinate><NameFromMark>いわきの東北東６０km付近</NameFromMark><MarkCode type="震央補助">203</MarkCode><Direction>東北東</Direction><Distance unit="km">60</Distance></Area></Hypocenter><jmx_eb:Magnitude type="Mj" description="M７．３">7.3</jmx_eb:Magnitude></Earthquake><Comments><WarningComment codeType="固定付加文"><Text>沖合での観測値であり、沿岸では津波はさらに高くなります。</Text><Code>0115</Code></WarningComment></Comments></Body></Report>'
           const xml = parser.parseFromString(dataTmp, "text/html");
           if (!xml) return false;
 
@@ -2471,7 +2469,7 @@ function EQI_JMAXML_Req(url, count) {
                 var ValidDateTimeTmp = new Date(xml.querySelector("ReportDateTime").textContent);
                 ValidDateTimeTmp.setHours(ValidDateTimeTmp.getHours() + 12);
               }
-//abcba               if (ValidDateTimeTmp < new Date()) return;
+              if (ValidDateTimeTmp < new Date()) return;
 
               tsunamiDataTmp = {
                 status: xml.querySelector("Status").textContent,
@@ -2571,7 +2569,6 @@ function EQI_JMAXML_Req(url, count) {
                         maxHeight: maxHeightTmp,
                       });
                     });
-                    console.log(tsunamiDataTmp.areas)
                 }
                 if (tsunamiElm.querySelector("Observation")) {
                   tsunamiElm
@@ -2659,7 +2656,6 @@ function EQI_JMAXML_Req(url, count) {
           }
           kmoniTimeUpdate(new Date() - Replay, "JMAXML", "success");
         } catch (err) {
-          console.log(err)
           kmoniTimeUpdate(new Date() - Replay, "JMAXML", "Error");
         }
       });
@@ -3102,7 +3098,7 @@ function TsunamiInfoControl(data) {
     var newInfo = !tsunamiData || !tsunamiData.issue || tsunamiData.issue.time < data.issue.time;
     if (newInfo) {
       //情報の有効期限
-      //abcba if (data.ValidDateTime && data.ValidDateTime < new Date()) return;
+      if (data.ValidDateTime && data.ValidDateTime < new Date()) return;
       soundPlay("TsunamiInfo");
       tsunamiData = data;
 

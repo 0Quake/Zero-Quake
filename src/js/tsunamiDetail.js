@@ -7,7 +7,6 @@ window.electronAPI.messageSend((event, request) => {
 
 var mySectElm;
 function tsunamiUpdate(dataTmp) {
-  console.log(dataTmp)
   var Tsunami_MajorWarning = (Tsunami_Warning = Tsunami_Watch = Tsunami_Yoho = false);
   document.getElementById("revocation").style.display = "none";
   document.getElementById("no-data").style.display = "none";

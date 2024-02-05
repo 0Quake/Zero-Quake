@@ -32,7 +32,6 @@
     <script>
         window.electronAPI.messageSend((event, request) => {
             if (request.action == "NankaiTroughInfo") {
-                console.log(request)
                 document.title = request.data.title + " (" + request.data.kind + ") - Zero Quake"
 
                 document.getElementById("title").innerText = request.data.title + " (" + request.data.kind + ")"
