@@ -39,7 +39,7 @@
   "homepage": "https://zeroquake.wwww.jp/",
   "devDependencies": {
     "electron": "^29.0.0",
-    "electron-builder": "^24.9.1",
+    "electron-builder": "^24.12.0",
     "eslint": "^8.56.0"
   },
   "dependencies": {
