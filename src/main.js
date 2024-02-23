@@ -633,10 +633,10 @@ ipcMain.on("message", (_event, response) => {
       checkUpdate();
       break;
     case "tsunamiReqest":
-      if (tsunamiData) {
+      if (Tsunami_Data.length) {
         messageToMainWindow({
           action: "tsunamiUpdate",
-          data: tsunamiData,
+          data: Tsunami_Data,
         });
       }
       break;
@@ -940,7 +940,7 @@ function tsunami_createWindow() {
       });
       tsunamiWindow.webContents.send("message2", {
         action: "tsunamiUpdate",
-        data: tsunamiData,
+        data: Tsunami_Data,
       });
     });
     tsunamiWindow.loadFile("src/TsunamiDetail.html");
@@ -1599,16 +1599,19 @@ function RegularExecution(roop) {
     });
 
     //津波情報解除
-    if (tsunamiData && tsunamiData.ValidDateTime <= new Date()) {
-      TsunamiInfoControl({
-        issue: { time: tsunamiData.ValidDateTime, EventID: null, EarthQuake: null },
-        revocation: true,
-        cancelled: false,
-        areas: [],
-        source: null,
-        ValidDateTime: null,
-      });
-    }
+    Tsunami_Data.forEach(function(elm){
+      //abcde
+      if(elm.ValidDateTime <= new Date()&&false){
+        TsunamiInfoControl({
+          issue: { time: tsunamiData.ValidDateTime, EventID: null, EarthQuake: null },
+          revocation: true,
+          cancelled: false,
+          areas: [],
+          source: null,
+          ValidDateTime: null,
+        });
+      }
+    })
   } catch (err) {
     throw new Error("内部の情報処理でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
   }
@@ -3089,32 +3092,114 @@ function eqInfoAlert(data, source, update, audioPlay) {
 }
 
 //🔴津波情報🔴
+Tsunami_Data = [];
+
 function TsunamiInfoControl(data) {
   try {
     if (!config.Info.TsunamiInfo.GetData) return;
     if (!config.Info.TsunamiInfo.showtraining && data.status == "訓練") return;
     if (!config.Info.TsunamiInfo.showTest && data.status == "試験") return;
 
-    var newInfo = !tsunamiData || !tsunamiData.issue || tsunamiData.issue.time < data.issue.time;
-    if (newInfo) {
       //情報の有効期限
       if (data.ValidDateTime && data.ValidDateTime < new Date()) return;
-      soundPlay("TsunamiInfo");
-      tsunamiData = data;
 
+    tsunamiItem = Tsunami_Data.find(function(elm){return elm.issue.time == data.issue.time && (!elm.issue.EventID || !data.issue.EventID||elm.issue.EventID == data.issue.EventID)})
+
+    if(tsunamiItem){
+      if(data.issue.EventID) tsunamiItem.issue.EventID = data.issue.EventID
+      if(data.issue.EarthQuake) tsunamiItem.issue.EarthQuake = data.issue.EarthQuake
+      if(data.revocation) tsunamiItem.revocation = data.revocation
+      if(data.cancelled) tsunamiItem.cancelled = data.cancelled
+      if(data.ValidDateTime) tsunamiItem.ValidDateTime = data.ValidDateTime
+      data.areas.forEach(function(elm){
+        areaItem = tsunamiItem.areas.find(function (elm2) {
+          return elm2.name == elm.name
+        })
+        if(areaItem){
+          if(elm.code)areaItem.code = elm.code
+          if(elm.grade)areaItem.grade=elm.grade;
+          if(elm.canceled)areaItem.canceled=elm.canceled
+          if(elm.firstHeight)areaItem.firstHeight=elm.firstHeight
+          if(elm.firstHeightCondition)areaItem.firstHeightCondition=elm.firstHeightCondition
+          if(elm.maxHeight)areaItem.maxHeight=elm.maxHeight
+
+          if(elm.stations){
+            elm.stations.forEach(function(elm2){
+              stItem = areaItem.stations.find(function (elm3) {
+                return elm3.name == elm2.name
+              })
+              if(stItem){
+                if(elm2.code) stItem.code = elm2.code
+                if(elm2.ArrivedTime) stItem.ArrivedTime = elm2.ArrivedTime
+                if(elm2.firstHeightCondition) stItem.firstHeightCondition = elm2.firstHeightCondition
+                if(elm2.firstHeightInitial) stItem.firstHeightInitial = elm2.firstHeightInitial
+                if(elm2.omaxHeight) stItem.omaxHeight = elm2.omaxHeight
+                if(elm2.maxheightRising) stItem.maxheightRising = elm2.maxheightRising
+                if(elm2.maxHeightTime) stItem.maxHeightTime = elm2.maxHeightTime
+                if(elm2.maxHeightCondition) stItem.maxHeightCondition = elm2.maxHeightCondition
+              } else elm.stations.push(elm2)
+            })
+          }
+        } else tsunamiItem.areas.push(elm)
+      })
+    } else {
+      Tsunami_Data.push(data)
       createWindow(); //アラート
-      messageToMainWindow({
+      soundPlay("TsunamiInfo");
+    }
+
+    Tsunami_data_Marged = {};
+    Tsunami_Data = Tsunami_Data.sort((a, b) => a.issue.time > b.issue.time ? 1 : -1)
+    Tsunami_Data.forEach(function(elm0) {
+      if(elm0.issue.EventID) Tsunami_data_Marged.issue.EventID = elm0.issue.EventID
+      if(elm0.issue.EarthQuake) Tsunami_data_Marged.issue.EarthQuake = elm0.issue.EarthQuake
+      if(elm0.revocation) Tsunami_data_Marged.revocation = elm0.revocation
+      if(elm0.cancelled) Tsunami_data_Marged.cancelled = elm0.cancelled
+      if(elm0.ValidDateTime) Tsunami_data_Marged.ValidDateTime = elm0.ValidDateTime
+      
+      elm0.areas.forEach(function(elm){
+        areaItem = Tsunami_data_Marged.areas.find(function (elm2) {
+          return elm2.name == elm.name
+        })
+        if(areaItem){
+          if(elm.code)areaItem.code = elm.code
+          if(elm.grade)areaItem.grade=elm.grade;
+          if(elm.canceled)areaItem.canceled=elm.canceled
+          if(elm.firstHeight)areaItem.firstHeight=elm.firstHeight
+          if(elm.firstHeightCondition)areaItem.firstHeightCondition=elm.firstHeightCondition
+          if(elm.maxHeight)areaItem.maxHeight=elm.maxHeight
+
+          if(elm.stations){
+            elm.stations.forEach(function(elm2){
+              stItem = areaItem.stations.find(function (elm3) {
+                return elm3.name == elm2.name
+              })
+              if(stItem){
+                if(elm2.code) stItem.code = elm2.code
+                if(elm2.ArrivedTime) stItem.ArrivedTime = elm2.ArrivedTime
+                if(elm2.firstHeightCondition) stItem.firstHeightCondition = elm2.firstHeightCondition
+                if(elm2.firstHeightInitial) stItem.firstHeightInitial = elm2.firstHeightInitial
+                if(elm2.omaxHeight) stItem.omaxHeight = elm2.omaxHeight
+                if(elm2.maxheightRising) stItem.maxheightRising = elm2.maxheightRising
+                if(elm2.maxHeightTime) stItem.maxHeightTime = elm2.maxHeightTime
+                if(elm2.maxHeightCondition) stItem.maxHeightCondition = elm2.maxHeightCondition
+              } else elm.stations.push(elm2)
+            })
+          }
+        } else elm.areas.push(elm)
+      })
+    })
+
+
+    messageToMainWindow({
+      action: "tsunamiUpdate",
+      data: Tsunami_data_Marged,
+    });
+    if (tsunamiWindow) {
+      tsunamiWindow.webContents.send("message2", {
         action: "tsunamiUpdate",
-        data: data,
-        new: newInfo,
+        data: Tsunami_data_Marged,
       });
-      if (tsunamiWindow) {
-        tsunamiWindow.webContents.send("message2", {
-          action: "tsunamiUpdate",
-          data: data,
-          new: newInfo,
-        });
-      }
     }
   } catch (err) {
     throw new Error("津波情報の処理（マージ）でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
