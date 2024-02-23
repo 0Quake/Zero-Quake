@@ -3101,7 +3101,7 @@ function TsunamiInfoControl(data) {
     if (!config.Info.TsunamiInfo.showTest && data.status == "試験") return;
 
       //情報の有効期限
-      if (data.ValidDateTime && data.ValidDateTime < new Date()) return;
+      //abcdeif (data.ValidDateTime && data.ValidDateTime < new Date()) return;
 
     tsunamiItem = Tsunami_Data.find(function(elm){return elm.issue.time == data.issue.time && (!elm.issue.EventID || !data.issue.EventID||elm.issue.EventID == data.issue.EventID)})
 
