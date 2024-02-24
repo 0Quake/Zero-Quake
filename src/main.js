@@ -1080,27 +1080,6 @@ function start() {
 
   //定期実行 着火
   RegularExecution(true);
-
-  setTimeout(function () {
-    eqInfoControl(
-      [
-        {
-          status: "発表",
-          eventId: 20240101000000,
-          category: "震度速報",
-          reportDateTime: new Date(),
-          OriginTime: new Date(),
-          epiCenter: "ばしょ",
-          M: 9,
-          maxI: "7",
-          cancel: false,
-          DetailURL: [],
-          axisData: null,
-        },
-      ],
-      "jma"
-    );
-  }, 16000);
 }
 
 function earlyEstReq() {
