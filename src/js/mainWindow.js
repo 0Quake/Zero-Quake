@@ -1868,9 +1868,9 @@ function tsunamiDataUpdate(data) {
               tsunamiST.classList.add("tsunami_st", classname);
 
               var tsunamiSTCap = document.createElement("span");
-              if(elm2.omaxHeight.includes("以上"))tsunamiSTCap.innerText = ">" + elm2.omaxHeight;
-              if(elm2.maxheightRising) tsunamiSTCap.innerText = elm2.omaxHeight + "↗";
-              else tsunamiSTCap.innerText = elm2.omaxHeight
+              tsunamiSTCap.innerText = elm2.omaxHeight;
+              if (elm2.omaxHeight.includes("以上")) tsunamiSTCap.innerText = ">" + elm2.omaxHeight.replace("以上", "");
+              if (elm2.maxheightRising) tsunamiSTCap.innerText = elm2.omaxHeight + "↗";
               tsunamiST.appendChild(tsunamiSTCap);
 
               var tsunamiSTMarker = document.createElement("div");
@@ -1893,17 +1893,17 @@ function tsunamiDataUpdate(data) {
 
               if (elm2.maxHeightTime) omaxHeight += " " + dateEncode(5, elm2.maxHeightTime);
 
-              if(omaxHeight) omaxHeight = "観測最大波：" + omaxHeight;
-              if(elm2.maxheightRising) omaxHeight += " （上昇中）";
+              if (omaxHeight) omaxHeight = "観測最大波：" + omaxHeight;
+              if (elm2.maxheightRising) omaxHeight += " （上昇中）";
 
-              if (elm2.ArrivedTime) ArrivedTime = "第１波観測時刻："+dateEncode(5, elm2.ArrivedTime);
+              if (elm2.ArrivedTime) ArrivedTime = "第１波観測時刻：" + dateEncode(5, elm2.ArrivedTime);
               else if (elm2.Condition == "第１波の到達を確認") ArrivedTime = "第1波到達";
               else if (elm2.Condition == "津波到達中と推測") ArrivedTime = "津波到達中と推測";
               else if (elm2.firstHeightCondition == "第１波識別不能") ArrivedTime = "第1波識別不能";
               if (elm2.firstHeightInitial) ArrivedTime += " " + elm2.firstHeightInitial;
               if (elm2.ArrivalTime) arrivalTime = "第1波予想：" + dateEncode(5, elm2.ArrivalTime);
 
-              var content = [arrivalTime, omaxHeight, ArrivedTime,  HighTideDateTime, condition].filter(Boolean).join("<br>");
+              var content = [arrivalTime, omaxHeight, ArrivedTime, HighTideDateTime, condition].filter(Boolean).join("<br>");
               var popupContent = "<h3 style='border-bottom:solid 2px " + color + "'>" + elm2.name + "</h3><div class='tsunamidetailwrap'>" + content + "</div>";
 
               var TsunamiPopup = new maplibregl.Popup().setHTML(popupContent);
