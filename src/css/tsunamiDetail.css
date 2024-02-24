@@ -144,8 +144,7 @@ table tr:nth-child(2) {
   outline: solid 2px var(--TsunamiYohoColor);
 }
 
-#revocation,
-#DTWrap {
+#revocation {
   font-size: 20px;
   padding: 20px;
 }

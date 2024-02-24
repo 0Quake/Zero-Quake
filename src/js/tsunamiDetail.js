@@ -7,13 +7,11 @@ window.electronAPI.messageSend((event, request) => {
 
 var mySectElm;
 function tsunamiUpdate(dataTmp) {
+  console.log(dataTmp);
   var Tsunami_MajorWarning = (Tsunami_Warning = Tsunami_Watch = Tsunami_Yoho = false);
   document.getElementById("revocation").style.display = "none";
   document.getElementById("no-data").style.display = "none";
 
-  document.getElementById("dateTime").innerText = dateEncode(5, new Date(dataTmp.issue.time));
-  document.getElementById("validdateTime_Wrap").style.display = dataTmp.ValidDateTime ? "inline" : "none";
-  document.getElementById("validdateTime").innerText = dateEncode(5, new Date(dataTmp.ValidDateTime));
   if (dataTmp.revocation) document.getElementById("revocation").style.display = "block";
   else if (!dataTmp || dataTmp.areas.length == 0) {
     document.getElementById("no-data").style.display = "table-row";
@@ -80,8 +78,8 @@ function tsunamiUpdate(dataTmp) {
       new_tr.classList.add("add-content");
       new_tr.classList.add("ListItem_" + elm.grade);
       new_tr.setAttribute("tabindex", "0");
-      if(elm.grade) document.getElementById(elm.grade + "Info").after(new_tr);
-      else  document.getElementById("no-data").before(new_tr);
+      if (elm.grade) document.getElementById(elm.grade + "Info").after(new_tr);
+      else document.getElementById("no-data").before(new_tr);
       if (config && config.home.TsunamiSect && elm.name == config.home.TsunamiSect) {
         mySectElm = new_tr;
         mySectElm.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -108,7 +106,7 @@ function tsunamiUpdate(dataTmp) {
             if (elm2.firstHeightInitial) omaxHeight = elm2.omaxHeight + " " + elm2.firstHeightInitial;
           } else if (elm2.maxHeightCondition) omaxHeight = elm2.maxHeightCondition;
 
-          if(elm2.maxheightRising) omaxHeight += "↗";
+          if (elm2.maxheightRising) omaxHeight += "↗";
 
           if (elm2.maxHeightTime) maxHeightTime = dateEncode(5, elm2.maxHeightTime);
 
