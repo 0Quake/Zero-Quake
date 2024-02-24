@@ -3239,9 +3239,11 @@ function TsunamiInfoControl(data) {
     Tsunami_data_Marged = { issue: {}, areas: [] };
     Tsunami_Data = Tsunami_Data.sort((a, b) => (a.issue.time > b.issue.time ? 1 : -1));
     var all_revocated = true;
+    var all_canceled = true;
     Tsunami_Data.forEach(function (elm0) {
-      if (!elm0.revocation) all_revocated = false;
-      if (elm0.revocation) return;
+      if (!elm0.revocation || !elm0.cancelled) all_revocated = false;
+      if (!elm0.cancelled) all_canceled = false;
+      if (elm0.revocation || elm0.cancelled) return;
       if (elm0.issue.EventID) Tsunami_data_Marged.issue.EventID = elm0.issue.EventID;
       if (elm0.issue.EarthQuake) Tsunami_data_Marged.issue.EarthQuake = elm0.issue.EarthQuake;
       if (elm0.cancelled) Tsunami_data_Marged.cancelled = elm0.cancelled;
@@ -3281,6 +3283,7 @@ function TsunamiInfoControl(data) {
       });
     });
     if (all_revocated) Tsunami_data_Marged.revocation = true;
+    if (all_canceled) Tsunami_data_Marged.cancelled = true;
 
     messageToMainWindow({
       action: "tsunamiUpdate",
