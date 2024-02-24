@@ -1586,6 +1586,9 @@ function Wolfx_WS() {
       } catch (err) {
         kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
       }
+      setInterval(function () {
+        connection.sendUTF("ping");
+      }, 600000);
     });
     connection.sendUTF("query_jmaeew");
     kmoniTimeUpdate(new Date() - Replay, "wolfx", "success");
