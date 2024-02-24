@@ -38,6 +38,7 @@ var sesmicPoints;
 var TimeTable_JMA2001;
 var soft_version;
 var EQInfoFetchCount = 0;
+var shindoColorTable = { 0: { r: 63, g: 250, b: 54 }, 1: { r: 189, g: 255, b: 12 }, 2: { r: 255, g: 255, b: 0 }, 3: { r: 255, g: 221, b: 0 }, 4: { r: 255, g: 144, b: 0 }, 5: { r: 255, g: 68, b: 0 }, 6: { r: 245, g: 0, b: 0 }, 7: { r: 170, g: 0, b: 0 }, "-3": { r: 0, g: 0, b: 205 }, "-2.9": { r: 0, g: 7, b: 209 }, "-2.8": { r: 0, g: 14, b: 214 }, "-2.7": { r: 0, g: 21, b: 218 }, "-2.6": { r: 0, g: 28, b: 223 }, "-2.5": { r: 0, g: 36, b: 227 }, "-2.4": { r: 0, g: 43, b: 231 }, "-2.3": { r: 0, g: 50, b: 236 }, "-2.2": { r: 0, g: 57, b: 240 }, "-2.1": { r: 0, g: 64, b: 245 }, "-2": { r: 0, g: 72, b: 250 }, "-1.9": { r: 0, g: 85, b: 238 }, "-1.8": { r: 0, g: 99, b: 227 }, "-1.7": { r: 0, g: 112, b: 216 }, "-1.6": { r: 0, g: 126, b: 205 }, "-1.5": { r: 0, g: 140, b: 194 }, "-1.4": { r: 0, g: 153, b: 183 }, "-1.3": { r: 0, g: 167, b: 172 }, "-1.2": { r: 0, g: 180, b: 161 }, "-1.1": { r: 0, g: 194, b: 150 }, "-1": { r: 0, g: 208, b: 139 }, "-0.9": { r: 6, g: 212, b: 130 }, "-0.8": { r: 12, g: 216, b: 121 }, "-0.7": { r: 18, g: 220, b: 113 }, "-0.6": { r: 25, g: 224, b: 104 }, "-0.5": { r: 31, g: 228, b: 96 }, "-0.4": { r: 37, g: 233, b: 88 }, "-0.3": { r: 44, g: 237, b: 79 }, "-0.2": { r: 50, g: 241, b: 71 }, "-0.1": { r: 56, g: 245, b: 62 }, 0.1: { r: 75, g: 250, b: 49 }, 0.2: { r: 88, g: 250, b: 45 }, 0.3: { r: 100, g: 251, b: 41 }, 0.4: { r: 113, g: 251, b: 37 }, 0.5: { r: 125, g: 252, b: 33 }, 0.6: { r: 138, g: 252, b: 28 }, 0.7: { r: 151, g: 253, b: 24 }, 0.8: { r: 163, g: 253, b: 20 }, 0.9: { r: 176, g: 254, b: 16 }, 1.1: { r: 195, g: 254, b: 10 }, 1.2: { r: 202, g: 254, b: 9 }, 1.3: { r: 208, g: 254, b: 8 }, 1.4: { r: 215, g: 254, b: 7 }, 1.5: { r: 222, g: 255, b: 5 }, 1.6: { r: 228, g: 254, b: 4 }, 1.7: { r: 235, g: 255, b: 3 }, 1.8: { r: 241, g: 254, b: 2 }, 1.9: { r: 248, g: 255, b: 1 }, 2.1: { r: 254, g: 251, b: 0 }, 2.2: { r: 254, g: 248, b: 0 }, 2.3: { r: 254, g: 244, b: 0 }, 2.4: { r: 254, g: 241, b: 0 }, 2.5: { r: 255, g: 238, b: 0 }, 2.6: { r: 254, g: 234, b: 0 }, 2.7: { r: 255, g: 231, b: 0 }, 2.8: { r: 254, g: 227, b: 0 }, 2.9: { r: 255, g: 224, b: 0 }, 3.1: { r: 254, g: 213, b: 0 }, 3.2: { r: 254, g: 205, b: 0 }, 3.3: { r: 254, g: 197, b: 0 }, 3.4: { r: 254, g: 190, b: 0 }, 3.5: { r: 255, g: 182, b: 0 }, 3.6: { r: 254, g: 174, b: 0 }, 3.7: { r: 255, g: 167, b: 0 }, 3.8: { r: 254, g: 159, b: 0 }, 3.9: { r: 255, g: 151, b: 0 }, 4.1: { r: 254, g: 136, b: 0 }, 4.2: { r: 254, g: 128, b: 0 }, 4.3: { r: 254, g: 121, b: 0 }, 4.4: { r: 254, g: 113, b: 0 }, 4.5: { r: 255, g: 106, b: 0 }, 4.6: { r: 254, g: 98, b: 0 }, 4.7: { r: 255, g: 90, b: 0 }, 4.8: { r: 254, g: 83, b: 0 }, 4.9: { r: 255, g: 75, b: 0 }, 5.1: { r: 254, g: 61, b: 0 }, 5.2: { r: 253, g: 54, b: 0 }, 5.3: { r: 252, g: 47, b: 0 }, 5.4: { r: 251, g: 40, b: 0 }, 5.5: { r: 250, g: 33, b: 0 }, 5.6: { r: 249, g: 27, b: 0 }, 5.7: { r: 248, g: 20, b: 0 }, 5.8: { r: 247, g: 13, b: 0 }, 5.9: { r: 246, g: 6, b: 0 }, 6.1: { r: 238, g: 0, b: 0 }, 6.2: { r: 230, g: 0, b: 0 }, 6.3: { r: 223, g: 0, b: 0 }, 6.4: { r: 215, g: 0, b: 0 }, 6.5: { r: 208, g: 0, b: 0 }, 6.6: { r: 200, g: 0, b: 0 }, 6.7: { r: 192, g: 0, b: 0 }, 6.8: { r: 185, g: 0, b: 0 }, 6.9: { r: 177, g: 0, b: 0 } };
 
 const store = new Store();
 var defaultConfigVal = {
@@ -1070,6 +1071,7 @@ function start() {
   AXIS_WS();
   ProjectBS_WS();
   Wolfx_WS();
+  WolfxSeis_WS();
 
   //HTTP定期GET着火
   SnetRequest();
@@ -1080,6 +1082,8 @@ function start() {
 
   //定期実行 着火
   RegularExecution(true);
+
+  Wolfx_st();
 }
 
 function earlyEstReq() {
@@ -1583,6 +1587,86 @@ function Wolfx_WS_TryConnect() {
 function Wolfx_WS_Connect() {
   if (WolfxWSclient) WolfxWSclient.connect("wss://ws-api.wolfx.jp/all_eew");
   WolfxlastConnectDate = new Date();
+}
+
+var wolfx_st;
+
+function Wolfx_st() {
+  if (net.online) {
+    var request = net.request("https://api.wolfx.jp/seis_list.json");
+    request.on("response", (res) => {
+      var dataTmp = "";
+      res.on("data", (chunk) => {
+        dataTmp += chunk;
+      });
+      res.on("end", function () {
+        try {
+          var json = jsonParse(dataTmp);
+          if (json) wolfx_st = json;
+        } catch (err) {
+          return;
+        }
+      });
+    });
+    request.end();
+  }
+}
+
+//Wolfx 地震観測 WebSocket接続・受信処理
+var WolfxSeisWSclient;
+var WolfxSeisData = {};
+function WolfxSeis_WS() {
+  if (!config.Source.wolfx.GetData) return;
+  WolfxSeisWSclient = new WebSocketClient();
+
+  WolfxSeisWSclient.on("connectFailed", function () {
+    kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
+    Wolfx_WS_TryConnect();
+  });
+
+  WolfxSeisWSclient.on("connect", function (connection) {
+    connection.on("error", function () {
+      kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
+    });
+    connection.on("close", function () {
+      kmoniTimeUpdate(new Date() - Replay, "wolfx", "Disconnect");
+      WolfxSeis_WS_TryConnect();
+    });
+    connection.on("message", function (message) {
+      if (Replay !== 0) return;
+      kmoniTimeUpdate(new Date() - Replay, "wolfx", "success");
+
+      try {
+        var json = jsonParse(message.utf8Data);
+        if (json.type == "heartbeat" || json.type == "pong") return;
+        stationData = wolfx_st ? wolfx_st[json.type] : null;
+        var rgb = shindoColorTable[Math.floor(json.CalcShindo * 10) / 10];
+        if (stationData) WolfxSeisData[json.type] = { Type: "Wolfx", shindo: json.CalcShindo, PGA: json.PGA, Code: json.type, Name: stationData.location, Location: { Longitude: stationData.longitude, Latitude: stationData.latitude }, rgb: [rgb.r, rgb.g, rgb.b] };
+        messageToMainWindow({
+          action: "wolfxSeisUpdate",
+          LocalTime: new Date(),
+          data: WolfxSeisData,
+        });
+      } catch (err) {
+        kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
+      }
+      setInterval(function () {
+        connection.sendUTF("ping");
+      }, 600000);
+    });
+    kmoniTimeUpdate(new Date() - Replay, "wolfx", "success");
+  });
+
+  WolfxSeis_WS_Connect();
+}
+var WolfxSeislastConnectDate = new Date();
+function WolfxSeis_WS_TryConnect() {
+  var timeoutTmp = Math.max(30000 - (new Date() - WolfxSeislastConnectDate), 100);
+  setTimeout(WolfxSeis_WS_Connect, timeoutTmp);
+}
+function WolfxSeis_WS_Connect() {
+  if (WolfxSeisWSclient) WolfxSeisWSclient.connect("wss://seis.wolfx.jp/all_seis");
+  WolfxSeislastConnectDate = new Date();
 }
 
 //定期実行

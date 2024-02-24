@@ -424,7 +424,7 @@
 
                 <hr>
                 <h2 id="%E5%8F%97%E4%BF%A1%E3%81%A7%E3%81%8D%E3%82%8B%E6%83%85%E5%A0%B1">受信できる情報</h2>
-                <h3 id="%E6%B0%97%E8%B1%A1%E5%BA%81">気象庁</h3>
+                <h3 id="%E6%B0%97%E8%B1%A1%E5%BA%81">気象庁による気象情報</h3>
                 <ul>
                     <li>
                         <h3 id="%E7%B7%8A%E6%80%A5%E5%9C%B0%E9%9C%87%E9%80%9F%E5%A0%B1">緊急地震速報</h3>
@@ -472,6 +472,7 @@
                 <ul>
                     <li>K-NET, KiK-net（防災科学技術研究所 強震観測網）</li>
                     <li>S-net, 相模湾地震観測施設（防災科学技術研究所 海底地震計）</li>
+                    <li>Wolfx 地震観測網（中国 コミュニティ地震観測網）</li>
                 </ul>
                 <details>
                     <summary>情報源</summary>
@@ -479,6 +480,7 @@
                         <li>強震モニタ <a href="http://www.kmoni.bosai.go.jp/">© 防災科学技術研究所</a>（強震／毎秒）</li>
                         <li>長周期地震動モニタ <a href="http://www.lmoni.bosai.go.jp/">© 防災科学技術研究所</a>（強震／毎秒）</li>
                         <li>海しる <a href="https://www.msil.go.jp/">© Japan Coast Guard, 防災科学技術研究所</a>（海底／3分毎）</li>
+                        <li>Wolfx 地震観測所データ共有 JSON API <a href="https://api.wolfx.jp/seis.html">© Wolfx Studio</a>（中国／毎秒）</li>
                     </ul>
                 </details>
                 <h3 id="%E3%81%9D%E3%81%AE%E4%BB%96">その他</h3>
@@ -528,6 +530,10 @@
                     <li>標準 BIZUDPGothic-Regular</li>
                     <li>数字 AzeretMono-Regular</li>
                     <li>アイコン MaterialIcons</li>
+                </ul>
+                <h3>その他</h3>
+                <ul>
+                    <li><a href="https://github.com/ingen084/KyoshinShindoColorMap">KyoshinShindoColorMap</a> ingen084 様, こんぽ様</li>
                 </ul>
             </div>
             <div id="tab1_content4" class="tabcontent">
@@ -774,6 +780,9 @@
             </div>
             <div id="tab1_content8" class="tabcontent">
                 <h3><span>情報源ごとの設定</span>強震モニタ</h3>
+                <div class="infoType">取得する情報：
+                    <div>リアルタイム（日本）</div>
+                </div>
                 <h4>全般</h4>
                 <section>
                     <label><input type="checkbox" id="kmoni_GetData">データを取得</label>
@@ -782,6 +791,9 @@
             </div>
             <div id="tab1_content9" class="tabcontent">
                 <h3><span>情報源ごとの設定</span>海しる</h3>
+                <div class="infoType">取得する情報：
+                    <div>準リアルタイム揺れ情報（海上）</div>
+                </div>
                 <h4>全般</h4>
                 <section>
                     <label><input type="checkbox" id="msil_GetData">データを取得</label>
@@ -790,6 +802,10 @@
             </div>
             <div id="tab1_content12" class="tabcontent">
                 <h3><span>情報源ごとの設定</span>Axis</h3>
+                <div class="infoType">取得する情報：
+                    <div>緊急地震速報</div>
+                    <div>地震情報</div>
+                </div>
                 <h4>全般</h4>
                 <section>
                     <label><input type="checkbox" id="Axis_GetData">データを取得</label>
@@ -818,6 +834,10 @@
             </div>
             <div id="tab1_content14" class="tabcontent">
                 <h3><span>情報源ごとの設定</span>Wolfx</h3>
+                <div class="infoType">取得する情報：
+                    <div>緊急地震速報</div>
+                    <div>リアルタイム震度（中国）</div>
+                </div>
                 <h4>全般</h4>
                 <section>
                     <label><input type="checkbox" id="Wolfx_GetData">データを取得</label>
@@ -826,10 +846,13 @@
             </div>
             <div id="tab1_content16" class="tabcontent">
                 <h3><span>情報源ごとの設定</span>Project BS</h3>
+                <div class="infoType">取得する情報：
+                    <div>緊急地震速報</div>
+                </div>
                 <h4>全般</h4>
                 <section>
                     <label><input type="checkbox" id="ProjectBS_GetData">データを取得</label>
-                    <p class="smalltext">WebSocketで随時情報を受け取ります。 </p>
+                    <span class="smalltext">WebSocketで随時情報を受け取ります。</span>
                 </section>
             </div>
             <div id="tab1_content10" class="tabcontent">
@@ -1114,6 +1137,9 @@
             </div>
             <div id="tab1_content15" class="tabcontent">
                 <h3><span>情報源ごとの設定</span>Early-est</h3>
+                <div class="infoType">取得する情報：
+                    <div>リアルタイム地震情報（全世界）</div>
+                </div>
                 <h4>全般</h4>
                 <section>
                     <label><input type="checkbox" id="EarlyEst_GetData">データを取得</label>

@@ -635,7 +635,39 @@ body {
 .maplibregl-ctrl-compass {
   display: none !important;
 }
-
+.obsShindoWrap {
+  border-radius: 4px;
+  display: inline-block;
+  font-family: "M PLUS 1p", sans-serif;
+  margin-right: 5px;
+  padding: 1px 5px;
+  height: 24px;
+  line-height: 24px;
+  vertical-align: middle;
+}
+.obsShindoWrap span {
+  font-size: 9px;
+  padding-left: 4px;
+  font-family: "AzeretMono-Regular", ui-monospace;
+}
+.obsPGAWrap {
+  border-radius: 4px;
+  display: inline-block;
+  margin-right: 5px;
+  padding: 1px 5px;
+  background: #444;
+  border: solid 1px #666;
+  height: 24px;
+  line-height: 22px;
+  font-size: 12px;
+  color: #eee;
+  vertical-align: middle;
+  font-family: "AzeretMono-Regular", ui-monospace;
+}
+.popupContentWrap {
+  padding: 5px;
+  text-align: center;
+}
 @media (max-width: 600px) {
   #sideBar.close #sokuho-Panel {
     max-height: max(200px, 50vh);

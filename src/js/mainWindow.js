@@ -60,6 +60,9 @@ window.electronAPI.messageSend((event, request) => {
       kmoniTimeUpdate(request.Updatetime, request.LocalTime, "msilImg", "success");
       kmoniMapUpdate(request.data, "snet");
       break;
+    case "wolfxSeisUpdate":
+      wolfxSeisUpdate(request.data);
+      break;
     case "setting":
       config = request.data;
       init();
@@ -1378,6 +1381,19 @@ function kmoniMapUpdate(dataTmp, type) {
       pointData.popupContent = "<h3 class='PointName' style='border-bottom:solid 2px rgba(128,128,128,0.5)'>" + (elm.Name ? elm.Name : "") + "<span>" + elm.Type + "_" + elm.Code + "</span></h3>";
       if (pointData.popup.isOpen()) pointData.popup.setHTML(pointData.popupContent);
     }
+  }
+}
+
+var wolfx_points = {};
+function wolfxSeisUpdate(dataTmp) {
+  for (key of Object.keys(dataTmp)) {
+    elm = dataTmp[key];
+    pointData = wolfx_points[elm.Name];
+    if (!pointData) pointData = wolfx_points[elm.Name] = addPointMarker(elm);
+    pointData.markerElm.style.background = "rgb(" + elm.rgb.join(",") + ")";
+    var shindoColor = shindoConvert(elm.shindo, 2);
+    pointData.popupContent = `<h3 class='PointName' style='border-bottom-color:rgb(${elm.rgb.join(",")})'>${elm.Name ? elm.Name : ""}<span>${elm.Type + "_" + elm.Code}</span></h3><div class='popupContentWrap'><div class='obsShindoWrap' style='background:${shindoColor[0]};color:${shindoColor[1]};'>震度 ${shindoConvert(elm.shindo, 1)}<span>${elm.shindo.toFixed(2)}</span></div><div class='obsPGAWrap'>PGA ${(Math.floor(elm.PGA * 100) / 100).toFixed(2)}</div></div>`;
+    if (pointData.popup.isOpen()) pointData.popup.setHTML(pointData.popupContent);
   }
 }
 

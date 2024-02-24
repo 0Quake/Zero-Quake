@@ -388,3 +388,19 @@ summary {
 summary:hover {
   background: rgb(149, 46, 46);
 }
+.infoType {
+  white-space: nowrap;
+  overflow-x: scroll;
+  font-size: 12px;
+}
+.infoType div {
+  display: inline-block;
+  background: #444;
+  border: solid 1px #666;
+  font-size: 12px;
+  line-height: 24px;
+  border-radius: 4px;
+  padding: 0 6px;
+  color: #eee;
+  margin: 2px;
+}

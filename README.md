@@ -6,7 +6,7 @@
 
 ## 受信できる情報
 
-### 気象庁
+### 気象庁による気象情報
 
 - ### 緊急地震速報
 
@@ -52,12 +52,14 @@
 
 - K-NET, KiK-net（防災科学技術研究所 強震観測網）
 - S-net, 相模湾地震観測施設（防災科学技術研究所 海底地震計）
+- Wolfx 地震観測網（中国 コミュニティ地震観測網）
 <details>
 <summary>情報源</summary>
 <ul>
   <li>強震モニタ <a href="http://www.kmoni.bosai.go.jp/">© 防災科学技術研究所</a>（強震／毎秒）</li>
   <li>長周期地震動モニタ <a href="http://www.lmoni.bosai.go.jp/">© 防災科学技術研究所</a>（強震／毎秒）</li>
   <li>海しる <a href="https://www.msil.go.jp/">© Japan Coast Guard, 防災科学技術研究所</a>（海底／3分毎）</li>
+  <li>Wolfx 地震観測所データ共有 JSON API <a href="https://www.msil.go.jp/">© Wolfx Studio</a>（中国／毎秒）</li>
 </ul>
 </details>
 
@@ -107,3 +109,7 @@
 - 標準 BIZUDPGothic-Regular
 - 数字 AzeretMono-Regular
 - アイコン MaterialIcons
+
+### その他
+
+- [KyoshinShindoColorMap](https://github.com/ingen084/KyoshinShindoColorMap) ingen084 様, こんぽ様
