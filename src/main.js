@@ -1080,6 +1080,27 @@ function start() {
 
   //定期実行 着火
   RegularExecution(true);
+
+  setTimeout(function () {
+    eqInfoControl(
+      [
+        {
+          status: "発表",
+          eventId: 20240101000000,
+          category: "震度速報",
+          reportDateTime: new Date(),
+          OriginTime: new Date(),
+          epiCenter: "ばしょ",
+          M: 9,
+          maxI: "7",
+          cancel: false,
+          DetailURL: [],
+          axisData: null,
+        },
+      ],
+      "jma"
+    );
+  }, 16000);
 }
 
 function earlyEstReq() {
@@ -3000,6 +3021,8 @@ function eqInfoControl(dataList, type, EEW, count) {
           if (EQElm.DetailURL.length !== EQInfo_Item.DetailURL.length) changed = true;
           if (EQInfo_Item.axisData) changed = true;
 
+          if (EQElm.category == "EEW" && EQInfo_Item.category != "EEW") playAudio = true;
+
           EQElm.category = EQInfo_Item.category;
           EQElm.EEW = EQInfo_Item.EEW;
           EQElm.reportDateTime = EQInfo_Item.reportDateTime;
@@ -3009,8 +3032,6 @@ function eqInfoControl(dataList, type, EEW, count) {
           EQElm.maxI = EQInfo_Item.maxI;
           EQElm.DetailURL = EQElm.DetailURL.concat(EQInfo_Item.DetailURL);
           if (EQInfo_Item.axisData) EQElm.axisData = EQInfo_Item.axisData;
-
-          if (EQElm.category == "EEW" && EQInfo_Item.category != "EEW") playAudio = true;
 
           if (changed) {
             eqInfoUpdateTmp.push(EQElm);
@@ -3151,7 +3172,6 @@ function TsunamiInfoControl(data) {
 
     Tsunami_data_Marged = { issue: {}, areas: [] };
     Tsunami_Data = Tsunami_Data.sort((a, b) => (a.issue.time > b.issue.time ? 1 : -1));
-    console.log(Tsunami_Data);
     var all_revocated = true;
     Tsunami_Data.forEach(function (elm0) {
       if (!elm0.revocation) all_revocated = false;
