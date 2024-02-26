@@ -814,6 +814,14 @@ function init() {
           data: "./Resource/plate.json",
           tolerance: 2,
         },
+        submarine: {
+          type: "raster",
+          tiles: ["./Resource/Submarine/{z}/{x}/{y}.png"],
+          tileSize: 256,
+          attribution: "NOAA",
+          minzoom: 0,
+          maxzoom: 5,
+        },
         tile0: {
           type: "raster",
           tiles: ["https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png"],

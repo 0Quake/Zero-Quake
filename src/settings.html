@@ -423,11 +423,12 @@
                 </section>
 
                 <hr>
-                <h2 id="%E5%8F%97%E4%BF%A1%E3%81%A7%E3%81%8D%E3%82%8B%E6%83%85%E5%A0%B1">受信できる情報</h2>
-                <h3 id="%E6%B0%97%E8%B1%A1%E5%BA%81">気象庁による気象情報</h3>
+
+                <h2 id="受信できる情報">受信できる情報</h2>
+                <h3 id="気象庁による気象情報">気象庁による気象情報</h3>
                 <ul>
                     <li>
-                        <h3 id="%E7%B7%8A%E6%80%A5%E5%9C%B0%E9%9C%87%E9%80%9F%E5%A0%B1">緊急地震速報</h3>
+                        <h3 id="緊急地震速報">緊急地震速報</h3>
                         <p>予報・警報／キャンセル報／PLUM 法など含む</p>
                         <details>
                             <summary>情報源</summary>
@@ -440,11 +441,10 @@
                         </details>
                     </li>
                     <li>
-                        <h3 id="%E5%9C%B0%E9%9C%87%E6%83%85%E5%A0%B1">地震情報</h3>
-                        <p>震度速報／震源に関する情報／震度・震源に関する情報[震度・震源情報/遠地地震に関する情報]
-                            長周期地震動に関する観測情報※／顕著な地震の震源要素更新のお知らせ／推計震度分布※<br>
+                        <h3 id="地震情報">地震情報</h3>
+                        <p>震度速報／震源に関する情報／震度・震源に関する情報[震度・震源情報/遠地地震に関する情報]<br>
+                            長周期地震動に関する観測情報※／顕著な地震の震源要素更新のお知らせ／推計震度分布※
                             南海トラフ地震に関連する情報※[南海トラフ地震臨時情報/南海トラフ地震関連解説情報]</p>
-
                         <details>
                             <summary>情報源</summary>
                             <ul>
@@ -456,7 +456,7 @@
                         </details>
                     </li>
                     <li>
-                        <h3 id="%E6%B4%A5%E6%B3%A2%E6%83%85%E5%A0%B1">津波情報</h3>
+                        <h3 id="津波情報">津波情報</h3>
                         <p>大津波警報／津波警報／津波注意報／津波予報※<br>
                             津波情報／沖合の津波観測に関する情報※</p>
                         <details>
@@ -468,7 +468,7 @@
                         </details>
                     </li>
                 </ul>
-                <h3 id="%E3%83%AA%E3%82%A2%E3%83%AB%E3%82%BF%E3%82%A4%E3%83%A0%E6%8F%BA%E3%82%8C%E6%83%85%E5%A0%B1">リアルタイム揺れ情報</h3>
+                <h3 id="リアルタイム揺れ情報">リアルタイム揺れ情報</h3>
                 <ul>
                     <li>K-NET, KiK-net（防災科学技術研究所 強震観測網）</li>
                     <li>S-net, 相模湾地震観測施設（防災科学技術研究所 海底地震計）</li>
@@ -483,30 +483,27 @@
                         <li>Wolfx 地震観測所データ共有 JSON API <a href="https://api.wolfx.jp/seis.html">© Wolfx Studio</a>（中国／毎秒）</li>
                     </ul>
                 </details>
-                <h3 id="%E3%81%9D%E3%81%AE%E4%BB%96">その他</h3>
+                <h3 id="その他">その他</h3>
                 <ol>
                     <li>Earthquake Catalog（USGS）</li>
-                    <li>リアルタイム地震情報（Early-Est）</li>
-                    <li>地盤増幅率（緊急地震速報シミュレーション時の震度予想に使用）</li>
+                    <li>リアルタイム地震情報（Early-Est）<details>
+                            <summary>情報源</summary>
+                            <ol>
+                                <li>FDSN Web Service <a href="https://earthquake.usgs.gov/fdsnws/event/1/">© USGS</a></li>
+                                <li>Early-est <a href="http://early-est.rm.ingv.it">© イタリア国立地球物理学火山学研究所</a></li>
+                            </ol>
+                        </details>
+                    </li>
                 </ol>
-                <details>
-                    <summary>情報源</summary>
-                    <ol>
-                        <li>FDSN Web Service <a href="https://earthquake.usgs.gov/fdsnws/event/1/">© USGS</a></li>
-                        <li>Early-est <a href="http://early-est.rm.ingv.it">© イタリア国立地球物理学火山学研究所</a></li>
-                        <li>表層地盤情報提供API <a href="https://www.j-shis.bosai.go.jp/api-sstruct-meshinfo">© 防災科学技術研究所</a></li>
-                    </ol>
-                </details>
-                <h2 id="%E4%BD%BF%E7%94%A8%E7%B4%A0%E6%9D%90">使用素材</h2>
-                <h3 id="%E5%9C%B0%E5%9B%B3%E3%83%87%E3%83%BC%E3%82%BF">地図データ</h3>
-                <h4 id="%E3%83%99%E3%83%BC%E3%82%B9%E3%83%9E%E3%83%83%E3%83%97">ベースマップ</h4>
+                <h2 id="使用素材">使用素材</h2>
+                <h3 id="地図データ">地図データ</h3>
+                <h4 id="ベースマップ">ベースマップ</h4>
                 <ul>
                     <li>「標準」 (単純化して使用)
                         <ul>
                             <li>国内：気象庁 予報区等 GIS データ <a href="https://www.data.jma.go.jp/developer/gis.html">© 気象庁</a></li>
                             <li>国外：ne_110m_admin_0_countries <a href="https://www.naturalearthdata.com/downloads/110m-cultural-vectors/">© Natural Earth </a></li>
                             <li>湖沼：国土数値情報 <a href="https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-W09-v2_2.html">© 国土交通省 </a></li>
-                            <li>プレート境界： <a href="http://www-udc.ig.utexas.edu/external/plates/data.htm">© テキサス大学</a></li>
                         </ul>
                     </li>
                     <li>「地理院地図(標準)」 <a href="https://maps.gsi.go.jp/development/ichiran.html">© 国土地理院</a></li>
@@ -514,7 +511,7 @@
                     <li>「地理院地図(写真)」 <a href="https://maps.gsi.go.jp/development/ichiran.html">© 国土地理院</a></li>
                     <li>「OpenStreetMap」 <a href="https://www.openstreetmap.org/copyright/">© OpenStreetMap contributors</a></li>
                 </ul>
-                <h4 id="%E3%82%AA%E3%83%BC%E3%83%90%E3%83%BC%E3%83%AC%E3%82%A4%E3%83%8F%E3%82%B6%E3%83%BC%E3%83%89%E3%83%9E%E3%83%83%E3%83%97%E3%81%AA%E3%81%A9">オーバーレイ（ハザードマップなど）</h4>
+                <h4 id="オーバーレイハザードマップなど">オーバーレイ（ハザードマップなど）</h4>
                 <ul>
                     <li>「詳細地図(地名・道路等)」 <a href="https://maps.gsi.go.jp/development/ichiran.html">© 国土地理院</a></li>
                     <li>「地理院 陰影起伏図」 <a href="https://maps.gsi.go.jp/development/ichiran.html">© 国土地理院</a></li>
@@ -524,15 +521,22 @@
                     <li>「地理院 土砂災害警戒区域（地すべり） ハザードマップ」 <a href="https://maps.gsi.go.jp/development/ichiran.html">© 国土地理院</a></li>
                     <li>「避難所」 <a href="https://maps.gsi.go.jp/development/ichiran.html">© 国土地理院</a></li>
                 </ul>
-                <h3 id="%E3%83%95%E3%82%A9%E3%83%B3%E3%83%88google-fonts">フォント（Google Fonts）</h3>
+                <h4 id="その他-gis-データ">その他 GIS データ</h4>
+                <ul>
+                    <li>プレート境界： <a href="http://www-udc.ig.utexas.edu/external/plates/data.htm">© テキサス大学</a></li>
+                    <li>海底地形：<a href="https://doi.org/10.25921/fd45-gt74">NOAA National Centers for Environmental Information. 2022: ETOPO 2022 15 Arc-Second Global Relief Model.</a></li>
+                </ul>
+                <h3 id="フォントgoogle-fonts">フォント（Google Fonts）</h3>
                 <ul>
                     <li>太字 MPLUS1p-ExtraBold</li>
                     <li>標準 BIZUDPGothic-Regular</li>
                     <li>数字 AzeretMono-Regular</li>
                     <li>アイコン MaterialIcons</li>
                 </ul>
-                <h3>その他</h3>
+                <h3 id="その他-1">その他</h3>
                 <ul>
+                    <li>地盤増幅率：表層地盤情報提供 API <a href="https://www.j-shis.bosai.go.jp/api-sstruct-meshinfo">© 防災科学技術研究所</a></a></li>
+                    </li>
                     <li><a href="https://github.com/ingen084/KyoshinShindoColorMap">KyoshinShindoColorMap</a> ingen084 様, こんぽ様</li>
                 </ul>
             </div>
