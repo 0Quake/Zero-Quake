@@ -67,13 +67,11 @@
 
 1. Earthquake Catalog（USGS）
 2. リアルタイム地震情報（Early-Est）
-3. 地盤増幅率（緊急地震速報シミュレーション時の震度予想に使用）
    <details>
    <summary>情報源</summary>
    <ol>
      <li>FDSN Web Service <a href="https://earthquake.usgs.gov/fdsnws/event/1/">© USGS</a></li>
      <li>Early-est <a href="http://early-est.rm.ingv.it">© イタリア国立地球物理学火山学研究所</a></li>
-     <li>表層地盤情報提供API <a href="https://www.j-shis.bosai.go.jp/api-sstruct-meshinfo">© 防災科学技術研究所</a></li>
    </ol>
    </details>
 
@@ -87,7 +85,6 @@
   - 国内：気象庁 予報区等 GIS データ [© 気象庁](https://www.data.jma.go.jp/developer/gis.html)
   - 国外：ne_110m_admin_0_countries [© Natural Earth ](https://www.naturalearthdata.com/downloads/110m-cultural-vectors/)
   - 湖沼：国土数値情報 [© 国土交通省 ](https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-W09-v2_2.html)
-  - プレート境界： [© テキサス大学](http://www-udc.ig.utexas.edu/external/plates/data.htm)
 - 「地理院地図(標準)」 [© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)
 - 「地理院地図(淡色)」 [© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)
 - 「地理院地図(写真)」 [© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)
@@ -103,6 +100,11 @@
 - 「地理院 土砂災害警戒区域（地すべり） ハザードマップ」 [© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)
 - 「避難所」 [© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)
 
+#### その他 GIS データ
+
+- プレート境界： [© テキサス大学](http://www-udc.ig.utexas.edu/external/plates/data.htm)
+- 海底地形：[NOAA National Centers for Environmental Information. 2022: ETOPO 2022 15 Arc-Second Global Relief Model.](https://doi.org/10.25921/fd45-gt74)
+
 ### フォント（Google Fonts）
 
 - 太字 MPLUS1p-ExtraBold
@@ -112,4 +114,5 @@
 
 ### その他
 
+- 地盤増幅率：表層地盤情報提供 API [© 防災科学技術研究所](https://www.j-shis.bosai.go.jp/api-sstruct-meshinfo)</a></li>
 - [KyoshinShindoColorMap](https://github.com/ingen084/KyoshinShindoColorMap) ingen084 様, こんぽ様
