@@ -30,8 +30,7 @@ fetch("./Resource/TsunamiStations.json")
   });
 
 window.electronAPI.messageSend((event, request) => {
-  if (request.action == "setting") {
-    config = request.data;
+  if (request.action == "init") {
     init();
   } else if (request.action == "activate") {
     background = false;

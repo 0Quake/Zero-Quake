@@ -760,6 +760,10 @@ function createWindow() {
             data: NankaiTroughInfo,
           });
         }
+
+        messageToMainWindow({
+          action: "init",
+        });
       });
 
       mainWindow.loadFile("src/index.html");
