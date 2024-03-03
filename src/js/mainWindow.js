@@ -1313,7 +1313,11 @@ function init() {
   };
   zoomLevelContinue();
   map.on("zoom", zoomLevelContinue);
-  map.on("load", function () {
+  map.on("load", async () => {
+    var image = await map.loadImage("./img/AlertOverlay.png");
+    map.addImage("pattern", image.data);
+    map.addLayer({ id: "Alert", type: "fill", source: "basemap", paint: { "fill-pattern": "pattern" }, filter: ["==", "name", ""] });
+
     window.electronAPI.messageReturn({
       action: "tsunamiReqest",
     });
