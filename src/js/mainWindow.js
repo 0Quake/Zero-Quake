@@ -4,8 +4,6 @@ var Tsunami_MajorWarning, Tsunami_Warning, Tsunami_Watch, Tsunami_Yoho;
 
 var psWaveList = [];
 var tsunamiAlertNow = false;
-var inited = false;
-var windowLoaded = false;
 var hinanjoLayers = [];
 var hinanjoCheck = document.getElementById("hinanjo");
 var knet_already_draw = false;
@@ -32,72 +30,49 @@ fetch("./Resource/TsunamiStations.json")
   });
 
 window.electronAPI.messageSend((event, request) => {
-  switch (request.action) {
-    case "activate":
-      background = false;
-      if (knetMapData) kmoniMapUpdate(knetMapData, "knet");
-      if (snetMapData) kmoniMapUpdate(snetMapData, "snet");
+  if (request.action == "setting") {
+    config = request.data;
+    init();
+  } else if (request.action == "activate") {
+    background = false;
+    if (knetMapData) kmoniMapUpdate(knetMapData, "knet");
+    if (snetMapData) kmoniMapUpdate(snetMapData, "snet");
+  } else if (request.action == "unactivate") {
+    background = true;
+    becomeForeground = true;
+    becomeForeground_S = true;
+  } else if (request.action == "EEWAlertUpdate") {
+    EEWAlertUpdate(request.data);
+    psWaveEntry();
+    JMAEstShindoControl(request.data);
+  } else if (request.action == "kmoniTimeUpdate") {
+    kmoniTimeUpdate(request.Updatetime, request.LocalTime, request.type, request.condition, request.vendor);
+  } else if (request.action == "kmoniUpdate") {
+    kmoniTimeUpdate(request.Updatetime, request.LocalTime, "kmoniImg", "success");
+    if (!background || !knet_already_draw) kmoniMapUpdate(request.data, "knet");
+  } else if (request.action == "SnetUpdate") {
+    kmoniTimeUpdate(request.Updatetime, request.LocalTime, "msilImg", "success");
+    kmoniMapUpdate(request.data, "snet");
+  } else if (request.action == "wolfxSeisUpdate") {
+    wolfxSeisUpdate(request.data);
+  } else if (request.action == "Replay") {
+    Replay = request.data;
+    document.getElementById("replayFrame").style.display = Replay == 0 ? "none" : "block";
+    Object.keys(points).forEach(function (elm) {
+      pointData = points[elm];
+      pointData.markerElm.style.background = "rgba(128,128,128,0.5)";
+      pointData.markerElm.classList.remove("strongDetectingMarker", "detectingMarker", "marker_Int");
+      pointData.popupContent = "<h3 class='PointName' style='border-bottom:solid 2px rgba(128,128,128,0.5)'>" + (elm.Name ? elm.Name : "") + "<span>" + elm.Type + "_" + elm.Code + "</span></h3>";
+      if (pointData.popup.isOpen()) pointData.popup.setHTML(pointData.popupContent);
+    });
+    psWaveEntry();
+  } else if (request.action == "EQInfo") eqInfoDraw(request.data, request.source);
+  else if (request.action == "notification_Update") show_errorMsg(request.data);
+  else if (request.action == "EQDetect") EQDetect(request.data);
+  else if (request.action == "EQDetectFinish") EQDetectFinish(request.data);
+  else if (request.action == "tsunamiUpdate") tsunamiDataUpdate(request.data);
+  else if (request.action == "NankaiTroughInfo") NankaiTroughInfo(request.data);
 
-      break;
-    case "unactivate":
-      background = true;
-      becomeForeground = true;
-      becomeForeground_S = true;
-      break;
-    case "EEWAlertUpdate":
-      EEWAlertUpdate(request.data);
-      psWaveEntry();
-      JMAEstShindoControl(request.data);
-      break;
-    case "kmoniTimeUpdate":
-      kmoniTimeUpdate(request.Updatetime, request.LocalTime, request.type, request.condition, request.vendor);
-      break;
-    case "kmoniUpdate":
-      kmoniTimeUpdate(request.Updatetime, request.LocalTime, "kmoniImg", "success");
-      if (!background || !knet_already_draw) kmoniMapUpdate(request.data, "knet");
-      break;
-    case "SnetUpdate":
-      kmoniTimeUpdate(request.Updatetime, request.LocalTime, "msilImg", "success");
-      kmoniMapUpdate(request.data, "snet");
-      break;
-    case "wolfxSeisUpdate":
-      wolfxSeisUpdate(request.data);
-      break;
-    case "setting":
-      config = request.data;
-      init();
-      break;
-    case "Replay":
-      Replay = request.data;
-      document.getElementById("replayFrame").style.display = Replay == 0 ? "none" : "block";
-      Object.keys(points).forEach(function (elm) {
-        pointData = points[elm];
-        pointData.markerElm.style.background = "rgba(128,128,128,0.5)";
-        pointData.markerElm.classList.remove("strongDetectingMarker", "detectingMarker", "marker_Int");
-        pointData.popupContent = "<h3 class='PointName' style='border-bottom:solid 2px rgba(128,128,128,0.5)'>" + (elm.Name ? elm.Name : "") + "<span>" + elm.Type + "_" + elm.Code + "</span></h3>";
-        if (pointData.popup.isOpen()) pointData.popup.setHTML(pointData.popupContent);
-      });
-      psWaveEntry();
-      break;
-    case "EQInfo":
-      eqInfoDraw(request.data, request.source);
-      break;
-    case "notification_Update":
-      show_errorMsg(request.data);
-      break;
-    case "EQDetect":
-      EQDetect(request.data);
-      break;
-    case "EQDetectFinish":
-      EQDetectFinish(request.data);
-      break;
-    case "tsunamiUpdate":
-      tsunamiDataUpdate(request.data);
-      break;
-    case "NankaiTroughInfo":
-      NankaiTroughInfo(request.data);
-      break;
-  }
   document.getElementById("splash").style.display = "none";
   return true;
 });
@@ -120,7 +95,6 @@ window.addEventListener("load", () => {
       document.getElementById("kmoni_Message").innerHTML = json.message;
     });
 
-  windowLoaded = true;
   psWaveAnm(); //予報円描画着火
   setInterval(function () {
     //時計（ローカル時刻）更新
@@ -752,11 +726,8 @@ var over3_visiblity = false;
 var over4_visiblity = false;
 
 //マップ初期化など
-var inited = false;
-
 function init() {
-  if (!config || !windowLoaded || inited) return;
-  inited = true;
+  if (map) return;
   map = new maplibregl.Map({
     container: "mapcontainer",
     center: [138.46, 32.99125],
@@ -1192,10 +1163,6 @@ function init() {
     },
   });
   map.touchZoomRotate.disableRotation();
-  map.loadImage("img/AlertOverlay.png", (err, image) => {
-    map.addImage("pattern", image);
-    map.addLayer({ id: "Alert", type: "fill", source: "basemap", paint: { "fill-pattern": "pattern" }, filter: ["==", "name", ""] });
-  });
 
   map.on("sourcedataloading", (e) => {
     if (e.sourceId == "hinanjo" && hinanjoCheck.checked && e.tile != undefined) {

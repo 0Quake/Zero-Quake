@@ -24,6 +24,16 @@
       "createStartMenuShortcut": true,
       "createDesktopShortcut": true,
       "shortcutName": "Zero Quake"
+    },
+    "appx": {
+      "identityName": "12345PublisherName.AppName",
+      "applicationId": "PublisherName.AppName",
+      "publisherDisplayName": "PublisherName",
+      "publisher": "CN=XXXXXXXXXX",
+      "languages": [
+        "JA-JP",
+        "EN-US"
+      ]
     }
   },
   "main": "src/main.js",
