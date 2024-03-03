@@ -308,9 +308,12 @@
   color: #ccc;
   border-radius: 5px;
   margin: 5px;
-  padding: 3px 8px;
-  font-size: 11px;
+  padding: 2px 5px;
+  font-size: 10px;
   pointer-events: none;
+}
+.maplibregl-ctrl a {
+  color: #ccc;
 }
 .maplibregl-ctrl-attrib-inner {
   display: block !important;
