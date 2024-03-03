@@ -126,6 +126,14 @@ function Mapinit() {
       glyphs: "https://gsi-cyberjapan.github.io/optimal_bvmap/glyphs/{fontstack}/{range}.pbf",
 
       sources: {
+        submarine: {
+          type: "raster",
+          tiles: ["./Resource/Submarine/{z}/{x}/{y}.png"],
+          tileSize: 256,
+          attribution: "NOAA",
+          minzoom: 0,
+          maxzoom: 5,
+        },
         v: {
           type: "vector",
           tiles: ["https://cyberjapandata.gsi.go.jp/xyz/optimal_bvmap-v1/{z}/{x}/{y}.pbf"],
@@ -259,6 +267,11 @@ function Mapinit() {
         },
       },
       layers: [
+        {
+          id: "submarine",
+          type: "raster",
+          source: "submarine",
+        },
         {
           id: "tile0",
           type: "raster",

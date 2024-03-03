@@ -912,6 +912,11 @@ function init() {
       },
       layers: [
         {
+          id: "submarine",
+          type: "raster",
+          source: "submarine",
+        },
+        {
           id: "tile0",
           type: "raster",
           source: "tile0",
