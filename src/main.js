@@ -1238,8 +1238,9 @@ function kmoniRequest() {
               if (errorCountkI > 3) {
                 errorCountkI = 0;
                 kmoniI_url++;
-                if (kmoniI_url > urlTmp.length) kmoniI_url = 0;
-              }
+                if (kmoniI_url >= urlTmp.length - 1) kmoniI_url = 0;
+                yoyuSetK(kmoniRequest);
+              }              
               kmoniTimeUpdate(new Date() - Replay, "kmoniImg", "Error");
             } else {
               errorCountkI = 0;
@@ -1726,7 +1727,7 @@ async function yoyuSetK(func) {
                 var json = jsonParse(dataTmp);
                 if (json) {
                   var resTime = new Date(json.latest_time);
-                  if (resTimeTmp !== resTime) yoyuK = reqTime - resTime;
+                  if (resTimeTmp !== resTime) yoyuK = new Date() - resTime - (new Date() - reqTime) / 2;
                   resTimeTmp = resTime;
                 }
               } catch (err) {
@@ -1742,7 +1743,9 @@ async function yoyuSetK(func) {
       }
     }
     if (!yoyuK) yoyuK = 2500;
-    func();
+    else yoyuK += 200
+    if(func)setTimeout(func,200)
+
   } catch (err) {
     yoyuK = 2500;
     throw new Error("強震モニタの遅延量の取得でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
