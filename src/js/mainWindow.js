@@ -1546,15 +1546,14 @@ function psWaveCalc(eid) {
     var SRadius = null;
 
     var i = 0;
+    SWmin = TimeTableTmp[0].S
     for (const elm of TimeTableTmp) {
-      if (i == 0) SWmin = elm.S;
       if (!PRadius) {
         if (elm.P == distance) {
           PRadius = elm.R;
           if (SRadius || SWmin > distance) break;
         } else if (elm.P > distance) {
-          elm2 = TimeTableTmp[i - 1];
-          if (!elm2) elm2 = elm;
+          elm2 = TimeTableTmp[Math.max(i - 1, 0)];
           PRadius = elm.R + ((elm2.R - elm.R) * (distance - elm.P)) / (elm2.P - elm.P);
           if (SRadius || SWmin > distance) break;
         }
@@ -1564,7 +1563,7 @@ function psWaveCalc(eid) {
           SRadius = elm.R;
           if (PRadius) break;
         } else if (elm.S > distance) {
-          elm2 = TimeTableTmp[i - 1];
+          elm2 = TimeTableTmp[Math.max(i - 1, 0)];
           SRadius = elm.R + ((elm2.R - elm.R) * (distance - elm.S)) / (elm2.S - elm.S);
           if (PRadius) break;
         }
