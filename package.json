@@ -26,13 +26,12 @@
       "shortcutName": "Zero Quake"
     },
     "appx": {
-      "identityName": "12345PublisherName.AppName",
-      "applicationId": "PublisherName.AppName",
-      "publisherDisplayName": "PublisherName",
-      "publisher": "CN=XXXXXXXXXX",
+      "identityName": "Benidate.ZeroQuake",
+      "applicationId": "Benidate.ZeroQuake",
+      "publisherDisplayName": "Benidate",
+      "publisher": "CN=0FCA04CE-D29D-4DB6-BA68-14F151A28AD4",
       "languages": [
-        "JA-JP",
-        "EN-US"
+        "JA-JP"
       ]
     }
   },
