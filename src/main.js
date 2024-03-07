@@ -43,7 +43,6 @@ var shindoColorTable = { 0: { r: 63, g: 250, b: 54 }, 1: { r: 189, g: 255, b: 12
 const store = new Store();
 var defaultConfigVal = {
   system: {
-    crashReportAutoSend: "yes",
     WindowAutoOpen: true,
     alwaysOnTop: false,
   },
@@ -442,22 +441,6 @@ let options = {
   buttons: ["今すぐ再起動", "終了", "無視"],
   noLink: true,
 };
-const options2 = {
-  type: "question",
-  title: "エラー情報の送信",
-  message: "エラー情報を送信しますか",
-  detail: "情報は今後のバグ改善に活用します。個人を特定できる情報を送信することはありません。\nご協力をお願いします。",
-  buttons: ["送信", "送信しない"],
-  checkboxLabel: "選択を記憶",
-  noLink: true,
-};
-const options3 = {
-  type: "error",
-  title: "エラー",
-  message: "エラー情報の送信に失敗しました。",
-  detail: "",
-  buttons: ["OK"],
-};
 var errorMsgBox = false;
 //エラーイベント
 process.on("uncaughtException", function (err) {
@@ -468,26 +451,8 @@ process.on("uncaughtException", function (err) {
       options.detail = "動作を選択してください。\nエラーコードは以下の通りです。\n" + err.stack;
 
       dialog.showMessageBox(mainWindow, options).then(function (result) {
-        if (config.system.crashReportAutoSend == "yes") {
-          crashReportSend(err.stack, result);
-          errorMsgBox = false;
-        } else if (config.system.crashReportAutoSend == "no") {
-          errorResolve(result.response);
-          errorMsgBox = false;
-        } else {
-          dialog.showMessageBox(mainWindow, options2).then(function (result2) {
-            if (result2.checkboxChecked) {
-              config.system.crashReportAutoSend = result2.response == 0 ? "yes" : "no";
-              store.set("config", config);
-            }
-            if (result2.response == 0) {
-              crashReportSend(err.stack, result);
-              errorMsgBox = false;
-            } else {
-              errorResolve(result.response);
-            }
-          });
-        }
+        errorMsgBox = false;
+        errorResolve(result.response);
       });
 
       Window_notification("予期しないエラーが発生しました。", "error");
@@ -507,33 +472,6 @@ function errorResolve(response) {
       case 1:
         app.exit(0);
         break;
-    }
-  } catch (err) {
-    return;
-  }
-}
-//クラッシュレポートの送信
-function crashReportSend(errMsg, result) {
-  try {
-    if (net.online) {
-      let request = net.request("https://zeroquake.wwww.jp/crashReport/?errorMsg=" + encodeURI(errMsg) + "&soft_version=" + encodeURI(soft_version));
-
-      request.on("error", () => {
-        dialog.showMessageBox(mainWindow, options3).then(function () {
-          errorResolve(result.response);
-        });
-      });
-      request.on("response", (res) => {
-        if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
-          dialog.showMessageBox(mainWindow, options3).then(function () {
-            errorResolve(result.response);
-          });
-        } else {
-          errorResolve(result.response);
-        }
-      });
-      // リクエストの送信
-      request.end();
     }
   } catch (err) {
     return;
@@ -1240,7 +1178,7 @@ function kmoniRequest() {
                 kmoniI_url++;
                 if (kmoniI_url >= urlTmp.length - 1) kmoniI_url = 0;
                 yoyuSetK(kmoniRequest);
-              }              
+              }
               kmoniTimeUpdate(new Date() - Replay, "kmoniImg", "Error");
             } else {
               errorCountkI = 0;
@@ -1743,9 +1681,8 @@ async function yoyuSetK(func) {
       }
     }
     if (!yoyuK) yoyuK = 2500;
-    else yoyuK += 200
-    if(func)setTimeout(func,200)
-
+    else yoyuK += 200;
+    if (func) setTimeout(func, 200);
   } catch (err) {
     yoyuK = 2500;
     throw new Error("強震モニタの遅延量の取得でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);

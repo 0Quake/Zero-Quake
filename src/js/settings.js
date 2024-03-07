@@ -79,7 +79,6 @@ function configDataDraw() {
 
   selectBoxSet(document.getElementById("TTSvoiceSelect"), config.notice.voice_parameter.voice);
 
-  selectBoxSet(document.getElementById("BugReportAutoSend"), config.system.crashReportAutoSend);
   selectBoxSet(document.getElementById("intType"), config.Info.EEW.IntType);
   document.getElementById("EarthquakeDetect").checked = config.Info.RealTimeShake.DetectEarthquake;
   document.getElementById("WindowAutoOpen").checked = config.system.WindowAutoOpen;
@@ -167,7 +166,6 @@ document.getElementById("resetConfig").addEventListener("click", function () {
 });
 
 function apply() {
-  config.system.crashReportAutoSend = document.getElementById("BugReportAutoSend").value;
   config.Info.EEW.IntType = document.getElementById("intType").value;
 
   config.Info.RealTimeShake.DetectEarthquake = document.getElementById("EarthquakeDetect").checked;
