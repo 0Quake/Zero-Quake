@@ -28,7 +28,6 @@ var EEWSectName = { 135: "宗谷支庁北部", 136: "宗谷支庁南部", 125: "
 const electron = require("electron");
 const { app, BrowserWindow, ipcMain, net, Notification, shell, dialog, Menu, powerSaveBlocker } = electron;
 const path = require("path");
-var fs;
 var JSDOM = require("jsdom").JSDOM;
 const Store = require("electron-store");
 var WebSocketClient = require("websocket").client;
@@ -302,15 +301,13 @@ function checkUpdate() {
                     type: "question",
                     title: "アプリケーションの更新",
                     message: "Zero Quake で更新が利用可能です。",
-                    detail: "v." + current_verTmp + " > v." + latest_verTmp + "\n操作を選択してください。[今すぐ更新]をすることをお勧めします。",
-                    buttons: ["今すぐ更新", "詳細", "後で確認"],
+                    detail: "v." + current_verTmp + " > v." + latest_verTmp + "\n操作を選択してください。",
+                    buttons: ["詳細を確認", "後で確認"],
                     noLink: true,
                   };
 
                   dialog.showMessageBox(mainWindow, options4).then(function (result) {
                     if (result.response == 0) {
-                      if (downloadURL) doUpdate(downloadURL);
-                    } else if (result.response == 1) {
                       setting_createWindow(true);
                     }
                   });
@@ -344,28 +341,6 @@ function checkUpdate() {
     });
     request.end();
   }
-}
-
-//アップデートの実行
-function doUpdate(url) {
-  if (net.online) {
-    var request = net.request(url);
-    request.on("response", (res) => {
-      try {
-        if (!fs) fs = require("fs");
-        res.pipe(fs.createWriteStream("ZeroQuakeInstaller.exe")).on("close", function () {
-          var COMMAND = "start ZeroQuakeInstaller.exe";
-          var spawn = require("child_process").spawn;
-          var Installer = spawn(COMMAND, [], { shell: true, detached: true, stdio: "inherit" });
-          Installer.unref();
-          app.exit(0);
-        });
-      } catch (err) {
-        throw new Error("インストーラーの起動に失敗しました。エラーメッセージは以下の通りです。\n" + err);
-      }
-    });
-    request.end();
-  } else throw new Error("オフライン状態のため、アップデートが実行できません。");
 }
 
 //定期実行
@@ -584,9 +559,6 @@ ipcMain.on("message", (_event, response) => {
       break;
     case "replay":
       replay(response.date);
-      break;
-    case "startInstall":
-      if (downloadURL) doUpdate(downloadURL);
       break;
     case "nankaiWIndowOpen":
       nankai_createWindow();
