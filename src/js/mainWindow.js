@@ -758,13 +758,13 @@ function init() {
         basemap: {
           type: "geojson",
           data: "./Resource/basemap.json",
-          tolerance: 0.7,
+          tolerance: 0.9,
           attribution: "気象庁",
         },
         prefmap: {
           type: "geojson",
           data: "./Resource/prefectures.json",
-          tolerance: 0.7,
+          tolerance: 0.9,
           attribution: "気象庁",
         },
         lake: {
@@ -958,8 +958,6 @@ function init() {
             "line-color": config.color.Tsunami.TsunamiYohoColor,
             "line-width": ["interpolate", ["linear"], ["zoom"], 2, 10, 5, 20, 10, 80, 18, 300],
           },
-          minzoom: 0,
-          maxzoom: 22,
           filter: ["==", "name", ""],
         },
 
@@ -975,8 +973,6 @@ function init() {
             "line-color": config.color.Tsunami.TsunamiWatchColor,
             "line-width": ["interpolate", ["linear"], ["zoom"], 2, 10, 5, 20, 10, 80, 18, 300],
           },
-          minzoom: 0,
-          maxzoom: 22,
           filter: ["==", "name", ""],
         },
         {
@@ -991,8 +987,6 @@ function init() {
             "line-color": config.color.Tsunami.TsunamiWarningColor,
             "line-width": ["interpolate", ["linear"], ["zoom"], 2, 10, 5, 20, 10, 80, 18, 300],
           },
-          minzoom: 0,
-          maxzoom: 22,
           filter: ["==", "name", ""],
         },
 
@@ -1008,8 +1002,6 @@ function init() {
             "line-color": config.color.Tsunami.TsunamiMajorWarningColor,
             "line-width": ["interpolate", ["linear"], ["zoom"], 2, 10, 5, 20, 10, 80, 18, 300],
           },
-          minzoom: 0,
-          maxzoom: 22,
           filter: ["==", "name", ""],
         },
 
@@ -1021,8 +1013,6 @@ function init() {
             "fill-color": "#333",
             "fill-opacity": 1,
           },
-          minzoom: 0,
-          maxzoom: 22,
         },
         {
           id: "basemap_LINE",
@@ -1032,8 +1022,6 @@ function init() {
             "line-color": "#666",
             "line-width": 1,
           },
-          minzoom: 6,
-          maxzoom: 22,
         },
         { id: "Int1", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["1"].background }, filter: ["==", "name", ""] },
         { id: "Int2", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["2"].background }, filter: ["==", "name", ""] },
@@ -1052,8 +1040,6 @@ function init() {
             "line-color": "#999",
             "line-width": 1,
           },
-          minzoom: 0,
-          maxzoom: 22,
         },
         {
           id: "worldmap_fill",
@@ -1063,8 +1049,6 @@ function init() {
             "fill-color": "#333",
             "fill-opacity": 1,
           },
-          minzoom: 0,
-          maxzoom: 22,
         },
         {
           id: "worldmap_LINE",
@@ -1074,8 +1058,6 @@ function init() {
             "line-color": "#444",
             "line-width": 1,
           },
-          minzoom: 0,
-          maxzoom: 22,
         },
         {
           id: "lake_fill",
@@ -1085,19 +1067,7 @@ function init() {
             "fill-color": "#325385",
             "fill-opacity": 0.5,
           },
-          minzoom: 0,
-          maxzoom: 22,
-        },
-        {
-          id: "lake_LINE",
-          type: "line",
-          source: "lake",
-          paint: {
-            "line-color": "#325385",
-            "line-width": 1,
-          },
-          minzoom: 0,
-          maxzoom: 22,
+          minzoom: 6,
         },
         {
           id: "plate",
@@ -1112,8 +1082,6 @@ function init() {
             "line-opacity": 0.4,
             "line-width": 1,
           },
-          minzoom: 0,
-          maxzoom: 22,
         },
         { id: "海岸線", type: "line", source: "v", "source-layer": "Cstline", filter: ["in", ["get", "vt_code"], ["literal", [5101, 5103]]], paint: { "line-color": "#999999", "line-offset": 0, "line-width": 1 }, layout: { visibility: "none" } },
         { id: "河川中心線人工水路地下", type: "line", source: "v", "source-layer": "RvrCL", filter: ["==", ["get", "vt_code"], 5322], paint: { "line-color": "rgba(36,104,203,0.25)", "line-width": 2 }, layout: { visibility: "none" } },
@@ -1156,7 +1124,6 @@ function init() {
           source: "hinanjo",
           layout: { visibility: "none" },
           minzoom: 10,
-          maxzoom: 22,
         },
       ],
     },
@@ -1546,7 +1513,7 @@ function psWaveCalc(eid) {
     var SRadius = null;
 
     var i = 0;
-    SWmin = TimeTableTmp[0].S
+    SWmin = TimeTableTmp[0].S;
     for (const elm of TimeTableTmp) {
       if (!PRadius) {
         if (elm.P == distance) {
