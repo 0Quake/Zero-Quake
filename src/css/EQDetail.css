@@ -282,7 +282,7 @@ td {
 .zoomLevel_2 .MaxShindoIcon,
 .zoomLevel_1 .MaxLgIntIcon,
 .zoomLevel_2 .MaxLgIntIcon {
-  opacity: 1;
+  opacity: 1 !important;
   pointer-events: auto !important;
 }
 .zoomLevel_1 .MaxShindoIcon div,
@@ -304,19 +304,19 @@ td {
 .zoomLevel_1 .LgIntIcon,
 .zoomLevel_2 .LgIntIcon,
 .zoomLevel_3 .LgIntIcon {
-  opacity: 0;
+  opacity: 0 !important;
   pointer-events: none !important;
 }
 
 .zoomLevel_4 .MaxShindoIcon,
 .zoomLevel_4 .MaxLgIntIcon {
-  opacity: 0;
+  opacity: 0 !important;
   pointer-events: none !important;
 }
 
 .zoomLevel_4 .ShindoIcon,
 .zoomLevel_4 .LgIntIcon {
-  opacity: 1;
+  opacity: 1 !important;
   pointer-events: auto !important;
 }
 
