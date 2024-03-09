@@ -131,13 +131,24 @@ function EQDetect(data, date, detect) {
             return elm2.Code == elm.Code;
           });
           if (!SameST) {
-            EQD_ItemTmp.Codes.push(elm);
-            if (!EQD_ItemTmp.Codes_history.includes(elm.Code)) EQD_ItemTmp.Codes_history.push(elm.Code);
-            ptData.Event = true;
+            arroundPointsLength = 0;
+            detectPointsLength = 0;
+            data.forEach(function (station) {
+              if (station.data && station.Code !== elm.Code && geosailing(station.Location.Latitude, station.Location.Longitude, elm.Location.Latitude, elm.Location.Longitude) <= 100) {
+                arroundPointsLength++;
+                if (station.detect) detectPointsLength++;
+              }
+            });
 
-            //最終検知時間（解除時に使用）を更新
-            EQD_ItemTmp.last_Detect = new Date() - Replay;
-            EQD_ItemTmp.last_changed = new Date() - Replay;
+            if (detectPointsLength / arroundPointsLength > 0.15 || arroundPointsLength < 1) {
+              EQD_ItemTmp.Codes.push(elm);
+              if (!EQD_ItemTmp.Codes_history.includes(elm.Code)) EQD_ItemTmp.Codes_history.push(elm.Code);
+              ptData.Event = true;
+
+              //最終検知時間（解除時に使用）を更新
+              EQD_ItemTmp.last_Detect = new Date() - Replay;
+              EQD_ItemTmp.last_changed = new Date() - Replay;
+            }
           }
         }
       }
