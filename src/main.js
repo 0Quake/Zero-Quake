@@ -1350,10 +1350,14 @@ function AXIS_WS() {
                 Hypocenter: { Area: { Name: null } },
                 Magnitude: null,
               };
-              if (data.message.Body.Earthquake[0]) EarthquakeElm = data.message.Body.Earthquake[0];
               var IntensityElm = {
                 Observation: { MaxInt: null },
               };
+              if (data.message.Body.Earthquake[0]) {
+                EarthquakeElm = data.message.Body.Earthquake[0];
+                OriginTimeTmp = new Date(EarthquakeElm.OriginTime);
+              }
+              if (!OriginTimeTmp) OriginTimeTmp = new Date(data.message.Head.TargetDateTime);
               if (data.message.Body.Intensity) IntensityElm = data.message.Body.Intensity;
 
               eqInfoControl(
@@ -1363,7 +1367,7 @@ function AXIS_WS() {
                     eventId: data.message.Head.EventID,
                     category: data.message.Head.Title,
                     reportDateTime: new Date(data.message.Head.ReportDateTime),
-                    OriginTime: new Date(data.message.Body.Earthquake[0].OriginTime),
+                    OriginTime: OriginTimeTmp,
                     epiCenter: EarthquakeElm.Hypocenter.Area.Name,
                     M: Number(EarthquakeElm.Magnitude[0].valueOf_),
                     maxI: shindoConvert(IntensityElm.Observation.MaxInt),
@@ -2406,6 +2410,7 @@ function EQI_JMAXML_Req(url, count) {
               magnitudeTmp = Number(EarthquakeElm.getElementsByTagName("jmx_eb:Magnitude")[0].textContent);
             }
 
+            if (!originTimeTmp) originTimeTmp = new Date(xml.querySelector("TargetDateTime").textContent);
             var IntensityElm = xml.querySelector("Body").querySelector("Intensity");
             var maxIntTmp;
             if (IntensityElm) maxIntTmp = shindoConvert(IntensityElm.querySelector("Observation").querySelector("MaxInt").textContent);
@@ -2878,6 +2883,8 @@ function EQI_narikakun_Req(url, count) {
           if (!json) return;
 
           var originTimeTmp = json.Body.Earthquake ? new Date(json.Body.Earthquake.OriginTime) : null;
+          if (!originTimeTmp) originTimeTmp = new Date(json.Head.TargetDateTime);
+
           var epiCenterTmp = json.Body.Earthquake ? json.Body.Earthquake.Hypocenter.Name : null;
           var MagnitudeTmp = json.Body.Earthquake ? json.Body.Earthquake.Magnitude : null;
           var MaxITmp = json.Body.Intensity ? json.Body.Intensity.Observation.MaxInt : null;
