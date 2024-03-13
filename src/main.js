@@ -592,10 +592,10 @@ function createWindow() {
       mainWindow = new BrowserWindow({
         minWidth: 450,
         minHeight: 400,
+        icon: path.join(__dirname, "img/icon.ico"),
         webPreferences: {
           preload: path.join(__dirname, "js/preload.js"),
           title: "Zero Quake",
-          icon: path.join(__dirname, "img/icon.ico"),
           backgroundThrottling: false,
         },
         backgroundColor: "#202227",
@@ -782,12 +782,12 @@ function setting_createWindow(update) {
     settingWindow = new BrowserWindow({
       minWidth: 600,
       minHeight: 300,
+      icon: path.join(__dirname, "img/icon.ico"),
       webPreferences: {
         preload: path.join(__dirname, "js/preload.js"),
         title: "設定 - Zero Quake",
         parent: mainWindow ? mainWindow : null,
         center: true,
-        icon: path.join(__dirname, "img/icon.ico"),
       },
       backgroundColor: "#202227",
       alwaysOnTop: config.system.alwaysOnTop,
@@ -838,10 +838,10 @@ function tsunami_createWindow() {
     tsunamiWindow = new BrowserWindow({
       minWidth: 600,
       minHeight: 300,
+      icon: path.join(__dirname, "img/icon.ico"),
       webPreferences: {
         preload: path.join(__dirname, "js/preload.js"),
         title: "津波詳細情報 - Zero Quake",
-        icon: path.join(__dirname, "img/icon.ico"),
       },
       backgroundColor: "#202227",
       alwaysOnTop: config.system.alwaysOnTop,
@@ -877,10 +877,10 @@ function nankai_createWindow() {
     nankaiWindow = new BrowserWindow({
       minWidth: 600,
       minHeight: 300,
+      icon: path.join(__dirname, "img/icon.ico"),
       webPreferences: {
         preload: path.join(__dirname, "js/preload.js"),
         title: "南海トラフ地震に関連する情報 - Zero Quake",
-        icon: path.join(__dirname, "img/icon.ico"),
       },
       backgroundColor: "#202227",
       alwaysOnTop: config.system.alwaysOnTop,
@@ -927,10 +927,10 @@ function EQInfo_createWindow(response, webSite) {
     var EQInfoWindow = new BrowserWindow({
       minWidth: 600,
       minHeight: 300,
+      icon: path.join(__dirname, "img/icon.ico"),
       webPreferences: {
         preload: path.join(__dirname, "js/preload.js"),
         title: "地震詳細情報 - Zero Quake",
-        icon: path.join(__dirname, "img/icon.ico"),
       },
       backgroundColor: webSite ? null : "#202227",
       alwaysOnTop: config.system.alwaysOnTop,
