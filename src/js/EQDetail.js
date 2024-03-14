@@ -345,6 +345,7 @@ function Mapinit() {
           id: "basemap_LINE",
           type: "line",
           source: "basemap",
+          minzoom: 6,
           paint: {
             "line-color": "#666",
             "line-width": 1,
