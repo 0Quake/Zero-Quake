@@ -1,3 +1,5 @@
+process.env.TZ = "Asia/Tokyo";
+console.log(new Date());
 //リプレイ
 var Replay = 0;
 var mainWindow, settingWindow, tsunamiWindow, kmoniWorker, nankaiWindow;
