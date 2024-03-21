@@ -1706,7 +1706,7 @@ function EEWdetect(type, json) {
             maxInt = maxInt == "//" ? null : shindoConvert(maxInt);
             var arrivalTime = EBIStr[i + 2];
             arrivalTime = arrivalTime.substring(0, 2) + ":" + arrivalTime.substring(2, 4) + ":" + arrivalTime.substring(4, 6);
-            arrivalTime = new Date(dateEncode(4, null) + " " + arrivalTime);
+            arrivalTime = new Date(dateEncode(6) + " " + arrivalTime);
 
             var alertFlg = EBIStr[i + 3].substring(0, 1) == "1";
             var arrived = EBIStr[i + 3].substring(1, 2) == "1";
@@ -1768,7 +1768,7 @@ function EEWdetect(type, json) {
             if (maxInt == 99) maxInt = minInt;
             var arrivalTime = EBIStr[i + 2];
             arrivalTime = arrivalTime.substring(0, 2) + ":" + arrivalTime.substring(2, 4) + ":" + arrivalTime.substring(4, 6);
-            arrivalTime = new Date(dateEncode(4, null) + " " + arrivalTime);
+            arrivalTime = new Date(dateEncode(6) + " " + arrivalTime);
 
             var alertFlg = EBIStr[i + 3].substring(0, 1) == "1";
             var arrived = EBIStr[i + 3].substring(1, 2) == "1";
@@ -3252,8 +3252,8 @@ function EEWTextGenerate(EEWData, update) {
   text = text.replaceAll("{training}", EEWData.is_training ? "テスト報" : "");
   text = text.replaceAll("{training2}", EEWData.is_training ? "これは訓練報です。" : "");
   text = text.replaceAll("{region_name}", EEWData.region_name ? EEWData.region_name : "");
-  text = text.replaceAll("{report_time}", EEWData.report_time ? dateEncode(5, EEWData.report_time) : "");
-  text = text.replaceAll("{origin_time}", EEWData.origin_time ? dateEncode(5, EEWData.origin_time) : "");
+  text = text.replaceAll("{report_time}", EEWData.report_time ? dateEncode(7, EEWData.report_time) : "");
+  text = text.replaceAll("{origin_time}", EEWData.origin_time ? dateEncode(7, EEWData.origin_time) : "");
   if (EEWData.warnZones && EEWData.warnZones.length) {
     var userSect = EEWData.warnZones.find(function (elm2) {
       return elm2.Name == config.home.Section;
@@ -3321,15 +3321,13 @@ function dateEncode(type, dateTmp) {
     case 4:
       return YYYY + "/" + MM + "/" + DD;
     case 5:
+      return DD + "日 " + hh + ":" + mm;
+    case 6:
+      return YYYY + "/" + MM + "/" + DD + " " + hh + ":" + mm;
+    case 7:
       return hh + "時" + mm + "分" + ss + "秒";
     default:
-      type.replaceAll("YYYY", YYYY);
-      type.replaceAll("MM", MM);
-      type.replaceAll("DD", DD);
-      type.replaceAll("hh", hh);
-      type.replaceAll("mm", mm);
-      type.replaceAll("ss", ss);
-      return type;
+      return new Date();
   }
 }
 //震度の形式変換
