@@ -239,7 +239,7 @@ var narikakun_EIDs = [];
 var eqInfo = { jma: [], usgs: [] };
 var kmoniTimeout;
 var msil_lastTime = 0;
-var kmoniPointsDataTmp, SnetPointsDataTmp;
+var kmoniPointsDataTmp, SnetPointsDataTmp, wolfxSeisData;
 let tray;
 var thresholds;
 
@@ -557,6 +557,7 @@ ipcMain.on("message", (_event, response) => {
     case "mapLoaded":
       if (kmoniPointsDataTmp) messageToMainWindow(kmoniPointsDataTmp);
       if (SnetPointsDataTmp) messageToMainWindow(SnetPointsDataTmp);
+      if (wolfxSeisData) messageToMainWindow(wolfxSeisData);
       break;
     case "replay":
       replay(response.date);
@@ -1562,11 +1563,12 @@ function WolfxSeis_WS() {
         stationData = wolfx_st ? wolfx_st[json.type] : null;
         var rgb = shindoColorTable[Math.floor(json.CalcShindo * 10) / 10];
         if (stationData) WolfxSeisData[json.type] = { Type: "Wolfx", shindo: json.CalcShindo, PGA: json.PGA, Code: json.type, Name: stationData.location, Location: { Longitude: stationData.longitude, Latitude: stationData.latitude }, rgb: [rgb.r, rgb.g, rgb.b] };
-        messageToMainWindow({
+        wolfxSeisData = {
           action: "wolfxSeisUpdate",
           LocalTime: new Date(),
           data: WolfxSeisData,
-        });
+        };
+        messageToMainWindow(wolfxSeisData);
       } catch (err) {
         kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
       }

@@ -1265,6 +1265,10 @@ function init() {
     });
     overlaySelect("kmoni_points", config.data.kmoni_points_show);
     document.getElementById("kmoni_points").checked = config.data.kmoni_points_show;
+
+    window.electronAPI.messageReturn({
+      action: "mapLoaded",
+    });
   });
 
   if (config.home.ShowPin) {
