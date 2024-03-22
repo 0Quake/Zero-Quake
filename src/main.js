@@ -673,9 +673,7 @@ function createWindow() {
           });
         }
 
-        messageToMainWindow({
-          action: "init",
-        });
+        messageToMainWindow({ action: "init" });
       });
 
       mainWindow.loadFile("src/index.html");
@@ -699,29 +697,19 @@ function createWindow() {
         }, 5000);
       });
       mainWindow.on("focus", () => {
-        messageToMainWindow({
-          action: "activate",
-        });
+        messageToMainWindow({ action: "activate" });
       });
       mainWindow.on("show", () => {
-        messageToMainWindow({
-          action: "activate",
-        });
+        messageToMainWindow({ action: "activate" });
       });
       mainWindow.on("hide", () => {
-        messageToMainWindow({
-          action: "unactivate",
-        });
+        messageToMainWindow({ action: "unactivate" });
       });
       mainWindow.on("restore", () => {
-        messageToMainWindow({
-          action: "activate",
-        });
+        messageToMainWindow({ action: "activate" });
       });
       mainWindow.on("minimize", () => {
-        messageToMainWindow({
-          action: "unactivate",
-        });
+        messageToMainWindow({ action: "unactivate" });
       });
       mainWindow.on("responsive", () => {
         mainWindow.responsive = false;
@@ -1195,9 +1183,7 @@ function SnetRequest() {
             var dateTime = 0;
             var NowDateTime = Number(new Date() - Replay);
             json.features.forEach(function (elm) {
-              if (NowDateTime - dateTime > NowDateTime - elm.attributes.msilstarttime && NowDateTime >= elm.attributes.msilstarttime) {
-                dateTime = Number(elm.attributes.msilstarttime);
-              }
+              if (NowDateTime - dateTime > NowDateTime - elm.attributes.msilstarttime && NowDateTime >= elm.attributes.msilstarttime) dateTime = Number(elm.attributes.msilstarttime);
             });
             if (msil_lastTime < dateTime) {
               var request = net.request("https://www.msil.go.jp/arcgis/rest/services/Msil/DisasterPrevImg1/ImageServer//exportImage?f=image&time=" + dateTime + "%2C" + dateTime + "&bbox=13409547.546603577%2C2713376.239114911%2C16907305.960932314%2C5966536.162931148&size=400%2C400");
@@ -1283,9 +1269,7 @@ function P2P_WS() {
                   if (elm.firstHeight.arrivalTime) elm.firstHeight = new Date(elm.firstHeight.arrivalTime);
                   else elm.firstHeight = null;
                 }
-                if (elm.maxHeight && elm.maxHeight.description) {
-                  elm.maxHeight = elm.maxHeight.description;
-                }
+                if (elm.maxHeight && elm.maxHeight.description) elm.maxHeight = elm.maxHeight.description;
               });
               TsunamiInfoControl(data);
               break;
@@ -1600,9 +1584,7 @@ function RegularExecution(roop) {
   try {
     //EEW解除
     EEW_nowList.forEach(function (elm) {
-      if (new Date() - Replay - new Date(elm.origin_time) > 300000) {
-        EEWClear(elm.EventID);
-      }
+      if (new Date() - Replay - new Date(elm.origin_time) > 300000) EEWClear(elm.EventID);
     });
 
     //津波情報解除
@@ -2082,15 +2064,11 @@ function EEWcontrol(data) {
       //第１報
       if (!data.maxInt) {
         if (!config.Info.EEW.IntQuestion) return; //予想最大震度不明を無視するか（設定に準拠）
-      } else if (shindoConvert(config.Info.EEW.IntThreshold, 5) > shindoConvert(data.maxInt, 5) && shindoConvert(data.maxInt) !== "?") {
-        return; //予想最大震度通知条件（設定に準拠）
-      }
+      } else if (shindoConvert(config.Info.EEW.IntThreshold, 5) > shindoConvert(data.maxInt, 5) && shindoConvert(data.maxInt) !== "?") return; //予想最大震度通知条件（設定に準拠）
 
       if (!data.userIntensity) {
         if (!config.Info.EEW.userIntQuestion) return; //予想震度不明を無視するか（設定に準拠）
-      } else if (shindoConvert(config.Info.EEW.userIntThreshold, 5) > shindoConvert(data.userIntensity, 5) && shindoConvert(data.userIntensity) !== "?") {
-        return; //予想震度（細分区域）通知条件（設定に準拠）
-      }
+      } else if (shindoConvert(config.Info.EEW.userIntThreshold, 5) > shindoConvert(data.userIntensity, 5) && shindoConvert(data.userIntensity) !== "?") return; //予想震度（細分区域）通知条件（設定に準拠）
 
       //データ追加
       EEW_Data.push({
@@ -2645,9 +2623,7 @@ function EQI_JMAXML_Req(url, count) {
                             stationElm.omaxHeight = elm2.omaxHeight;
                             stationElm.maxheightTime = elm2.ArrivedTime;
                             stationElm.maxHeightCondition = elm2.maxHeightCondition;
-                          } else {
-                            tsunamiItem.stations.push(elm2);
-                          }
+                          } else tsunamiItem.stations.push(elm2);
                         });
                       } else {
                         tsunamiDataTmp.areas.push({
@@ -3122,10 +3098,11 @@ function TsunamiInfoControl(data) {
       if (data.ValidDateTime) tsunamiItem.ValidDateTime = data.ValidDateTime;
       data.areas.forEach(function (elm) {
         var areaItem;
-        if (tsunamiItem.areas)
+        if (tsunamiItem.areas) {
           areaItem = tsunamiItem.areas.find(function (elm2) {
             return elm2.name == elm.name;
           });
+        }
 
         if (areaItem) {
           if (elm.code) areaItem.code = elm.code;
@@ -3455,13 +3432,9 @@ function mergeDeeply(target, source, opts) {
     if (isObject(target) && isObject(source)) {
       for (const [sourceKey, sourceValue] of Object.entries(source)) {
         const targetValue = target[sourceKey];
-        if (isConcatArray && Array.isArray(sourceValue) && Array.isArray(targetValue)) {
-          result[sourceKey] = targetValue.concat(...sourceValue);
-        } else if (isObject(sourceValue) && Object.prototype.hasOwnProperty.call(target, sourceKey)) {
-          result[sourceKey] = mergeDeeply(targetValue, sourceValue, opts);
-        } else {
-          Object.assign(result, { [sourceKey]: sourceValue });
-        }
+        if (isConcatArray && Array.isArray(sourceValue) && Array.isArray(targetValue)) result[sourceKey] = targetValue.concat(...sourceValue);
+        else if (isObject(sourceValue) && Object.prototype.hasOwnProperty.call(target, sourceKey)) result[sourceKey] = mergeDeeply(targetValue, sourceValue, opts);
+        else Object.assign(result, { [sourceKey]: sourceValue });
       }
     }
     return result;
