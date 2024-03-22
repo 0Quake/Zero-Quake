@@ -2239,9 +2239,7 @@ function EEWAlert(data, first, update) {
           icon: path.join(__dirname, "img/icon.ico"),
         });
         EEWNotification.show();
-        EEWNotification.on("click", function () {
-          createWindow();
-        });
+        EEWNotification.on("click", createWindow);
       } else if (notice_setting == "openWindow") createWindow();
     }
 
