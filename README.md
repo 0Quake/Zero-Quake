@@ -114,11 +114,12 @@
 
 ### その他
 
-- 強震観測点の情報 [© 2019 ingen084](https://raw.githubusercontent.com/ingen084/KyoshinEewViewerIngen/develop/LICENSE)
+- 強震観測点の情報（編集して使用） [© 2019 ingen084](https://raw.githubusercontent.com/ingen084/KyoshinEewViewerIngen/develop/LICENSE)
 - 地盤増幅率：表層地盤情報提供 API [© 防災科学技術研究所／下記文献](https://www.j-shis.bosai.go.jp/api-sstruct-meshinfo)
+
   1. 若松加寿江・松岡昌志(2013)：全国統一基準による地形・地盤分類 250m メッシュマップの構築とその利用，地震工学会誌 No.18, pp.35-38.
   2. Wakamatsu, K. and Matsuoka, M. (2013): " Nationwide 7.5-Arc-Second Japan Engineering Geomorphologic Classification Map and Vs30 Zoning", Journal of Disaster Research Vol.8 No.5, pp.904-911.
   3. 松岡昌志・若松加寿江(2008) ： 地形・地盤分類 250m メッシュマップ全国版に基づく地盤のゆれやすさデータ，産業技術総合研究所，知的財産管理番号 H20PRO-936．
-  4. 藤本一雄・翠川三郎(2006) : 近接観測点ペアの強震観測記録に基づく地盤増幅度と地盤の平均 S 波速度の関係,日本地震工学会論文集,Vol.6,No.1,pp.11-22. 
+  4. 藤本一雄・翠川三郎(2006) : 近接観測点ペアの強震観測記録に基づく地盤増幅度と地盤の平均 S 波速度の関係,日本地震工学会論文集,Vol.6,No.1,pp.11-22.
 
 - [KyoshinShindoColorMap](https://github.com/ingen084/KyoshinShindoColorMap) ingen084 様, こんぽ様
