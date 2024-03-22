@@ -3296,9 +3296,9 @@ function dateEncode(type, dateTmp) {
     case 2:
       return YYYY + MM + DD;
     case 3:
-      return YYYY + "/" + MM + "/" + DD + " " + hh + ":" + mm;
+      return YYYY + "/" + MM + "/" + DD + " " + hh + ":" + mm + ":" + ss;
     case 4:
-      return YYYY + "/" + MM + "/" + DD;
+      return YYYY + "/" + MM + "/" + DD + " " + hh + ":" + mm;
     case 5:
       return DD + "日 " + hh + ":" + mm;
     case 7:
@@ -3306,8 +3306,7 @@ function dateEncode(type, dateTmp) {
     default:
       return new Date();
   }
-}
-//震度の形式変換
+} //震度の形式変換
 function shindoConvert(str, responseType) {
   var ShindoTmp;
   if (str === null || str === undefined) ShindoTmp = 11;

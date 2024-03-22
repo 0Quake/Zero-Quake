@@ -226,9 +226,9 @@ function dateEncode(type, dateTmp) {
     case 2:
       return YYYY + MM + DD;
     case 3:
-      return YYYY + "/" + MM + "/" + DD + " " + hh + ":" + mm;
+      return YYYY + "/" + MM + "/" + DD + " " + hh + ":" + mm + ":" + ss;
     case 4:
-      return YYYY + "/" + MM + "/" + DD;
+      return YYYY + "/" + MM + "/" + DD + " " + hh + ":" + mm;
     case 5:
       return DD + "日 " + hh + ":" + mm;
     case 7:

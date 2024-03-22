@@ -218,9 +218,9 @@
         case 2:
           return YYYY + MM + DD;
         case 3:
-          return YYYY + "/" + MM + "/" + DD + " " + hh + ":" + mm;
+          return YYYY + "/" + MM + "/" + DD + " " + hh + ":" + mm + ":" + ss;
         case 4:
-          return YYYY + "/" + MM + "/" + DD;
+          return YYYY + "/" + MM + "/" + DD + " " + hh + ":" + mm;
         case 5:
           return DD + "日 " + hh + ":" + mm;
         case 7:
@@ -228,8 +228,7 @@
         default:
           return new Date();
       }
-    }
-    function dateDecode(str) {
+    } function dateDecode(str) {
       var year = parseInt(str.substring(0, 4));
       var month = parseInt(str.substring(4, 6));
       var day = parseInt(str.substring(6, 8));
