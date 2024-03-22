@@ -2,268 +2,243 @@
 <html lang="ja">
 
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width," initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width," initial-scale=1.0">
+  <title>Document</title>
 </head>
 
 <body>
-    <script>
-        var ESregionName = { "011": "北海道地方", "012": "東北地方", "013": "北陸地方", "014": "関東甲信地方", "015": "小笠原地方", "016": "東海地方", "017": "近畿地方", "018": "中国地方", "019": "四国地方", "020": "九州地方", "021": "沖縄地方", "100": "石狩地方北部", "101": "石狩地方中部", "102": "石狩地方南部", "105": "渡島地方北部", "106": "渡島地方東部", "107": "渡島地方西部", "110": "檜山地方", "115": "後志地方北部", "116": "後志地方東部", "117": "後志地方西部", "120": "空知地方北部", "121": "空知地方中部", "122": "空知地方南部", "125": "上川地方北部", "126": "上川地方中部", "127": "上川地方南部", "130": "留萌地方中北部", "131": "留萌地方南部", "135": "宗谷地方北部", "136": "宗谷地方南部", "140": "網走地方", "141": "北見地方", "142": "紋別地方", "145": "胆振地方西部", "146": "胆振地方中東部", "150": "日高地方西部", "151": "日高地方中部", "152": "日高地方東部", "155": "十勝地方北部", "156": "十勝地方中部", "157": "十勝地方南部", "160": "釧路地方北部", "161": "釧路地方中南部", "165": "根室地方北部", "166": "根室地方中部", "167": "根室地方南部", "180": "北海道南西沖", "181": "北海道西方沖", "182": "石狩湾", "183": "北海道北西沖", "184": "宗谷海峡", "186": "国後島付近", "187": "択捉島付近", "188": "北海道東方沖", "189": "根室半島南東沖", "190": "釧路沖", "191": "十勝沖", "192": "浦河沖", "193": "苫小牧沖", "194": "内浦湾", "195": "宗谷東方沖", "196": "網走沖", "197": "択捉島南東沖", "200": "青森県津軽北部", "201": "青森県津軽南部", "202": "青森県三八上北地方", "203": "青森県下北地方", "210": "岩手県沿岸北部", "211": "岩手県沿岸南部", "212": "岩手県内陸北部", "213": "岩手県内陸南部", "220": "宮城県北部", "221": "宮城県南部", "222": "宮城県中部", "230": "秋田県沿岸北部", "231": "秋田県沿岸南部", "232": "秋田県内陸北部", "233": "秋田県内陸南部", "240": "山形県庄内地方", "241": "山形県最上地方", "242": "山形県村山地方", "243": "山形県置賜地方", "250": "福島県中通り", "251": "福島県浜通り", "252": "福島県会津", "280": "津軽海峡", "281": "山形県沖", "282": "秋田県沖", "283": "青森県西方沖", "284": "陸奥湾", "285": "青森県東方沖", "286": "岩手県沖", "287": "宮城県沖", "288": "三陸沖", "289": "福島県沖", "300": "茨城県北部", "301": "茨城県南部", "309": "千葉県南東沖", "310": "栃木県北部", "311": "栃木県南部", "320": "群馬県北部", "321": "群馬県南部", "330": "埼玉県北部", "331": "埼玉県南部", "332": "埼玉県秩父地方", "340": "千葉県北東部", "341": "千葉県北西部", "342": "千葉県南部", "349": "房総半島南方沖", "350": "東京都２３区", "351": "東京都多摩東部", "352": "東京都多摩西部", "360": "神奈川県東部", "361": "神奈川県西部", "370": "新潟県上越地方", "371": "新潟県中越地方", "372": "新潟県下越地方", "378": "新潟県下越沖", "379": "新潟県上中越沖", "380": "富山県東部", "381": "富山県西部", "390": "石川県能登地方", "391": "石川県加賀地方", "400": "福井県嶺北", "401": "福井県嶺南", "411": "山梨県中・西部", "412": "山梨県東部・富士五湖", "420": "長野県北部", "421": "長野県中部", "422": "長野県南部", "430": "岐阜県飛騨地方", "431": "岐阜県美濃東部", "432": "岐阜県美濃中西部", "440": "静岡県伊豆地方", "441": "静岡県東部", "442": "静岡県中部", "443": "静岡県西部", "450": "愛知県東部", "451": "愛知県西部", "460": "三重県北部", "461": "三重県中部", "462": "三重県南部", "469": "三重県南東沖", "471": "茨城県沖", "472": "関東東方沖", "473": "千葉県東方沖", "475": "八丈島東方沖", "476": "八丈島近海", "477": "東京湾", "478": "相模湾", "480": "伊豆大島近海", "481": "伊豆半島東方沖", "482": "三宅島近海", "483": "新島・神津島近海", "485": "駿河湾", "486": "駿河湾南方沖", "487": "遠州灘", "489": "三河湾", "490": "伊勢湾", "492": "若狭湾", "493": "福井県沖", "494": "石川県西方沖", "495": "能登半島沖", "497": "富山湾", "498": "佐渡付近", "499": "東海道南方沖", "500": "滋賀県北部", "501": "滋賀県南部", "510": "京都府北部", "511": "京都府南部", "520": "大阪府北部", "521": "大阪府南部", "530": "兵庫県北部", "531": "兵庫県南東部", "532": "兵庫県南西部", "540": "奈良県", "550": "和歌山県北部", "551": "和歌山県南部", "560": "鳥取県東部", "562": "鳥取県中部", "563": "鳥取県西部", "570": "島根県東部", "571": "島根県西部", "580": "岡山県北部", "581": "岡山県南部", "590": "広島県北部", "591": "広島県南東部", "592": "広島県南西部", "600": "徳島県北部", "601": "徳島県南部", "610": "香川県東部", "611": "香川県西部", "620": "愛媛県東予", "621": "愛媛県中予", "622": "愛媛県南予", "630": "高知県東部", "631": "高知県中部", "632": "高知県西部", "673": "土佐湾", "674": "紀伊水道", "675": "大阪湾", "676": "播磨灘", "677": "瀬戸内海中部", "678": "安芸灘", "679": "周防灘", "680": "伊予灘", "681": "豊後水道", "682": "山口県北西沖", "683": "島根県沖", "684": "鳥取県沖", "685": "隠岐島近海", "686": "兵庫県北方沖", "687": "京都府沖", "688": "淡路島付近", "689": "和歌山県南方沖", "700": "山口県北部", "702": "山口県西部", "703": "山口県東部", "704": "山口県中部", "710": "福岡県福岡地方", "711": "福岡県北九州地方", "712": "福岡県筑豊地方", "713": "福岡県筑後地方", "720": "佐賀県北部", "721": "佐賀県南部", "730": "長崎県北部", "731": "長崎県南西部", "732": "長崎県島原半島", "740": "熊本県阿蘇地方", "741": "熊本県熊本地方", "742": "熊本県球磨地方", "743": "熊本県天草・芦北地方", "750": "大分県北部", "751": "大分県中部", "752": "大分県南部", "753": "大分県西部", "760": "宮崎県北部平野部", "761": "宮崎県北部山沿い", "762": "宮崎県南部平野部", "763": "宮崎県南部山沿い", "770": "鹿児島県薩摩地方", "771": "鹿児島県大隅地方", "783": "五島列島近海", "784": "天草灘", "785": "有明海", "786": "橘湾", "787": "鹿児島湾", "790": "種子島近海", "791": "日向灘", "793": "奄美大島近海", "795": "壱岐・対馬近海", "796": "福岡県北西沖", "797": "薩摩半島西方沖", "798": "トカラ列島近海", "799": "奄美大島北西沖", "820": "大隅半島東方沖", "821": "九州地方南東沖", "822": "種子島南東沖", "823": "奄美大島北東沖", "850": "沖縄本島近海", "851": "南大東島近海", "852": "沖縄本島南方沖", "853": "宮古島近海", "854": "石垣島近海", "855": "石垣島南方沖", "856": "西表島付近", "857": "与那国島近海", "858": "沖縄本島北西沖", "859": "宮古島北西沖", "860": "石垣島北西沖", "900": "台湾付近", "901": "東シナ海", "902": "四国沖", "903": "鳥島近海", "904": "鳥島東方沖", "905": "オホーツク海南部", "906": "サハリン西方沖", "907": "日本海北部", "908": "日本海中部", "909": "日本海西部", "911": "父島近海", "912": "千島列島", "913": "千島列島南東沖", "914": "北海道南東沖", "915": "東北地方東方沖", "916": "小笠原諸島西方沖", "917": "硫黄島近海", "918": "小笠原諸島東方沖", "919": "南海道南方沖", "920": "薩南諸島東方沖", "921": "本州南方沖", "922": "サハリン南部付近", "930": "北西太平洋", "932": "マリアナ諸島", "933": "黄海", "934": "朝鮮半島南部", "935": "朝鮮半島北部", "936": "中国東北部", "937": "ウラジオストク付近", "938": "シベリア南部", "939": "サハリン近海", "940": "アリューシャン列島", "941": "カムチャツカ半島付近", "942": "北米西部", "943": "北米中部", "944": "北米東部", "945": "中米", "946": "南米西部", "947": "南米中部", "948": "南米東部", "949": "北東太平洋", "950": "南太平洋", "951": "インドシナ半島付近", "952": "フィリピン付近", "953": "インドネシア付近", "954": "グアム付近", "955": "ニューギニア付近", "956": "ニュージーランド付近", "957": "オーストラリア付近", "958": "シベリア付近", "959": "ロシア西部", "960": "ロシア中部", "961": "ロシア東部", "962": "中央アジア", "963": "中国西部", "964": "中国中部", "965": "中国東部", "966": "インド付近", "967": "インド洋", "968": "中東", "969": "ヨーロッパ西部", "970": "ヨーロッパ中部", "971": "ヨーロッパ東部", "972": "地中海", "973": "アフリカ西部", "974": "アフリカ中部", "975": "アフリカ東部", "976": "北大西洋", "977": "南大西洋", "978": "北極付近", "979": "南極付近", "999": "遠地" }
-        var EEWSectName = { 135: "宗谷支庁北部", 136: "宗谷支庁南部", 125: "上川支庁北部", 126: "上川支庁中部", 127: "上川支庁南部", 130: "留萌支庁中北部", 131: "留萌支庁南部", 139: "北海道利尻礼文", 150: "日高支庁西部", 151: "日高支庁中部", 152: "日高支庁東部", 145: "胆振支庁西部", 146: "胆振支庁中東部", 110: "檜山支庁", 105: "渡島支庁北部", 106: "渡島支庁東部", 107: "渡島支庁西部", 140: "網走支庁網走", 141: "網走支庁北見", 142: "網走支庁紋別", 165: "根室支庁北部", 166: "根室支庁中部", 167: "根室支庁南部", 160: "釧路支庁北部", 161: "釧路支庁中南部", 155: "十勝支庁北部", 156: "十勝支庁中部", 157: "十勝支庁南部", 119: "北海道奥尻島", 120: "空知支庁北部", 121: "空知支庁中部", 122: "空知支庁南部", 100: "石狩支庁北部", 101: "石狩支庁中部", 102: "石狩支庁南部", 115: "後志支庁北部", 116: "後志支庁東部", 117: "後志支庁西部", 200: "青森県津軽北部", 201: "青森県津軽南部", 202: "青森県三八上北", 203: "青森県下北", 230: "秋田県沿岸北部", 231: "秋田県沿岸南部", 232: "秋田県内陸北部", 233: "秋田県内陸南部", 210: "岩手県沿岸北部", 211: "岩手県沿岸南部", 212: "岩手県内陸北部", 213: "岩手県内陸南部", 220: "宮城県北部", 221: "宮城県南部", 222: "宮城県中部", 240: "山形県庄内", 241: "山形県最上", 242: "山形県村山", 243: "山形県置賜", 250: "福島県中通り", 251: "福島県浜通り", 252: "福島県会津", 300: "茨城県北部", 301: "茨城県南部", 310: "栃木県北部", 311: "栃木県南部", 320: "群馬県北部", 321: "群馬県南部", 330: "埼玉県北部", 331: "埼玉県南部", 332: "埼玉県秩父", 350: "東京都２３区", 351: "東京都多摩東部", 352: "東京都多摩西部", 354: "神津島", 355: "伊豆大島", 356: "新島", 357: "三宅島", 358: "八丈島", 359: "小笠原", 340: "千葉県北東部", 341: "千葉県北西部", 342: "千葉県南部", 360: "神奈川県東部", 361: "神奈川県西部", 420: "長野県北部", 421: "長野県中部", 422: "長野県南部", 410: "山梨県東部", 411: "山梨県中・西部", 412: "山梨県東部・富士五湖", 440: "静岡県伊豆", 441: "静岡県東部", 442: "静岡県中部", 443: "静岡県西部", 450: "愛知県東部", 451: "愛知県西部", 430: "岐阜県飛騨", 431: "岐阜県美濃東部", 432: "岐阜県美濃中西部", 460: "三重県北部", 461: "三重県中部", 462: "三重県南部", 370: "新潟県上越", 371: "新潟県中越", 372: "新潟県下越", 375: "新潟県佐渡", 380: "富山県東部", 381: "富山県西部", 390: "石川県能登", 391: "石川県加賀", 400: "福井県嶺北", 401: "福井県嶺南", 500: "滋賀県北部", 501: "滋賀県南部", 510: "京都府北部", 511: "京都府南部", 520: "大阪府北部", 521: "大阪府南部", 530: "兵庫県北部", 531: "兵庫県南東部", 532: "兵庫県南西部", 535: "兵庫県淡路島", 540: "奈良県", 550: "和歌山県北部", 551: "和歌山県南部", 580: "岡山県北部", 581: "岡山県南部", 590: "広島県北部", 591: "広島県南東部", 592: "広島県南西部", 570: "島根県東部", 571: "島根県西部", 575: "島根県隠岐", 560: "鳥取県東部", 562: "鳥取県中部", 563: "鳥取県西部", 600: "徳島県北部", 601: "徳島県南部", 610: "香川県東部", 611: "香川県西部", 620: "愛媛県東予", 621: "愛媛県中予", 622: "愛媛県南予", 630: "高知県東部", 631: "高知県中部", 632: "高知県西部", 700: "山口県北部", 701: "山口県東部", 702: "山口県西部", 710: "福岡県福岡", 711: "福岡県北九州", 712: "福岡県筑豊", 713: "福岡県筑後", 750: "大分県北部", 751: "大分県中部", 752: "大分県南部", 753: "大分県西部", 730: "長崎県北部", 731: "長崎県南西部", 732: "長崎県島原半島", 735: "長崎県対馬", 736: "長崎県壱岐", 737: "長崎県五島", 720: "佐賀県北部", 721: "佐賀県南部", 740: "熊本県阿蘇", 741: "熊本県熊本", 742: "熊本県球磨", 743: "熊本県天草・芦北", 760: "宮崎県北部平野部", 761: "宮崎県北部山沿い", 762: "宮崎県南部平野部", 763: "宮崎県南部山沿い", 770: "鹿児島県薩摩", 771: "鹿児島県大隅", 774: "鹿児島県十島村", 775: "鹿児島県甑島", 776: "鹿児島県種子島", 777: "鹿児島県屋久島", 778: "鹿児島県奄美北部", 779: "鹿児島県奄美南部", 800: "沖縄県本島北部", 801: "沖縄県本島中南部", 802: "沖縄県久米島", 803: "沖縄県大東島", 804: "沖縄県宮古島", 805: "沖縄県石垣島", 806: "沖縄県与那国島", 807: "沖縄県西表島" }
-        data = {
-            EpiCenter: {}
-        }
-        code = "39 03 10 230503062056 C11 230503062033 ND20230503062035 NCN002 JD////////////// JN/// /// //// ///// /// // // RK///// RT///// RC///// 9999="
-        code = "37 03 00 230504065519 C11 230504065422 ND20230504065427 NCN902 JD////////////// JN002 289 N367 E1422 020 37 01 RK77609 RT10/// RC0//// 9999="
-        // code = "37 03 00 020117093020 C11 020117093010 ND20020117093010 NCN003 JD20020117093010 JN002 486 N343 E1384 010 75 6- RK665// RT01000 RC11000 EBI 442 S6-5- 093022 10 440 S6-04 093022 10 443 S6-04 093030 10 441 S0503 093036 10 9999="
-
-        const startTime = performance.now(); // 開始時間
-
-
-        codeData = code.split(" ")
-
-        data.EventID = Number(codeData[6].substring(2))
-        data.Serial = Number(codeData[7].substring(4))
-        infotype = (codeData[7].substring(3, 4))
-        data.isFinal = infotype == 8 || infotype == 9
-        data.AlertFlg = codeData[17].substring(3, 4) == 1
-
-        codeData[0]//電文種別コード
-        codeData[1]//発信官署
-        data.Canceled = codeData[0] == 39
-        data.training = codeData[2] == "01" || codeData[2] == "30"
-        data.ReportTime = dateDecode("20" + codeData[3])
-        data.OriginTime = dateDecode("20" + codeData[5])
-        data.EpiCenter.Code = Number(codeData[10])
-        data.EpiCenter.Name = regionNameConvert(codeData[10])
-        data.EpiCenter.Latitude = LatitudeConvert(codeData[11])
-        data.EpiCenter.Longitude = LongitudeConvert(codeData[12])
-        data.Depth = codeData[13] == "///" ? null : Number(codeData[13])
-        data.Magnitude = codeData[14] == "///" ? null : Number(codeData[14]) / 10
-        data.MaxInt = shindoConvert(codeData[15], 0)
-        data.isSea = codeData[17].substring(2, 3) == 1
-        data.isAssumption = codeData[17].substring(4, 5) == 9
-
-        EBIData = []
-        EBIStr = code.split("EBI ")[1]
-        if (EBIStr) {
-            EBIStr = EBIStr.split("ECI")[0].split("EII")[0].split(" 9999=")[0]
-            EBIStr = EBIStr.split(" ")
-            if (EBIStr.length % 4 == 0) {
-                for (let i = 0; i < EBIStr.length; i += 4) {
-                    var sectName = EEWSectName[EBIStr[i]]
-                    var maxInt = EBIStr[i + 1].substring(1, 3)
-                    var minInt = EBIStr[i + 1].substring(3, 5)
-                    minInt = minInt == "//" ? null : shindoConvert(minInt, 0)
-                    var arrivalTime = EBIStr[i + 2]
-                    arrivalTime = arrivalTime.substring(0, 2) + ":" + arrivalTime.substring(2, 4) + ":" + arrivalTime.substring(4, 6)
-                    arrivalTime = new Date(dateEncode(4, null) + " " + arrivalTime)
-
-                    var alertFlg = EBIStr[i + 3].substring(0, 1) == "1"
-                    var arrived = EBIStr[i + 3].substring(1, 2) == "1"
-
-                    EBIData.push({
-                        Code: Number(EBIStr[i]),
-                        Name: sectName,
-                        Alert: alertFlg,
-                        IntTo: maxInt,
-                        IntFrom: minInt,
-                        ArrivalTime: arrivalTime,
-                        Arrived: arrived
-                    })
-                }
-            } else throw new Error("予想震度等のでコードでエラー")
-        }
-        data.Forecast = EBIData
-
-        const endTime = performance.now(); // 終了時間
-        console.log(endTime - startTime + "ms"); // 何ミリ秒かかったかを表示する
-
-        document.body.innerText = JSON.stringify(data).split(",").join(",\n")
-        console.log(data)
-        function regionNameConvert(Rcode) {
-            if (Rcode == "///") return null;
-            var RnameTmp = ESregionName[Rcode]
-            if (RnameTmp) return RnameTmp
-            else return null
-        }
-
-        function LatitudeConvert(lat) {
-            if (lat == "////" || lat == "N///") return null;
-            latNum = Number(lat.substring(1)) / 10
-            if (lat.substring(0, 1) == "S") latNum = 0 - latNum
-            if (!isNaN(latNum)) return latNum
-            else return null
-        }
-
-        function LongitudeConvert(lng) {
-            if (lng == "/////" || lng == "E////") return null;
-            lngNum = Number(lng.substring(1)) / 10
-            if (lng.substring(0, 1) == "W") lngNum = 0 - lngNum
-            if (!isNaN(lngNum)) return lngNum
-            else return null
-        }
-function shindoConvert(str, responseType) {
-  var ShindoTmp;
-  if (str === null || str === undefined) ShindoTmp = 11;
-  else if (isNaN(str)) {
-    str = String(str)
-      .replace(/[０-９]/g, function (s) {
-        return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
-      })
-      .replaceAll("＋", "+")
-      .replaceAll("－", "-")
-      .replaceAll("強", "+")
-      .replaceAll("弱", "-")
-      .replace(/\s+/g, "");
-    switch (str) {
-      case "1":
-      case "10":
-        ShindoTmp = 1;
-        break;
-      case "2":
-      case "20":
-        ShindoTmp = 2;
-        break;
-      case "3":
-      case "30":
-        ShindoTmp = 3;
-        break;
-      case "4":
-      case "40":
-        ShindoTmp = 4;
-        break;
-      case "5-":
-      case "45":
-        ShindoTmp = 5;
-        break;
-      case "5+":
-      case "50":
-        ShindoTmp = 6;
-        break;
-      case "6-":
-      case "55":
-        ShindoTmp = 7;
-        break;
-      case "6+":
-      case "60":
-        ShindoTmp = 8;
-        break;
-      case "7":
-      case "70":
-        ShindoTmp = 9;
-        break;
-      case "震度5-以上未入電":
-      case "5+?":
-        ShindoTmp = 10;
-        break;
-      case "-1":
-      case "?":
-      case "不明":
-      default:
-        ShindoTmp = 11;
+  <script>
+    var ESregionName = { "011": "北海道地方", "012": "東北地方", "013": "北陸地方", "014": "関東甲信地方", "015": "小笠原地方", "016": "東海地方", "017": "近畿地方", "018": "中国地方", "019": "四国地方", "020": "九州地方", "021": "沖縄地方", "100": "石狩地方北部", "101": "石狩地方中部", "102": "石狩地方南部", "105": "渡島地方北部", "106": "渡島地方東部", "107": "渡島地方西部", "110": "檜山地方", "115": "後志地方北部", "116": "後志地方東部", "117": "後志地方西部", "120": "空知地方北部", "121": "空知地方中部", "122": "空知地方南部", "125": "上川地方北部", "126": "上川地方中部", "127": "上川地方南部", "130": "留萌地方中北部", "131": "留萌地方南部", "135": "宗谷地方北部", "136": "宗谷地方南部", "140": "網走地方", "141": "北見地方", "142": "紋別地方", "145": "胆振地方西部", "146": "胆振地方中東部", "150": "日高地方西部", "151": "日高地方中部", "152": "日高地方東部", "155": "十勝地方北部", "156": "十勝地方中部", "157": "十勝地方南部", "160": "釧路地方北部", "161": "釧路地方中南部", "165": "根室地方北部", "166": "根室地方中部", "167": "根室地方南部", "180": "北海道南西沖", "181": "北海道西方沖", "182": "石狩湾", "183": "北海道北西沖", "184": "宗谷海峡", "186": "国後島付近", "187": "択捉島付近", "188": "北海道東方沖", "189": "根室半島南東沖", "190": "釧路沖", "191": "十勝沖", "192": "浦河沖", "193": "苫小牧沖", "194": "内浦湾", "195": "宗谷東方沖", "196": "網走沖", "197": "択捉島南東沖", "200": "青森県津軽北部", "201": "青森県津軽南部", "202": "青森県三八上北地方", "203": "青森県下北地方", "210": "岩手県沿岸北部", "211": "岩手県沿岸南部", "212": "岩手県内陸北部", "213": "岩手県内陸南部", "220": "宮城県北部", "221": "宮城県南部", "222": "宮城県中部", "230": "秋田県沿岸北部", "231": "秋田県沿岸南部", "232": "秋田県内陸北部", "233": "秋田県内陸南部", "240": "山形県庄内地方", "241": "山形県最上地方", "242": "山形県村山地方", "243": "山形県置賜地方", "250": "福島県中通り", "251": "福島県浜通り", "252": "福島県会津", "280": "津軽海峡", "281": "山形県沖", "282": "秋田県沖", "283": "青森県西方沖", "284": "陸奥湾", "285": "青森県東方沖", "286": "岩手県沖", "287": "宮城県沖", "288": "三陸沖", "289": "福島県沖", "300": "茨城県北部", "301": "茨城県南部", "309": "千葉県南東沖", "310": "栃木県北部", "311": "栃木県南部", "320": "群馬県北部", "321": "群馬県南部", "330": "埼玉県北部", "331": "埼玉県南部", "332": "埼玉県秩父地方", "340": "千葉県北東部", "341": "千葉県北西部", "342": "千葉県南部", "349": "房総半島南方沖", "350": "東京都２３区", "351": "東京都多摩東部", "352": "東京都多摩西部", "360": "神奈川県東部", "361": "神奈川県西部", "370": "新潟県上越地方", "371": "新潟県中越地方", "372": "新潟県下越地方", "378": "新潟県下越沖", "379": "新潟県上中越沖", "380": "富山県東部", "381": "富山県西部", "390": "石川県能登地方", "391": "石川県加賀地方", "400": "福井県嶺北", "401": "福井県嶺南", "411": "山梨県中・西部", "412": "山梨県東部・富士五湖", "420": "長野県北部", "421": "長野県中部", "422": "長野県南部", "430": "岐阜県飛騨地方", "431": "岐阜県美濃東部", "432": "岐阜県美濃中西部", "440": "静岡県伊豆地方", "441": "静岡県東部", "442": "静岡県中部", "443": "静岡県西部", "450": "愛知県東部", "451": "愛知県西部", "460": "三重県北部", "461": "三重県中部", "462": "三重県南部", "469": "三重県南東沖", "471": "茨城県沖", "472": "関東東方沖", "473": "千葉県東方沖", "475": "八丈島東方沖", "476": "八丈島近海", "477": "東京湾", "478": "相模湾", "480": "伊豆大島近海", "481": "伊豆半島東方沖", "482": "三宅島近海", "483": "新島・神津島近海", "485": "駿河湾", "486": "駿河湾南方沖", "487": "遠州灘", "489": "三河湾", "490": "伊勢湾", "492": "若狭湾", "493": "福井県沖", "494": "石川県西方沖", "495": "能登半島沖", "497": "富山湾", "498": "佐渡付近", "499": "東海道南方沖", "500": "滋賀県北部", "501": "滋賀県南部", "510": "京都府北部", "511": "京都府南部", "520": "大阪府北部", "521": "大阪府南部", "530": "兵庫県北部", "531": "兵庫県南東部", "532": "兵庫県南西部", "540": "奈良県", "550": "和歌山県北部", "551": "和歌山県南部", "560": "鳥取県東部", "562": "鳥取県中部", "563": "鳥取県西部", "570": "島根県東部", "571": "島根県西部", "580": "岡山県北部", "581": "岡山県南部", "590": "広島県北部", "591": "広島県南東部", "592": "広島県南西部", "600": "徳島県北部", "601": "徳島県南部", "610": "香川県東部", "611": "香川県西部", "620": "愛媛県東予", "621": "愛媛県中予", "622": "愛媛県南予", "630": "高知県東部", "631": "高知県中部", "632": "高知県西部", "673": "土佐湾", "674": "紀伊水道", "675": "大阪湾", "676": "播磨灘", "677": "瀬戸内海中部", "678": "安芸灘", "679": "周防灘", "680": "伊予灘", "681": "豊後水道", "682": "山口県北西沖", "683": "島根県沖", "684": "鳥取県沖", "685": "隠岐島近海", "686": "兵庫県北方沖", "687": "京都府沖", "688": "淡路島付近", "689": "和歌山県南方沖", "700": "山口県北部", "702": "山口県西部", "703": "山口県東部", "704": "山口県中部", "710": "福岡県福岡地方", "711": "福岡県北九州地方", "712": "福岡県筑豊地方", "713": "福岡県筑後地方", "720": "佐賀県北部", "721": "佐賀県南部", "730": "長崎県北部", "731": "長崎県南西部", "732": "長崎県島原半島", "740": "熊本県阿蘇地方", "741": "熊本県熊本地方", "742": "熊本県球磨地方", "743": "熊本県天草・芦北地方", "750": "大分県北部", "751": "大分県中部", "752": "大分県南部", "753": "大分県西部", "760": "宮崎県北部平野部", "761": "宮崎県北部山沿い", "762": "宮崎県南部平野部", "763": "宮崎県南部山沿い", "770": "鹿児島県薩摩地方", "771": "鹿児島県大隅地方", "783": "五島列島近海", "784": "天草灘", "785": "有明海", "786": "橘湾", "787": "鹿児島湾", "790": "種子島近海", "791": "日向灘", "793": "奄美大島近海", "795": "壱岐・対馬近海", "796": "福岡県北西沖", "797": "薩摩半島西方沖", "798": "トカラ列島近海", "799": "奄美大島北西沖", "820": "大隅半島東方沖", "821": "九州地方南東沖", "822": "種子島南東沖", "823": "奄美大島北東沖", "850": "沖縄本島近海", "851": "南大東島近海", "852": "沖縄本島南方沖", "853": "宮古島近海", "854": "石垣島近海", "855": "石垣島南方沖", "856": "西表島付近", "857": "与那国島近海", "858": "沖縄本島北西沖", "859": "宮古島北西沖", "860": "石垣島北西沖", "900": "台湾付近", "901": "東シナ海", "902": "四国沖", "903": "鳥島近海", "904": "鳥島東方沖", "905": "オホーツク海南部", "906": "サハリン西方沖", "907": "日本海北部", "908": "日本海中部", "909": "日本海西部", "911": "父島近海", "912": "千島列島", "913": "千島列島南東沖", "914": "北海道南東沖", "915": "東北地方東方沖", "916": "小笠原諸島西方沖", "917": "硫黄島近海", "918": "小笠原諸島東方沖", "919": "南海道南方沖", "920": "薩南諸島東方沖", "921": "本州南方沖", "922": "サハリン南部付近", "930": "北西太平洋", "932": "マリアナ諸島", "933": "黄海", "934": "朝鮮半島南部", "935": "朝鮮半島北部", "936": "中国東北部", "937": "ウラジオストク付近", "938": "シベリア南部", "939": "サハリン近海", "940": "アリューシャン列島", "941": "カムチャツカ半島付近", "942": "北米西部", "943": "北米中部", "944": "北米東部", "945": "中米", "946": "南米西部", "947": "南米中部", "948": "南米東部", "949": "北東太平洋", "950": "南太平洋", "951": "インドシナ半島付近", "952": "フィリピン付近", "953": "インドネシア付近", "954": "グアム付近", "955": "ニューギニア付近", "956": "ニュージーランド付近", "957": "オーストラリア付近", "958": "シベリア付近", "959": "ロシア西部", "960": "ロシア中部", "961": "ロシア東部", "962": "中央アジア", "963": "中国西部", "964": "中国中部", "965": "中国東部", "966": "インド付近", "967": "インド洋", "968": "中東", "969": "ヨーロッパ西部", "970": "ヨーロッパ中部", "971": "ヨーロッパ東部", "972": "地中海", "973": "アフリカ西部", "974": "アフリカ中部", "975": "アフリカ東部", "976": "北大西洋", "977": "南大西洋", "978": "北極付近", "979": "南極付近", "999": "遠地" }
+    var EEWSectName = { 135: "宗谷支庁北部", 136: "宗谷支庁南部", 125: "上川支庁北部", 126: "上川支庁中部", 127: "上川支庁南部", 130: "留萌支庁中北部", 131: "留萌支庁南部", 139: "北海道利尻礼文", 150: "日高支庁西部", 151: "日高支庁中部", 152: "日高支庁東部", 145: "胆振支庁西部", 146: "胆振支庁中東部", 110: "檜山支庁", 105: "渡島支庁北部", 106: "渡島支庁東部", 107: "渡島支庁西部", 140: "網走支庁網走", 141: "網走支庁北見", 142: "網走支庁紋別", 165: "根室支庁北部", 166: "根室支庁中部", 167: "根室支庁南部", 160: "釧路支庁北部", 161: "釧路支庁中南部", 155: "十勝支庁北部", 156: "十勝支庁中部", 157: "十勝支庁南部", 119: "北海道奥尻島", 120: "空知支庁北部", 121: "空知支庁中部", 122: "空知支庁南部", 100: "石狩支庁北部", 101: "石狩支庁中部", 102: "石狩支庁南部", 115: "後志支庁北部", 116: "後志支庁東部", 117: "後志支庁西部", 200: "青森県津軽北部", 201: "青森県津軽南部", 202: "青森県三八上北", 203: "青森県下北", 230: "秋田県沿岸北部", 231: "秋田県沿岸南部", 232: "秋田県内陸北部", 233: "秋田県内陸南部", 210: "岩手県沿岸北部", 211: "岩手県沿岸南部", 212: "岩手県内陸北部", 213: "岩手県内陸南部", 220: "宮城県北部", 221: "宮城県南部", 222: "宮城県中部", 240: "山形県庄内", 241: "山形県最上", 242: "山形県村山", 243: "山形県置賜", 250: "福島県中通り", 251: "福島県浜通り", 252: "福島県会津", 300: "茨城県北部", 301: "茨城県南部", 310: "栃木県北部", 311: "栃木県南部", 320: "群馬県北部", 321: "群馬県南部", 330: "埼玉県北部", 331: "埼玉県南部", 332: "埼玉県秩父", 350: "東京都２３区", 351: "東京都多摩東部", 352: "東京都多摩西部", 354: "神津島", 355: "伊豆大島", 356: "新島", 357: "三宅島", 358: "八丈島", 359: "小笠原", 340: "千葉県北東部", 341: "千葉県北西部", 342: "千葉県南部", 360: "神奈川県東部", 361: "神奈川県西部", 420: "長野県北部", 421: "長野県中部", 422: "長野県南部", 410: "山梨県東部", 411: "山梨県中・西部", 412: "山梨県東部・富士五湖", 440: "静岡県伊豆", 441: "静岡県東部", 442: "静岡県中部", 443: "静岡県西部", 450: "愛知県東部", 451: "愛知県西部", 430: "岐阜県飛騨", 431: "岐阜県美濃東部", 432: "岐阜県美濃中西部", 460: "三重県北部", 461: "三重県中部", 462: "三重県南部", 370: "新潟県上越", 371: "新潟県中越", 372: "新潟県下越", 375: "新潟県佐渡", 380: "富山県東部", 381: "富山県西部", 390: "石川県能登", 391: "石川県加賀", 400: "福井県嶺北", 401: "福井県嶺南", 500: "滋賀県北部", 501: "滋賀県南部", 510: "京都府北部", 511: "京都府南部", 520: "大阪府北部", 521: "大阪府南部", 530: "兵庫県北部", 531: "兵庫県南東部", 532: "兵庫県南西部", 535: "兵庫県淡路島", 540: "奈良県", 550: "和歌山県北部", 551: "和歌山県南部", 580: "岡山県北部", 581: "岡山県南部", 590: "広島県北部", 591: "広島県南東部", 592: "広島県南西部", 570: "島根県東部", 571: "島根県西部", 575: "島根県隠岐", 560: "鳥取県東部", 562: "鳥取県中部", 563: "鳥取県西部", 600: "徳島県北部", 601: "徳島県南部", 610: "香川県東部", 611: "香川県西部", 620: "愛媛県東予", 621: "愛媛県中予", 622: "愛媛県南予", 630: "高知県東部", 631: "高知県中部", 632: "高知県西部", 700: "山口県北部", 701: "山口県東部", 702: "山口県西部", 710: "福岡県福岡", 711: "福岡県北九州", 712: "福岡県筑豊", 713: "福岡県筑後", 750: "大分県北部", 751: "大分県中部", 752: "大分県南部", 753: "大分県西部", 730: "長崎県北部", 731: "長崎県南西部", 732: "長崎県島原半島", 735: "長崎県対馬", 736: "長崎県壱岐", 737: "長崎県五島", 720: "佐賀県北部", 721: "佐賀県南部", 740: "熊本県阿蘇", 741: "熊本県熊本", 742: "熊本県球磨", 743: "熊本県天草・芦北", 760: "宮崎県北部平野部", 761: "宮崎県北部山沿い", 762: "宮崎県南部平野部", 763: "宮崎県南部山沿い", 770: "鹿児島県薩摩", 771: "鹿児島県大隅", 774: "鹿児島県十島村", 775: "鹿児島県甑島", 776: "鹿児島県種子島", 777: "鹿児島県屋久島", 778: "鹿児島県奄美北部", 779: "鹿児島県奄美南部", 800: "沖縄県本島北部", 801: "沖縄県本島中南部", 802: "沖縄県久米島", 803: "沖縄県大東島", 804: "沖縄県宮古島", 805: "沖縄県石垣島", 806: "沖縄県与那国島", 807: "沖縄県西表島" }
+    data = {
+      EpiCenter: {}
     }
-  } else {
-    if (str < 0.5) ShindoTmp = 0;
-    else if (str < 1.5) ShindoTmp = 1;
-    else if (str < 2.5) ShindoTmp = 2;
-    else if (str < 3.5) ShindoTmp = 3;
-    else if (str < 4.5) ShindoTmp = 4;
-    else if (str < 5) ShindoTmp = 5;
-    else if (str < 5.5) ShindoTmp = 6;
-    else if (str < 6) ShindoTmp = 7;
-    else if (str < 6.5) ShindoTmp = 8;
-    else if (6.5 <= str) ShindoTmp = 9;
-    else ShindoTmp = 11;
-  }
-  switch (responseType) {
-    case 1:
-      var ConvTable = ["0", "1", "2", "3", "4", "5弱", "5強", "6弱", "6強", "7", "５弱以上未入電", "不明"];
-      break;
-    case 2:
-      var ConvTable = [[config.color.Shindo["0"].background, config.color.Shindo["0"].color], [config.color.Shindo["1"].background, config.color.Shindo["1"].color], [config.color.Shindo["2"].background, config.color.Shindo["2"].color], [config.color.Shindo["3"].background, config.color.Shindo["3"].color], [config.color.Shindo["4"].background, config.color.Shindo["4"].color], [config.color.Shindo["5m"].background, config.color.Shindo["5m"].color], [config.color.Shindo["5p"].background, config.color.Shindo["5p"].color], [config.color.Shindo["6m"].background, config.color.Shindo["6m"].color], [config.color.Shindo["6p"].background, config.color.Shindo["6p"].color], [config.color.Shindo["7"].background, config.color.Shindo["7"].color], [config.color.Shindo["5p?"].background, config.color.Shindo["5p?"].color], [config.color.Shindo["?"].background, config.color.Shindo["?"].color]];
-      break;
-    case 3:
-      var ConvTable = [null, "1", "2", "3", "4", "5m", "5p", "6m", "6p", "7", "5p?", null];
-      break;
-    case 4:
-      var ConvTable = [0, 1, 2, 3, 4, 4.5, 5, 5.5, 6, 7, 4.5, null];
-      break;
-    case 5:
-      var ConvTable = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 4.5, 0];
-      break;
-    case 0:
-    default:
-      var ConvTable = ["0", "1", "2", "3", "4", "5-", "5+", "6-", "6+", "7", "未", "?"];
-      break;
-  }
-  return ConvTable[ShindoTmp];
-}
+    code = "39 03 10 230503062056 C11 230503062033 ND20230503062035 NCN002 JD////////////// JN/// /// //// ///// /// // // RK///// RT///// RC///// 9999="
+    code = "37 03 00 230504065519 C11 230504065422 ND20230504065427 NCN902 JD////////////// JN002 289 N367 E1422 020 37 01 RK77609 RT10/// RC0//// 9999="
+    // code = "37 03 00 020117093020 C11 020117093010 ND20020117093010 NCN003 JD20020117093010 JN002 486 N343 E1384 010 75 6- RK665// RT01000 RC11000 EBI 442 S6-5- 093022 10 440 S6-04 093022 10 443 S6-04 093030 10 441 S0503 093036 10 9999="
 
-        function dateEncode(type, dateTmp) {
-            if (!dateTmp) dateTmp = new Date()
-            else dateTmp = new Date(dateTmp);
-            if (type == 1) {
-                //YYYYMMDDHHMMSS
-                var YYYY = String(dateTmp.getFullYear());
-                var MM = String(dateTmp.getMonth() + 1).padStart(2, "0");
-                var DD = String(dateTmp.getDate()).padStart(2, "0");
-                var hh = String(dateTmp.getHours()).padStart(2, "0");
-                var mm = String(dateTmp.getMinutes()).padStart(2, "0");
-                var ss = String(dateTmp.getSeconds()).padStart(2, "0");
-                return YYYY + MM + DD + hh + mm + ss;
-            } else if (type == 2) {
-                //YYYYMMDDHHMMSS
-                var YYYY = String(dateTmp.getFullYear());
-                var MM = String(dateTmp.getMonth() + 1).padStart(2, "0");
-                var DD = String(dateTmp.getDate()).padStart(2, "0");
-                return YYYY + MM + DD;
-            } else if (type == 3) {
-                //YYYYMMDDHHMMSS
-                var YYYY = String(dateTmp.getFullYear());
-                var MM = String(dateTmp.getMonth() + 1).padStart(2, "0");
-                var DD = String(dateTmp.getDate()).padStart(2, "0");
-                var hh = String(dateTmp.getHours()).padStart(2, "0");
-                var mm = String(dateTmp.getMinutes()).padStart(2, "0");
-                var ss = String(dateTmp.getSeconds()).padStart(2, "0");
-                return YYYY + "/" + MM + "/" + DD + " " + hh + ":" + mm + ":" + ss;
-            } else if (type == 4) {
-                //YYYYMMDDHHMMSS
-                var YYYY = String(dateTmp.getFullYear());
-                var MM = String(dateTmp.getMonth() + 1).padStart(2, "0");
-                var DD = String(dateTmp.getDate()).padStart(2, "0");
-                return YYYY + "/" + MM + "/" + DD;
-            } else {
-                var YYYY = String(dateTmp.getFullYear());
-                var MM = String(dateTmp.getMonth() + 1).padStart(2, "0");
-                var DD = String(dateTmp.getDate()).padStart(2, "0");
-                var hh = String(dateTmp.getHours()).padStart(2, "0");
-                var mm = String(dateTmp.getMinutes()).padStart(2, "0");
-                var ss = String(dateTmp.getSeconds()).padStart(2, "0");
+    const startTime = performance.now(); // 開始時間
 
-                type.replaceAll("YYYY", YYYY);
-                type.replaceAll("MM", MM);
-                type.replaceAll("DD", DD);
-                type.replaceAll("hh", hh);
-                type.replaceAll("mm", mm);
-                type.replaceAll("ss", ss);
 
-                return type;
-            }
+    codeData = code.split(" ")
+
+    data.EventID = Number(codeData[6].substring(2))
+    data.Serial = Number(codeData[7].substring(4))
+    infotype = (codeData[7].substring(3, 4))
+    data.isFinal = infotype == 8 || infotype == 9
+    data.AlertFlg = codeData[17].substring(3, 4) == 1
+
+    codeData[0]//電文種別コード
+    codeData[1]//発信官署
+    data.Canceled = codeData[0] == 39
+    data.training = codeData[2] == "01" || codeData[2] == "30"
+    data.ReportTime = dateDecode("20" + codeData[3])
+    data.OriginTime = dateDecode("20" + codeData[5])
+    data.EpiCenter.Code = Number(codeData[10])
+    data.EpiCenter.Name = regionNameConvert(codeData[10])
+    data.EpiCenter.Latitude = LatitudeConvert(codeData[11])
+    data.EpiCenter.Longitude = LongitudeConvert(codeData[12])
+    data.Depth = codeData[13] == "///" ? null : Number(codeData[13])
+    data.Magnitude = codeData[14] == "///" ? null : Number(codeData[14]) / 10
+    data.MaxInt = shindoConvert(codeData[15], 0)
+    data.isSea = codeData[17].substring(2, 3) == 1
+    data.isAssumption = codeData[17].substring(4, 5) == 9
+
+    EBIData = []
+    EBIStr = code.split("EBI ")[1]
+    if (EBIStr) {
+      EBIStr = EBIStr.split("ECI")[0].split("EII")[0].split(" 9999=")[0]
+      EBIStr = EBIStr.split(" ")
+      if (EBIStr.length % 4 == 0) {
+        for (let i = 0; i < EBIStr.length; i += 4) {
+          var sectName = EEWSectName[EBIStr[i]]
+          var maxInt = EBIStr[i + 1].substring(1, 3)
+          var minInt = EBIStr[i + 1].substring(3, 5)
+          minInt = minInt == "//" ? null : shindoConvert(minInt, 0)
+          var arrivalTime = EBIStr[i + 2]
+          arrivalTime = arrivalTime.substring(0, 2) + ":" + arrivalTime.substring(2, 4) + ":" + arrivalTime.substring(4, 6)
+          arrivalTime = new Date(dateEncode(4, null) + " " + arrivalTime)
+
+          var alertFlg = EBIStr[i + 3].substring(0, 1) == "1"
+          var arrived = EBIStr[i + 3].substring(1, 2) == "1"
+
+          EBIData.push({
+            Code: Number(EBIStr[i]),
+            Name: sectName,
+            Alert: alertFlg,
+            IntTo: maxInt,
+            IntFrom: minInt,
+            ArrivalTime: arrivalTime,
+            Arrived: arrived
+          })
         }
+      } else throw new Error("予想震度等のでコードでエラー")
+    }
+    data.Forecast = EBIData
 
-        function dateDecode(str) {
-            var year = parseInt(str.substring(0, 4));
-            var month = parseInt(str.substring(4, 6));
-            var day = parseInt(str.substring(6, 8));
-            var hour = parseInt(str.substring(8, 10));
-            var min = parseInt(str.substring(10, 12));
-            var sec = parseInt(str.substring(12, 15));
-            return new Date(year, month - 1, day, hour, min, sec);
+    const endTime = performance.now(); // 終了時間
+    console.log(endTime - startTime + "ms"); // 何ミリ秒かかったかを表示する
+
+    document.body.innerText = JSON.stringify(data).split(",").join(",\n")
+    console.log(data)
+    function regionNameConvert(Rcode) {
+      if (Rcode == "///") return null;
+      var RnameTmp = ESregionName[Rcode]
+      if (RnameTmp) return RnameTmp
+      else return null
+    }
+
+    function LatitudeConvert(lat) {
+      if (lat == "////" || lat == "N///") return null;
+      latNum = Number(lat.substring(1)) / 10
+      if (lat.substring(0, 1) == "S") latNum = 0 - latNum
+      if (!isNaN(latNum)) return latNum
+      else return null
+    }
+
+    function LongitudeConvert(lng) {
+      if (lng == "/////" || lng == "E////") return null;
+      lngNum = Number(lng.substring(1)) / 10
+      if (lng.substring(0, 1) == "W") lngNum = 0 - lngNum
+      if (!isNaN(lngNum)) return lngNum
+      else return null
+    }
+    function shindoConvert(str, responseType) {
+      var ShindoTmp;
+      if (str === null || str === undefined) ShindoTmp = 11;
+      else if (isNaN(str)) {
+        str = String(str)
+          .replace(/[０-９]/g, function (s) {
+            return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
+          })
+          .replaceAll("＋", "+")
+          .replaceAll("－", "-")
+          .replaceAll("強", "+")
+          .replaceAll("弱", "-")
+          .replace(/\s+/g, "");
+        switch (str) {
+          case "1":
+          case "10":
+            ShindoTmp = 1;
+            break;
+          case "2":
+          case "20":
+            ShindoTmp = 2;
+            break;
+          case "3":
+          case "30":
+            ShindoTmp = 3;
+            break;
+          case "4":
+          case "40":
+            ShindoTmp = 4;
+            break;
+          case "5-":
+          case "45":
+            ShindoTmp = 5;
+            break;
+          case "5+":
+          case "50":
+            ShindoTmp = 6;
+            break;
+          case "6-":
+          case "55":
+            ShindoTmp = 7;
+            break;
+          case "6+":
+          case "60":
+            ShindoTmp = 8;
+            break;
+          case "7":
+          case "70":
+            ShindoTmp = 9;
+            break;
+          case "震度5-以上未入電":
+          case "5+?":
+            ShindoTmp = 10;
+            break;
+          case "-1":
+          case "?":
+          case "不明":
+          default:
+            ShindoTmp = 11;
         }
-    </script>
+      } else {
+        if (str < 0.5) ShindoTmp = 0;
+        else if (str < 1.5) ShindoTmp = 1;
+        else if (str < 2.5) ShindoTmp = 2;
+        else if (str < 3.5) ShindoTmp = 3;
+        else if (str < 4.5) ShindoTmp = 4;
+        else if (str < 5) ShindoTmp = 5;
+        else if (str < 5.5) ShindoTmp = 6;
+        else if (str < 6) ShindoTmp = 7;
+        else if (str < 6.5) ShindoTmp = 8;
+        else if (6.5 <= str) ShindoTmp = 9;
+        else ShindoTmp = 11;
+      }
+      switch (responseType) {
+        case 1:
+          var ConvTable = ["0", "1", "2", "3", "4", "5弱", "5強", "6弱", "6強", "7", "５弱以上未入電", "不明"];
+          break;
+        case 2:
+          var ConvTable = [[config.color.Shindo["0"].background, config.color.Shindo["0"].color], [config.color.Shindo["1"].background, config.color.Shindo["1"].color], [config.color.Shindo["2"].background, config.color.Shindo["2"].color], [config.color.Shindo["3"].background, config.color.Shindo["3"].color], [config.color.Shindo["4"].background, config.color.Shindo["4"].color], [config.color.Shindo["5m"].background, config.color.Shindo["5m"].color], [config.color.Shindo["5p"].background, config.color.Shindo["5p"].color], [config.color.Shindo["6m"].background, config.color.Shindo["6m"].color], [config.color.Shindo["6p"].background, config.color.Shindo["6p"].color], [config.color.Shindo["7"].background, config.color.Shindo["7"].color], [config.color.Shindo["5p?"].background, config.color.Shindo["5p?"].color], [config.color.Shindo["?"].background, config.color.Shindo["?"].color]];
+          break;
+        case 3:
+          var ConvTable = [null, "1", "2", "3", "4", "5m", "5p", "6m", "6p", "7", "5p?", null];
+          break;
+        case 4:
+          var ConvTable = [0, 1, 2, 3, 4, 4.5, 5, 5.5, 6, 7, 4.5, null];
+          break;
+        case 5:
+          var ConvTable = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 4.5, 0];
+          break;
+        case 0:
+        default:
+          var ConvTable = ["0", "1", "2", "3", "4", "5-", "5+", "6-", "6+", "7", "未", "?"];
+          break;
+      }
+      return ConvTable[ShindoTmp];
+    }
+
+    function dateEncode(type, dateTmp) {
+      if (!dateTmp) dateTmp = new Date();
+      else dateTmp = new Date(dateTmp);
+
+      var YYYY = String(dateTmp.getFullYear());
+      var MM = String(dateTmp.getMonth() + 1).padStart(2, "0");
+      var DD = String(dateTmp.getDate()).padStart(2, "0");
+      var hh = String(dateTmp.getHours()).padStart(2, "0");
+      var mm = String(dateTmp.getMinutes()).padStart(2, "0");
+      var ss = String(dateTmp.getSeconds()).padStart(2, "0");
+      switch (type) {
+        case 1:
+          return YYYY + MM + DD + hh + mm + ss;
+        case 2:
+          return YYYY + MM + DD;
+        case 3:
+          return YYYY + "/" + MM + "/" + DD + " " + hh + ":" + mm;
+        case 4:
+          return YYYY + "/" + MM + "/" + DD;
+        case 5:
+          return DD + "日 " + hh + ":" + mm;
+        case 7:
+          return hh + "時" + mm + "分" + ss + "秒";
+        default:
+          return new Date();
+      }
+    }
+    function dateDecode(str) {
+      var year = parseInt(str.substring(0, 4));
+      var month = parseInt(str.substring(4, 6));
+      var day = parseInt(str.substring(6, 8));
+      var hour = parseInt(str.substring(8, 10));
+      var min = parseInt(str.substring(10, 12));
+      var sec = parseInt(str.substring(12, 15));
+      return new Date(year, month - 1, day, hour, min, sec);
+    }
+  </script>
 
 </body>
 
