@@ -217,12 +217,12 @@
           return YYYY + MM + DD + hh + mm + ss;
         case 2:
           return YYYY + MM + DD;
+        case 3:
+          return YYYY + "/" + MM + "/" + DD + " " + hh + ":" + mm;
         case 4:
           return YYYY + "/" + MM + "/" + DD;
         case 5:
           return DD + "日 " + hh + ":" + mm;
-        case 6:
-          return YYYY + "/" + MM + "/" + DD + " " + hh + ":" + mm;
         case 7:
           return hh + "時" + mm + "分" + ss + "秒";
         default:

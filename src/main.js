@@ -1706,7 +1706,7 @@ function EEWdetect(type, json) {
             maxInt = maxInt == "//" ? null : shindoConvert(maxInt);
             var arrivalTime = EBIStr[i + 2];
             arrivalTime = arrivalTime.substring(0, 2) + ":" + arrivalTime.substring(2, 4) + ":" + arrivalTime.substring(4, 6);
-            arrivalTime = new Date(dateEncode(6) + " " + arrivalTime);
+            arrivalTime = new Date(dateEncode(4) + " " + arrivalTime);
 
             var alertFlg = EBIStr[i + 3].substring(0, 1) == "1";
             var arrived = EBIStr[i + 3].substring(1, 2) == "1";
@@ -1768,7 +1768,7 @@ function EEWdetect(type, json) {
             if (maxInt == 99) maxInt = minInt;
             var arrivalTime = EBIStr[i + 2];
             arrivalTime = arrivalTime.substring(0, 2) + ":" + arrivalTime.substring(2, 4) + ":" + arrivalTime.substring(4, 6);
-            arrivalTime = new Date(dateEncode(6) + " " + arrivalTime);
+            arrivalTime = new Date(dateEncode(4) + " " + arrivalTime);
 
             var alertFlg = EBIStr[i + 3].substring(0, 1) == "1";
             var arrived = EBIStr[i + 3].substring(1, 2) == "1";
@@ -3318,12 +3318,12 @@ function dateEncode(type, dateTmp) {
       return YYYY + MM + DD + hh + mm + ss;
     case 2:
       return YYYY + MM + DD;
+    case 3:
+      return YYYY + "/" + MM + "/" + DD + " " + hh + ":" + mm;
     case 4:
       return YYYY + "/" + MM + "/" + DD;
     case 5:
       return DD + "日 " + hh + ":" + mm;
-    case 6:
-      return YYYY + "/" + MM + "/" + DD + " " + hh + ":" + mm;
     case 7:
       return hh + "時" + mm + "分" + ss + "秒";
     default:
