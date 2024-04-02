@@ -1266,6 +1266,10 @@ function init() {
     overlaySelect("kmoni_points", config.data.kmoni_points_show);
     document.getElementById("kmoni_points").checked = config.data.kmoni_points_show;
 
+    now_EEW.forEach(function (elm) {
+      epiCenterUpdate(elm);
+    });
+
     window.electronAPI.messageReturn({
       action: "mapLoaded",
     });
@@ -1436,16 +1440,18 @@ function JMAEstShindoControl(data) {
 }
 
 function JMAEstShindoDraw() {
-  map.setFilter("Int1", Int1T);
-  map.setFilter("Int2", Int2T);
-  map.setFilter("Int3", Int3T);
-  map.setFilter("Int4", Int4T);
-  map.setFilter("Int5-", Int5mT);
-  map.setFilter("Int5+", Int5pT);
-  map.setFilter("Int6-", Int6mT);
-  map.setFilter("Int6+", Int6pT);
-  map.setFilter("Int7", Int7T);
-  map.setFilter("Alert", AlertT);
+  if (map) {
+    map.setFilter("Int1", Int1T);
+    map.setFilter("Int2", Int2T);
+    map.setFilter("Int3", Int3T);
+    map.setFilter("Int4", Int4T);
+    map.setFilter("Int5-", Int5mT);
+    map.setFilter("Int5+", Int5pT);
+    map.setFilter("Int6-", Int6mT);
+    map.setFilter("Int6+", Int6pT);
+    map.setFilter("Int7", Int7T);
+    map.setFilter("Alert", AlertT);
+  }
 }
 
 //🔴予報円🔴
@@ -1569,6 +1575,7 @@ let circle_options = {
 };
 //予報円描画
 function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrived, SArriveTime, nowDistance) {
+  if (!map) return;
   var EQElm = psWaveList.find(function (elm) {
     return elm.id == EventID;
   });
