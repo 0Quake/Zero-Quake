@@ -1498,7 +1498,7 @@ var wolfx_st;
 
 function Wolfx_st() {
   if (net.online) {
-    var request = net.request("https://api.wolfx.jp/seis_list.json");
+    var request = net.request("https://api.wolfx.jp/seis_list.json?_=" + Number(new Date()));
     request.on("response", (res) => {
       var dataTmp = "";
       res.on("data", (chunk) => {
@@ -1546,7 +1546,7 @@ function WolfxSeis_WS() {
         if (json.type == "heartbeat" || json.type == "pong") return;
         stationData = wolfx_st ? wolfx_st[json.type] : null;
         var rgb = shindoColorTable[Math.floor(json.CalcShindo * 10) / 10];
-        if (stationData) WolfxSeisData[json.type] = { Type: "Wolfx", shindo: json.CalcShindo, PGA: json.PGA, Code: json.type, Name: stationData.location, Location: { Longitude: stationData.longitude, Latitude: stationData.latitude }, rgb: [rgb.r, rgb.g, rgb.b] };
+        if (stationData && stationData.enable) WolfxSeisData[json.type] = { Type: "Wolfx", shindo: json.CalcShindo, PGA: json.PGA, Code: json.type, Name: stationData.name, Location: { Longitude: stationData.longitude, Latitude: stationData.latitude }, rgb: [rgb.r, rgb.g, rgb.b] };
         wolfxSeisData = {
           action: "wolfxSeisUpdate",
           LocalTime: new Date(),
