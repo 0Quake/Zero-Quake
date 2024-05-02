@@ -56,7 +56,7 @@
   "dependencies": {
     "@turf/turf": "^6.5.0",
     "electron-squirrel-startup": "^1.0.0",
-    "electron-store": "^8.2.0",
+    "electron-store": "^9.0.0",
     "jsdom": "^24.0.0",
     "net": "^1.0.2",
     "path": "^0.12.7",
