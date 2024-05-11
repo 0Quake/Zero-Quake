@@ -1630,7 +1630,7 @@ function WolfxSeis_WS() {
         if (json.type == "heartbeat" || json.type == "pong") return;
         var stationData = wolfx_st ? wolfx_st[json.type] : null;
         var rgb = shindoColorTable[Math.max(-3, Math.floor(json.CalcShindo * 10) / 10)];
-        if (stationData && stationData.enable) WolfxSeisData[json.type] = { Type: "Wolfx", shindo: json.CalcShindo, PGA: json.PGA, Code: json.type, Name: stationData.name, Location: { Longitude: stationData.longitude, Latitude: stationData.latitude }, rgb: [rgb.r, rgb.g, rgb.b] };
+        if (stationData && stationData.enable) WolfxSeisData[json.type] = { Type: "Wolfx", shindo: json.CalcShindo, PGA: json.PGA, Code: json.type, Name: stationData.location, Location: { Longitude: stationData.longitude, Latitude: stationData.latitude }, rgb: [rgb.r, rgb.g, rgb.b] };
         WolfxSeisData_Marged = {
           action: "wolfxSeisUpdate",
           LocalTime: new Date(),
