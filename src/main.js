@@ -585,6 +585,8 @@ ipcMain.on("message", (_event, response) => {
         RegularExecution();
         if (wolfxConnection) wolfxConnection.sendUTF("query_jmaeew");
         if (PBSConnection) PBSConnection.sendUTF("queryjson");
+        Wolfx_st();
+        TremRts_st();
       }
       break;
   }
