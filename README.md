@@ -59,7 +59,7 @@
   <li>強震モニタ <a href="http://www.kmoni.bosai.go.jp/">© 防災科学技術研究所</a>（強震／毎秒）</li>
   <li>長周期地震動モニタ <a href="http://www.lmoni.bosai.go.jp/">© 防災科学技術研究所</a>（強震／毎秒）</li>
   <li>海しる <a href="https://www.msil.go.jp/">© Japan Coast Guard, 防災科学技術研究所</a>（海底／3分毎）</li>
-  <li>Wolfx 地震観測所データ共有 JSON API <a href="https://api.wolfx.jp/seis.html">© Wolfx Studio</a>（中国／毎秒）</li>
+  <li>Wolfx Seis Net API <a href="https://api.wolfx.jp/seis.html">© Wolfx Studio</a>（中国／毎秒）</li>
 </ul>
 </details>
 
