@@ -1289,7 +1289,7 @@ function addPointMarker(elm) {
 
   const el = document.createElement("div");
   el.classList.add("marker-circle", "KmoniPoint_" + codeEscaped);
-  if (elm.Type == "S-net") el.classList.add("marker-circle-S-net");
+  if (elm.Type == "S-net" || elm.Type == "Sagami") el.classList.add("marker-circle-S-net");
   elm.popupContent = "";
   elm.popup = new maplibregl.Popup({ offset: 10 }).on("open", () => {
     elm.popup.setHTML(elm.popupContent);
