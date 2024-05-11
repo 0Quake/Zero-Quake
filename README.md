@@ -4,6 +4,13 @@
 ![](https://img.shields.io/github/v/release/0Quake/Zero-Quake)
 ![](https://img.shields.io/github/license/0quake/Zero-Quake)
 
+## ご注意
+
+- [気象庁「緊急地震速報について」](https://www.data.jma.go.jp/svd/eew/data/nc/)を確認し、緊急地震速報について正しく理解したうえでご利用ください。
+- 地図に表示されるリアルタイムの揺れ情報には、生活振動などを含みます。
+- TREM-RTS から取得する台湾の揺れ情報は、日本とは異なる尺度の震度ですが、おおむね日本の震度と対応するため、そのまま表示しています。
+- インターネットを使用して情報を取得する都合で、情報の遅延・取得漏れ等があり得ます。
+
 ## 受信できる情報
 
 ### 気象庁による気象情報
@@ -52,7 +59,11 @@
 
 - K-NET, KiK-net（防災科学技術研究所 強震観測網）
 - S-net, 相模湾地震観測施設（防災科学技術研究所 海底地震計）
-- Wolfx 地震観測網（中国 コミュニティ地震観測網）
+- Wolfx Seis Net（中国 コミュニティ地震観測網）
+- TREM-RTS※（台湾など コミュニティ地震観測網）
+
+※<a href="https://github.com/whes1015">YuYu1015 様</a>のご厚意でデータを提供していただいています
+
 <details>
 <summary>情報源</summary>
 <ul>
@@ -60,6 +71,7 @@
   <li>長周期地震動モニタ <a href="http://www.lmoni.bosai.go.jp/">© 防災科学技術研究所</a>（強震／毎秒）</li>
   <li>海しる <a href="https://www.msil.go.jp/">© Japan Coast Guard, 防災科学技術研究所</a>（海底／3分毎）</li>
   <li>Wolfx Seis Net API <a href="https://api.wolfx.jp/seis.html">© Wolfx Studio</a>（中国／毎秒）</li>
+  <li>TREM-RTS API © ExpTech Studio（台湾など／毎秒）</li>
 </ul>
 </details>
 

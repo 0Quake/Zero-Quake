@@ -1001,6 +1001,11 @@ dialog {
 dialog::backdrop {
   background: rgba(0, 0, 0, 0.4);
 }
+input,
+select,
+textarea {
+  background: #2e2e2e;
+}
 button {
   background: #333;
   color: #fff;

@@ -112,6 +112,10 @@ var defaultConfigVal = {
     wolfx: {
       GetData: true,
     },
+    TREMRTS: {
+      GetData: true,
+      Interval: 1000,
+    },
     EarlyEst: {
       GetData: true,
       Interval: 60000,
@@ -248,7 +252,7 @@ var narikakun_EIDs = [];
 var eqInfo = { jma: [], usgs: [] };
 var kmoniTimeout;
 var msil_lastTime = 0;
-var kmoniPointsDataTmp, SnetPointsDataTmp, wolfxSeisData;
+var kmoniPointsDataTmp, SnetPointsDataTmp, WolfxSeisData_Marged, TremRtsData_Marged;
 let tray;
 var thresholds;
 
@@ -566,7 +570,8 @@ ipcMain.on("message", (_event, response) => {
     case "mapLoaded":
       if (kmoniPointsDataTmp) messageToMainWindow(kmoniPointsDataTmp);
       if (SnetPointsDataTmp) messageToMainWindow(SnetPointsDataTmp);
-      if (wolfxSeisData) messageToMainWindow(wolfxSeisData);
+      if (WolfxSeisData_Marged) messageToMainWindow(WolfxSeisData_Marged);
+      if (TremRtsData_Marged) messageToMainWindow(TremRtsData_Marged);
       break;
     case "replay":
       replay(response.date);
@@ -992,11 +997,80 @@ function start() {
   yoyuSetK(kmoniRequest);
   eqInfoUpdate(true); //地震情報定期取得 着火
   earlyEstReq();
+  TremRtsReq();
 
   //定期実行 着火
   RegularExecution(true);
 
   Wolfx_st();
+  TremRts_st();
+}
+
+var TremRts_sta;
+function TremRts_st() {
+  if (net.online) {
+    var request = net.request("https://api-2.exptech.com.tw/api/v1/trem/station?_=" + Number(new Date()));
+    request.on("response", (res) => {
+      var dataTmp = "";
+      res.on("data", (chunk) => {
+        dataTmp += chunk;
+      });
+      res.on("end", function () {
+        try {
+          var json = jsonParse(dataTmp);
+          if (json) TremRts_sta = json;
+        } catch (err) {
+          return;
+        }
+      });
+    });
+    request.end();
+  }
+}
+
+function TremRtsReq() {
+  if (config.Source.TREMRTS.GetData) {
+    if (net.online) {
+      var request = net.request("https://lb-1.exptech.com.tw/api/v1/trem/rts?_=" + Number(new Date()));
+      request.on("response", (res) => {
+        var dataTmp = "";
+        res.on("data", (chunk) => {
+          dataTmp += chunk;
+        });
+        res.on("end", function () {
+          try {
+            var json = jsonParse(dataTmp);
+            var TremRtsData = {};
+            Object.keys(json.station).forEach(function (StID) {
+              var st = json.station[StID];
+              var stationData = TremRts_sta ? TremRts_sta[StID] : null;
+              if (stationData) {
+                var JPShindo = st.i; //おおむね対応するため、現時点では変換不要と判断
+                var rgb = shindoColorTable[Math.max(-3, Math.floor(JPShindo * 10) / 10)];
+                TremRtsData[StID] = { Type: "TREMRTS", shindo: JPShindo, PGA: st.pga, Code: StID, Name: "", Location: { Longitude: stationData.info[0].lon, Latitude: stationData.info[0].lat }, rgb: [rgb.r, rgb.g, rgb.b] };
+              }
+            });
+            TremRtsData_Marged = {
+              action: "TREM-RTSUpdate",
+              LocalTime: new Date(),
+              data: TremRtsData,
+            };
+            messageToMainWindow(TremRtsData_Marged);
+            kmoniTimeUpdate(new Date(json.time), "TREM-RTS", "success");
+          } catch (err) {
+            kmoniTimeUpdate(new Date() - Replay, "TREM-RTS", "Error");
+            return;
+          }
+        });
+      });
+      request.on("error", () => {
+        kmoniTimeUpdate(new Date() - Replay, "TREM-RTS", "Error");
+      });
+      request.end();
+    } else kmoniTimeUpdate(new Date() - Replay, "TREM-RTS", "Error");
+  }
+
+  setTimeout(TremRtsReq, config.Source.TREMRTS.Interval);
 }
 
 function earlyEstReq() {
@@ -1453,7 +1527,6 @@ function Wolfx_WS() {
   WolfxWSclient = new WebSocketClient();
 
   WolfxWSclient.on("connectFailed", function () {
-    console.log("aa");
     kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
     Wolfx_WS_TryConnect();
   });
@@ -1461,7 +1534,6 @@ function Wolfx_WS() {
   WolfxWSclient.on("connect", function (connection) {
     wolfxConnection = connection;
     connection.on("error", function () {
-      console.log("bb");
       kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
     });
     connection.on("close", function () {
@@ -1482,7 +1554,6 @@ function Wolfx_WS() {
             break;
         }
       } catch (err) {
-        console.log("cc", error);
         kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
       }
       setInterval(function () {
@@ -1537,14 +1608,12 @@ function WolfxSeis_WS() {
 
   WolfxSeisWSclient.on("connectFailed", function () {
     kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
-    console.log("44");
     Wolfx_WS_TryConnect();
   });
 
   WolfxSeisWSclient.on("connect", function (connection) {
     connection.on("error", function () {
       kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
-      console.log("55");
     });
     connection.on("close", function () {
       kmoniTimeUpdate(new Date() - Replay, "wolfx", "Disconnect");
@@ -1560,15 +1629,14 @@ function WolfxSeis_WS() {
         var stationData = wolfx_st ? wolfx_st[json.type] : null;
         var rgb = shindoColorTable[Math.max(-3, Math.floor(json.CalcShindo * 10) / 10)];
         if (stationData && stationData.enable) WolfxSeisData[json.type] = { Type: "Wolfx", shindo: json.CalcShindo, PGA: json.PGA, Code: json.type, Name: stationData.name, Location: { Longitude: stationData.longitude, Latitude: stationData.latitude }, rgb: [rgb.r, rgb.g, rgb.b] };
-        wolfxSeisData = {
+        WolfxSeisData_Marged = {
           action: "wolfxSeisUpdate",
           LocalTime: new Date(),
           data: WolfxSeisData,
         };
-        messageToMainWindow(wolfxSeisData);
+        messageToMainWindow(WolfxSeisData_Marged);
       } catch (err) {
         kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
-        console.log("66", err);
       }
       setInterval(function () {
         connection.sendUTF("ping");
@@ -2360,7 +2428,6 @@ function EQI_JMAXMLList_Req(LongPeriodFeed, count) {
           kmoniTimeUpdate(new Date() - Replay, "JMAXML", "success");
         } catch (err) {
           kmoniTimeUpdate(new Date() - Replay, "JMAXML", "Error");
-          console.log(1, err);
         }
       });
     });
@@ -2655,7 +2722,6 @@ function EQI_JMAXML_Req(url, count) {
           kmoniTimeUpdate(new Date() - Replay, "JMAXML", "success");
         } catch (err) {
           kmoniTimeUpdate(new Date() - Replay, "JMAXML", "Error");
-          console.log(2, err);
         }
       });
     });

@@ -65,6 +65,9 @@
                 <div id="tab1_menu16" class="tabmenu" data-contentid="tab1_content16">
                     Project BS
                 </div>
+                <div id="tab1_menu17" class="tabmenu" data-contentid="tab1_content17">
+                    TREM-RTS
+                </div>
                 <div id="tab1_menu9" class="tabmenu" data-contentid="tab1_content9">
                     海しる
                 </div>
@@ -1149,6 +1152,20 @@
                     <label> 情報取得間隔（秒）<input id="EarlyEstInterval" type="number" min="5" max="300" value="1" step="1"></label>
                 </section>
             </div>
+            <div id="tab1_content17" class="tabcontent">
+                <h3><span>情報源ごとの設定</span>TREM-RTS</h3>
+                <div class="infoType">取得する情報：
+                    <div>リアルタイム震度（台湾など）</div>
+                </div>
+                <h4>全般</h4>
+                <section>
+                    <label><input type="checkbox" id="TREM-RTS_GetData">データを取得</label>
+                    <span class="smalltext">WebSocketで随時情報を受け取ります。</span>
+                    <label> 情報取得間隔（秒）<input id="TREM-RTS_Interval" type="number" min="1" max="30" value="1" step="1"></label>
+
+                </section>
+            </div>
+
 
         </div>
 

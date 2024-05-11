@@ -101,6 +101,9 @@ function configDataDraw() {
 
   document.getElementById("EQInfo_Test").checked = config.Info.EQInfo.showTest;
   document.getElementById("EQInfo_training").checked = config.Info.EQInfo.showtraining;
+
+  document.getElementById("TREM-RTS_GetData").checked = config.Source.TREMRTS.GetData;
+  document.getElementById("TREM-RTS_Interval").value = config.Source.TREMRTS.Interval / 1000;
 }
 
 function UpdateDataDraw(data) {
@@ -206,6 +209,9 @@ function apply() {
 
   config.Info.EQInfo.showTest = document.getElementById("EQInfo_Test").checked;
   config.Info.EQInfo.showtraining = document.getElementById("EQInfo_training").checked;
+
+  config.Source.TREMRTS.GetData = document.getElementById("TREM-RTS_GetData").checked;
+  config.Source.TREMRTS.Interval = Number(document.getElementById("TREM-RTS_Interval").value) * 1000;
 
   window.electronAPI.messageReturn({
     action: "settingReturn",

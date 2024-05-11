@@ -29,6 +29,7 @@ fetch("./Resource/TsunamiStations.json")
     tsunamiStations = data;
   });
 
+var TREMRTS_TMP;
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "init") {
     init();
@@ -36,6 +37,7 @@ window.electronAPI.messageSend((event, request) => {
     background = false;
     if (knetMapData) kmoniMapUpdate(knetMapData, "knet");
     if (snetMapData) kmoniMapUpdate(snetMapData, "snet");
+    if (TREMRTS_TMP) TREMRTSUpdate(TREMRTS_TMP);
   } else if (request.action == "unactivate") {
     background = true;
     becomeForeground = true;
@@ -54,6 +56,9 @@ window.electronAPI.messageSend((event, request) => {
     kmoniMapUpdate(request.data, "snet");
   } else if (request.action == "wolfxSeisUpdate") {
     wolfxSeisUpdate(request.data);
+  } else if (request.action == "TREM-RTSUpdate") {
+    TREMRTS_TMP = request.data;
+    TREMRTSUpdate(request.data);
   } else if (request.action == "Replay") {
     Replay = request.data;
     document.getElementById("replayFrame").style.display = Replay == 0 ? "none" : "block";
@@ -1353,6 +1358,24 @@ function wolfxSeisUpdate(dataTmp) {
     var shindoColor = shindoConvert(elm.shindo, 2);
     pointData.popupContent = `<h3 class='PointName' style='border-bottom-color:rgb(${elm.rgb.join(",")})'>${elm.Name ? elm.Name : ""}<span>${elm.Type + "_" + elm.Code}</span></h3><div class='popupContentWrap'><div class='obsShindoWrap' style='background:${shindoColor[0]};color:${shindoColor[1]};'>震度 ${shindoConvert(elm.shindo, 1)}<span>${elm.shindo.toFixed(2)}</span></div><div class='obsPGAWrap'>PGA ${(Math.floor(elm.PGA * 100) / 100).toFixed(2)}</div></div>`;
     if (pointData.popup.isOpen()) pointData.popup.setHTML(pointData.popupContent);
+  }
+}
+
+var TREMRTS_points = {};
+function TREMRTSUpdate(dataTmp) {
+  if (!background) {
+    for (key of Object.keys(dataTmp)) {
+      elm = dataTmp[key];
+      pointData = TREMRTS_points[elm.Code];
+      if (!pointData) pointData = TREMRTS_points[elm.Code] = addPointMarker(elm);
+      if (pointData.rgb.join("") != elm.rgb.join("")) {
+        pointData.markerElm.style.background = "rgb(" + elm.rgb.join(",") + ")";
+        var shindoColor = shindoConvert(elm.shindo, 2);
+        pointData.popupContent = `<h3 class='PointName' style='border-bottom-color:rgb(${elm.rgb.join(",")})'><span>${elm.Type + "_" + elm.Code}</span></h3><div class='popupContentWrap'><div class='obsShindoWrap' style='background:${shindoColor[0]};color:${shindoColor[1]};'>震度 ${shindoConvert(elm.shindo, 1)}<span>${elm.shindo.toFixed(2)}</span></div><div class='obsPGAWrap'>PGA ${(Math.floor(elm.PGA * 100) / 100).toFixed(2)}</div></div>`;
+        if (pointData.popup.isOpen()) pointData.popup.setHTML(pointData.popupContent);
+      }
+      pointData.rgb = elm.rgb;
+    }
   }
 }
 
