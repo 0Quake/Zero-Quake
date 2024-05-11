@@ -2360,6 +2360,7 @@ function EQI_JMAXMLList_Req(LongPeriodFeed, count) {
           kmoniTimeUpdate(new Date() - Replay, "JMAXML", "success");
         } catch (err) {
           kmoniTimeUpdate(new Date() - Replay, "JMAXML", "Error");
+          console.log(1, err);
         }
       });
     });
@@ -2389,7 +2390,7 @@ function EQI_JMAXML_Req(url, count) {
           if (!xml) return false;
 
           var title = xml.title;
-          cancel = xml.querySelector("InfoType").textContent == "取消";
+          var cancel = xml.querySelector("InfoType").textContent == "取消";
 
           if (title == "震度速報" || title == "震源に関する情報" || title == "震源・震度に関する情報" || title == "遠地地震に関する情報" || title == "顕著な地震の震源要素更新のお知らせ") {
             //地震情報
@@ -2654,6 +2655,7 @@ function EQI_JMAXML_Req(url, count) {
           kmoniTimeUpdate(new Date() - Replay, "JMAXML", "success");
         } catch (err) {
           kmoniTimeUpdate(new Date() - Replay, "JMAXML", "Error");
+          console.log(2, err);
         }
       });
     });
@@ -2922,7 +2924,7 @@ function eqInfoControl(dataList, type, EEW, count) {
 
       dataList.forEach(function (data) {
         if (!data.eventId) return;
-        EQElm = EQInfoData[data.eventId];
+        var EQElm = EQInfoData[data.eventId];
         if (EQElm) {
           var EQInfo_Item = {
             eventId: EQElm.eventId,

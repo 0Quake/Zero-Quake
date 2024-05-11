@@ -132,7 +132,7 @@ function EQDetect(data, date, detect) {
             return elm2.Code == elm.Code;
           });
           if (!SameST) {
-            nearpointslength = 0;
+            var nearpointslength = 0;
             detectPointsLength = 0;
             data.forEach(function (station) {
               if (station.data && station.Code !== elm.Code && geosailing(station.Location.Latitude, station.Location.Longitude, elm.Location.Latitude, elm.Location.Longitude) <= 100) {
