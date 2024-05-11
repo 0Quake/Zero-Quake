@@ -132,16 +132,16 @@ function EQDetect(data, date, detect) {
             return elm2.Code == elm.Code;
           });
           if (!SameST) {
-            arroundPointsLength = 0;
+            nearpointslength = 0;
             detectPointsLength = 0;
             data.forEach(function (station) {
               if (station.data && station.Code !== elm.Code && geosailing(station.Location.Latitude, station.Location.Longitude, elm.Location.Latitude, elm.Location.Longitude) <= 100) {
-                arroundPointsLength++;
+                nearpointslength++;
                 if (station.detect) detectPointsLength++;
               }
             });
 
-            if (detectPointsLength / arroundPointsLength > 0.15 || arroundPointsLength < 1) {
+            if (detectPointsLength / nearpointslength > 0.15 || nearpointslength < 1) {
               EQD_ItemTmp.Codes.push(elm);
               if (!EQD_ItemTmp.Codes_history.includes(elm.Code)) EQD_ItemTmp.Codes_history.push(elm.Code);
               ptData.Event = true;
