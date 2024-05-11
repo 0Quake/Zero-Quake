@@ -227,8 +227,8 @@ function GuessHypocenter(EQElm, data) {
   for (const station of EQElm.Codes) {
     if (o_arrivalTime_min > pointsData[station.Code].o_arrivalTime) o_arrivalTime_min = pointsData[station.Code].o_arrivalTime;
   }
-  if (EQElm.origin_Time - o_arrivalTime_min < 10000) originTime = new Date(o_arrivalTime_min - 2000);
-  else originTime = new Date(EQElm.origin_Time - 6000);
+  if (EQElm.origin_Time - o_arrivalTime_min < 10000) var originTime = new Date(o_arrivalTime_min - 2000);
+  else var originTime = new Date(EQElm.origin_Time - 6000);
 
   var Tmp = { dif: Infinity };
   for (let lat = Math.floor(EQElm.lat2) - 3; lat <= Math.floor(EQElm.lat2) + 3; lat++) {
