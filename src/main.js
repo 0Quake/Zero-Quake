@@ -1,4 +1,5 @@
 process.env.TZ = "Asia/Tokyo";
+
 //リプレイ
 var Replay = 0;
 var mainWindow, settingWindow, tsunamiWindow, kmoniWorker, nankaiWindow;
@@ -26,14 +27,22 @@ function replay(ReplayDate) {
 // prettier-ignore
 var EEWSectName = { 135: "宗谷支庁北部", 136: "宗谷支庁南部", 125: "上川支庁北部", 126: "上川支庁中部", 127: "上川支庁南部", 130: "留萌支庁中北部", 131: "留萌支庁南部", 139: "北海道利尻礼文", 150: "日高支庁西部", 151: "日高支庁中部", 152: "日高支庁東部", 145: "胆振支庁西部", 146: "胆振支庁中東部", 110: "檜山支庁", 105: "渡島支庁北部", 106: "渡島支庁東部", 107: "渡島支庁西部", 140: "網走支庁網走", 141: "網走支庁北見", 142: "網走支庁紋別", 165: "根室支庁北部", 166: "根室支庁中部", 167: "根室支庁南部", 160: "釧路支庁北部", 161: "釧路支庁中南部", 155: "十勝支庁北部", 156: "十勝支庁中部", 157: "十勝支庁南部", 119: "北海道奥尻島", 120: "空知支庁北部", 121: "空知支庁中部", 122: "空知支庁南部", 100: "石狩支庁北部", 101: "石狩支庁中部", 102: "石狩支庁南部", 115: "後志支庁北部", 116: "後志支庁東部", 117: "後志支庁西部", 200: "青森県津軽北部", 201: "青森県津軽南部", 202: "青森県三八上北", 203: "青森県下北", 230: "秋田県沿岸北部", 231: "秋田県沿岸南部", 232: "秋田県内陸北部", 233: "秋田県内陸南部", 210: "岩手県沿岸北部", 211: "岩手県沿岸南部", 212: "岩手県内陸北部", 213: "岩手県内陸南部", 220: "宮城県北部", 221: "宮城県南部", 222: "宮城県中部", 240: "山形県庄内", 241: "山形県最上", 242: "山形県村山", 243: "山形県置賜", 250: "福島県中通り", 251: "福島県浜通り", 252: "福島県会津", 300: "茨城県北部", 301: "茨城県南部", 310: "栃木県北部", 311: "栃木県南部", 320: "群馬県北部", 321: "群馬県南部", 330: "埼玉県北部", 331: "埼玉県南部", 332: "埼玉県秩父", 350: "東京都２３区", 351: "東京都多摩東部", 352: "東京都多摩西部", 354: "神津島", 355: "伊豆大島", 356: "新島", 357: "三宅島", 358: "八丈島", 359: "小笠原", 340: "千葉県北東部", 341: "千葉県北西部", 342: "千葉県南部", 360: "神奈川県東部", 361: "神奈川県西部", 420: "長野県北部", 421: "長野県中部", 422: "長野県南部", 410: "山梨県東部", 411: "山梨県中・西部", 412: "山梨県東部・富士五湖", 440: "静岡県伊豆", 441: "静岡県東部", 442: "静岡県中部", 443: "静岡県西部", 450: "愛知県東部", 451: "愛知県西部", 430: "岐阜県飛騨", 431: "岐阜県美濃東部", 432: "岐阜県美濃中西部", 460: "三重県北部", 461: "三重県中部", 462: "三重県南部", 370: "新潟県上越", 371: "新潟県中越", 372: "新潟県下越", 375: "新潟県佐渡", 380: "富山県東部", 381: "富山県西部", 390: "石川県能登", 391: "石川県加賀", 400: "福井県嶺北", 401: "福井県嶺南", 500: "滋賀県北部", 501: "滋賀県南部", 510: "京都府北部", 511: "京都府南部", 520: "大阪府北部", 521: "大阪府南部", 530: "兵庫県北部", 531: "兵庫県南東部", 532: "兵庫県南西部", 535: "兵庫県淡路島", 540: "奈良県", 550: "和歌山県北部", 551: "和歌山県南部", 580: "岡山県北部", 581: "岡山県南部", 590: "広島県北部", 591: "広島県南東部", 592: "広島県南西部", 570: "島根県東部", 571: "島根県西部", 575: "島根県隠岐", 560: "鳥取県東部", 562: "鳥取県中部", 563: "鳥取県西部", 600: "徳島県北部", 601: "徳島県南部", 610: "香川県東部", 611: "香川県西部", 620: "愛媛県東予", 621: "愛媛県中予", 622: "愛媛県南予", 630: "高知県東部", 631: "高知県中部", 632: "高知県西部", 700: "山口県北部", 701: "山口県東部", 702: "山口県西部", 710: "福岡県福岡", 711: "福岡県北九州", 712: "福岡県筑豊", 713: "福岡県筑後", 750: "大分県北部", 751: "大分県中部", 752: "大分県南部", 753: "大分県西部", 730: "長崎県北部", 731: "長崎県南西部", 732: "長崎県島原半島", 735: "長崎県対馬", 736: "長崎県壱岐", 737: "長崎県五島", 720: "佐賀県北部", 721: "佐賀県南部", 740: "熊本県阿蘇", 741: "熊本県熊本", 742: "熊本県球磨", 743: "熊本県天草・芦北", 760: "宮崎県北部平野部", 761: "宮崎県北部山沿い", 762: "宮崎県南部平野部", 763: "宮崎県南部山沿い", 770: "鹿児島県薩摩", 771: "鹿児島県大隅", 774: "鹿児島県十島村", 775: "鹿児島県甑島", 776: "鹿児島県種子島", 777: "鹿児島県屋久島", 778: "鹿児島県奄美北部", 779: "鹿児島県奄美南部", 800: "沖縄県本島北部", 801: "沖縄県本島中南部", 802: "沖縄県久米島", 803: "沖縄県大東島", 804: "沖縄県宮古島", 805: "沖縄県石垣島", 806: "沖縄県与那国島", 807: "沖縄県西表島" };
 
-const electron = require("electron");
+import electron from "electron";
 const { app, BrowserWindow, ipcMain, net, Notification, shell, dialog, Menu, powerSaveBlocker } = electron;
-const path = require("path");
-var JSDOM = require("jsdom").JSDOM;
-const Store = require("electron-store");
-var WebSocketClient = require("websocket").client;
-var turf = require("@turf/turf");
-var FERegion = require("./Resource/feRegion.json");
+import fs from "fs";
+import { fileURLToPath } from "url";
+import path from "path";
+import jsdom from "jsdom";
+const JSDOM = jsdom.JSDOM;
+import Store from "electron-store";
+import WebSocket from "websocket";
+var WebSocketClient = WebSocket.client;
+import * as turf from "@turf/turf";
+import workerThreads from "worker_threads";
+
+var __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+var FERegion = jsonParse(fs.readFileSync("./src/Resource/feRegion.json"));
 var sesmicPoints;
 var TimeTable_JMA2001;
 var soft_version;
@@ -271,7 +280,7 @@ function checkUpdate() {
           try {
             var json = jsonParse(dataTmp);
             var latest_verTmp = String(json[0].tag_name.replace("v", ""));
-            var p = require("../package.json");
+            var p = jsonParse(fs.readFileSync("./package.json"));
             var current_verTmp = p.version;
             var latest_v = String(latest_verTmp).split(".").map(Number);
             var current_v = String(current_verTmp).split(".").map(Number);
@@ -964,8 +973,8 @@ function EQInfo_createWindow(response, webSite) {
 
 //開始処理
 function start() {
-  soft_version = require("../package.json").version;
-  TimeTable_JMA2001 = require("./Resource/TimeTable_JMA2001.json");
+  soft_version = jsonParse(fs.readFileSync("./package.json")).version;
+  TimeTable_JMA2001 = jsonParse(fs.readFileSync("./src/Resource/TimeTable_JMA2001.json"));
 
   //地震検知ワーカー作成
   createWorker();
@@ -1050,7 +1059,6 @@ function earlyEstReq() {
 }
 
 function createWorker() {
-  const workerThreads = require("worker_threads");
   worker = new workerThreads.Worker(path.join(__dirname, "js/EQDetectWorker.js"), {
     workerData: "From Main", // Worker に初期値を渡せる
   });
@@ -1445,6 +1453,7 @@ function Wolfx_WS() {
   WolfxWSclient = new WebSocketClient();
 
   WolfxWSclient.on("connectFailed", function () {
+    console.log("aa");
     kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
     Wolfx_WS_TryConnect();
   });
@@ -1452,6 +1461,7 @@ function Wolfx_WS() {
   WolfxWSclient.on("connect", function (connection) {
     wolfxConnection = connection;
     connection.on("error", function () {
+      console.log("bb");
       kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
     });
     connection.on("close", function () {
@@ -1472,6 +1482,7 @@ function Wolfx_WS() {
             break;
         }
       } catch (err) {
+        console.log("cc", error);
         kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
       }
       setInterval(function () {
@@ -1526,12 +1537,14 @@ function WolfxSeis_WS() {
 
   WolfxSeisWSclient.on("connectFailed", function () {
     kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
+    console.log("44");
     Wolfx_WS_TryConnect();
   });
 
   WolfxSeisWSclient.on("connect", function (connection) {
     connection.on("error", function () {
       kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
+      console.log("55");
     });
     connection.on("close", function () {
       kmoniTimeUpdate(new Date() - Replay, "wolfx", "Disconnect");
@@ -1544,8 +1557,8 @@ function WolfxSeis_WS() {
       try {
         var json = jsonParse(message.utf8Data);
         if (json.type == "heartbeat" || json.type == "pong") return;
-        stationData = wolfx_st ? wolfx_st[json.type] : null;
-        var rgb = shindoColorTable[Math.floor(json.CalcShindo * 10) / 10];
+        var stationData = wolfx_st ? wolfx_st[json.type] : null;
+        var rgb = shindoColorTable[Math.max(-3, Math.floor(json.CalcShindo * 10) / 10)];
         if (stationData && stationData.enable) WolfxSeisData[json.type] = { Type: "Wolfx", shindo: json.CalcShindo, PGA: json.PGA, Code: json.type, Name: stationData.name, Location: { Longitude: stationData.longitude, Latitude: stationData.latitude }, rgb: [rgb.r, rgb.g, rgb.b] };
         wolfxSeisData = {
           action: "wolfxSeisUpdate",
@@ -1555,6 +1568,7 @@ function WolfxSeis_WS() {
         messageToMainWindow(wolfxSeisData);
       } catch (err) {
         kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
+        console.log("66", err);
       }
       setInterval(function () {
         connection.sendUTF("ping");
@@ -1949,7 +1963,7 @@ function EEWcontrol(data) {
           data.arrivalTime = new Date(Number(data.origin_time) + SSec * 1000);
         }
         if (data.depth <= 150) {
-          if (!sesmicPoints) sesmicPoints = require("./Resource/PointSeismicIntensityLocation.json");
+          if (!sesmicPoints) sesmicPoints = jsonParse(fs.readFileSync("./src/Resource/PointSeismicIntensityLocation.json"));
           Object.keys(sesmicPoints).forEach(function (key) {
             elm = sesmicPoints[key];
             if (elm.arv && elm.sect) {
@@ -3074,7 +3088,7 @@ function eqInfoAlert(data, source, update, audioPlay) {
 }
 
 //🔴津波情報🔴
-Tsunami_Data = [];
+var Tsunami_Data = [];
 var Tsunami_data_Marged;
 function TsunamiInfoControl(data) {
   try {

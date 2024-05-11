@@ -37,6 +37,7 @@
       "backgroundColor": "#202227"
     }
   },
+  "type": "module",
   "main": "src/main.js",
   "author": "benidate",
   "license": "GPL-2.0",

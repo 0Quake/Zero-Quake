@@ -1,4 +1,5 @@
-const workerThreads = require("worker_threads");
+import workerThreads from "worker_threads";
+import fs from "fs";
 
 var EEWNow = false; //EEW発令中かどうか
 var EQDetectID = 0; //独自の地震ID
@@ -258,7 +259,7 @@ function GuessHypocenter(EQElm, data) {
   return [result, originTime];
 }
 
-var TimeTable_JMA2001 = require("../Resource/TimeTable_JMA2001.json");
+var TimeTable_JMA2001 = JSON.parse(fs.readFileSync("./src/Resource/TimeTable_JMA2001.json"));
 function calcDifference(lat, lng, stations, data, originTime, dep) {
   var TimeTable = TimeTable_JMA2001[dep];
   var f_arrivalTime_min = Infinity;
