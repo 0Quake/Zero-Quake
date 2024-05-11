@@ -10,6 +10,6 @@
   },
   "rules": {
     "no-redeclare": "off",
-    "no-undef": "off"
+    "no-undef": "error"
   }
 }
