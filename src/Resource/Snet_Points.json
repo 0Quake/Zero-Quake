@@ -148,5 +148,11 @@
   { "Type": "S-net", "Code": "N.S6N22", "IsSuspended": false, "depth": 3941, "Location": { "Latitude": 33.8601, "Longitude": 141.1281 }, "Point": { "X": 262, "Y": 236 } },
   { "Type": "S-net", "Code": "N.S6N23", "IsSuspended": false, "depth": 1723, "Location": { "Latitude": 33.9448, "Longitude": 140.5189 }, "Point": { "X": 254, "Y": 235 } },
   { "Type": "S-net", "Code": "N.S6N24", "IsSuspended": false, "depth": 1276, "Location": { "Latitude": 34.1773, "Longitude": 139.9814 }, "Point": { "X": 247, "Y": 231 } },
-  { "Type": "S-net", "Code": "N.S6N25", "IsSuspended": false, "depth": 2411, "Location": { "Latitude": 34.6696, "Longitude": 139.8167 }, "Point": { "X": 245, "Y": 225 } }
+  { "Type": "S-net", "Code": "N.S6N25", "IsSuspended": false, "depth": 2411, "Location": { "Latitude": 34.6696, "Longitude": 139.8167 }, "Point": { "X": 245, "Y": 225 } },
+  { "Type": "Sagami", "Code": "N.ST1H", "IsSuspended": false, "Location": { "Latitude": 34.59219, "Longitude": 139.9215 }, "Point": { "X": 248, "Y": 226 } },
+  { "Type": "Sagami", "Code": "N.ST2H", "IsSuspended": false, "Location": { "Latitude": 34.73631, "Longitude": 139.8425 }, "Point": { "X": 247, "Y": 223 } },
+  { "Type": "Sagami", "Code": "N.ST3H", "IsSuspended": false, "Location": { "Latitude": 34.795, "Longitude": 139.64669 }, "Point": { "X": 244, "Y": 223 } },
+  { "Type": "Sagami", "Code": "N.ST4H", "IsSuspended": false, "Location": { "Latitude": 34.88981, "Longitude": 139.57431 }, "Point": { "X": 243, "Y": 222 } },
+  { "Type": "Sagami", "Code": "N.ST5H", "IsSuspended": false, "Location": { "Latitude": 34.938, "Longitude": 139.4245 }, "Point": { "X": 241, "Y": 221 } },
+  { "Type": "Sagami", "Code": "N.ST6H", "IsSuspended": false, "Location": { "Latitude": 35.09331, "Longitude": 139.381 }, "Point": { "X": 241, "Y": 219 } }
 ]
