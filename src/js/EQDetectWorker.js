@@ -233,10 +233,10 @@ function GuessHypocenter(EQElm, data) {
   var Tmp = { dif: Infinity };
   for (let lat = Math.floor(EQElm.lat2) - 3; lat <= Math.floor(EQElm.lat2) + 3; lat++) {
     for (let lng = Math.floor(EQElm.lng2) - 3; lng <= Math.floor(EQElm.lng2) + 3; lng++) {
-      for (depth of [0, 10, 30, 70, 100, 300, 700]) {
-        res = calcDifference(lat, lng, EQElm, data, originTime, depth);
+      for (var depth of [0, 10, 30, 70, 100, 300, 700]) {
+        var res = calcDifference(lat, lng, EQElm, data, originTime, depth);
         if (res) {
-          item = { lat: lat, lng: lng, dif: res[0], rad: res[1] };
+          var item = { lat: lat, lng: lng, dif: res[0], rad: res[1] };
           if (Tmp.dif > item.dif) Tmp = item;
         }
       }
@@ -246,10 +246,10 @@ function GuessHypocenter(EQElm, data) {
   var result = { dif: Infinity };
   for (let lat = Tmp.lat - 0.5; lat <= Tmp.lat + 0.5; lat += 0.2) {
     for (let lng = Tmp.lng - 0.5; lng <= Tmp.lng + 0.5; lng += 0.2) {
-      for (depth of [0, 10, 30, 70, 100, 300, 700]) {
-        res = calcDifference(lat, lng, EQElm, data, originTime, depth);
+      for (var depth of [0, 10, 30, 70, 100, 300, 700]) {
+        var res = calcDifference(lat, lng, EQElm, data, originTime, depth);
         if (res) {
-          item = { lat: lat, lng: lng, dif: res[0], rad: res[1] };
+          var item = { lat: lat, lng: lng, dif: res[0], rad: res[1] };
           if (Tmp.dif > item.dif) result = item;
         }
       }
