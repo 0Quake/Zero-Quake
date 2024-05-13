@@ -29,7 +29,6 @@ var EEWSectName = { 135: "宗谷支庁北部", 136: "宗谷支庁南部", 125: "
 
 import electron from "electron";
 const { app, BrowserWindow, ipcMain, net, Notification, shell, dialog, Menu, powerSaveBlocker } = electron;
-import fs from "fs";
 import { fileURLToPath } from "url";
 import path from "path";
 import jsdom from "jsdom";
@@ -41,10 +40,8 @@ import * as turf from "@turf/turf";
 import workerThreads from "worker_threads";
 
 var __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-var FERegion = jsonParse(fs.readFileSync(__dirname + "/Resource/feRegion.json"));
-var sesmicPoints;
-var TimeTable_JMA2001;
+import FERegion from "./Resource/feRegion.json" assert { type: "json" };
+import packageJson from "../package.json" assert { type: "json" };
 var soft_version;
 var EQInfoFetchCount = 0;
 var shindoColorTable = { 0: { r: 63, g: 250, b: 54 }, 1: { r: 189, g: 255, b: 12 }, 2: { r: 255, g: 255, b: 0 }, 3: { r: 255, g: 221, b: 0 }, 4: { r: 255, g: 144, b: 0 }, 5: { r: 255, g: 68, b: 0 }, 6: { r: 245, g: 0, b: 0 }, 7: { r: 170, g: 0, b: 0 }, "-3": { r: 0, g: 0, b: 205 }, "-2.9": { r: 0, g: 7, b: 209 }, "-2.8": { r: 0, g: 14, b: 214 }, "-2.7": { r: 0, g: 21, b: 218 }, "-2.6": { r: 0, g: 28, b: 223 }, "-2.5": { r: 0, g: 36, b: 227 }, "-2.4": { r: 0, g: 43, b: 231 }, "-2.3": { r: 0, g: 50, b: 236 }, "-2.2": { r: 0, g: 57, b: 240 }, "-2.1": { r: 0, g: 64, b: 245 }, "-2": { r: 0, g: 72, b: 250 }, "-1.9": { r: 0, g: 85, b: 238 }, "-1.8": { r: 0, g: 99, b: 227 }, "-1.7": { r: 0, g: 112, b: 216 }, "-1.6": { r: 0, g: 126, b: 205 }, "-1.5": { r: 0, g: 140, b: 194 }, "-1.4": { r: 0, g: 153, b: 183 }, "-1.3": { r: 0, g: 167, b: 172 }, "-1.2": { r: 0, g: 180, b: 161 }, "-1.1": { r: 0, g: 194, b: 150 }, "-1": { r: 0, g: 208, b: 139 }, "-0.9": { r: 6, g: 212, b: 130 }, "-0.8": { r: 12, g: 216, b: 121 }, "-0.7": { r: 18, g: 220, b: 113 }, "-0.6": { r: 25, g: 224, b: 104 }, "-0.5": { r: 31, g: 228, b: 96 }, "-0.4": { r: 37, g: 233, b: 88 }, "-0.3": { r: 44, g: 237, b: 79 }, "-0.2": { r: 50, g: 241, b: 71 }, "-0.1": { r: 56, g: 245, b: 62 }, 0.1: { r: 75, g: 250, b: 49 }, 0.2: { r: 88, g: 250, b: 45 }, 0.3: { r: 100, g: 251, b: 41 }, 0.4: { r: 113, g: 251, b: 37 }, 0.5: { r: 125, g: 252, b: 33 }, 0.6: { r: 138, g: 252, b: 28 }, 0.7: { r: 151, g: 253, b: 24 }, 0.8: { r: 163, g: 253, b: 20 }, 0.9: { r: 176, g: 254, b: 16 }, 1.1: { r: 195, g: 254, b: 10 }, 1.2: { r: 202, g: 254, b: 9 }, 1.3: { r: 208, g: 254, b: 8 }, 1.4: { r: 215, g: 254, b: 7 }, 1.5: { r: 222, g: 255, b: 5 }, 1.6: { r: 228, g: 254, b: 4 }, 1.7: { r: 235, g: 255, b: 3 }, 1.8: { r: 241, g: 254, b: 2 }, 1.9: { r: 248, g: 255, b: 1 }, 2.1: { r: 254, g: 251, b: 0 }, 2.2: { r: 254, g: 248, b: 0 }, 2.3: { r: 254, g: 244, b: 0 }, 2.4: { r: 254, g: 241, b: 0 }, 2.5: { r: 255, g: 238, b: 0 }, 2.6: { r: 254, g: 234, b: 0 }, 2.7: { r: 255, g: 231, b: 0 }, 2.8: { r: 254, g: 227, b: 0 }, 2.9: { r: 255, g: 224, b: 0 }, 3.1: { r: 254, g: 213, b: 0 }, 3.2: { r: 254, g: 205, b: 0 }, 3.3: { r: 254, g: 197, b: 0 }, 3.4: { r: 254, g: 190, b: 0 }, 3.5: { r: 255, g: 182, b: 0 }, 3.6: { r: 254, g: 174, b: 0 }, 3.7: { r: 255, g: 167, b: 0 }, 3.8: { r: 254, g: 159, b: 0 }, 3.9: { r: 255, g: 151, b: 0 }, 4.1: { r: 254, g: 136, b: 0 }, 4.2: { r: 254, g: 128, b: 0 }, 4.3: { r: 254, g: 121, b: 0 }, 4.4: { r: 254, g: 113, b: 0 }, 4.5: { r: 255, g: 106, b: 0 }, 4.6: { r: 254, g: 98, b: 0 }, 4.7: { r: 255, g: 90, b: 0 }, 4.8: { r: 254, g: 83, b: 0 }, 4.9: { r: 255, g: 75, b: 0 }, 5.1: { r: 254, g: 61, b: 0 }, 5.2: { r: 253, g: 54, b: 0 }, 5.3: { r: 252, g: 47, b: 0 }, 5.4: { r: 251, g: 40, b: 0 }, 5.5: { r: 250, g: 33, b: 0 }, 5.6: { r: 249, g: 27, b: 0 }, 5.7: { r: 248, g: 20, b: 0 }, 5.8: { r: 247, g: 13, b: 0 }, 5.9: { r: 246, g: 6, b: 0 }, 6.1: { r: 238, g: 0, b: 0 }, 6.2: { r: 230, g: 0, b: 0 }, 6.3: { r: 223, g: 0, b: 0 }, 6.4: { r: 215, g: 0, b: 0 }, 6.5: { r: 208, g: 0, b: 0 }, 6.6: { r: 200, g: 0, b: 0 }, 6.7: { r: 192, g: 0, b: 0 }, 6.8: { r: 185, g: 0, b: 0 }, 6.9: { r: 177, g: 0, b: 0 } };
@@ -284,8 +281,8 @@ function checkUpdate() {
           try {
             var json = jsonParse(dataTmp);
             var latest_verTmp = String(json[0].tag_name.replace("v", ""));
-            var p = jsonParse(fs.readFileSync(path.join(__dirname, "../package.json")));
-            var current_verTmp = p.version;
+
+            var current_verTmp = packageJson.version;
             var latest_v = String(latest_verTmp).split(".").map(Number);
             var current_v = String(current_verTmp).split(".").map(Number);
             var dl_page = json[0].html_url;
@@ -978,10 +975,10 @@ function EQInfo_createWindow(response, webSite) {
   }
 }
 
+import TimeTable_JMA2001 from "./Resource/TimeTable_JMA2001.json" assert { type: "json" };
 //開始処理
 function start() {
-  soft_version = jsonParse(fs.readFileSync(path.join(__dirname, "../package.json"))).version;
-  TimeTable_JMA2001 = jsonParse(fs.readFileSync(__dirname + "/Resource/TimeTable_JMA2001.json"));
+  soft_version = packageJson.version;
 
   //地震検知ワーカー作成
   createWorker();
@@ -1990,6 +1987,7 @@ function EEWdetect(type, json) {
   }
 }
 
+import sesmicPoints from "./Resource/PointSeismicIntensityLocation.json" assert { type: "json" };
 //EEW情報マージ
 function EEWcontrol(data) {
   if (!data) return; //データがない場合、処理終了
@@ -2033,7 +2031,6 @@ function EEWcontrol(data) {
           data.arrivalTime = new Date(Number(data.origin_time) + SSec * 1000);
         }
         if (data.depth <= 150) {
-          if (!sesmicPoints) sesmicPoints = jsonParse(fs.readFileSync(__dirname + "/Resource/PointSeismicIntensityLocation.json"));
           Object.keys(sesmicPoints).forEach(function (key) {
             elm = sesmicPoints[key];
             if (elm.arv && elm.sect) {
