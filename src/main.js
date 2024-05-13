@@ -42,7 +42,7 @@ import workerThreads from "worker_threads";
 
 var __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-var FERegion = jsonParse(fs.readFileSync("./src/Resource/feRegion.json"));
+var FERegion = jsonParse(fs.readFileSync(__dirname + "/Resource/feRegion.json"));
 var sesmicPoints;
 var TimeTable_JMA2001;
 var soft_version;
@@ -284,7 +284,7 @@ function checkUpdate() {
           try {
             var json = jsonParse(dataTmp);
             var latest_verTmp = String(json[0].tag_name.replace("v", ""));
-            var p = jsonParse(fs.readFileSync("./package.json"));
+            var p = jsonParse(fs.readFileSync(path.join(__dirname, "../package.json")));
             var current_verTmp = p.version;
             var latest_v = String(latest_verTmp).split(".").map(Number);
             var current_v = String(current_verTmp).split(".").map(Number);
@@ -980,8 +980,8 @@ function EQInfo_createWindow(response, webSite) {
 
 //開始処理
 function start() {
-  soft_version = jsonParse(fs.readFileSync("./package.json")).version;
-  TimeTable_JMA2001 = jsonParse(fs.readFileSync("./src/Resource/TimeTable_JMA2001.json"));
+  soft_version = jsonParse(fs.readFileSync(path.join(__dirname, "../package.json"))).version;
+  TimeTable_JMA2001 = jsonParse(fs.readFileSync(__dirname + "/Resource/TimeTable_JMA2001.json"));
 
   //地震検知ワーカー作成
   createWorker();
@@ -2033,7 +2033,7 @@ function EEWcontrol(data) {
           data.arrivalTime = new Date(Number(data.origin_time) + SSec * 1000);
         }
         if (data.depth <= 150) {
-          if (!sesmicPoints) sesmicPoints = jsonParse(fs.readFileSync("./src/Resource/PointSeismicIntensityLocation.json"));
+          if (!sesmicPoints) sesmicPoints = jsonParse(fs.readFileSync(__dirname + "/Resource/PointSeismicIntensityLocation.json"));
           Object.keys(sesmicPoints).forEach(function (key) {
             elm = sesmicPoints[key];
             if (elm.arv && elm.sect) {
