@@ -1544,20 +1544,19 @@ function Wolfx_WS() {
       kmoniTimeUpdate(new Date() - Replay, "wolfx", "success");
       try {
         var json = jsonParse(message.utf8Data);
-        switch (json.type) {
-          case "jma_eew":
-            EEWdetect(2, json);
-            break;
-          case "jma_eqlist":
-            eqInfoUpdate();
-            break;
+        if (json.type == "heartbeat") {
+          connection.sendUTF("ping");
+        } else if (json.type == "jma_eew") {
+          EEWdetect(2, json);
+        } else if (json.type == "jma_eqlist") {
+          eqInfoUpdate();
         }
       } catch (err) {
         kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
       }
       setInterval(function () {
         connection.sendUTF("ping");
-      }, 600000);
+      }, 60000);
     });
     connection.sendUTF("query_jmaeew");
     kmoniTimeUpdate(new Date() - Replay, "wolfx", "success");
@@ -1624,22 +1623,25 @@ function WolfxSeis_WS() {
 
       try {
         var json = jsonParse(message.utf8Data);
-        if (json.type == "heartbeat" || json.type == "pong") return;
-        var stationData = wolfx_st ? wolfx_st[json.type] : null;
-        var rgb = shindoColorTable[Math.max(-3, Math.floor(json.CalcShindo * 10) / 10)];
-        if (stationData && stationData.enable) WolfxSeisData[json.type] = { Type: "Wolfx", shindo: json.CalcShindo, PGA: json.PGA, Code: json.type, Name: stationData.location, Location: { Longitude: stationData.longitude, Latitude: stationData.latitude }, rgb: [rgb.r, rgb.g, rgb.b] };
-        WolfxSeisData_Marged = {
-          action: "wolfxSeisUpdate",
-          LocalTime: new Date(),
-          data: WolfxSeisData,
-        };
-        messageToMainWindow(WolfxSeisData_Marged);
+        if (json.type == "heartbeat") {
+          connection.sendUTF("ping");
+        } else if (json.type != "pong") {
+          var stationData = wolfx_st ? wolfx_st[json.type] : null;
+          var rgb = shindoColorTable[Math.max(-3, Math.floor(json.CalcShindo * 10) / 10)];
+          if (stationData && stationData.enable) WolfxSeisData[json.type] = { Type: "Wolfx", shindo: json.CalcShindo, PGA: json.PGA, Code: json.type, Name: stationData.location, Location: { Longitude: stationData.longitude, Latitude: stationData.latitude }, rgb: [rgb.r, rgb.g, rgb.b] };
+          WolfxSeisData_Marged = {
+            action: "wolfxSeisUpdate",
+            LocalTime: new Date(),
+            data: WolfxSeisData,
+          };
+          messageToMainWindow(WolfxSeisData_Marged);
+        }
       } catch (err) {
         kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
       }
       setInterval(function () {
         connection.sendUTF("ping");
-      }, 600000);
+      }, 60000);
     });
     kmoniTimeUpdate(new Date() - Replay, "wolfx", "success");
   });
