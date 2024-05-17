@@ -259,7 +259,7 @@ function GuessHypocenter(EQElm, data) {
   return [result, originTime];
 }
 
-import TimeTable_JMA2001 from "../Resource/TimeTable_JMA2001.json" assert { type: "json" };
+import TimeTable_JMA2001 from "../Resource/TimeTable_JMA2001.json" with { type: "json" };
 function calcDifference(lat, lng, stations, data, originTime, dep) {
   var TimeTable = TimeTable_JMA2001[dep];
   var f_arrivalTime_min = Infinity;
