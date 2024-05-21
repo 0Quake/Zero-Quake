@@ -249,7 +249,7 @@ var narikakun_EIDs = [];
 var eqInfo = { jma: [], usgs: [] };
 var kmoniTimeout;
 var msil_lastTime = 0;
-var kmoniPointsDataTmp, SnetPointsDataTmp, WolfxSeisData_Marged, TremRtsData_Marged;
+var kmoniPointsDataTmp, SnetPointsDataTmp, TremRtsData_Marged;
 let tray;
 var thresholds;
 
@@ -567,7 +567,6 @@ ipcMain.on("message", (_event, response) => {
     case "mapLoaded":
       if (kmoniPointsDataTmp) messageToMainWindow(kmoniPointsDataTmp);
       if (SnetPointsDataTmp) messageToMainWindow(SnetPointsDataTmp);
-      if (WolfxSeisData_Marged) messageToMainWindow(WolfxSeisData_Marged);
       if (TremRtsData_Marged) messageToMainWindow(TremRtsData_Marged);
       break;
     case "replay":
@@ -582,7 +581,6 @@ ipcMain.on("message", (_event, response) => {
         RegularExecution();
         if (wolfxConnection) wolfxConnection.sendUTF("query_jmaeew");
         if (PBSConnection) PBSConnection.sendUTF("queryjson");
-        Wolfx_st();
         TremRts_st();
       }
       break;
@@ -988,7 +986,6 @@ function start() {
   AXIS_WS();
   ProjectBS_WS();
   Wolfx_WS();
-  WolfxSeis_WS();
 
   //HTTP定期GET着火
   SnetRequest();
@@ -1001,7 +998,6 @@ function start() {
   //定期実行 着火
   RegularExecution(true);
 
-  Wolfx_st();
   TremRts_st();
 }
 
@@ -1575,88 +1571,6 @@ function Wolfx_WS_Connect() {
 }
 
 var wolfx_st;
-
-function Wolfx_st() {
-  if (net.online) {
-    var request = net.request("https://api.wolfx.jp/seis_list.json?_=" + Number(new Date()));
-    request.on("response", (res) => {
-      var dataTmp = "";
-      res.on("data", (chunk) => {
-        dataTmp += chunk;
-      });
-      res.on("end", function () {
-        try {
-          var json = jsonParse(dataTmp);
-          if (json) wolfx_st = json;
-        } catch (err) {
-          return;
-        }
-      });
-    });
-    request.end();
-  }
-}
-
-//Wolfx 地震観測 WebSocket接続・受信処理
-var WolfxSeisWSclient;
-var WolfxSeisData = {};
-function WolfxSeis_WS() {
-  if (!config.Source.wolfx.GetData) return;
-  WolfxSeisWSclient = new WebSocketClient();
-
-  WolfxSeisWSclient.on("connectFailed", function () {
-    kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
-    Wolfx_WS_TryConnect();
-  });
-
-  WolfxSeisWSclient.on("connect", function (connection) {
-    connection.on("error", function () {
-      kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
-    });
-    connection.on("close", function () {
-      kmoniTimeUpdate(new Date() - Replay, "wolfx", "Disconnect");
-      WolfxSeis_WS_TryConnect();
-    });
-    connection.on("message", function (message) {
-      if (Replay !== 0) return;
-      kmoniTimeUpdate(new Date() - Replay, "wolfx", "success");
-
-      try {
-        var json = jsonParse(message.utf8Data);
-        if (json.type == "heartbeat") {
-          connection.sendUTF("ping");
-        } else if (json.type != "pong") {
-          var stationData = wolfx_st ? wolfx_st[json.type] : null;
-          var rgb = shindoColorTable[Math.max(-3, Math.floor(json.CalcShindo * 10) / 10)];
-          if (stationData && stationData.enable) WolfxSeisData[json.type] = { Type: "Wolfx", shindo: json.CalcShindo, PGA: json.PGA, Code: json.type, Name: stationData.location, Location: { Longitude: stationData.longitude, Latitude: stationData.latitude }, rgb: [rgb.r, rgb.g, rgb.b] };
-          WolfxSeisData_Marged = {
-            action: "wolfxSeisUpdate",
-            LocalTime: new Date(),
-            data: WolfxSeisData,
-          };
-          messageToMainWindow(WolfxSeisData_Marged);
-        }
-      } catch (err) {
-        kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
-      }
-      setInterval(function () {
-        connection.sendUTF("ping");
-      }, 60000);
-    });
-    kmoniTimeUpdate(new Date() - Replay, "wolfx", "success");
-  });
-
-  WolfxSeis_WS_Connect();
-}
-var WolfxSeislastConnectDate = new Date();
-function WolfxSeis_WS_TryConnect() {
-  var timeoutTmp = Math.max(30000 - (new Date() - WolfxSeislastConnectDate), 100);
-  setTimeout(WolfxSeis_WS_Connect, timeoutTmp);
-}
-function WolfxSeis_WS_Connect() {
-  if (WolfxSeisWSclient) WolfxSeisWSclient.connect("wss://seis.wolfx.jp/all_seis");
-  WolfxSeislastConnectDate = new Date();
-}
 
 //定期実行
 function RegularExecution(roop) {

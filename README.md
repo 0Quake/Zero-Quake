@@ -59,7 +59,6 @@
 
 - K-NET, KiK-net（防災科学技術研究所 強震観測網）
 - S-net, 相模湾地震観測施設（防災科学技術研究所 海底地震計）
-- Wolfx Seis Net（中国 コミュニティ地震観測網）
 - TREM-RTS※（台湾など コミュニティ地震観測網）
 
 ※<a href="https://github.com/whes1015">YuYu1015 様</a>のご厚意でデータを提供していただいています
@@ -70,7 +69,6 @@
   <li>強震モニタ <a href="http://www.kmoni.bosai.go.jp/">© 防災科学技術研究所</a>（強震／毎秒）</li>
   <li>長周期地震動モニタ <a href="http://www.lmoni.bosai.go.jp/">© 防災科学技術研究所</a>（強震／毎秒）</li>
   <li>海しる <a href="https://www.msil.go.jp/">© Japan Coast Guard, 防災科学技術研究所</a>（海底／3分毎）</li>
-  <li>Wolfx Seis Net API <a href="https://api.wolfx.jp/seis.html">© Wolfx Studio</a>（中国／毎秒）</li>
   <li>TREM-RTS API © ExpTech Studio（台湾など／毎秒）</li>
 </ul>
 </details>
