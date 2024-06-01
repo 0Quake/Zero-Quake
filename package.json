@@ -50,7 +50,7 @@
   },
   "homepage": "https://zeroquake.wwww.jp/",
   "devDependencies": {
-    "electron": "^30.0.8",
+    "electron": "^30.0.9",
     "electron-builder": "^24.13.3",
     "eslint": "^9.3.0"
   },
