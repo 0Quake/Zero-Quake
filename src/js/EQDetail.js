@@ -128,9 +128,9 @@ function Mapinit() {
       sources: {
         submarine: {
           type: "raster",
-          tiles: ["./Resource/Submarine/{z}/{x}/{y}.png"],
+          tiles: ["./Resource/Submarine/{z}/{x}/{y}.jpg"],
           tileSize: 256,
-          attribution: "NOAA",
+          attribution: "NOAA, Peter Bird",
           minzoom: 0,
           maxzoom: 5,
         },
@@ -164,11 +164,6 @@ function Mapinit() {
           data: "./Resource/lake.json",
           tolerance: 1.7,
           attribution: "国土数値情報",
-        },
-        plate: {
-          type: "geojson",
-          data: "./Resource/plate.json",
-          tolerance: 2,
         },
         estimated_intensity_map: {
           type: "geojson",
@@ -402,20 +397,6 @@ function Mapinit() {
             "fill-opacity": 0.5,
           },
           minzoom: 6,
-        },
-        {
-          id: "plate",
-          type: "line",
-          source: "plate",
-          layout: {
-            "line-join": "round",
-            "line-cap": "round",
-          },
-          paint: {
-            "line-color": "#C88",
-            "line-opacity": 0.4,
-            "line-width": 1,
-          },
         },
         { id: "海岸線", type: "line", source: "v", "source-layer": "Cstline", filter: ["in", ["get", "vt_code"], ["literal", [5101, 5103]]], paint: { "line-color": "#999999", "line-offset": 0, "line-width": 1 }, layout: { visibility: "none" } },
         { id: "河川中心線人工水路地下", type: "line", source: "v", "source-layer": "RvrCL", filter: ["==", ["get", "vt_code"], 5322], paint: { "line-color": "rgba(36,104,203,0.25)", "line-width": 2 }, layout: { visibility: "none" } },

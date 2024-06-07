@@ -112,7 +112,7 @@
 
 #### その他 GIS データ
 
-- プレート境界： [© テキサス大学](http://www-udc.ig.utexas.edu/external/plates/data.htm)
+- プレート境界： [© Hugo Ahlenius, Nordpil and Peter Bird](https://raw.githubusercontent.com/fraxen/tectonicplates/master/LICENSE.md)
 - 海底地形：[NOAA National Centers for Environmental Information. 2022: ETOPO 2022 15 Arc-Second Global Relief Model.](https://doi.org/10.25921/fd45-gt74)
 
 ### フォント（Google Fonts）
