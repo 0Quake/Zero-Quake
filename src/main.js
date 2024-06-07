@@ -1908,7 +1908,7 @@ import sesmicPoints from "./Resource/PointSeismicIntensityLocation.json" with { 
 function EEWcontrol(data) {
   if (!data) return; //データがない場合、処理終了
   try {
-    if (!config.Info.EEW.showtraining && data.is_training) return; //訓練法を受信するかどうか（設定に準拠）
+    if (!config.Info.EEW.showtraining && data.is_training && data.source != "simulation") return; //訓練法を受信するかどうか（設定に準拠）
     if (!data.origin_time || !data.EventID || !data.serial || !data.latitude || !data.longitude) return;
 
     //５分以上前の地震／未来の地震（リプレイ時）を除外
