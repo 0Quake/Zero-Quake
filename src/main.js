@@ -270,6 +270,17 @@ var downloadURL;
 //アップデートの確認
 function checkUpdate() {
   if (net.online) {
+    var UpdateError = function(){
+      var current_verTmp = soft_version;
+
+      update_data = { check_error: true, check_date: new Date(), latest_version: null, current_version: current_verTmp, update_available: null, dl_page: null };
+      if (settingWindow) {
+        settingWindow.webContents.send("message2", {
+          action: "Update_Data",
+          data: update_data,
+        });
+      }
+    }
     let request = net.request("https://api.github.com/repos/0quake/Zero-Quake/releases?_=" + Number(new Date()));
     request.on("response", (res) => {
       if (!300 <= res._responseHead.statusCode && !res._responseHead.statusCode < 200) {
@@ -334,22 +345,12 @@ function checkUpdate() {
               });
             }
           } catch (err) {
-            return;
+            UpdateError()
           }
         });
       }
     });
-    request.on("error", () => {
-      var current_verTmp = soft_version;
-
-      update_data = { check_error: true, check_date: new Date(), latest_version: null, current_version: current_verTmp, update_available: null, dl_page: null };
-      if (settingWindow) {
-        settingWindow.webContents.send("message2", {
-          action: "Update_Data",
-          data: update_data,
-        });
-      }
-    });
+    request.on("error", UpdateError);
     request.end();
   }
 }
@@ -388,7 +389,7 @@ function ScheduledExecution() {
               Window_notification("Axisのアクセストークンが不正です。", "error");
             }
           } catch (err) {
-            return;
+            kmoniTimeUpdate(new Date() - Replay, "axis", "Error");
           }
         });
       });
@@ -1016,7 +1017,7 @@ function TremRts_st() {
           var json = jsonParse(dataTmp);
           if (json) TremRts_sta = json;
         } catch (err) {
-          return;
+          kmoniTimeUpdate(new Date() - Replay, "TREM-RTS", "Error");
         }
       });
     });
@@ -1061,7 +1062,6 @@ function TremRtsReq() {
             kmoniTimeUpdate(new Date(json.time), "TREM-RTS", "success");
           } catch (err) {
             kmoniTimeUpdate(new Date() - Replay, "TREM-RTS", "Error");
-            return;
           }
         });
       });
@@ -1634,7 +1634,7 @@ async function yoyuSetK(func) {
                   resTimeTmp = resTime;
                 }
               } catch (err) {
-                return;
+                kmoniTimeUpdate(new Date() - Replay, "kmoniImg", "Error");
               }
             });
           });
@@ -1736,7 +1736,7 @@ function EEWdetect(type, json) {
       };
       EEWcontrol(EEWdata);
     } catch (err) {
-      return;
+      kmoniTimeUpdate(new Date() - Replay, "ProjectBS", "Error");
     }
   } else if (type == 2) {
     //wolfx
@@ -1798,7 +1798,7 @@ function EEWdetect(type, json) {
 
       EEWcontrol(EEWdata, json);
     } catch (err) {
-      return;
+      kmoniTimeUpdate(new Date() - Replay, "wolfx", "Error");
     }
   } else if (type == 3) {
     //axis
