@@ -998,6 +998,7 @@ function start() {
   //定期実行 着火
   RegularExecution(true);
 
+  //一回限り
   TremRts_st();
 }
 
@@ -1026,6 +1027,12 @@ function TremRts_st() {
 function TremRtsReq() {
   if (config.Source.TREMRTS.GetData) {
     if (net.online) {
+
+      if(!TremRts_sta) {
+        TremRts_st();
+        return
+      }
+
       var request = net.request("https://lb-1.exptech.com.tw/api/v1/trem/rts?_=" + Number(new Date()));
       request.on("response", (res) => {
         var dataTmp = "";
