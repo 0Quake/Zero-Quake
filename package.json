@@ -48,7 +48,7 @@
   "bugs": {
     "url": "https://github.com/0Quake/Zero-Quake/issues"
   },
-  "homepage": "https://zeroquake.wwww.jp/",
+  "homepage": "https://0quake.github.io/ZeroQuake_Website/",
   "devDependencies": {
     "electron": "^30.1.0",
     "electron-builder": "^24.13.3",
