@@ -1090,7 +1090,7 @@ function Req_EarlyEst() {
               let parser = new new JSDOM().window.DOMParser();
               let doc = parser.parseFromString(dataTmp, "text/xml");
               Array.prototype.forEach.call(doc.getElementsByTagName("eventParameters"), function(parent) { 
-                elm = parentevent.getElementsByTagName("event")[0];
+                var elm = parent.getElementsByTagName("event")[0];
                 if(elm){
                   var latitude = elm.querySelector("origin latitude value") ? Number(elm.querySelector("origin latitude value").textContent) : null;
                   var longitude = elm.querySelector("origin longitude value") ? Number(elm.querySelector("origin longitude value").textContent) : null;
@@ -2520,7 +2520,7 @@ function Req_JMAXML(url, count) {
                           return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
                         });
                       } else if (elm.getElementsByTagName("MaxHeight")[0].getElementsByTagName("Condition")[0]) {
-                        maxHeightTmp = elm.getElementsByTagName("MaxHeight").getElementsByTagName("Condition")[0].textContent;
+                        maxHeightTmp = elm.getElementsByTagName("MaxHeight")[0].getElementsByTagName("Condition")[0].textContent;
                       }
                     }
 
@@ -3118,7 +3118,7 @@ function ConvertTsunamiInfo(data) {
 
           if (elm.stations) {
             elm.stations.forEach(function (elm2) {
-              stItem = areaItem.stations.find(function (elm3) {
+              var stItem = areaItem.stations.find(function (elm3) {
                 return elm3.name == elm2.name;
               });
               if (stItem) {
