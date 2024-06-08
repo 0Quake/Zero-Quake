@@ -1591,7 +1591,6 @@ function RegularExecution(roop) {
 
     //津波情報解除
     Tsunami_Data.forEach(function (elm) {
-      /*
       if (elm.ValidDateTime <= new Date() && !elm.revocation) {
         ConvertTsunamiInfo({
           issue: { time: elm.issue.time, EventID: null, EarthQuake: null },
@@ -1601,7 +1600,7 @@ function RegularExecution(roop) {
           source: null,
           ValidDateTime: null,
         });
-      }*/
+      }
     });
   } catch (err) {
     throw new Error("内部の情報処理でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
@@ -2459,7 +2458,7 @@ function Req_JMAXML(url, count) {
                 var ValidDateTimeTmp = new Date(xml.getElementsByTagName("ReportDateTime")[0].textContent);
                 ValidDateTimeTmp.setHours(ValidDateTimeTmp.getHours() + 12);
               }
-              //if (ValidDateTimeTmp < new Date()) return;
+              if (ValidDateTimeTmp < new Date()) return;
 
               tsunamiDataTmp = {
                 status: xml.getElementsByTagName("Status")[0].textContent,
@@ -3087,7 +3086,7 @@ function ConvertTsunamiInfo(data) {
     if (!config.Info.TsunamiInfo.showTest && data.status == "試験") return;
 
     //情報の有効期限
-    //if (data.ValidDateTime && data.ValidDateTime < new Date()) return;
+    if (data.ValidDateTime && data.ValidDateTime < new Date()) return;
 
     let tsunamiItem = Tsunami_Data.find(function (elm) {
       return elm.issue.time == data.issue.time && (!elm.issue.EventID || !data.issue.EventID || elm.issue.EventID == data.issue.EventID);
