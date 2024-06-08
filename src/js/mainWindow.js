@@ -1658,6 +1658,13 @@ function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrive
       SIElm = new maplibregl.Marker({ element: el }).setLngLat([longitude, latitude]).addTo(map);
 
       EQElm.SIElm = SIElm;
+
+      var SCircleElm = map.getSource("SCircle_" + EventID);
+      if (SCircleElm) {
+        var scircle = turf.circle(_center, 0, circle_options);
+        SCircleElm.setData(scircle);
+        map.setPaintProperty("SCircle_" + EventID, "line-width", SnotArrived ? 0 : 2);
+      }
     }
   }
 
