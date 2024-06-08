@@ -104,6 +104,9 @@ function configDataDraw() {
 
   document.getElementById("TREM-RTS_GetData").checked = config.Source.TREMRTS.GetData;
   document.getElementById("TREM-RTS_Interval").value = config.Source.TREMRTS.Interval / 1000;
+
+  document.getElementById("VoiceEngine_" + config.notice.voice_parameter.engine).checked = true;
+  document.getElementById("Boyomi_Port").value = config.notice.voice_parameter.Boyomi_Port;
 }
 
 function UpdateDataDraw(data) {
@@ -213,6 +216,12 @@ function apply() {
   config.Source.TREMRTS.GetData = document.getElementById("TREM-RTS_GetData").checked;
   config.Source.TREMRTS.Interval = Number(document.getElementById("TREM-RTS_Interval").value) * 1000;
 
+  let VoiceEngine_Elm = document.getElementsByName('VoiceEngine');
+  for (let i = 0; i < VoiceEngine_Elm.length; i++){
+    if (VoiceEngine_Elm.item(i).checked) config.notice.voice_parameter.engine = VoiceEngine_Elm.item(i).value;
+  }
+  config.notice.voice_parameter.Boyomi_Port = Math.floor(Number(document.getElementById("Boyomi_Port").value));
+  
   window.electronAPI.messageReturn({
     action: "settingReturn",
     data: config,

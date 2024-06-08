@@ -124,6 +124,8 @@ var defaultConfigVal = {
       pitch: 1,
       volume: 1,
       voice: "",
+      engine: "Default",
+      Boyomi_Port: 50080,
     },
     voice: {
       EEW: "緊急地震速報です。強い揺れに警戒してください。",
@@ -1575,8 +1577,6 @@ function Connect_WolfxWS() {
   if (WolfxWS_Client) WolfxWS_Client.connect("wss://ws-api.wolfx.jp/all_eew");
   Wolfx_ConnectedDate = new Date();
 }
-
-var wolfx_st;
 
 //定期実行
 function RegularExecution(roop) {
