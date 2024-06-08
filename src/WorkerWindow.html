@@ -102,29 +102,7 @@
         kmoni_date2 = request.date
         image2.src = request.data;
       } else if (request.action == "speak") {
-        if (config.notice.voice_parameter.engine == "Boyomichan") {
-          fetch(`http://localhost:${config.notice.voice_parameter.Boyomi_Port}/Talk?text=${request.data}&speed=${Rate * 100}&volume=${Volume * 100}&tone=${Pitch * 100}`).then(function (res) {
-            return res.json();
-          }).then(function (json) { })
-        } else if (config.notice.voice_parameter.engine == "Default") {
-          speechSynthesis.cancel();
-          // 発言を作成
-          const uttr = new SpeechSynthesisUtterance();
-          uttr.text = request.data;
-          uttr.lang = "ja-JP";
-          if (!Svoice) {
-            if (config.notice.voice_parameter.voice) {
-              Svoice = speechSynthesis.getVoices().find(function (elm) {
-                return elm.name == config.notice.voice_parameter.voice;
-              });
-            }
-          }
-          uttr.voice = Svoice;
-          uttr.rate = Rate;
-          uttr.pitch = Pitch;
-          uttr.volume = Volume;
-          speechSynthesis.speak(uttr);
-        }
+        speak(request.data)
       } else if (request.action == "PlayAudio") {
         var AudioElm = AudioElms[request.data];
         if (AudioElm) {
@@ -133,6 +111,53 @@
         }
       }
     });
+
+
+    function speak(text, engine) {
+      if (!engine) engine = config.notice.voice_parameter.engine
+      if (engine == "Boyomichan") {
+        if (config.notice.voice_parameter.Boyomi_Voice == "auto") {
+          fetch(`http://localhost:${config.notice.voice_parameter.Boyomi_Port}/Talk?text=${text}&speed=${Rate * 100}&volume=${Volume * 100}&tone=${Pitch * 100}`)
+            .catch(function (err) {
+              speak(text, "Default")
+            });
+        } else {
+          fetch("http://localhost:50080/GetVoiceList").then(function (res) {
+            return res.json()
+          }).then(function (json) {
+            var voice_parameter = "";
+            var voiceElm = json.voiceList.find(function (elm) {
+              return elm.id == config.notice.voice_parameter.Boyomi_Voice;
+            })
+            if (voiceElm) voice_parameter = "&voice=" + config.notice.voice_parameter.Boyomi_Voice;
+
+            fetch(`http://localhost:${config.notice.voice_parameter.Boyomi_Port}/Talk?text=${text}${voice_parameter}&speed=${Rate * 100}&volume=${Volume * 100}&tone=${Pitch * 100}`)
+              .catch(function (err) {
+                speak(text, "Default")
+              });
+          });
+        }
+
+      } else if (engine == "Default") {
+        speechSynthesis.cancel();
+        // 発言を作成
+        const uttr = new SpeechSynthesisUtterance();
+        uttr.text = text;
+        uttr.lang = "ja-JP";
+        if (!Svoice) {
+          if (config.notice.voice_parameter.voice) {
+            Svoice = speechSynthesis.getVoices().find(function (elm) {
+              return elm.name == config.notice.voice_parameter.voice;
+            });
+          }
+        }
+        uttr.voice = Svoice;
+        uttr.rate = Rate;
+        uttr.pitch = Pitch;
+        uttr.volume = Volume;
+        speechSynthesis.speak(uttr);
+      }
+    }
 
     function kmoniRedraw() {
       if (!points) return

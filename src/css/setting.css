@@ -406,6 +406,7 @@ summary:hover {
 }
 .VoiceSettingContent{
   display: none;
+  padding: 15px 10px;
 }
 .VoiceEngine_Wrap {
   border: solid 1px #888;

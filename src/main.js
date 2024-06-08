@@ -126,6 +126,7 @@ var defaultConfigVal = {
       voice: "",
       engine: "Default",
       Boyomi_Port: 50080,
+      Boyomi_Voice: "auto",
     },
     voice: {
       EEW: "緊急地震速報です。強い揺れに警戒してください。",

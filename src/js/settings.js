@@ -107,6 +107,20 @@ function configDataDraw() {
 
   document.getElementById("VoiceEngine_" + config.notice.voice_parameter.engine).checked = true;
   document.getElementById("Boyomi_Port").value = config.notice.voice_parameter.Boyomi_Port;
+
+  fetch("http://localhost:50080/GetVoiceList")
+    .then(function (res) {
+      return res.json();
+    })
+    .then(function (json) {
+      json.voiceList.forEach(function (elm) {
+        var VoiceOption = document.createElement("option");
+        VoiceOption.textContent = elm.name;
+        VoiceOption.value = elm.id;
+        if (elm.id == config.notice.voice_parameter.Boyomi_Voice) VoiceOption.selected = true;
+        document.getElementById("BoyomiVoiceSelect").appendChild(VoiceOption);
+      });
+    });
 }
 
 function UpdateDataDraw(data) {
@@ -216,12 +230,13 @@ function apply() {
   config.Source.TREMRTS.GetData = document.getElementById("TREM-RTS_GetData").checked;
   config.Source.TREMRTS.Interval = Number(document.getElementById("TREM-RTS_Interval").value) * 1000;
 
-  let VoiceEngine_Elm = document.getElementsByName('VoiceEngine');
-  for (let i = 0; i < VoiceEngine_Elm.length; i++){
+  let VoiceEngine_Elm = document.getElementsByName("VoiceEngine");
+  for (let i = 0; i < VoiceEngine_Elm.length; i++) {
     if (VoiceEngine_Elm.item(i).checked) config.notice.voice_parameter.engine = VoiceEngine_Elm.item(i).value;
   }
   config.notice.voice_parameter.Boyomi_Port = Math.floor(Number(document.getElementById("Boyomi_Port").value));
-  
+  config.notice.voice_parameter.Boyomi_Voice = document.getElementById("BoyomiVoiceSelect").value;
+
   window.electronAPI.messageReturn({
     action: "settingReturn",
     data: config,
@@ -520,24 +535,64 @@ speechSynthesis.onvoiceschanged = () => {
   });
   TTSVoiceSelect.innerHTML = opts;
 };
+
+document.getElementById("BoyomiVoiceSelect");
+
 document.getElementById("speak_test").addEventListener("click", function () {
-  speechSynthesis.cancel();
-
-  const uttr = new SpeechSynthesisUtterance();
-  uttr.text = "音声合成のテストです";
-
-  uttr.lang = "ja-JP";
-  if (TTSVoiceSelect.value) {
-    Svoice = voices.find(function (elm) {
-      return elm.name == TTSVoiceSelect.value;
-    });
-    uttr.voice = Svoice;
-  }
-  uttr.rate = TTSspeed;
-  uttr.pitch = TTSpitch;
-  uttr.volume = TTSvolume;
-  speechSynthesis.speak(uttr);
+  speak("音声合成のテストです");
 });
+function speak(text, engine) {
+  if (!engine) {
+    let VoiceEngine_Elm = document.getElementsByName("VoiceEngine");
+    for (let i = 0; i < VoiceEngine_Elm.length; i++) {
+      if (VoiceEngine_Elm.item(i).checked) engine = VoiceEngine_Elm.item(i).value;
+    }
+  }
+  if (engine == "Boyomichan") {
+    if (document.getElementById("BoyomiVoiceSelect").value == "auto") {
+      fetch(`http://localhost:${document.getElementById("Boyomi_Port").value}/Talk?text=${text}&speed=${TTSspeed * 100}&volume=${TTSvolume * 100}&tone=${TTSpitch * 100}`).catch(function (err) {
+        speak(text, "Default");
+      });
+    } else {
+      fetch("http://localhost:50080/GetVoiceList")
+        .then(function (res) {
+          return res.json();
+        })
+        .then(function (json) {
+          var voice_parameter = "";
+          var voiceElm = json.voiceList.find(function (elm) {
+            return elm.id == document.getElementById("BoyomiVoiceSelect").value;
+          });
+          if (voiceElm) voice_parameter = "&voice=" + document.getElementById("BoyomiVoiceSelect").value;
+
+          fetch(`http://localhost:${document.getElementById("Boyomi_Port").value}/Talk?text=${text}${voice_parameter}&speed=${TTSspeed * 100}&volume=${TTSvolume * 100}&tone=${TTSpitch * 100}`).catch(function (err) {
+            speak(text, "Default");
+          });
+        });
+    }
+  } else if (engine == "Default") {
+    speechSynthesis.cancel();
+    // 発言を作成
+    const uttr = new SpeechSynthesisUtterance();
+
+    if (TTSVoiceSelect.value) {
+      Svoice = voices.find(function (elm) {
+        return elm.name == TTSVoiceSelect.value;
+      });
+      uttr.voice = Svoice;
+    }
+
+    uttr.text = text;
+    uttr.lang = "ja-JP";
+
+    uttr.voice = Svoice;
+    uttr.rate = TTSspeed;
+    uttr.pitch = TTSpitch;
+    uttr.volume = TTSvolume;
+    speechSynthesis.speak(uttr);
+  }
+}
+
 function TTSspeedSet(val) {
   val = Number(val);
   document.getElementById("TTSSpeedN").value = val;
