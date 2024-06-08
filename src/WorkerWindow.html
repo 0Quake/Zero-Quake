@@ -119,7 +119,7 @@
         uttr.pitch = Pitch;
         uttr.volume = Volume;
         speechSynthesis.speak(uttr);
-      } else if (request.action == "soundPlay") {
+      } else if (request.action == "PlayAudio") {
         var AudioElm = AudioElms[request.data];
         if (AudioElm) {
           AudioElm.currentTime = 0;

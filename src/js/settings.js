@@ -8,10 +8,10 @@ var tsunamiFeatures;
 var EQSectFeatures;
 var defaultConfigVal;
 window.addEventListener("load", function () {
-  this.document.getElementById("replay").value = dateEncode(3, new Date()).replaceAll("/", "-");
-  this.document.getElementById("EEWE_EventID").value = dateEncode(1, new Date()).replaceAll("/", "-");
-  this.document.getElementById("EEWE_report_time").value = dateEncode(3, new Date()).replaceAll("/", "-");
-  this.document.getElementById("EEWE_origin_time").value = dateEncode(3, new Date()).replaceAll("/", "-");
+  this.document.getElementById("replay").value = NormalizeDate(3, new Date()).replaceAll("/", "-");
+  this.document.getElementById("EEWE_EventID").value = NormalizeDate(1, new Date()).replaceAll("/", "-");
+  this.document.getElementById("EEWE_report_time").value = NormalizeDate(3, new Date()).replaceAll("/", "-");
+  this.document.getElementById("EEWE_origin_time").value = NormalizeDate(3, new Date()).replaceAll("/", "-");
 });
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "Replay") {
@@ -46,7 +46,7 @@ var update_detail = document.getElementById("update-detail");
 document.getele;
 downloadLink.addEventListener("click", function () {
   var lnk = document.createElement("a");
-  lnk.href = "https://0quake.github.io/ZeroQuake_Website/download.html#download-section";
+  lnk.href = "https://0quake.github.io/ZeroQuake_IS_WebURL/download.html#download-section";
   lnk.click();
 });
 
@@ -107,7 +107,7 @@ function configDataDraw() {
 }
 
 function UpdateDataDraw(data) {
-  document.getElementById("update-check-date").innerText = dateEncode(3, data.check_date);
+  document.getElementById("update-check-date").innerText = NormalizeDate(3, data.check_date);
   updateWrap.classList.remove("U-error", "U-available", "U-not_available");
   updateBtnWrap.style.display = "none";
   update_detail.style.display = "none";
@@ -230,7 +230,7 @@ document.getElementById("cancel").addEventListener("click", function () {
   window.close();
 });
 document.getElementById("replayReset").addEventListener("click", function () {
-  document.getElementById("replay").value = dateEncode(3, new Date()).replaceAll("/", "-");
+  document.getElementById("replay").value = NormalizeDate(3, new Date()).replaceAll("/", "-");
   window.electronAPI.messageReturn({
     action: "replay",
     date: null,
@@ -242,7 +242,7 @@ document.getElementById("replayJump").addEventListener("click", function () {
   repVal = new Date(document.getElementById("replay").value);
   if (repVal > new Date()) {
     repVal = new Date();
-    document.getElementById("replay").value = dateEncode(3, repVal).replaceAll("/", "-");
+    document.getElementById("replay").value = NormalizeDate(3, repVal).replaceAll("/", "-");
   }
   window.electronAPI.messageReturn({
     action: "replay",

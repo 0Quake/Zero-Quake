@@ -101,7 +101,7 @@ window.electronAPI.messageSend((event, request) => {
 function InfoFetch() {
   jma_ListReq();
   narikakun_ListReq(new Date().getFullYear(), new Date().getMonth() + 1);
-  if (EEWData) EQInfoControl(EEWData);
+  if (EEWData) ConvertEQInfo(EEWData);
 
   if (axisDatas) {
     axisDatas.forEach(function (elm) {
@@ -828,7 +828,7 @@ function estimated_intensity_mapReq() {
         return elm.url.split("_")[0] == String(eid).substring(0, 12);
       });
       if (ItemTmp) {
-        EQInfoControl({
+        ConvertEQInfo({
           category: "推計震度分布",
           status: "通常",
           reportTime: ItemTmp.hypo.it,
@@ -931,7 +931,7 @@ function narikakun_ListReq(year, month, retry) {
     });
 }
 
-//気象庁 取得・フォーマット変更→ EQInfoControl
+//気象庁 取得・フォーマット変更→ ConvertEQInfo
 function jma_Fetch(url) {
   fetch(url)
     .then(function (res) {
@@ -985,7 +985,7 @@ function jma_Fetch(url) {
         });
       }
 
-      EQInfoControl({
+      ConvertEQInfo({
         category: json.Head.Title,
         status: json.Control.Status,
         reportTime: json.Head.ReportDateTime,
@@ -1056,7 +1056,7 @@ function jmaL_Fetch(url) {
         });
       }
 
-      EQInfoControl({
+      ConvertEQInfo({
         category: json.Head.Title,
         status: json.Control.Status,
         reportTime: 0,
@@ -1073,7 +1073,7 @@ function jmaL_Fetch(url) {
       });
     });
 }
-//気象庁防災XML 取得・フォーマット変更→ EQInfoControl
+//気象庁防災XML 取得・フォーマット変更→ ConvertEQInfo
 function jmaXMLFetch(url) {
   fetch(url)
     .then((response) => {
@@ -1102,7 +1102,7 @@ function jmaXMLFetch(url) {
       }
 
       var IntensityElm = xml.querySelector("Body Intensity");
-      if (IntensityElm) maxIntTmp = shindoConvert(IntensityElm.querySelector("MaxInt").textContent, 4);
+      if (IntensityElm) maxIntTmp = NormalizeShindo(IntensityElm.querySelector("MaxInt").textContent, 4);
 
       var commentText = { ForecastComment: "", VarComment: "", FreeFormComment: "" };
       if (xml.querySelector("Body Comments")) {
@@ -1140,7 +1140,7 @@ function jmaXMLFetch(url) {
         });
       }
 
-      EQInfoControl({
+      ConvertEQInfo({
         category: infoType,
         status: xml.querySelector("Control Status").textContent,
         reportTime: new Date(xml.querySelector("Head ReportDateTime").textContent),
@@ -1158,7 +1158,7 @@ function jmaXMLFetch(url) {
       });
     });
 }
-//narikakun地震情報API 取得・フォーマット変更→ EQInfoControl
+//narikakun地震情報API 取得・フォーマット変更→ ConvertEQInfo
 function narikakun_Fetch(url) {
   fetch(url)
     .then(function (res) {
@@ -1206,7 +1206,7 @@ function narikakun_Fetch(url) {
           });
         }
 
-        EQInfoControl({
+        ConvertEQInfo({
           category: json.Head.Title,
           status: json.Control.Status,
           reportTime: json.Head.ReportDateTime,
@@ -1273,7 +1273,7 @@ function axisInfoCtrl(json) {
     });
   }
 
-  EQInfoControl({
+  ConvertEQInfo({
     category: json.Head.Title,
     status: json.Control.Status,
     reportTime: json.Head.ReportDateTime,
@@ -1379,7 +1379,7 @@ var intensityIcons = [];
 //都道府県ごとの情報描画（リスト）
 function add_Pref_info(name, maxInt) {
   var newDiv = document.createElement("div");
-  var color1 = shindoConvert(maxInt, 2);
+  var color1 = NormalizeShindo(maxInt, 2);
   newDiv.innerHTML = "<span style='background:" + color1[0] + ";color:" + color1[1] + ";'>" + maxInt + "</span>" + name;
   newDiv.classList.add("ShindoItem", "ShindoItem1");
   document.getElementById("Shindo").appendChild(newDiv);
@@ -1400,7 +1400,7 @@ function add_Area_info(name, maxInt) {
   var wrap = document.querySelectorAll(".WrapLevel1");
 
   var newDiv = document.createElement("div");
-  var color = shindoConvert(maxInt, 2);
+  var color = NormalizeShindo(maxInt, 2);
   newDiv.innerHTML = "<span style='background:" + color[0] + ";color:" + color[1] + ";'>" + maxInt + "</span>" + name;
   newDiv.classList.add("ShindoItem", "ShindoItem2");
   wrap[wrap.length - 1].appendChild(newDiv);
@@ -1428,16 +1428,16 @@ function add_Area_info(name, maxInt) {
   if (pointLocation) {
     const icon = document.createElement("div");
     icon.classList.add("MaxShindoIcon");
-    icon.innerHTML = '<div style="background:' + color[0] + ";color:" + color[1] + '">' + shindoConvert(maxInt) + "</div>";
+    icon.innerHTML = '<div style="background:' + color[0] + ";color:" + color[1] + '">' + NormalizeShindo(maxInt) + "</div>";
 
-    var maxIntStr = shindoConvert(maxInt, 1);
+    var maxIntStr = NormalizeShindo(maxInt, 1);
     var AreaPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<div class='popupContent'><div class='shindoItem_S' style='background:" + color[0] + ";color:" + color[1] + "'>震度 " + maxIntStr + "</div><div class='pointName'>" + name + "</div><div class='pointHead'>細分区域</div></div><div></div>");
     markerElm = new maplibregl.Marker({ element: icon }).setLngLat([pointLocation[1], pointLocation[0]]).setPopup(AreaPopup).addTo(map);
     intensityIcons.push(markerElm);
     ZoomBounds.extend([pointLocation[1], pointLocation[0]]);
   }
 
-  var shindo = String(shindoConvert(maxInt, 0));
+  var shindo = String(NormalizeShindo(maxInt, 0));
   switch (shindo) {
     case "0":
       Int0T.push(["==", "name", name]);
@@ -1478,7 +1478,7 @@ function add_City_info(name, maxInt) {
   var wrap2 = document.querySelectorAll(".WrapLevel2");
 
   var newDiv = document.createElement("div");
-  var color3 = shindoConvert(maxInt, 2);
+  var color3 = NormalizeShindo(maxInt, 2);
   newDiv.innerHTML = "<span style='background:" + color3[0] + ";color:" + color3[1] + ";'>" + maxInt + "</span>" + name;
   newDiv.classList.add("ShindoItem", "ShindoItem3");
   wrap2[wrap2.length - 1].appendChild(newDiv);
@@ -1496,11 +1496,11 @@ function add_City_info(name, maxInt) {
 function add_IntensityStation_info(lat, lng, name, int) {
   var wrap3 = document.querySelectorAll(".WrapLevel3");
 
-  var intStr = shindoConvert(int);
-  var intStrLong = shindoConvert(int, 1);
+  var intStr = NormalizeShindo(int);
+  var intStrLong = NormalizeShindo(int, 1);
 
   var newDiv = document.createElement("div");
-  var color4 = shindoConvert(int, 2);
+  var color4 = NormalizeShindo(int, 2);
   newDiv.innerHTML = "<span style='background:" + color4[0] + ";color:" + color4[1] + ";'>" + intStr + "</span>" + name;
   newDiv.classList.add("ShindoItem", "ShindoItem4");
   const icon = document.createElement("div");
@@ -1676,7 +1676,7 @@ function add_IntensityStation_infoL(lat, lng, name, int) {
 var EQInfoMarged = {};
 var EQInfoData = [];
 //地震情報マージ
-function EQInfoControl(data) {
+function ConvertEQInfo(data) {
   EQInfoData.push(data);
 
   EQInfoData = EQInfoData.sort(function (a, b) {
@@ -1760,9 +1760,9 @@ function EQInfoControl(data) {
   if (EQInfoMarged.depth || EQInfoMarged.depth === 0) EQInfo.depth = Math.abs(EQInfoMarged.depth);
   if (EQInfoMarged.epiCenter) EQInfo.epiCenter = EQInfoMarged.epiCenter;
 
-  if (EQInfo.originTime) data_time.innerText = dateEncode(4, EQInfo.originTime);
-  if (EQInfo.maxI) data_maxI.innerText = shindoConvert(EQInfo.maxI, 1);
-  if (EQInfo.maxI) data_maxI.style.borderBottom = "solid 2px " + shindoConvert(EQInfo.maxI, 2)[0];
+  if (EQInfo.originTime) data_time.innerText = NormalizeDate(4, EQInfo.originTime);
+  if (EQInfo.maxI) data_maxI.innerText = NormalizeShindo(EQInfo.maxI, 1);
+  if (EQInfo.maxI) data_maxI.style.borderBottom = "solid 2px " + NormalizeShindo(EQInfo.maxI, 2)[0];
   if (EQInfo.mag) data_M.innerText = EQInfo.mag;
 
   if (EQInfo.depth == 0) data_depth.innerText = "ごく浅い";

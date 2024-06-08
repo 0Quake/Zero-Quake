@@ -42,7 +42,7 @@ self.addEventListener("message", (event) => {
               ESMap_context_out.beginPath();
 
               ESMap_context_out.rect(j, i, 1, 1);
-              ESMap_context_out.fillStyle = shindoConvert(int, 2)[0];
+              ESMap_context_out.fillStyle = NormalizeShindo(int, 2)[0];
               ESMap_context_out.fill();
             }
             if (j % 2 == 0) x += 3;
@@ -72,7 +72,7 @@ self.addEventListener("message", (event) => {
   }
 });
 
-function shindoConvert(str, responseType) {
+function NormalizeShindo(str, responseType) {
   var ShindoTmp;
   if (str === null || str === undefined) ShindoTmp = 11;
   else if (isNaN(str)) {
@@ -150,7 +150,20 @@ function shindoConvert(str, responseType) {
       var ConvTable = ["0", "1", "2", "3", "4", "5弱", "5強", "6弱", "6強", "7", "５弱以上未入電", "不明"];
       break;
     case 2:
-      var ConvTable = [[config.color.Shindo["0"].background, config.color.Shindo["0"].color], [config.color.Shindo["1"].background, config.color.Shindo["1"].color], [config.color.Shindo["2"].background, config.color.Shindo["2"].color], [config.color.Shindo["3"].background, config.color.Shindo["3"].color], [config.color.Shindo["4"].background, config.color.Shindo["4"].color], [config.color.Shindo["5m"].background, config.color.Shindo["5m"].color], [config.color.Shindo["5p"].background, config.color.Shindo["5p"].color], [config.color.Shindo["6m"].background, config.color.Shindo["6m"].color], [config.color.Shindo["6p"].background, config.color.Shindo["6p"].color], [config.color.Shindo["7"].background, config.color.Shindo["7"].color], [config.color.Shindo["5p?"].background, config.color.Shindo["5p?"].color], [config.color.Shindo["?"].background, config.color.Shindo["?"].color]];
+      var ConvTable = [
+        [config.color.Shindo["0"].background, config.color.Shindo["0"].color],
+        [config.color.Shindo["1"].background, config.color.Shindo["1"].color],
+        [config.color.Shindo["2"].background, config.color.Shindo["2"].color],
+        [config.color.Shindo["3"].background, config.color.Shindo["3"].color],
+        [config.color.Shindo["4"].background, config.color.Shindo["4"].color],
+        [config.color.Shindo["5m"].background, config.color.Shindo["5m"].color],
+        [config.color.Shindo["5p"].background, config.color.Shindo["5p"].color],
+        [config.color.Shindo["6m"].background, config.color.Shindo["6m"].color],
+        [config.color.Shindo["6p"].background, config.color.Shindo["6p"].color],
+        [config.color.Shindo["7"].background, config.color.Shindo["7"].color],
+        [config.color.Shindo["5p?"].background, config.color.Shindo["5p?"].color],
+        [config.color.Shindo["?"].background, config.color.Shindo["?"].color],
+      ];
       break;
     case 3:
       var ConvTable = [null, "1", "2", "3", "4", "5m", "5p", "6m", "6p", "7", "5p?", null];
