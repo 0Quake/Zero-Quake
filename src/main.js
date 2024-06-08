@@ -1420,6 +1420,7 @@ function AXIS() {
               var IntensityElm = {
                 Observation: { MaxInt: null },
               };
+              var OriginTimeTmp
               if (data.message.Body.Earthquake[0]) {
                 EarthquakeElm = data.message.Body.Earthquake[0];
                 OriginTimeTmp = new Date(EarthquakeElm.OriginTime);
@@ -2221,7 +2222,7 @@ function EEW_Alert(data, first, update) {
           icon: path.join(__dirname, "img/icon.ico"),
         });
         EEWNotification.show();
-        EEWNotification.on("click", createWindow);
+        EEWNotification.on("click", CreateMainWindow);
       } else if (notice_setting == "openWindow") CreateMainWindow();
     }
 
@@ -3168,7 +3169,7 @@ function ConvertTsunamiInfo(data) {
 
           if (elm.stations) {
             elm.stations.forEach(function (elm2) {
-              stItem = areaItem.stations.find(function (elm3) {
+              var stItem = areaItem.stations.find(function (elm3) {
                 return elm3.name == elm2.name;
               });
 
