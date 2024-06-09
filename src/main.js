@@ -38,10 +38,10 @@ import WebSocket from "websocket";
 var WebSocketClient = WebSocket.client;
 import * as turf from "@turf/turf";
 import workerThreads from "worker_threads";
-
+import { readFile } from "fs/promises";
 var __dirname = path.dirname(fileURLToPath(import.meta.url));
-import FERegion from "./Resource/feRegion.json" with { type: "json" };
-import packageJson from "../package.json" with { type: "json" };
+var FERegion = JSON.parse(await readFile(path.join(__dirname, "./Resource/feRegion.json")));
+var packageJson = JSON.parse(await readFile(path.join(__dirname, "../package.json")));
 var soft_version;
 var EQInfoFetchCount = 0;
 var shindoColorTable = { 0: { r: 63, g: 250, b: 54 }, 1: { r: 189, g: 255, b: 12 }, 2: { r: 255, g: 255, b: 0 }, 3: { r: 255, g: 221, b: 0 }, 4: { r: 255, g: 144, b: 0 }, 5: { r: 255, g: 68, b: 0 }, 6: { r: 245, g: 0, b: 0 }, 7: { r: 170, g: 0, b: 0 }, "-3": { r: 0, g: 0, b: 205 }, "-2.9": { r: 0, g: 7, b: 209 }, "-2.8": { r: 0, g: 14, b: 214 }, "-2.7": { r: 0, g: 21, b: 218 }, "-2.6": { r: 0, g: 28, b: 223 }, "-2.5": { r: 0, g: 36, b: 227 }, "-2.4": { r: 0, g: 43, b: 231 }, "-2.3": { r: 0, g: 50, b: 236 }, "-2.2": { r: 0, g: 57, b: 240 }, "-2.1": { r: 0, g: 64, b: 245 }, "-2": { r: 0, g: 72, b: 250 }, "-1.9": { r: 0, g: 85, b: 238 }, "-1.8": { r: 0, g: 99, b: 227 }, "-1.7": { r: 0, g: 112, b: 216 }, "-1.6": { r: 0, g: 126, b: 205 }, "-1.5": { r: 0, g: 140, b: 194 }, "-1.4": { r: 0, g: 153, b: 183 }, "-1.3": { r: 0, g: 167, b: 172 }, "-1.2": { r: 0, g: 180, b: 161 }, "-1.1": { r: 0, g: 194, b: 150 }, "-1": { r: 0, g: 208, b: 139 }, "-0.9": { r: 6, g: 212, b: 130 }, "-0.8": { r: 12, g: 216, b: 121 }, "-0.7": { r: 18, g: 220, b: 113 }, "-0.6": { r: 25, g: 224, b: 104 }, "-0.5": { r: 31, g: 228, b: 96 }, "-0.4": { r: 37, g: 233, b: 88 }, "-0.3": { r: 44, g: 237, b: 79 }, "-0.2": { r: 50, g: 241, b: 71 }, "-0.1": { r: 56, g: 245, b: 62 }, 0.1: { r: 75, g: 250, b: 49 }, 0.2: { r: 88, g: 250, b: 45 }, 0.3: { r: 100, g: 251, b: 41 }, 0.4: { r: 113, g: 251, b: 37 }, 0.5: { r: 125, g: 252, b: 33 }, 0.6: { r: 138, g: 252, b: 28 }, 0.7: { r: 151, g: 253, b: 24 }, 0.8: { r: 163, g: 253, b: 20 }, 0.9: { r: 176, g: 254, b: 16 }, 1.1: { r: 195, g: 254, b: 10 }, 1.2: { r: 202, g: 254, b: 9 }, 1.3: { r: 208, g: 254, b: 8 }, 1.4: { r: 215, g: 254, b: 7 }, 1.5: { r: 222, g: 255, b: 5 }, 1.6: { r: 228, g: 254, b: 4 }, 1.7: { r: 235, g: 255, b: 3 }, 1.8: { r: 241, g: 254, b: 2 }, 1.9: { r: 248, g: 255, b: 1 }, 2.1: { r: 254, g: 251, b: 0 }, 2.2: { r: 254, g: 248, b: 0 }, 2.3: { r: 254, g: 244, b: 0 }, 2.4: { r: 254, g: 241, b: 0 }, 2.5: { r: 255, g: 238, b: 0 }, 2.6: { r: 254, g: 234, b: 0 }, 2.7: { r: 255, g: 231, b: 0 }, 2.8: { r: 254, g: 227, b: 0 }, 2.9: { r: 255, g: 224, b: 0 }, 3.1: { r: 254, g: 213, b: 0 }, 3.2: { r: 254, g: 205, b: 0 }, 3.3: { r: 254, g: 197, b: 0 }, 3.4: { r: 254, g: 190, b: 0 }, 3.5: { r: 255, g: 182, b: 0 }, 3.6: { r: 254, g: 174, b: 0 }, 3.7: { r: 255, g: 167, b: 0 }, 3.8: { r: 254, g: 159, b: 0 }, 3.9: { r: 255, g: 151, b: 0 }, 4.1: { r: 254, g: 136, b: 0 }, 4.2: { r: 254, g: 128, b: 0 }, 4.3: { r: 254, g: 121, b: 0 }, 4.4: { r: 254, g: 113, b: 0 }, 4.5: { r: 255, g: 106, b: 0 }, 4.6: { r: 254, g: 98, b: 0 }, 4.7: { r: 255, g: 90, b: 0 }, 4.8: { r: 254, g: 83, b: 0 }, 4.9: { r: 255, g: 75, b: 0 }, 5.1: { r: 254, g: 61, b: 0 }, 5.2: { r: 253, g: 54, b: 0 }, 5.3: { r: 252, g: 47, b: 0 }, 5.4: { r: 251, g: 40, b: 0 }, 5.5: { r: 250, g: 33, b: 0 }, 5.6: { r: 249, g: 27, b: 0 }, 5.7: { r: 248, g: 20, b: 0 }, 5.8: { r: 247, g: 13, b: 0 }, 5.9: { r: 246, g: 6, b: 0 }, 6.1: { r: 238, g: 0, b: 0 }, 6.2: { r: 230, g: 0, b: 0 }, 6.3: { r: 223, g: 0, b: 0 }, 6.4: { r: 215, g: 0, b: 0 }, 6.5: { r: 208, g: 0, b: 0 }, 6.6: { r: 200, g: 0, b: 0 }, 6.7: { r: 192, g: 0, b: 0 }, 6.8: { r: 185, g: 0, b: 0 }, 6.9: { r: 177, g: 0, b: 0 } };
@@ -273,7 +273,7 @@ var downloadURL;
 //アップデートの確認
 function checkUpdate() {
   if (net.online) {
-    var UpdateError = function(){
+    var UpdateError = function () {
       var current_verTmp = soft_version;
 
       update_data = { check_error: true, check_date: new Date(), latest_version: null, current_version: current_verTmp, update_available: null, dl_page: null };
@@ -283,7 +283,7 @@ function checkUpdate() {
           data: update_data,
         });
       }
-    }
+    };
     let request = net.request("https://api.github.com/repos/0quake/Zero-Quake/releases?_=" + Number(new Date()));
     request.on("response", (res) => {
       if (!300 <= res._responseHead.statusCode && !res._responseHead.statusCode < 200) {
@@ -348,7 +348,7 @@ function checkUpdate() {
               });
             }
           } catch (err) {
-            UpdateError()
+            UpdateError();
           }
         });
       }
@@ -543,7 +543,7 @@ ipcMain.on("message", (_event, response) => {
         openAtLogin: response.data,
       });
       break;
-    case "settingReturn":
+    case "ChangeConfig":
       config = response.data;
       store.set("config", config);
 
@@ -551,6 +551,15 @@ ipcMain.on("message", (_event, response) => {
         SettingWindow.webContents.send("message2", {
           action: "setting",
           data: config,
+        });
+      }
+
+      if (response.from == "ConfigWindow") {
+        if (MainWindow) MainWindow.reload();
+        if (WorkerWindow) WorkerWindow.reload();
+        if (TsunamiWindow) TsunamiWindow.reload();
+        Object.keys(EQI_Window).forEach(function (key) {
+          if (EQI_Window[key] && EQI_Window[key].window) EQI_Window[key].window.reload();
         });
       }
       break;
@@ -914,12 +923,12 @@ function messageToMainWindow(message) {
 
 //地震情報ウィンドウ表示処理
 var EQI_Window = {};
-function handleUrlOpen (e, url) {
+function handleUrlOpen(e, url) {
   if (url.match(/^http/)) {
     e.preventDefault();
     shell.openExternal(url);
   }
-};
+}
 function EQInfo_createWindow(response, IS_WebURL) {
   try {
     var EQInfoWindowT = EQI_Window[response.eid];
@@ -977,7 +986,8 @@ function EQInfo_createWindow(response, IS_WebURL) {
   }
 }
 
-import TimeTable_JMA2001 from "./Resource/TimeTable_JMA2001.json" with { type: "json" };
+var TimeTable_JMA2001 = JSON.parse(await readFile(path.join(__dirname, "./Resource/TimeTable_JMA2001.json")));
+
 //開始処理
 function start() {
   soft_version = packageJson.version;
@@ -1031,8 +1041,7 @@ function Req_TremRts_sta() {
 function Req_TremRts() {
   if (config.Source.TREMRTS.GetData) {
     if (net.online) {
-
-      if(!TremRts_sta) Req_TremRts_sta();
+      if (!TremRts_sta) Req_TremRts_sta();
 
       var request = net.request("https://lb-1.exptech.com.tw/api/v1/trem/rts?_=" + Number(new Date()));
       request.on("response", (res) => {
@@ -1092,9 +1101,9 @@ function Req_EarlyEst() {
               UpdateStatus(new Date() - Replay, "Early-est", "success");
               let parser = new new JSDOM().window.DOMParser();
               let doc = parser.parseFromString(dataTmp, "text/xml");
-              Array.prototype.forEach.call(doc.getElementsByTagName("eventParameters"), function(parent) { 
+              Array.prototype.forEach.call(doc.getElementsByTagName("eventParameters"), function (parent) {
                 var elm = parent.getElementsByTagName("event")[0];
-                if(elm){
+                if (elm) {
                   var latitude = elm.querySelector("origin latitude value") ? Number(elm.querySelector("origin latitude value").textContent) : null;
                   var longitude = elm.querySelector("origin longitude value") ? Number(elm.querySelector("origin longitude value").textContent) : null;
                   if (!latitude || !longitude) return;
@@ -1138,9 +1147,7 @@ function Req_EarlyEst() {
 }
 
 function createWorker() {
-  worker = new workerThreads.Worker(path.join(__dirname, "js/EQDetectWorker.js"), {
-    workerData: "From Main",
-  });
+  worker = new workerThreads.Worker(path.join(__dirname, "js/EQDetectWorker.js"));
   worker.on("message", (message) => {
     switch (message.action) {
       case "EQDetectAdd":
@@ -1163,9 +1170,7 @@ function createWorker() {
         messageToMainWindow(message.data);
         break;
       case "sendDataToWorkerWindow":
-        if (WorkerWindow) {
-          WorkerWindow.webContents.send("message2", message.data);
-        }
+        if (WorkerWindow) WorkerWindow.webContents.send("message2", message.data);
         break;
       case "thresholds":
         thresholds = message.data;
@@ -1208,7 +1213,6 @@ var kmoniI_url = 0;
 function Req_kmoni() {
   if (config.Source.kmoni.kmoni.GetData) {
     if (net.online) {
-
       var ReqTime = new Date() - KmoniOffset - Replay;
       var urlTmp = ["https://smi.lmoniexp.bosai.go.jp/data/map_img/RealTimeImg/jma_s/" + NormalizeDate(2, ReqTime) + "/" + NormalizeDate(1, ReqTime) + ".jma_s.gif", "http://www.kmoni.bosai.go.jp/data/map_img/RealTimeImg/jma_s/" + NormalizeDate(2, ReqTime) + "/" + NormalizeDate(1, ReqTime) + ".jma_s.gif"][kmoniI_url];
 
@@ -1423,7 +1427,7 @@ function AXIS() {
               var IntensityElm = {
                 Observation: { MaxInt: null },
               };
-              var OriginTimeTmp
+              var OriginTimeTmp;
               if (data.message.Body.Earthquake[0]) {
                 EarthquakeElm = data.message.Body.Earthquake[0];
                 OriginTimeTmp = new Date(EarthquakeElm.OriginTime);
@@ -1467,9 +1471,10 @@ function TryConnect_AXIS() {
   setTimeout(Connect_AXIS, timeoutTmp);
 }
 function Connect_AXIS() {
-  if (AXIS_Client) AXIS_Client.connect("wss://ws.axis.prioris.jp/socket", null, null, {
-    Authorization: `Bearer ${config.Source.axis.AccessToken}`,
-  });
+  if (AXIS_Client)
+    AXIS_Client.connect("wss://ws.axis.prioris.jp/socket", null, null, {
+      Authorization: `Bearer ${config.Source.axis.AccessToken}`,
+    });
   AXIS_ConnectedDate = new Date();
 }
 
@@ -1910,7 +1915,8 @@ function DetectEEW(type, json) {
   }
 }
 
-import sesmicPoints from "./Resource/PointSeismicIntensityLocation.json" with { type: "json" };
+var sesmicPoints = JSON.parse(await readFile(path.join(__dirname, "./Resource/PointSeismicIntensityLocation.json")));
+
 //EEW情報マージ
 function MargeEEW(data) {
   if (!data) return; //データがない場合、処理終了
@@ -2336,7 +2342,7 @@ function Req_JMAXMLList(LongPeriodFeed, count) {
           const xml = parser.parseFromString(dataTmp, "text/html");
           if (!xml) return;
           var EQInfoCount = 0;
-          Array.prototype.forEach.call(xml.getElementsByTagName("entry"), function(elm) { 
+          Array.prototype.forEach.call(xml.getElementsByTagName("entry"), function (elm) {
             var url;
             var urlElm = elm.getElementsByTagName("id");
             if (urlElm) url = urlElm[0].textContent;
@@ -2423,7 +2429,7 @@ function Req_JMAXML(url, count) {
             var tsunamiDataTmp;
             var EventID = xml.getElementsByTagName("EventID")[0].textContent.split(" ").map(Number);
             var EQData = [];
-            Array.prototype.forEach.call(xml.getElementsByTagName("Earthquake"), function(elm, index) { 
+            Array.prototype.forEach.call(xml.getElementsByTagName("Earthquake"), function (elm, index) {
               var magTmp = elm.getElementsByTagName("jmx_eb:Magnitude")[0];
               magTmp = magTmp !== "NaN" && magTmp ? magTmp.textContent : null;
               var ECTmp = elm.getElementsByTagName("Name")[0];
@@ -2477,7 +2483,7 @@ function Req_JMAXML(url, count) {
                 if (tsunamiElm.getElementsByTagName("Forecast")[0]) forecastElm = tsunamiElm.getElementsByTagName("Forecast")[0];
                 if (tsunamiElm.getElementsByTagName("Estimation")[0]) forecastElm = tsunamiElm.getElementsByTagName("Estimation")[0];
                 if (forecastElm) {
-                  Array.prototype.forEach.call(forecastElm.getElementsByTagName("Item"), function(elm) { 
+                  Array.prototype.forEach.call(forecastElm.getElementsByTagName("Item"), function (elm) {
                     var gradeTmp;
                     var canceledTmp = false;
                     if (elm.getElementsByTagName("Category")[0]) {
@@ -2527,7 +2533,7 @@ function Req_JMAXML(url, count) {
 
                     var stations = [];
                     if (elm.getElementsByTagName("Station")[0]) {
-                      Array.prototype.forEach.call(elm.getElementsByTagName("Station"), function(elm2) { 
+                      Array.prototype.forEach.call(elm.getElementsByTagName("Station"), function (elm2) {
                         var ArrivalTimeTmp;
                         var ConditionTmp;
                         var nameTmp = elm2.getElementsByTagName("Name")[0].textContent;
@@ -2561,84 +2567,82 @@ function Req_JMAXML(url, count) {
                 }
 
                 if (tsunamiElm.getElementsByTagName("Observation")[0]) {
-                  Array.prototype.forEach.call( tsunamiElm
-                    .getElementsByTagName("Observation")[0]
-                    .getElementsByTagName("Item"), function(elm) { 
-                      var stations = [];
-                      if (elm.getElementsByTagName("Station")[0]) {
-                        Array.prototype.forEach.call( elm.getElementsByTagName("Station"), function(elm2) { 
-                          var ArrivalTimeTmp;
-                          var firstHeightConditionTmp;
-                          var firstHeightInitialTmp;
-                          var maxheightTime;
-                          var maxHeightCondition;
-                          var oMaxHeightTmp, maxheightRising;
-                          var nameTmp = elm2.getElementsByTagName("Name")[0].textContent;
-                          if (elm2.getElementsByTagName("FirstHeight")[0]) {
-                            var firstHeightTag=elm2.getElementsByTagName("FirstHeight")[0]
-                            if (firstHeightTag.getElementsByTagName("ArrivalTime")[0]) ArrivalTimeTmp = new Date(firstHeightTag.getElementsByTagName("ArrivalTime")[0].textContent);
-                            if (firstHeightTag.getElementsByTagName("Condition")[0]) firstHeightConditionTmp =firstHeightTag.getElementsByTagName("Condition")[0].textContent;
-                            if (firstHeightTag.getElementsByTagName("Initial")[0]) firstHeightInitialTmp = firstHeightTag.getElementsByTagName("Initial")[0].textContent;
-                          }
-                          if (elm2.getElementsByTagName("MaxHeight")[0]) {
-                            var maxheightElm = elm2.getElementsByTagName("MaxHeight")[0].getElementsByTagName("jmx_eb:TsunamiHeight")[0];
-                            if (maxheightElm) {
-                              oMaxHeightTmp = maxheightElm.getAttribute("description");
-                              oMaxHeightTmp = oMaxHeightTmp.replace(/[Ａ-Ｚａ-ｚ０-９．]/g, function (s) {
-                                return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
-                              });
-                              if (maxheightElm.getAttribute("condition")) maxheightRising = maxheightElm.getAttribute("condition") == "上昇中";
-                            }
-
-                            var maxheightTimeElm = elm2.getElementsByTagName("MaxHeight")[0].getElementsByTagName("DateTime")[0];
-                            if (maxheightTimeElm) maxheightTime = new Date(maxheightTimeElm.textContent);
-
-                            var maxheightConditionElm = elm2.getElementsByTagName("MaxHeight")[0].getElementsByTagName("Condition")[0];
-                            if (maxheightConditionElm) maxHeightCondition = elm2.getElementsByTagName("MaxHeight")[0].getElementsByTagName("Condition")[0].textContent;
+                  Array.prototype.forEach.call(tsunamiElm.getElementsByTagName("Observation")[0].getElementsByTagName("Item"), function (elm) {
+                    var stations = [];
+                    if (elm.getElementsByTagName("Station")[0]) {
+                      Array.prototype.forEach.call(elm.getElementsByTagName("Station"), function (elm2) {
+                        var ArrivalTimeTmp;
+                        var firstHeightConditionTmp;
+                        var firstHeightInitialTmp;
+                        var maxheightTime;
+                        var maxHeightCondition;
+                        var oMaxHeightTmp, maxheightRising;
+                        var nameTmp = elm2.getElementsByTagName("Name")[0].textContent;
+                        if (elm2.getElementsByTagName("FirstHeight")[0]) {
+                          var firstHeightTag = elm2.getElementsByTagName("FirstHeight")[0];
+                          if (firstHeightTag.getElementsByTagName("ArrivalTime")[0]) ArrivalTimeTmp = new Date(firstHeightTag.getElementsByTagName("ArrivalTime")[0].textContent);
+                          if (firstHeightTag.getElementsByTagName("Condition")[0]) firstHeightConditionTmp = firstHeightTag.getElementsByTagName("Condition")[0].textContent;
+                          if (firstHeightTag.getElementsByTagName("Initial")[0]) firstHeightInitialTmp = firstHeightTag.getElementsByTagName("Initial")[0].textContent;
+                        }
+                        if (elm2.getElementsByTagName("MaxHeight")[0]) {
+                          var maxheightElm = elm2.getElementsByTagName("MaxHeight")[0].getElementsByTagName("jmx_eb:TsunamiHeight")[0];
+                          if (maxheightElm) {
+                            oMaxHeightTmp = maxheightElm.getAttribute("description");
+                            oMaxHeightTmp = oMaxHeightTmp.replace(/[Ａ-Ｚａ-ｚ０-９．]/g, function (s) {
+                              return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
+                            });
+                            if (maxheightElm.getAttribute("condition")) maxheightRising = maxheightElm.getAttribute("condition") == "上昇中";
                           }
 
-                          var codeTmp = elm2.getElementsByTagName("Code")[0].textContent;
+                          var maxheightTimeElm = elm2.getElementsByTagName("MaxHeight")[0].getElementsByTagName("DateTime")[0];
+                          if (maxheightTimeElm) maxheightTime = new Date(maxheightTimeElm.textContent);
 
-                          stations.push({
-                            name: nameTmp,
-                            code: codeTmp,
-                            ArrivedTime: ArrivalTimeTmp,
-                            firstHeightCondition: firstHeightConditionTmp,
-                            firstHeightInitial: firstHeightInitialTmp,
-                            omaxHeight: oMaxHeightTmp,
-                            maxheightRising: maxheightRising,
-                            maxHeightTime: maxheightTime,
-                            maxHeightCondition: maxHeightCondition,
-                          });
+                          var maxheightConditionElm = elm2.getElementsByTagName("MaxHeight")[0].getElementsByTagName("Condition")[0];
+                          if (maxheightConditionElm) maxHeightCondition = elm2.getElementsByTagName("MaxHeight")[0].getElementsByTagName("Condition")[0].textContent;
+                        }
+
+                        var codeTmp = elm2.getElementsByTagName("Code")[0].textContent;
+
+                        stations.push({
+                          name: nameTmp,
+                          code: codeTmp,
+                          ArrivedTime: ArrivalTimeTmp,
+                          firstHeightCondition: firstHeightConditionTmp,
+                          firstHeightInitial: firstHeightInitialTmp,
+                          omaxHeight: oMaxHeightTmp,
+                          maxheightRising: maxheightRising,
+                          maxHeightTime: maxheightTime,
+                          maxHeightCondition: maxHeightCondition,
                         });
-                      }
-
-                      var tsunamiItem = tsunamiDataTmp.areas.find(function (elm2) {
-                        return elm2.name == elm.getElementsByTagName("Name")[0].textContent;
                       });
-                      if (tsunamiItem) {
-                        stations.forEach(function (elm2) {
-                          var stationElm = tsunamiItem.stations.find(function (elm3) {
-                            return elm3.name == elm2.name;
-                          });
-                          if (stationElm) {
-                            stationElm.ArrivedTime = elm2.ArrivedTime;
-                            stationElm.firstHeightCondition = elm2.firstHeightCondition;
-                            stationElm.firstHeightInitial = elm2.firstHeightInitial;
-                            stationElm.omaxHeight = elm2.omaxHeight;
-                            stationElm.maxheightTime = elm2.ArrivedTime;
-                            stationElm.maxHeightCondition = elm2.maxHeightCondition;
-                          } else tsunamiItem.stations.push(elm2);
-                        });
-                      } else {
-                        tsunamiDataTmp.areas.push({
-                          name: title == "沖合の津波観測に関する情報" ? "（海上）" : elm.getElementsByTagName("Name")[0].textContent,
-                          stations: stations,
-                        });
-                      }
+                    }
+
+                    var tsunamiItem = tsunamiDataTmp.areas.find(function (elm2) {
+                      return elm2.name == elm.getElementsByTagName("Name")[0].textContent;
                     });
+                    if (tsunamiItem) {
+                      stations.forEach(function (elm2) {
+                        var stationElm = tsunamiItem.stations.find(function (elm3) {
+                          return elm3.name == elm2.name;
+                        });
+                        if (stationElm) {
+                          stationElm.ArrivedTime = elm2.ArrivedTime;
+                          stationElm.firstHeightCondition = elm2.firstHeightCondition;
+                          stationElm.firstHeightInitial = elm2.firstHeightInitial;
+                          stationElm.omaxHeight = elm2.omaxHeight;
+                          stationElm.maxheightTime = elm2.ArrivedTime;
+                          stationElm.maxHeightCondition = elm2.maxHeightCondition;
+                        } else tsunamiItem.stations.push(elm2);
+                      });
+                    } else {
+                      tsunamiDataTmp.areas.push({
+                        name: title == "沖合の津波観測に関する情報" ? "（海上）" : elm.getElementsByTagName("Name")[0].textContent,
+                        stations: stations,
+                      });
+                    }
+                  });
                 }
-              }      
+              }
             }
             ConvertTsunamiInfo(tsunamiDataTmp);
           }
@@ -2943,7 +2947,8 @@ function ConvertEQInfo(dataList, type, EEW, count) {
             if (!config.Info.EQInfo.showTest && elm.status == "試験") return;
             if (new Date(elm.reportDateTime) > new Date() - Replay) return;
 
-            if (elm.category == "EEW" && EQElm.EEW == false) return; //EEW以外の情報が既に入っているとき、EEWによる情報を破棄
+            //EEW以外の情報が既に入っているとき、EEWによる情報を破棄
+            if (elm.category == "EEW" && EQElm.EEW == false) return;
             else if (elm.category == "EEW") EQElm.EEW = true;
             else if (elm.category != "EEW" && EQElm.EEW == true) {
               //EEW以外の情報が入ってきたとき、EEWによる情報を破棄
@@ -3135,7 +3140,8 @@ function ConvertTsunamiInfo(data) {
             });
           }
         } else {
-          tsunamiItem.areas.push(elm);}
+          tsunamiItem.areas.push(elm);
+        }
       });
     } else {
       Tsunami_Data.push(data);
@@ -3186,7 +3192,9 @@ function ConvertTsunamiInfo(data) {
               } else elm.stations.push(elm2);
             });
           }
-        } else{ Tsunami_data_Marged.areas.push(elm);}
+        } else {
+          Tsunami_data_Marged.areas.push(elm);
+        }
       });
     });
     if (all_revocated) Tsunami_data_Marged.revocation = true;

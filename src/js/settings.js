@@ -167,7 +167,8 @@ document.getElementById("resetConfig").addEventListener("click", function () {
   var conf = confirm("本当に設定を初期化しますか？");
   if (conf) {
     window.electronAPI.messageReturn({
-      action: "settingReturn",
+      action: "ChangeConfig",
+      from: "ConfigWindow",
       data: defaultConfigVal,
     });
     window.electronAPI.messageReturn({
@@ -238,7 +239,8 @@ function apply() {
   config.notice.voice_parameter.Boyomi_Voice = document.getElementById("BoyomiVoiceSelect").value;
 
   window.electronAPI.messageReturn({
-    action: "settingReturn",
+    action: "ChangeConfig",
+    from: "ConfigWindow",
     data: config,
   });
 

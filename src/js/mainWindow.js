@@ -652,7 +652,8 @@ function layerSelect(layerName) {
   }
   config.data.layer = layerName;
   window.electronAPI.messageReturn({
-    action: "settingReturn",
+    action: "ChangeConfig",
+    from: "Other",
     data: config,
   });
 }
@@ -668,7 +669,8 @@ function overlaySelect(layerName, checked) {
   if (layerName == "kmoni_points") {
     config.data.kmoni_points_show = checked;
     window.electronAPI.messageReturn({
-      action: "settingReturn",
+      action: "ChangeConfig",
+      from:"Other",
       data: config,
     });
 
@@ -715,8 +717,9 @@ function overlaySelect(layerName, checked) {
 
   config.data.overlay = selectedLayer;
   window.electronAPI.messageReturn({
-    action: "settingReturn",
-    data: config,
+    action: "ChangeConfig",
+    from:"Other",
+  data: config,
   });
 }
 document.getElementsByName("overlaySelect").forEach(function (elm) {
