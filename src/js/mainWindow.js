@@ -412,10 +412,11 @@ function EQDetect(data) {
   var EQD_Item = EQDetectItem.find(function (elm) {
     return elm.id == data.id;
   });
-  var regions = [];
-  data.Codes.forEach(function (elm) {
-    if (!regions.includes(elm.Region)) regions.push(elm.Region);
+
+  var DetectRegions = data.Codes.map(function (elm) {
+    return elm.Region;
   });
+  DetectRegions = Array.from(new Set(DetectRegions));
 
   if (EQD_Item) {
     //情報更新
@@ -437,14 +438,14 @@ function EQDetect(data) {
     var EQDItem = document.getElementById("EQDItem_" + data.id);
     EQDItem.classList.remove("lv1", "lv2");
     EQDItem.classList.add("lv" + data.Lv);
-    EQDItem.querySelector(".EQD_Regions").innerText = regions.join(" ");
+    EQDItem.querySelector(".EQD_Regions").innerText = DetectRegions.join(" ");
   } else {
     //初回検知
     var clone = EQDetectTemplate.content.cloneNode(true);
     var EQDItem = clone.querySelector(".EQDItem");
     EQDItem.setAttribute("id", "EQDItem_" + data.id);
     EQDItem.classList.add("lv" + data.Lv);
-    EQDItem.querySelector(".EQD_Regions").innerText = regions.join(" ");
+    EQDItem.querySelector(".EQD_Regions").innerText = DetectRegions.join(" ");
     document.getElementById("EQDetect-Panel").prepend(clone);
 
     const img = document.createElement("img");
@@ -670,7 +671,7 @@ function overlaySelect(layerName, checked) {
     config.data.kmoni_points_show = checked;
     window.electronAPI.messageReturn({
       action: "ChangeConfig",
-      from:"Other",
+      from: "Other",
       data: config,
     });
 
@@ -718,8 +719,8 @@ function overlaySelect(layerName, checked) {
   config.data.overlay = selectedLayer;
   window.electronAPI.messageReturn({
     action: "ChangeConfig",
-    from:"Other",
-  data: config,
+    from: "Other",
+    data: config,
   });
 }
 document.getElementsByName("overlaySelect").forEach(function (elm) {
