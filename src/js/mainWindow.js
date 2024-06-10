@@ -499,12 +499,12 @@ function EQDetect(data) {
     map.fitBounds(turf.bbox(_circle), { maxZoom: 7, animate: false, padding: 100 });
   }
   document.getElementById("noEEW").style.display = now_EEW.length == 0 && !now_tsunami && EQDetectItem.length == 0 ? "block" : "none";
-  if (now_EEW.length == 0) document.body.classList.remove("EQDetecting");
-  else document.body.classList.add("EQDetecting");
+
+  if (EQDetectItem.length != 0) document.body.classList.add("EQDetecting");
 }
-//地震検知情報更新
+//地震検知終了
 function EQDetectFinish(id) {
-  EQDetectItem.forEach(function (elmA, index) {
+  EQDetectItem.find(function (elmA, index) {
     if (elmA.id == id) {
       if (map.getLayer("EQDItem_" + id)) map.removeLayer("EQDItem_" + id);
       if (map.getLayer("EQDItemF_" + id)) map.removeLayer("EQDItemF_" + id);
@@ -512,11 +512,15 @@ function EQDetectFinish(id) {
       elmA.ECMarker.remove();
 
       EQDetectItem.splice(index, 1);
+      return true;
     }
   });
+
   var eqdItem = document.getElementById("EQDItem_" + id);
   if (eqdItem) eqdItem.remove();
   document.getElementById("noEEW").style.display = now_EEW.length == 0 && !now_tsunami && EQDetectItem.length == 0 ? "block" : "none";
+
+  if (EQDetectItem.length == 0) document.body.classList.remove("EQDetecting");
 }
 
 //🔴UI🔴
