@@ -28,7 +28,7 @@
             <div id="tab1_group1_content" class="tabgroupContent active_tabgroupContent">
                 <div id="tab1_menu11" class="tabmenu active_tabmenu" data-contentid="tab1_content11"><span class="material-icons-round"> construction</span>システム設定</div>
                 <div id="tab1_menu1" class="tabmenu" data-contentid="tab1_content1"><span class="material-icons-round">home </span>現在地</div>
-                <div id="tab1_menu12" class="tabmenu" data-contentid="tab1_content13"><span class="material-icons-round"> history</span>シミュレーション</div>
+                <div id="tab1_menu13" class="tabmenu" data-contentid="tab1_content13"><span class="material-icons-round"> history</span>シミュレーション</div>
             </div>
 
             <div id="tab1_group2" class="tabgroup" data-contentid="tab1_group2_content"><span class="material-icons-round">info</span>情報種別ごとの設定</div>
@@ -108,7 +108,7 @@
                     <label>緯度<input id="latitude" type="number" oninput="MapReDraw()" step="0.1" min="-90" max="90" placeholder="緯度（10進法）"></label>
                     <label>経度<input id="longitude" type="number" oninput="MapReDraw()" step="0.1" min="-180" max="180" placeholder="経度（10進法）"></label>
                     <label>細分区域<select id="saibun" onchange="MapReDraw()">
-                            <option selected disabled></option>
+                            <option selected disabled>（未選択）</option>
                             <option>石狩地方北部</option>
                             <option>石狩地方中部</option>
                             <option>石狩地方南部</option>
@@ -304,8 +304,9 @@
                             <option>津倉瀬(宇治群島北東方）</option>
                             <option>うるま市・金武町境界部地先の埋立地</option>
                         </select></label>
-                    <label>津波予報区<select id="tsunamiSect" onchange="MapReDraw()">
-                            <option selected disabled></option>
+                    <label>津波予報区
+                        <select id="tsunamiSect" onchange="MapReDraw()">
+                            <option selected disabled>（未選択）</option>
                             <option>オホーツク海沿岸</option>
                             <option>愛知県外海</option>
                             <option>愛媛県宇和海</option>
@@ -376,27 +377,51 @@
                             <option>京都府</option>
                             <option>高知県</option>
                             <option>有明・八代海</option>
-                        </select><label>
-                            <label>地盤増幅率<input id="arv" type="number" step="0.01" min="0" max="10" placeholder="工学的基盤（Vs=400m/s）から地表に至る最大速度の増幅率"></label>
+                        </select>
+                    </label>
+                    <label>地盤増幅率<input id="arv" type="number" step="0.01" min="0" max="10" placeholder="工学的基盤（Vs=400m/s）から地表に至る最大速度の増幅率"></label>
 
                 </section>
             </div>
             <div id="tab1_content3" class="tabcontent">
                 <h3><span>通知と音声</span>通知音 / 音声合成</h3>
-                <h4>音声の設定</h4>
+                <h4>音声の調整</h4>
                 <section>
                     <label> 話速：<input id="TTSSpeedN" type="number" min="0.1" max="10" value="1" step="0.1" oninput="TTSspeedSet(this.value)"><input id="TTSSpeedR" type="range" min="0.1" max="10" value="1" step="0.1" oninput="TTSspeedSet(this.value)"></label>
                     <label> 音高：<input id="TTSPitchN" type="number" min="0" max="2" value="1" step="0.05" oninput="TTSpitchSet(this.value)"><input id="TTSPitchR" type="range" min="0" max="2" value="1" step="0.05" oninput="TTSpitchSet(this.value)"></label>
                     <label> 音量：<input id="TTSVolumeN" type="number" min="0" max="1" value="1" step="0.05" oninput="TTSvolumeSet(this.value)"><input id="TTSVolumeR" type="range" min="0" max="1" value="1" step="0.05" oninput="TTSvolumeSet(this.value)"></label>
-                    <label> 音声：<select id="TTSvoiceSelect">
-                            <option disabled selected>既定</option>
-                        </select></label>
                     <button id="speak_test">テスト</button>
                 </section>
+
+
+                <h4>音声合成エンジン</h4>
+                <section class="VoiceEngine_Wrap">
+                    <label><input type="radio" name="VoiceEngine" id="VoiceEngine_Default" value="Default">OS標準音声を使用 </label>
+                    <div class="VoiceSettingContent">
+                        <label>
+                            音声：
+                            <select id="TTSvoiceSelect"></select>
+                        </label>
+                    </div>
+                </section>
+                <section class="VoiceEngine_Wrap">
+                    <label><input type="radio" name="VoiceEngine" id="VoiceEngine_Boyomichan" value="Boyomichan">棒読みちゃんを使用</label>
+                    <div class="VoiceSettingContent">
+                        <label>ポート番号：<input type="number" min="0" max="65535" value="50080" step="1" id="Boyomi_Port"></label>
+                        <label>
+                            音声：
+                            <select id="BoyomiVoiceSelect">
+                                <option selected value="auto">棒読みちゃんの設定に準拠</option>
+                            </select>
+                        </label>
+                        <div class="smalltext">指定された音声が見つからない場合や、棒読みちゃん未起動時は、別の音声で読み上げます。「ポート番号」は、棒読みちゃんの設定値（通常は50080）にしてください。<a href="https://github.com/0Quake/Zero-Quake/wiki/%E9%9F%B3%E5%A3%B0%E5%90%88%E6%88%90%EF%BC%88%E8%AA%AD%E3%81%BF%E4%B8%8A%E3%81%92%EF%BC%89">詳細は説明ページを参照</a></div>
+                    </div>
+                </section>
+
             </div>
             <div id="tab1_content2" class="tabcontent">
 
-                <h2 id="softName"><a href="https://zeroquake.wwww.jp/"><img src="./img/icon.svg">Zero Quake V<span id="softVersion">取得中</span></a></h2>
+                <h2 id="softName"><a href="https://0quake.github.io/ZeroQuake_Website/"><img src="./img/icon.svg">Zero Quake V<span id="softVersion">取得中</span></a></h2>
 
                 <div id="smallWrap">
                     <small>&copy;2022-2024 Benidate</small>
@@ -425,6 +450,16 @@
                 </section>
 
                 <hr>
+
+                <h2>ご注意</h2>
+                <ul>
+                    <li><a href="https://www.data.jma.go.jp/svd/eew/data/nc/">気象庁「緊急地震速報について」</a>を確認し、緊急地震速報について正しく理解したうえでご利用ください。</li>
+                    <li>地図に表示されるリアルタイムの揺れ情報には、生活振動などを含みます。</li>
+                    <li>TREM-RTS から取得する台湾の揺れ情報は、日本とは異なる尺度の震度ですが、おおむね日本の震度と対応するため、そのまま表示しています。</li>
+                    <li>インターネットを使用して情報を取得する都合で、情報の遅延・取得漏れ等があり得ます。</li>
+                    <li>当アプリとしては、動画・配信等での使用は制限しませんが、当アプリで使用している情報源、合成音声システム等に付帯する、第三者の権利には十分にご注意ください。</li>
+                </ul>
+
                 <h2 id="受信できる情報">受信できる情報</h2>
                 <h3 id="気象庁による気象情報">気象庁による気象情報</h3>
                 <ul>
@@ -444,7 +479,7 @@
                     <li>
                         <h3 id="地震情報">地震情報</h3>
                         <p>震度速報／震源に関する情報／震度・震源に関する情報[震度・震源情報/遠地地震に関する情報]<br>
-                            長周期地震動に関する観測情報※／顕著な地震の震源要素更新のお知らせ／推計震度分布※
+                            長周期地震動に関する観測情報※／顕著な地震の震源要素更新のお知らせ／推計震度分布※<br>
                             南海トラフ地震に関連する情報※[南海トラフ地震臨時情報/南海トラフ地震関連解説情報]</p>
                         <details>
                             <summary>情報源</summary>
@@ -524,7 +559,7 @@
                 </ul>
                 <h4 id="その他-gis-データ">その他 GIS データ</h4>
                 <ul>
-                    <li>プレート境界： <a href="http://www-udc.ig.utexas.edu/external/plates/data.htm">© テキサス大学</a></li>
+                    <li>プレート境界： <a href="https://raw.githubusercontent.com/fraxen/tectonicplates/master/LICENSE.md">© Hugo Ahlenius, Nordpil and Peter Bird</a></li>
                     <li>海底地形：<a href="https://doi.org/10.25921/fd45-gt74">NOAA National Centers for Environmental Information. 2022: ETOPO 2022 15 Arc-Second Global Relief Model.</a></li>
                 </ul>
                 <h3 id="フォントgoogle-fonts">フォント（Google Fonts）</h3>
@@ -791,7 +826,7 @@
                 <h3><span>情報種別ごとの設定</span>リアルタイム揺れ情報</h3>
                 <h4>全般</h4>
                 <section>
-                    <label><input type="checkbox" id="EarthquakeDetect">揺れ検知機能を使用</label>
+                    <label><input type="checkbox" id="EarthquakeDetect">揺れ検知機能を使用（日本のみ）</label>
                 </section>
 
             </div>
@@ -839,7 +874,7 @@
                     <ol>
                         <li><a href="https://axis.prioris.jp/">Axisのサイト</a>にアクセス</li>
                         <li>ユーザー登録</li>
-                        <li>［Access Token］ のページから、[jmx-seismology]と[eew]の２つのチャンネルを選択</li>
+                        <li>［Channel］ のページから、[jmx-seismology]と[eew]の２つのチャンネルを選択</li>
                         <li>［Access Token］ のページからアクセストークンを確認</li>
                     </ol>
 
@@ -853,7 +888,6 @@
                 <h3><span>情報源ごとの設定</span>Wolfx</h3>
                 <div class="infoType">取得する情報：
                     <div>緊急地震速報</div>
-                    <div>リアルタイム震度（中国）</div>
                 </div>
                 <h4>全般</h4>
                 <section>
@@ -1155,7 +1189,7 @@
             <div id="tab1_content17" class="tabcontent">
                 <h3><span>情報源ごとの設定</span>TREM-RTS</h3>
                 <div class="infoType">取得する情報：
-                    <div>リアルタイム震度（台湾など）</div>
+                    <div>リアルタイム揺れ情報（台湾など）</div>
                 </div>
                 <h4>全般</h4>
                 <section>

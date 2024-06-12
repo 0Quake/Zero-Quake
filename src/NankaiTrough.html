@@ -35,7 +35,7 @@
                 document.title = request.data.title + " (" + request.data.kind + ") - Zero Quake"
 
                 document.getElementById("title").innerText = request.data.title + " (" + request.data.kind + ")"
-                document.getElementById("headline").innerText = request.data.HeadLine + " (" + dateEncode(4,request.data.reportDate) + ")"
+                document.getElementById("headline").innerText = request.data.HeadLine + " (" + NormalizeDate(4, request.data.reportDate) + ")"
                 document.getElementById("Text").innerText = request.data.Text
                 document.getElementById("Appendix").innerText = request.data.Appendix
                 document.getElementById("NextAdvisory").innerText = request.data.NextAdvisory

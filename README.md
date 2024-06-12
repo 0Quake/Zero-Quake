@@ -10,6 +10,7 @@
 - 地図に表示されるリアルタイムの揺れ情報には、生活振動などを含みます。
 - TREM-RTS から取得する台湾の揺れ情報は、日本とは異なる尺度の震度ですが、おおむね日本の震度と対応するため、そのまま表示しています。
 - インターネットを使用して情報を取得する都合で、情報の遅延・取得漏れ等があり得ます。
+- 当アプリとしては、動画・配信等での使用は制限しませんが、当アプリで使用している情報源、合成音声システム等に付帯する、第三者の権利には十分にご注意ください。
 
 ## 受信できる情報
 
@@ -30,8 +31,8 @@
 
 - ### 地震情報
 
-  震度速報／震源に関する情報／震度・震源に関する情報[震度・震源情報/遠地地震に関する情報]  
-  長周期地震動に関する観測情報※／顕著な地震の震源要素更新のお知らせ／推計震度分布※
+  震度速報／震源に関する情報／震度・震源に関する情報[震度・震源情報/遠地地震に関する情報]    
+  長周期地震動に関する観測情報※／顕著な地震の震源要素更新のお知らせ／推計震度分布※  
   南海トラフ地震に関連する情報※[南海トラフ地震臨時情報/南海トラフ地震関連解説情報]
   <details>
   <summary>情報源</summary>
@@ -112,7 +113,7 @@
 
 #### その他 GIS データ
 
-- プレート境界： [© テキサス大学](http://www-udc.ig.utexas.edu/external/plates/data.htm)
+- プレート境界： [© Hugo Ahlenius, Nordpil and Peter Bird](https://raw.githubusercontent.com/fraxen/tectonicplates/master/LICENSE.md)
 - 海底地形：[NOAA National Centers for Environmental Information. 2022: ETOPO 2022 15 Arc-Second Global Relief Model.](https://doi.org/10.25921/fd45-gt74)
 
 ### フォント（Google Fonts）

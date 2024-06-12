@@ -8,10 +8,10 @@ var tsunamiFeatures;
 var EQSectFeatures;
 var defaultConfigVal;
 window.addEventListener("load", function () {
-  this.document.getElementById("replay").value = dateEncode(3, new Date()).replaceAll("/", "-");
-  this.document.getElementById("EEWE_EventID").value = dateEncode(1, new Date()).replaceAll("/", "-");
-  this.document.getElementById("EEWE_report_time").value = dateEncode(3, new Date()).replaceAll("/", "-");
-  this.document.getElementById("EEWE_origin_time").value = dateEncode(3, new Date()).replaceAll("/", "-");
+  this.document.getElementById("replay").value = NormalizeDate(3, new Date()).replaceAll("/", "-");
+  this.document.getElementById("EEWE_EventID").value = NormalizeDate(1, new Date()).replaceAll("/", "-");
+  this.document.getElementById("EEWE_report_time").value = NormalizeDate(3, new Date()).replaceAll("/", "-");
+  this.document.getElementById("EEWE_origin_time").value = NormalizeDate(3, new Date()).replaceAll("/", "-");
 });
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "Replay") {
@@ -46,7 +46,7 @@ var update_detail = document.getElementById("update-detail");
 document.getele;
 downloadLink.addEventListener("click", function () {
   var lnk = document.createElement("a");
-  lnk.href = "https://0quake.github.io/ZeroQuake_Website/download.html#download-section";
+  lnk.href = "https://0quake.github.io/ZeroQuake_IS_WebURL/download.html#download-section";
   lnk.click();
 });
 
@@ -104,10 +104,27 @@ function configDataDraw() {
 
   document.getElementById("TREM-RTS_GetData").checked = config.Source.TREMRTS.GetData;
   document.getElementById("TREM-RTS_Interval").value = config.Source.TREMRTS.Interval / 1000;
+
+  document.getElementById("VoiceEngine_" + config.notice.voice_parameter.engine).checked = true;
+  document.getElementById("Boyomi_Port").value = config.notice.voice_parameter.Boyomi_Port;
+
+  fetch("http://localhost:50080/GetVoiceList")
+    .then(function (res) {
+      return res.json();
+    })
+    .then(function (json) {
+      json.voiceList.forEach(function (elm) {
+        var VoiceOption = document.createElement("option");
+        VoiceOption.textContent = elm.name;
+        VoiceOption.value = elm.id;
+        if (elm.id == config.notice.voice_parameter.Boyomi_Voice) VoiceOption.selected = true;
+        document.getElementById("BoyomiVoiceSelect").appendChild(VoiceOption);
+      });
+    });
 }
 
 function UpdateDataDraw(data) {
-  document.getElementById("update-check-date").innerText = dateEncode(3, data.check_date);
+  document.getElementById("update-check-date").innerText = NormalizeDate(3, data.check_date);
   updateWrap.classList.remove("U-error", "U-available", "U-not_available");
   updateBtnWrap.style.display = "none";
   update_detail.style.display = "none";
@@ -150,7 +167,8 @@ document.getElementById("resetConfig").addEventListener("click", function () {
   var conf = confirm("本当に設定を初期化しますか？");
   if (conf) {
     window.electronAPI.messageReturn({
-      action: "settingReturn",
+      action: "ChangeConfig",
+      from: "ConfigWindow",
       data: defaultConfigVal,
     });
     window.electronAPI.messageReturn({
@@ -213,8 +231,16 @@ function apply() {
   config.Source.TREMRTS.GetData = document.getElementById("TREM-RTS_GetData").checked;
   config.Source.TREMRTS.Interval = Number(document.getElementById("TREM-RTS_Interval").value) * 1000;
 
+  let VoiceEngine_Elm = document.getElementsByName("VoiceEngine");
+  for (let i = 0; i < VoiceEngine_Elm.length; i++) {
+    if (VoiceEngine_Elm.item(i).checked) config.notice.voice_parameter.engine = VoiceEngine_Elm.item(i).value;
+  }
+  config.notice.voice_parameter.Boyomi_Port = Math.floor(Number(document.getElementById("Boyomi_Port").value));
+  config.notice.voice_parameter.Boyomi_Voice = document.getElementById("BoyomiVoiceSelect").value;
+
   window.electronAPI.messageReturn({
-    action: "settingReturn",
+    action: "ChangeConfig",
+    from: "ConfigWindow",
     data: config,
   });
 
@@ -230,7 +256,7 @@ document.getElementById("cancel").addEventListener("click", function () {
   window.close();
 });
 document.getElementById("replayReset").addEventListener("click", function () {
-  document.getElementById("replay").value = dateEncode(3, new Date()).replaceAll("/", "-");
+  document.getElementById("replay").value = NormalizeDate(3, new Date()).replaceAll("/", "-");
   window.electronAPI.messageReturn({
     action: "replay",
     date: null,
@@ -242,7 +268,7 @@ document.getElementById("replayJump").addEventListener("click", function () {
   repVal = new Date(document.getElementById("replay").value);
   if (repVal > new Date()) {
     repVal = new Date();
-    document.getElementById("replay").value = dateEncode(3, repVal).replaceAll("/", "-");
+    document.getElementById("replay").value = NormalizeDate(3, repVal).replaceAll("/", "-");
   }
   window.electronAPI.messageReturn({
     action: "replay",
@@ -511,24 +537,64 @@ speechSynthesis.onvoiceschanged = () => {
   });
   TTSVoiceSelect.innerHTML = opts;
 };
+
+document.getElementById("BoyomiVoiceSelect");
+
 document.getElementById("speak_test").addEventListener("click", function () {
-  speechSynthesis.cancel();
-
-  const uttr = new SpeechSynthesisUtterance();
-  uttr.text = "音声合成のテストです";
-
-  uttr.lang = "ja-JP";
-  if (TTSVoiceSelect.value) {
-    Svoice = voices.find(function (elm) {
-      return elm.name == TTSVoiceSelect.value;
-    });
-    uttr.voice = Svoice;
-  }
-  uttr.rate = TTSspeed;
-  uttr.pitch = TTSpitch;
-  uttr.volume = TTSvolume;
-  speechSynthesis.speak(uttr);
+  speak("音声合成のテストです");
 });
+function speak(text, engine) {
+  if (!engine) {
+    let VoiceEngine_Elm = document.getElementsByName("VoiceEngine");
+    for (let i = 0; i < VoiceEngine_Elm.length; i++) {
+      if (VoiceEngine_Elm.item(i).checked) engine = VoiceEngine_Elm.item(i).value;
+    }
+  }
+  if (engine == "Boyomichan") {
+    if (document.getElementById("BoyomiVoiceSelect").value == "auto") {
+      fetch(`http://localhost:${document.getElementById("Boyomi_Port").value}/Talk?text=${text}&speed=${TTSspeed * 100}&volume=${TTSvolume * 100}&tone=${TTSpitch * 100}`).catch(function (err) {
+        speak(text, "Default");
+      });
+    } else {
+      fetch("http://localhost:50080/GetVoiceList")
+        .then(function (res) {
+          return res.json();
+        })
+        .then(function (json) {
+          var voice_parameter = "";
+          var voiceElm = json.voiceList.find(function (elm) {
+            return elm.id == document.getElementById("BoyomiVoiceSelect").value;
+          });
+          if (voiceElm) voice_parameter = "&voice=" + document.getElementById("BoyomiVoiceSelect").value;
+
+          fetch(`http://localhost:${document.getElementById("Boyomi_Port").value}/Talk?text=${text}${voice_parameter}&speed=${TTSspeed * 100}&volume=${TTSvolume * 100}&tone=${TTSpitch * 100}`).catch(function (err) {
+            speak(text, "Default");
+          });
+        });
+    }
+  } else if (engine == "Default") {
+    speechSynthesis.cancel();
+    // 発言を作成
+    const uttr = new SpeechSynthesisUtterance();
+
+    if (TTSVoiceSelect.value) {
+      Svoice = voices.find(function (elm) {
+        return elm.name == TTSVoiceSelect.value;
+      });
+      uttr.voice = Svoice;
+    }
+
+    uttr.text = text;
+    uttr.lang = "ja-JP";
+
+    uttr.voice = Svoice;
+    uttr.rate = TTSspeed;
+    uttr.pitch = TTSpitch;
+    uttr.volume = TTSvolume;
+    speechSynthesis.speak(uttr);
+  }
+}
+
 function TTSspeedSet(val) {
   val = Number(val);
   document.getElementById("TTSSpeedN").value = val;

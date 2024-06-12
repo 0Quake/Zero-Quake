@@ -42,17 +42,17 @@ window.electronAPI.messageSend((event, request) => {
     background = true;
     becomeForeground = true;
     becomeForeground_S = true;
-  } else if (request.action == "EEWAlertUpdate") {
-    EEWAlertUpdate(request.data);
+  } else if (request.action == "EEW_AlertUpdate") {
+    EEW_AlertUpdate(request.data);
     psWaveEntry();
     JMAEstShindoControl(request.data);
-  } else if (request.action == "kmoniTimeUpdate") {
-    kmoniTimeUpdate(request.Updatetime, request.LocalTime, request.type, request.condition, request.vendor);
+  } else if (request.action == "UpdateStatus") {
+    UpdateStatus(request.Updatetime, request.LocalTime, request.type, request.condition, request.vendor);
   } else if (request.action == "kmoniUpdate") {
-    kmoniTimeUpdate(request.Updatetime, request.LocalTime, "kmoniImg", "success");
+    UpdateStatus(request.Updatetime, request.LocalTime, "kmoniImg", "success");
     if (!background || !knet_already_draw) kmoniMapUpdate(request.data, "knet");
   } else if (request.action == "SnetUpdate") {
-    kmoniTimeUpdate(request.Updatetime, request.LocalTime, "msilImg", "success");
+    UpdateStatus(request.Updatetime, request.LocalTime, "msilImg", "success");
     kmoniMapUpdate(request.data, "snet");
   } else if (request.action == "TREM-RTSUpdate") {
     TREMRTS_TMP = request.data;
@@ -81,11 +81,11 @@ window.electronAPI.messageSend((event, request) => {
 
 window.addEventListener("load", () => {
   //オフライン警告表示・非表示
-  if (navigator.onLine) kmoniTimeUpdate(new Date(), new Date(), "Internet", "success");
+  if (navigator.onLine) UpdateStatus(new Date(), new Date(), "Internet", "success");
   else {
     document.getElementById("offline").showModal();
     document.getElementById("offline2").style.display = "block";
-    kmoniTimeUpdate(new Date(), new Date(), "Internet", "Error");
+    UpdateStatus(new Date(), new Date(), "Internet", "Error");
   }
 
   //強震モニタお知らせ取得
@@ -100,21 +100,21 @@ window.addEventListener("load", () => {
   psWaveAnm(); //予報円描画着火
   setInterval(function () {
     //時計（ローカル時刻）更新
-    if (UTDialogShow && !background) document.getElementById("PC_TIME").textContent = dateEncode(3, new Date() - Replay);
-    document.getElementById("all_UpdateTime").textContent = dateEncode(3, new Date() - Replay);
+    if (UTDialogShow && !background) document.getElementById("PC_TIME").textContent = NormalizeDate(3, new Date() - Replay);
+    document.getElementById("all_UpdateTime").textContent = NormalizeDate(3, new Date() - Replay);
   }, 500);
 });
 //オフライン警告非表示
 window.addEventListener("online", () => {
   document.getElementById("offline").close();
   document.getElementById("offline2").style.display = "none";
-  kmoniTimeUpdate(new Date(), new Date(), "Internet", "success");
+  UpdateStatus(new Date(), new Date(), "Internet", "success");
 });
 //オフライン警告表示
 window.addEventListener("offline", () => {
   document.getElementById("offline").showModal();
   document.getElementById("offline2").style.display = "block";
-  kmoniTimeUpdate(new Date(), new Date(), "Internet", "Error");
+  UpdateStatus(new Date(), new Date(), "Internet", "Error");
 });
 
 //eslint-disable-next-line
@@ -131,7 +131,7 @@ var template = document.getElementById("EEWTemplate");
 var epiCenter = [];
 var EEW_LocalIDs = [];
 //EEW追加・更新
-function EEWAlertUpdate(data) {
+function EEW_AlertUpdate(data) {
   data.forEach((elm) => {
     var sameEQ = now_EEW.find(function (elm2) {
       return elm.EventID == elm2.EventID;
@@ -154,20 +154,20 @@ function EEWAlertUpdate(data) {
       clone.querySelector(".EEWLocalID").textContent = EEWID;
       clone.querySelector(".serial").textContent = elm.serial;
       clone.querySelector(".maxInt").textContent = elm.maxInt ? elm.maxInt : "?";
-      clone.querySelector(".maxInt").style.background = shindoConvert(elm.maxInt, 2)[0];
-      clone.querySelector(".maxInt").style.color = shindoConvert(elm.maxInt, 2)[1];
+      clone.querySelector(".maxInt").style.background = NormalizeShindo(elm.maxInt, 2)[0];
+      clone.querySelector(".maxInt").style.color = NormalizeShindo(elm.maxInt, 2)[1];
       clone.querySelector(".is_final").style.display = elm.is_final ? "inline" : "none";
       clone.querySelector(".canceled").style.display = elm.is_cancel ? "flex" : "none";
       clone.querySelector(".region_name").textContent = elm.region_name ? elm.region_name : "震源地域不明";
-      clone.querySelector(".origin_time").textContent = dateEncode(3, elm.origin_time);
+      clone.querySelector(".origin_time").textContent = NormalizeDate(3, elm.origin_time);
       clone.querySelector(".magnitude").textContent = elm.magnitude ? Math.round(elm.magnitude * 10) / 10 : "不明";
       clone.querySelector(".depth").textContent = elm.depth ? Math.round(elm.depth) : "不明";
       clone.querySelector(".training").style.display = elm.is_training ? "block" : "none";
       clone.querySelector(".EpicenterElement").style.display = !elm.isPlum ? "block" : "none";
       clone.querySelector(".NoEpicenterElement").style.display = elm.isPlum ? "block" : "none";
-      clone.querySelector(".userIntensity").textContent = elm.userIntensity ? shindoConvert(elm.userIntensity) : "?";
-      clone.querySelector(".userDataWrap").style.background = shindoConvert(elm.userIntensity, 2)[0];
-      clone.querySelector(".userDataWrap").style.color = shindoConvert(elm.userIntensity, 2)[1];
+      clone.querySelector(".userIntensity").textContent = elm.userIntensity ? NormalizeShindo(elm.userIntensity) : "?";
+      clone.querySelector(".userDataWrap").style.background = NormalizeShindo(elm.userIntensity, 2)[0];
+      clone.querySelector(".userDataWrap").style.color = NormalizeShindo(elm.userIntensity, 2)[1];
       if (elm.distance < 10000) distanceTmp = Math.round(elm.distance);
       else distanceTmp = Math.round(elm.distance / 1000) / 10 + "万";
       clone.querySelector(".distance").textContent = elm.distance ? distanceTmp + "km" : "";
@@ -194,19 +194,19 @@ function EEWAlertUpdate(data) {
         }
 
         EQMenu.querySelector(".maxInt").textContent = elm.maxInt ? elm.maxInt : "?";
-        EQMenu.querySelector(".maxInt").style.background = shindoConvert(elm.maxInt, 2)[0];
-        EQMenu.querySelector(".maxInt").style.color = shindoConvert(elm.maxInt, 2)[1];
+        EQMenu.querySelector(".maxInt").style.background = NormalizeShindo(elm.maxInt, 2)[0];
+        EQMenu.querySelector(".maxInt").style.color = NormalizeShindo(elm.maxInt, 2)[1];
         EQMenu.querySelector(".is_final").style.display = elm.is_final ? "inline" : "none";
         EQMenu.querySelector(".canceled").style.display = elm.is_cancel ? "flex" : "none";
         EQMenu.querySelector(".region_name").textContent = elm.region_name ? elm.region_name : "震源地域不明";
-        EQMenu.querySelector(".origin_time").textContent = dateEncode(3, elm.origin_time);
+        EQMenu.querySelector(".origin_time").textContent = NormalizeDate(3, elm.origin_time);
         EQMenu.querySelector(".magnitude").textContent = elm.magnitude ? Math.round(elm.magnitude * 10) / 10 : "不明";
         EQMenu.querySelector(".depth").textContent = elm.depth ? Math.round(elm.depth) : "不明";
         EQMenu.querySelector(".EpicenterElement").style.display = !elm.isPlum ? "block" : "none";
         EQMenu.querySelector(".NoEpicenterElement").style.display = elm.isPlum ? "block" : "none";
-        EQMenu.querySelector(".userIntensity").textContent = elm.userIntensity ? shindoConvert(elm.userIntensity) : "?";
-        EQMenu.querySelector(".userDataWrap").style.background = shindoConvert(elm.userIntensity, 2)[0];
-        EQMenu.querySelector(".userDataWrap").style.color = shindoConvert(elm.userIntensity, 2)[1];
+        EQMenu.querySelector(".userIntensity").textContent = elm.userIntensity ? NormalizeShindo(elm.userIntensity) : "?";
+        EQMenu.querySelector(".userDataWrap").style.background = NormalizeShindo(elm.userIntensity, 2)[0];
+        EQMenu.querySelector(".userDataWrap").style.color = NormalizeShindo(elm.userIntensity, 2)[1];
 
         if (elm.distance < 10000) distanceTmp = Math.round(elm.distance);
         else distanceTmp = Math.round(elm.distance / 1000) / 10 + "万";
@@ -362,14 +362,14 @@ function eqInfoDraw(data, source) {
     var clone = EQTemplate.content.cloneNode(true);
 
     clone.querySelector(".EQI_epiCenter").textContent = elm.epiCenter ? elm.epiCenter : "震源調査中";
-    clone.querySelector(".EQI_datetime").textContent = elm.OriginTime ? dateEncode(4, elm.OriginTime) : "発生時刻不明";
+    clone.querySelector(".EQI_datetime").textContent = elm.OriginTime ? NormalizeDate(4, elm.OriginTime) : "発生時刻不明";
     clone.querySelector(".EQI_magnitude").textContent = elm.M ? elm.M : "不明";
     if (source == "jma") {
       clone.querySelector(".EQItem").setAttribute("id", "EQItem_" + elm.eventId);
       var maxITmp = elm.maxI;
       if (maxITmp == "不明") maxITmp = "?";
-      maxITmp = shindoConvert(maxITmp, 0);
-      var shindoColor = shindoConvert(maxITmp, 2);
+      maxITmp = NormalizeShindo(maxITmp, 0);
+      var shindoColor = NormalizeShindo(maxITmp, 2);
 
       clone.querySelector(".EQI_maxI").textContent = maxITmp;
       clone.querySelector(".EQI_maxI").style.background = shindoColor[0];
@@ -395,7 +395,7 @@ function eqInfoDraw(data, source) {
     } else if (source == "usgs") {
       clone.querySelector(".EQItem").addEventListener("click", function () {
         window.electronAPI.messageReturn({
-          action: "EQInfoWindowOpen_website",
+          action: "EQInfoWindowOpen_IS_WebURL",
           url: String(elm.DetailURL),
         });
       });
@@ -412,10 +412,11 @@ function EQDetect(data) {
   var EQD_Item = EQDetectItem.find(function (elm) {
     return elm.id == data.id;
   });
-  var regions = [];
-  data.Codes.forEach(function (elm) {
-    if (!regions.includes(elm.Region)) regions.push(elm.Region);
+
+  var DetectRegions = data.Codes.map(function (elm) {
+    return elm.Region;
   });
+  DetectRegions = Array.from(new Set(DetectRegions));
 
   if (EQD_Item) {
     //情報更新
@@ -437,14 +438,14 @@ function EQDetect(data) {
     var EQDItem = document.getElementById("EQDItem_" + data.id);
     EQDItem.classList.remove("lv1", "lv2");
     EQDItem.classList.add("lv" + data.Lv);
-    EQDItem.querySelector(".EQD_Regions").innerText = regions.join(" ");
+    EQDItem.querySelector(".EQD_Regions").innerText = DetectRegions.join(" ");
   } else {
     //初回検知
     var clone = EQDetectTemplate.content.cloneNode(true);
     var EQDItem = clone.querySelector(".EQDItem");
     EQDItem.setAttribute("id", "EQDItem_" + data.id);
     EQDItem.classList.add("lv" + data.Lv);
-    EQDItem.querySelector(".EQD_Regions").innerText = regions.join(" ");
+    EQDItem.querySelector(".EQD_Regions").innerText = DetectRegions.join(" ");
     document.getElementById("EQDetect-Panel").prepend(clone);
 
     const img = document.createElement("img");
@@ -498,12 +499,12 @@ function EQDetect(data) {
     map.fitBounds(turf.bbox(_circle), { maxZoom: 7, animate: false, padding: 100 });
   }
   document.getElementById("noEEW").style.display = now_EEW.length == 0 && !now_tsunami && EQDetectItem.length == 0 ? "block" : "none";
-  if (now_EEW.length == 0) document.body.classList.remove("EQDetecting");
-  else document.body.classList.add("EQDetecting");
+
+  if (EQDetectItem.length != 0) document.body.classList.add("EQDetecting");
 }
-//地震検知情報更新
+//地震検知終了
 function EQDetectFinish(id) {
-  EQDetectItem.forEach(function (elmA, index) {
+  EQDetectItem.find(function (elmA, index) {
     if (elmA.id == id) {
       if (map.getLayer("EQDItem_" + id)) map.removeLayer("EQDItem_" + id);
       if (map.getLayer("EQDItemF_" + id)) map.removeLayer("EQDItemF_" + id);
@@ -511,11 +512,15 @@ function EQDetectFinish(id) {
       elmA.ECMarker.remove();
 
       EQDetectItem.splice(index, 1);
+      return true;
     }
   });
+
   var eqdItem = document.getElementById("EQDItem_" + id);
   if (eqdItem) eqdItem.remove();
   document.getElementById("noEEW").style.display = now_EEW.length == 0 && !now_tsunami && EQDetectItem.length == 0 ? "block" : "none";
+
+  if (EQDetectItem.length == 0) document.body.classList.remove("EQDetecting");
 }
 
 //🔴UI🔴
@@ -539,19 +544,19 @@ document.getElementById("TsunamiDetail").addEventListener("click", function () {
 //設定ウィンドウ表示
 document.getElementById("setting").addEventListener("click", function () {
   window.electronAPI.messageReturn({
-    action: "settingWindowOpen",
+    action: "SettingWindowOpen",
   });
 });
 
 //情報更新時刻更新
 var UpdateTime = [];
-function kmoniTimeUpdate(updateTime, LocalTime, type, condition, vendor) {
+function UpdateStatus(updateTime, LocalTime, type, condition, vendor) {
   if (updateTime > new Date() - Replay) return;
   UpdateTime[type] = { type: type, updateTime: updateTime, LocalTime: LocalTime, condition: condition, vendor: vendor };
   if (UTDialogShow && !background) kmoniTimeRedraw(updateTime, LocalTime, type, condition, vendor);
 }
 function kmoniTimeRedraw(updateTime, LocalTime, type, condition) {
-  document.getElementById(type + "_UT").textContent = dateEncode(3, updateTime);
+  document.getElementById(type + "_UT").textContent = NormalizeDate(3, updateTime);
   var iconElm = document.getElementById(type + "_ICN");
 
   switch (condition) {
@@ -652,7 +657,8 @@ function layerSelect(layerName) {
   }
   config.data.layer = layerName;
   window.electronAPI.messageReturn({
-    action: "settingReturn",
+    action: "ChangeConfig",
+    from: "Other",
     data: config,
   });
 }
@@ -668,7 +674,8 @@ function overlaySelect(layerName, checked) {
   if (layerName == "kmoni_points") {
     config.data.kmoni_points_show = checked;
     window.electronAPI.messageReturn({
-      action: "settingReturn",
+      action: "ChangeConfig",
+      from: "Other",
       data: config,
     });
 
@@ -715,7 +722,8 @@ function overlaySelect(layerName, checked) {
 
   config.data.overlay = selectedLayer;
   window.electronAPI.messageReturn({
-    action: "settingReturn",
+    action: "ChangeConfig",
+    from: "Other",
     data: config,
   });
 }
@@ -789,9 +797,9 @@ function init() {
         },
         submarine: {
           type: "raster",
-          tiles: ["./Resource/Submarine/{z}/{x}/{y}.png"],
+          tiles: ["./Resource/Submarine/{z}/{x}/{y}.jpg"],
           tileSize: 256,
-          attribution: "NOAA",
+          attribution: "NOAA, Peter Bird",
           minzoom: 0,
           maxzoom: 5,
         },
@@ -888,6 +896,9 @@ function init() {
           id: "submarine",
           type: "raster",
           source: "submarine",
+          paint: {
+            "raster-fade-duration": 500,
+          },
         },
         {
           id: "tile0",
@@ -1072,20 +1083,6 @@ function init() {
             "fill-opacity": 0.5,
           },
           minzoom: 6,
-        },
-        {
-          id: "plate",
-          type: "line",
-          source: "plate",
-          layout: {
-            "line-join": "round",
-            "line-cap": "round",
-          },
-          paint: {
-            "line-color": "#C88",
-            "line-opacity": 0.4,
-            "line-width": 1,
-          },
         },
         { id: "海岸線", type: "line", source: "v", "source-layer": "Cstline", filter: ["in", ["get", "vt_code"], ["literal", [5101, 5103]]], paint: { "line-color": "#999999", "line-offset": 0, "line-width": 1 }, layout: { visibility: "none" } },
         { id: "河川中心線人工水路地下", type: "line", source: "v", "source-layer": "RvrCL", filter: ["==", ["get", "vt_code"], 5322], paint: { "line-color": "rgba(36,104,203,0.25)", "line-width": 2 }, layout: { visibility: "none" } },
@@ -1355,8 +1352,8 @@ function TREMRTSUpdate(dataTmp) {
       if (!pointData) pointData = TREMRTS_points[elm.Code] = addPointMarker(elm);
       if (pointData.rgb.join("") != elm.rgb.join("")) {
         pointData.markerElm.style.background = "rgb(" + elm.rgb.join(",") + ")";
-        var shindoColor = shindoConvert(elm.shindo, 2);
-        pointData.popupContent = `<h3 class='PointName' style='border-bottom-color:rgb(${elm.rgb.join(",")})'><span>${elm.Type + "_" + elm.Code}</span></h3><div class='popupContentWrap'><div class='obsShindoWrap' style='background:${shindoColor[0]};color:${shindoColor[1]};'>震度 ${shindoConvert(elm.shindo, 1)}<span>${elm.shindo.toFixed(2)}</span></div><div class='obsPGAWrap'>PGA ${(Math.floor(elm.PGA * 100) / 100).toFixed(2)}</div></div>`;
+        var shindoColor = NormalizeShindo(elm.shindo, 2);
+        pointData.popupContent = `<h3 class='PointName' style='border-bottom-color:rgb(${elm.rgb.join(",")})'><span>${elm.Type + "_" + elm.Code}</span></h3><div class='popupContentWrap'><div class='obsShindoWrap' style='background:${shindoColor[0]};color:${shindoColor[1]};'>震度 ${NormalizeShindo(elm.shindo, 1)}<span>${elm.shindo.toFixed(2)}</span></div><div class='obsPGAWrap'>PGA ${(Math.floor(elm.PGA * 100) / 100).toFixed(2)}</div></div>`;
         if (pointData.popup.isOpen()) pointData.popup.setHTML(pointData.popupContent);
       }
       pointData.rgb = elm.rgb;
@@ -1408,7 +1405,7 @@ function JMAEstShindoControl(data) {
     if (sectData.Alert) AlertT.push(["==", "name", elm]);
 
     IntData = config.Info.EEW.IntType == "max" ? sectData.IntTo : sectData.IntFrom;
-    switch (shindoConvert(IntData)) {
+    switch (NormalizeShindo(IntData)) {
       case "0":
         Int0T.push(["==", "name", elm]);
         break;
@@ -1669,6 +1666,13 @@ function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrive
       SIElm = new maplibregl.Marker({ element: el }).setLngLat([longitude, latitude]).addTo(map);
 
       EQElm.SIElm = SIElm;
+
+      var SCircleElm = map.getSource("SCircle_" + EventID);
+      if (SCircleElm) {
+        var scircle = turf.circle(_center, 0, circle_options);
+        SCircleElm.setData(scircle);
+        map.setPaintProperty("SCircle_" + EventID, "line-width", SnotArrived ? 0 : 2);
+      }
     }
   }
 
@@ -1769,7 +1773,7 @@ function tsunamiDataUpdate(data) {
 
         var firstWave = "";
         var maxWave = "";
-        if (sectData.firstHeight) firstWave = "第1波予想<span>" + dateEncode(5, sectData.firstHeight) + "</span>";
+        if (sectData.firstHeight) firstWave = "第1波予想<span>" + NormalizeDate(5, sectData.firstHeight) + "</span>";
         else {
           switch (sectData.firstHeightCondition) {
             case "津波到達中と推測":
@@ -1869,24 +1873,24 @@ function tsunamiDataUpdate(data) {
 
               if (elm2.Conditions) condition = elm2.Conditions;
 
-              if (elm2.HighTideDateTime) HighTideDateTime = "満潮：" + dateEncode(5, elm2.HighTideDateTime);
+              if (elm2.HighTideDateTime) HighTideDateTime = "満潮：" + NormalizeDate(5, elm2.HighTideDateTime);
 
               if (elm2.omaxHeight) {
                 omaxHeight = elm2.omaxHeight;
                 if (elm2.firstHeightInitial) omaxHeight = elm2.omaxHeight + " " + elm2.firstHeightInitial;
               } else if (elm2.maxHeightCondition) omaxHeight = elm2.maxHeightCondition;
 
-              if (elm2.maxHeightTime) omaxHeight += " " + dateEncode(5, elm2.maxHeightTime);
+              if (elm2.maxHeightTime) omaxHeight += " " + NormalizeDate(5, elm2.maxHeightTime);
 
               if (omaxHeight) omaxHeight = "観測最大波：" + omaxHeight;
               if (elm2.maxheightRising) omaxHeight += " （上昇中）";
 
-              if (elm2.ArrivedTime) ArrivedTime = "第１波観測時刻：" + dateEncode(5, elm2.ArrivedTime);
+              if (elm2.ArrivedTime) ArrivedTime = "第１波観測時刻：" + NormalizeDate(5, elm2.ArrivedTime);
               else if (elm2.Condition == "第１波の到達を確認") ArrivedTime = "第1波到達";
               else if (elm2.Condition == "津波到達中と推測") ArrivedTime = "津波到達中と推測";
               else if (elm2.firstHeightCondition == "第１波識別不能") ArrivedTime = "第1波識別不能";
               if (elm2.firstHeightInitial) ArrivedTime += " " + elm2.firstHeightInitial;
-              if (elm2.ArrivalTime) arrivalTime = "第1波予想：" + dateEncode(5, elm2.ArrivalTime);
+              if (elm2.ArrivalTime) arrivalTime = "第1波予想：" + NormalizeDate(5, elm2.ArrivalTime);
 
               var content = [arrivalTime, omaxHeight, ArrivedTime, HighTideDateTime, condition].filter(Boolean).join("<br>");
               var popupContent = "<h3 style='border-bottom:solid 2px " + color + "'>" + elm2.name + "</h3><div class='tsunamidetailwrap'>" + content + "</div>";
@@ -2004,7 +2008,7 @@ function tsunamiPopup(e) {
         var firstWave = "";
         var maxWave = "";
         var firstCondition = "";
-        if (elm.firstHeight) firstWave = "<div>第１波予想:" + dateEncode(5, elm.firstHeight) + "</div>";
+        if (elm.firstHeight) firstWave = "<div>第１波予想:" + NormalizeDate(5, elm.firstHeight) + "</div>";
 
         if (elm.maxHeight) maxWave = "<div>最大波予想:" + elm.maxHeight + "</div>";
         else if (elm.grade == "Yoho") maxWave = "<div>最大波予想:若干の海面変動</div>";
@@ -2021,7 +2025,7 @@ function tsunamiPopup(e) {
 function NankaiTroughInfo(data) {
   document.getElementById("NankaiTroughInfo").addEventListener("click", function () {
     window.electronAPI.messageReturn({
-      action: "nankaiWIndowOpen",
+      action: "NankaiWindowOpen",
     });
   });
   document.getElementById("NankaiTroughInfo").style.display = "block";

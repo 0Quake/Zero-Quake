@@ -48,17 +48,18 @@
   "bugs": {
     "url": "https://github.com/0Quake/Zero-Quake/issues"
   },
-  "homepage": "https://zeroquake.wwww.jp/",
+  "homepage": "https://0quake.github.io/ZeroQuake_Website/",
   "devDependencies": {
-    "electron": "^30.0.6",
+    "electron": "^31.0.0",
     "electron-builder": "^24.13.3",
-    "eslint": "^9.3.0"
+    "eslint": "^9.4.0",
+    "prettier": "^3.3.2"
   },
   "dependencies": {
-    "@turf/turf": "^6.5.0",
+    "@turf/turf": "^7.0.0",
     "electron-squirrel-startup": "^1.0.1",
     "electron-store": "^9.0.0",
-    "jsdom": "^24.0.0",
+    "jsdom": "^24.1.0",
     "net": "^1.0.2",
     "path": "^0.12.7",
     "websocket": "^1.0.35"

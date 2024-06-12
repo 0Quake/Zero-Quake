@@ -5,49 +5,50 @@ var config;
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "setting") {
     config = request.data;
-
-    root.style.setProperty("--IntTheme_Q_BgColor", config.color.Shindo["?"].background);
-    root.style.setProperty("--IntTheme_0_BgColor", config.color.Shindo["0"].background);
-    root.style.setProperty("--IntTheme_1_BgColor", config.color.Shindo["1"].background);
-    root.style.setProperty("--IntTheme_2_BgColor", config.color.Shindo["2"].background);
-    root.style.setProperty("--IntTheme_3_BgColor", config.color.Shindo["3"].background);
-    root.style.setProperty("--IntTheme_4_BgColor", config.color.Shindo["4"].background);
-    root.style.setProperty("--IntTheme_5m_BgColor", config.color.Shindo["5m"].background);
-    root.style.setProperty("--IntTheme_5p_BgColor", config.color.Shindo["5p"].background);
-    root.style.setProperty("--IntTheme_6m_BgColor", config.color.Shindo["6m"].background);
-    root.style.setProperty("--IntTheme_6p_BgColor", config.color.Shindo["6p"].background);
-    root.style.setProperty("--IntTheme_7_BgColor", config.color.Shindo["7"].background);
-    root.style.setProperty("--IntTheme_7p_BgColor", config.color.Shindo["7p"].background);
-
-    root.style.setProperty("--IntTheme_Q_color", config.color.Shindo["?"].color);
-    root.style.setProperty("--IntTheme_0_color", config.color.Shindo["0"].color);
-    root.style.setProperty("--IntTheme_1_color", config.color.Shindo["1"].color);
-    root.style.setProperty("--IntTheme_2_color", config.color.Shindo["2"].color);
-    root.style.setProperty("--IntTheme_3_color", config.color.Shindo["3"].color);
-    root.style.setProperty("--IntTheme_4_color", config.color.Shindo["4"].color);
-    root.style.setProperty("--IntTheme_5m_color", config.color.Shindo["5m"].color);
-    root.style.setProperty("--IntTheme_5p_color", config.color.Shindo["5p"].color);
-    root.style.setProperty("--IntTheme_6m_color", config.color.Shindo["6m"].color);
-    root.style.setProperty("--IntTheme_6p_color", config.color.Shindo["6p"].color);
-    root.style.setProperty("--IntTheme_7_color", config.color.Shindo["7"].color);
-    root.style.setProperty("--IntTheme_7p_color", config.color.Shindo["7p"].color);
-
-    root.style.setProperty("--LngIntTheme_1_BgColor", config.color.LgInt["1"].background);
-    root.style.setProperty("--LngIntTheme_2_BgColor", config.color.LgInt["2"].background);
-    root.style.setProperty("--LngIntTheme_3_BgColor", config.color.LgInt["3"].background);
-    root.style.setProperty("--LngIntTheme_4_BgColor", config.color.LgInt["4"].background);
-
-    root.style.setProperty("--LngIntTheme_1_color", config.color.LgInt["1"].color);
-    root.style.setProperty("--LngIntTheme_2_color", config.color.LgInt["2"].color);
-    root.style.setProperty("--LngIntTheme_3_color", config.color.LgInt["3"].color);
-    root.style.setProperty("--LngIntTheme_4_color", config.color.LgInt["4"].color);
-
-    root.style.setProperty("--TsunamiMajorWarningColor", config.color.Tsunami.TsunamiMajorWarningColor);
-    root.style.setProperty("--TsunamiWarningColor", config.color.Tsunami.TsunamiWarningColor);
-    root.style.setProperty("--TsunamiWatchColor", config.color.Tsunami.TsunamiWatchColor);
-    root.style.setProperty("--TsunamiYohoColor", config.color.Tsunami.TsunamiYohoColor);
+    SetShindoColor();
   }
 });
+
+function SetShindoColor() {
+  root.style.setProperty("--IntTheme_Q_BgColor", config.color.Shindo["?"].background);
+  root.style.setProperty("--IntTheme_0_BgColor", config.color.Shindo["0"].background);
+  root.style.setProperty("--IntTheme_1_BgColor", config.color.Shindo["1"].background);
+  root.style.setProperty("--IntTheme_2_BgColor", config.color.Shindo["2"].background);
+  root.style.setProperty("--IntTheme_3_BgColor", config.color.Shindo["3"].background);
+  root.style.setProperty("--IntTheme_4_BgColor", config.color.Shindo["4"].background);
+  root.style.setProperty("--IntTheme_5m_BgColor", config.color.Shindo["5m"].background);
+  root.style.setProperty("--IntTheme_5p_BgColor", config.color.Shindo["5p"].background);
+  root.style.setProperty("--IntTheme_6m_BgColor", config.color.Shindo["6m"].background);
+  root.style.setProperty("--IntTheme_6p_BgColor", config.color.Shindo["6p"].background);
+  root.style.setProperty("--IntTheme_7_BgColor", config.color.Shindo["7"].background);
+
+  root.style.setProperty("--IntTheme_Q_color", config.color.Shindo["?"].color);
+  root.style.setProperty("--IntTheme_0_color", config.color.Shindo["0"].color);
+  root.style.setProperty("--IntTheme_1_color", config.color.Shindo["1"].color);
+  root.style.setProperty("--IntTheme_2_color", config.color.Shindo["2"].color);
+  root.style.setProperty("--IntTheme_3_color", config.color.Shindo["3"].color);
+  root.style.setProperty("--IntTheme_4_color", config.color.Shindo["4"].color);
+  root.style.setProperty("--IntTheme_5m_color", config.color.Shindo["5m"].color);
+  root.style.setProperty("--IntTheme_5p_color", config.color.Shindo["5p"].color);
+  root.style.setProperty("--IntTheme_6m_color", config.color.Shindo["6m"].color);
+  root.style.setProperty("--IntTheme_6p_color", config.color.Shindo["6p"].color);
+  root.style.setProperty("--IntTheme_7_color", config.color.Shindo["7"].color);
+
+  root.style.setProperty("--LngIntTheme_1_BgColor", config.color.LgInt["1"].background);
+  root.style.setProperty("--LngIntTheme_2_BgColor", config.color.LgInt["2"].background);
+  root.style.setProperty("--LngIntTheme_3_BgColor", config.color.LgInt["3"].background);
+  root.style.setProperty("--LngIntTheme_4_BgColor", config.color.LgInt["4"].background);
+
+  root.style.setProperty("--LngIntTheme_1_color", config.color.LgInt["1"].color);
+  root.style.setProperty("--LngIntTheme_2_color", config.color.LgInt["2"].color);
+  root.style.setProperty("--LngIntTheme_3_color", config.color.LgInt["3"].color);
+  root.style.setProperty("--LngIntTheme_4_color", config.color.LgInt["4"].color);
+
+  root.style.setProperty("--TsunamiMajorWarningColor", config.color.Tsunami.TsunamiMajorWarningColor);
+  root.style.setProperty("--TsunamiWarningColor", config.color.Tsunami.TsunamiWarningColor);
+  root.style.setProperty("--TsunamiWatchColor", config.color.Tsunami.TsunamiWatchColor);
+  root.style.setProperty("--TsunamiYohoColor", config.color.Tsunami.TsunamiYohoColor);
+}
 
 //タブUI
 document.querySelectorAll(".tabmenu").forEach(function (elm) {
@@ -81,7 +82,7 @@ document.querySelectorAll(".tabgroup").forEach(function (elm) {
 
 //震度フォーマット
 //eslint-disable-next-line
-function shindoConvert(str, responseType) {
+function NormalizeShindo(str, responseType) {
   var ShindoTmp;
   if (str === null || str === undefined) ShindoTmp = 11;
   else if (isNaN(str)) {
@@ -210,7 +211,7 @@ function LgIntConvert(str) {
 
 //日時フォーマット
 //eslint-disable-next-line
-function dateEncode(type, dateTmp) {
+function NormalizeDate(type, dateTmp) {
   if (!dateTmp) dateTmp = new Date();
   else dateTmp = new Date(dateTmp);
 

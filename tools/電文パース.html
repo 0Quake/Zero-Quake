@@ -42,7 +42,7 @@
     data.EpiCenter.Longitude = LongitudeConvert(codeData[12])
     data.Depth = codeData[13] == "///" ? null : Number(codeData[13])
     data.Magnitude = codeData[14] == "///" ? null : Number(codeData[14]) / 10
-    data.MaxInt = shindoConvert(codeData[15], 0)
+    data.MaxInt = NormalizeShindo(codeData[15], 0)
     data.isSea = codeData[17].substring(2, 3) == 1
     data.isAssumption = codeData[17].substring(4, 5) == 9
 
@@ -56,10 +56,10 @@
           var sectName = EEWSectName[EBIStr[i]]
           var maxInt = EBIStr[i + 1].substring(1, 3)
           var minInt = EBIStr[i + 1].substring(3, 5)
-          minInt = minInt == "//" ? null : shindoConvert(minInt, 0)
+          minInt = minInt == "//" ? null : NormalizeShindo(minInt, 0)
           var arrivalTime = EBIStr[i + 2]
           arrivalTime = arrivalTime.substring(0, 2) + ":" + arrivalTime.substring(2, 4) + ":" + arrivalTime.substring(4, 6)
-          arrivalTime = new Date(dateEncode(4, null) + " " + arrivalTime)
+          arrivalTime = new Date(NormalizeDate(4, null) + " " + arrivalTime)
 
           var alertFlg = EBIStr[i + 3].substring(0, 1) == "1"
           var arrived = EBIStr[i + 3].substring(1, 2) == "1"
@@ -105,7 +105,7 @@
       if (!isNaN(lngNum)) return lngNum
       else return null
     }
-    function shindoConvert(str, responseType) {
+    function NormalizeShindo(str, responseType) {
       var ShindoTmp;
       if (str === null || str === undefined) ShindoTmp = 11;
       else if (isNaN(str)) {
@@ -202,7 +202,7 @@
       return ConvTable[ShindoTmp];
     }
 
-    function dateEncode(type, dateTmp) {
+    function NormalizeDate(type, dateTmp) {
       if (!dateTmp) dateTmp = new Date();
       else dateTmp = new Date(dateTmp);
 

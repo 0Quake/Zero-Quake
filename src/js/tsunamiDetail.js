@@ -27,7 +27,7 @@ function tsunamiUpdate(dataTmp) {
       var arrivalTime = "";
       var maxHeight = "";
       if (elm.firstHeight) {
-        arrivalTime = dateEncode(5, elm.firstHeight);
+        arrivalTime = NormalizeDate(5, elm.firstHeight);
         if (elm.firstHeightCondition) condition = elm.firstHeightCondition;
       } else if (elm.firstHeightCondition) {
         if (elm.firstHeightCondition == "第１波の到達を確認") arrivalTime = "到達";
@@ -98,7 +98,7 @@ function tsunamiUpdate(dataTmp) {
 
           if (elm2.Conditions) condition = elm2.Conditions;
 
-          if (elm2.HighTideDateTime) HighTideDateTime = dateEncode(5, elm2.HighTideDateTime);
+          if (elm2.HighTideDateTime) HighTideDateTime = NormalizeDate(5, elm2.HighTideDateTime);
 
           if (elm2.omaxHeight) {
             omaxHeight = elm2.omaxHeight;
@@ -107,14 +107,14 @@ function tsunamiUpdate(dataTmp) {
 
           if (elm2.maxheightRising) omaxHeight += "↗";
 
-          if (elm2.maxHeightTime) maxHeightTime = dateEncode(5, elm2.maxHeightTime);
+          if (elm2.maxHeightTime) maxHeightTime = NormalizeDate(5, elm2.maxHeightTime);
 
-          if (elm2.ArrivedTime) ArrivedTime = dateEncode(5, elm2.ArrivedTime);
+          if (elm2.ArrivedTime) ArrivedTime = NormalizeDate(5, elm2.ArrivedTime);
           else if (elm2.Condition == "第１波の到達を確認") ArrivedTime = "到達";
           else if (elm2.Condition == "津波到達中と推測") ArrivedTime = "到達と推測";
           else if (elm2.firstHeightCondition == "第１波識別不能") ArrivedTime = elm2.firstHeightCondition;
           if (elm2.firstHeightInitial) ArrivedTime += " " + elm2.firstHeightInitial;
-          if (elm2.ArrivalTime) arrivalTime = dateEncode(5, elm2.ArrivalTime);
+          if (elm2.ArrivalTime) arrivalTime = NormalizeDate(5, elm2.ArrivalTime);
 
           var new_tr2 = document.createElement("tr");
           var ihtml = "";
