@@ -3240,7 +3240,7 @@ function GenerateEEWText(EEWData, update) {
   text = text.replaceAll("{magnitude}", EEWData.magnitude ? EEWData.magnitude : "");
   text = text.replaceAll("{maxInt}", EEWData.maxInt ? NormalizeShindo(EEWData.maxInt, 1) : "");
   text = text.replaceAll("{depth}", EEWData.depth ? EEWData.depth : "");
-  text = text.replaceAll("{training}", EEWData.is_training ? "テスト報" : "");
+  text = text.replaceAll("{training}", EEWData.is_training ? "訓練報" : "");
   text = text.replaceAll("{training2}", EEWData.is_training ? "これは訓練報です。" : "");
   text = text.replaceAll("{region_name}", EEWData.region_name ? EEWData.region_name : "");
   text = text.replaceAll("{report_time}", EEWData.report_time ? NormalizeDate(7, EEWData.report_time) : "");
