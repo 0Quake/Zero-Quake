@@ -2213,7 +2213,7 @@ function EEW_Alert(data, first, update) {
       //第１報
 
       PlayAudio(data.alertflg == "警報" ? "EEW1" : "EEW2");
-      speak(GenerateEEWText(data), !first);
+      speak(GenerateEEWText(data, !first));
 
       messageToMainWindow({
         action: "EEW_AlertUpdate",
@@ -3233,7 +3233,8 @@ function GenerateEEWText(EEWData, update) {
   else if (update) var text = config.notice.voice.EEWUpdate;
   else var text = config.notice.voice.EEW;
 
-  text = update ? config.notice.voice.EEWUpdate : config.notice.voice.EEW;
+  console.log(update);
+
   text = text.replaceAll("{grade}", EEWData.alertflg ? EEWData.alertflg : "");
   text = text.replaceAll("{serial}", EEWData.serial ? EEWData.serial : "");
   text = text.replaceAll("{final}", EEWData.is_final ? "最終報" : "");
