@@ -8,14 +8,16 @@ var hinanjoLayers = [];
 var hinanjoCheck = document.getElementById("hinanjo");
 var knet_already_draw = false;
 var now_EEW = [];
-/* eslint-disable */
 var Replay = 0;
 var background = false;
 var becomeForeground = true;
 var becomeForeground_S = true;
 var knetMapData;
 var snetMapData;
-/* eslint-enable */
+var userPosition = [138.46, 32.99125];
+var userZoom = 4;
+var userMotion;
+
 document.body.addEventListener("mouseover", function () {
   background = false;
 });
@@ -339,6 +341,8 @@ function epiCenterClear(eid) {
       epicenterElm.ESPopup2.remove();
       epicenterElm.ESPopup2 = null;
     }
+
+    returnToUserPosition();
   }
 }
 
@@ -521,6 +525,8 @@ function EQDetectFinish(id) {
   document.getElementById("noEEW").style.display = now_EEW.length == 0 && !now_tsunami && EQDetectItem.length == 0 ? "block" : "none";
 
   if (EQDetectItem.length == 0) document.body.classList.remove("EQDetecting");
+
+  returnToUserPosition();
 }
 
 //🔴UI🔴
@@ -1185,26 +1191,6 @@ function init() {
     }
   });
 
-  map.on("click", "tsunami_Yoho", tsunamiPopup);
-  map.on("click", "tsunami_Watch", tsunamiPopup);
-  map.on("click", "tsunami_Warn", tsunamiPopup);
-  map.on("click", "tsunami_MajorWarn", tsunamiPopup);
-
-  setInterval(function () {
-    if (tsunamiData) {
-      map.setPaintProperty("tsunami_Yoho", "line-opacity", 0);
-      map.setPaintProperty("tsunami_Watch", "line-opacity", 0);
-      map.setPaintProperty("tsunami_Warn", "line-opacity", 0);
-      map.setPaintProperty("tsunami_MajorWarn", "line-opacity", 0);
-      setTimeout(function () {
-        map.setPaintProperty("tsunami_Yoho", "line-opacity", 1);
-        map.setPaintProperty("tsunami_Watch", "line-opacity", 1);
-        map.setPaintProperty("tsunami_Warn", "line-opacity", 1);
-        map.setPaintProperty("tsunami_MajorWarn", "line-opacity", 1);
-      }, 300);
-    }
-  }, 2500);
-
   map.addControl(new maplibregl.NavigationControl(), "top-right");
 
   var layerButton = document.createElement("button");
@@ -1228,6 +1214,63 @@ function init() {
     "top-left"
   );
 
+  var homeButton = document.createElement("button");
+  homeButton.innerText = "home";
+  homeButton.title = "初期位置に戻る";
+  homeButton.className = "material-icons-round";
+  homeButton.addEventListener("click", function () {
+    userMotion = true;
+    map.panTo([138.46, 32.99125], { animate: false });
+    map.zoomTo(4, { animate: false });
+    userMotion = false;
+    userPosition = map.getCenter().toArray();
+    userZoom = map.getZoom();
+  });
+
+  var returnButton = document.createElement("button");
+  returnButton.innerText = "undo";
+  returnButton.title = "直前の操作位置に戻る";
+  returnButton.className = "material-icons-round";
+  returnButton.addEventListener("click", function () {
+    userMotion = true;
+    returnToUserPosition();
+    userMotion = false;
+  });
+  returnButton.setAttribute("id", "returnToUserPosition");
+  returnButton.style.display = "none";
+
+  var cbWrapper = document.createElement("div");
+  cbWrapper.className = "maplibregl-ctrl maplibregl-ctrl-group";
+  cbWrapper.appendChild(homeButton);
+  cbWrapper.appendChild(returnButton);
+
+  map.addControl({
+    onAdd: function () {
+      return cbWrapper;
+    },
+    onRemove: function () {},
+  });
+
+  map.on("click", "tsunami_Yoho", tsunamiPopup);
+  map.on("click", "tsunami_Watch", tsunamiPopup);
+  map.on("click", "tsunami_Warn", tsunamiPopup);
+  map.on("click", "tsunami_MajorWarn", tsunamiPopup);
+
+  setInterval(function () {
+    if (tsunamiData) {
+      map.setPaintProperty("tsunami_Yoho", "line-opacity", 0);
+      map.setPaintProperty("tsunami_Watch", "line-opacity", 0);
+      map.setPaintProperty("tsunami_Warn", "line-opacity", 0);
+      map.setPaintProperty("tsunami_MajorWarn", "line-opacity", 0);
+      setTimeout(function () {
+        map.setPaintProperty("tsunami_Yoho", "line-opacity", 1);
+        map.setPaintProperty("tsunami_Watch", "line-opacity", 1);
+        map.setPaintProperty("tsunami_Warn", "line-opacity", 1);
+        map.setPaintProperty("tsunami_MajorWarn", "line-opacity", 1);
+      }, 300);
+    }
+  }, 2500);
+
   var zoomLevelContinue = function () {
     var currentZoom = map.getZoom();
     document.getElementById("mapcontainer").classList.remove("zoomLevel_1", "zoomLevel_2", "zoomLevel_3", "zoomLevel_4", "popup_show");
@@ -1246,7 +1289,6 @@ function init() {
     }
   };
   zoomLevelContinue();
-  map.on("zoom", zoomLevelContinue);
   map.on("load", async () => {
     var image = await map.loadImage("./img/AlertOverlay.png");
     map.addImage("pattern", image.data);
@@ -1275,12 +1317,31 @@ function init() {
     });
   });
 
+  map.on("zoom", function (e) {
+    zoomLevelContinue();
+    if (e.originalEvent) userZoom = map.getZoom();
+  });
+  map.on("move", function (e) {
+    var nowAtUserPosition;
+    if (e.originalEvent || userMotion) {
+      userPosition = map.getCenter().toArray();
+      nowAtUserPosition = true;
+    }
+
+    document.getElementById("returnToUserPosition").style.display = nowAtUserPosition ? "none" : "block";
+  });
+
   if (config.home.ShowPin) {
     const img = document.createElement("img");
     img.src = "./img/homePin.svg";
     img.classList.add("homeIcon");
     new maplibregl.Marker({ element: img }).setLngLat([config.home.longitude, config.home.latitude]).addTo(map);
   }
+}
+
+function returnToUserPosition() {
+  if (userPosition) map.panTo(userPosition, { animate: false });
+  if (userZoom) map.zoomTo(userZoom, { animate: false });
 }
 
 //観測点マーカー追加
