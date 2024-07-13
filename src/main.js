@@ -3233,11 +3233,10 @@ function GenerateEEWText(EEWData, update) {
   else if (update) var text = config.notice.voice.EEWUpdate;
   else var text = config.notice.voice.EEW;
 
-  console.log(update);
-
   text = text.replaceAll("{grade}", EEWData.alertflg ? EEWData.alertflg : "");
   text = text.replaceAll("{serial}", EEWData.serial ? EEWData.serial : "");
   text = text.replaceAll("{final}", EEWData.is_final ? "最終報" : "");
+  text = text.replaceAll("{location}", config.home.name ? config.home.name : "現在地");
   text = text.replaceAll("{magnitude}", EEWData.magnitude ? EEWData.magnitude : "");
   text = text.replaceAll("{maxInt}", EEWData.maxInt ? NormalizeShindo(EEWData.maxInt, 1) : "");
   text = text.replaceAll("{depth}", EEWData.depth ? EEWData.depth : "");

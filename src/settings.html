@@ -629,15 +629,15 @@
                                 </tr>
                                 <tr>
                                     <td>一般向け</td>
-                                    <td>緊急地震速報です。{region_name}で最大の震度、{maxInt}の地震が発生しました。現在地の予想震度は{local_Int}です。</td>
+                                    <td>緊急地震速報です。{region_name}で最大の震度、{maxInt}の地震が発生しました。{location}の予想震度は{local_Int}です。</td>
                                 </tr>
                                 <tr>
                                     <td>一般向け 詳細</td>
-                                    <td>緊急地震速報、{grade}、{training}。現在地の予想震度は{local_Int}。地震の規模を表すマグニチュードは、{magnitude}と予想されます。この地震で予想される最大の震度は、{maxInt}です。{region_name}の、深さ{depth}キロメートルで発生しました。</td>
+                                    <td>緊急地震速報、{grade}、{training}。{location}の予想震度は{local_Int}。地震の規模を表すマグニチュードは、{magnitude}と予想されます。この地震で予想される最大の震度は、{maxInt}です。{region_name}の、深さ{depth}キロメートルで発生しました。</td>
                                 </tr>
                                 <tr>
                                     <td>詳細</td>
-                                    <td>緊急地震速報、{grade}、第{serial}報、{training}。現在地の予想震度は{local_Int}。予想マグニチュード、{magnitude}。予想最大震度、{maxInt}。{region_name}の、深さ{depth}キロメートルで、{origin_time}に発生。{final}</td>
+                                    <td>緊急地震速報、{grade}、第{serial}報、{training}。{location}の予想震度は{local_Int}。予想マグニチュード、{magnitude}。予想最大震度、{maxInt}。{region_name}の、深さ{depth}キロメートルで、{origin_time}に発生。{final}</td>
                                 </tr>
                                 <tr>
                                     <td>キャンセル</td>
@@ -720,15 +720,20 @@
                                 <tr>
                                     <td>{maxInt}</td>
                                     <td>予想最大震度</td>
-                                    <td>"0", "1", "2", "3", "4", "5弱", "5強", "6弱" ,"6強", "7", "不明"</td>
+                                    <td>"0", "1", "2", "3", "4", "5弱", "5強", "6弱" ,"6強", "7" ／ データ無し:"不明"</td>
                                 </tr>
                                 <tr>
                                     <td>{local_Int}</td>
                                     <td>設定地点の予想震度</td>
-                                    <td>"0", "1", "2", "3", "4", "5弱", "5強", "6弱" ,"6強", "7", "7以上", "不明"</td>
+                                    <td>"0", "1", "2", "3", "4", "5弱", "5強", "6弱" ,"6強", "7", "7以上" ／ データ無し:"不明"</td>
+                                </tr>
+                                <tr>
+                                    <td>{location}</td>
+                                    <td>設定地点の名前</td>
+                                    <td>[設定>全般>現在地>表示名] の設定値 ／ データ無し:"現在地"</td>
                                 </tr>
                             </table>
-                            <div class="smalltext">※データがない場合、基本的に値は ""（空文字）となります。{maxInt}, {local_Int}のみ"不明"となります。</div>
+                            <div class="smalltext">※データがない場合、基本的に値は ""（空白）となります。</div>
 
 
                         </div>
