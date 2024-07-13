@@ -132,6 +132,8 @@ var defaultConfigVal = {
       EEW: "緊急地震速報です。強い揺れに警戒してください。",
       EEWUpdate: "緊急地震速報が更新されました。",
       EEWCancel: "緊急地震速報が取り消されました。",
+      EQInfo: "{training2}{origin_time2}の地震について、{category}が発表されました。",
+      EQInfoCancel: "地震情報が取り消されました。",
     },
     window: {
       EEW: "openWindow",
@@ -1014,6 +1016,26 @@ function start() {
 
   //一回限り
   Req_TremRts_sta();
+
+  setTimeout(function () {
+    ConvertEQInfo(
+      [
+        {
+          status: "通常",
+          eventId: "afd",
+          category: "震度速報",
+          reportDateTime: new Date(),
+          OriginTime: new Date(new Date() - 5000000),
+          epiCenter: "京都",
+          M: 5,
+          //maxI: "5+",
+          cancel: false,
+          DetailURL: [],
+        },
+      ],
+      "jma"
+    );
+  }, 1000);
 }
 
 var TremRts_sta;
@@ -2236,7 +2258,7 @@ function EEW_Alert(data, first, update) {
     ConvertEQInfo(
       [
         {
-          status: data.is_training ? "訓練" : "発表",
+          status: data.is_training ? "訓練" : "通常",
           eventId: data.EventID,
           category: "EEW",
           reportDateTime: new Date(data.report_time),
@@ -3025,6 +3047,7 @@ function ConvertEQInfo(dataList, type, EEW, count) {
           if ((!Boolean2(count) || count > 0) && data.category !== "EEW") playAudio = true;
         }
       });
+
       if (eqInfoTmp.length > 0) AlertEQInfo(eqInfoTmp, "jma", false, playAudio);
       if (UpdateEQInfoTmp.length > 0) AlertEQInfo(UpdateEQInfoTmp, "jma", true, playAudio);
       break;
@@ -3037,11 +3060,60 @@ function ConvertEQInfo(dataList, type, EEW, count) {
   }
 }
 
+//EEW時読み上げ文章 生成
+function GenerateEQInfoText(EQData) {
+  if (EQData.category == "EEW") return ""; //EEWは専用の読み上げシステムに任せる
+  if (!EQData.epiCenter && !EQData.maxI) return; //震度も震源もわからない（壊れたデータ）
+
+  if (EQData.cancel) var text = config.notice.voice.EQInfoCancel;
+  else var text = config.notice.voice.EQInfo;
+
+  var category = EQData.category;
+  if (category == "Tsunami") category = "津波情報に付帯する地震情報";
+
+  var dif = timeDifference(Number(new Date() - new Date(EQData.OriginTime)));
+  text = text.replaceAll("{category}", category ? category : "");
+  text = text.replaceAll("{training}", EQData.status == "訓練" ? "訓練報" : "");
+  text = text.replaceAll("{training2}", EQData.status == "訓練" ? "これは訓練報です。" : "");
+  text = text.replaceAll("{report_time}", EQData.reportDateTime ? NormalizeDate(7, EQData.reportDateTime) : "");
+  text = text.replaceAll("{origin_time}", EQData.OriginTime ? NormalizeDate(7, EQData.OriginTime) : "");
+  text = text.replaceAll("{origin_time2}", EQData.OriginTime ? dif.num + dif.unit + "前" : "先ほど");
+  text = text.replaceAll("{region_name}", EQData.epiCenter ? EQData.epiCenter : "");
+  text = text.replaceAll("{magnitude}", EQData.M ? EQData.M : "");
+  text = text.replaceAll("{maxInt}", EQData.maxI ? NormalizeShindo(EQData.maxI, 1) : "");
+
+  if (!EQData.epiCenter) text = text.replace(/\[.*?\]/g, "");
+  if (!EQData.maxI) text = text.replace(/\<.*?\>/g, "");
+  text = text.replace(/\[|\]|<|>/g, "");
+
+  return text;
+}
+
+//時間(ms)を「～分[秒,分,時間,日]」の形にする
+function timeDifference(miliseconds) {
+  if (miliseconds < 60000) {
+    return { num: Math.round(miliseconds / 1000), unit: "秒" };
+  } else if (miliseconds < 3600000) {
+    return { num: Math.round(miliseconds / 60000), unit: "分" };
+  } else if (miliseconds < 86400000) {
+    return { num: Math.round(miliseconds / 3600000), unit: "時間" };
+  } else {
+    return { num: Math.round(miliseconds / 86400000), unit: "日" };
+  }
+}
+
 //地震情報通知（音声・画面表示等）
 function AlertEQInfo(data, source, update, audioPlay) {
   try {
     if (source == "jma") {
-      if (audioPlay) PlayAudio("EQInfo");
+      if (audioPlay) {
+        PlayAudio("EQInfo");
+
+        data = data.sort(function (a, b) {
+          return a.OriginTime > b.OriginTime ? -1 : 1;
+        });
+        speak(GenerateEQInfoText(data[0]));
+      }
 
       eqInfo.jma = eqInfo.jma
         .filter(function (elm) {
@@ -3219,7 +3291,7 @@ function ConvertTsunamiInfo(data) {
 
 //音声合成
 function speak(str) {
-  if (WorkerWindow) {
+  if (str && WorkerWindow) {
     WorkerWindow.webContents.send("message2", {
       action: "speak",
       data: str,

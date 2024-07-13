@@ -618,7 +618,7 @@
                     <details>
                         <summary>サンプル読み上げ文章</summary>
                         <div class="tableWrap">
-                            <table id="sampleTextTable">
+                            <table class="sampleTextTable">
                                 <tr>
                                     <td>簡易</td>
                                     <td>地震です。地震です</td>
@@ -655,7 +655,7 @@
                     <details>
                         <summary>読み上げ用タグの解説</summary>
                         <div class="tableWrap">
-                            <table id="tagTable">
+                            <table class="tagTable">
                                 <tr>
                                     <th>タグ</th>
                                     <th>意味</th>
@@ -701,7 +701,7 @@
                                 <tr>
                                     <td>{region_name}</td>
                                     <td>震央地名</td>
-                                    <td>細分区域名, ""</td>
+                                    <td>地名, ""</td>
                                 </tr>
                                 <tr>
                                     <td>{depth}</td>
@@ -819,6 +819,133 @@
                 <h4>画面右側のリスト</h4>
                 <section>
                     <label>表示する件数<input type="number" id="EQInfo_ItemCount" min="1" max="50"></label>
+                </section>
+
+                <h4>音声合成</h4>
+                <section>
+
+                    <label>地震情報：<input id="EQInfo_Voice1" type="text" placeholder="地震情報の発表時に読み上げる文章"></label>
+                    <label>地震情報（キャンセル報）：<input id="EQInfo_Voice2" type="text" placeholder="地震情報が取り消されたときに読み上げる文章"></label>
+
+                    <details>
+                        <summary>サンプル読み上げ文章</summary>
+                        <div class="tableWrap">
+                            <table class="sampleTextTable">
+                                <tr>
+                                    <td>一般向け</td>
+                                    <td>{training2}先ほどの地震について情報が発表されました。</td>
+                                </tr>
+                                <tr>
+                                    <td>一般向け 詳細</td>
+                                    <td>{training2}{origin_time2}の地震について、情報が発表されました。[地震の規模を表すマグニチュードは、{magnitude}です。]&lt;この地震で、最大震度 {maxInt}が観測されました。&gt;
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>端的</td>
+                                    <td>{training2}{origin_time2}の地震について、{category}が発表されました。</td>
+                                </tr>
+                                <tr>
+                                    <td>詳細</td>
+                                    <td>{training2}{origin_time2}の地震について、{category}が発表されました。[{origin_time}、{region_name}でマグニチュード{magnitude}]、&lt;最大震度 {maxInt}&gt;の地震が観測されました。</td>
+                                </tr>
+                                <tr>
+                                    <td>キャンセル</td>
+                                    <td>{training2}地震情報が取り消されました。</td>
+                                </tr>
+
+                            </table>
+                        </div>
+                    </details>
+
+                    <details>
+                        <summary>読み上げ用タグの解説</summary>
+                        <div class="tableWrap">
+                            <table class="tagTable">
+                                <caption>読み上げタグ</caption>
+                                <tr>
+                                    <th>タグ</th>
+                                    <th>意味</th>
+                                    <th>とりうる値</th>
+                                </tr>
+                                <tr>
+                                    <th colspan="3">電文情報</th>
+                                </tr>
+                                <tr>
+                                    <td>{category}</td>
+                                    <td>情報種別 (気象庁XML電文のTitle)</td>
+                                    <td>"震度速報", "震度・震源情報", "津波情報に付帯する地震情報"※ など...</td>
+                                </tr>
+                                <tr>
+                                    <td>{report_time}</td>
+                                    <td>発表時刻</td>
+                                    <td>hh時mm分ss秒, ""</td>
+                                </tr>
+                                <tr>
+                                    <td>{training}</td>
+                                    <td>訓練報かどうか</td>
+                                    <td>"訓練報", ""</td>
+                                </tr>
+                                <tr>
+                                    <td>{training2}</td>
+                                    <td>訓練報かどうか(文章)</td>
+                                    <td>"これは訓練報です。", ""</td>
+                                </tr>
+
+                                <tr>
+                                    <th colspan="3">Ⓐ 震源要素等</th>
+                                </tr>
+                                <tr>
+                                    <td>{region_name}</td>
+                                    <td>震央地名</td>
+                                    <td>地名, ""</td>
+                                </tr>
+                                <tr>
+                                    <td>{origin_time}</td>
+                                    <td>発生時刻</td>
+                                    <td>hh時mm分ss秒, ""</td>
+                                </tr>
+                                <tr>
+                                    <td>{origin_time2}</td>
+                                    <td>発生時刻（「～前」形式）</td>
+                                    <td>n秒前, n分前, n時間前, n日前, "先ほど"</td>
+                                </tr>
+                                <tr>
+                                    <td>{magnitude}</td>
+                                    <td>マグニチュード</td>
+                                    <td>数字, ""</td>
+                                </tr>
+                                <tr>
+                                    <th colspan="3">Ⓑ 震度データ</th>
+                                </tr>
+
+                                <tr>
+                                    <td>{maxInt}</td>
+                                    <td>最大震度</td>
+                                    <td>"0", "1", "2", "3", "4", "5弱", "5強", "6弱" ,"6強", "7" ／ データ無し:"不明"</td>
+                                </tr>
+                            </table>
+                            <div class="smalltext">※データがない場合、基本的に値は ""（空白）となります。</div>
+                            <div class="smalltext">※"津波情報に付帯する地震情報"は、当アプリ独自の呼称です。</div>
+
+                            <table class="tagTable" id="parenthesis_sample">
+                                <caption>カッコ</caption>
+                                <tr>
+                                    <th>カッコ</th>
+                                    <th>動作</th>
+                                </tr>
+
+                                <tr>
+                                    <td>[]</td>
+                                    <td>このカッコに囲まれた部分は、上の表「Ⓐ 震源要素等」に含まれる情報（{region_name}など）が分かっている場合のみ読み上げられます。</td>
+                                </tr>
+                                <tr>
+                                    <td>&lt;&gt;</td>
+                                    <td>このカッコに囲まれた部分は、上の表「Ⓑ 震度データ」に含まれる情報（{maxInt}）が分かっている場合のみ読み上げられます。</td>
+                                </tr>
+
+                            </table>
+                        </div>
+                    </details>
                 </section>
             </div>
             <div id="tab1_content6" class="tabcontent">

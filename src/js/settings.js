@@ -58,6 +58,8 @@ function configDataDraw() {
   document.getElementById("EEW_Voice").value = config.notice.voice.EEW;
   document.getElementById("EEW2_Voice").value = config.notice.voice.EEWUpdate;
   document.getElementById("EEW3_Voice").value = config.notice.voice.EEWCancel;
+  document.getElementById("EQInfo_Voice1").value = config.notice.voice.EQInfo;
+  document.getElementById("EQInfo_Voice2").value = config.notice.voice.EQInfoCancel;
   document.getElementById("EQInfo_ItemCount").value = config.Info.EQInfo.ItemCount;
   document.getElementById("EEW_training").checked = config.Info.EEW.showtraining;
   document.getElementById("EEW_IntQ").checked = config.Info.EEW.IntQuestion;
@@ -196,6 +198,8 @@ function apply() {
   config.notice.voice.EEW = document.getElementById("EEW_Voice").value;
   config.notice.voice.EEWUpdate = document.getElementById("EEW2_Voice").value;
   config.notice.voice.EEWCancel = document.getElementById("EEW3_Voice").value;
+  config.notice.voice.EQInfo = document.getElementById("EQInfo_Voice1").value;
+  config.notice.voice.EQInfoCancel = document.getElementById("EQInfo_Voice2").value;
   config.Info.EQInfo.ItemCount = Number(document.getElementById("EQInfo_ItemCount").value);
   config.Info.EEW.showtraining = document.getElementById("EEW_training").checked;
   config.Info.EEW.IntQuestion = document.getElementById("EEW_IntQ").checked;
@@ -570,7 +574,8 @@ function speak(text, engine) {
           fetch(`http://localhost:${document.getElementById("Boyomi_Port").value}/Talk?text=${text}${voice_parameter}&speed=${TTSspeed * 100}&volume=${TTSvolume * 100}&tone=${TTSpitch * 100}`).catch(function (err) {
             speak(text, "Default");
           });
-        });
+        })
+        .catch(function (err) {});
     }
   } else if (engine == "Default") {
     speechSynthesis.cancel();
