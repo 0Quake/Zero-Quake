@@ -1016,26 +1016,6 @@ function start() {
 
   //一回限り
   Req_TremRts_sta();
-
-  setTimeout(function () {
-    ConvertEQInfo(
-      [
-        {
-          status: "通常",
-          eventId: "afd",
-          category: "震度速報",
-          reportDateTime: new Date(),
-          OriginTime: new Date(new Date() - 5000000),
-          epiCenter: "京都",
-          M: 5,
-          //maxI: "5+",
-          cancel: false,
-          DetailURL: [],
-        },
-      ],
-      "jma"
-    );
-  }, 1000);
 }
 
 var TremRts_sta;
