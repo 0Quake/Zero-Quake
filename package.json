@@ -52,8 +52,8 @@
   "devDependencies": {
     "electron": "^31.2.0",
     "electron-builder": "^24.13.3",
-    "eslint": "^9.6.0",
-    "prettier": "^3.3.2"
+    "eslint": "^9.7.0",
+    "prettier": "^3.3.3"
   },
   "dependencies": {
     "@turf/turf": "^7.0.0",
