@@ -119,7 +119,6 @@ window.addEventListener("offline", () => {
   UpdateStatus(new Date(), new Date(), "Internet", "Error");
 });
 
-//eslint-disable-next-line
 function replay(date) {
   if (date) date = new Date(date);
   window.electronAPI.messageReturn({
@@ -141,6 +140,8 @@ function EEW_AlertUpdate(data) {
 
     if (!sameEQ) {
       //新しい地震、新しい報
+      if (elm.is_cancel) return;
+
       var clone = template.content.cloneNode(true);
 
       var alertflgTmp = "(" + elm.alertflg + ")";
