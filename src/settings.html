@@ -621,31 +621,31 @@
                             <table class="sampleTextTable">
                                 <tr>
                                     <td>簡易</td>
-                                    <td>地震です。地震です</td>
+                                    <td>{training2}地震です。地震です</td>
                                 </tr>
                                 <tr>
                                     <td>簡易２</td>
-                                    <td>緊急地震速報です。</td>
+                                    <td>{training2}緊急地震速報です。</td>
                                 </tr>
                                 <tr>
                                     <td>呼びかけ</td>
-                                    <td>緊急地震速報です。強い揺れに警戒してください。揺れが収まるまで身を守ってください。</td>
+                                    <td>{training2}緊急地震速報です。強い揺れに警戒してください。揺れが収まるまで身を守ってください。</td>
                                 </tr>
                                 <tr>
                                     <td>一般向け</td>
-                                    <td>緊急地震速報です。{region_name}で最大の震度、{maxInt}の地震が発生しました。{location}の予想震度は{local_Int}です。</td>
+                                    <td>{training2}緊急地震速報です。{region_name}で最大の震度、{maxInt}の地震が発生しました。{location}の予想震度は{local_Int}です。</td>
                                 </tr>
                                 <tr>
                                     <td>一般向け 詳細</td>
-                                    <td>緊急地震速報、{grade}、{training}。{location}の予想震度は{local_Int}。地震の規模を表すマグニチュードは、{magnitude}と予想されます。この地震で予想される最大の震度は、{maxInt}です。{region_name}の、深さ{depth}キロメートルで発生しました。</td>
+                                    <td>{training} 緊急地震速報、{grade}。{location}の予想震度は{local_Int}。地震の規模を表すマグニチュードは、{magnitude}と予想されます。この地震で予想される最大の震度は、{maxInt}です。{region_name}の、深さ{depth}キロメートルで発生しました。</td>
                                 </tr>
                                 <tr>
                                     <td>詳細</td>
-                                    <td>緊急地震速報、{grade}、第{serial}報、{training}。{location}の予想震度は{local_Int}。予想マグニチュード、{magnitude}。予想最大震度、{maxInt}。{region_name}の、深さ{depth}キロメートルで、{origin_time}に発生。{final}</td>
+                                    <td>{training}{training}緊急地震速報、{grade}、第{serial}報。{location}の予想震度は{local_Int}。予想マグニチュード、{magnitude}。予想最大震度、{maxInt}。{region_name}の、深さ{depth}キロメートルで、{origin_time}に発生。{final}</td>
                                 </tr>
                                 <tr>
                                     <td>キャンセル</td>
-                                    <td>緊急地震速報が取り消されました。</td>
+                                    <td>{training2}緊急地震速報が取り消されました。</td>
                                 </tr>
 
                             </table>
@@ -687,7 +687,7 @@
                                 <tr>
                                     <td>{training}</td>
                                     <td>訓練報かどうか</td>
-                                    <td>"訓練報", ""</td>
+                                    <td>"訓練報。", ""</td>
                                 </tr>
                                 <tr>
                                     <td>{training2}</td>
@@ -883,7 +883,7 @@
                                 <tr>
                                     <td>{training}</td>
                                     <td>訓練報かどうか</td>
-                                    <td>"訓練報", ""</td>
+                                    <td>"訓練報。", ""</td>
                                 </tr>
                                 <tr>
                                     <td>{training2}</td>
