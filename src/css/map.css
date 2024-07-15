@@ -231,10 +231,9 @@
 }
 
 .marker-circle {
-  width: 10px;
-  height: 10px;
   background: rgba(128, 128, 128, 0.2);
   border-radius: 50%;
+  transition: none;
   z-index: 220;
 }
 .kmoni_hide .marker-circle {
