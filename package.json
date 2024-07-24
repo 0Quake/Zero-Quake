@@ -59,7 +59,7 @@
     "@turf/turf": "^7.0.0",
     "electron-squirrel-startup": "^1.0.1",
     "electron-store": "^10.0.0",
-    "jsdom": "^24.1.0",
+    "jsdom": "^24.1.1",
     "net": "^1.0.2",
     "path": "^0.12.7",
     "websocket": "^1.0.35"
