@@ -1020,44 +1020,6 @@ function start() {
 
   //一回限り
   Req_TremRts_sta();
-
-  setTimeout(function () {
-    var dataTmp2 = [
-      {
-        status: "通常",
-        eventId: 20240101000000,
-        category: "震度速報",
-        OriginTime: new Date(),
-        epiCenter: null,
-        M: null,
-        maxI: 5,
-        cancel: false,
-        reportDateTime: new Date(Number(new Date()) - 2500),
-        DetailURL: [],
-        axisData: null,
-      },
-    ];
-    ConvertEQInfo(dataTmp2, "jma", false);
-  }, 1000);
-
-  setTimeout(function () {
-    var dataTmp2 = [
-      {
-        status: "通常",
-        eventId: 20240101000000,
-        category: "震源に関する情報",
-        OriginTime: new Date(),
-        epiCenter: "ばしょ",
-        M: 5,
-        maxI: null,
-        cancel: false,
-        reportDateTime: new Date(),
-        DetailURL: [],
-        axisData: null,
-      },
-    ];
-    ConvertEQInfo(dataTmp2, "jma", false);
-  }, 3000);
 }
 
 var TremRts_sta;
@@ -2392,7 +2354,7 @@ function Req_JMAXMLList(LongPeriodFeed, count) {
             if (urlElm) url = urlElm[0].textContent;
             if (!url) return;
             var title = elm.getElementsByTagName("title")[0].textContent;
-            if (title == "震度速報" || title == "震源に関する情報" || title == "震源・震度に関する情報" || title == "遠地地震に関する情報" || title == "顕著な地震の震源要素更新のお知らせ") {
+            if (title == "震度速報" || title == "震源に関する情報" || title == "震源・震度に関する情報" || title == "長周期地震動に関する観測情報" || title == "遠地地震に関する情報" || title == "顕著な地震の震源要素更新のお知らせ") {
               if (EQInfoCount <= config.Info.EQInfo.ItemCount) Req_JMAXML(url, count);
               EQInfoCount++;
             } else if (title == "津波情報a" || title == "津波警報・注意報・予報a") Req_JMAXML(url, count);
@@ -2431,7 +2393,7 @@ function Req_JMAXML(url, count) {
           var title = xml.title;
           var cancel = xml.getElementsByTagName("InfoType")[0].textContent == "取消";
 
-          if (title == "震度速報" || title == "震源に関する情報" || title == "震源・震度に関する情報" || title == "遠地地震に関する情報" || title == "顕著な地震の震源要素更新のお知らせ") {
+          if (title == "震度速報" || title == "震源に関する情報" || title == "震源・震度に関する情報" || title == "長周期地震動に関する観測情報" || title == "遠地地震に関する情報" || title == "顕著な地震の震源要素更新のお知らせ") {
             //地震情報
             var EarthquakeElm = xml.getElementsByTagName("Body")[0].getElementsByTagName("Earthquake")[0];
             var originTimeTmp;
@@ -2446,7 +2408,11 @@ function Req_JMAXML(url, count) {
             if (!originTimeTmp) originTimeTmp = new Date(xml.getElementsByTagName("TargetDateTime")[0].textContent);
             var IntensityElm = xml.getElementsByTagName("Body")[0].getElementsByTagName("Intensity")[0];
             var maxIntTmp;
-            if (IntensityElm) maxIntTmp = NormalizeShindo(IntensityElm.getElementsByTagName("Observation")[0].getElementsByTagName("MaxInt")[0].textContent);
+            var maxLgInt;
+            if (IntensityElm) {
+              maxIntTmp = NormalizeShindo(IntensityElm.getElementsByTagName("Observation")[0].getElementsByTagName("MaxInt")[0].textContent);
+              if (IntensityElm.getElementsByTagName("Observation")[0].getElementsByTagName("MaxLgInt")[0]) maxLgInt = IntensityElm.getElementsByTagName("Observation")[0].getElementsByTagName("MaxLgInt")[0].textContent;
+            }
             if (maxIntTmp == "[objectHTMLUnknownElement]") maxIntTmp = null;
             ConvertEQInfo(
               [
@@ -2458,6 +2424,7 @@ function Req_JMAXML(url, count) {
                   epiCenter: epiCenterTmp,
                   M: Number(magnitudeTmp),
                   maxI: NormalizeShindo(maxIntTmp),
+                  maxLgInt: maxLgInt,
                   cancel: Boolean(cancel),
                   reportDateTime: new Date(xml.getElementsByTagName("ReportDateTime")[0].textContent),
                   DetailURL: [url],
@@ -2972,6 +2939,7 @@ function ConvertEQInfo(dataList, type, EEW, count) {
             epiCenter: null,
             M: null,
             maxI: null,
+            maxLgInt: null,
             DetailURL: [],
             axisData: [],
           };
@@ -3006,6 +2974,7 @@ function ConvertEQInfo(dataList, type, EEW, count) {
                 epiCenter: null,
                 M: null,
                 maxI: null,
+                maxLgInt: null,
                 DetailURL: [],
                 axisData: [],
               };
@@ -3013,10 +2982,12 @@ function ConvertEQInfo(dataList, type, EEW, count) {
 
             EQInfo_Item.category = elm.category;
             if (!elm.maxI) elm.maxI = null;
+            if (!elm.maxLgInt) elm.maxLgInt = null;
             if (Boolean2(elm.OriginTime)) EQInfo_Item.OriginTime = elm.OriginTime;
             if (Boolean2(elm.epiCenter)) EQInfo_Item.epiCenter = elm.epiCenter;
             if (Boolean2(elm.M) && elm.M != "Ｍ不明" && elm.M != "NaN") EQInfo_Item.M = elm.M;
             if (Boolean2(elm.maxI) && elm.maxI !== "?") EQInfo_Item.maxI = elm.maxI;
+            if (Boolean2(elm.maxLgInt) && elm.maxLgInt !== "?") EQInfo_Item.maxLgInt = elm.maxLgInt;
 
             if (Array.isArray(elm.DetailURL)) {
               elm.DetailURL.forEach(function (elm2) {
@@ -3038,6 +3009,7 @@ function ConvertEQInfo(dataList, type, EEW, count) {
           if (EQElm.epiCenter !== EQInfo_Item.epiCenter) changed = true;
           if (EQElm.M !== EQInfo_Item.M) changed = true;
           if (EQElm.maxI !== EQInfo_Item.maxI) changed = true;
+          if (EQElm.maxLgInt !== EQInfo_Item.maxLgInt) changed = true;
           if (EQElm.DetailURL.length !== EQInfo_Item.DetailURL.length) changed = true;
           if (EQInfo_Item.axisData) changed = true;
 
@@ -3050,6 +3022,7 @@ function ConvertEQInfo(dataList, type, EEW, count) {
           EQElm.epiCenter = EQInfo_Item.epiCenter;
           EQElm.M = EQInfo_Item.M;
           EQElm.maxI = EQInfo_Item.maxI;
+          EQElm.maxLgInt = EQInfo_Item.maxLgInt;
           EQElm.DetailURL = EQElm.DetailURL.concat(EQInfo_Item.DetailURL);
           if (EQInfo_Item.axisData) EQElm.axisData = EQInfo_Item.axisData;
 

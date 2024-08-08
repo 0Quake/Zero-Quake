@@ -375,10 +375,16 @@ function eqInfoDraw(data, source) {
       if (maxITmp == "不明") maxITmp = "?";
       maxITmp = NormalizeShindo(maxITmp, 0);
       var shindoColor = NormalizeShindo(maxITmp, 2);
+      var LgIntColor = LgIntConvert(elm.maxLgInt);
 
+      console.log(elm.maxLgInt);
       clone.querySelector(".EQI_maxI").textContent = maxITmp;
       clone.querySelector(".EQI_maxI").style.background = shindoColor[0];
       clone.querySelector(".EQI_maxI").style.color = shindoColor[1];
+      clone.querySelector(".EQI_LgInt").style.display = Boolean(elm.maxLgInt) ? "block" : "none";
+      clone.querySelector(".EQI_LgIntBody").textContent = elm.maxLgInt;
+      clone.querySelector(".EQI_LgInt").style.background = LgIntColor[0];
+      clone.querySelector(".EQI_LgInt").style.color = LgIntColor[1];
       clone.querySelector(".canceled").style.display = elm.cancel ? "flex" : "none";
       clone.querySelector(".EEWNotes").style.display = elm.category == "EEW" ? "block" : "none";
       clone.querySelector(".TestNotes").style.display = elm.status == "試験" ? "block" : "none";

@@ -31,28 +31,36 @@ body {
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: local("BIZ UDPGothic"), url(../font/BIZUDPGothic-Regular.woff) format("woff2");
+  src:
+    local("BIZ UDPGothic"),
+    url(../font/BIZUDPGothic-Regular.woff) format("woff2");
 }
 @font-face {
   font-family: "M PLUS 1p";
   font-style: normal;
   font-weight: 800;
   font-display: swap;
-  src: local("MPLUS1p-ExtraBold"), url(../font/MPLUS1p-ExtraBold.woff) format("woff2");
+  src:
+    local("MPLUS1p-ExtraBold"),
+    url(../font/MPLUS1p-ExtraBold.woff) format("woff2");
 }
 @font-face {
   font-family: "Material Icons Round";
   font-style: normal;
   font-weight: 400;
   font-display: block;
-  src: local("MaterialIconsRound-Regular"), url(../font/MaterialIcons.woff) format("woff2");
+  src:
+    local("MaterialIconsRound-Regular"),
+    url(../font/MaterialIcons.woff) format("woff2");
 }
 @font-face {
   font-family: "AzeretMono-Regular";
   font-style: normal;
   font-weight: 400;
   font-display: block;
-  src: local("AzeretMono-Regular"), url(../font/AzeretMono-Regular.woff) format("woff2");
+  src:
+    local("AzeretMono-Regular"),
+    url(../font/AzeretMono-Regular.woff) format("woff2");
 }
 
 .material-icons-round {
@@ -747,7 +755,7 @@ td {
   display: flex;
   flex-wrap: wrap;
   align-content: center;
-  align-items: flex-start;
+  align-items: center;
   padding: 5px;
   margin: 5px;
   background: #222;
@@ -780,6 +788,7 @@ td {
   border: solid 1px var(--TsunamiYohoColor);
   color: #fff;
 }
+
 .EQI_maxI {
   width: 50px;
   height: 50px;
@@ -787,8 +796,24 @@ td {
   text-align: center;
   font-size: 30px;
   border-radius: 4px;
-  float: left;
   margin: auto 5px auto 0;
+  font-family: "M PLUS 1p";
+}
+.EQI_LgInt {
+  width: 50px;
+  height: 20px;
+  text-align: center;
+  font-size: 10px;
+  margin: auto 5px auto 0;
+  background: #f00;
+  border-radius: 3px;
+  margin: 5px 0 0 0;
+  line-height: 20px;
+}
+.EQI_LgIntBody {
+  display: inline-block;
+  font-size: 15px;
+  line-height: 20px;
   font-family: "M PLUS 1p";
 }
 .EEWNotes,
