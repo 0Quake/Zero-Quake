@@ -562,19 +562,8 @@ function Mapinit() {
   continueButton.innerText = "sync";
   continueButton.title = "情報を再取得";
   continueButton.className = "material-icons-round";
-  var sync = false;
   continueButton.addEventListener("click", function () {
-    if (sync) return;
-    sync = true;
-    InfoFetch();
-    continueButton.animate([{ transform: "rotate(0deg)" }, { transform: "rotate(720deg)" }], {
-      duration: 2000,
-      fill: "backwards",
-      easing: "linear",
-    });
-    setTimeout(function () {
-      sync = false;
-    }, 1000);
+    location.reload();
   });
 
   var homeButton = document.createElement("button");
