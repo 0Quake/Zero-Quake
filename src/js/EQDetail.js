@@ -1759,11 +1759,9 @@ function ConvertEQInfo(data) {
   });
 
   EQInfoMarged = EQInfoTmp;
-  console.time("a");
 
   if (EQInfoMarged.IntData) DrawIntensity(EQInfoMarged.IntData);
   if (EQInfoMarged.LngIntData) DrawLgIntensity(EQInfoMarged.LngIntData);
-  console.timeEnd("a");
 
   document.getElementById("canceled").style.display = EQInfoMarged.cancel ? "flex" : "none";
 
