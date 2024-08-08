@@ -2677,7 +2677,7 @@ function REQ_JMAList() {
           var json = ParseJSON(dataTmp);
           if (!json) return false;
           var nankai = json.find(function (elm) {
-            return elm.ttl == "南海トラフ地震関連解説情報";
+            return elm.ttl == "南海トラフ地震関連解説情報" || elm.ttl.startsWith("南海トラフ地震臨時情報");
           });
           if (nankai) REQ_JMA("https://www.jma.go.jp/bosai/quake/data/" + nankai.json);
 
