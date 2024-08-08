@@ -7,6 +7,7 @@ window.electronAPI.messageSend((event, request) => {
 
 var mySectElm;
 function tsunamiUpdate(dataTmp) {
+  console.log(dataTmp);
   var Tsunami_MajorWarning = (Tsunami_Warning = Tsunami_Watch = Tsunami_Yoho = false);
   document.getElementById("revocation").style.display = "none";
   document.getElementById("no-data").style.display = "none";
@@ -14,8 +15,11 @@ function tsunamiUpdate(dataTmp) {
   if (dataTmp.revocation) document.getElementById("revocation").style.display = "block";
   else if (!dataTmp || dataTmp.areas.length == 0) {
     document.getElementById("no-data").style.display = "table-row";
-    document.getElementById("dateTime").style.display = "none";
   }
+
+  if (dataTmp.issue.time) document.getElementById("dateTime").textContent = NormalizeDate(5, dataTmp.issue.time);
+  if (dataTmp.ValidDateTime) document.getElementById("validdateTime").textContent = NormalizeDate(5, dataTmp.ValidDateTime);
+
   document.querySelectorAll(".add-content").forEach(function (elm) {
     elm.remove();
   });
@@ -98,7 +102,7 @@ function tsunamiUpdate(dataTmp) {
 
           if (elm2.Conditions) condition = elm2.Conditions;
 
-          if (elm2.HighTideDateTime) HighTideDateTime = NormalizeDate(5, elm2.HighTideDateTime);
+          if (elm2.HighTideDateTime) HighTideDateTime = NormalizeDate(6, elm2.HighTideDateTime);
 
           if (elm2.omaxHeight) {
             omaxHeight = elm2.omaxHeight;

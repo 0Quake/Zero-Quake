@@ -1020,6 +1020,44 @@ function start() {
 
   //一回限り
   Req_TremRts_sta();
+
+  setTimeout(function () {
+    var dataTmp2 = [
+      {
+        status: "通常",
+        eventId: 20240101000000,
+        category: "震度速報",
+        OriginTime: new Date(),
+        epiCenter: null,
+        M: null,
+        maxI: 5,
+        cancel: false,
+        reportDateTime: new Date(Number(new Date()) - 2500),
+        DetailURL: [],
+        axisData: null,
+      },
+    ];
+    ConvertEQInfo(dataTmp2, "jma", false);
+  }, 1000);
+
+  setTimeout(function () {
+    var dataTmp2 = [
+      {
+        status: "通常",
+        eventId: 20240101000000,
+        category: "震源に関する情報",
+        OriginTime: new Date(),
+        epiCenter: "ばしょ",
+        M: 5,
+        maxI: null,
+        cancel: false,
+        reportDateTime: new Date(),
+        DetailURL: [],
+        axisData: null,
+      },
+    ];
+    ConvertEQInfo(dataTmp2, "jma", false);
+  }, 3000);
 }
 
 var TremRts_sta;
@@ -3371,6 +3409,8 @@ function NormalizeDate(type, dateTmp) {
       return YYYY + "/" + MM + "/" + DD + " " + hh + ":" + mm;
     case 5:
       return DD + "日 " + hh + ":" + mm;
+    case 6:
+      return hh + ":" + mm;
     case 7:
       return hh + "時" + mm + "分" + ss + "秒";
     default:

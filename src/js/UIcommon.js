@@ -232,6 +232,8 @@ function NormalizeDate(type, dateTmp) {
       return YYYY + "/" + MM + "/" + DD + " " + hh + ":" + mm;
     case 5:
       return DD + "日 " + hh + ":" + mm;
+    case 6:
+      return hh + ":" + mm;
     case 7:
       return hh + "時" + mm + "分" + ss + "秒";
     default:
