@@ -7,6 +7,7 @@ window.electronAPI.messageSend((event, request) => {
 
 var mySectElm;
 function tsunamiUpdate(dataTmp) {
+  console.log(dataTmp);
   var Tsunami_MajorWarning = (Tsunami_Warning = Tsunami_Watch = Tsunami_Yoho = false);
   document.getElementById("revocation").style.display = "none";
   document.getElementById("no-data").style.display = "none";
@@ -110,6 +111,7 @@ function tsunamiUpdate(dataTmp) {
           if (elm2.maxHeightTime) maxHeightTime = NormalizeDate(5, elm2.maxHeightTime);
 
           if (elm2.ArrivedTime) ArrivedTime = NormalizeDate(5, elm2.ArrivedTime);
+          else if (elm2.firstHeightCondition == "欠測") ArrivedTime = "欠測";
           else if (elm2.Condition == "第１波の到達を確認") ArrivedTime = "到達";
           else if (elm2.Condition == "津波到達中と推測") ArrivedTime = "到達と推測";
           else if (elm2.firstHeightCondition == "第１波識別不能") ArrivedTime = elm2.firstHeightCondition;
