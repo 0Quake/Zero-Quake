@@ -1683,6 +1683,11 @@ var EQInfoMarged = {};
 var EQInfoData = [];
 //地震情報マージ
 function ConvertEQInfo(data) {
+  var sameData = EQInfoData.find(function (elm) {
+    return elm.category == data.category && Number(new Date(elm.reportTime)) == Number(new Date(data.reportTime));
+  });
+  if (sameData) return;
+
   EQInfoData.push(data);
 
   EQInfoData = EQInfoData.sort(function (a, b) {
