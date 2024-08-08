@@ -659,8 +659,8 @@ function layerSelect(layerName) {
   config.data.layer = layerName;
   window.electronAPI.messageReturn({
     action: "ChangeConfig",
-    from:"Other",
-  data: config,
+    from: "Other",
+    data: config,
   });
 }
 
@@ -708,8 +708,8 @@ function overlaySelect(layerName, checked) {
   config.data.overlay = selectedLayer;
   window.electronAPI.messageReturn({
     action: "ChangeConfig",
-    from:"Other",
-  data: config,
+    from: "Other",
+    data: config,
   });
 }
 document.getElementsByName("overlaySelect").forEach(function (elm) {
@@ -1374,7 +1374,11 @@ function mapFillDraw() {
 }
 
 function mapZoomReset() {
-  map.fitBounds(ZoomBounds, { padding: 60, maxZoom: 7, animate: false });
+  try {
+    map.fitBounds(ZoomBounds, { padding: 60, maxZoom: 7, animate: false });
+  } catch (err) {
+    return;
+  }
 }
 
 var intensityIcons = [];
@@ -1715,7 +1719,8 @@ function ConvertEQInfo(data) {
     if (!config.Info.EQInfo.showtraining && elm.status == "訓練") return;
     if (!config.Info.EQInfo.showTest && elm.status == "試験") return;
 
-    if (elm.category == "EEW" && EQInfoTmp.EEW == false) return; //EEW以外の情報が既に入っているとき、EEWによる情報を破棄
+    //EEW以外の情報が既に入っているとき、EEWによる情報を破棄
+    if (elm.category == "EEW" && EQInfoTmp.EEW == false) return;
     else if (elm.category == "EEW") EQInfoTmp.EEW = true;
     else if (elm.category != "EEW" && EQInfoTmp.EEW == true) {
       //EEW以外の情報が入ってきたとき、EEWによる情報を破棄
