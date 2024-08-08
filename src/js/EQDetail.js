@@ -1841,7 +1841,7 @@ function ConvertEQInfo(data) {
       img.src = "./img/epicenter.svg";
       img.classList.add("epicenterIcon");
 
-      var ESPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<h3 style='background: rgb(149, 46, 46);'>震央</h3><div class='epicenterWrp'>" + EQInfo.epiCenter + "</div>");
+      var ESPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<div class='popupContent'><div class='epicenterTitle'>震央</div><div class='pointName'>" + EQInfo.epiCenter + "</div></div>");
       ESmarkerElm = new maplibregl.Marker({ element: img }).setLngLat([EQInfoMarged.lng, EQInfoMarged.lat]).setPopup(ESPopup).addTo(map);
     } else ESmarkerElm.setLngLat([EQInfoMarged.lng, EQInfoMarged.lat]);
   }
