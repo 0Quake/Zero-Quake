@@ -1138,6 +1138,10 @@ function init() {
   });
   map.touchZoomRotate.disableRotation();
 
+  map.on("click", "basemap_fill", function (e) {
+    e.originalEvent.cancelBubble = true;
+  });
+
   map.on("sourcedataloading", (e) => {
     if (e.sourceId == "hinanjo" && hinanjoCheck.checked && e.tile != undefined) {
       var ca = e.tile.tileID.canonical;
@@ -2044,6 +2048,8 @@ function tsunamiColorConv(str) {
 }
 
 function tsunamiPopup(e) {
+  if (e.originalEvent.cancelBubble) return;
+
   if (tsunamiData.areas) {
     elm = tsunamiData.areas.find(function (elm) {
       return elm.name == e.features[0].properties.name;
