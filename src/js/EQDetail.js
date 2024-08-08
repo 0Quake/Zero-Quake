@@ -1686,8 +1686,9 @@ function ConvertEQInfo(data) {
   EQInfoData.push(data);
 
   EQInfoData = EQInfoData.sort(function (a, b) {
-    return a.reportTime < b.reportTime ? -1 : 1;
+    return new Date(a.reportTime) < new Date(b.reportTime) ? -1 : 1;
   });
+
   EQInfoData.forEach(function (elm, index) {
     if (elm.cancel) {
       EQInfoData.slice(0, index).forEach(function (elm2, index2) {
@@ -1962,6 +1963,7 @@ function radioSet(name, val) {
     if (elm.value == val) elm.checked = true;
   });
 }
+
 function Boolean2(elm) {
-  return (elm !== null) & (elm !== undefined) && elm !== "" && elm !== false && !Number.isNaN(elm) && elm !== "Invalid Date";
+  return Boolean(elm !== null && elm !== undefined && elm !== "" && !Number.isNaN(elm) && elm != "Invalid Date" && (!Array.isArray(elm) || elm.length > 0) && elm);
 }
