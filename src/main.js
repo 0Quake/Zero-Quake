@@ -908,6 +908,10 @@ function Create_NankaiWindow() {
           action: "NankaiTroughInfo",
           data: NankaiTroughInfo,
         });
+        NankaiWindow.webContents.send("message2", {
+          action: "setting",
+          data: config,
+        });
       }
     });
     NankaiWindow.loadFile("src/NankaiTrough.html");
