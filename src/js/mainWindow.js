@@ -377,7 +377,6 @@ function eqInfoDraw(data, source) {
       var shindoColor = NormalizeShindo(maxITmp, 2);
       var LgIntColor = LgIntConvert(elm.maxLgInt);
 
-      console.log(elm.maxLgInt);
       clone.querySelector(".EQI_maxI").textContent = maxITmp;
       clone.querySelector(".EQI_maxI").style.background = shindoColor[0];
       clone.querySelector(".EQI_maxI").style.color = shindoColor[1];
