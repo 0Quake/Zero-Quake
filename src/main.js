@@ -3522,5 +3522,5 @@ function depthFilter(depth) {
   else return Math.floor(depth / 2) * 2;
 }
 function Boolean2(elm) {
-  return (elm !== null) & (elm !== undefined) && elm !== "" && elm !== false && !Number.isNaN(elm) && elm !== "Invalid Date";
+  return Boolean(elm !== null && elm !== undefined && elm !== "" && !Number.isNaN(elm) && elm != "Invalid Date" && (!Array.isArray(elm) || elm.length > 0) && elm);
 }

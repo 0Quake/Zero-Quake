@@ -1443,8 +1443,7 @@ function add_Area_info(name, maxInt) {
     ZoomBounds.extend([pointLocation[1], pointLocation[0]]);
   }
 
-  var shindo = String(NormalizeShindo(maxInt, 0));
-  switch (shindo) {
+  switch (maxInt) {
     case "0":
       Int0T.push(["==", "name", name]);
       break;
@@ -1526,10 +1525,12 @@ function DrawIntensity(data) {
   intensityIcons.forEach(function (elm) {
     elm.remove();
   });
+  intensityIcons = [];
   removeChild(document.getElementById("Shindo"));
   document.getElementById("ShindoWrap").style.display = "inline-block";
   document.getElementById("Shindo").style.display = "block";
   mapFillReset();
+
   data.forEach(function (elm) {
     add_Pref_info(elm.name, elm.int);
     if (elm.area) {
@@ -1548,6 +1549,7 @@ function DrawIntensity(data) {
       });
     }
   });
+
   mapFillDraw();
   mapZoomReset();
 }
@@ -1757,9 +1759,11 @@ function ConvertEQInfo(data) {
   });
 
   EQInfoMarged = EQInfoTmp;
+  console.time("a");
 
   if (EQInfoMarged.IntData) DrawIntensity(EQInfoMarged.IntData);
   if (EQInfoMarged.LngIntData) DrawLgIntensity(EQInfoMarged.LngIntData);
+  console.timeEnd("a");
 
   document.getElementById("canceled").style.display = EQInfoMarged.cancel ? "flex" : "none";
 
