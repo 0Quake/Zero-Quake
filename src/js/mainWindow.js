@@ -2103,6 +2103,7 @@ function NankaiTroughInfo(data) {
       document.getElementById("NankaiTroughInfo").classList.add("nankaiWarn");
       break;
     case "調査終了":
+    case "調査中":
       document.getElementById("NankaiTroughInfo").classList.add("nankaiInfo");
       break;
   }
