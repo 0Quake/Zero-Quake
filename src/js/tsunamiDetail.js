@@ -104,8 +104,10 @@ function tsunamiUpdate(dataTmp) {
           if (elm2.omaxHeight) {
             omaxHeight = elm2.omaxHeight;
             if (elm2.firstHeightInitial) omaxHeight = elm2.omaxHeight + " " + elm2.firstHeightInitial;
-          } else if (elm2.maxHeightCondition) omaxHeight = elm2.maxHeightCondition;
-
+          } else if (elm2.maxHeightCondition && elm2.maxHeightCondition.includes("観測中")) omaxHeight = "観測中";
+          else if (elm2.maxHeightCondition && elm2.maxHeightCondition.includes("微弱")) omaxHeight = "微弱";
+          else if (elm2.maxHeightCondition && elm2.maxHeightCondition.includes("欠測")) omaxHeight = "欠測";
+          else if (elm2.maxHeightCondition) omaxHeight = elm2.maxHeightCondition;
           if (elm2.maxheightRising) omaxHeight += "↗";
 
           if (elm2.maxHeightTime) maxHeightTime = NormalizeDate(5, elm2.maxHeightTime);
