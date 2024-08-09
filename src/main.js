@@ -886,11 +886,12 @@ function Create_TsunamiWindow() {
 var NankaiWindow = { type: null, window: null };
 function Create_NankaiWindow(type) {
   try {
+    if (NankaiWindow.window.isMinimized()) NankaiWindow.window.restore();
+    if (!NankaiWindow.window.isFocused()) NankaiWindow.window.focus();
+
     if (NankaiWindow.window) {
       if (NankaiWindow.type == type) {
-        //同じ情報について表示していたならそのウィンドウを再表示しておわる
-        if (NankaiWindow.window.isMinimized()) NankaiWindow.window.restore();
-        if (!NankaiWindow.window.isFocused()) NankaiWindow.window.focus();
+        //同じ情報について表示していたならおわる
         return false;
       } else NankaiWindow.type = type;
     } else {
