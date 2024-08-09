@@ -1510,7 +1510,23 @@ function add_IntensityStation_info(lat, lng, name, int) {
   ZoomBounds.extend([lng, lat]);
 }
 
+var lastDrawDate;
+var drawTimeout;
+var DataToDraw;
 function DrawIntensity(data) {
+  DataToDraw = data;
+  if (lastDrawDate && new Date() - lastDrawDate < 500) {
+    if (drawTimeout) clearTimeout(drawTimeout);
+    drawTimeout = setTimeout(function () {
+      DrawIntensity(DataToDraw);
+    }, 500);
+  } else {
+    DrawIntensityCORE(DataToDraw);
+    lastDrawDate = new Date();
+  }
+}
+
+function DrawIntensityCORE(data) {
   intensityIcons.forEach(function (elm) {
     elm.remove();
   });
@@ -1520,6 +1536,7 @@ function DrawIntensity(data) {
   document.getElementById("Shindo").style.display = "block";
   mapFillReset();
 
+  console.time("a");
   data.forEach(function (elm) {
     add_Pref_info(elm.name, elm.int);
     if (elm.area) {
@@ -1538,6 +1555,7 @@ function DrawIntensity(data) {
       });
     }
   });
+  console.timeEnd("a");
 
   mapFillDraw();
   mapZoomReset();
