@@ -2362,9 +2362,9 @@ function Req_JMAXMLList(LongPeriodFeed, count) {
             if (urlElm) url = urlElm[0].textContent;
             if (!url) return;
             var title = elm.getElementsByTagName("title")[0].textContent;
-            if (title == "震度速報" || title == "震源に関する情報" || title == "震源・震度に関する情報" || title == "長周期地震動に関する観測情報" || title == "遠地地震に関する情報" || title == "顕著な地震の震源要素更新のお知らせ") {
+            if (title == "震度速報" || title == "震源に関する情報" || title == "震源・震度に関する情報" || title == "長周期地震動に関する観測情報" || title == "顕著な地震の震源要素更新のお知らせ") {
               if (EQInfoCount <= config.Info.EQInfo.ItemCount) Req_JMAXML(url, count);
-              EQInfoCount++;
+              if (title == "震源・震度に関する情報") EQInfoCount++; //「震源・震度に関する情報」の件数≒地震の数 のためカウント
             } else if (title == "津波情報a" || title == "津波警報・注意報・予報a") Req_JMAXML(url, count);
           });
 
