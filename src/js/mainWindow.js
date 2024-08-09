@@ -2096,8 +2096,6 @@ function tsunamiPopup(e) {
 
 //🔴南海トラフ情報🔴
 function NankaiTroughInfo(data) {
-  console.log(data.rinji);
-  console.log(data.teirei);
   if (data.rinji) {
     document.getElementById("NankaiTroughInfo_Rinji").addEventListener("click", function () {
       window.electronAPI.messageReturn({
