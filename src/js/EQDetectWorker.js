@@ -178,8 +178,8 @@ function EQDetect(data, date, detect) {
       //地震アイテムに属する観測点数が閾値以上なら
       if (Math.abs(EQD_ItemTmp.last_Detect - (new Date() - Replay)) < 500) {
         var result = GuessHypocenter(EQD_ItemTmp, data);
-        if (Math.abs(EQD_ItemTmp.lat - result[0].lat) > 0.2) EQD_ItemTmp.lat = result[0].lat;
-        if (Math.abs(EQD_ItemTmp.lng - result[0].lng) > 0.2) EQD_ItemTmp.lng = result[0].lng;
+        if (Math.abs(EQD_ItemTmp.lat - result[0].lat) > 0.5) EQD_ItemTmp.lat = result[0].lat;
+        if (Math.abs(EQD_ItemTmp.lng - result[0].lng) > 0.5) EQD_ItemTmp.lng = result[0].lng;
         if (result[0].rad) EQD_ItemTmp.Radius = result[0].rad;
       }
 
@@ -233,7 +233,7 @@ function GuessHypocenter(EQElm, data) {
   var Tmp = { dif: Infinity };
   for (let lat = Math.floor(EQElm.lat2) - 3; lat <= Math.floor(EQElm.lat2) + 3; lat++) {
     for (let lng = Math.floor(EQElm.lng2) - 3; lng <= Math.floor(EQElm.lng2) + 3; lng++) {
-      for (var depth of [0, 10, 30, 70, 100, 300, 700]) {
+      for (var depth of [10, 40, 100, 300]) {
         var res = calcDifference(lat, lng, EQElm, data, originTime, depth);
         if (res) {
           var item = { lat: lat, lng: lng, dif: res[0], rad: res[1] };

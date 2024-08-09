@@ -495,16 +495,6 @@ function EQDetect(data) {
       },
     });
 
-    map.addLayer({
-      id: "EQDItem_" + data.id,
-      type: "line",
-      source: "EQDItem_" + data.id,
-      paint: {
-        "line-color": "#FFF",
-        "line-width": 3,
-      },
-    });
-
     map.panTo([data.lng, data.lat], { animate: false });
     map.fitBounds(turf.bbox(_circle), { maxZoom: 7, animate: false, padding: 100 });
   }
@@ -516,7 +506,6 @@ function EQDetect(data) {
 function EQDetectFinish(id) {
   EQDetectItem.find(function (elmA, index) {
     if (elmA.id == id) {
-      if (map.getLayer("EQDItem_" + id)) map.removeLayer("EQDItem_" + id);
       if (map.getLayer("EQDItemF_" + id)) map.removeLayer("EQDItemF_" + id);
       if (map.getSource("EQDItem_" + id)) map.removeSource("EQDItem_" + id);
       elmA.ECMarker.remove();
