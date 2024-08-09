@@ -3068,8 +3068,8 @@ function GenerateEQInfoText(EQData) {
   text = text.replaceAll("{category}", category ? category : "");
   text = text.replaceAll("{training}", EQData.status == "訓練" ? "訓練報。" : "");
   text = text.replaceAll("{training2}", EQData.status == "訓練" ? "これは訓練報です。" : "");
-  text = text.replaceAll("{report_time}", EQData.reportDateTime ? NormalizeDate(7, EQData.reportDateTime) : "");
-  text = text.replaceAll("{origin_time}", EQData.OriginTime ? NormalizeDate(7, EQData.OriginTime) : "");
+  text = text.replaceAll("{report_time}", EQData.reportDateTime ? NormalizeDate(8, EQData.reportDateTime) : "");
+  text = text.replaceAll("{origin_time}", EQData.OriginTime ? NormalizeDate(8, EQData.OriginTime) : "");
   text = text.replaceAll("{origin_time2}", EQData.OriginTime ? dif.num + dif.unit + "前" : "先ほど");
   text = text.replaceAll("{region_name}", EQData.epiCenter ? EQData.epiCenter : "");
   text = text.replaceAll("{magnitude}", EQData.M ? EQData.M : "");
@@ -3308,8 +3308,8 @@ function GenerateEEWText(EEWData, update) {
   text = text.replaceAll("{training}", EEWData.is_training ? "訓練報。" : "");
   text = text.replaceAll("{training2}", EEWData.is_training ? "これは訓練報です。" : "");
   text = text.replaceAll("{region_name}", EEWData.region_name ? EEWData.region_name : "");
-  text = text.replaceAll("{report_time}", EEWData.report_time ? NormalizeDate(7, EEWData.report_time) : "");
-  text = text.replaceAll("{origin_time}", EEWData.origin_time ? NormalizeDate(7, EEWData.origin_time) : "");
+  text = text.replaceAll("{report_time}", EEWData.report_time ? NormalizeDate(8, EEWData.report_time) : "");
+  text = text.replaceAll("{origin_time}", EEWData.origin_time ? NormalizeDate(8, EEWData.origin_time) : "");
   if (EEWData.warnZones && EEWData.warnZones.length) {
     var userSect = EEWData.warnZones.find(function (elm2) {
       return elm2.Name == config.home.Section;
@@ -3369,6 +3369,11 @@ function NormalizeDate(type, dateTmp) {
   var hh = String(dateTmp.getHours()).padStart(2, "0");
   var mm = String(dateTmp.getMinutes()).padStart(2, "0");
   var ss = String(dateTmp.getSeconds()).padStart(2, "0");
+  var M = String(dateTmp.getMonth() + 1);
+  var D = String(dateTmp.getDate());
+  var h = String(dateTmp.getHours());
+  var m = String(dateTmp.getMinutes());
+  var s = String(dateTmp.getSeconds());
   switch (type) {
     case 1:
       return YYYY + MM + DD + hh + mm + ss;
@@ -3384,6 +3389,8 @@ function NormalizeDate(type, dateTmp) {
       return hh + ":" + mm;
     case 7:
       return hh + "時" + mm + "分" + ss + "秒";
+    case 8:
+      return h + "時" + m + "分" + s + "秒";
     default:
       return new Date();
   }
