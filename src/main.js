@@ -2455,6 +2455,7 @@ function Req_JMAXML(url, count) {
                 M: Number(magTmp),
                 maxI: null,
                 cancel: Boolean(cancel),
+                reportDateTime: new Date(xml.getElementsByTagName("ReportDateTime")[0].textContent),
                 DetailURL: [url],
                 axisData: null,
               });
@@ -3039,7 +3040,7 @@ function ConvertEQInfo(dataList, type, EEW, count) {
 
           eqInfoTmp.push(data);
           eqInfo.jma.push(data);
-          if ((!Boolean2(count) || count > 0) && data.category !== "EEW") playAudio = true;
+          if (count !== 0 && data.category !== "EEW") playAudio = true;
         }
       });
 
