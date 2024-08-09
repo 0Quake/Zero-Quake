@@ -1944,7 +1944,7 @@ function tsunamiDataUpdate(data) {
 
               if (elm2.Conditions) condition = elm2.Conditions;
 
-              if (elm2.HighTideDateTime) HighTideDateTime = "満潮：" + NormalizeDate(5, elm2.HighTideDateTime);
+              if (elm2.HighTideDateTime) HighTideDateTime = "満潮：" + NormalizeDate(6, elm2.HighTideDateTime);
 
               if (elm2.omaxHeight) {
                 omaxHeight = elm2.omaxHeight;
