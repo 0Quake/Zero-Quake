@@ -539,6 +539,7 @@ td {
 .description {
   color: #999;
   font-size: 12px;
+  padding: 3px 8px;
 }
 .pointName {
   display: inline-block;

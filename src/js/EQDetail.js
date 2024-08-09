@@ -1424,7 +1424,7 @@ function add_Area_info(name, maxInt) {
 
     var maxIntStr = NormalizeShindo(maxInt, 1);
     var AreaPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<div class='popupContent'><div class='shindoItem_S' style='background:" + color[0] + ";color:" + color[1] + "'>震度 " + maxIntStr + "</div><div class='pointName'>" + name + "</div><div class='pointHead'>細分区域</div></div><div></div>");
-    markerElm = new maplibregl.Marker({ element: icon }).setLngLat([pointLocation[1], pointLocation[0]]).setPopup(AreaPopup).addTo(map);
+    markerElm = new maplibregl.Marker({ element: icon }).setLngLat([pointLocation[1], pointLocation[0]]).setPopup(AreaPopup);
     intensityIcons.push(markerElm);
     ZoomBounds.extend([pointLocation[1], pointLocation[0]]);
   }
@@ -1553,6 +1553,11 @@ function DrawIntensityCORE(data) {
       });
     }
   });
+
+  intensityIcons.forEach(function (icon) {
+    icon.addTo(map);
+  });
+
   document.getElementById("Shindo").appendChild(ShindoFragment);
   console.timeEnd("a");
 
