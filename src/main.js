@@ -886,8 +886,8 @@ function Create_TsunamiWindow() {
 var NankaiWindow = { type: null, window: null };
 function Create_NankaiWindow(type) {
   try {
-    if (NankaiWindow.window.isMinimized()) NankaiWindow.window.restore();
-    if (!NankaiWindow.window.isFocused()) NankaiWindow.window.focus();
+    if (NankaiWindow.window && NankaiWindow.window.isMinimized()) NankaiWindow.window.restore();
+    if (NankaiWindow.window && !NankaiWindow.window.isFocused()) NankaiWindow.window.focus();
 
     if (NankaiWindow.window) {
       if (NankaiWindow.type == type) {
