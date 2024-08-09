@@ -2334,7 +2334,6 @@ function UpdateEQInfo(roop) {
     Req_JMAXMLList(EQInfoFetchCount == 0, EQInfoFetchCount);
     Req_NarikakunList("https://ntool.online/api/earthquakeList?year=" + new Date().getFullYear() + "&month=" + (new Date().getMonth() + 1), 10, true, EQInfoFetchCount);
     Req_USGS();
-    REQ_JMAList();
   } catch (err) {
     throw new Error("地震情報の処理でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
   }
@@ -2353,7 +2352,7 @@ function Req_JMAXMLList(LongPeriodFeed, count) {
       res.on("end", function () {
         try {
           const parser = new new JSDOM().window.DOMParser();
-          const xml = parser.parseFromString(dataTmp, "text/html");
+          const xml = parser.parseFromString(dataTmp, "text/xml");
           if (!xml) return;
           var EQInfoCount = 0;
           Array.prototype.forEach.call(xml.getElementsByTagName("entry"), function (elm) {
@@ -2367,6 +2366,22 @@ function Req_JMAXMLList(LongPeriodFeed, count) {
               EQInfoCount++;
             } else if (title == "津波情報a" || title == "津波警報・注意報・予報a") Req_JMAXML(url, count);
           });
+
+          var nankai = Array.from(xml.getElementsByTagName("entry")).find(function (elm) {
+            var ttl = elm.getElementsByTagName("title")[0];
+            return ttl && ttl.textContent.startsWith("南海トラフ地震関連解説情報");
+          });
+
+          if (nankai) Req_JMAXML(nankai.getElementsByTagName("link")[0].getAttribute("href"));
+
+          var nankai = Array.from(xml.getElementsByTagName("entry")).forEach(function (elm) {
+            var ttl = elm.getElementsByTagName("title")[0];
+
+            if (ttl && ttl.textContent.startsWith("南海トラフ地震臨時情報") && Number(new Date() - new Date(elm.getElementsByTagName("updated")[0].textContent)) <= 1209600000) {
+              Req_JMAXML(elm.getElementsByTagName("link")[0].getAttribute("href"));
+            }
+          });
+
           UpdateStatus(new Date() - Replay, "JMAXML", "success");
         } catch (err) {
           UpdateStatus(new Date() - Replay, "JMAXML", "Error");
@@ -2395,10 +2410,10 @@ function Req_JMAXML(url, count) {
       res.on("end", function () {
         try {
           const parser = new new JSDOM().window.DOMParser();
-          const xml = parser.parseFromString(dataTmp, "text/html");
+          const xml = parser.parseFromString(dataTmp, "text/xml");
           if (!xml) return false;
 
-          var title = xml.title;
+          var title = xml.getElementsByTagName("Control")[0].getElementsByTagName("Title")[0].textContent;
           var cancel = xml.getElementsByTagName("InfoType")[0].textContent == "取消";
 
           if (title == "震度速報" || title == "震源に関する情報" || title == "震源・震度に関する情報" || title == "長周期地震動に関する観測情報" || title == "遠地地震に関する情報" || title == "顕著な地震の震源要素更新のお知らせ") {
@@ -2427,7 +2442,7 @@ function Req_JMAXML(url, count) {
                 {
                   status: xml.getElementsByTagName("Status")[0].textContent,
                   eventId: xml.getElementsByTagName("EventID")[0].textContent,
-                  category: xml.title,
+                  category: xml.getElementsByTagName("Title")[0].textContent,
                   OriginTime: originTimeTmp,
                   epiCenter: epiCenterTmp,
                   M: Number(magnitudeTmp),
@@ -2443,6 +2458,69 @@ function Req_JMAXML(url, count) {
               false,
               count
             );
+          } else if (title == "南海トラフ地震関連解説情報" || title == "南海トラフ地震臨時情報") {
+            try {
+              var data = {
+                title: title, //南海トラフ地震関連解説情報など
+                kind: null, //定例など
+                reportDate: new Date(xml.getElementsByTagName("ReportDateTime")[0].textContent), //時刻
+                HeadLine: xml.getElementsByTagName("Headline")[0].getElementsByTagName("Text")[0].textContent, //要約
+                Text: "",
+                Appendix: "",
+                NextAdvisory: "",
+                Text2: "",
+              };
+              var Body = xml.getElementsByTagName("Body")[0];
+              var EarthQuakeInfo = Body.getElementsByTagName("EarthquakeInfo")[0];
+              if (EarthQuakeInfo) {
+                if (EarthQuakeInfo.getElementsByTagName("InfoSerial")[0]) data.kind = EarthQuakeInfo.getElementsByTagName("InfoSerial")[0].getElementsByTagName("Name")[0].textContent;
+                data.Text = EarthQuakeInfo.getElementsByTagName("Text")[0].textContent;
+                if (EarthQuakeInfo.getElementsByTagName("Appendix")[0]) data.Appendix = EarthQuakeInfo.getElementsByTagName("Appendix")[0].textContent;
+              }
+              if (Body.getElementsByTagName("NextAdvisory")[0]) data.NextAdvisory = Body.getElementsByTagName("NextAdvisory")[0].textContent;
+
+              var Text2Elm = Array.from(xml.getElementsByTagName("Body")[0].children).find(function (elm) {
+                return elm.tagName == "Text";
+              });
+              if (Text2Elm) data.Text2 = Text2Elm.textContent;
+
+              NankaiTroughInfoAll.push(data);
+              NankaiTroughInfoAll = NankaiTroughInfoAll.sort(function (a, b) {
+                return a.reportDate > b.reportDate ? -1 : 1;
+              });
+
+              var teirei;
+              var rinji = NankaiTroughInfoAll.find(function (elm) {
+                var offset = Number(new Date() - new Date(elm.reportDate));
+                return elm.title.startsWith("南海トラフ地震臨時情報") && ((elm.kind == "巨大地震警戒" && offset <= 1209600000) || elm.kind == "巨大地震注意" || elm.kind == "調査中" || (elm.kind == "調査終了" && offset <= 604800000));
+              });
+              if (rinji) {
+                teirei = NankaiTroughInfoAll.find(function (elm) {
+                  return elm.title.startsWith("南海トラフ地震関連解説情報") && new Date(rinji.reportDate) <= new Date(elm.reportDate);
+                });
+              } else {
+                teirei = NankaiTroughInfoAll[0];
+              }
+
+              NankaiTroughInfo = { rinji: rinji, teirei: teirei };
+
+              messageToMainWindow({
+                action: "NankaiTroughInfo",
+                data: NankaiTroughInfo,
+              });
+
+              if (NankaiWindow.window) {
+                var data = NankaiWindow.type == "rinji" ? NankaiTroughInfo.rinji : NankaiTroughInfo.teirei;
+                if (data) {
+                  NankaiWindow.window.webContents.send("message2", {
+                    action: "NankaiTroughInfo",
+                    data: data,
+                  });
+                }
+              }
+            } catch (err) {
+              console.log(err);
+            }
           } else if (title == "津波情報a" || title == "津波警報・注意報・予報a" || title == "沖合の津波観測に関する情報") {
             //津波予報
             var tsunamiDataTmp;
@@ -2681,123 +2759,6 @@ function Req_JMAXML(url, count) {
 
 var NankaiTroughInfo = { rinji: null, teirei: null };
 var NankaiTroughInfoAll = [];
-
-//気象庁HPリクエスト
-function REQ_JMAList() {
-  if (net.online) {
-    var request = net.request("https://www.jma.go.jp/bosai/quake/data/list.json");
-    request.on("response", (res) => {
-      var dataTmp = "";
-      res.on("data", (chunk) => {
-        dataTmp += chunk;
-      });
-      res.on("end", function () {
-        try {
-          var json = ParseJSON(dataTmp);
-          if (!json) return false;
-          var nankai = json.find(function (elm) {
-            return elm.ttl.startsWith("南海トラフ地震関連解説情報");
-          });
-          if (nankai) REQ_JMA("https://www.jma.go.jp/bosai/quake/data/" + nankai.json);
-
-          json.forEach(function (elm) {
-            if (elm.ttl.startsWith("南海トラフ地震臨時情報") && Number(new Date() - new Date(elm.rdt)) <= 1209600000) {
-              REQ_JMA("https://www.jma.go.jp/bosai/quake/data/" + elm.json);
-            }
-          });
-        } catch (err) {
-          UpdateStatus(new Date() - Replay, "JMAHP", "Error");
-        }
-      });
-    });
-    request.on("error", () => {
-      UpdateStatus(new Date() - Replay, "JMAHP", "Error");
-    });
-    request.end();
-  } else UpdateStatus(new Date() - Replay, "JMAHP", "Error");
-}
-
-//気象庁HPリクエスト（南海トラフ関連）v
-var Nankai_fetchedURL = [];
-function REQ_JMA(url) {
-  if (net.online && !Nankai_fetchedURL.includes(url)) {
-    var request = net.request(url);
-    request.on("response", (res) => {
-      var dataTmp = "";
-      res.on("data", (chunk) => {
-        dataTmp += chunk;
-      });
-      res.on("end", function () {
-        try {
-          Nankai_fetchedURL.push(url);
-          var json = ParseJSON(dataTmp);
-          if (!json) return false;
-
-          var data = {
-            title: json.Control.Title, //南海トラフ地震関連解説情報など
-            kind: null, //定例など
-            reportDate: new Date(json.Head.ReportDateTime), //時刻
-            HeadLine: json.Head.Headline.Text, //要約
-            Text: "",
-            Appendix: "",
-            NextAdvisory: "",
-            Text2: "",
-          };
-          if (json.Body.EarthquakeInfo) {
-            if (json.Body.EarthquakeInfo.InfoSerial) data.kind = json.Body.EarthquakeInfo.InfoSerial.Name;
-            data.Text = json.Body.EarthquakeInfo.Text;
-            if (json.Body.EarthquakeInfo.Appendix) data.Appendix = json.Body.EarthquakeInfo.Appendix;
-          }
-          if (json.Body.NextAdvisory) data.NextAdvisory = json.Body.NextAdvisory;
-          if (json.Body.Text) data.Text2 = json.Body.Text.reportDate;
-
-          NankaiTroughInfoAll.push(data);
-          NankaiTroughInfoAll = NankaiTroughInfoAll.sort(function (a, b) {
-            return a.reportDate > b.reportDate ? -1 : 1;
-          });
-
-          var teirei;
-          var rinji = NankaiTroughInfoAll.find(function (elm) {
-            var offset = Number(new Date() - new Date(elm.reportDate));
-            return elm.title.startsWith("南海トラフ地震臨時情報") && ((elm.kind == "巨大地震警戒" && offset <= 1209600000) || elm.kind == "巨大地震注意" || elm.kind == "調査中" || (elm.kind == "調査終了" && offset <= 604800000));
-          });
-          if (rinji) {
-            teirei = NankaiTroughInfoAll.find(function (elm) {
-              return elm.title.startsWith("南海トラフ地震関連解説情報") && new Date(rinji.reportDate) <= new Date(elm.reportDate);
-            });
-          } else {
-            teirei = NankaiTroughInfoAll[0];
-          }
-
-          NankaiTroughInfo = { rinji: rinji, teirei: teirei };
-
-          messageToMainWindow({
-            action: "NankaiTroughInfo",
-            data: NankaiTroughInfo,
-          });
-
-          if (NankaiWindow.window) {
-            var data = NankaiWindow.type == "rinji" ? NankaiTroughInfo.rinji : NankaiTroughInfo.teirei;
-            if (data) {
-              NankaiWindow.window.webContents.send("message2", {
-                action: "NankaiTroughInfo",
-                data: data,
-              });
-            }
-          }
-
-          UpdateStatus(new Date() - Replay, "JMAHP", "success");
-        } catch (err) {
-          UpdateStatus(new Date() - Replay, "JMAHP", "Error");
-        }
-      });
-    });
-    request.on("error", () => {
-      UpdateStatus(new Date() - Replay, "JMAHP", "Error");
-    });
-    request.end();
-  } else UpdateStatus(new Date() - Replay, "JMAHP", "Error");
-}
 
 //USGS 取得・フォーマット変更→ConvertEQInfo
 var usgsLastGenerated = 0;
