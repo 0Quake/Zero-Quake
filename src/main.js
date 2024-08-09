@@ -2,7 +2,7 @@ process.env.TZ = "Asia/Tokyo";
 
 //リプレイ
 var Replay = 0;
-var MainWindow, SettingWindow, TsunamiWindow, WorkerWindow, NankaiWindow;
+var MainWindow, SettingWindow, TsunamiWindow, WorkerWindow;
 var worker;
 function replay(ReplayDate) {
   if (ReplayDate) {
@@ -588,7 +588,7 @@ ipcMain.on("message", (_event, response) => {
       replay(response.date);
       break;
     case "NankaiWindowOpen":
-      Create_NankaiWindow();
+      Create_NankaiWindow(response.type);
       break;
     case "internetConnection":
       if (response.internetConnection) {
@@ -883,42 +883,50 @@ function Create_TsunamiWindow() {
   }
 }
 //南海トラフ関連情報ウィンドウの作成
-function Create_NankaiWindow() {
+var NankaiWindow = { type: null, window: null };
+function Create_NankaiWindow(type) {
   try {
-    if (NankaiWindow) {
-      if (NankaiWindow.isMinimized()) NankaiWindow.restore();
-      if (!NankaiWindow.isFocused()) NankaiWindow.focus();
-      return false;
+    if (NankaiWindow.window) {
+      if (NankaiWindow.type == type) {
+        //同じ情報について表示していたならそのウィンドウを再表示しておわる
+        if (NankaiWindow.window.isMinimized()) NankaiWindow.window.restore();
+        if (!NankaiWindow.window.isFocused()) NankaiWindow.window.focus();
+        return false;
+      } else NankaiWindow.type = type;
+    } else {
+      NankaiWindow.type = type;
+      NankaiWindow.window = new BrowserWindow({
+        minWidth: 600,
+        minHeight: 300,
+        icon: path.join(__dirname, "img/icon.ico"),
+        webPreferences: {
+          preload: path.join(__dirname, "js/preload.js"),
+          title: "南海トラフ地震に関連する情報 - Zero Quake",
+        },
+        backgroundColor: "#202227",
+        alwaysOnTop: config.system.alwaysOnTop,
+      });
+
+      NankaiWindow.window.webContents.on("did-finish-load", () => {
+        var data = NankaiWindow.type == "rinji" ? NankaiTroughInfo.rinji : NankaiTroughInfo.teirei;
+        if (data) {
+          NankaiWindow.window.webContents.send("message2", {
+            action: "NankaiTroughInfo",
+            data: data,
+          });
+          NankaiWindow.window.webContents.send("message2", {
+            action: "setting",
+            data: config,
+          });
+        }
+      });
+
+      NankaiWindow.window.on("closed", () => {
+        NankaiWindow = {};
+      });
     }
-    NankaiWindow = new BrowserWindow({
-      minWidth: 600,
-      minHeight: 300,
-      icon: path.join(__dirname, "img/icon.ico"),
-      webPreferences: {
-        preload: path.join(__dirname, "js/preload.js"),
-        title: "南海トラフ地震に関連する情報 - Zero Quake",
-      },
-      backgroundColor: "#202227",
-      alwaysOnTop: config.system.alwaysOnTop,
-    });
 
-    NankaiWindow.webContents.on("did-finish-load", () => {
-      if (NankaiTroughInfo) {
-        NankaiWindow.webContents.send("message2", {
-          action: "NankaiTroughInfo",
-          data: NankaiTroughInfo,
-        });
-        NankaiWindow.webContents.send("message2", {
-          action: "setting",
-          data: config,
-        });
-      }
-    });
-    NankaiWindow.loadFile("src/NankaiTrough.html");
-
-    NankaiWindow.on("closed", () => {
-      NankaiWindow = null;
-    });
+    NankaiWindow.window.loadFile("src/NankaiTrough.html");
   } catch (err) {
     throw new Error("南海トラフ関連情報ウィンドウの作成でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
   }
@@ -2671,7 +2679,8 @@ function Req_JMAXML(url, count) {
   } else UpdateStatus(new Date() - Replay, "JMAXML", "Error");
 }
 
-var NankaiTroughInfo;
+var NankaiTroughInfo = { rinji: null, teirei: null };
+var NankaiTroughInfoAll = [];
 
 //気象庁HPリクエスト
 function REQ_JMAList() {
@@ -2687,11 +2696,15 @@ function REQ_JMAList() {
           var json = ParseJSON(dataTmp);
           if (!json) return false;
           var nankai = json.find(function (elm) {
-            return elm.ttl == "南海トラフ地震関連解説情報" || elm.ttl.startsWith("南海トラフ地震臨時情報");
+            return elm.ttl.startsWith("南海トラフ地震関連解説情報");
           });
           if (nankai) REQ_JMA("https://www.jma.go.jp/bosai/quake/data/" + nankai.json);
 
-          UpdateStatus(new Date() - Replay, "JMAHP", "success");
+          json.forEach(function (elm) {
+            if (elm.ttl.startsWith("南海トラフ地震臨時情報") && Number(new Date() - new Date(elm.rdt)) <= 1209600000) {
+              REQ_JMA("https://www.jma.go.jp/bosai/quake/data/" + elm.json);
+            }
+          });
         } catch (err) {
           UpdateStatus(new Date() - Replay, "JMAHP", "Error");
         }
@@ -2704,9 +2717,10 @@ function REQ_JMAList() {
   } else UpdateStatus(new Date() - Replay, "JMAHP", "Error");
 }
 
-//気象庁HPリクエスト
+//気象庁HPリクエスト（南海トラフ関連）v
+var Nankai_fetchedURL = [];
 function REQ_JMA(url) {
-  if (net.online) {
+  if (net.online && !Nankai_fetchedURL.includes(url)) {
     var request = net.request(url);
     request.on("response", (res) => {
       var dataTmp = "";
@@ -2715,6 +2729,7 @@ function REQ_JMA(url) {
       });
       res.on("end", function () {
         try {
+          Nankai_fetchedURL.push(url);
           var json = ParseJSON(dataTmp);
           if (!json) return false;
 
@@ -2736,21 +2751,41 @@ function REQ_JMA(url) {
           if (json.Body.NextAdvisory) data.NextAdvisory = json.Body.NextAdvisory;
           if (json.Body.Text) data.Text2 = json.Body.Text.reportDate;
 
-          if (!NankaiTroughInfo || NankaiTroughInfo.reportDate < data.reportDate) {
-            NankaiTroughInfo = data;
+          NankaiTroughInfoAll.push(data);
+          NankaiTroughInfoAll = NankaiTroughInfoAll.sort(function (a, b) {
+            return a.reportDate > b.reportDate ? -1 : 1;
+          });
 
-            messageToMainWindow({
-              action: "NankaiTroughInfo",
-              data: NankaiTroughInfo,
+          var teirei;
+          var rinji = NankaiTroughInfoAll.find(function (elm) {
+            var offset = Number(new Date() - new Date(elm.reportDate));
+            return elm.title.startsWith("南海トラフ地震臨時情報") && ((elm.kind == "巨大地震警戒" && offset <= 1209600000) || elm.kind == "巨大地震注意" || elm.kind == "調査中" || (elm.kind == "調査終了" && offset <= 604800000));
+          });
+          if (rinji) {
+            teirei = NankaiTroughInfoAll.find(function (elm) {
+              return elm.title.startsWith("南海トラフ地震関連解説情報") && new Date(rinji.reportDate) <= new Date(elm.reportDate);
             });
+          } else {
+            teirei = NankaiTroughInfoAll[0];
+          }
 
-            if (NankaiWindow) {
-              NankaiWindow.webContents.send("message2", {
+          NankaiTroughInfo = { rinji: rinji, teirei: teirei };
+
+          messageToMainWindow({
+            action: "NankaiTroughInfo",
+            data: NankaiTroughInfo,
+          });
+
+          if (NankaiWindow.window) {
+            var data = NankaiWindow.type == "rinji" ? NankaiTroughInfo.rinji : NankaiTroughInfo.teirei;
+            if (data) {
+              NankaiWindow.window.webContents.send("message2", {
                 action: "NankaiTroughInfo",
-                data: NankaiTroughInfo,
+                data: data,
               });
             }
           }
+
           UpdateStatus(new Date() - Replay, "JMAHP", "success");
         } catch (err) {
           UpdateStatus(new Date() - Replay, "JMAHP", "Error");

@@ -2096,28 +2096,47 @@ function tsunamiPopup(e) {
 
 //🔴南海トラフ情報🔴
 function NankaiTroughInfo(data) {
-  document.getElementById("NankaiTroughInfo").addEventListener("click", function () {
-    window.electronAPI.messageReturn({
-      action: "NankaiWindowOpen",
+  console.log(data.rinji);
+  console.log(data.teirei);
+  if (data.rinji) {
+    document.getElementById("NankaiTroughInfo_Rinji").addEventListener("click", function () {
+      window.electronAPI.messageReturn({
+        action: "NankaiWindowOpen",
+        type: "rinji",
+      });
     });
-  });
-  document.getElementById("NankaiTroughInfo").style.display = "block";
-  document.getElementById("NankaiTroughInfo").setAttribute("title", "クリックして詳細を表示\n" + data.HeadLine);
-  document.getElementById("Nankai_Title").innerText = data.title + " (" + data.kind + ")";
-  document.getElementById("NankaiTroughInfo").classList.remove("nankaiAlert", "nankaiWarn", "nankaiInfo");
-  switch (data.kind) {
-    case "巨大地震警戒":
-      document.getElementById("NankaiTroughInfo").classList.add("nankaiAlert");
-      break;
-    case "巨大地震注意":
-    case "臨時解説":
-      document.getElementById("NankaiTroughInfo").classList.add("nankaiWarn");
-      break;
-    case "調査終了":
-    case "調査中":
-      document.getElementById("NankaiTroughInfo").classList.add("nankaiInfo");
-      break;
-  }
+    document.getElementById("NankaiTroughInfo_Rinji").style.display = "block";
+    document.getElementById("NankaiTroughInfo_Rinji").setAttribute("title", "クリックして詳細を表示\n" + data.rinji.HeadLine);
+    document.getElementById("Nankai_Title_Rinji").innerText = data.rinji.title + " (" + data.rinji.kind + ")";
+    document.getElementById("NankaiTroughInfo_Rinji").classList.remove("nankaiAlert", "nankaiWarn", "nankaiInfo");
+    switch (data.rinji.kind) {
+      case "巨大地震警戒":
+        document.getElementById("NankaiTroughInfo_Rinji").classList.add("nankaiAlert");
+        break;
+      case "巨大地震注意":
+        document.getElementById("NankaiTroughInfo_Rinji").classList.add("nankaiWarn");
+        break;
+      case "調査終了":
+      case "調査中":
+        document.getElementById("NankaiTroughInfo_Rinji").classList.add("nankaiInfo");
+        break;
+    }
+  } else document.getElementById("NankaiTroughInfo_Rinji").style.display = "none";
+
+  if (data.teirei) {
+    document.getElementById("NankaiTroughInfo_Teirei").addEventListener("click", function () {
+      window.electronAPI.messageReturn({
+        action: "NankaiWindowOpen",
+        type: "teirei",
+      });
+    });
+    document.getElementById("NankaiTroughInfo_Teirei").style.display = "block";
+    document.getElementById("NankaiTroughInfo_Teirei").setAttribute("title", "クリックして詳細を表示\n" + data.teirei.HeadLine);
+    document.getElementById("Nankai_Title_Teirei").innerText = data.teirei.title + " (" + data.teirei.kind + ")";
+    document.getElementById("NankaiTroughInfo_Teirei").classList.remove("nankaiAlert", "nankaiWarn", "nankaiInfo");
+
+    if (data.teirei.kind == "臨時解説") document.getElementById("NankaiTroughInfo_Teirei").classList.add("nankaiWarn");
+  } else document.getElementById("NankaiTroughInfo_Teirei").style.display = "none";
 }
 
 function hinanjoPopup(e) {
