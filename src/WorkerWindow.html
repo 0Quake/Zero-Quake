@@ -122,7 +122,7 @@
               speak(text, "Default")
             });
         } else {
-          fetch("http://localhost:50080/GetVoiceList").then(function (res) {
+          fetch(`http://localhost:${config.notice.voice_parameter.Boyomi_Port}/GetVoiceList`).then(function (res) {
             return res.json()
           }).then(function (json) {
             var voice_parameter = "";
