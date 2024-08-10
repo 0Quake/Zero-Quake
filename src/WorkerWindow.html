@@ -131,11 +131,14 @@
             })
             if (voiceElm) voice_parameter = "&voice=" + config.notice.voice_parameter.Boyomi_Voice;
 
-            fetch(`http://localhost:${config.notice.voice_parameter.Boyomi_Port}/clear`)
+            fetch(`http://localhost:${config.notice.voice_parameter.Boyomi_Port}/skip`)
               .then(function () {
-                fetch(`http://localhost:${config.notice.voice_parameter.Boyomi_Port}/Talk?text=${text}${voice_parameter}&speed=${Rate * 100}&volume=${Volume * 100}&tone=${Pitch * 100}`)
-                  .catch(function (err) {
-                    speak(text, "Default")
+                fetch(`http://localhost:${config.notice.voice_parameter.Boyomi_Port}/clear`)
+                  .then(function () {
+                    fetch(`http://localhost:${config.notice.voice_parameter.Boyomi_Port}/Talk?text=${text}${voice_parameter}&speed=${Rate * 100}&volume=${Volume * 100}&tone=${Pitch * 100}`)
+                      .catch(function (err) {
+                        speak(text, "Default")
+                      });
                   });
               });
 
