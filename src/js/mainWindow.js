@@ -5,7 +5,6 @@ var Tsunami_MajorWarning, Tsunami_Warning, Tsunami_Watch, Tsunami_Yoho;
 var psWaveList = [];
 var tsunamiAlertNow = false;
 var hinanjoLayers = [];
-var hinanjoCheck = document.getElementById("hinanjo");
 var knet_already_draw = false;
 var now_EEW = [];
 var Replay = 0;
@@ -1120,7 +1119,8 @@ function init() {
   });
 
   map.on("sourcedataloading", (e) => {
-    if (e.sourceId == "hinanjo" && hinanjoCheck.checked && e.tile != undefined) {
+    var hinanjoCheck = config.data.overlay.includes("hinanjo");
+    if (e.sourceId == "hinanjo" && hinanjoCheck && e.tile != undefined) {
       var ca = e.tile.tileID.canonical;
       if (map.getLayer("hinanjo_eq_" + ca.x + ca.y + ca.z)) map.removeLayer("hinanjo_eq_" + ca.x + ca.y + ca.z);
       if (map.getSource("hinanjo_eq_" + ca.x + ca.y + ca.z)) map.removeSource("hinanjo_eq_" + ca.x + ca.y + ca.z);
@@ -1136,7 +1136,7 @@ function init() {
         id: "hinanjo_eq_" + ca.x + ca.y + ca.z,
         type: "circle",
         source: "hinanjo_eq_" + ca.x + ca.y + ca.z,
-        layout: { visibility: hinanjoCheck.checked ? "visible" : "none" },
+        layout: { visibility: hinanjoCheck ? "visible" : "none" },
         paint: {
           "circle-color": "#bf8715",
           "circle-radius": 6,
@@ -1156,7 +1156,7 @@ function init() {
         id: "hinanjo_ts_" + ca.x + ca.y + ca.z,
         type: "circle",
         source: "hinanjo_ts_" + ca.x + ca.y + ca.z,
-        layout: { visibility: hinanjoCheck.checked ? "visible" : "none" },
+        layout: { visibility: hinanjoCheck ? "visible" : "none" },
         paint: {
           "circle-color": "#2488c7",
           "circle-radius": 6,
@@ -1284,7 +1284,7 @@ function init() {
     layerSelect(config.data.layer);
     radioSet("mapSelect", config.data.layer);
     config.data.overlay.forEach(function (elm) {
-      document.getElementById(elm).checked = true;
+      if (document.getElementById(elm)) document.getElementById(elm).checked = true;
       overlaySelect(elm, true);
     });
     overlaySelect("kmoni_points", config.data.kmoni_points_show);
@@ -2123,7 +2123,7 @@ function hinanjoPopup(e) {
   supportType = supportType.join(", ");
   new maplibregl.Popup({ offset: 20 })
     .setLngLat(e.lngLat)
-    .setHTML("<h3>指定緊急避難場所</h3><p>" + DataTmp.name + "</p>対応：" + supportType + (DataTmp.remarks ? "<div>" + DataTmp.remarks + "</div>" : ""))
+    .setHTML(`<div class='popupContent'><div class='hinanjoTitle'>指定緊急避難場所</div><div class="pointName">${DataTmp.name}</div><div class='popupContent'>対応：${supportType + (DataTmp.remarks ? "<div>" + DataTmp.remarks + "</div>" : "")}</div></div>`)
     .addTo(map);
 }
 

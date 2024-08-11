@@ -429,7 +429,8 @@ function Mapinit() {
   ZoomBounds = new maplibregl.LngLatBounds();
 
   map.on("sourcedataloading", (e) => {
-    if (e.sourceId == "hinanjo" && hinanjoCheck.checked && e.tile != undefined) {
+    var hinanjoShow = config.data.overlay.includes("hinanjo");
+    if (e.sourceId == "hinanjo" && hinanjoShow && e.tile != undefined) {
       var ca = e.tile.tileID.canonical;
       if (map.getLayer("hinanjo_eq_" + ca.x + ca.y + ca.z)) map.removeLayer("hinanjo_eq_" + ca.x + ca.y + ca.z);
       if (map.getSource("hinanjo_eq_" + ca.x + ca.y + ca.z)) map.removeSource("hinanjo_eq_" + ca.x + ca.y + ca.z);
@@ -445,7 +446,7 @@ function Mapinit() {
         id: "hinanjo_eq_" + ca.x + ca.y + ca.z,
         type: "circle",
         source: "hinanjo_eq_" + ca.x + ca.y + ca.z,
-        layout: { visibility: hinanjoCheck.checked ? "visible" : "none" },
+        layout: { visibility: hinanjoShow ? "visible" : "none" },
         paint: {
           "circle-color": "#bf8715",
           "circle-radius": 6,
@@ -465,7 +466,7 @@ function Mapinit() {
         id: "hinanjo_ts_" + ca.x + ca.y + ca.z,
         type: "circle",
         source: "hinanjo_ts_" + ca.x + ca.y + ca.z,
-        layout: { visibility: hinanjoCheck.checked ? "visible" : "none" },
+        layout: { visibility: hinanjoShow ? "visible" : "none" },
         paint: {
           "circle-color": "#2488c7",
           "circle-radius": 6,
@@ -584,8 +585,8 @@ function Mapinit() {
     InfoFetch();
 
     config.data.overlay.forEach(function (elm) {
-      overlaySelect(elm, true);
       if (document.getElementById(elm)) document.getElementById(elm).checked = true;
+      overlaySelect(elm, true);
     });
   });
 
@@ -1955,7 +1956,7 @@ function hinanjoPopup(e) {
   supportType = supportType.join(", ");
   new maplibregl.Popup({ offset: 20 })
     .setLngLat(e.lngLat)
-    .setHTML("<h3>指定緊急避難場所</h3><p>" + DataTmp.name + "</p>対応：" + supportType + (DataTmp.remarks ? "<div>" + DataTmp.remarks + "</div>" : ""))
+    .setHTML(`<div class='popupContent'><div class='hinanjoTitle'>指定緊急避難場所</div><div class="pointName">${DataTmp.name}</div><div class='popupContent'>対応：${supportType + (DataTmp.remarks ? "<div>" + DataTmp.remarks + "</div>" : "")}</div></div>`)
     .addTo(map);
 }
 

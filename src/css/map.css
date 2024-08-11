@@ -164,7 +164,7 @@
   color: #fff;
   font-size: 14px;
   border-radius: 3px;
-
+  max-width: 400px;
   border: solid 1px #888;
 }
 .maplibregl-popup-wrapper {
@@ -670,6 +670,23 @@ body {
   padding: 5px;
   text-align: center;
 }
+.hinanjoTitle {
+  display: inline-block;
+  font-family: "M PLUS 1p", sans-serif;
+  margin-right: 5px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgb(47, 101, 57);
+  color: #fff;
+}
+.popupContent {
+  padding: 4px;
+}
+.pointName {
+  display: inline-block;
+  margin: 0 30px 0 5px;
+}
+
 @media (max-width: 600px) {
   #sideBar.close #sokuho-Panel {
     max-height: max(200px, 50vh);
@@ -679,14 +696,6 @@ body {
 
   #mainContent {
     display: block;
-  }
-  #sideBar {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    height: 100%;
-    z-index: 100000000;
   }
   #sideBar.close #sokuho-Panel {
     display: block;

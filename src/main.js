@@ -618,7 +618,7 @@ function CreateMainWindow() {
       if (!MainWindow.isVisible()) MainWindow.show();
     } else {
       MainWindow = new BrowserWindow({
-        minWidth: 450,
+        minWidth: 650,
         minHeight: 400,
         icon: path.join(__dirname, "img/icon.ico"),
         webPreferences: {
@@ -796,8 +796,8 @@ function Create_SettingWindow(update) {
     }
 
     SettingWindow = new BrowserWindow({
-      minWidth: 600,
-      minHeight: 300,
+      minWidth: 650,
+      minHeight: 400,
       icon: path.join(__dirname, "img/icon.ico"),
       webPreferences: {
         preload: path.join(__dirname, "js/preload.js"),
@@ -852,8 +852,8 @@ function Create_TsunamiWindow() {
       return false;
     }
     TsunamiWindow = new BrowserWindow({
-      minWidth: 600,
-      minHeight: 300,
+      minWidth: 650,
+      minHeight: 400,
       icon: path.join(__dirname, "img/icon.ico"),
       webPreferences: {
         preload: path.join(__dirname, "js/preload.js"),
@@ -897,8 +897,8 @@ function Create_NankaiWindow(type) {
     } else {
       NankaiWindow.type = type;
       NankaiWindow.window = new BrowserWindow({
-        minWidth: 600,
-        minHeight: 300,
+        minWidth: 650,
+        minHeight: 400,
         icon: path.join(__dirname, "img/icon.ico"),
         webPreferences: {
           preload: path.join(__dirname, "js/preload.js"),
@@ -954,8 +954,8 @@ function EQInfo_createWindow(response, IS_WebURL) {
     }
 
     var EQInfoWindow = new BrowserWindow({
-      minWidth: 600,
-      minHeight: 300,
+      minWidth: 650,
+      minHeight: 400,
       icon: path.join(__dirname, "img/icon.ico"),
       webPreferences: {
         preload: path.join(__dirname, "js/preload.js"),

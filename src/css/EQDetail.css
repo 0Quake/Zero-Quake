@@ -517,15 +517,11 @@ td {
 #LgInt_radioWrap {
   display: none;
 }
-.popupContent {
-  padding: 4px;
-}
 .shindoItem,
 .shindoItem_S {
   display: inline-block;
   font-family: "M PLUS 1p", sans-serif;
   border-radius: 100px;
-  margin-right: 5px;
   padding: 1px 5px;
 }
 .shindoItem_S {
@@ -540,10 +536,6 @@ td {
   color: #999;
   font-size: 12px;
   padding: 3px 8px;
-}
-.pointName {
-  display: inline-block;
-  margin-right: 30px;
 }
 .maplibregl-popup {
   max-width: unset !important;
