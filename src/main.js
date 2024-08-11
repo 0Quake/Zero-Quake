@@ -2520,7 +2520,7 @@ function Req_JMAXML(url, count) {
                 }
               }
             } catch (err) {
-              console.log(err);
+              return;
             }
           } else if (title == "津波情報a" || title == "津波警報・注意報・予報a" || title == "沖合の津波観測に関する情報") {
             //津波予報
