@@ -22,13 +22,27 @@
         <div id="loading-wrap"></div>
     </div>
 
-    <h1 id="title"></h1>
-    <div id="headline"></div>
+    <header>
+        <h1 id="title"></h1>
+        <div id="headline"></div>
+    </header>
     <hr>
-    <div id="Text"></div>
-    <div id="Appendix"></div>
-    <div id="NextAdvisory"></div>
-    <div id="Text2"></div>
+    <section id="Text">
+        <h2>本文</h2>
+        <div id="Text_body"></div>
+    </section>
+    <section id="Appendix">
+        <h2>参考情報</h2>
+        <div id="Appendix_body"></div>
+    </section>
+    <section id="NextAdvisory">
+        <h2>次回発表予定</h2>
+        <div id="NextAdvisory_body"></div>
+    </section>
+    <section id="Text2">
+        <h2>追加情報</h2>
+        <div id="Text2_body"></div>
+    </section>
 
     <script src="./js/UIcommon.js"></script>
     <script>
@@ -39,10 +53,10 @@
                 document.getElementById("title").innerText = request.data.title + " (" + request.data.kind + ")"
                 var SerialStr = request.data.Serial ? ", 情報番号#" + request.data.Serial : ""
                 document.getElementById("headline").innerText = request.data.HeadLine + " (" + NormalizeDate(4, request.data.reportDate) + SerialStr + ")"
-                document.getElementById("Text").innerText = request.data.Text
-                document.getElementById("Appendix").innerText = request.data.Appendix
-                document.getElementById("NextAdvisory").innerText = request.data.NextAdvisory
-                document.getElementById("Text2").innerText = request.data.Text2;
+                document.getElementById("Text_body").innerText = removeFirstBR(request.data.Text)
+                document.getElementById("Appendix_body").innerText = removeFirstBR(request.data.Appendix)
+                document.getElementById("NextAdvisory_body").innerText = removeFirstBR(request.data.NextAdvisory)
+                document.getElementById("Text2_body").innerText = removeFirstBR(request.data.Text2)
 
                 if (request.data.Text) document.getElementById("Text").style.display = "block"
                 if (request.data.Appendix) document.getElementById("Appendix").style.display = "block"
@@ -66,9 +80,29 @@
                 }
             }
         });
+
+        function removeFirstBR(str) {
+            if (str.startsWith("\n")) return str.replace("\n", "")
+            else return str
+        }
     </script>
 
     <style>
+        section {
+            padding: 20px 10px;
+        }
+
+        section h2 {
+            margin: 10px 3px;
+            background: #444;
+            padding: 2px 10px;
+            border-radius: 4px;
+        }
+
+        section div {
+            padding: 0 20px;
+        }
+
         h1 {
             text-align: center;
             border-radius: 5px;
@@ -93,7 +127,6 @@
         #NextAdvisory,
         #Text2 {
             display: none;
-            padding: 1em;
         }
 
         .nankaiAlert h1 {
