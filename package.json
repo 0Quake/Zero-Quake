@@ -56,7 +56,6 @@
     "prettier": "^3.3.3"
   },
   "dependencies": {
-    "@turf/turf": "^7.0.0",
     "electron-squirrel-startup": "^1.0.1",
     "electron-store": "^10.0.0",
     "jsdom": "^24.1.1",
