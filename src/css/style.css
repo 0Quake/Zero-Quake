@@ -793,6 +793,11 @@ td {
   border: solid 1px var(--TsunamiYohoColor);
   color: #fff;
 }
+.nankai_serial {
+  font-size: 13px;
+  color: #ccc;
+  margin-left: 4px;
+}
 
 .EQI_maxI {
   width: 50px;

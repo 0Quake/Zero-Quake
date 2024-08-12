@@ -2465,12 +2465,15 @@ function Req_JMAXML(url, count) {
                 title: title, //南海トラフ地震関連解説情報など
                 kind: null, //定例など
                 reportDate: new Date(xml.getElementsByTagName("ReportDateTime")[0].textContent), //時刻
+                Serial: null,
                 HeadLine: xml.getElementsByTagName("Headline")[0].getElementsByTagName("Text")[0].textContent, //要約
                 Text: "",
                 Appendix: "",
                 NextAdvisory: "",
                 Text2: "",
               };
+
+              if (xml.getElementsByTagName("Serial")[0] && xml.getElementsByTagName("Serial")[0].textContent) data.Serial = Number(xml.getElementsByTagName("Serial")[0].textContent);
               var Body = xml.getElementsByTagName("Body")[0];
               var EarthQuakeInfo = Body.getElementsByTagName("EarthquakeInfo")[0];
               if (EarthQuakeInfo) {

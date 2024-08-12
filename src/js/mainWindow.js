@@ -2077,7 +2077,8 @@ function NankaiTroughInfo(data) {
     });
     document.getElementById("NankaiTroughInfo_Rinji").style.display = "block";
     document.getElementById("NankaiTroughInfo_Rinji").setAttribute("title", "クリックして詳細を表示\n" + data.rinji.HeadLine);
-    document.getElementById("Nankai_Title_Rinji").innerText = data.rinji.title + " (" + data.rinji.kind + ")";
+    var serialStr = data.rinji.Serial ? "<span class='nankai_serial'>#" + data.rinji.Serial + "</span>" : "";
+    document.getElementById("Nankai_Title_Rinji").innerHTML = data.rinji.title + " (" + data.rinji.kind + ") " + serialStr;
     document.getElementById("NankaiTroughInfo_Rinji").classList.remove("nankaiAlert", "nankaiWarn", "nankaiInfo");
     switch (data.rinji.kind) {
       case "巨大地震警戒":
@@ -2102,7 +2103,8 @@ function NankaiTroughInfo(data) {
     });
     document.getElementById("NankaiTroughInfo_Teirei").style.display = "block";
     document.getElementById("NankaiTroughInfo_Teirei").setAttribute("title", "クリックして詳細を表示\n" + data.teirei.HeadLine);
-    document.getElementById("Nankai_Title_Teirei").innerText = data.teirei.title + " (" + data.teirei.kind + ")";
+    var serialStr = data.teirei.Serial ? "<span class='nankai_serial'>#" + data.teirei.Serial + "</span>" : "";
+    document.getElementById("Nankai_Title_Teirei").innerHTML = data.teirei.title + " (" + data.teirei.kind + ")" + serialStr;
     document.getElementById("NankaiTroughInfo_Teirei").classList.remove("nankaiAlert", "nankaiWarn", "nankaiInfo");
 
     if (data.teirei.kind == "臨時解説") document.getElementById("NankaiTroughInfo_Teirei").classList.add("nankaiWarn");
