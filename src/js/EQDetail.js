@@ -54,6 +54,7 @@ window.electronAPI.messageSend((event, request) => {
       });
     }
 
+    console.log(request);
     if (request.urls && Array.isArray(request.urls)) {
       request.urls.forEach(function (elm) {
         if (elm) {

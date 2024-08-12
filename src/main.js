@@ -2401,7 +2401,6 @@ function Req_JMAXML(url, count) {
   if (!url || jmaXML_Fetched.includes(url)) return;
 
   if (net.online) {
-    jmaXML_Fetched.push(url);
     var request = net.request(url);
     request.on("response", (res) => {
       var dataTmp = "";
@@ -2749,6 +2748,7 @@ function Req_JMAXML(url, count) {
             ConvertTsunamiInfo(tsunamiDataTmp);
           }
           UpdateStatus(new Date() - Replay, "JMAXML", "success");
+          jmaXML_Fetched.push(url);
         } catch (err) {
           UpdateStatus(new Date() - Replay, "JMAXML", "Error");
         }
@@ -2839,10 +2839,8 @@ function Req_NarikakunList(url, num, first, count) {
           }
           for (let elm of narikakun_URLs) {
             var eidTmp = String(elm).split("_")[2];
-            if (nakn_Fetched.indexOf(url) === -1) {
-              nakn_Fetched.push(elm);
-              Req_Narikakun(elm, count);
-            }
+            Req_Narikakun(elm, count);
+
             if (!narikakun_EIDs.includes(eidTmp)) {
               narikakun_EIDs.push(eidTmp);
               if (narikakun_EIDs.length == config.Info.EQInfo.ItemCount) break;
@@ -2868,6 +2866,8 @@ function Req_NarikakunList(url, num, first, count) {
 
 //narikakun地震情報API 取得・フォーマット変更→ConvertEQInfo
 function Req_Narikakun(url, count) {
+  if (!url || nakn_Fetched.includes(url)) return;
+
   if (net.online) {
     var request = net.request(url);
     request.on("response", (res) => {
@@ -2904,6 +2904,7 @@ function Req_Narikakun(url, count) {
           ];
           ConvertEQInfo(dataTmp2, "jma", false, count);
           UpdateStatus(new Date() - Replay, "ntool", "success");
+          nakn_Fetched.push(url);
         } catch (err) {
           UpdateStatus(new Date() - Replay, "ntool", "Error");
         }
@@ -2992,7 +2993,7 @@ function ConvertEQInfo(dataList, type, EEW, count) {
 
             if (Array.isArray(elm.DetailURL)) {
               elm.DetailURL.forEach(function (elm2) {
-                if (elm2 && !EQInfo_Item.DetailURL.includes(elm2)) {
+                if (elm2 && !EQInfo_Item.DetailURL.includes(elm2) && !EQElm.DetailURL.includes(elm2)) {
                   EQInfo_Item.DetailURL.push(elm2);
                 }
               });
