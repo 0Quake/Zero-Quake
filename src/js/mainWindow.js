@@ -367,7 +367,7 @@ function eqInfoDraw(data, source) {
 
     clone.querySelector(".EQI_epiCenter").textContent = elm.epiCenter ? elm.epiCenter : "震源調査中";
     clone.querySelector(".EQI_datetime").textContent = elm.OriginTime ? NormalizeDate(4, elm.OriginTime) : "発生時刻不明";
-    clone.querySelector(".EQI_magnitude").textContent = elm.M ? elm.M : "不明";
+    clone.querySelector(".EQI_magnitude").textContent = elm.M ? elm.M.toFixed(1) : "不明";
     if (source == "jma") {
       clone.querySelector(".EQItem").setAttribute("id", "EQItem_" + elm.eventId);
       var maxITmp = elm.maxI;

@@ -715,8 +715,12 @@ td {
   height: calc(100% - 30px);
   padding: 0;
 }
+#tab2_content1 {
+  padding: 3px;
+}
 #tab2_content .tabcontent {
   height: 100%;
+  width: 320px;
   overflow: auto;
 }
 #tab2_bar {
@@ -745,7 +749,7 @@ td {
   flex: 1;
 }
 .EQI_datetime {
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   font-size: 14px;
   font-family: "AzeretMono-Regular", ui-monospace;
 }
@@ -757,17 +761,20 @@ td {
   flex-wrap: wrap;
   align-content: center;
   align-items: center;
-  padding: 5px;
-  margin: 5px;
+  margin: 7px 5px;
   background: #222;
   border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
 }
+.EQItem {
+  padding: 6px;
+}
 #NankaiTroughInfo_Rinji,
 #NankaiTroughInfo_Teirei {
   display: none;
   font-size: 14px;
+  padding: 5px 10px;
   color: #ccc;
   white-space: nowrap;
   overflow: hidden;
@@ -912,9 +919,10 @@ td {
   float: right;
 }
 .EQI_magnitude {
-  font-size: 24px;
+  font-size: 26px;
   font-family: "AzeretMono-Regular", ui-monospace;
   margin-left: 5px;
+  letter-spacing: -2px;
 }
 
 .infoOverlay {
