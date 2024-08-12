@@ -46,7 +46,7 @@ var update_detail = document.getElementById("update-detail");
 document.getele;
 downloadLink.addEventListener("click", function () {
   var lnk = document.createElement("a");
-  lnk.href = "https://0quake.github.io/ZeroQuake_IS_WebURL/download.html#download-section";
+  lnk.href = "https://0quake.github.io/ZeroQuake_Website/download.html#download-section";
   lnk.click();
 });
 
