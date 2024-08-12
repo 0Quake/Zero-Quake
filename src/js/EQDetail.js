@@ -48,15 +48,17 @@ window.electronAPI.messageSend((event, request) => {
   if (request.action == "metaData") {
     eid = request.eid;
 
-    var EEWURL = "https://www.data.jma.go.jp/svd/eew/data/nc/fc_hist/" + String(eid).slice(0, 4) + "/" + String(eid).slice(4, 6) + "/" + eid + "/index.html";
-    fetch(EEWURL).then(function (res) {
-      if (res.status == 200) {
-        document.getElementById("EEWLink").style.display = "block";
-        document.getElementById("EEWLink").addEventListener("click", function () {
-          window.open(EEWURL);
-        });
-      }
-    });
+    if (document.getElementById("EEWLink").style.display != "block") {
+      var EEWURL = "https://www.data.jma.go.jp/svd/eew/data/nc/fc_hist/" + String(eid).slice(0, 4) + "/" + String(eid).slice(4, 6) + "/" + eid + "/index.html";
+      fetch(EEWURL).then(function (res) {
+        if (res.status == 200) {
+          document.getElementById("EEWLink").style.display = "block";
+          document.getElementById("EEWLink").addEventListener("click", function () {
+            window.open(EEWURL);
+          });
+        }
+      });
+    }
 
     if (request.urls && Array.isArray(request.urls)) {
       jmaURL = request.urls.filter(function (elm) {
