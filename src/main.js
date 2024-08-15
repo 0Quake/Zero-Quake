@@ -39,6 +39,8 @@ var WebSocketClient = WebSocket.client;
 import * as turf from "@turf/turf";
 import workerThreads from "worker_threads";
 import { readFile } from "fs/promises";
+import fs from "fs";
+import { exec } from "child_process";
 var __dirname = path.dirname(fileURLToPath(import.meta.url));
 var FERegion = JSON.parse(await readFile(path.join(__dirname, "./Resource/feRegion.json")));
 var packageJson = JSON.parse(await readFile(path.join(__dirname, "../package.json")));
@@ -51,6 +53,7 @@ var defaultConfigVal = {
   system: {
     WindowAutoOpen: true,
     alwaysOnTop: false,
+    isFirstRun: false, //初回起動時かどうか判定用（自動起動を設定するため）
   },
   home: {
     name: "自宅",
@@ -231,6 +234,7 @@ var defaultConfigVal = {
   },
 };
 var config = store.get("config", defaultConfigVal);
+var isFirstRunTmp = !config || config.system.isFirstRun !== false;
 config = mergeDeeply(defaultConfigVal, config);
 store.set("config", config);
 
@@ -411,6 +415,22 @@ app.whenReady().then(() => {
   ScheduledExecution();
   setInterval(ScheduledExecution, 600000);
 
+  //↓ 「!== false」必須
+  if (isFirstRunTmp) {
+    dialog
+      .showMessageBox({
+        type: "question",
+        detail: "PCの起動時に自動実行する様に設定しますか？",
+        normalizeAccessKeys: true,
+        buttons: ["いいえ", "はい"],
+        noLink: true,
+        cancelId: 0,
+      })
+      .then(function (result) {
+        if (result.response == 1) setOpenAtLogin(true);
+      });
+  }
+
   if (config.system.WindowAutoOpen) {
     CreateMainWindow();
     app.on("activate", () => {
@@ -541,9 +561,7 @@ ipcMain.on("message", (_event, response) => {
       EQInfo_createWindow(response, true);
       break;
     case "openAtLogin":
-      app.setLoginItemSettings({
-        openAtLogin: response.data,
-      });
+      setOpenAtLogin(response.data);
       break;
     case "ChangeConfig":
       config = response.data;
@@ -601,6 +619,36 @@ ipcMain.on("message", (_event, response) => {
       break;
   }
 });
+
+function setOpenAtLogin(openAtLogin) {
+  if (process.platform != "win32") {
+    app.setLoginItemSettings({
+      openAtLogin: openAtLogin,
+    });
+  } else {
+    app.setLoginItemSettings({
+      openAtLogin: false,
+    });
+
+    const homePath = String(app.getPath("home")).replace("\\\\", "/");
+    const dist = `${homePath}/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup/ZeroQuake.lnk`;
+    if (openAtLogin) {
+      const source = String(app.getPath("exe")).replace("\\\\", "/");
+      let command = `
+  $WshShell = New-Object -ComObject WScript.Shell;
+  $ShortCut = $WshShell.CreateShortcut("${dist}");
+  $ShortCut.TargetPath = "${source}";
+  $ShortCut.Save();
+  `;
+      exec(command, { shell: "powershell.exe" });
+    } else {
+      if (fs.existsSync(dist))
+        fs.unlink(dist, () => {
+          return;
+        });
+    }
+  }
+}
 
 const unresponsiveMsg = {
   type: "question",
@@ -817,12 +865,13 @@ function Create_SettingWindow(update) {
         });
       }
 
+      const homePath = String(app.getPath("home")).replace("\\\\", "/");
       SettingWindow.webContents.send("message2", {
         action: "initialData",
         config: config,
         defaultConfigVal: defaultConfigVal,
         softVersion: soft_version,
-        openAtLogin: app.getLoginItemSettings().openAtLogin,
+        openAtLogin: app.getLoginItemSettings().openAtLogin || fs.existsSync(`${homePath}/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup/ZeroQuake.lnk`),
         updatePanelMode: update,
       });
       if (update_data) {
