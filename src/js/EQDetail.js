@@ -807,7 +807,7 @@ function estimated_intensity_mapReq() {
           lng: ItemTmp.hypo.lon,
           depth: ItemTmp.hypo.dep,
           epiCenter: ItemTmp.hypo.epi,
-          comment: null,
+          comment: ItemTmp.comment,
           cancel: null,
         });
 
@@ -1743,7 +1743,9 @@ function ConvertEQInfo(data) {
       if (Boolean2(elm.lng)) EQInfoTmp.lng = elm.lng;
       if (Boolean2(elm.depth)) EQInfoTmp.depth = elm.depth;
       if (Boolean2(elm.epiCenter)) EQInfoTmp.epiCenter = elm.epiCenter;
-      if (Boolean2(elm.comment)) EQInfoTmp.comment = elm.comment;
+      if (Boolean2(elm.comment) && (Boolean2(elm.comment.ForecastComment) || Boolean2(elm.comment.VarComment) || Boolean2(elm.comment.FreeFormComment))) {
+        if (!EQInfoTmp.comment) EQInfoTmp.comment = elm.comment;
+      }
       if (Boolean2(elm.IntData)) EQInfoTmp.IntData = elm.IntData;
       if (Boolean2(elm.LngIntData)) EQInfoTmp.LngIntData = elm.LngIntData;
     }
