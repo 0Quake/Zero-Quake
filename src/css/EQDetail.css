@@ -72,17 +72,30 @@ td {
   text-align: left;
 }
 #tableWrap {
-  display: inline-flex;
-  max-width: 1000px;
+  max-width: 1300px;
   width: 100%;
-  text-align: left;
+  text-align: center;
+  margin: 0 auto;
+  font-size: 0;
 }
 #leftSide,
 #ShindoWrap {
+  display: inline-block;
   vertical-align: top;
-  display: inline-table;
-  width: 100%;
+  width: calc(50% - 20px);
   padding: 10px;
+  text-align: left;
+  margin: 5px;
+  font-size: initial;
+  word-break: break-word;
+}
+
+@media (max-width: 650px) {
+  #leftSide,
+  #ShindoWrap {
+    display: block;
+    width: 100%;
+  }
 }
 
 #EQInfo {
@@ -603,10 +616,4 @@ td {
   padding: 1px 5px;
   border-radius: 4px;
   background: rgb(149, 46, 46);
-}
-
-@media (max-width: 600px) {
-  #tableWrap {
-    display: block;
-  }
 }
