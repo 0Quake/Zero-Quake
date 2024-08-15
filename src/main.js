@@ -499,13 +499,13 @@ electron.app.on("ready", () => {
   tray.setContextMenu(
     electron.Menu.buildFromTemplate([
       {
-        label: "画面の表示",
+        label: "メイン画面の表示",
         click: () => {
           CreateMainWindow();
         },
       },
       {
-        label: "設定画面表示",
+        label: "設定",
         click: () => {
           Create_SettingWindow();
         },
