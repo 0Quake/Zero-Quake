@@ -423,6 +423,7 @@ app.whenReady().then(() => {
         detail: "PCの起動時に自動実行する様に設定しますか？",
         normalizeAccessKeys: true,
         buttons: ["いいえ", "はい"],
+        defaultId: 1,
         noLink: true,
         cancelId: 0,
       })
