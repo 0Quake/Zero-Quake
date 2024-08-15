@@ -1784,7 +1784,7 @@ function ConvertEQInfo(data) {
   if (EQInfoMarged.comment) {
     EQInfo.comment = EQInfoMarged.comment;
 
-    data_comment.innerHTML = (EQInfoMarged.comment.ForecastComment + "\n" + EQInfoMarged.comment.VarComment + "\n" + EQInfoMarged.comment.FreeFormComment).replaceAll("\n", "<br>");
+    data_comment.innerHTML = (EQInfoMarged.comment.ForecastComment + "\n" + EQInfoMarged.comment.VarComment + "\n" + EQInfoMarged.comment.FreeFormComment).replaceAll("\n", "<br>").replace(/(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gi, "<a href='$1'>$1</a>");
 
     var comments = EQInfoMarged.comment.ForecastComment.split("\n").concat(EQInfoMarged.comment.VarComment.split("\n"), EQInfoMarged.comment.FreeFormComment.split("\n"));
 
