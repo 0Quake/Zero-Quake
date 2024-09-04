@@ -192,6 +192,40 @@ function NormalizeShindo(str, responseType) {
   return ConvTable[ShindoTmp];
 }
 
+//MMI震度フォーマット
+//eslint-disable-next-line
+function NormalizeMMI(str, responseType) {
+  var ShindoTmp = 0;
+  if (str === null || str === undefined) ShindoTmp = 0;
+  else if (!isNaN(str)) {
+    ShindoTmp = Math.min(12, Math.max(1, Math.round(Number(str))));
+  }
+  switch (responseType) {
+    default:
+    case 1:
+      var ConvTable = ["?", "Ⅰ", "Ⅱ", "Ⅲ", "Ⅳ", "Ⅴ", "Ⅵ", "Ⅶ", "Ⅷ", "Ⅸ", "Ⅹ", "Ⅺ", "Ⅻ"];
+      break;
+    case 2:
+      var ConvTable = [
+        [config.color.Shindo["?"].background, config.color.Shindo["?"].color],
+        [config.color.Shindo["0"].background, config.color.Shindo["0"].color],
+        [config.color.Shindo["1"].background, config.color.Shindo["1"].color],
+        [config.color.Shindo["2"].background, config.color.Shindo["2"].color],
+        [config.color.Shindo["3"].background, config.color.Shindo["3"].color],
+        [config.color.Shindo["4"].background, config.color.Shindo["4"].color],
+        [config.color.Shindo["5m"].background, config.color.Shindo["5m"].color],
+        [config.color.Shindo["5p"].background, config.color.Shindo["5p"].color],
+        [config.color.Shindo["6m"].background, config.color.Shindo["6m"].color],
+        [config.color.Shindo["6p"].background, config.color.Shindo["6p"].color],
+        [config.color.Shindo["7"].background, config.color.Shindo["7"].color],
+        [config.color.Shindo["7"].background, config.color.Shindo["7"].color],
+        [config.color.Shindo["7"].background, config.color.Shindo["7"].color],
+      ];
+      break;
+  }
+  return ConvTable[ShindoTmp];
+}
+
 //eslint-disable-next-line
 function LgIntConvert(str) {
   switch (String(str)) {

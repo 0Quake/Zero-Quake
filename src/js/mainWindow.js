@@ -368,7 +368,7 @@ function eqInfoDraw(data, source) {
 
     clone.querySelector(".EQI_epiCenter").textContent = elm.epiCenter ? elm.epiCenter : "震源調査中";
     clone.querySelector(".EQI_datetime").textContent = elm.OriginTime ? NormalizeDate(4, elm.OriginTime) : "発生時刻不明";
-    clone.querySelector(".EQI_magnitude").textContent = elm.M ? elm.M.toFixed(1) : "不明";
+    clone.querySelector(".EQI_magnitude").textContent = elm.M !== null ? elm.M.toFixed(1) : "不明";
     if (source == "jma") {
       clone.querySelector(".EQItem").setAttribute("id", "EQItem_" + elm.eventId);
       var maxITmp = elm.maxI;
@@ -403,12 +403,21 @@ function eqInfoDraw(data, source) {
         });
       }
     } else if (source == "usgs") {
+      console.log(NormalizeMMI, elm.maxI);
+      var colorTmp = NormalizeMMI(elm.maxI, 2);
+      console.log(elm);
+      clone.querySelector(".EQI_maxI").textContent = NormalizeMMI(elm.maxI, 1);
+      clone.querySelector(".EQI_maxI").style.background = colorTmp[0];
+      clone.querySelector(".EQI_maxI").style.color = colorTmp[1];
+      console.log(elm);
+
       clone.querySelector(".EQItem").addEventListener("click", function () {
         window.electronAPI.messageReturn({
           action: "EQInfoWindowOpen_IS_WebURL",
           url: String(elm.DetailURL),
         });
       });
+      console.log(elm);
     }
     EQListWrap.appendChild(clone);
   });

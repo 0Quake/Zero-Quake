@@ -2840,13 +2840,16 @@ function Req_USGS() {
                 return turf.booleanPointInPolygon(elm.geometry.coordinates, elm2);
               });
 
+              var maxi;
+              if (elm.properties.mmi !== null) maxi = elm.properties.mmi;
+
               dataTmp2.push({
                 eventId: elm.id,
                 category: null,
                 OriginTime: new Date(elm.properties.time),
                 epiCenter: FECode.properties.nameJA,
                 M: Math.round(elm.properties.mag * 10) / 10,
-                maxI: null,
+                maxI: maxi,
                 DetailURL: [elm.properties.url],
               });
             });

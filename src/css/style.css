@@ -1171,3 +1171,7 @@ button:focus {
 #tsunamiSectTitle {
   font-size: 18px;
 }
+.usgs_Item .EQI_epiCenter {
+  max-width: 150px;
+  font-size: 14px;
+}
