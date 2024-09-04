@@ -272,7 +272,7 @@ function epiCenterUpdate(elm) {
       epicenterElm.markerElm.setLngLat([longitude, latitude]);
       epicenterElm.latitude = latitude;
       epicenterElm.longitude = longitude;
-      if (tooltipContent) epicenterElm.ESPopup2.setText(tooltipContent).addTo(map);
+      if (tooltipContent) epicenterElm.ESPopup2.setLngLat([longitude, latitude]).setText(tooltipContent);
       else epicenterElm.ESPopup2.remove();
     } else {
       //初報
@@ -286,9 +286,10 @@ function epiCenterUpdate(elm) {
       map.zoomTo(8, { animate: false });
 
       var ESPopup = new maplibregl.Popup({ closeButton: false, closeOnClick: false, className: "epiCenterTooltip", offset: [0, -17] }).setText(EEWIDTmp).setLngLat([longitude, latitude]).addTo(map);
-      var ESPopup2 = new maplibregl.Popup({ closeButton: false, closeOnClick: false, className: "epiCenterTooltip2", offset: [0, 37] }).setLngLat([longitude, latitude]);
-      if (tooltipContent) ESPopup2.setText(tooltipContent).addTo(map);
-      else ESPopup2.remove();
+      var ESPopup2;
+      if (tooltipContent) {
+        ESPopup2 = new maplibregl.Popup({ closeButton: false, closeOnClick: false, className: "epiCenterTooltip2", offset: [0, 37] }).setLngLat([longitude, latitude]).setText(tooltipContent).addTo(map);
+      }
       var ECMarker = new maplibregl.Marker({ element: img }).setLngLat([longitude, latitude]).setPopup(ESPopup).addTo(map).togglePopup();
 
       epiCenter.push({ eid: eid, markerElm: ECMarker, latitude: latitude, longitude: longitude, EEWID: Number(EEWIDTmp), ESPopup: ESPopup, ESPopup2: ESPopup2 });
