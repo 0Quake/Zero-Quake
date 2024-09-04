@@ -57,11 +57,9 @@
   },
   "dependencies": {
     "@turf/turf": "^7.1.0",
-    "electron-squirrel-startup": "^1.0.1",
     "electron-store": "^10.0.0",
     "jsdom": "^25.0.0",
     "maplibre-gl": "^4.6.0",
-    "net": "^1.0.2",
     "path": "^0.12.7",
     "websocket": "^1.0.35"
   }
