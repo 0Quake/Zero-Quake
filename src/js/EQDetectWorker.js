@@ -1,5 +1,4 @@
 import workerThreads from "worker_threads";
-import fs from "fs";
 
 var EEWNow = false; //EEW発令中かどうか
 var EQDetectID = 0; //独自の地震ID
