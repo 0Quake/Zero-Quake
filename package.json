@@ -50,7 +50,7 @@
   },
   "homepage": "https://0quake.github.io/ZeroQuake_Website/",
   "devDependencies": {
-    "electron": "^32.0.1",
+    "electron": "^32.0.2",
     "electron-builder": "^25.0.5",
     "eslint": "^9.9.1",
     "prettier": "^3.3.3"
