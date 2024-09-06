@@ -1,4 +1,8 @@
 import workerThreads from "worker_threads";
+import path from "path";
+import { readFile } from "fs/promises";
+import { fileURLToPath } from "url";
+var __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 var EEWNow = false; //EEW発令中かどうか
 var EQDetectID = 0; //独自の地震ID
@@ -258,7 +262,7 @@ function GuessHypocenter(EQElm, data) {
   return [result, originTime];
 }
 
-import TimeTable_JMA2001 from "../Resource/TimeTable_JMA2001.json" with { type: "json" };
+var TimeTable_JMA2001 = JSON.parse(await readFile(path.join(__dirname, "../Resource/TimeTable_JMA2001.json")));
 function calcDifference(lat, lng, stations, data, originTime, dep) {
   var TimeTable = TimeTable_JMA2001[dep];
   var f_arrivalTime_min = Infinity;
