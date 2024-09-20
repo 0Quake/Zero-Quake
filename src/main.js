@@ -1084,7 +1084,7 @@ function start() {
 var TremRts_sta;
 function Req_TremRts_sta() {
   if (net.online) {
-    var request = net.request("https://api-2.exptech.com.tw/api/v1/trem/station?_=" + Number(new Date()));
+    var request = net.request("https://api-2.exptech.dev/api/v1/trem/station?_=" + Number(new Date()));
     request.on("response", (res) => {
       var dataTmp = "";
       res.on("data", (chunk) => {
@@ -1108,8 +1108,8 @@ function Req_TremRts() {
     if (net.online) {
       if (!TremRts_sta) Req_TremRts_sta();
 
-      if (Replay !== 0) var url = "https://api-2.exptech.com.tw/api/v1/trem/rts/" + Number(new Date() - Replay);
-      else var url = "https://lb-1.exptech.com.tw/api/v1/trem/rts?_=" + Number(new Date());
+      if (Replay !== 0) var url = "https://api-2.exptech.dev/api/v1/trem/rts/" + Number(new Date() - Replay);
+      else var url = "https://lb-1.exptech.dev/api/v1/trem/rts?_=" + Number(new Date());
 
       var request = net.request(url);
       request.on("response", (res) => {
