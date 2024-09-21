@@ -105,8 +105,8 @@
 
                     <label><input id="HomePinShow" type="checkbox">現在地ピンを表示</label>
                     <label>表示名<input id="HomeName" type="text" placeholder="自宅"></label>
-                    <label>緯度<input id="latitude" type="number" onchange="MapReDraw()" step="0.1" min="-90" max="90" placeholder="緯度（10進法）"></label>
-                    <label>経度<input id="longitude" type="number" onchange="MapReDraw()" step="0.1" min="-180" max="180" placeholder="経度（10進法）"></label>
+                    <label>緯度<input id="latitude" type="number" onchange="MapReDraw()" step="0.01" min="-90" max="90" placeholder="緯度（10進法）"></label>
+                    <label>経度<input id="longitude" type="number" onchange="MapReDraw()" step="0.01" min="-180" max="180" placeholder="経度（10進法）"></label>
                     <label>細分区域<select id="saibun" onchange="MapReDraw()">
                             <option selected disabled>（未選択）</option>
                             <option>石狩地方北部</option>
@@ -1302,8 +1302,8 @@
                             <option>うるま市・金武町境界部地先の埋立地</option>
                         </select>
                     </label>
-                    <label>緯度 <input id="EEWE_latitude" type="number" min="-90" max="90" value="35.6809591"></label>
-                    <label>経度 <input id="EEWE_longitude" type="number" min="-180" max="180" value="139.7673068"></label>
+                    <label>緯度 <input id="EEWE_latitude" type="number" min="-90" max="90" step="0.1" value="35.7"></label>
+                    <label>経度 <input id="EEWE_longitude" type="number" min="-180" max="180" step="0.1" value="139.8"></label>
 
 
                     <label>深さ(km) <input id="EEWE_depth" type="number" min="0" max="6500" step="1" value="10"></label>
