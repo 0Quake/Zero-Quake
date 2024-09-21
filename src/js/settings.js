@@ -623,6 +623,10 @@ document.getElementById("Start_simulation").addEventListener("click", function (
     isPlum: document.getElementById("EEWE_isPlum").checked,
     source: "simulation",
   };
+
+  document.getElementById("EEWE_serial").value = EEWData.serial + 1;
+  document.getElementById("EEWE_serial").min = EEWData.serial + 1;
+
   window.electronAPI.messageReturn({
     action: "EEWSimulation",
     data: EEWData,
