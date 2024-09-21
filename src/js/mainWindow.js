@@ -1645,16 +1645,21 @@ function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrive
 
     if (map.getSource("PCircle_" + EventID)) {
       var PCircleElm = map.getSource("PCircle_" + EventID);
-      if (pRadius && PCircleElm) {
-        var pcircle = turf.circle(_center, pRadius / 1000, circle_options);
-        PCircleElm.setData(pcircle);
+      if (PCircleElm) {
+        if (pRadius) {
+          var pcircle = turf.circle(_center, pRadius / 1000, circle_options);
+          PCircleElm.setData(pcircle);
+          map.setPaintProperty("PCircle_" + EventID, "line-width", 2);
+        } else map.setPaintProperty("PCircle_" + EventID, "line-width", 0);
       }
 
       var SCircleElm = map.getSource("SCircle_" + EventID);
-      if (sRadius && SCircleElm) {
-        var scircle = turf.circle(_center, sRadius / 1000, circle_options);
-        SCircleElm.setData(scircle);
-        map.setPaintProperty("SCircle_" + EventID, "line-width", SnotArrived ? 0 : 2);
+      if (SCircleElm) {
+        if (sRadius) {
+          var scircle = turf.circle(_center, sRadius / 1000, circle_options);
+          SCircleElm.setData(scircle);
+          map.setPaintProperty("SCircle_" + EventID, "line-width", SnotArrived ? 0 : 2);
+        } else map.setPaintProperty("SCircle_" + EventID, "line-width", 0);
       }
     } else {
       map.addSource("PCircle_" + EventID, {
