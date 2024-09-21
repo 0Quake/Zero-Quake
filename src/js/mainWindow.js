@@ -334,12 +334,12 @@ function epiCenterClear(eid) {
       }
       return elm2.eid !== eid;
     });
-    if (epicenterElm && epicenterElm.markerElm) {
-      epicenterElm.markerElm.remove();
+    if (epicenterElm) {
+      if (epicenterElm.markerElm) epicenterElm.markerElm.remove();
       epicenterElm.markerElm = null;
-      epicenterElm.ESPopup.remove();
+      if (epicenterElm.ESPopup) epicenterElm.ESPopup.remove();
       epicenterElm.ESPopup = null;
-      epicenterElm.ESPopup2.remove();
+      if (epicenterElm.ESPopup2) epicenterElm.ESPopup2.remove();
       epicenterElm.ESPopup2 = null;
     }
 
