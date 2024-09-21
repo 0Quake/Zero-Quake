@@ -304,13 +304,14 @@ function epiCenterUpdate(elm) {
     return elm.id == eid;
   });
   if (EQElm) {
-    if (EQElm.PCircleElm) {
-      var pswaveFind = psWaveList.find(function (elm2) {
-        return elm2.id == eid;
-      });
-      pswaveFind.data.latitude = latitude;
-      pswaveFind.data.longitude = longitude;
-    }
+    var pswaveFind = psWaveList.find(function (elm2) {
+      return elm2.id == eid;
+    });
+    pswaveFind.data.latitude = latitude;
+    pswaveFind.data.longitude = longitude;
+    pswaveFind.data.originTime = elm.origin_time;
+    console.log(elm, elm.origin_time);
+
     if (EQElm.SIElm) EQElm.SIElm.setLngLat([longitude, latitude]);
   }
   latitudeTmp = latitude;
@@ -403,13 +404,10 @@ function eqInfoDraw(data, source) {
         });
       }
     } else if (source == "usgs") {
-      console.log(NormalizeMMI, elm.maxI);
       var colorTmp = NormalizeMMI(elm.maxI, 2);
-      console.log(elm);
       clone.querySelector(".EQI_maxI").textContent = NormalizeMMI(elm.maxI, 1);
       clone.querySelector(".EQI_maxI").style.background = colorTmp[0];
       clone.querySelector(".EQI_maxI").style.color = colorTmp[1];
-      console.log(elm);
 
       clone.querySelector(".EQItem").addEventListener("click", function () {
         window.electronAPI.messageReturn({
@@ -417,7 +415,6 @@ function eqInfoDraw(data, source) {
           url: String(elm.DetailURL),
         });
       });
-      console.log(elm);
     }
     EQListWrap.appendChild(clone);
   });
