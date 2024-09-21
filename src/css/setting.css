@@ -41,12 +41,14 @@ button {
 }
 
 #tab1_bar {
+  display: flex;
+  flex-direction: column;
   min-width: 250px;
   width: auto;
   height: 100%;
   writing-mode: unset;
   text-orientation: unset;
-  padding: 5px 5px 45px 5px;
+  padding: 0;
 }
 #tab1_bar .tabmenu {
   margin: 0;
@@ -139,15 +141,16 @@ div .tabcontent {
 #tab1_content2 {
   max-width: none;
 }
+#MenuBar {
+  overflow-y: scroll;
+  padding: 0 0 10px 5px;
+}
 #BtnWrap {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  right: 0;
   line-height: 40px;
   border-top: solid 1px #666;
   text-align: center;
   font-size: 0;
+  margin: 0 8px 8px 3px;
   background: #222;
 }
 
