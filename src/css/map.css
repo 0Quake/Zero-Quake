@@ -693,10 +693,6 @@ body {
     right: calc(50vw - 150px);
     min-width: 300px;
   }
-
-  #mainContent {
-    display: block;
-  }
   #sideBar.close #sokuho-Panel {
     display: block;
     max-height: 50vh;
