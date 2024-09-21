@@ -631,7 +631,7 @@ function psWaveAnm() {
   else {
     setTimeout(function () {
       requestAnimationFrame(psWaveAnm);
-    }, 100);
+    }, 250);
   }
 }
 
@@ -1625,7 +1625,7 @@ function psWaveCalc(eid) {
 }
 
 let circle_options = {
-  steps: 80,
+  steps: 60,
   units: "kilometers",
 };
 //予報円描画
@@ -1662,6 +1662,7 @@ function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrive
       map.addSource("PCircle_" + EventID, {
         type: "geojson",
         data: turf.circle(_center, pRadius / 1000, circle_options),
+        tolerance: 0.6,
       });
 
       map.addLayer({
@@ -1678,6 +1679,7 @@ function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrive
       map.addSource("SCircle_" + EventID, {
         type: "geojson",
         data: turf.circle(_center, sRadTmp, circle_options),
+        tolerance: 0.6,
       });
 
       map.addLayer({
