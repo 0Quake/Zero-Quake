@@ -58,7 +58,7 @@
   "dependencies": {
     "@turf/turf": "^7.1.0",
     "electron-store": "^10.0.0",
-    "jsdom": "^25.0.0",
+    "jsdom": "^25.0.1",
     "maplibre-gl": "^4.7.1",
     "path": "^0.12.7",
     "websocket": "^1.0.35"
