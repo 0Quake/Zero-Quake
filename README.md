@@ -49,8 +49,8 @@
   <details>
   <summary>情報源</summary>
   <ul>
-    <li>気象庁防災情報 XML <a href="https://xml.kishou.go.jp/xmlpull.html">© 気象庁</a></li>
-    <li>P2P 地震情報 API <a href="https://www.p2pquake.net/json_api_v2/">@p2pquake_takuya</a>（※の項目を除く）</li>
+    <li>気象庁防災情報 XML<a href="https://xml.kishou.go.jp/xmlpull.html">© 気象庁</a></li>
+    <li>P2P 地震情報 API（※の項目を除く）</li>
   </ul>
   </details>
 
@@ -75,12 +75,12 @@
 - ### 海外の地震情報
 
   1. Earthquake Catalog（USGS）
-  2. リアルタイム地震情報（Early-Est）
+  2. Early-Est リアルタイム地震情報
   <details>
-  <summary>情報源</summary>
+  <summary>出典</summary>
   <ol>
-    <li>FDSN Web Service <a href="https://earthquake.usgs.gov/fdsnws/event/1/">© USGS</a></li>
-    <li>Early-est <a href="http://early-est.rm.ingv.it">© イタリア国立地球物理学火山学研究所</a></li>
+    <li>© U.S. Geological Survey</li>
+    <li>© INGV - National Institute of Geophysics and Volcanology (イタリア国立地球物理学火山学研究所)</li>
   </ol>
   </details>
 
