@@ -58,7 +58,7 @@
 
   K-NET, KiK-net（防災科学技術研究所 強震観測網）  
   S-net, 相模湾地震観測施設（防災科学技術研究所 海底観測網）  
-  TREM-RTS※（台湾など コミュニティ観測網）
+  TREM-RTS (SE-Net, MS-Net)※（台湾など コミュニティ観測網）
 
   ※<a href="https://github.com/whes1015">YuYu1015 様</a>のご厚意でデータを提供していただいています
 
