@@ -310,7 +310,6 @@ function epiCenterUpdate(elm) {
     pswaveFind.data.latitude = latitude;
     pswaveFind.data.longitude = longitude;
     pswaveFind.data.originTime = elm.origin_time;
-    console.log(elm, elm.origin_time);
 
     if (EQElm.SIElm) EQElm.SIElm.setLngLat([longitude, latitude]);
   }
@@ -1399,8 +1398,12 @@ function TREMRTSUpdate(dataTmp) {
     for (key of Object.keys(dataTmp)) {
       elm = dataTmp[key];
       pointData = TREMRTS_points[elm.Code];
-      if (!pointData) pointData = TREMRTS_points[elm.Code] = addPointMarker(elm);
-      if (pointData.rgb.join("") != elm.rgb.join("")) {
+      var firstTime;
+      if (!pointData) {
+        pointData = TREMRTS_points[elm.Code] = addPointMarker(elm);
+        firstTime = true;
+      }
+      if (pointData.rgb.join("") != elm.rgb.join("") || firstTime) {
         pointData.markerElm.style.background = "rgb(" + elm.rgb.join(",") + ")";
         var shindoColor = NormalizeShindo(elm.shindo, 2);
         pointData.popupContent = `<h3 class='PointName' style='border-bottom-color:rgb(${elm.rgb.join(",")})'><span>${elm.Type + "_" + elm.Code}</span></h3><div class='popupContentWrap'><div class='obsShindoWrap' style='background:${shindoColor[0]};color:${shindoColor[1]};'>震度 ${NormalizeShindo(elm.shindo, 1)}<span>${elm.shindo.toFixed(2)}</span></div><div class='obsPGAWrap'>PGA ${(Math.floor(elm.PGA * 100) / 100).toFixed(2)}</div></div>`;
