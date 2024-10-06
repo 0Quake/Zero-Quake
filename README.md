@@ -18,7 +18,7 @@
 
   予報・警報／キャンセル報／PLUM 法など含む
   <details>
-  <summary>情報源</summary>
+  <summary>出典・情報源</summary>
   <ul>
     <li>Wolfx <a href="https://api.wolfx.jp/">© Wolfx Studio.</a></li>
     <li>ProjectBS © CrossRoad</li>
@@ -33,12 +33,12 @@
   長周期地震動に関する観測情報※ ／ 顕著な地震の震源要素更新のお知らせ ／ 推計震度分布※  
   南海トラフ地震に関連する情報[南海トラフ地震臨時情報/南海トラフ地震関連解説情報]
   <details>
-  <summary>情報源</summary>
+  <summary>出典・情報源</summary>
   <ul>
-    <li>気象庁防災情報 XML <a href="https://xml.kishou.go.jp/xmlpull.html">© 気象庁</a></li>
-    <li>nTool Earthquake API<a href="https://ntool.online/apidoc/earthquakeapi">© Narikakun Network</a></li>
-    <li>Axis <a href="https://axis.prioris.jp/">© Prioris</a>（無料登録必須）</li>
-    <li>気象庁ホームページ <a href="https://www.jma.go.jp/">© 気象庁</a>（※の項目のみ）</li>
+    <li>出典：<a href="https://xml.kishou.go.jp/xmlpull.html">気象庁防災情報 XML</a></li>
+    <li>出典：<a href="https://www.jma.go.jp/bosai/map.html?contents=earthquake_map">気象庁ホームページ</a>（※の項目のみ）</li>
+    <li><a href="https://ntool.online/apidoc/earthquakeapi">nTool Earthquake API</a></li>
+    <li> <a href="https://axis.prioris.jp/">Prioris Axis</a>（無料登録必須）</li>
   </ul>
   </details>
 
@@ -47,9 +47,9 @@
   大津波警報／津波警報／津波注意報／津波予報※  
   津波情報／沖合の津波観測に関する情報※
   <details>
-  <summary>情報源</summary>
+  <summary>出典・情報源</summary>
   <ul>
-    <li>気象庁防災情報 XML<a href="https://xml.kishou.go.jp/xmlpull.html">© 気象庁</a></li>
+    <li>出典：<a href="https://xml.kishou.go.jp/xmlpull.html">気象庁防災情報 XML</a></li>
     <li>P2P 地震情報 API（※の項目を除く）</li>
   </ul>
   </details>
@@ -63,21 +63,21 @@
   ※<a href="https://github.com/whes1015">YuYu1015 様</a>のご厚意でデータを提供していただいています
 
   <details>
-  <summary>情報源</summary>
+  <summary>出典・情報源</summary>
   <ul>
-    <li>強震モニタ <a href="http://www.kmoni.bosai.go.jp/">© 防災科学技術研究所</a>（強震／毎秒）</li>
-    <li>長周期地震動モニタ <a href="http://www.lmoni.bosai.go.jp/">© 防災科学技術研究所</a>（強震／毎秒）</li>
-    <li>海しる <a href="https://www.msil.go.jp/">© Japan Coast Guard, 防災科学技術研究所</a>（海底／3分毎）</li>
-    <li>TREM-RTS API © ExpTech Studio（台湾など／毎秒）</li>
+    <li>出典：強震モニタ <a href="http://www.kmoni.bosai.go.jp/">© 防災科学技術研究所</a>（強震）</li>
+    <li>出典：長周期地震動モニタ <a href="http://www.lmoni.bosai.go.jp/">© 防災科学技術研究所</a>（強震）</li>
+    <li>出典：海しる <a href="https://www.msil.go.jp/">© Japan Coast Guard, 防災科学技術研究所</a>（海底）</li>
+    <li>出典：TREM-RTS API © ExpTech Studio（台湾など）</li>
   </ul>
   </details>
 
 - ### 海外の地震情報
 
-  1. Earthquake Catalog（USGS）
+  1. USGS Earthquake Catalog
   2. Early-Est リアルタイム地震情報
   <details>
-  <summary>出典</summary>
+  <summary>出典・情報源</summary>
   <ol>
     <li>© U.S. Geological Survey</li>
     <li>© INGV - National Institute of Geophysics and Volcanology (イタリア国立地球物理学火山学研究所)</li>
@@ -88,20 +88,14 @@
 
 ### 地図データ
 
-#### ベースマップ・オーバーレイ（ハザードマップ等）
-
-- 「標準」
-  - 国内陸地 出典： [気象庁 地震情報／細分区域](https://www.data.jma.go.jp/developer/gis.html)※
-  - 国内湖沼 出典：[国土交通省 国土数値情報(湖沼データ)](https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-W09-v2_2.html)※
-  - 国外陸地 出典：Natural Earth※  
-    ※加工（単純化処理）して使用
-- 「OpenStreetMap」 [© OpenStreetMap contributors](https://www.openstreetmap.org/copyright/)
-- 最適化ベクトルタイル, 地理院タイル [© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)
-
-#### その他 GIS データ
-
+- 国内陸地 出典： [気象庁 地震情報／細分区域](https://www.data.jma.go.jp/developer/gis.html)※
+- 国内湖沼 出典：[国土交通省 国土数値情報(湖沼データ)](https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-W09-v2_2.html)※
+- 国外陸地 出典：Natural Earth※
 - プレート境界： [© Hugo Ahlenius, Nordpil, Peter Bird](http://opendatacommons.org/licenses/by/1.0/)
-- 海底地形：[NOAA National Centers for Environmental Information. 2022: ETOPO 2022 15 Arc-Second Global Relief Model.](https://doi.org/10.25921/fd45-gt74)
+- 海底地形：GEBCO
+- [© OpenStreetMap contributors](https://www.openstreetmap.org/copyright/)
+- 最適化ベクトルタイル, 地理院タイル [© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)  
+  ※加工（単純化処理）して使用
 
 ### フォント
 
@@ -116,8 +110,8 @@
 ### その他
 
 - 強震観測点の情報：[© 2019 ingen084](https://raw.githubusercontent.com/ingen084/KyoshinEewViewerIngen/develop/LICENSE)（編集して使用）
-- [KyoshinShindoColorMap](https://github.com/ingen084/KyoshinShindoColorMap) ingen084 様, こんぽ様
-- 地盤増幅率：[ 防災科学技術研究所 表層地盤情報提供 API ／下記文献](https://www.j-shis.bosai.go.jp/api-sstruct-meshinfo)
+- KyoshinShindoColorMap [© ingen084, こんぽ](https://github.com/ingen084/KyoshinShindoColorMap)
+- 地盤増幅率：[ 防災科学技術研究所 ／ 下記文献](https://www.j-shis.bosai.go.jp/api-sstruct-meshinfo)
 
   1. 若松加寿江・松岡昌志(2013)：全国統一基準による地形・地盤分類 250m メッシュマップの構築とその利用，地震工学会誌 No.18, pp.35-38.
   2. Wakamatsu, K. and Matsuoka, M. (2013): " Nationwide 7.5-Arc-Second Japan Engineering Geomorphologic Classification Map and Vs30 Zoning", Journal of Disaster Research Vol.8 No.5, pp.904-911.
