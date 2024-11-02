@@ -574,12 +574,13 @@ td {
   color: #ccc;
   height: 35px;
   line-height: 35px;
-  width: 220px;
+  width: 240px;
   margin: auto;
   text-align: center;
-  font-size: 18px;
+  font-size: 17px;
   border-radius: 10px;
   z-index: 1000;
+  padding: 0 10px;
 }
 #TsunamiShortMsg::before {
   content: "tsunami";

@@ -1791,41 +1791,57 @@ function ConvertEQInfo(data) {
     var comments = EQInfoMarged.comment.ForecastComment.split("\n").concat(EQInfoMarged.comment.VarComment.split("\n"), EQInfoMarged.comment.FreeFormComment.split("\n"));
 
     var TsunamiShortMsg;
-    for (const elm of comments) {
+    var TsunamiColor;
+
+    for (let elm of comments) {
+      elm = "一般的に、この規模の地震が海域の浅い領域で発生すると、津波が発生することがあります。";
       switch (elm) {
         case "この地震による津波の心配はありません。":
-        case "この地震による日本への津波の影響はありません。":
         case "震源の近傍で小さな津波発生の可能性がありますが、被害をもたらす津波の心配はありません。":
         case "この地震により、日本の沿岸では若干の海面変動があるかもしれませんが、被害の心配はありません。":
           TsunamiShortMsg = "津波の心配 なし";
+          TsunamiColor = "";
+          break;
+        case "この地震による日本への津波の影響はありません。":
+          TsunamiShortMsg = "津波の影響 なし";
+          TsunamiColor = "";
           break;
         case "津波警報等（大津波警報・津波警報あるいは津波注意報）を発表中です。":
           TsunamiShortMsg = "津波警報等 発表";
+          TsunamiColor = config.color.Tsunami.TsunamiWarningColor;
           break;
         case "震源が海底の場合、津波が発生するおそれがあります。":
         case "一般的に、この規模の地震が海域の浅い領域で発生すると、津波が発生することがあります。":
           TsunamiShortMsg = "場合により津波の恐れ";
+          TsunamiColor = config.color.Tsunami.TsunamiWatchColor;
           break;
         case "震源の近傍で津波発生の可能性があります。":
           TsunamiShortMsg = "震源付近で津波の恐れ";
+          TsunamiColor = config.color.Tsunami.TsunamiWatchColor;
           break;
         case "今後の情報に注意してください。":
         case "日本への津波の有無については現在調査中です。":
           TsunamiShortMsg = "今後の情報に注意";
+          TsunamiColor = config.color.Tsunami.TsunamiWatchColor;
           break;
         case "太平洋の広域に津波発生の可能性があります。":
         case "太平洋で津波発生の可能性があります。":
         case "北西太平洋で津波発生の可能性があります。":
           TsunamiShortMsg = "太平洋で津波の恐れ";
+          TsunamiColor = config.color.Tsunami.TsunamiWatchColor;
           break;
         case "インド洋の広域に津波発生の可能性があります。":
         case "インド洋で津波発生の可能性があります。":
           TsunamiShortMsg = "インド洋で津波の恐れ";
+          TsunamiColor = config.color.Tsunami.TsunamiWatchColor;
           break;
       }
     }
     if (TsunamiShortMsg) {
       document.getElementById("TsunamiShortMsg").style.display = "block";
+      document.getElementById("TsunamiShortMsg").style.borderColor = TsunamiColor;
+      document.getElementById("TsunamiShortMsg").style.borderWidth = TsunamiColor ? "2px" : "";
+      document.getElementById("TsunamiShortMsg").style.color = TsunamiColor ? "#FFF" : "";
       document.getElementById("TsunamiShortMsg").innerText = TsunamiShortMsg;
     }
   }
