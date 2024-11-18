@@ -1794,7 +1794,6 @@ function ConvertEQInfo(data) {
     var TsunamiColor;
 
     for (let elm of comments) {
-      elm = "一般的に、この規模の地震が海域の浅い領域で発生すると、津波が発生することがあります。";
       switch (elm) {
         case "この地震による津波の心配はありません。":
         case "震源の近傍で小さな津波発生の可能性がありますが、被害をもたらす津波の心配はありません。":
