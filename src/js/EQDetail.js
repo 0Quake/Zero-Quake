@@ -1746,9 +1746,21 @@ function ConvertEQInfo(data) {
       if (Boolean2(elm.comment) && (Boolean2(elm.comment.ForecastComment) || Boolean2(elm.comment.VarComment) || Boolean2(elm.comment.FreeFormComment))) {
         if (!EQInfoTmp.comment) EQInfoTmp.comment = elm.comment;
       }
-      if (Boolean2(elm.IntData)) EQInfoTmp.IntData = elm.IntData;
+      console.log(elm.category);
       if (Boolean2(elm.LngIntData)) EQInfoTmp.LngIntData = elm.LngIntData;
     }
+  });
+
+  EQInfoData.filter(function (elm) {
+    return elm.category == "長周期地震動に関する観測情報";
+  }).forEach(function (elm) {
+    if (Boolean2(elm.IntData)) EQInfoTmp.IntData = elm.IntData;
+  });
+
+  EQInfoData.filter(function (elm) {
+    return elm.category !== "長周期地震動に関する観測情報";
+  }).forEach(function (elm) {
+    if (Boolean2(elm.IntData)) EQInfoTmp.IntData = elm.IntData;
   });
 
   EQInfoTmp.cancel = !EQInfoData.find(function (elm) {
