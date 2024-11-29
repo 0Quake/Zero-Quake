@@ -1538,7 +1538,6 @@ function DrawIntensityCORE(data) {
     if (elm.area) {
       elm.area.forEach(function (elm2) {
         add_Area_info(elm2.name, elm2.int);
-        console.log(elm2);
         if (elm2.city && elm2.city.length) {
           elm2.city.forEach(function (elm3) {
             add_City_info(elm3.name, elm3.int);
@@ -1780,12 +1779,12 @@ function ConvertEQInfo(data) {
       EQInfoTmp.IntData = elm.IntData;
     }
   });
-  /*
+
   EQInfoData.filter(function (elm) {
     return elm.category !== "長周期地震動に関する観測情報";
   }).forEach(function (elm) {
     if (Boolean2(elm.IntData)) EQInfoTmp.IntData = elm.IntData;
-  });*/
+  });
 
   EQInfoTmp.cancel = !EQInfoData.find(function (elm) {
     return !elm.cancel;
