@@ -1003,22 +1003,27 @@ function jmaL_Fetch(url) {
       }
 
       var LngIntData = [];
+      var IntData = [];
       if (json.Body.Intensity && json.Body.Intensity.Observation.Pref) {
         json.Body.Intensity.Observation.Pref.forEach(function (elm) {
+          var areaDataL = [];
           var areaData = [];
           if (elm.Area) {
             elm.Area.forEach(function (elm2) {
+              var stDataL = [];
               var stData = [];
               if (elm2.IntensityStation) {
                 elm2.IntensityStation.forEach(function (elm4) {
-                  stData.push({ lat: elm4.latlon.lat, lng: elm4.latlon.lon, name: elm4.Name, lgint: elm4.LgInt });
+                  stDataL.push({ lat: elm4.latlon.lat, lng: elm4.latlon.lon, name: elm4.Name, lgint: elm4.LgInt });
+                  stData.push({ lat: elm4.latlon.lat, lng: elm4.latlon.lon, name: elm4.Name, int: elm4.Int });
                 });
               }
-              areaData.push({ name: elm2.Name, lgint: elm2.MaxLgInt, station: stData });
+              areaDataL.push({ name: elm2.Name, lgint: elm2.MaxLgInt, station: stDataL });
+              areaData.push({ name: elm2.Name, int: elm2.MaxInt, station: stData });
             });
           }
-          33;
-          LngIntData.push({ name: elm.Name, lgint: elm.MaxLgInt, area: areaData });
+          LngIntData.push({ name: elm.Name, lgint: elm.MaxLgInt, area: areaDataL });
+          IntData.push({ name: elm.Name, int: elm.MaxInt, area: areaData });
         });
       }
 
@@ -1036,6 +1041,7 @@ function jmaL_Fetch(url) {
         comment: commentText,
         cancel: cancelTmp,
         LngIntData: LngIntData,
+        IntData: IntData,
       });
     });
 }
@@ -1086,13 +1092,14 @@ function jmaXMLFetch(url) {
       if (xml.querySelector("Body Intensity") && xml.querySelector("Body Intensity Observation Pref")) {
         xml.querySelectorAll("Body Intensity Observation Pref").forEach(function (elm) {
           var areaData = [];
-          if (elm.querySelectorAll("Area")) {
+          if (elm.querySelectorAll("Area")[0]) {
             elm.querySelectorAll("Area").forEach(function (elm2) {
               var cityData = [];
-              if (elm2.querySelectorAll("City")) {
+              var stData = [];
+              if (elm2.querySelectorAll("City")[0]) {
                 elm2.querySelectorAll("City").forEach(function (elm3) {
                   var stData = [];
-                  if (elm3.querySelectorAll("IntensityStation")) {
+                  if (elm3.querySelectorAll("IntensityStation")[0]) {
                     elm3.querySelectorAll("IntensityStation").forEach(function (elm4) {
                       var pointT = pointList[elm4.querySelector("Code").textContent];
                       if (pointT) stData.push({ lat: pointT.location[0], lng: pointT.location[1], name: elm4.querySelector("Name").textContent, int: elm4.querySelector("Int").textContent });
@@ -1100,8 +1107,14 @@ function jmaXMLFetch(url) {
                   }
                   cityData.push({ name: elm3.querySelector("Name").textContent, int: elm3.querySelector("MaxInt").textContent, station: stData });
                 });
+              } else if (elm2.querySelectorAll("IntensityStation")[0]) {
+                var stData = [];
+                elm2.querySelectorAll("IntensityStation").forEach(function (elm4) {
+                  var pointT = pointList[elm4.querySelector("Code").textContent];
+                  if (pointT) stData.push({ lat: pointT.location[0], lng: pointT.location[1], name: elm4.querySelector("Name").textContent, int: elm4.querySelector("Int").textContent });
+                });
               }
-              areaData.push({ name: elm2.querySelector("Name").textContent, int: elm2.querySelector("MaxInt").textContent, city: cityData });
+              areaData.push({ name: elm2.querySelector("Name").textContent, int: elm2.querySelector("MaxInt").textContent, city: cityData, station: stData });
             });
           }
           IntData.push({ name: elm.querySelector("Name").textContent, int: elm.querySelector("MaxInt").textContent, area: areaData });
@@ -1452,17 +1465,20 @@ function add_City_info(name, maxInt) {
   var wrap2 = ShindoFragment.querySelectorAll(".WrapLevel2");
 
   var newDiv = document.createElement("div");
-  var color3 = NormalizeShindo(maxInt, 2);
-  newDiv.innerHTML = "<span style='background:" + color3[0] + ";color:" + color3[1] + ";'>" + maxInt + "</span>" + name;
-  newDiv.classList.add("ShindoItem", "ShindoItem3");
-  newDiv.addEventListener("click", function () {
-    this.classList.toggle("has-open");
-    this.nextElementSibling.classList.toggle("open");
-  });
+  if (name) {
+    var color3 = NormalizeShindo(maxInt, 2);
+    newDiv.innerHTML = "<span style='background:" + color3[0] + ";color:" + color3[1] + ";'>" + maxInt + "</span>" + name;
+    newDiv.classList.add("ShindoItem", "ShindoItem3");
+    newDiv.addEventListener("click", function () {
+      this.classList.toggle("has-open");
+      this.nextElementSibling.classList.toggle("open");
+    });
+  }
 
   var newDiv2 = document.createElement("div");
   newDiv2.innerHTML = "<div></div>";
-  newDiv2.classList.add("WrapLevel3", "close");
+  newDiv2.classList.add("WrapLevel3");
+  if (name) newDiv2.classList.add("close");
 
   wrap2[wrap2.length - 1].append(newDiv, newDiv2);
 }
@@ -1522,7 +1538,8 @@ function DrawIntensityCORE(data) {
     if (elm.area) {
       elm.area.forEach(function (elm2) {
         add_Area_info(elm2.name, elm2.int);
-        if (elm2.city) {
+        console.log(elm2);
+        if (elm2.city && elm2.city.length) {
           elm2.city.forEach(function (elm3) {
             add_City_info(elm3.name, elm3.int);
             if (elm3.station) {
@@ -1530,6 +1547,11 @@ function DrawIntensityCORE(data) {
                 add_IntensityStation_info(elm4.lat, elm4.lng, elm4.name, elm4.int);
               });
             }
+          });
+        } else if (elm2.station) {
+          add_City_info("", "");
+          elm2.station.forEach(function (elm4) {
+            add_IntensityStation_info(elm4.lat, elm4.lng, elm4.name, elm4.int);
           });
         }
       });
@@ -1746,7 +1768,7 @@ function ConvertEQInfo(data) {
       if (Boolean2(elm.comment) && (Boolean2(elm.comment.ForecastComment) || Boolean2(elm.comment.VarComment) || Boolean2(elm.comment.FreeFormComment))) {
         if (!EQInfoTmp.comment) EQInfoTmp.comment = elm.comment;
       }
-      console.log(elm.category);
+
       if (Boolean2(elm.LngIntData)) EQInfoTmp.LngIntData = elm.LngIntData;
     }
   });
@@ -1754,14 +1776,16 @@ function ConvertEQInfo(data) {
   EQInfoData.filter(function (elm) {
     return elm.category == "長周期地震動に関する観測情報";
   }).forEach(function (elm) {
-    if (Boolean2(elm.IntData)) EQInfoTmp.IntData = elm.IntData;
+    if (Boolean2(elm.IntData)) {
+      EQInfoTmp.IntData = elm.IntData;
+    }
   });
-
+  /*
   EQInfoData.filter(function (elm) {
     return elm.category !== "長周期地震動に関する観測情報";
   }).forEach(function (elm) {
     if (Boolean2(elm.IntData)) EQInfoTmp.IntData = elm.IntData;
-  });
+  });*/
 
   EQInfoTmp.cancel = !EQInfoData.find(function (elm) {
     return !elm.cancel;
