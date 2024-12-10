@@ -1881,6 +1881,7 @@ function ConvertEQInfo(data) {
   }
 
   if (EQInfoMarged.lat && EQInfoMarged.lng) {
+    console.log(EQInfoMarged.lng, EQInfoMarged.lat);
     ZoomBounds.extend([EQInfoMarged.lng, EQInfoMarged.lat]);
 
     if (!ESmarkerElm) {
@@ -1947,7 +1948,10 @@ function InfoType_add(type) {
       InfoType_remove("type-1");
       InfoType_remove("type-2");
       InfoType_remove("type-3");
-      if (map) map.setZoom(2);
+      if (map) {
+        mapZoomReset();
+        map.setZoom(2);
+      }
       break;
     case "type-5":
       InfoType_remove("type-1");
