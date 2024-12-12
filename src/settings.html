@@ -1015,11 +1015,18 @@
                 <h3><span>情報源ごとの設定</span>Wolfx</h3>
                 <div class="infoType">取得する情報：
                     <div>緊急地震速報</div>
+                    <div>リアルタイム揺れ情報</div>
                 </div>
-                <h4>全般</h4>
+                <h4>全般（SeisJSを除く）</h4>
                 <section>
                     <label><input type="checkbox" id="Wolfx_GetData">データを取得</label>
-                    <span class="smalltext">WebSocketで随時情報を受け取ります。</span>
+                    <span class="smalltext">WebSocketで随時 緊急地震速報を受け取ります。</span>
+                </section>
+
+                <h4>SeisJS（コミュニティ地震観測網）</h4>
+                <section>
+                    <label><input type="checkbox" id="Wolfx_SeisJS_GetData">データを取得</label>
+                    <span class="smalltext">中国を中心に運営されるコミュニティ観測網によるリアルタイム震度を取得します。政府機関等運営の物よりも精度は劣ります。</span>
                 </section>
             </div>
             <div id="tab1_content16" class="tabcontent">

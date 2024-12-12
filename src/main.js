@@ -111,6 +111,7 @@ var defaultConfigVal = {
     },
     wolfx: {
       GetData: true,
+      GetDataFromSeisJS: false,
     },
     TREMRTS: {
       GetData: true,
@@ -1065,6 +1066,7 @@ function start() {
   AXIS();
   ProjectBS();
   WolfxWS();
+  SeisjsWS();
 
   //HTTP定期GET着火
   Req_SNet();
@@ -1650,6 +1652,95 @@ function TryConnect_WolfxWS() {
 function Connect_WolfxWS() {
   if (WolfxWS_Client) WolfxWS_Client.connect("wss://ws-api.wolfx.jp/all_eew");
   Wolfx_ConnectedDate = new Date();
+}
+
+//Seisjs WebSocket接続・受信処理
+var SeisjsWS_Client;
+var SeisjsConnection;
+function SeisjsWS() {
+  if (!config.Source.wolfx.GetDataFromSeisJS) return;
+  SeisjsWS_Client = new WebSocketClient();
+
+  SeisjsWS_Client.on("connectFailed", function () {
+    UpdateStatus(new Date() - Replay, "wolfx", "Error");
+    TryConnect_SeisjsWS();
+  });
+
+  SeisjsWS_Client.on("connect", function (SeisjsConnection) {
+    SeisjsConnection.on("error", function () {
+      UpdateStatus(new Date() - Replay, "wolfx", "Error");
+    });
+    SeisjsConnection.on("close", function () {
+      UpdateStatus(new Date() - Replay, "wolfx", "Disconnect");
+      TryConnect_SeisjsWS();
+    });
+    SeisjsConnection.on("message", function (message) {
+      if (Replay !== 0) return;
+      UpdateStatus(new Date() - Replay, "wolfx", "success");
+      try {
+        var json = ParseJSON(message.utf8Data);
+        if (!json || json.type == "pong" || json.type == "heartbeat") return;
+        MargeSeisJS(json);
+      } catch (err) {
+        UpdateStatus(new Date() - Replay, "wolfx", "Error");
+      }
+      setInterval(function () {
+        SeisjsConnection.sendUTF("ping");
+      }, 60000);
+    });
+    UpdateStatus(new Date() - Replay, "wolfx", "success");
+  });
+
+  Connect_SeisjsWS();
+}
+var Seisjs_ConnectedDate = new Date();
+function TryConnect_SeisjsWS() {
+  var timeoutTmp = Math.max(30000 - (new Date() - Seisjs_ConnectedDate), 100);
+  setTimeout(Connect_SeisjsWS, timeoutTmp);
+}
+function Connect_SeisjsWS() {
+  if (SeisjsWS_Client) SeisjsWS_Client.connect("wss://seisjs.wolfx.jp/all_seis");
+  Seisjs_ConnectedDate = new Date();
+}
+
+var SeisJSData = {};
+function MargeSeisJS(json) {
+  SeisJSData[json.type] = json;
+
+  var rgb = shindoColorTable[Math.max(-3, Math.floor(json.CalcShindo * 10) / 10)];
+  SeisJSData[json.type] = { Type: "Wolfx_SeisJS", shindo: json.CalcShindo, PGA: json.PGA, Code: json.type, Name: json.region, Location: { Longitude: json.longitude, Latitude: json.latitude }, rgb: [rgb.r, rgb.g, rgb.b] };
+
+  Object.keys(SeisJSData).forEach(function (elm) {
+    var dif = Number(new Date() - new Date(Number(new Date(SeisJSData[elm].update_at)) + 3600000));
+    if (dif > 15 * 1000) SeisJSData[elm] = null;
+  });
+
+  IntervalRun(500, function () {
+    messageToMainWindow({
+      action: "SeisJSUpdate",
+      LocalTime: new Date(),
+      data: SeisJSData,
+    });
+  });
+}
+
+var LastRunTime = 0;
+var RunnningTimer;
+function IntervalRun(msec, func) {
+  if (RunnningTimer) {
+    clearInterval(RunnningTimer);
+    RunnningTimer = null;
+  }
+  var dif = new Date() - LastRunTime;
+  if (dif > msec) {
+    func();
+    LastRunTime = new Date();
+  } else {
+    RunnningTimer = setTimeout(function () {
+      func();
+      LastRunTime = new Date();
+    }, msec - dif);
+  }
 }
 
 //定期実行

@@ -31,6 +31,7 @@ fetch("./Resource/TsunamiStations.json")
   });
 
 var TREMRTS_TMP;
+var SeisJS_TMP;
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "init") {
     init();
@@ -39,6 +40,7 @@ window.electronAPI.messageSend((event, request) => {
     if (knetMapData) kmoniMapUpdate(knetMapData, "knet");
     if (snetMapData) kmoniMapUpdate(snetMapData, "snet");
     if (TREMRTS_TMP) TREMRTSUpdate(TREMRTS_TMP);
+    if (SeisJS_TMP) SeisJSUpdate(SeisJS_TMP);
   } else if (request.action == "unactivate") {
     background = true;
     becomeForeground = true;
@@ -58,6 +60,9 @@ window.electronAPI.messageSend((event, request) => {
   } else if (request.action == "TREM-RTSUpdate") {
     TREMRTS_TMP = request.data;
     TREMRTSUpdate(request.data);
+  } else if (request.action == "SeisJSUpdate") {
+    SeisJS_TMP = request.data;
+    SeisJSUpdate(request.data);
   } else if (request.action == "Replay") {
     Replay = request.data;
     document.getElementById("replayFrame").style.display = Replay == 0 ? "none" : "block";
@@ -1263,7 +1268,7 @@ function init() {
     var currentZoom = map.getZoom();
     document.getElementById("mapcontainer").classList.remove("zoomLevel_1", "zoomLevel_2", "zoomLevel_3", "zoomLevel_4", "popup_show");
 
-    if (currentZoom < 4.5) {
+    if (currentZoom < 4.3) {
       document.getElementById("mapcontainer").classList.add("zoomLevel_1");
     } else if (currentZoom < 6) {
       document.getElementById("mapcontainer").classList.add("zoomLevel_2");
@@ -1407,6 +1412,28 @@ function TREMRTSUpdate(dataTmp) {
         pointData.markerElm.style.background = "rgb(" + elm.rgb.join(",") + ")";
         var shindoColor = NormalizeShindo(elm.shindo, 2);
         pointData.popupContent = `<h3 class='PointName' style='border-bottom-color:rgb(${elm.rgb.join(",")})'><span>${elm.Type + "_" + elm.Code}</span></h3><div class='popupContentWrap'><div class='obsShindoWrap' style='background:${shindoColor[0]};color:${shindoColor[1]};'>震度 ${NormalizeShindo(elm.shindo, 1)}<span>${elm.shindo.toFixed(2)}</span></div><div class='obsPGAWrap'>PGA ${(Math.floor(elm.PGA * 100) / 100).toFixed(2)}</div></div>`;
+        if (pointData.popup.isOpen()) pointData.popup.setHTML(pointData.popupContent);
+      }
+      pointData.rgb = elm.rgb;
+    }
+  }
+}
+
+var SeisJS_points = {};
+function SeisJSUpdate(dataTmp) {
+  if (!background) {
+    for (key of Object.keys(dataTmp)) {
+      elm = dataTmp[key];
+      pointData = SeisJS_points[elm.Code];
+      var firstTime;
+      if (!pointData) {
+        pointData = SeisJS_points[elm.Code] = addPointMarker(elm);
+        firstTime = true;
+      }
+      if (pointData.rgb.join("") != elm.rgb.join("") || firstTime) {
+        pointData.markerElm.style.background = "rgb(" + elm.rgb.join(",") + ")";
+        var shindoColor = NormalizeShindo(elm.shindo, 2);
+        pointData.popupContent = `<h3 class='PointName' style='border-bottom-color:rgb(${elm.rgb.join(",")})'><span>${elm.Type + "_" + elm.Name}</span></h3><div class='popupContentWrap'><div class='obsShindoWrap' style='background:${shindoColor[0]};color:${shindoColor[1]};'>震度 ${NormalizeShindo(elm.shindo, 1)}<span>${elm.shindo.toFixed(2)}</span></div><div class='obsPGAWrap'>PGA ${(Math.floor(elm.PGA * 100) / 100).toFixed(2)}</div></div>`;
         if (pointData.popup.isOpen()) pointData.popup.setHTML(pointData.popupContent);
       }
       pointData.rgb = elm.rgb;
