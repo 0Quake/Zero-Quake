@@ -27,13 +27,6 @@ fetch("Resource/PointSeismicIntensityLocation.json")
   })
   .then(function (data) {
     pointList = data;
-    fetch("https://files.nakn.jp/earthquake/code/PointSeismicIntensityLocation.json")
-      .then(function (res2) {
-        return res2.json();
-      })
-      .then(function (data2) {
-        pointList = data2;
-      });
   });
 
 var EEWData;
