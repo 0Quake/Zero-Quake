@@ -470,7 +470,7 @@
   top: 0;
   right: 60px;
   min-width: 300px;
-  z-index: 999;
+  z-index: 99999;
   height: auto;
   border: solid 1px #777;
   border-top: none;
