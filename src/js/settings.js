@@ -111,6 +111,11 @@ function configDataDraw() {
   document.getElementById("VoiceEngine_" + config.notice.voice_parameter.engine).checked = true;
   document.getElementById("Boyomi_Port").value = config.notice.voice_parameter.Boyomi_Port;
 
+  document.getElementById("NotificationSound").checked = config.Info.EQInfo.NotificationSound;
+  selectBoxSet(document.getElementById("maxI_threshold"), config.Info.EQInfo.maxI_threshold);
+  document.getElementById("M_threshold").value = config.Info.EQInfo.M_threshold;
+  document.getElementById("Bypass_threshold").checked = config.Info.EQInfo.Bypass_threshold;
+
   fetch("http://localhost:50080/GetVoiceList")
     .then(function (res) {
       return res.json();
@@ -243,6 +248,11 @@ function apply() {
   }
   config.notice.voice_parameter.Boyomi_Port = Math.floor(Number(document.getElementById("Boyomi_Port").value));
   config.notice.voice_parameter.Boyomi_Voice = document.getElementById("BoyomiVoiceSelect").value;
+
+  config.Info.EQInfo.NotificationSound = document.getElementById("NotificationSound").checked;
+  config.Info.EQInfo.maxI_threshold = document.getElementById("maxI_threshold").value;
+  config.Info.EQInfo.M_threshold = document.getElementById("M_threshold").value;
+  config.Info.EQInfo.Bypass_threshold = document.getElementById("Bypass_threshold").checked;
 
   window.electronAPI.messageReturn({
     action: "ChangeConfig",

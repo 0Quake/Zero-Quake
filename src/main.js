@@ -78,6 +78,10 @@ var defaultConfigVal = {
       Interval: 60000,
       showtraining: false,
       showTest: false,
+      NotificationSound: true,
+      maxI_threshold: "0",
+      M_threshold: -5,
+      Bypass_threshold: true,
     },
     TsunamiInfo: {
       GetData: true,
@@ -3251,12 +3255,14 @@ function AlertEQInfo(data, source, update, audioPlay) {
   try {
     if (source == "jma") {
       if (audioPlay) {
-        PlayAudio("EQInfo");
-
         data = data.sort(function (a, b) {
           return a.OriginTime > b.OriginTime ? -1 : 1;
         });
-        speak(GenerateEQInfoText(data[0]));
+
+        if (config.Info.EQInfo.NotificationSound && (config.Info.EQInfo.Bypass_threshold || NormalizeShindo(config.Info.EQInfo.maxI_threshold, 5) <= NormalizeShindo(data[0].maxI, 5) || config.Info.EQInfo.M_threshold <= data[0].M)) {
+          PlayAudio("EQInfo");
+          speak(GenerateEQInfoText(data[0]));
+        }
       }
 
       eqInfo.jma = eqInfo.jma

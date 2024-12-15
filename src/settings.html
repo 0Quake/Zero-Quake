@@ -386,7 +386,7 @@
             </div>
             <div id="tab1_content3" class="tabcontent">
                 <h3><span>通知と音声</span>通知音 / 音声合成</h3>
-                <h4>音声の調整</h4>
+                <h4>合成音声の調整</h4>
                 <section>
                     <label> 話速：<input id="TTSSpeedN" type="number" min="0.1" max="10" value="1" step="0.1" oninput="TTSspeedSet(this.value)"><input id="TTSSpeedR" type="range" min="0.1" max="10" value="1" step="0.1" oninput="TTSspeedSet(this.value)"></label>
                     <label> 音高：<input id="TTSPitchN" type="number" min="0" max="2" value="1" step="0.05" oninput="TTSpitchSet(this.value)"><input id="TTSPitchR" type="range" min="0" max="2" value="1" step="0.05" oninput="TTSpitchSet(this.value)"></label>
@@ -812,7 +812,39 @@
                     <label>表示する件数<input type="number" id="EQInfo_ItemCount" min="1" max="50"></label>
                 </section>
 
-                <h4>音声合成</h4>
+                <h4>音声通知</h4>
+                <section>
+                    <div id="notify_setting_wrap">
+                        <label><input type="checkbox" id="NotificationSound">音声通知を利用</label>
+                        <div id="notify_threshold">
+                            <h5>音声通知条件</h5>
+                            <div class="smalltext">通知音（ベル音）および読み上げ音声に適用されます。設定した条件の1つでも合致する場合は音声で通知します。（OR条件）</div>
+
+                            <div id="thresholds_wrap">
+                                <label><input type="checkbox" id="Bypass_threshold">無条件に全地震を通知</label>
+
+                                <div id="thresholds">
+                                    <label>最大震度<select id="maxI_threshold">
+                                            <option value="0" selected>条件なし（全地震）</option>
+                                            <option value="1">震度1以上</option>
+                                            <option value="2">震度2以上</option>
+                                            <option value="3">震度3以上</option>
+                                            <option value="4">震度4以上</option>
+                                            <option value="5-">震度5弱以上</option>
+                                            <option value="5+">震度5強以上</option>
+                                            <option value="6-">震度6弱以上</option>
+                                            <option value="6+">震度6強以上</option>
+                                            <option value="7">震度7以上</option>
+                                        </select></label>
+                                    <label>マグニチュード～以上<input type="number" min="-5" max="12" step="0.1" id="M_threshold"></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+
+                <h4>音声合成文</h4>
                 <section>
 
                     <label>地震情報：<input id="EQInfo_Voice1" type="text" placeholder="地震情報の発表時に読み上げる文章"></label>
@@ -1042,7 +1074,7 @@
             </div>
             <div id="tab1_content10" class="tabcontent">
                 <h3><span>通知と音声</span>画面表示</h3>
-                <p class="smalltext">画面表示の設定は、「情報種別ごとの設定」から調整してください。</p>
+                <p class="smalltext">画面表示による通知の設定は、「情報種別ごとの設定」から調整してください。</p>
             </div>
             <div id="tab1_content11" class="tabcontent  active_tabcontent">
                 <h3><span>全般</span>システム設定</h3>

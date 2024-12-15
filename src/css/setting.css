@@ -416,17 +416,43 @@ summary:hover {
   display: none;
   padding: 15px 10px;
 }
-.VoiceEngine_Wrap {
+.VoiceEngine_Wrap,
+#notify_threshold {
   border: solid 1px #888;
   margin: 10px 0;
   border-radius: 5px;
   opacity: 0.5;
 }
-.VoiceEngine_Wrap:has(input[type="radio"]:checked) {
+#notify_threshold {
+  padding: 8px 13px;
+  cursor: not-allowed;
+}
+#notify_threshold h5 {
+  margin: 3px 0 7px 0;
+}
+#notify_threshold * {
+  pointer-events: none;
+}
+.VoiceEngine_Wrap:has(input:checked),
+#notify_setting_wrap:has(#NotificationSound:checked) #notify_threshold {
   border: solid 1px rgb(255 146 146);
   background: rgba(255, 146, 146, 0.1);
   opacity: 1;
+  cursor: auto;
 }
-.VoiceEngine_Wrap:has(input[type="radio"]:checked) .VoiceSettingContent {
+
+#notify_setting_wrap:has(#NotificationSound:checked) #notify_threshold * {
+  pointer-events: all;
+}
+
+.VoiceEngine_Wrap:has(input:checked) .VoiceSettingContent {
   display: block;
+}
+
+#thresholds_wrap:has(#Bypass_threshold:checked) #thresholds {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+#thresholds_wrap:has(#Bypass_threshold:checked) #thresholds * {
+  pointer-events: none;
 }
