@@ -1,7 +1,7 @@
 {
   "name": "zeroquake",
   "productName": "Zero Quake",
-  "version": "0.7.9",
+  "version": "0.7.10",
   "description": "地震に関する情報を即座に受信できるアプリケーションです。緊急地震速報に加え、津波情報や地震情報の受信に対応しています。このアプリ一つで、様々な種類の情報を、迅速に、分かりやすく表示します。",
   "scripts": {
     "start": "electron . --develop --debug-mode"
@@ -52,7 +52,7 @@
   "devDependencies": {
     "electron": "^33.2.1",
     "electron-builder": "^25.1.8",
-    "eslint": "^9.16.0",
+    "eslint": "^9.17.0",
     "prettier": "^3.4.2"
   },
   "dependencies": {
