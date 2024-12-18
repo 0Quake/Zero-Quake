@@ -1424,6 +1424,7 @@ function SeisJSUpdate(dataTmp) {
   if (!background) {
     for (key of Object.keys(dataTmp)) {
       elm = dataTmp[key];
+      if (elm.Location.Longitude == 0 && elm.Location.Latitude == 0) return;
       pointData = SeisJS_points[elm.Code];
       var firstTime;
       if (!pointData) {
