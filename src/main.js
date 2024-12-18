@@ -1714,11 +1714,7 @@ function MargeSeisJS(json) {
 
   Object.keys(SeisJSData).forEach(function (elm) {
     var dif = Number(new Date() - new Date(Number(new Date(SeisJSData[elm].update_at)) + 3600000));
-    //console.log(SeisJSData[elm], dif, new Date(Number(new Date(SeisJSData[elm].update_at)) + 3600000), Number(new Date(SeisJSData[elm].update_at)), new Date(SeisJSData[elm].update_at), SeisJSData[elm].update_at);
-    if (dif > 15 * 1000) {
-      delete SeisJSData[elm];
-      console.log("aa");
-    }
+    if (dif > 15 * 1000) delete SeisJSData[elm];
   });
 
   IntervalRun(500, function () {

@@ -1422,7 +1422,6 @@ function TREMRTSUpdate(dataTmp) {
 var SeisJS_points = {};
 function SeisJSUpdate(dataTmp) {
   if (!background) {
-    console.log(dataTmp);
     for (key of Object.keys(dataTmp)) {
       elm = dataTmp[key];
       if (elm.Location.Longitude == 0 && elm.Location.Latitude == 0) return;
@@ -1444,7 +1443,6 @@ function SeisJSUpdate(dataTmp) {
     Object.keys(SeisJS_points).forEach(function (key) {
       elm = SeisJS_points[key];
       if (!Object.keys(dataTmp).includes(key)) {
-        console.log("aaaaaaaaa");
         elm.markerElm.style.background = "rgba(128,128,128,0.5)";
 
         var shindoColor = NormalizeShindo("?", 2);

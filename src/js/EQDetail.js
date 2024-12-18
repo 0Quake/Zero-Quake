@@ -1874,7 +1874,6 @@ function ConvertEQInfo(data) {
   }
 
   if (EQInfoMarged.lat && EQInfoMarged.lng) {
-    console.log(EQInfoMarged.lng, EQInfoMarged.lat);
     ZoomBounds.extend([EQInfoMarged.lng, EQInfoMarged.lat]);
 
     if (!ESmarkerElm) {
