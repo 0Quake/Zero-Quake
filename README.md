@@ -21,10 +21,10 @@
   <details>
   <summary>出典・情報源</summary>
   <ul>
-    <li>Wolfx <a href="https://api.wolfx.jp/">© Wolfx Studio.</a></li>
+    <li>Wolfx © Wolfx Project.</li>
     <li>ProjectBS © CrossRoad</li>
-    <li>Axis <a href="https://axis.prioris.jp/">© Prioris</a>（無料登録必須）</li>
-    <li>P2P 地震情報 API <a href="https://www.p2pquake.net/json_api_v2/">© P2P地震情報</a>（警報のみ）</li>
+    <li>Axis © Prioris（無料登録必須）</li>
+    <li>P2P 地震情報 API © P2P地震情報（警報のみ）</li>
   </ul>
   </details>
 
@@ -38,8 +38,8 @@
   <ul>
     <li>出典：<a href="https://xml.kishou.go.jp/xmlpull.html">気象庁防災情報 XML</a></li>
     <li>出典：<a href="https://www.jma.go.jp/bosai/map.html?contents=earthquake_map">気象庁ホームページ</a>（※の項目のみ）</li>
-    <li><a href="https://ntool.online/apidoc/earthquakeapi">nTool Earthquake API</a></li>
-    <li> <a href="https://axis.prioris.jp/">Prioris Axis</a>（無料登録必須）</li>
+    <li>nTool Earthquake API</li>
+    <li>Prioris Axis（無料登録必須）</li>
   </ul>
   </details>
 
@@ -60,16 +60,18 @@
   K-NET, KiK-net（防災科学技術研究所 強震観測網）  
   S-net, 相模湾地震観測施設（防災科学技術研究所 海底観測網）  
   TREM-RTS (SE-Net, MS-Net)※（台湾など コミュニティ観測網）
+  Wolfx SeisJS（中国など　コミュニティ観測網）
 
   ※<a href="https://github.com/whes1015">YuYu1015 様</a>のご厚意でデータを提供していただいています
 
   <details>
   <summary>出典・情報源</summary>
   <ul>
-    <li>出典：強震モニタ <a href="http://www.kmoni.bosai.go.jp/">© 防災科学技術研究所</a>（強震）</li>
-    <li>出典：長周期地震動モニタ <a href="http://www.lmoni.bosai.go.jp/">© 防災科学技術研究所</a>（強震）</li>
-    <li>出典：海しる <a href="https://www.msil.go.jp/">© Japan Coast Guard, 防災科学技術研究所</a>（海底）</li>
-    <li>出典：TREM-RTS API © ExpTech Studio（台湾など）</li>
+    <li>出典：強震モニタ <a href="http://www.kmoni.bosai.go.jp/">© 防災科学技術研究所</a>（K-NET, KiK-net）</li>
+    <li>出典：長周期地震動モニタ <a href="http://www.lmoni.bosai.go.jp/">© 防災科学技術研究所</a>（K-NET, KiK-net）</li>
+    <li>出典：海しる <a href="https://www.msil.go.jp/">© Japan Coast Guard, 防災科学技術研究所</a>（S-net, 相模湾地震観測施設）</li>
+    <li>出典：TREM-RTS API © ExpTech Studio（TREM-RTS）</li>
+    <li>出典：Wolfx © Wolfx Project.（Wolfx SeisJS）</li>
   </ul>
   </details>
 
