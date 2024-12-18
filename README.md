@@ -95,7 +95,7 @@
 - 国内湖沼 出典：[国土交通省 国土数値情報(湖沼データ)](https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-W09-v2_2.html)※
 - 国外陸地 出典：Natural Earth※
 - プレート境界： [© Hugo Ahlenius, Nordpil, Peter Bird](http://opendatacommons.org/licenses/by/1.0/)
-- 海底地形：GEBCO
+- 海底地形 出典：GEBCO
 - [© OpenStreetMap contributors](https://www.openstreetmap.org/copyright/)
 - 最適化ベクトルタイル, 地理院タイル [© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)  
   ※加工（単純化処理）して使用

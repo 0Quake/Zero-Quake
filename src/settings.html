@@ -460,6 +460,7 @@
                     <li><a href="https://www.data.jma.go.jp/svd/eew/data/nc/">気象庁「緊急地震速報について」</a>を確認し、緊急地震速報について正しく理解したうえでご利用ください。</li>
                     <li>地図に表示されるリアルタイムの揺れ情報には、生活振動などを含みます。</li>
                     <li>TREM-RTS から取得する台湾の揺れ情報は、日本とは異なる尺度の震度ですが、おおむね日本の震度と対応するため、そのまま表示しています。</li>
+                    <li>Early-Estによる情報は実験的なものであり、専門家による検証を経ていません。自己責任にて有効化してください。</li>
                     <li>インターネットを使用して情報を取得する都合で、情報の遅延・取得漏れ等があり得ます。</li>
                     <li>当アプリとしては、動画・配信等での使用は制限しませんが、当アプリで使用している情報源、合成音声システム等に付帯する、第三者の権利には十分にご注意ください。</li>
                 </ul>
@@ -471,10 +472,10 @@
                         <details>
                             <summary>出典・情報源</summary>
                             <ul>
-                                <li>Wolfx <a href="https://api.wolfx.jp/">© Wolfx Studio.</a></li>
+                                <li>Wolfx © Wolfx Project.</li>
                                 <li>ProjectBS © CrossRoad</li>
-                                <li>Axis <a href="https://axis.prioris.jp/">© Prioris</a>（無料登録必須）</li>
-                                <li>P2P 地震情報 API <a href="https://www.p2pquake.net/json_api_v2/">© P2P地震情報</a>（警報のみ）</li>
+                                <li>Axis © Prioris（無料登録必須）</li>
+                                <li>P2P 地震情報 API © P2P地震情報（警報のみ）</li>
                             </ul>
                         </details>
                     </li>
@@ -488,8 +489,8 @@
                             <ul>
                                 <li>出典：<a href="https://xml.kishou.go.jp/xmlpull.html">気象庁防災情報 XML</a></li>
                                 <li>出典：<a href="https://www.jma.go.jp/bosai/map.html?contents=earthquake_map">気象庁ホームページ</a>（※の項目のみ）</li>
-                                <li><a href="https://ntool.online/apidoc/earthquakeapi">nTool Earthquake API</a></li>
-                                <li> <a href="https://axis.prioris.jp/">Prioris Axis</a>（無料登録必須）</li>
+                                <li>nTool Earthquake API</li>
+                                <li>Prioris Axis（無料登録必須）</li>
                             </ul>
                         </details>
                     </li>
@@ -509,15 +510,17 @@
                         <h3 id="リアルタイム揺れ情報">リアルタイム揺れ情報</h3>
                         <p>K-NET, KiK-net（防災科学技術研究所 強震観測網）<br>
                             S-net, 相模湾地震観測施設（防災科学技術研究所 海底観測網）<br>
-                            TREM-RTS (SE-Net, MS-Net)※（台湾など コミュニティ観測網）</p>
+                            TREM-RTS (SE-Net, MS-Net)※（台湾など コミュニティ観測網）
+                            Wolfx SeisJS（中国など　コミュニティ観測網）</p>
                         <p>※<a href="https://github.com/whes1015">YuYu1015 様</a>のご厚意でデータを提供していただいています</p>
                         <details>
                             <summary>出典・情報源</summary>
                             <ul>
-                                <li>出典：強震モニタ <a href="http://www.kmoni.bosai.go.jp/">© 防災科学技術研究所</a>（強震）</li>
-                                <li>出典：長周期地震動モニタ <a href="http://www.lmoni.bosai.go.jp/">© 防災科学技術研究所</a>（強震）</li>
-                                <li>出典：海しる <a href="https://www.msil.go.jp/">© Japan Coast Guard, 防災科学技術研究所</a>（海底）</li>
-                                <li>出典：TREM-RTS API © ExpTech Studio（台湾など）</li>
+                                <li>出典：強震モニタ <a href="http://www.kmoni.bosai.go.jp/">© 防災科学技術研究所</a>（K-NET, KiK-net）</li>
+                                <li>出典：長周期地震動モニタ <a href="http://www.lmoni.bosai.go.jp/">© 防災科学技術研究所</a>（K-NET, KiK-net）</li>
+                                <li>出典：海しる <a href="https://www.msil.go.jp/">© Japan Coast Guard, 防災科学技術研究所</a>（S-net, 相模湾地震観測施設）</li>
+                                <li>出典：TREM-RTS API © ExpTech Studio（TREM-RTS）</li>
+                                <li>出典：Wolfx © Wolfx Project.（Wolfx SeisJS）</li>
                             </ul>
                         </details>
                     </li>
@@ -543,7 +546,7 @@
                     <li>国内湖沼 出典：<a href="https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-W09-v2_2.html">国土交通省 国土数値情報(湖沼データ)</a>※</li>
                     <li>国外陸地 出典：Natural Earth※</li>
                     <li>プレート境界： <a href="http://opendatacommons.org/licenses/by/1.0/">© Hugo Ahlenius, Nordpil, Peter Bird</a></li>
-                    <li>海底地形：GEBCO</li>
+                    <li>海底地形 出典：GEBCO</li>
                     <li><a href="https://www.openstreetmap.org/copyright/">© OpenStreetMap contributors</a></li>
                     <li>最適化ベクトルタイル, 地理院タイル <a href="https://maps.gsi.go.jp/development/ichiran.html">© 国土地理院</a><br>
                         ※加工（単純化処理）して使用</li>
