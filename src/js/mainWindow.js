@@ -1422,6 +1422,7 @@ function TREMRTSUpdate(dataTmp) {
 var SeisJS_points = {};
 function SeisJSUpdate(dataTmp) {
   if (!background) {
+    console.log(dataTmp);
     for (key of Object.keys(dataTmp)) {
       elm = dataTmp[key];
       if (elm.Location.Longitude == 0 && elm.Location.Latitude == 0) return;
@@ -1434,11 +1435,24 @@ function SeisJSUpdate(dataTmp) {
       if (pointData.rgb.join("") != elm.rgb.join("") || firstTime) {
         pointData.markerElm.style.background = "rgb(" + elm.rgb.join(",") + ")";
         var shindoColor = NormalizeShindo(elm.shindo, 2);
-        pointData.popupContent = `<h3 class='PointName' style='border-bottom-color:rgb(${elm.rgb.join(",")})'><span>${elm.Type + "_" + elm.Name}</span></h3><div class='popupContentWrap'><div class='obsShindoWrap' style='background:${shindoColor[0]};color:${shindoColor[1]};'>震度 ${NormalizeShindo(elm.shindo, 1)}<span>${elm.shindo.toFixed(2)}</span></div><div class='obsPGAWrap'>PGA ${(Math.floor(elm.PGA * 100) / 100).toFixed(2)}</div></div>`;
+        pointData.popupContent = `<h3 class='PointName' style='border-bottom-color:rgb(${elm.rgb.join(",")})'>${elm.Name}<span>${elm.Type}</span></h3><div class='popupContentWrap'><div class='obsShindoWrap' style='background:${shindoColor[0]};color:${shindoColor[1]};'>震度 ${NormalizeShindo(elm.shindo, 1)}<span>${elm.shindo.toFixed(2)}</span></div><div class='obsPGAWrap'>PGA ${(Math.floor(elm.PGA * 100) / 100).toFixed(2)}</div></div>`;
         if (pointData.popup.isOpen()) pointData.popup.setHTML(pointData.popupContent);
       }
       pointData.rgb = elm.rgb;
     }
+
+    Object.keys(SeisJS_points).forEach(function (key) {
+      elm = SeisJS_points[key];
+      if (!Object.keys(dataTmp).includes(key)) {
+        console.log("aaaaaaaaa");
+        elm.markerElm.style.background = "rgba(128,128,128,0.5)";
+
+        var shindoColor = NormalizeShindo("?", 2);
+        elm.popupContent = `<h3 class='PointName' style='border-bottom-color:rgba(128,128,128,0.5)'>${elm.Name}<span>${elm.Type}</span></h3><div class='popupContentWrap'><div class='obsShindoWrap' style='background:${shindoColor[0]};color:${shindoColor[1]};'>震度 不明<span></span></div><div class='obsPGAWrap'>PGA ?</div></div>`;
+
+        if (elm.popup.isOpen()) elm.popup.setHTML(elm.popupContent);
+      }
+    });
   }
 }
 

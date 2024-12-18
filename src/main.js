@@ -1709,14 +1709,16 @@ function Connect_SeisjsWS() {
 
 var SeisJSData = {};
 function MargeSeisJS(json) {
-  SeisJSData[json.type] = json;
-
   var rgb = shindoColorTable[Math.max(-3, Math.floor(json.CalcShindo * 10) / 10)];
-  SeisJSData[json.type] = { Type: "Wolfx_SeisJS", shindo: json.CalcShindo, PGA: json.PGA, Code: json.type, Name: json.region, Location: { Longitude: json.longitude, Latitude: json.latitude }, rgb: [rgb.r, rgb.g, rgb.b] };
+  SeisJSData[json.type] = { Type: "Wolfx_SeisJS", shindo: json.CalcShindo, PGA: json.PGA, Code: json.type, Name: json.region, Location: { Longitude: json.longitude, Latitude: json.latitude }, rgb: [rgb.r, rgb.g, rgb.b], update_at: json.update_at };
 
   Object.keys(SeisJSData).forEach(function (elm) {
     var dif = Number(new Date() - new Date(Number(new Date(SeisJSData[elm].update_at)) + 3600000));
-    if (dif > 15 * 1000) SeisJSData[elm] = null;
+    //console.log(SeisJSData[elm], dif, new Date(Number(new Date(SeisJSData[elm].update_at)) + 3600000), Number(new Date(SeisJSData[elm].update_at)), new Date(SeisJSData[elm].update_at), SeisJSData[elm].update_at);
+    if (dif > 15 * 1000) {
+      delete SeisJSData[elm];
+      console.log("aa");
+    }
   });
 
   IntervalRun(500, function () {
