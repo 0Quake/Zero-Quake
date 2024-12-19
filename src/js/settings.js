@@ -55,6 +55,7 @@ function configDataDraw() {
   document.getElementById("HomeName").value = config.home.name;
   document.getElementById("latitude").value = config.home.latitude;
   document.getElementById("longitude").value = config.home.longitude;
+  beforeCordinates = [config.home.longitude, config.home.latitude];
   document.getElementById("EEW_Voice").value = config.notice.voice.EEW;
   document.getElementById("EEW2_Voice").value = config.notice.voice.EEWUpdate;
   document.getElementById("EEW3_Voice").value = config.notice.voice.EEWCancel;
@@ -465,8 +466,11 @@ function mapInit() {
 
 var beforeCordinates = [0, 0];
 function MapReDraw() {
-  lat = document.getElementById("latitude").value;
-  lng = document.getElementById("longitude").value;
+  lat = Number(document.getElementById("latitude").value);
+  lng = Number(document.getElementById("longitude").value);
+  if (!lat) lat = 0;
+  if (!lng) lng = 0;
+
   var inside_sect = EQSectFeatures.find(function (elm) {
     return turf.booleanPointInPolygon([lng, lat], elm);
   });
