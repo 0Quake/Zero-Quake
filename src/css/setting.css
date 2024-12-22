@@ -461,6 +461,6 @@ summary:hover {
   cursor: not-allowed;
 }
 #thresholds_wrap:has(#Bypass_threshold:checked) #thresholds *,
-#T_thresholds_wrap:has(#Tsunami_Bypass_threshold:checked) #T_thresholds {
+#T_thresholds_wrap:has(#Tsunami_Bypass_threshold:checked) #T_thresholds * {
   pointer-events: none;
 }
