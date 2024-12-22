@@ -1816,8 +1816,8 @@ function tsunamiDataUpdate(data) {
   map.setFilter("tsunami_Yoho", ["==", "name", ""]);
   Tsunami_MajorWarning = Tsunami_Warning = Tsunami_Watch = Tsunami_Yoho = false;
 
-  document.getElementById("tsunamiCancel").style.display = data.cancelled ? "block" : "none";
-  document.getElementById("tsunamiRevocation").style.display = data.revocation ? "block" : "none";
+  document.getElementById("tsunamiCancel").style.display = data.Torikeshi ? "block" : "none";
+  document.getElementById("tsunamiRevocation").style.display = data.revocation || data.cancelled ? "block" : "none";
 
   document.querySelector("#tsunamiWrap .TestNotes").style.display = data.status == "試験" ? "block" : "none";
   document.querySelector("#tsunamiWrap .trainingNotes").style.display = data.status == "訓練" ? "block" : "none";
