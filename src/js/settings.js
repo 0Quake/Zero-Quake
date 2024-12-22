@@ -58,6 +58,10 @@ function configDataDraw() {
   document.getElementById("EEW_Voice").value = config.notice.voice.EEW;
   document.getElementById("EEW2_Voice").value = config.notice.voice.EEWUpdate;
   document.getElementById("EEW3_Voice").value = config.notice.voice.EEWCancel;
+  document.getElementById("Tsunami_Voice").value = config.notice.voice.Tsunami;
+  document.getElementById("Tsunami_Voice2").value = config.notice.voice.TsunamiRevocation;
+  document.getElementById("Tsunami_Voice3").value = config.notice.voice.TsunamiTorikeshi;
+
   document.getElementById("EQInfo_Voice1").value = config.notice.voice.EQInfo;
   document.getElementById("EQInfo_Voice2").value = config.notice.voice.EQInfoCancel;
   document.getElementById("EQInfo_ItemCount").value = config.Info.EQInfo.ItemCount;
@@ -204,6 +208,9 @@ function apply() {
   config.notice.voice.EEW = document.getElementById("EEW_Voice").value;
   config.notice.voice.EEWUpdate = document.getElementById("EEW2_Voice").value;
   config.notice.voice.EEWCancel = document.getElementById("EEW3_Voice").value;
+  config.notice.voice.Tsunami = document.getElementById("Tsunami_Voice").value;
+  config.notice.voice.TsunamiRevocation = document.getElementById("Tsunami_Voice2").value;
+  config.notice.voice.TsunamiTorikeshi = document.getElementById("Tsunami_Voice3").value;
   config.notice.voice.EQInfo = document.getElementById("EQInfo_Voice1").value;
   config.notice.voice.EQInfoCancel = document.getElementById("EQInfo_Voice2").value;
   config.Info.EQInfo.ItemCount = Number(document.getElementById("EQInfo_ItemCount").value);

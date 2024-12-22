@@ -142,6 +142,9 @@ var defaultConfigVal = {
       EEWCancel: "緊急地震速報が取り消されました。",
       EQInfo: "{training2}{origin_time2}の地震について、{category}が発表されました。",
       EQInfoCancel: "地震情報が取り消されました。",
+      Tsunami: "{max_grade}が発表されました。[直ちに逃げてください。直ちに逃げてください。]",
+      TsunamiRevocation: "津波情報が解除されました。",
+      TsunamiTorikeshi: "津波情報が取り消されました。",
     },
     window: {
       EEW: "openWindow",
@@ -1760,8 +1763,9 @@ function RegularExecution(roop) {
     //津波情報解除
     Tsunami_Data.forEach(function (elm) {
       if (elm.ValidDateTime <= new Date() && !elm.revocation) {
+        elm.revocation = true;
         ConvertTsunamiInfo({
-          issue: { time: elm.issue.time, EventID: null, EarthQuake: null },
+          issue: { time: new Date(), EventID: elm.issue.EventID, EarthQuake: null },
           revocation: true,
           cancelled: false,
           areas: [],
@@ -3206,35 +3210,6 @@ function ConvertEQInfo(dataList, type, EEW, count) {
   }
 }
 
-//EEW時読み上げ文章 生成
-function GenerateEQInfoText(EQData) {
-  if (EQData.category == "EEW") return ""; //EEWは専用の読み上げシステムに任せる
-  if (!EQData.epiCenter && !EQData.maxI) return; //震度も震源もわからない（壊れたデータ）
-
-  if (EQData.cancel) var text = config.notice.voice.EQInfoCancel;
-  else var text = config.notice.voice.EQInfo;
-
-  var category = EQData.category;
-  if (category == "Tsunami") category = "津波情報に付帯する地震情報";
-
-  var dif = timeDifference(Number(new Date() - new Date(EQData.OriginTime)));
-  text = text.replaceAll("{category}", category ? category : "");
-  text = text.replaceAll("{training}", EQData.status == "訓練" ? "訓練報。" : "");
-  text = text.replaceAll("{training2}", EQData.status == "訓練" ? "これは訓練報です。" : "");
-  text = text.replaceAll("{report_time}", EQData.reportDateTime ? NormalizeDate(8, EQData.reportDateTime) : "");
-  text = text.replaceAll("{origin_time}", EQData.OriginTime ? NormalizeDate(8, EQData.OriginTime) : "");
-  text = text.replaceAll("{origin_time2}", EQData.OriginTime ? dif.num + dif.unit + "前" : "先ほど");
-  text = text.replaceAll("{region_name}", EQData.epiCenter ? EQData.epiCenter : "");
-  text = text.replaceAll("{magnitude}", EQData.M ? EQData.M : "");
-  text = text.replaceAll("{maxInt}", EQData.maxI ? NormalizeShindo(EQData.maxI, 1) : "");
-
-  if (!EQData.epiCenter) text = text.replace(/\[.*?\]/g, "");
-  if (!EQData.maxI) text = text.replace(/\<.*?\>/g, "");
-  text = text.replace(/\[|\]|<|>/g, "");
-
-  return text;
-}
-
 //時間(ms)を「～分[秒,分,時間,日]」の形にする
 function timeDifference(miliseconds) {
   if (miliseconds < 60000) {
@@ -3365,17 +3340,17 @@ function ConvertTsunamiInfo(data) {
       });
     } else {
       Tsunami_Data.push(data);
-      CreateMainWindow(); //アラート
+      //アラート
+      CreateMainWindow();
       PlayAudio("TsunamiInfo");
+      speak(GenerateTsunamiText(data));
     }
 
     Tsunami_data_Marged = { issue: {}, areas: [] };
     Tsunami_Data = Tsunami_Data.sort((a, b) => (a.issue.time > b.issue.time ? 1 : -1));
-    var all_revocated = true;
-    var all_canceled = true;
     Tsunami_Data.forEach(function (elm0) {
-      if (!elm0.revocation || !elm0.cancelled) all_revocated = false;
-      if (!elm0.cancelled) all_canceled = false;
+      if (elm0.revocation) Tsunami_data_Marged.revocation = elm0.revocation;
+      if (elm0.cancelled) Tsunami_data_Marged.cancelled = elm0.cancelled;
       if (elm0.revocation || elm0.cancelled) return;
       if (elm0.issue.EventID) Tsunami_data_Marged.issue.EventID = elm0.issue.EventID;
       if (elm0.issue.EarthQuake) Tsunami_data_Marged.issue.EarthQuake = elm0.issue.EarthQuake;
@@ -3417,8 +3392,6 @@ function ConvertTsunamiInfo(data) {
         }
       });
     });
-    if (all_revocated) Tsunami_data_Marged.revocation = true;
-    if (all_canceled) Tsunami_data_Marged.cancelled = true;
 
     messageToMainWindow({
       action: "tsunamiUpdate",
@@ -3478,6 +3451,101 @@ function GenerateEEWText(EEWData, update) {
 
   return text;
 }
+//津波情報時読み上げ文章 生成
+function GenerateEQInfoText(EQData) {
+  if (EQData.category == "EEW") return ""; //EEWは専用の読み上げシステムに任せる
+  if (!EQData.epiCenter && !EQData.maxI) return; //震度も震源もわからない（壊れたデータ）をはねる
+
+  if (EQData.cancel) var text = config.notice.voice.EQInfoCancel;
+  else var text = config.notice.voice.EQInfo;
+
+  var category = EQData.category;
+  if (category == "Tsunami") category = "津波情報に付帯する地震情報";
+
+  var dif = timeDifference(Number(new Date() - new Date(EQData.OriginTime)));
+  text = text.replaceAll("{category}", category ? category : "");
+  text = text.replaceAll("{training}", EQData.status == "訓練" ? "訓練報。" : "");
+  text = text.replaceAll("{training2}", EQData.status == "訓練" ? "これは訓練報です。" : "");
+  text = text.replaceAll("{report_time}", EQData.reportDateTime ? NormalizeDate(8, EQData.reportDateTime) : "");
+  text = text.replaceAll("{origin_time}", EQData.OriginTime ? NormalizeDate(8, EQData.OriginTime) : "");
+  text = text.replaceAll("{origin_time2}", EQData.OriginTime ? dif.num + dif.unit + "前" : "先ほど");
+  text = text.replaceAll("{region_name}", EQData.epiCenter ? EQData.epiCenter : "");
+  text = text.replaceAll("{magnitude}", EQData.M ? EQData.M : "");
+  text = text.replaceAll("{maxInt}", EQData.maxI ? NormalizeShindo(EQData.maxI, 1) : "");
+
+  if (!EQData.epiCenter) text = text.replace(/\[.*?\]/g, "");
+  if (!EQData.maxI) text = text.replace(/\<.*?\>/g, "");
+  text = text.replace(/\[|\]|<|>/g, "");
+
+  return text;
+}
+//津波情報時読み上げ文章 生成
+function GenerateTsunamiText(data) {
+  if (data.Torikeshi) var text = config.notice.voice.TsunamiTorikeshi;
+  else if (data.revocation || data.cancelled) var text = config.notice.voice.TsunamiRevocation;
+  else var text = config.notice.voice.Tsunami;
+  var grades = { MajorWarning: false, Warning: false, Watch: false, Yoho: false };
+  var glades_JA = { MajorWarning: "大津波警報", Warning: "津波警報", Watch: "津波注意報", Yoho: "津波予報" };
+
+  //自地域（カッコで）　最大波高さ
+  var glade_arr = [];
+  var homeArea;
+  data.areas.forEach(function (area) {
+    if (area.grade) grades[area.grade] = true;
+    if (config.home.TsunamiSect && area.name == config.home.TsunamiSect) homeArea = area;
+  });
+
+  Object.keys(grades).forEach(function (key) {
+    if (grades[key]) glade_arr.push(glades_JA[key]);
+  });
+
+  text = text.replaceAll("{max_grade}", glade_arr[0] ? glade_arr[0] : "津波情報");
+  text = text.replaceAll("{all_grade}", glade_arr[0] ? glade_arr.join("、") : "津波情報");
+  text = text.replaceAll("{report_time}", data.issue.time ? NormalizeDate(9, data.issue.time) : "不明な時刻");
+
+  if (homeArea && !homeArea.canceled) {
+    text = text.replaceAll("{home_area}", homeArea.name ? homeArea.name : "設定地点");
+    text = text.replaceAll("{home_grade}", homeArea.grade ? glades_JA[homeArea.grade] : "津波情報");
+
+    var firstHeightTmp = "";
+    if (homeArea.firstHeight) firstHeightTmp = "第一波が" + NormalizeDate(7, homeArea.firstHeight) + "に予想され、";
+    else if (homeArea.firstHeightCondition == "津波到達中と推測") firstHeightTmp = "津波が到達中とみられ、";
+    else if (homeArea.firstHeightCondition == "第１波の到達を確認") firstHeightTmp = "既に第一波が到達し、";
+    else firstHeightTmp = "";
+    text = text.replaceAll("{first_height1}", firstHeightTmp);
+
+    var firstHeightTmp2 = "";
+    if (homeArea.firstHeight) firstHeightTmp2 = "到達予想時刻は" + NormalizeDate(9, homeArea.firstHeight);
+    else if (homeArea.firstHeightCondition == "津波到達中と推測") firstHeightTmp2 = "津波到達中と推測";
+    else if (homeArea.firstHeightCondition == "第１波の到達を確認") firstHeightTmp2 = "第１波の到達を確認";
+    else firstHeightTmp2 = "到達時刻は不明";
+    text = text.replaceAll("{first_height2}", firstHeightTmp2);
+
+    var immediately = "";
+    if (homeArea.firstHeightCondition == "ただちに津波来襲と予測") immediately = "ただちに津波が来襲すると予測されます。";
+    text = text.replaceAll("{immediately}", immediately);
+
+    var MaxHeightTmp = "";
+    if (homeArea.maxHeight == "巨大") MaxHeightTmp = "巨大な津波";
+    else if (homeArea.maxHeight == "高い") MaxHeightTmp = "高い津波";
+    else if (homeArea.maxHeight) MaxHeightTmp = "今後最大" + homeArea.maxHeight.replace("m", "メートル") + "の津波";
+    else if (!homeArea.maxHeight && homeArea.grade == "Yoho") MaxHeightTmp = "若干の海面変動";
+    else MaxHeightTmp = "高さ不明の津波";
+    text = text.replaceAll("{max_height1}", MaxHeightTmp);
+
+    var MaxHeightTmp2 = "";
+    if (homeArea.maxHeight == "巨大") MaxHeightTmp2 = "巨大";
+    else if (homeArea.maxHeight == "高い") MaxHeightTmp2 = "高い";
+    else if (homeArea.maxHeight) MaxHeightTmp2 = homeArea.maxHeight.replace("m", "メートル");
+    else if (!homeArea.maxHeight && homeArea.grade == "Yoho") MaxHeightTmp2 = "若干の海面変動";
+    else MaxHeightTmp2 = "不明";
+    text = text.replaceAll("{max_height2}", MaxHeightTmp2);
+  } else text = text.replace(/\[.*?\]/g, "");
+
+  text = text.replace(/\[|\]/g, "");
+  return text;
+}
+
 //音声再生(WorkerWindow連携)
 function PlayAudio(name) {
   if (WorkerWindow) {
