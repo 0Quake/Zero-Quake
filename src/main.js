@@ -2125,13 +2125,17 @@ function MargeEEW(data) {
           data.arrivalTime = new Date(Number(data.origin_time) + SSec * 1000);
         }
         if (data.depth <= 150) {
+          var maxShindo = 0;
           Object.keys(sesmicPoints).forEach(function (key) {
             elm = sesmicPoints[key];
             if (elm.arv && elm.sect) {
               var estInt = calcInt(data.magnitude, data.depth, data.latitude, data.longitude, elm.location[0], elm.location[1], elm.arv);
+              if (maxShindo < estInt) maxShindo = estInt;
               if (!estIntTmp[elm.sect] || estInt > estIntTmp[elm.sect]) estIntTmp[elm.sect] = estInt;
             }
           });
+
+          if (NormalizeShindo(data.maxInt, 4) === null) data.maxInt = NormalizeShindo(maxShindo);
           Object.keys(estIntTmp).forEach(function (elm) {
             var shindo = NormalizeShindo(estIntTmp[elm]);
             var sectData;

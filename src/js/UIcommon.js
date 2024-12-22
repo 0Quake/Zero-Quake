@@ -192,6 +192,17 @@ function NormalizeShindo(str, responseType) {
   return ConvTable[ShindoTmp];
 }
 
+document.querySelectorAll("input[type=number]").forEach(function (elm) {
+  elm.addEventListener("change", function () {
+    var max = this.getAttribute("max");
+    if (Number(max) < Number(this.value)) this.value = max;
+    var min = this.getAttribute("min");
+    if (Number(min) > Number(this.value)) this.value = min;
+    var step = this.getAttribute("step");
+    if (Number(this.value) % Number(step) == 0) this.value = Math.floor(this.value / step) * step;
+  });
+});
+
 //MMI震度フォーマット
 //eslint-disable-next-line
 function NormalizeMMI(str, responseType) {

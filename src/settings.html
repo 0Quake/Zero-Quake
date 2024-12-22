@@ -106,8 +106,8 @@
 
                     <label><input id="HomePinShow" type="checkbox">現在地ピンを表示</label>
                     <label>表示名<input id="HomeName" type="text" placeholder="自宅"></label>
-                    <label>緯度<input id="latitude" type="number" onchange="MapReDraw()" step="0.01" min="-90" max="90" placeholder="緯度（10進法）"></label>
-                    <label>経度<input id="longitude" type="number" onchange="MapReDraw()" step="0.01" min="-180" max="180" placeholder="経度（10進法）"></label>
+                    <label>緯度<input id="latitude" type="number" onchange="MapReDraw()" min="-90" max="90" placeholder="緯度（10進法）"></label>
+                    <label>経度<input id="longitude" type="number" onchange="MapReDraw()" min="-180" max="180" placeholder="経度（10進法）"></label>
                     <label>細分区域<select id="saibun" onchange="MapReDraw()">
                             <option selected disabled>（未選択）</option>
                             <option>石狩地方北部</option>
@@ -388,9 +388,9 @@
                 <h3><span>通知と音声</span>通知音 / 音声合成</h3>
                 <h4>合成音声の調整</h4>
                 <section>
-                    <label> 話速：<input id="TTSSpeedN" type="number" min="0.1" max="10" value="1" step="0.1" oninput="TTSspeedSet(this.value)"><input id="TTSSpeedR" type="range" min="0.1" max="10" value="1" step="0.1" oninput="TTSspeedSet(this.value)"></label>
-                    <label> 音高：<input id="TTSPitchN" type="number" min="0" max="2" value="1" step="0.05" oninput="TTSpitchSet(this.value)"><input id="TTSPitchR" type="range" min="0" max="2" value="1" step="0.05" oninput="TTSpitchSet(this.value)"></label>
-                    <label> 音量：<input id="TTSVolumeN" type="number" min="0" max="1" value="1" step="0.05" oninput="TTSvolumeSet(this.value)"><input id="TTSVolumeR" type="range" min="0" max="1" value="1" step="0.05" oninput="TTSvolumeSet(this.value)"></label>
+                    <label> 話速：<input id="TTSSpeedN" type="number" min="0.1" max="10" value="1" step="0.1" oninput="TTSspeedSet(this.value)" placeholder="話速（0.1~10）"><input id="TTSSpeedR" type="range" min="0.1" max="10" value="1" step="0.1" oninput="TTSspeedSet(this.value)"></label>
+                    <label> 音高：<input id="TTSPitchN" type="number" min="0" max="2" value="1" step="0.05" oninput="TTSpitchSet(this.value)" placeholder="音高（0~2）"><input id="TTSPitchR" type="range" min="0" max="2" value="1" step="0.05" oninput="TTSpitchSet(this.value)"></label>
+                    <label> 音量：<input id="TTSVolumeN" type="number" min="0" max="1" value="1" step="0.05" oninput="TTSvolumeSet(this.value)" placeholder="音量（0~1）"><input id="TTSVolumeR" type="range" min="0" max="1" value="1" step="0.05" oninput="TTSvolumeSet(this.value)"></label>
                     <button id="speak_test">テスト</button>
                 </section>
 
@@ -408,7 +408,7 @@
                 <section class="VoiceEngine_Wrap">
                     <label><input type="radio" name="VoiceEngine" id="VoiceEngine_Boyomichan" value="Boyomichan">棒読みちゃんを使用</label>
                     <div class="VoiceSettingContent">
-                        <label>ポート番号：<input type="number" min="0" max="65535" value="50080" step="1" id="Boyomi_Port"></label>
+                        <label>ポート番号：<input type="number" min="0" max="65535" value="50080" step="1" id="Boyomi_Port" placeholder="棒読みちゃんのポート番号（例：50080）"></label>
                         <label>
                             音声：
                             <select id="BoyomiVoiceSelect">
@@ -806,11 +806,11 @@
                     <label><input type="checkbox" id="EQInfo_training">訓練報を受信</label>
                     <label><input type="checkbox" id="EQInfo_Test">試験電文を受信</label>
 
-                    <label> 情報取得間隔（秒）<input id="EQInfoInterval" type="number" min="10" max="600" value="30" step="1"></label>
+                    <label> 情報取得間隔（秒）<input id="EQInfoInterval" type="number" min="10" max="600" value="30" step="1" placeholder="情報を取得する間隔（秒）"></label>
                 </section>
                 <h4>画面右側のリスト</h4>
                 <section>
-                    <label>表示する件数<input type="number" id="EQInfo_ItemCount" min="1" max="50"></label>
+                    <label>表示する件数<input type="number" id="EQInfo_ItemCount" min="1" max="50" step="1" placeholder="リストに表示する情報の最大件数"></label>
                 </section>
 
                 <h4>音声通知</h4>
@@ -837,7 +837,7 @@
                                             <option value="6+">震度6強以上</option>
                                             <option value="7">震度7以上</option>
                                         </select></label>
-                                    <label>マグニチュード～以上<input type="number" min="-5" max="12" step="0.1" id="M_threshold"></label>
+                                    <label>マグニチュード～以上<input type="number" min="-5" max="12" step="0.1" id="M_threshold" placeholder="マグニチュードしきい値"></label>
                                 </div>
                             </div>
                         </div>
@@ -1122,7 +1122,7 @@
                 <h4>全般</h4>
                 <section>
                     <label><input type="checkbox" id="kmoni_GetData">データを取得</label>
-                    <label> 情報取得間隔（秒）<input id="kmoniInterval" type="number" min="1" max="300" value="1" step="1"></label>
+                    <label> 情報取得間隔（秒）<input id="kmoniInterval" type="number" min="1" max="300" value="1" step="1" placeholder="情報を取得する間隔（秒）"></label>
                 </section>
             </div>
             <div id="tab1_content9" class="tabcontent">
@@ -1133,7 +1133,7 @@
                 <h4>全般</h4>
                 <section>
                     <label><input type="checkbox" id="msil_GetData">データを取得</label>
-                    <label> 情報取得間隔（秒）<input id="msilInterval" type="number" min="5" max="300" value="10" step="1"></label>
+                    <label> 情報取得間隔（秒）<input id="msilInterval" type="number" min="5" max="300" value="10" step="1" placeholder="情報を取得する間隔（秒）"></label>
                 </section>
             </div>
             <div id="tab1_content12" class="tabcontent">
@@ -1226,26 +1226,27 @@
                 <h4>リプレイ</h4>
                 <section>
                     <label>リプレイ時刻：
-                        <input id="replay" type="datetime-local" min="1970-01-01T00:00:00" step="1"><button id="replayJump" title="設定した時刻まで巻き戻し">ジャンプ</button><button id="replayReset" title="リプレイを解除">リセット</button>
+                        <input id="replay" type="datetime-local" min="1970-01-01T00:00:00" step="1" placeholder="リプレイする時刻"><button id="replayJump" title="設定した時刻まで巻き戻し">ジャンプ</button><button id="replayReset" title="リプレイを解除">リセット</button>
                     </label>
                     <div>オフセット：<span id="replayOffset">-</span></div>
                     <p class="smalltext">リプレイ中はリアルタイムの情報が入手できません。リプレイで利用できるのは、強震モニタの情報のみです。</p>
                 </section>
                 <h4>緊急地震速報</h4>
                 <section>
-                    <label>EventID<input type="number" min="19700101000001" value="1" id="EEWE_EventID"></label>
+                    <label>EventID<input type="number" min="19700101000001" max="99999999999999" value="1" step="1" placeholder="YYYYMMDDhhmmss" id="EEWE_EventID"></label>
                     <label>種別<select id="EEWE_alertflg">
                             <option>警報</option>
                             <option>予報</option>
                         </select></label>
-                    <label>報数<input type="number" min="1" max="9999" value="1" id="EEWE_serial"></label>
-                    <label>発表日時 <input id="EEWE_report_time" type="datetime-local" min="1970-01-01T00:00:00" step="1"></label>
+                    <label>報数<input type="number" min="1" max="9999" value="1" id="EEWE_serial" placeholder="第n報"></label>
+                    <label>発表日時 <input id="EEWE_report_time" type="datetime-local" min="1970-01-01T00:00:00" step="1" placeholder="情報の発表日時"></label>
                     <label><input id="EEWE_is_final" type="checkbox">最終報</label>
                     <label><input id="EEWE_is_cancel" type="checkbox">キャンセル報</label>
-                    <label>マグニチュード <input id="EEWE_magnitude" type="number" min="0" value="3.5" max="10" step="0.1"></label>
+                    <label>マグニチュード <input id="EEWE_magnitude" type="number" min="0" value="3.5" max="10" step="0.1" placeholder="予想マグニチュード"></label>
                     <label>最大震度
                         <select id="EEWE_maxInt">
-                            <option value="0" selected>震度0</option>
+                            <option value="?" selected>自動計算</option>
+                            <option value="0">震度0</option>
                             <option value="1">震度1</option>
                             <option value="2">震度2</option>
                             <option value="3">震度3</option>
@@ -1258,7 +1259,7 @@
                         </select>
                     </label>
                     <label><input id="EEWE_isPlum" type="checkbox">仮定震源要素</label>
-                    <label>発生日時 <input id="EEWE_origin_time" type="datetime-local" min="1970-01-01T00:00:00" step="1"></label>
+                    <label>発生日時 <input id="EEWE_origin_time" type="datetime-local" min="1970-01-01T00:00:00" step="1" placeholder="地震の発生日時"></label>
                     <label>震央地域名
                         <select id="EEWE_region_name">
                             <option>石狩地方北部</option>
@@ -1457,11 +1458,11 @@
                             <option>うるま市・金武町境界部地先の埋立地</option>
                         </select>
                     </label>
-                    <label>緯度 <input id="EEWE_latitude" type="number" min="-90" max="90" step="0.1" value="35.7"></label>
-                    <label>経度 <input id="EEWE_longitude" type="number" min="-180" max="180" step="0.1" value="139.8"></label>
+                    <label>緯度 <input id="EEWE_latitude" type="number" min="-90" max="90" step="0.1" value="35.7" placeholder="震源の緯度（10進）"></label>
+                    <label>経度 <input id="EEWE_longitude" type="number" min="-180" max="180" step="0.1" value="139.8" placeholder="震源の緯度（10進）"></label>
 
 
-                    <label>深さ(km) <input id="EEWE_depth" type="number" min="0" max="6500" step="1" value="10"></label>
+                    <label>深さ(km) <input id="EEWE_depth" type="number" min="0" max="6500" step="1" value="10" placeholder="震源の深さ（km）"></label>
                     <button id="Start_simulation">シミュレーション</button>
                     <div class="smalltext">実際の地震の被害推定には使用しないでください。緊急地震速報 発令時は、シミュレーションできません。</div>
                 </section>
@@ -1474,7 +1475,7 @@
                 <h4>全般</h4>
                 <section>
                     <label><input type="checkbox" id="EarlyEst_GetData">データを取得</label>
-                    <label> 情報取得間隔（秒）<input id="EarlyEstInterval" type="number" min="5" max="300" value="1" step="1"></label>
+                    <label> 情報取得間隔（秒）<input id="EarlyEstInterval" type="number" min="5" max="300" value="1" step="1" placeholder="情報を取得する間隔（秒）"></label>
                     <div class="smalltext">Early-Estによる情報は実験的なものであり、専門家による検証を経ていません。自己責任にて有効化してください。</div>
                 </section>
             </div>
@@ -1487,7 +1488,7 @@
                 <section>
                     <label><input type="checkbox" id="TREM-RTS_GetData">データを取得</label>
                     <span class="smalltext">WebSocketで随時情報を受け取ります。</span>
-                    <label> 情報取得間隔（秒）<input id="TREM-RTS_Interval" type="number" min="1" max="30" value="1" step="1"></label>
+                    <label> 情報取得間隔（秒）<input id="TREM-RTS_Interval" type="number" min="1" max="30" value="1" step="1" placeholder="情報を取得する間隔（秒）"></label>
 
                 </section>
             </div>
