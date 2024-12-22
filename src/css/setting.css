@@ -417,31 +417,37 @@ summary:hover {
   padding: 15px 10px;
 }
 .VoiceEngine_Wrap,
-#notify_threshold {
+#notify_threshold,
+#T_notify_threshold {
   border: solid 1px #888;
   margin: 10px 0;
   border-radius: 5px;
   opacity: 0.5;
 }
-#notify_threshold {
+#notify_threshold,
+#T_notify_threshold {
   padding: 8px 13px;
   cursor: not-allowed;
 }
-#notify_threshold h5 {
+#notify_threshold h5,
+#T_notify_threshold h5 {
   margin: 3px 0 7px 0;
 }
-#notify_threshold * {
+#notify_threshold *,
+#T_notify_threshold * {
   pointer-events: none;
 }
 .VoiceEngine_Wrap:has(input:checked),
-#notify_setting_wrap:has(#NotificationSound:checked) #notify_threshold {
+#notify_setting_wrap:has(#NotificationSound:checked) #notify_threshold,
+#T_notify_setting_wrap:has(#Tsunami_NotificationSound:checked) #T_notify_threshold {
   border: solid 1px rgb(255 146 146);
   background: rgba(255, 146, 146, 0.1);
   opacity: 1;
   cursor: auto;
 }
 
-#notify_setting_wrap:has(#NotificationSound:checked) #notify_threshold * {
+#notify_setting_wrap:has(#NotificationSound:checked) #notify_threshold *,
+#T_notify_setting_wrap:has(#Tsunami_NotificationSound:checked) #T_notify_threshold * {
   pointer-events: all;
 }
 
@@ -449,10 +455,12 @@ summary:hover {
   display: block;
 }
 
-#thresholds_wrap:has(#Bypass_threshold:checked) #thresholds {
+#thresholds_wrap:has(#Bypass_threshold:checked) #thresholds,
+#T_thresholds_wrap:has(#Tsunami_Bypass_threshold:checked) #T_thresholds {
   opacity: 0.5;
   cursor: not-allowed;
 }
-#thresholds_wrap:has(#Bypass_threshold:checked) #thresholds * {
+#thresholds_wrap:has(#Bypass_threshold:checked) #thresholds *,
+#T_thresholds_wrap:has(#Tsunami_Bypass_threshold:checked) #T_thresholds {
   pointer-events: none;
 }

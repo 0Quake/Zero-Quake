@@ -87,6 +87,10 @@ var defaultConfigVal = {
       GetData: true,
       showtraining: false,
       showTest: false,
+      NotificationSound: true,
+      Global_threshold: 0,
+      Local_threshold: -1,
+      Bypass_threshold: true,
     },
     RealTimeShake: {
       List: {
@@ -3346,8 +3350,23 @@ function ConvertTsunamiInfo(data) {
       Tsunami_Data.push(data);
       //アラート
       CreateMainWindow();
-      PlayAudio("TsunamiInfo");
-      speak(GenerateTsunamiText(data));
+
+      var grade_num = { MajorWarning: 3, Warning: 2, Watch: 1, Yoho: 0 };
+
+      var home_grade = 0;
+      var grades = data.areas.map(function (elm) {
+        if (config.home.TsunamiSect && elm.name == config.home.TsunamiSect) home_grade = grade_num[elm.grade];
+        return grade_num[elm.grade] ? grade_num[elm.grade] : 0;
+      });
+
+      var max_grade = Math.max(...grades);
+
+      if (config.Info.TsunamiInfo.NotificationSound) {
+        if (max_grade >= config.Info.TsunamiInfo.Global_threshold || home_grade >= config.Info.TsunamiInfo.Local_threshold || config.Info.TsunamiInfo.Bypass_threshold) {
+          PlayAudio("TsunamiInfo");
+          speak(GenerateTsunamiText(data));
+        }
+      }
     }
 
     Tsunami_data_Marged = { issue: {}, areas: [] };
@@ -3489,10 +3508,10 @@ function GenerateTsunamiText(data) {
   else if (data.revocation || data.cancelled) var text = config.notice.voice.TsunamiRevocation;
   else var text = config.notice.voice.Tsunami;
   var grades = { MajorWarning: false, Warning: false, Watch: false, Yoho: false };
-  var glades_JA = { MajorWarning: "大津波警報", Warning: "津波警報", Watch: "津波注意報", Yoho: "津波予報" };
+  var grades_JA = { MajorWarning: "大津波警報", Warning: "津波警報", Watch: "津波注意報", Yoho: "津波予報" };
 
   //自地域（カッコで）　最大波高さ
-  var glade_arr = [];
+  var grade_arr = [];
   var homeArea;
   data.areas.forEach(function (area) {
     if (area.grade) grades[area.grade] = true;
@@ -3500,16 +3519,16 @@ function GenerateTsunamiText(data) {
   });
 
   Object.keys(grades).forEach(function (key) {
-    if (grades[key]) glade_arr.push(glades_JA[key]);
+    if (grades[key]) grade_arr.push(grades_JA[key]);
   });
 
-  text = text.replaceAll("{max_grade}", glade_arr[0] ? glade_arr[0] : "津波情報");
-  text = text.replaceAll("{all_grade}", glade_arr[0] ? glade_arr.join("、") : "津波情報");
+  text = text.replaceAll("{max_grade}", grade_arr[0] ? grade_arr[0] : "津波情報");
+  text = text.replaceAll("{all_grade}", grade_arr[0] ? grade_arr.join("、") : "津波情報");
   text = text.replaceAll("{report_time}", data.issue.time ? NormalizeDate(9, data.issue.time) : "不明な時刻");
 
   if (homeArea && !homeArea.canceled) {
     text = text.replaceAll("{home_area}", homeArea.name ? homeArea.name : "設定地点");
-    text = text.replaceAll("{home_grade}", homeArea.grade ? glades_JA[homeArea.grade] : "津波情報");
+    text = text.replaceAll("{home_grade}", homeArea.grade ? grades_JA[homeArea.grade] : "津波情報");
 
     var firstHeightTmp = "";
     if (homeArea.firstHeight) firstHeightTmp = "第一波が" + NormalizeDate(7, homeArea.firstHeight) + "に予想され、";

@@ -121,6 +121,11 @@ function configDataDraw() {
   document.getElementById("M_threshold").value = config.Info.EQInfo.M_threshold;
   document.getElementById("Bypass_threshold").checked = config.Info.EQInfo.Bypass_threshold;
 
+  document.getElementById("Tsunami_NotificationSound").checked = config.Info.TsunamiInfo.NotificationSound;
+  selectBoxSet(document.getElementById("Tsunami_threshold"), config.Info.TsunamiInfo.Global_threshold);
+  selectBoxSet(document.getElementById("Tsunami_L_threshold"), config.Info.TsunamiInfo.Local_threshold);
+  document.getElementById("Tsunami_Bypass_threshold").checked = config.Info.TsunamiInfo.Bypass_threshold;
+
   fetch("http://localhost:50080/GetVoiceList")
     .then(function (res) {
       return res.json();
@@ -261,6 +266,11 @@ function apply() {
   config.Info.EQInfo.maxI_threshold = document.getElementById("maxI_threshold").value;
   config.Info.EQInfo.M_threshold = document.getElementById("M_threshold").value;
   config.Info.EQInfo.Bypass_threshold = document.getElementById("Bypass_threshold").checked;
+
+  config.Info.TsunamiInfo.NotificationSound = document.getElementById("Tsunami_NotificationSound").checked;
+  config.Info.TsunamiInfo.Global_threshold = document.getElementById("Tsunami_threshold").value;
+  config.Info.TsunamiInfo.Local_threshold = document.getElementById("Tsunami_L_threshold").value;
+  config.Info.TsunamiInfo.Bypass_threshold = document.getElementById("Tsunami_Bypass_threshold").checked;
 
   window.electronAPI.messageReturn({
     action: "ChangeConfig",

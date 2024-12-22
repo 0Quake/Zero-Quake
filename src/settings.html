@@ -982,6 +982,40 @@
                     <div class="smalltext">現在地の津波予報区は、［全般＞現在地］より設定を行ってください。</div>
                 </section>
 
+                <h4>音声通知</h4>
+                <section>
+                    <div id="T_notify_setting_wrap">
+                        <label><input type="checkbox" id="Tsunami_NotificationSound">音声通知を利用</label>
+                        <div id="T_notify_threshold">
+                            <h5>音声通知条件</h5>
+                            <div class="smalltext">通知音（ベル音）および読み上げ音声に適用されます。設定した条件の1つでも合致する場合は音声で通知します。（OR条件）</div>
+
+                            <div id="T_thresholds_wrap">
+                                <label><input type="checkbox" id="Tsunami_Bypass_threshold">無条件に全津波を通知</label>
+
+                                <div id="T_thresholds">
+                                    <label>全国で～が発表された際<select id="Tsunami_threshold">
+                                            <option value="0" selected>何らかの津波情報（常に通知）</option>
+                                            <option value="1">津波注意報・津波警報・大津波警報</option>
+                                            <option value="2">津波警報・大津波警報</option>
+                                            <option value="3">大津波警報</option>
+                                            <option value="4">条件なし（すべて条件外）</option>
+                                        </select></label>
+
+                                    <label>設定地点で～が発表された際<select id="Tsunami_L_threshold">
+                                            <option value="-1" selected>（常に通知）</option>
+                                            <option value="0">何らかの津波情報</option>
+                                            <option value="1">津波注意報・津波警報・大津波警報</option>
+                                            <option value="2">津波警報・大津波警報</option>
+                                            <option value="3">大津波警報</option>
+                                            <option value="4">条件なし（すべて条件外）</option>
+                                        </select></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
                 <h4>音声合成文</h4>
                 <section>
 
