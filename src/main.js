@@ -3539,17 +3539,20 @@ function NormalizeDate(type, dateTmp) {
     case 4:
       return YYYY + "/" + MM + "/" + DD + " " + hh + ":" + mm;
     case 5:
-      return DD + "日 " + hh + ":" + mm;
+      return D + "日 " + hh + ":" + mm;
     case 6:
       return hh + ":" + mm;
     case 7:
       return hh + "時" + mm + "分" + ss + "秒";
     case 8:
       return h + "時" + m + "分" + s + "秒";
+    case 9:
+      return D + "日 " + h + "時" + m + "分";
     default:
       return new Date();
   }
-} //震度の形式変換
+}
+//震度の形式変換
 function NormalizeShindo(str, responseType) {
   var ShindoTmp;
   if (str === null || str === undefined) ShindoTmp = 11;

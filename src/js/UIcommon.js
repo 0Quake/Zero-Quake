@@ -255,6 +255,11 @@ function NormalizeDate(type, dateTmp) {
   var hh = String(dateTmp.getHours()).padStart(2, "0");
   var mm = String(dateTmp.getMinutes()).padStart(2, "0");
   var ss = String(dateTmp.getSeconds()).padStart(2, "0");
+  var M = String(dateTmp.getMonth() + 1);
+  var D = String(dateTmp.getDate());
+  var h = String(dateTmp.getHours());
+  var m = String(dateTmp.getMinutes());
+  var s = String(dateTmp.getSeconds());
   switch (type) {
     case 1:
       return YYYY + MM + DD + hh + mm + ss;
@@ -265,16 +270,19 @@ function NormalizeDate(type, dateTmp) {
     case 4:
       return YYYY + "/" + MM + "/" + DD + " " + hh + ":" + mm;
     case 5:
-      return DD + "日 " + hh + ":" + mm;
+      return D + "日 " + hh + ":" + mm;
     case 6:
       return hh + ":" + mm;
     case 7:
       return hh + "時" + mm + "分" + ss + "秒";
+    case 8:
+      return h + "時" + m + "分" + s + "秒";
+    case 9:
+      return D + "日 " + h + "時" + m + "分";
     default:
       return new Date();
   }
-}
-//子要素一括削除
+} //子要素一括削除
 //eslint-disable-next-line
 function removeChild(element) {
   while (element.firstChild) {
