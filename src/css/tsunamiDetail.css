@@ -42,7 +42,7 @@ table thead {
   position: -webkit-sticky;
   position: sticky;
   top: 100px;
-  z-index: 1;
+  z-index: 101;
   background: #222;
   height: 50px;
   font-size: 20px;
