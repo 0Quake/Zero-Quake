@@ -256,21 +256,23 @@ function LgIntConvert(str) {
 
 //日時フォーマット
 //eslint-disable-next-line
-function NormalizeDate(type, dateTmp) {
-  if (!dateTmp) dateTmp = new Date();
-  else dateTmp = new Date(dateTmp);
+function NormalizeDate(type, date) {
+  if (!date) date = new Date();
+  else date = new Date(date);
+  if (Number.isNaN(date.getTime())) return "";
 
-  var YYYY = String(dateTmp.getFullYear());
-  var MM = String(dateTmp.getMonth() + 1).padStart(2, "0");
-  var DD = String(dateTmp.getDate()).padStart(2, "0");
-  var hh = String(dateTmp.getHours()).padStart(2, "0");
-  var mm = String(dateTmp.getMinutes()).padStart(2, "0");
-  var ss = String(dateTmp.getSeconds()).padStart(2, "0");
-  var M = String(dateTmp.getMonth() + 1);
-  var D = String(dateTmp.getDate());
-  var h = String(dateTmp.getHours());
-  var m = String(dateTmp.getMinutes());
-  var s = String(dateTmp.getSeconds());
+  var YYYY = String(date.getFullYear());
+  var MM = String(date.getMonth() + 1).padStart(2, "0");
+  var DD = String(date.getDate()).padStart(2, "0");
+  var hh = String(date.getHours()).padStart(2, "0");
+  var mm = String(date.getMinutes()).padStart(2, "0");
+  var ss = String(date.getSeconds()).padStart(2, "0");
+  var M = String(date.getMonth() + 1);
+  var D = String(date.getDate());
+  var h = String(date.getHours());
+  var m = String(date.getMinutes());
+  var s = String(date.getSeconds());
+  var isToday = date.toDateString() == new Date().toDateString();
   switch (type) {
     case 1:
       return YYYY + MM + DD + hh + mm + ss;
@@ -289,11 +291,18 @@ function NormalizeDate(type, dateTmp) {
     case 8:
       return h + "時" + m + "分" + s + "秒";
     case 9:
-      return D + "日 " + h + "時" + m + "分";
+      var date_str = "";
+      if (!isToday) date_str = D + "日 ";
+      return date_str + h + "時" + m + "分";
+    case 10:
+      var date_str = "";
+      if (!isToday) date_str = D + "日 ";
+      return date_str + hh + ":" + mm;
     default:
-      return new Date();
+      return new Date().toLocaleString("ja-jp");
   }
-} //子要素一括削除
+}
+//子要素一括削除
 //eslint-disable-next-line
 function removeChild(element) {
   while (element.firstChild) {

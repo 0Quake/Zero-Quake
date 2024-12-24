@@ -23,6 +23,9 @@ function tsunamiUpdate(dataTmp) {
     elm.remove();
   });
 
+  var has_condition = false;
+  var has_tide = false;
+  var has_obs = false;
   dataTmp.areas.reverse();
   dataTmp.areas.forEach((elm) => {
     if (!elm.canceled) {
@@ -30,13 +33,15 @@ function tsunamiUpdate(dataTmp) {
       var arrivalTime = "";
       var maxHeight = "";
       if (elm.firstHeight) {
-        arrivalTime = NormalizeDate(5, elm.firstHeight);
-        if (elm.firstHeightCondition) condition = elm.firstHeightCondition;
+        arrivalTime = NormalizeDate(10, elm.firstHeight);
+        if (elm.firstHeightCondition == "早いところでは既に津波到達と推定") condition = "早いところでは到達と推定";
+        else if (elm.firstHeightCondition) condition = elm.firstHeightCondition;
       } else if (elm.firstHeightCondition) {
         if (elm.firstHeightCondition == "第１波の到達を確認") arrivalTime = "到達";
         else if (elm.firstHeightCondition == "津波到達中と推測") arrivalTime = "到達中と推測";
         else arrivalTime = elm.firstHeightCondition;
       }
+      if (condition) has_condition = true;
 
       if (elm.maxHeight) {
         maxHeight = elm.maxHeight;
@@ -71,11 +76,11 @@ function tsunamiUpdate(dataTmp) {
       ihtml += "<td>" + elm.name + "</td>";
       ihtml += "<td>" + arrivalTime + "</td>";
       ihtml += "<td>" + maxHeight + "</td>";
-      ihtml += "<td class='disabled-cell'>-</td>";
-      ihtml += "<td class='disabled-cell'>-</td>";
-      ihtml += "<td class='disabled-cell'>-</td>";
-      ihtml += "<td class='disabled-cell'>-</td>";
-      ihtml += "<td>" + condition + "</td>";
+      ihtml += "<td class='disabled-cell obs_item'>-</td>";
+      ihtml += "<td class='disabled-cell obs_item'>-</td>";
+      ihtml += "<td class='disabled-cell obs_item'>-</td>";
+      ihtml += "<td class='disabled-cell tide_item'>-</td>";
+      ihtml += "<td class='condition_item'>" + condition + "</td>";
       new_tr.innerHTML = ihtml;
       new_tr.classList.add("add-content");
       new_tr.classList.add("ListItem_" + elm.grade);
@@ -90,7 +95,11 @@ function tsunamiUpdate(dataTmp) {
         }, 100);
       }
 
-      if (elm.stations && Array.isArray(elm.stations)) {
+      if (elm.stations && Array.isArray(elm.stations) && elm.stations[0]) {
+        document.querySelectorAll(".obs_item").forEach(function (elm) {
+          elm.style.display = "";
+        });
+
         elm.stations.forEach(function (elm2) {
           var condition = "";
           var arrivalTime = "-";
@@ -101,7 +110,10 @@ function tsunamiUpdate(dataTmp) {
 
           if (elm2.Conditions) condition = elm2.Conditions;
 
+          if (condition) has_condition = true;
+
           if (elm2.HighTideDateTime) HighTideDateTime = NormalizeDate(6, elm2.HighTideDateTime);
+          if (HighTideDateTime) has_tide = true;
 
           if (elm2.omaxHeight) {
             omaxHeight = elm2.omaxHeight;
@@ -112,15 +124,15 @@ function tsunamiUpdate(dataTmp) {
           else if (elm2.maxHeightCondition) omaxHeight = elm2.maxHeightCondition;
           if (elm2.maxheightRising) omaxHeight += "↗";
 
-          if (elm2.maxHeightTime) maxHeightTime = NormalizeDate(5, elm2.maxHeightTime);
+          if (elm2.maxHeightTime) maxHeightTime = NormalizeDate(10, elm2.maxHeightTime);
 
-          if (elm2.ArrivedTime) ArrivedTime = NormalizeDate(5, elm2.ArrivedTime);
+          if (elm2.ArrivedTime) ArrivedTime = NormalizeDate(10, elm2.ArrivedTime);
           else if (elm2.firstHeightCondition == "欠測") ArrivedTime = "欠測";
           else if (elm2.Condition == "第１波の到達を確認") ArrivedTime = "到達";
           else if (elm2.Condition == "津波到達中と推測") ArrivedTime = "到達と推測";
           else if (elm2.firstHeightCondition == "第１波識別不能") ArrivedTime = elm2.firstHeightCondition;
           if (elm2.firstHeightInitial) ArrivedTime += " " + elm2.firstHeightInitial;
-          if (elm2.ArrivalTime) arrivalTime = NormalizeDate(5, elm2.ArrivalTime);
+          if (elm2.ArrivalTime) arrivalTime = NormalizeDate(10, elm2.ArrivalTime);
 
           var new_tr2 = document.createElement("tr");
           var ihtml = "";
@@ -128,12 +140,14 @@ function tsunamiUpdate(dataTmp) {
           ihtml += "<td>" + elm2.name + "</td>";
           ihtml += "<td" + (arrivalTime ? " class='disabled-cell'" : "") + ">" + arrivalTime + "</td>";
           ihtml += "<td class='disabled-cell'>-</td>";
-          ihtml += "<td>" + ArrivedTime + "</td>";
-          ihtml += "<td>" + omaxHeight + "</td>";
-          ihtml += "<td>" + maxHeightTime + "</td>";
-          ihtml += "<td>" + HighTideDateTime + "</td>";
-          ihtml += "<td>" + condition + "</td>";
+          ihtml += "<td class='obs_item'>" + ArrivedTime + "</td>";
+          ihtml += "<td class='obs_item'>" + omaxHeight + "</td>";
+          ihtml += "<td class='obs_item'>" + maxHeightTime + "</td>";
+          ihtml += "<td class='tide_item'>" + HighTideDateTime + "</td>";
+          ihtml += "<td class='condition_item'>" + condition + "</td>";
           new_tr2.innerHTML = ihtml;
+
+          if (ArrivedTime || omaxHeight || maxHeightTime) has_obs = true;
 
           new_tr2.classList.add("add-content");
           new_tr2.classList.add("ListItem_detail");
@@ -141,6 +155,16 @@ function tsunamiUpdate(dataTmp) {
         });
       }
     }
+  });
+
+  document.querySelectorAll(".obs_item").forEach(function (elm) {
+    elm.style.display = has_obs ? "" : "none";
+  });
+  document.querySelectorAll(".condition_item").forEach(function (elm) {
+    elm.style.display = has_condition ? "" : "none";
+  });
+  document.querySelectorAll(".tide_item").forEach(function (elm) {
+    elm.style.display = has_tide ? "" : "none";
   });
 
   document.getElementById("MajorWarningInfo").style.display = Tsunami_MajorWarning ? "table-row" : "none";

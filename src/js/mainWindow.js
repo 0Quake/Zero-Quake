@@ -1873,7 +1873,7 @@ function tsunamiDataUpdate(data) {
 
         var firstWave = "";
         var maxWave = "";
-        if (sectData.firstHeight) firstWave = "第1波予想<span>" + NormalizeDate(5, sectData.firstHeight) + "</span>";
+        if (sectData.firstHeight) firstWave = "第1波予想<span>" + NormalizeDate(10, sectData.firstHeight) + "</span>";
         else {
           switch (sectData.firstHeightCondition) {
             case "津波到達中と推測":
@@ -1980,17 +1980,17 @@ function tsunamiDataUpdate(data) {
                 if (elm2.firstHeightInitial) omaxHeight = elm2.omaxHeight + " " + elm2.firstHeightInitial;
               } else if (elm2.maxHeightCondition) omaxHeight = elm2.maxHeightCondition;
 
-              if (elm2.maxHeightTime) omaxHeight += " " + NormalizeDate(5, elm2.maxHeightTime);
+              if (elm2.maxHeightTime) omaxHeight += " " + NormalizeDate(10, elm2.maxHeightTime);
 
               if (omaxHeight) omaxHeight = "観測最大波：" + omaxHeight;
               if (elm2.maxheightRising) omaxHeight += " （上昇中）";
 
-              if (elm2.ArrivedTime) ArrivedTime = "第１波観測時刻：" + NormalizeDate(5, elm2.ArrivedTime);
+              if (elm2.ArrivedTime) ArrivedTime = "第１波観測時刻：" + NormalizeDate(10, elm2.ArrivedTime);
               else if (elm2.Condition == "第１波の到達を確認") ArrivedTime = "第1波到達";
               else if (elm2.Condition == "津波到達中と推測") ArrivedTime = "津波到達中と推測";
               else if (elm2.firstHeightCondition == "第１波識別不能") ArrivedTime = "第1波識別不能";
               if (elm2.firstHeightInitial) ArrivedTime += " " + elm2.firstHeightInitial;
-              if (elm2.ArrivalTime) arrivalTime = "第1波予想：" + NormalizeDate(5, elm2.ArrivalTime);
+              if (elm2.ArrivalTime) arrivalTime = "第1波予想：" + NormalizeDate(10, elm2.ArrivalTime);
 
               var content = [arrivalTime, omaxHeight, ArrivedTime, HighTideDateTime, condition].filter(Boolean).join("<br>");
               var popupContent = "<h3 style='border-bottom:solid 2px " + color + "'>" + elm2.name + "</h3><div class='tsunamidetailwrap'>" + content + "</div>";
@@ -2110,7 +2110,7 @@ function tsunamiPopup(e) {
         var firstWave = "";
         var maxWave = "";
         var firstCondition = "";
-        if (elm.firstHeight) firstWave = "<div>第１波予想:" + NormalizeDate(5, elm.firstHeight) + "</div>";
+        if (elm.firstHeight) firstWave = "<div>第１波予想:" + NormalizeDate(10, elm.firstHeight) + "</div>";
 
         if (elm.maxHeight) maxWave = "<div>最大波予想:" + elm.maxHeight + "</div>";
         else if (elm.grade == "Yoho") maxWave = "<div>最大波予想:若干の海面変動</div>";
