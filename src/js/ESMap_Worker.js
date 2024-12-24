@@ -32,15 +32,22 @@ self.addEventListener("message", (event) => {
 
             var int;
             if (imgData[(y * 800 + x) * 4 + 3] > 50) {
-              if (Math.abs(r - 250) < 16 && Math.abs(g - 230) < 16 && Math.abs(b - 150) < 16) int = "4";
-              else if (Math.abs(r - 255) < 16 && Math.abs(g - 230) < 16 && Math.abs(b - 0) < 16) int = "5-";
-              else if (Math.abs(r - 255) < 16 && Math.abs(g - 153) < 16 && Math.abs(b - 0) < 16) int = "5+";
-              else if (Math.abs(r - 255) < 16 && Math.abs(g - 40) < 16 && Math.abs(b - 0) < 16) int = "6-";
-              else if (Math.abs(r - 165) < 16 && Math.abs(g - 0) < 16 && Math.abs(b - 33) < 16) int = "6+";
-              else if (Math.abs(r - 180) < 16 && Math.abs(g - 0) < 16 && Math.abs(b - 104) < 16) int = "7";
+              if (r == 250 && g == 230 && b == 150) int = "4";
+              else if (r == 255 && g == 230 && b == 0) int = "5-";
+              else if (r == 255 && g == 153 && b == 0) int = "5+";
+              else if (r == 255 && g == 40 && b == 0) int = "6-";
+              else if (r == 165 && g == 0 && b == 33) int = "6+";
+              else if (r == 180 && g == 0 && b == 104) int = "7";
+              else {
+                if (Math.abs(r - 250) < 16 && Math.abs(g - 230) < 16 && Math.abs(b - 150) < 16) int = "4";
+                else if (Math.abs(r - 255) < 16 && Math.abs(g - 230) < 16 && Math.abs(b - 0) < 16) int = "5-";
+                else if (Math.abs(r - 255) < 16 && Math.abs(g - 153) < 16 && Math.abs(b - 0) < 16) int = "5+";
+                else if (Math.abs(r - 255) < 16 && Math.abs(g - 40) < 16 && Math.abs(b - 0) < 16) int = "6-";
+                else if (Math.abs(r - 165) < 16 && Math.abs(g - 0) < 16 && Math.abs(b - 33) < 16) int = "6+";
+                else if (Math.abs(r - 180) < 16 && Math.abs(g - 0) < 16 && Math.abs(b - 104) < 16) int = "7";
+              }
 
               ESMap_context_out.beginPath();
-
               ESMap_context_out.rect(j, i, 1, 1);
               ESMap_context_out.fillStyle = NormalizeShindo(int, 2)[0];
               ESMap_context_out.fill();
