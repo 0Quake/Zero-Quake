@@ -1959,7 +1959,7 @@ function tsunamiDataUpdate(data) {
               var tsunamiSTCap = document.createElement("span");
               tsunamiSTCap.innerText = elm2.omaxHeight;
               if (elm2.omaxHeight.includes("以上")) tsunamiSTCap.innerText = ">" + elm2.omaxHeight.replace("以上", "");
-              if (elm2.maxheightRising) tsunamiSTCap.innerText = elm2.omaxHeight + "↗";
+              if (elm2.maxHeightRising) tsunamiSTCap.innerText = elm2.omaxHeight + "↗";
               tsunamiST.appendChild(tsunamiSTCap);
 
               var tsunamiSTMarker = document.createElement("div");
@@ -1983,7 +1983,7 @@ function tsunamiDataUpdate(data) {
               if (elm2.maxHeightTime) omaxHeight += " " + NormalizeDate(10, elm2.maxHeightTime);
 
               if (omaxHeight) omaxHeight = "観測最大波：" + omaxHeight;
-              if (elm2.maxheightRising) omaxHeight += " （上昇中）";
+              if (elm2.maxHeightRising) omaxHeight += " （上昇中）";
 
               if (elm2.ArrivedTime) ArrivedTime = "第１波観測時刻：" + NormalizeDate(10, elm2.ArrivedTime);
               else if (elm2.Condition == "第１波の到達を確認") ArrivedTime = "第1波到達";

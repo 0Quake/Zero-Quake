@@ -7,6 +7,7 @@ window.electronAPI.messageSend((event, request) => {
 
 var mySectElm;
 function tsunamiUpdate(dataTmp) {
+  console.log(dataTmp);
   var Tsunami_MajorWarning = (Tsunami_Warning = Tsunami_Watch = Tsunami_Yoho = false);
   document.getElementById("revocation").style.display = "none";
   document.getElementById("no-data").style.display = "none";
@@ -78,7 +79,6 @@ function tsunamiUpdate(dataTmp) {
       ihtml += "<td>" + maxHeight + "</td>";
       ihtml += "<td class='disabled-cell obs_item'>-</td>";
       ihtml += "<td class='disabled-cell obs_item'>-</td>";
-      ihtml += "<td class='disabled-cell obs_item'>-</td>";
       ihtml += "<td class='disabled-cell tide_item'>-</td>";
       ihtml += "<td class='condition_item'>" + condition + "</td>";
       new_tr.innerHTML = ihtml;
@@ -107,6 +107,7 @@ function tsunamiUpdate(dataTmp) {
           var HighTideDateTime = "";
           var omaxHeight = "";
           var maxHeightTime = "";
+          var rising = "";
 
           if (elm2.Conditions) condition = elm2.Conditions;
 
@@ -122,9 +123,10 @@ function tsunamiUpdate(dataTmp) {
           else if (elm2.maxHeightCondition && elm2.maxHeightCondition.includes("微弱")) omaxHeight = "微弱";
           else if (elm2.maxHeightCondition && elm2.maxHeightCondition.includes("欠測")) omaxHeight = "欠測";
           else if (elm2.maxHeightCondition) omaxHeight = elm2.maxHeightCondition;
-          if (elm2.maxheightRising) omaxHeight += "↗";
+          if (elm2.maxHeightRising) rising = " <span class='rising'>上昇中↗</span>";
+          console.log(elm2.maxHeightRising);
 
-          if (elm2.maxHeightTime) maxHeightTime = NormalizeDate(10, elm2.maxHeightTime);
+          if (elm2.maxHeightTime) maxHeightTime = "（" + NormalizeDate(10, elm2.maxHeightTime) + "）";
 
           if (elm2.ArrivedTime) ArrivedTime = NormalizeDate(10, elm2.ArrivedTime);
           else if (elm2.firstHeightCondition == "欠測") ArrivedTime = "欠測";
@@ -141,13 +143,12 @@ function tsunamiUpdate(dataTmp) {
           ihtml += "<td" + (arrivalTime ? " class='disabled-cell'" : "") + ">" + arrivalTime + "</td>";
           ihtml += "<td class='disabled-cell'>-</td>";
           ihtml += "<td class='obs_item'>" + ArrivedTime + "</td>";
-          ihtml += "<td class='obs_item'>" + omaxHeight + "</td>";
-          ihtml += "<td class='obs_item'>" + maxHeightTime + "</td>";
+          ihtml += "<td class='obs_item'>" + omaxHeight + maxHeightTime + rising + "</td>";
           ihtml += "<td class='tide_item'>" + HighTideDateTime + "</td>";
           ihtml += "<td class='condition_item'>" + condition + "</td>";
           new_tr2.innerHTML = ihtml;
 
-          if (ArrivedTime || omaxHeight || maxHeightTime) has_obs = true;
+          if (ArrivedTime || omaxHeight || maxHeightTime || rising) has_obs = true;
 
           new_tr2.classList.add("add-content");
           new_tr2.classList.add("ListItem_detail");
