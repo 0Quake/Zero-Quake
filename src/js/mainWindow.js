@@ -2021,6 +2021,7 @@ function tsunamiDataUpdate(data) {
     }
     tsunamiAlertNow = alertNowTmp;
 
+    document.getElementById("tsunamiHeadline").innerText = (data.headline ? data.headline : "") + (data.issue.time ? ` (${NormalizeDate(10, data.issue.time)})` : "");
     document.getElementById("tsunami_MajorWarning").style.display = Tsunami_MajorWarning ? "inline-block" : "none";
     document.getElementById("tsunami_Warning").style.display = Tsunami_Warning ? "inline-block" : "none";
     document.getElementById("tsunami_Watch").style.display = Tsunami_Watch ? "inline-block" : "none";

@@ -7,7 +7,6 @@ window.electronAPI.messageSend((event, request) => {
 
 var mySectElm;
 function tsunamiUpdate(dataTmp) {
-  console.log(dataTmp);
   var Tsunami_MajorWarning = (Tsunami_Warning = Tsunami_Watch = Tsunami_Yoho = false);
   document.getElementById("revocation").style.display = "none";
   document.getElementById("no-data").style.display = "none";
@@ -19,6 +18,11 @@ function tsunamiUpdate(dataTmp) {
 
   if (dataTmp.issue.time) document.getElementById("dateTime").textContent = NormalizeDate(5, dataTmp.issue.time);
   if (dataTmp.ValidDateTime) document.getElementById("validdateTime").textContent = NormalizeDate(5, dataTmp.ValidDateTime);
+
+  if (dataTmp.comment) {
+    document.getElementById("headline").innerText = dataTmp.headline;
+    document.getElementById("comment").innerText = dataTmp.comment;
+  }
 
   document.querySelectorAll(".add-content").forEach(function (elm) {
     elm.remove();
@@ -124,7 +128,6 @@ function tsunamiUpdate(dataTmp) {
           else if (elm2.maxHeightCondition && elm2.maxHeightCondition.includes("欠測")) omaxHeight = "欠測";
           else if (elm2.maxHeightCondition) omaxHeight = elm2.maxHeightCondition;
           if (elm2.maxHeightRising) rising = " <span class='rising'>上昇中↗</span>";
-          console.log(elm2.maxHeightRising);
 
           if (elm2.maxHeightTime) maxHeightTime = "（" + NormalizeDate(10, elm2.maxHeightTime) + "）";
 

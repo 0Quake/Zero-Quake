@@ -1175,3 +1175,8 @@ button:focus {
   max-width: 150px;
   font-size: 14px;
 }
+#tsunamiHeadline {
+  font-size: 14px;
+  margin: 8px 5px 3px 5px;
+  color: #ccc;
+}

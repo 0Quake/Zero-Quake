@@ -16,7 +16,33 @@ html {
   overflow: unset;
 }
 
+#comment_wrap {
+  display: inline-block;
+  min-width: max(50vw, 500px);
+  max-width: 90vw;
+  max-height: 150px;
+  margin: 20px auto;
+  text-align: left;
+  padding: 5px;
+  background: #111;
+  border: solid 1px #666;
+  border-radius: 6px;
+  overflow-y: auto;
+}
+
+#DTWrap {
+  color: #ccc;
+  font-size: 14px;
+}
+
+#comment {
+  margin-top: 1.5em;
+}
+
 table {
+  min-width: max(50vw, 500px);
+  display: inline-table;
+  text-align: left;
   border-collapse: separate;
   border-spacing: 0;
 }
@@ -59,12 +85,6 @@ tr#tablerow2 th {
   line-height: 1.2em;
   padding: 5px 7px;
   color: #ccc;
-}
-
-table {
-  min-width: 500px;
-  display: inline-table;
-  text-align: left;
 }
 
 #MajorWarningInfo,

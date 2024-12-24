@@ -2727,11 +2727,36 @@ function Req_JMAXML(url, count) {
               }
               if (ValidDateTimeTmp < new Date()) return;
 
+              var headline = "";
+              var headlineElm = xml.getElementsByTagName("Headline")[0];
+              if (headlineElm && headlineElm.getElementsByTagName("Text")[0]) headline = headlineElm.getElementsByTagName("Text")[0].textContent;
+
+              try {
+                var Text1 = "";
+                if (xml.querySelector("Body  > Text")) {
+                  Text1 = xml.querySelector("Body  > Text").textContent + "\n\n";
+                }
+
+                var WarningComment = "";
+                var FreeFormComment = "";
+                var comments_elm = xml.getElementsByTagName("Comments")[0];
+                if (comments_elm) {
+                  var WarningComment_elm = comments_elm.getElementsByTagName("WarningComment")[0];
+                  if (WarningComment_elm) WarningComment = WarningComment_elm.getElementsByTagName("Text")[0].textContent + "\n\n";
+
+                  var FreeFormComment_elm = comments_elm.getElementsByTagName("FreeFormComment")[0];
+                  if (FreeFormComment_elm) FreeFormComment = FreeFormComment_elm.textContent;
+                }
+              } catch (err) {
+                return;
+              }
               tsunamiDataTmp = {
                 status: xml.getElementsByTagName("Status")[0].textContent,
                 issue: { time: new Date(xml.getElementsByTagName("ReportDateTime")[0].textContent), EventID: EventID, EarthQuake: EQData },
                 areas: [],
                 revocation: false,
+                headline: headline,
+                comment: Text1 + WarningComment + FreeFormComment,
                 source: "jmaXML",
                 ValidDateTime: ValidDateTimeTmp,
               };
@@ -2780,9 +2805,9 @@ function Req_JMAXML(url, count) {
                       }
                     }
                     if (elm.getElementsByTagName("MaxHeight")[0]) {
-                      var maxheightElm = elm.getElementsByTagName("MaxHeight")[0].getElementsByTagName("jmx_eb:TsunamiHeight");
-                      if (maxheightElm[0]) {
-                        maxHeightTmp = maxheightElm[0].getAttribute("description").replace(/[Ａ-Ｚａ-ｚ０-９．]/g, function (s) {
+                      var maxHeightElm = elm.getElementsByTagName("MaxHeight")[0].getElementsByTagName("jmx_eb:TsunamiHeight");
+                      if (maxHeightElm[0]) {
+                        maxHeightTmp = maxHeightElm[0].getAttribute("description").replace(/[Ａ-Ｚａ-ｚ０-９．]/g, function (s) {
                           return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
                         });
                       } else if (elm.getElementsByTagName("MaxHeight")[0].getElementsByTagName("Condition")[0]) {
@@ -2833,9 +2858,10 @@ function Req_JMAXML(url, count) {
                         var ArrivalTimeTmp;
                         var firstHeightConditionTmp;
                         var firstHeightInitialTmp;
-                        var maxheightTime;
+                        var maxHeightTime;
                         var maxHeightCondition;
-                        var oMaxHeightTmp, maxheightRising;
+                        var oMaxHeightTmp;
+                        var maxHeightRising = false;
                         var nameTmp = elm2.getElementsByTagName("Name")[0].textContent;
                         if (elm2.getElementsByTagName("FirstHeight")[0]) {
                           var firstHeightTag = elm2.getElementsByTagName("FirstHeight")[0];
@@ -2844,20 +2870,20 @@ function Req_JMAXML(url, count) {
                           if (firstHeightTag.getElementsByTagName("Initial")[0]) firstHeightInitialTmp = firstHeightTag.getElementsByTagName("Initial")[0].textContent;
                         }
                         if (elm2.getElementsByTagName("MaxHeight")[0]) {
-                          var maxheightElm = elm2.getElementsByTagName("MaxHeight")[0].getElementsByTagName("jmx_eb:TsunamiHeight")[0];
-                          if (maxheightElm) {
-                            oMaxHeightTmp = maxheightElm.getAttribute("description");
+                          var maxHeightElm = elm2.getElementsByTagName("MaxHeight")[0].getElementsByTagName("jmx_eb:TsunamiHeight")[0];
+                          if (maxHeightElm) {
+                            oMaxHeightTmp = maxHeightElm.getAttribute("description");
                             oMaxHeightTmp = oMaxHeightTmp.replace(/[Ａ-Ｚａ-ｚ０-９．]/g, function (s) {
                               return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
                             });
-                            if (maxheightElm.getAttribute("condition")) maxheightRising = maxheightElm.getAttribute("condition") == "上昇中";
+                            if (maxHeightElm.getAttribute("condition")) maxHeightRising = maxHeightElm.getAttribute("condition") == "上昇中";
                           }
 
-                          var maxheightTimeElm = elm2.getElementsByTagName("MaxHeight")[0].getElementsByTagName("DateTime")[0];
-                          if (maxheightTimeElm) maxheightTime = new Date(maxheightTimeElm.textContent);
+                          var maxHeightTimeElm = elm2.getElementsByTagName("MaxHeight")[0].getElementsByTagName("DateTime")[0];
+                          if (maxHeightTimeElm) maxHeightTime = new Date(maxHeightTimeElm.textContent);
 
-                          var maxheightConditionElm = elm2.getElementsByTagName("MaxHeight")[0].getElementsByTagName("Condition")[0];
-                          if (maxheightConditionElm) maxHeightCondition = elm2.getElementsByTagName("MaxHeight")[0].getElementsByTagName("Condition")[0].textContent;
+                          var maxHeightConditionElm = elm2.getElementsByTagName("MaxHeight")[0].getElementsByTagName("Condition")[0];
+                          if (maxHeightConditionElm) maxHeightCondition = elm2.getElementsByTagName("MaxHeight")[0].getElementsByTagName("Condition")[0].textContent;
                         }
 
                         var codeTmp = elm2.getElementsByTagName("Code")[0].textContent;
@@ -2869,8 +2895,8 @@ function Req_JMAXML(url, count) {
                           firstHeightCondition: firstHeightConditionTmp,
                           firstHeightInitial: firstHeightInitialTmp,
                           omaxHeight: oMaxHeightTmp,
-                          maxheightRising: maxheightRising,
-                          maxHeightTime: maxheightTime,
+                          maxHeightRising: maxHeightRising,
+                          maxHeightTime: maxHeightTime,
                           maxHeightCondition: maxHeightCondition,
                         });
                       });
@@ -2881,17 +2907,11 @@ function Req_JMAXML(url, count) {
                     });
                     if (tsunamiItem) {
                       stations.forEach(function (elm2) {
-                        var stationElm = tsunamiItem.stations.find(function (elm3) {
+                        var stationElm = tsunamiItem.stations.findIndex(function (elm3) {
                           return elm3.name == elm2.name;
                         });
-                        if (stationElm) {
-                          stationElm.ArrivedTime = elm2.ArrivedTime;
-                          stationElm.firstHeightCondition = elm2.firstHeightCondition;
-                          stationElm.firstHeightInitial = elm2.firstHeightInitial;
-                          stationElm.omaxHeight = elm2.omaxHeight;
-                          stationElm.maxheightTime = elm2.ArrivedTime;
-                          stationElm.maxHeightCondition = elm2.maxHeightCondition;
-                        } else tsunamiItem.stations.push(elm2);
+                        if (stationElm > -1) tsunamiItem.stations[stationElm] = Object.assign(elm2, tsunamiItem.stations[stationElm]);
+                        else tsunamiItem.stations.push(elm2);
                       });
                     } else {
                       tsunamiDataTmp.areas.push({
@@ -3303,6 +3323,9 @@ function ConvertTsunamiInfo(data) {
     });
 
     if (tsunamiItem) {
+      if (!tsunamiItem.headline) tsunamiItem.headline = data.headline;
+      if (!tsunamiItem.comment) tsunamiItem.comment = data.comment;
+      if (!tsunamiItem.status) tsunamiItem.status = data.status;
       if (!tsunamiItem.issue) tsunamiItem.issue = {};
       if (data.issue.EventID) tsunamiItem.issue.EventID = data.issue.EventID;
       if (data.issue.EarthQuake) tsunamiItem.issue.EarthQuake = data.issue.EarthQuake;
@@ -3336,7 +3359,7 @@ function ConvertTsunamiInfo(data) {
                 if (elm2.firstHeightCondition) stItem.firstHeightCondition = elm2.firstHeightCondition;
                 if (elm2.firstHeightInitial) stItem.firstHeightInitial = elm2.firstHeightInitial;
                 if (elm2.omaxHeight) stItem.omaxHeight = elm2.omaxHeight;
-                if (elm2.maxheightRising) stItem.maxheightRising = elm2.maxheightRising;
+                if (elm2.maxHeightRising) stItem.maxHeightRising = elm2.maxHeightRising;
                 if (elm2.maxHeightTime) stItem.maxHeightTime = elm2.maxHeightTime;
                 if (elm2.maxHeightCondition) stItem.maxHeightCondition = elm2.maxHeightCondition;
               } else elm.stations.push(elm2);
@@ -3372,14 +3395,20 @@ function ConvertTsunamiInfo(data) {
     Tsunami_data_Marged = { issue: {}, areas: [] };
     Tsunami_Data = Tsunami_Data.sort((a, b) => (a.issue.time > b.issue.time ? 1 : -1));
     Tsunami_Data.forEach(function (elm0) {
-      if (elm0.revocation) Tsunami_data_Marged.revocation = elm0.revocation;
-      if (elm0.cancelled) Tsunami_data_Marged.cancelled = elm0.cancelled;
+      Tsunami_data_Marged.revocation = elm0.revocation;
+      Tsunami_data_Marged.cancelled = elm0.cancelled;
       if (elm0.revocation || elm0.cancelled) return;
+
+      if (elm0.headline) Tsunami_data_Marged.headline = elm0.headline;
+      if (elm0.comment) Tsunami_data_Marged.comment = elm0.comment;
+      if (elm0.status) Tsunami_data_Marged.status = elm0.status;
+
       if (elm0.issue.EventID) Tsunami_data_Marged.issue.EventID = elm0.issue.EventID;
       if (elm0.issue.EarthQuake) Tsunami_data_Marged.issue.EarthQuake = elm0.issue.EarthQuake;
       if (elm0.cancelled) Tsunami_data_Marged.cancelled = elm0.cancelled;
       if (elm0.ValidDateTime) Tsunami_data_Marged.ValidDateTime = elm0.ValidDateTime;
       if (elm0.issue.time) Tsunami_data_Marged.issue.time = elm0.issue.time;
+
       elm0.areas.forEach(function (elm) {
         var areaItem = Tsunami_data_Marged.areas.find(function (elm2) {
           return elm2.name == elm.name;
@@ -3404,7 +3433,7 @@ function ConvertTsunamiInfo(data) {
                 if (elm2.firstHeightCondition) stItem.firstHeightCondition = elm2.firstHeightCondition;
                 if (elm2.firstHeightInitial) stItem.firstHeightInitial = elm2.firstHeightInitial;
                 if (elm2.omaxHeight) stItem.omaxHeight = elm2.omaxHeight;
-                if (elm2.maxheightRising) stItem.maxheightRising = elm2.maxheightRising;
+                if (elm2.maxHeightRising) stItem.maxHeightRising = elm2.maxHeightRising;
                 if (elm2.maxHeightTime) stItem.maxHeightTime = elm2.maxHeightTime;
                 if (elm2.maxHeightCondition) stItem.maxHeightCondition = elm2.maxHeightCondition;
               } else elm.stations.push(elm2);
@@ -3525,15 +3554,16 @@ function GenerateTsunamiText(data) {
   text = text.replaceAll("{max_grade}", grade_arr[0] ? grade_arr[0] : "津波情報");
   text = text.replaceAll("{all_grade}", grade_arr[0] ? grade_arr.join("、") : "津波情報");
   text = text.replaceAll("{report_time}", data.issue.time ? NormalizeDate(9, data.issue.time) : "不明な時刻");
+  text = text.replaceAll("{headline}", data.headline ? data.headline : "");
 
   if (homeArea && !homeArea.canceled) {
     text = text.replaceAll("{home_area}", homeArea.name ? homeArea.name : "設定地点");
     text = text.replaceAll("{home_grade}", homeArea.grade ? grades_JA[homeArea.grade] : "津波情報");
 
     var firstHeightTmp = "";
-    if (homeArea.firstHeight) firstHeightTmp = "第一波が" + NormalizeDate(7, homeArea.firstHeight) + "に予想され、";
+    if (homeArea.firstHeight) firstHeightTmp = "第１波が" + NormalizeDate(9, homeArea.firstHeight) + "に予想され、";
     else if (homeArea.firstHeightCondition == "津波到達中と推測") firstHeightTmp = "津波が到達中とみられ、";
-    else if (homeArea.firstHeightCondition == "第１波の到達を確認") firstHeightTmp = "既に第一波が到達し、";
+    else if (homeArea.firstHeightCondition == "第１波の到達を確認") firstHeightTmp = "既に第１波が到達し、";
     else firstHeightTmp = "";
     text = text.replaceAll("{first_height1}", firstHeightTmp);
 
