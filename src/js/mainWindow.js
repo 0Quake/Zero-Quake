@@ -1404,6 +1404,8 @@ function kmoniMapUpdate(dataTmp, type) {
             Type: elm.Type,
             checked: elm.checked,
             data: elm.data,
+            detect: elm.detect,
+            detect2: elm.detect2,
             detectLv: elm.detect2 ? 2 : elm.detect ? 1 : 0,
             pga: elm.pga,
             rgb: elm.rgb,
