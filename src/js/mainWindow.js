@@ -9,8 +9,6 @@ var knet_already_draw = false;
 var now_EEW = [];
 var Replay = 0;
 var background = false;
-var becomeForeground = true;
-var becomeForeground_S = true;
 var knetMapData;
 var snetMapData;
 var userPosition = [138.46, 32.99125];
@@ -43,8 +41,6 @@ window.electronAPI.messageSend((event, request) => {
     if (SeisJS_TMP) SeisJSUpdate(SeisJS_TMP);
   } else if (request.action == "unactivate") {
     background = true;
-    becomeForeground = true;
-    becomeForeground_S = true;
   } else if (request.action == "EEW_AlertUpdate") {
     EEW_AlertUpdate(request.data);
     psWaveEntry();
@@ -901,6 +897,10 @@ function init() {
           minzoom: 10,
           maxzoom: 10,
         },
+        knet_points: {
+          type: "geojson",
+          data: {},
+        },
       },
       layers: [
         {
@@ -1120,6 +1120,17 @@ function init() {
           layout: { visibility: "none" },
           minzoom: 10,
         },
+        {
+          id: "knet_points",
+          type: "circle",
+          source: "knet_points",
+          paint: {
+            "circle-color": ["rgb", ["at", 0, ["get", "rgb"]], ["at", 1, ["get", "rgb"]], ["at", 2, ["get", "rgb"]]],
+            "circle-radius": ["interpolate", ["linear"], ["zoom"], 2, 1, 5, 3, 10, 20, 15, 40, 20, 60],
+            "circle-stroke-width": ["match", ["get", "detectLv"], 0, 0, 1, 2, 2, 2, 0],
+            "circle-stroke-color": ["match", ["get", "detectLv"], 0, "#0000", 1, "rgb(203, 99, 43)", 2, "rgb(203, 43, 43)", "#0000"],
+          },
+        },
       ],
     },
   });
@@ -1128,6 +1139,17 @@ function init() {
   map.on("click", "basemap_fill", function (e) {
     e.originalEvent.cancelBubble = true;
   });
+  var nied_popup = function (e) {
+    elm = e.features[0].properties;
+    if (kmoni_popup[elm.Code] && kmoni_popup[elm.Code].isOpen()) return;
+    var popupContent = generatePopupContent_K(elm);
+    if (kmoni_popup[elm.Code]) {
+      kmoni_popup[elm.Code].setHTML(popupContent).addTo(map);
+    } else {
+      kmoni_popup[elm.Code] = new maplibregl.Popup().setLngLat(e.features[0].geometry.coordinates).setHTML(popupContent).addTo(map);
+    }
+  };
+  map.on("click", "knet_points", nied_popup);
 
   map.on("sourcedataloading", (e) => {
     var hinanjoCheck = config.data.overlay.includes("hinanjo");
@@ -1354,46 +1376,83 @@ function addPointMarker(elm) {
 }
 //観測点情報更新
 var pointData;
-var changed_bypass = false;
+var kmoni_popup = {};
 function kmoniMapUpdate(dataTmp, type) {
   if (!dataTmp.data) return;
   if (type == "knet") {
     knetMapData = dataTmp;
-    if (becomeForeground || Object.keys(points).length == 0) {
-      changed_bypass = true;
-      becomeForeground = false;
-    } else changed_bypass = false;
-    knet_already_draw = true;
+    geojson = {
+      type: "FeatureCollection",
+      crs: {
+        type: "name",
+        properties: {
+          name: "urn:ogc:def:crs:OGC:1.3:CRS84",
+        },
+      },
+      features: [],
+    };
+
+    dataTmp.data.forEach(function (elm) {
+      if (elm.data) {
+        geojson.features.push({
+          type: "Feature",
+          properties: {
+            Code: elm.Code,
+            IsSuspended: elm.IsSuspended,
+            Name: elm.Name,
+            Region: elm.Region,
+            Type: elm.Type,
+            checked: elm.checked,
+            data: elm.data,
+            detectLv: elm.detect2 ? 2 : elm.detect ? 1 : 0,
+            pga: elm.pga,
+            rgb: elm.rgb,
+            shindo: elm.shindo,
+          },
+          geometry: {
+            type: "Point",
+            coordinates: [elm.Location.Longitude, elm.Location.Latitude],
+          },
+        });
+      }
+      if (kmoni_popup[elm.Code] && kmoni_popup[elm.Code].isOpen()) {
+        kmoni_popup[elm.Code].setHTML(generatePopupContent_K(elm));
+      }
+    });
+    map.getSource("knet_points").setData(geojson);
+
+    return;
   } else {
     snetMapData = dataTmp;
-    if (becomeForeground_S || Object.keys(points).length == 0) {
-      changed_bypass = true;
-      becomeForegroundS = false;
-    } else changed_bypass = false;
-  }
 
-  if (changed_bypass) dataTmp = dataTmp.data;
-  else dataTmp = dataTmp.changedData;
+    for (elm of dataTmp.data) {
+      pointData = points[elm.Code];
+      if (elm.data) {
+        if (!pointData) pointData = points[elm.Code] = addPointMarker(elm);
+        pointData.markerElm.style.background = "rgb(" + elm.rgb.join(",") + ")";
+        if (elm.detect) {
+          pointData.markerElm.classList.add("detectingMarker");
+          if (elm.detect2) pointData.markerElm.classList.add("strongDetectingMarker");
+        } else pointData.markerElm.classList.remove("strongDetectingMarker", "detectingMarker");
 
-  for (elm of dataTmp) {
-    pointData = points[elm.Code];
-    if (elm.data) {
-      if (!pointData) pointData = points[elm.Code] = addPointMarker(elm);
-      pointData.markerElm.style.background = "rgb(" + elm.rgb.join(",") + ")";
-      if (elm.detect) {
-        pointData.markerElm.classList.add("detectingMarker");
-        if (elm.detect2) pointData.markerElm.classList.add("strongDetectingMarker");
-      } else pointData.markerElm.classList.remove("strongDetectingMarker", "detectingMarker");
+        pointData.popupContent = "<h3 class='PointName' style='border-bottom-color:rgb(" + elm.rgb.join(",") + ")'>" + (elm.Name ? elm.Name : "") + "<span>" + elm.Type + "_" + elm.Code + "</span></h3>" + (elm.detect ? "<h4 class='detecting'>地震検知中</h4>" : "");
+        if (pointData.popup.isOpen()) pointData.popup.setHTML(pointData.popupContent);
+      } else if (pointData) {
+        pointData.markerElm.style.background = "rgba(128,128,128,0.5)";
+        pointData.markerElm.classList.remove("strongDetectingMarker", "detectingMarker");
 
-      pointData.popupContent = "<h3 class='PointName' style='border-bottom-color:rgb(" + elm.rgb.join(",") + ")'>" + (elm.Name ? elm.Name : "") + "<span>" + elm.Type + "_" + elm.Code + "</span></h3>" + (elm.detect ? "<h4 class='detecting'>地震検知中</h4>" : "");
-      if (pointData.popup.isOpen()) pointData.popup.setHTML(pointData.popupContent);
-    } else if (pointData) {
-      pointData.markerElm.style.background = "rgba(128,128,128,0.5)";
-      pointData.markerElm.classList.remove("strongDetectingMarker", "detectingMarker");
-
-      pointData.popupContent = "<h3 class='PointName' style='border-bottom:solid 2px rgba(128,128,128,0.5)'>" + (elm.Name ? elm.Name : "") + "<span>" + elm.Type + "_" + elm.Code + "</span></h3>";
-      if (pointData.popup.isOpen()) pointData.popup.setHTML(pointData.popupContent);
+        pointData.popupContent = "<h3 class='PointName' style='border-bottom:solid 2px rgba(128,128,128,0.5)'>" + (elm.Name ? elm.Name : "") + "<span>" + elm.Type + "_" + elm.Code + "</span></h3>";
+        if (pointData.popup.isOpen()) pointData.popup.setHTML(pointData.popupContent);
+      }
     }
+  }
+}
+function generatePopupContent_K(params) {
+  if (params.data) {
+    if (!Array.isArray(params.rgb)) params.rgb = JSON.parse(params.rgb);
+    return "<h3 class='PointName' style='border-bottom-color:rgb(" + params.rgb.join(",") + ")'>" + (params.Name ? params.Name : "") + "<span>" + params.Type + "_" + params.Code + "</span></h3>" + (params.detect ? "<h4 class='detecting'>地震検知中</h4>" : "");
+  } else {
+    return "<h3 class='PointName' style='border-bottom:solid 2px rgba(128,128,128,0.5)'>" + (params.Name ? params.Name : "") + "<span>" + params.Type + "_" + params.Code + "</span></h3>";
   }
 }
 
