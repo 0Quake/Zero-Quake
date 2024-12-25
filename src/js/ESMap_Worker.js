@@ -11,6 +11,15 @@ self.addEventListener("message", (event) => {
     ESMapO = event.data.canvas;
     ESMap_context_out = ESMapO.getContext("2d");
   } else if (event.data.action == "URL") {
+    var intColor = {
+      4: NormalizeShindo("4", 2)[0].replace("rgb(", "").replace(")", "").replace(" ", "").split(","),
+      "5-": NormalizeShindo("5-", 2)[0].replace("rgb(", "").replace(")", "").replace(" ", "").split(","),
+      "5+": NormalizeShindo("5+", 2)[0].replace("rgb(", "").replace(")", "").replace(" ", "").split(","),
+      "6-": NormalizeShindo("6-", 2)[0].replace("rgb(", "").replace(")", "").replace(" ", "").split(","),
+      "6+": NormalizeShindo("6+", 2)[0].replace("rgb(", "").replace(")", "").replace(" ", "").split(","),
+      7: NormalizeShindo("7", 2)[0].replace("rgb(", "").replace(")", "").replace(" ", "").split(","),
+    };
+
     fetch(event.data.url)
       .then((r) => r.blob())
       .then(function (imageBlob) {
@@ -21,44 +30,43 @@ self.addEventListener("message", (event) => {
         ESMap_context.drawImage(img, 0, 0, 800, 800);
         var imgData = ESMap_context.getImageData(0, 0, 800, 800).data;
         ESMap_context_out.clearRect(0, 0, 320, 320);
+        var imgData_out = ESMap_context_out.getImageData(0, 0, 320, 320);
 
         var y = 1;
         for (let i = 0; i < 320; i++) {
           var x = 1;
           for (let j = 0; j < 320; j++) {
-            var r = imgData[(y * 800 + x) * 4];
-            var g = imgData[(y * 800 + x) * 4 + 1];
-            var b = imgData[(y * 800 + x) * 4 + 2];
-
-            var int;
             if (imgData[(y * 800 + x) * 4 + 3] > 50) {
-              if (r == 250 && g == 230 && b == 150) int = "4";
-              else if (r == 255 && g == 230 && b == 0) int = "5-";
-              else if (r == 255 && g == 153 && b == 0) int = "5+";
-              else if (r == 255 && g == 40 && b == 0) int = "6-";
-              else if (r == 165 && g == 0 && b == 33) int = "6+";
-              else if (r == 180 && g == 0 && b == 104) int = "7";
+              var r = imgData[(y * 800 + x) * 4];
+              var g = imgData[(y * 800 + x) * 4 + 1];
+              var b = imgData[(y * 800 + x) * 4 + 2];
+
+              var color;
+              if (r == 250 && g == 230 && b == 150) color = intColor["4"];
+              else if (r == 255 && g == 230 && b == 0) color = intColor["5-"];
+              else if (r == 255 && g == 153 && b == 0) color = intColor["5+"];
+              else if (r == 255 && g == 40 && b == 0) color = intColor["6-"];
+              else if (r == 165 && g == 0 && b == 33) color = intColor["6+"];
+              else if (r == 180 && g == 0 && b == 104) color = intColor["7"];
               else {
-                if (Math.abs(r - 250) < 16 && Math.abs(g - 230) < 16 && Math.abs(b - 150) < 16) int = "4";
-                else if (Math.abs(r - 255) < 16 && Math.abs(g - 230) < 16 && Math.abs(b - 0) < 16) int = "5-";
-                else if (Math.abs(r - 255) < 16 && Math.abs(g - 153) < 16 && Math.abs(b - 0) < 16) int = "5+";
-                else if (Math.abs(r - 255) < 16 && Math.abs(g - 40) < 16 && Math.abs(b - 0) < 16) int = "6-";
-                else if (Math.abs(r - 165) < 16 && Math.abs(g - 0) < 16 && Math.abs(b - 33) < 16) int = "6+";
-                else if (Math.abs(r - 180) < 16 && Math.abs(g - 0) < 16 && Math.abs(b - 104) < 16) int = "7";
+                if (Math.abs(r - 250) < 16 && Math.abs(g - 230) < 16 && Math.abs(b - 150) < 16) color = intColor["4"];
+                else if (Math.abs(r - 255) < 16 && Math.abs(g - 230) < 16 && Math.abs(b - 0) < 16) color = intColor["5-"];
+                else if (Math.abs(r - 255) < 16 && Math.abs(g - 153) < 16 && Math.abs(b - 0) < 16) color = intColor["5+"];
+                else if (Math.abs(r - 255) < 16 && Math.abs(g - 40) < 16 && Math.abs(b - 0) < 16) color = intColor["6-"];
+                else if (Math.abs(r - 165) < 16 && Math.abs(g - 0) < 16 && Math.abs(b - 33) < 16) color = intColor["6+"];
+                else if (Math.abs(r - 180) < 16 && Math.abs(g - 0) < 16 && Math.abs(b - 104) < 16) color = intColor["7"];
               }
 
-              ESMap_context_out.beginPath();
-              ESMap_context_out.rect(j, i, 1, 1);
-              ESMap_context_out.fillStyle = NormalizeShindo(int, 2)[0];
-              ESMap_context_out.fill();
+              imgData_out.data[(i * 320 + j) * 4] = color[0];
+              imgData_out.data[(i * 320 + j) * 4 + 1] = color[1];
+              imgData_out.data[(i * 320 + j) * 4 + 2] = color[2];
+              imgData_out.data[(i * 320 + j) * 4 + 3] = 255;
             }
-            if (j % 2 == 0) x += 3;
-            else x += 2;
+            x += j % 2 == 0 ? 3 : 2;
           }
-
-          if (i % 2 == 0) y += 2;
-          else y += 3;
+          y += i % 2 == 0 ? 2 : 3;
         }
+        ESMap_context_out.putImageData(imgData_out, 0, 0);
 
         ESMapO.convertToBlob().then(function (blob) {
           let reader = new FileReader();
