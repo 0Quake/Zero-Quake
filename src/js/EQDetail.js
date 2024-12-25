@@ -87,6 +87,8 @@ window.electronAPI.messageSend((event, request) => {
 //情報取得
 function InfoFetch() {
   jma_ListReq();
+  estimated_intensity_mapReq();
+
   narikakun_ListReq(new Date().getFullYear(), new Date().getMonth() + 1);
   if (EEWData) ConvertEQInfo(EEWData);
 
@@ -95,7 +97,6 @@ function InfoFetch() {
       axisInfoCtrl(elm.message);
     });
   }
-  estimated_intensity_mapReq();
 }
 
 //地図初期化
