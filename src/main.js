@@ -1095,9 +1095,10 @@ function start() {
 }
 
 var TremRts_sta;
+var Trem_server = true;
 function Req_TremRts_sta() {
   if (net.online) {
-    var request = net.request("https://api-2.exptech.dev/api/v1/trem/station?_=" + Number(new Date()));
+    var request = net.request("https://api-" + (Trem_server ? 1 : 2) + ".exptech.dev/api/v1/trem/station?_=" + Number(new Date()));
     request.on("response", (res) => {
       var dataTmp = "";
       res.on("data", (chunk) => {
@@ -1109,20 +1110,25 @@ function Req_TremRts_sta() {
           if (json) TremRts_sta = json;
         } catch (err) {
           UpdateStatus(new Date() - Replay, "TREM-RTS", "Error");
+          Trem_server = !Trem_server;
         }
       });
+    });
+    request.on("error", () => {
+      Trem_server = !Trem_server;
     });
     request.end();
   }
 }
 
+var TremRTS_server = true;
 function Req_TremRts() {
   if (config.Source.TREMRTS.GetData) {
     if (net.online) {
       if (!TremRts_sta) Req_TremRts_sta();
 
-      if (Replay !== 0) var url = "https://api-2.exptech.dev/api/v1/trem/rts/" + Number(new Date() - Replay);
-      else var url = "https://lb-1.exptech.dev/api/v1/trem/rts?_=" + Number(new Date());
+      if (Replay !== 0) var url = "https://api-" + (TremRTS_server ? 1 : 2) + ".exptech.dev/api/v1/trem/rts/" + Number(new Date() - Replay);
+      else var url = "https://lb-" + (TremRTS_server ? 1 : 2) + ".exptech.dev/api/v1/trem/rts?_=" + Number(new Date());
 
       var request = net.request(url);
       request.on("response", (res) => {
@@ -1152,11 +1158,13 @@ function Req_TremRts() {
             UpdateStatus(new Date(json.time), "TREM-RTS", "success");
           } catch (err) {
             UpdateStatus(new Date() - Replay, "TREM-RTS", "Error");
+            TremRTS_server = !TremRTS_server;
           }
         });
       });
       request.on("error", () => {
         UpdateStatus(new Date() - Replay, "TREM-RTS", "Error");
+        TremRTS_server = !TremRTS_server;
       });
       request.end();
     } else UpdateStatus(new Date() - Replay, "TREM-RTS", "Error");
