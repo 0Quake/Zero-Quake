@@ -5,23 +5,27 @@ var Replay = 0;
 var MainWindow, SettingWindow, TsunamiWindow, WorkerWindow;
 var worker;
 function replay(ReplayDate) {
-  if (ReplayDate) {
-    Replay = new Date() - new Date(ReplayDate);
-  } else {
-    Replay = 0;
-  }
-  EQDetect_List = [];
-  EEW_nowList = [];
-  if (worker) worker.postMessage({ action: "Replay", data: Replay });
-  messageToMainWindow({
-    action: "Replay",
-    data: Replay,
-  });
-  if (SettingWindow) {
-    SettingWindow.webContents.send("message2", {
+  try {
+    if (ReplayDate) {
+      Replay = new Date() - new Date(ReplayDate);
+    } else {
+      Replay = 0;
+    }
+    EQDetect_List = [];
+    EEW_nowList = [];
+    if (worker) worker.postMessage({ action: "Replay", data: Replay });
+    messageToMainWindow({
       action: "Replay",
       data: Replay,
     });
+    if (SettingWindow) {
+      SettingWindow.webContents.send("message2", {
+        action: "Replay",
+        data: Replay,
+      });
+    }
+  } catch (err) {
+    throw new Error("リプレイに失敗しました。エラーメッセージは以下の通りです。\n" + err);
   }
 }
 // prettier-ignore
@@ -290,89 +294,93 @@ var downloadURL;
 
 //アップデートの確認
 function checkUpdate() {
-  if (net.online) {
-    var UpdateError = function () {
-      var current_verTmp = soft_version;
+  try {
+    if (net.online) {
+      var UpdateError = function () {
+        var current_verTmp = soft_version;
 
-      update_data = { check_error: true, check_date: new Date(), latest_version: null, current_version: current_verTmp, update_available: null, dl_page: null };
-      if (SettingWindow) {
-        SettingWindow.webContents.send("message2", {
-          action: "Update_Data",
-          data: update_data,
-        });
-      }
-    };
-    let request = net.request("https://api.github.com/repos/0quake/Zero-Quake/releases?_=" + Number(new Date()));
-    request.on("response", (res) => {
-      if (!300 <= res._responseHead.statusCode && !res._responseHead.statusCode < 200) {
-        var dataTmp = "";
-        res.on("data", (chunk) => {
-          dataTmp += chunk;
-        });
-        res.on("end", function () {
-          try {
-            var json = ParseJSON(dataTmp);
-            var latest_verTmp = String(json[0].tag_name.replace("v", ""));
+        update_data = { check_error: true, check_date: new Date(), latest_version: null, current_version: current_verTmp, update_available: null, dl_page: null };
+        if (SettingWindow) {
+          SettingWindow.webContents.send("message2", {
+            action: "Update_Data",
+            data: update_data,
+          });
+        }
+      };
+      let request = net.request("https://api.github.com/repos/0quake/Zero-Quake/releases?_=" + Number(new Date()));
+      request.on("response", (res) => {
+        if (!300 <= res._responseHead.statusCode && !res._responseHead.statusCode < 200) {
+          var dataTmp = "";
+          res.on("data", (chunk) => {
+            dataTmp += chunk;
+          });
+          res.on("end", function () {
+            try {
+              var json = ParseJSON(dataTmp);
+              var latest_verTmp = String(json[0].tag_name.replace("v", ""));
 
-            var current_verTmp = packageJson.version;
-            var latest_v = String(latest_verTmp).split(".").map(Number);
-            var current_v = String(current_verTmp).split(".").map(Number);
-            var dl_page = json[0].html_url;
-            var update_detail = json[0].body;
-            downloadURL = json[0].assets[0];
-            if (downloadURL && downloadURL.browser_download_url) downloadURL = downloadURL.browser_download_url;
-            else {
-              update_data = { check_error: true, check_date: new Date() };
+              var current_verTmp = packageJson.version;
+              var latest_v = String(latest_verTmp).split(".").map(Number);
+              var current_v = String(current_verTmp).split(".").map(Number);
+              var dl_page = json[0].html_url;
+              var update_detail = json[0].body;
+              downloadURL = json[0].assets[0];
+              if (downloadURL && downloadURL.browser_download_url) downloadURL = downloadURL.browser_download_url;
+              else {
+                update_data = { check_error: true, check_date: new Date() };
+                if (SettingWindow) {
+                  SettingWindow.webContents.send("message2", {
+                    action: "Update_Data",
+                    data: update_data,
+                  });
+                }
+              }
+              var update_available = false;
+              if (latest_v[0] > current_v[0]) {
+                update_available = true;
+              } else if (latest_v[0] == current_v[0]) {
+                if (latest_v[1] > current_v[1]) {
+                  update_available = true;
+                } else if (latest_v[1] == current_v[1]) {
+                  if (latest_v[2] > current_v[2]) {
+                    update_available = true;
+
+                    var options4 = {
+                      type: "question",
+                      title: "アプリケーションの更新",
+                      message: "Zero Quake で更新が利用可能です。",
+                      detail: "v." + current_verTmp + " > v." + latest_verTmp + "\n操作を選択してください。",
+                      buttons: ["詳細を確認", "後で確認"],
+                      noLink: true,
+                    };
+
+                    dialog.showMessageBox(MainWindow, options4).then(function (result) {
+                      if (result.response == 0) {
+                        Create_SettingWindow(true);
+                      }
+                    });
+                  }
+                }
+              }
+
+              update_data = { check_error: false, check_date: new Date(), latest_version: latest_verTmp, current_version: current_verTmp, update_available: update_available, dl_page: dl_page, update_detail: update_detail };
               if (SettingWindow) {
                 SettingWindow.webContents.send("message2", {
                   action: "Update_Data",
                   data: update_data,
                 });
               }
+            } catch (err) {
+              UpdateError();
             }
-            var update_available = false;
-            if (latest_v[0] > current_v[0]) {
-              update_available = true;
-            } else if (latest_v[0] == current_v[0]) {
-              if (latest_v[1] > current_v[1]) {
-                update_available = true;
-              } else if (latest_v[1] == current_v[1]) {
-                if (latest_v[2] > current_v[2]) {
-                  update_available = true;
-
-                  var options4 = {
-                    type: "question",
-                    title: "アプリケーションの更新",
-                    message: "Zero Quake で更新が利用可能です。",
-                    detail: "v." + current_verTmp + " > v." + latest_verTmp + "\n操作を選択してください。",
-                    buttons: ["詳細を確認", "後で確認"],
-                    noLink: true,
-                  };
-
-                  dialog.showMessageBox(MainWindow, options4).then(function (result) {
-                    if (result.response == 0) {
-                      Create_SettingWindow(true);
-                    }
-                  });
-                }
-              }
-            }
-
-            update_data = { check_error: false, check_date: new Date(), latest_version: latest_verTmp, current_version: current_verTmp, update_available: update_available, dl_page: dl_page, update_detail: update_detail };
-            if (SettingWindow) {
-              SettingWindow.webContents.send("message2", {
-                action: "Update_Data",
-                data: update_data,
-              });
-            }
-          } catch (err) {
-            UpdateError();
-          }
-        });
-      }
-    });
-    request.on("error", UpdateError);
-    request.end();
+          });
+        }
+      });
+      request.on("error", UpdateError);
+      request.end();
+    }
+  } catch (err) {
+    throw new Error("アップデートの確認に失敗しました。エラーメッセージは以下の通りです。\n" + err);
   }
 }
 
@@ -1762,10 +1770,6 @@ function IntervalRun(msec, func) {
 
 //定期実行
 function RegularExecution(roop) {
-  if (roop)
-    setTimeout(function () {
-      RegularExecution(true);
-    }, 1000);
   try {
     //EEW解除
     EEW_nowList.forEach(function (elm) {
@@ -1786,6 +1790,11 @@ function RegularExecution(roop) {
         });
       }
     });
+
+    if (roop)
+      setTimeout(function () {
+        RegularExecution(true);
+      }, 1000);
   } catch (err) {
     throw new Error("内部の情報処理でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
   }
@@ -1832,7 +1841,6 @@ async function SetKmoniOffset(func) {
     if (func) setTimeout(func, 200);
   } catch (err) {
     KmoniOffset = 2500;
-    throw new Error("強震モニタの遅延量の取得でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
   }
 }
 
@@ -2625,70 +2633,66 @@ function Req_JMAXML(url, count) {
               count
             );
           } else if (title == "南海トラフ地震関連解説情報" || title == "南海トラフ地震臨時情報") {
-            try {
-              var data = {
-                title: title, //南海トラフ地震関連解説情報など
-                kind: null, //定例など
-                reportDate: new Date(xml.getElementsByTagName("ReportDateTime")[0].textContent), //時刻
-                Serial: null,
-                HeadLine: xml.getElementsByTagName("Headline")[0].getElementsByTagName("Text")[0].textContent, //要約
-                Text: "",
-                Appendix: "",
-                NextAdvisory: "",
-                Text2: "",
-              };
+            var data = {
+              title: title, //南海トラフ地震関連解説情報など
+              kind: null, //定例など
+              reportDate: new Date(xml.getElementsByTagName("ReportDateTime")[0].textContent), //時刻
+              Serial: null,
+              HeadLine: xml.getElementsByTagName("Headline")[0].getElementsByTagName("Text")[0].textContent, //要約
+              Text: "",
+              Appendix: "",
+              NextAdvisory: "",
+              Text2: "",
+            };
 
-              if (xml.getElementsByTagName("Serial")[0] && xml.getElementsByTagName("Serial")[0].textContent) data.Serial = Number(xml.getElementsByTagName("Serial")[0].textContent);
-              var Body = xml.getElementsByTagName("Body")[0];
-              var EarthQuakeInfo = Body.getElementsByTagName("EarthquakeInfo")[0];
-              if (EarthQuakeInfo) {
-                if (EarthQuakeInfo.getElementsByTagName("InfoSerial")[0]) data.kind = EarthQuakeInfo.getElementsByTagName("InfoSerial")[0].getElementsByTagName("Name")[0].textContent;
-                data.Text = EarthQuakeInfo.getElementsByTagName("Text")[0].textContent;
-                if (EarthQuakeInfo.getElementsByTagName("Appendix")[0]) data.Appendix = EarthQuakeInfo.getElementsByTagName("Appendix")[0].textContent;
-              }
-              if (Body.getElementsByTagName("NextAdvisory")[0]) data.NextAdvisory = Body.getElementsByTagName("NextAdvisory")[0].textContent;
+            if (xml.getElementsByTagName("Serial")[0] && xml.getElementsByTagName("Serial")[0].textContent) data.Serial = Number(xml.getElementsByTagName("Serial")[0].textContent);
+            var Body = xml.getElementsByTagName("Body")[0];
+            var EarthQuakeInfo = Body.getElementsByTagName("EarthquakeInfo")[0];
+            if (EarthQuakeInfo) {
+              if (EarthQuakeInfo.getElementsByTagName("InfoSerial")[0]) data.kind = EarthQuakeInfo.getElementsByTagName("InfoSerial")[0].getElementsByTagName("Name")[0].textContent;
+              data.Text = EarthQuakeInfo.getElementsByTagName("Text")[0].textContent;
+              if (EarthQuakeInfo.getElementsByTagName("Appendix")[0]) data.Appendix = EarthQuakeInfo.getElementsByTagName("Appendix")[0].textContent;
+            }
+            if (Body.getElementsByTagName("NextAdvisory")[0]) data.NextAdvisory = Body.getElementsByTagName("NextAdvisory")[0].textContent;
 
-              var Text2Elm = Array.from(xml.getElementsByTagName("Body")[0].children).find(function (elm) {
-                return elm.tagName == "Text";
+            var Text2Elm = Array.from(xml.getElementsByTagName("Body")[0].children).find(function (elm) {
+              return elm.tagName == "Text";
+            });
+            if (Text2Elm) data.Text2 = Text2Elm.textContent;
+
+            NankaiTroughInfoAll.push(data);
+            NankaiTroughInfoAll = NankaiTroughInfoAll.sort(function (a, b) {
+              return a.reportDate > b.reportDate ? -1 : 1;
+            });
+
+            var teirei;
+            var rinji = NankaiTroughInfoAll.find(function (elm) {
+              var offset = Number(new Date() - new Date(elm.reportDate));
+              return elm.title.startsWith("南海トラフ地震臨時情報") && ((elm.kind == "巨大地震警戒" && offset <= 1209600000) || elm.kind == "巨大地震注意" || elm.kind == "調査中" || (elm.kind == "調査終了" && offset <= 604800000));
+            });
+            if (rinji) {
+              teirei = NankaiTroughInfoAll.find(function (elm) {
+                return elm.title.startsWith("南海トラフ地震関連解説情報") && new Date(rinji.reportDate) <= new Date(elm.reportDate);
               });
-              if (Text2Elm) data.Text2 = Text2Elm.textContent;
+            } else {
+              teirei = NankaiTroughInfoAll[0];
+            }
 
-              NankaiTroughInfoAll.push(data);
-              NankaiTroughInfoAll = NankaiTroughInfoAll.sort(function (a, b) {
-                return a.reportDate > b.reportDate ? -1 : 1;
-              });
+            NankaiTroughInfo = { rinji: rinji, teirei: teirei };
 
-              var teirei;
-              var rinji = NankaiTroughInfoAll.find(function (elm) {
-                var offset = Number(new Date() - new Date(elm.reportDate));
-                return elm.title.startsWith("南海トラフ地震臨時情報") && ((elm.kind == "巨大地震警戒" && offset <= 1209600000) || elm.kind == "巨大地震注意" || elm.kind == "調査中" || (elm.kind == "調査終了" && offset <= 604800000));
-              });
-              if (rinji) {
-                teirei = NankaiTroughInfoAll.find(function (elm) {
-                  return elm.title.startsWith("南海トラフ地震関連解説情報") && new Date(rinji.reportDate) <= new Date(elm.reportDate);
+            messageToMainWindow({
+              action: "NankaiTroughInfo",
+              data: NankaiTroughInfo,
+            });
+
+            if (NankaiWindow.window) {
+              var data = NankaiWindow.type == "rinji" ? NankaiTroughInfo.rinji : NankaiTroughInfo.teirei;
+              if (data) {
+                NankaiWindow.window.webContents.send("message2", {
+                  action: "NankaiTroughInfo",
+                  data: data,
                 });
-              } else {
-                teirei = NankaiTroughInfoAll[0];
               }
-
-              NankaiTroughInfo = { rinji: rinji, teirei: teirei };
-
-              messageToMainWindow({
-                action: "NankaiTroughInfo",
-                data: NankaiTroughInfo,
-              });
-
-              if (NankaiWindow.window) {
-                var data = NankaiWindow.type == "rinji" ? NankaiTroughInfo.rinji : NankaiTroughInfo.teirei;
-                if (data) {
-                  NankaiWindow.window.webContents.send("message2", {
-                    action: "NankaiTroughInfo",
-                    data: data,
-                  });
-                }
-              }
-            } catch (err) {
-              return;
             }
           } else if (title == "津波情報a" || title == "津波警報・注意報・予報a" || title == "沖合の津波観測に関する情報") {
             //津波予報
@@ -2739,14 +2743,15 @@ function Req_JMAXML(url, count) {
               var headlineElm = xml.getElementsByTagName("Headline")[0];
               if (headlineElm && headlineElm.getElementsByTagName("Text")[0]) headline = headlineElm.getElementsByTagName("Text")[0].textContent;
 
+              var Text1 = "";
+              var WarningComment = "";
+              var FreeFormComment = "";
+              //付加文取得の不具合による処理停止を回避
               try {
-                var Text1 = "";
                 if (xml.querySelector("Body  > Text")) {
                   Text1 = xml.querySelector("Body  > Text").textContent + "\n\n";
                 }
 
-                var WarningComment = "";
-                var FreeFormComment = "";
                 var comments_elm = xml.getElementsByTagName("Comments")[0];
                 if (comments_elm) {
                   var WarningComment_elm = comments_elm.getElementsByTagName("WarningComment")[0];
@@ -2755,9 +2760,8 @@ function Req_JMAXML(url, count) {
                   var FreeFormComment_elm = comments_elm.getElementsByTagName("FreeFormComment")[0];
                   if (FreeFormComment_elm) FreeFormComment = FreeFormComment_elm.textContent;
                 }
-              } catch (err) {
-                return;
-              }
+              } catch (err) {}
+
               tsunamiDataTmp = {
                 status: xml.getElementsByTagName("Status")[0].textContent,
                 issue: { time: new Date(xml.getElementsByTagName("ReportDateTime")[0].textContent), EventID: EventID, EarthQuake: EQData },
@@ -3109,145 +3113,150 @@ function Req_Narikakun(url, count) {
 var EQInfoData = {};
 //地震情報マージ→AlertEQInfo
 function ConvertEQInfo(dataList, type, EEW, count) {
-  switch (type) {
-    case "jma":
-      var eqInfoTmp = [];
-      var UpdateEQInfoTmp = [];
+  try {
+    switch (type) {
+      case "jma":
+        var eqInfoTmp = [];
+        var UpdateEQInfoTmp = [];
 
-      var playAudio = false;
-      var changed = false;
+        var playAudio = false;
+        var changed = false;
 
-      dataList.forEach(function (data) {
-        if (!data.eventId) return;
-        var EQElm = EQInfoData[data.eventId];
-        if (EQElm) {
-          var EQInfo_Item = {
-            eventId: EQElm.eventId,
-            category: null,
-            EEW: null,
-            reportDateTime: null,
-            OriginTime: null,
-            epiCenter: null,
-            M: null,
-            maxI: null,
-            maxLgInt: null,
-            DetailURL: [],
-            axisData: [],
-          };
-          EQElm.raw_data.push(data);
-          var rawData = EQElm.raw_data.sort(function (a, b) {
-            return a.reportDateTime < b.reportDateTime ? -1 : 1;
-          });
-          rawData.forEach(function (elm, index) {
-            if (elm.cancel) {
-              rawData.slice(0, index).forEach(function (elm2, index2) {
-                if (elm2.category == elm.category) rawData[index2].cancel = true;
-              });
-            }
-          });
-          rawData.forEach(function (elm) {
-            if (!config.Info.EQInfo.showtraining && elm.status == "訓練") return;
-            if (!config.Info.EQInfo.showTest && elm.status == "試験") return;
-            if (new Date(elm.reportDateTime) > new Date() - Replay) return;
-
-            //EEW以外の情報が既に入っているとき、EEWによる情報を破棄
-            if (elm.category == "EEW" && EQElm.EEW == false) return;
-            else if (elm.category == "EEW") EQElm.EEW = true;
-            else if (elm.category != "EEW" && EQElm.EEW == true) {
-              //EEW以外の情報が入ってきたとき、EEWによる情報を破棄
-              EQElm.EEW == false;
-              EQInfo_Item = {
-                eventId: EQElm.eventId,
-                category: null,
-                EEW: false,
-                reportDateTime: null,
-                OriginTime: null,
-                epiCenter: null,
-                M: null,
-                maxI: null,
-                maxLgInt: null,
-                DetailURL: [],
-                axisData: [],
-              };
-            }
-
-            EQInfo_Item.category = elm.category;
-            if (!elm.maxI) elm.maxI = null;
-            if (!elm.maxLgInt) elm.maxLgInt = null;
-            if (Boolean2(elm.OriginTime)) EQInfo_Item.OriginTime = elm.OriginTime;
-            if (Boolean2(elm.epiCenter)) EQInfo_Item.epiCenter = elm.epiCenter;
-            if (Boolean2(elm.M) && elm.M != "Ｍ不明" && elm.M != "NaN") EQInfo_Item.M = elm.M;
-            if (Boolean2(elm.maxI) && elm.maxI !== "?") EQInfo_Item.maxI = elm.maxI;
-            if (Boolean2(elm.maxLgInt) && elm.maxLgInt !== "?") EQInfo_Item.maxLgInt = elm.maxLgInt;
-
-            if (Array.isArray(elm.DetailURL)) {
-              elm.DetailURL.forEach(function (elm2) {
-                if (elm2 && !EQInfo_Item.DetailURL.includes(elm2) && !EQElm.DetailURL.includes(elm2)) {
-                  EQInfo_Item.DetailURL.push(elm2);
-                }
-              });
-            }
-            if (elm.axisData) EQInfo_Item.axisData.push(elm.axisData);
-          });
-
-          EQElm.cancel = !rawData.find(function (elm) {
-            return !elm.cancel;
-          });
-
-          if (EQElm.category !== EQInfo_Item.category) changed = true;
-          if (EQElm.EEW !== EQInfo_Item.EEW) changed = true;
-          if (EQElm.OriginTime !== EQInfo_Item.OriginTime) changed = true;
-          if (EQElm.epiCenter !== EQInfo_Item.epiCenter) changed = true;
-          if (EQElm.M !== EQInfo_Item.M) changed = true;
-          if (EQElm.maxI !== EQInfo_Item.maxI) changed = true;
-          if (EQElm.maxLgInt !== EQInfo_Item.maxLgInt) changed = true;
-          if (EQElm.DetailURL.length !== EQInfo_Item.DetailURL.length) changed = true;
-          if (EQInfo_Item.axisData) changed = true;
-
-          if (EQElm.category == "EEW" && EQInfo_Item.category != "EEW") playAudio = true;
-
-          EQElm.category = EQInfo_Item.category;
-          EQElm.EEW = EQInfo_Item.EEW;
-          EQElm.reportDateTime = EQInfo_Item.reportDateTime;
-          EQElm.OriginTime = EQInfo_Item.OriginTime;
-          EQElm.epiCenter = EQInfo_Item.epiCenter;
-          EQElm.M = EQInfo_Item.M;
-          EQElm.maxI = EQInfo_Item.maxI;
-          EQElm.maxLgInt = EQInfo_Item.maxLgInt;
-          EQElm.DetailURL = EQElm.DetailURL.concat(EQInfo_Item.DetailURL);
-          if (EQInfo_Item.axisData) EQElm.axisData = EQInfo_Item.axisData;
-
-          if (changed) {
-            UpdateEQInfoTmp.push(EQElm);
-            var i = eqInfo.jma.findIndex(function (elm2) {
-              return elm2.eventId == EQElm.eventId;
+        dataList.forEach(function (data) {
+          if (!data.eventId) return;
+          var EQElm = EQInfoData[data.eventId];
+          if (EQElm) {
+            var EQInfo_Item = {
+              eventId: EQElm.eventId,
+              category: null,
+              EEW: null,
+              reportDateTime: null,
+              OriginTime: null,
+              epiCenter: null,
+              M: null,
+              maxI: null,
+              maxLgInt: null,
+              DetailURL: [],
+              axisData: [],
+            };
+            EQElm.raw_data.push(data);
+            var rawData = EQElm.raw_data.sort(function (a, b) {
+              return a.reportDateTime < b.reportDateTime ? -1 : 1;
             });
-            eqInfo.jma[i] = EQElm;
+            rawData.forEach(function (elm, index) {
+              if (elm.cancel) {
+                rawData.slice(0, index).forEach(function (elm2, index2) {
+                  if (elm2.category == elm.category) rawData[index2].cancel = true;
+                });
+              }
+            });
+            rawData.forEach(function (elm) {
+              if (!config.Info.EQInfo.showtraining && elm.status == "訓練") return;
+              if (!config.Info.EQInfo.showTest && elm.status == "試験") return;
+              if (new Date(elm.reportDateTime) > new Date() - Replay) return;
+
+              //EEW以外の情報が既に入っているとき、EEWによる情報を破棄
+              if (elm.category == "EEW" && EQElm.EEW == false) return;
+              else if (elm.category == "EEW") EQElm.EEW = true;
+              else if (elm.category != "EEW" && EQElm.EEW == true) {
+                //EEW以外の情報が入ってきたとき、EEWによる情報を破棄
+                EQElm.EEW == false;
+                EQInfo_Item = {
+                  eventId: EQElm.eventId,
+                  category: null,
+                  EEW: false,
+                  reportDateTime: null,
+                  OriginTime: null,
+                  epiCenter: null,
+                  M: null,
+                  maxI: null,
+                  maxLgInt: null,
+                  DetailURL: [],
+                  axisData: [],
+                };
+              }
+
+              EQInfo_Item.category = elm.category;
+              if (!elm.maxI) elm.maxI = null;
+              if (!elm.maxLgInt) elm.maxLgInt = null;
+              if (Boolean2(elm.OriginTime)) EQInfo_Item.OriginTime = elm.OriginTime;
+              if (Boolean2(elm.epiCenter)) EQInfo_Item.epiCenter = elm.epiCenter;
+              if (Boolean2(elm.M) && elm.M != "Ｍ不明" && elm.M != "NaN") EQInfo_Item.M = elm.M;
+              if (Boolean2(elm.maxI) && elm.maxI !== "?") EQInfo_Item.maxI = elm.maxI;
+              if (Boolean2(elm.maxLgInt) && elm.maxLgInt !== "?") EQInfo_Item.maxLgInt = elm.maxLgInt;
+
+              if (Array.isArray(elm.DetailURL)) {
+                elm.DetailURL.forEach(function (elm2) {
+                  if (elm2 && !EQInfo_Item.DetailURL.includes(elm2) && !EQElm.DetailURL.includes(elm2)) {
+                    EQInfo_Item.DetailURL.push(elm2);
+                  }
+                });
+              }
+              if (elm.axisData) EQInfo_Item.axisData.push(elm.axisData);
+            });
+
+            EQElm.cancel = !rawData.find(function (elm) {
+              return !elm.cancel;
+            });
+
+            if (EQElm.category !== EQInfo_Item.category) changed = true;
+            if (EQElm.EEW !== EQInfo_Item.EEW) changed = true;
+            if (EQElm.OriginTime !== EQInfo_Item.OriginTime) changed = true;
+            if (EQElm.epiCenter !== EQInfo_Item.epiCenter) changed = true;
+            if (EQElm.M !== EQInfo_Item.M) changed = true;
+            if (EQElm.maxI !== EQInfo_Item.maxI) changed = true;
+            if (EQElm.maxLgInt !== EQInfo_Item.maxLgInt) changed = true;
+            if (EQElm.DetailURL.length !== EQInfo_Item.DetailURL.length) changed = true;
+            if (EQInfo_Item.axisData) changed = true;
+
+            if (EQElm.category == "EEW" && EQInfo_Item.category != "EEW") playAudio = true;
+
+            EQElm.category = EQInfo_Item.category;
+            EQElm.EEW = EQInfo_Item.EEW;
+            EQElm.reportDateTime = EQInfo_Item.reportDateTime;
+            EQElm.OriginTime = EQInfo_Item.OriginTime;
+            EQElm.epiCenter = EQInfo_Item.epiCenter;
+            EQElm.M = EQInfo_Item.M;
+            EQElm.maxI = EQInfo_Item.maxI;
+            EQElm.maxLgInt = EQInfo_Item.maxLgInt;
+            EQElm.DetailURL = EQElm.DetailURL.concat(EQInfo_Item.DetailURL);
+            if (EQInfo_Item.axisData) EQElm.axisData = EQInfo_Item.axisData;
+
+            if (changed) {
+              UpdateEQInfoTmp.push(EQElm);
+              var i = eqInfo.jma.findIndex(function (elm2) {
+                return elm2.eventId == EQElm.eventId;
+              });
+              eqInfo.jma[i] = EQElm;
+            }
+          } else {
+            EQInfoData[data.eventId] = Object.assign({}, data);
+            EQInfoData[data.eventId].raw_data = [Object.assign({}, data)];
+
+            eqInfoTmp.push(data);
+            eqInfo.jma.push(data);
+            if (count !== 0 && data.category !== "EEW") playAudio = true;
           }
-        } else {
-          EQInfoData[data.eventId] = Object.assign({}, data);
-          EQInfoData[data.eventId].raw_data = [Object.assign({}, data)];
+        });
 
-          eqInfoTmp.push(data);
-          eqInfo.jma.push(data);
-          if (count !== 0 && data.category !== "EEW") playAudio = true;
-        }
-      });
-
-      if (eqInfoTmp.length > 0) AlertEQInfo(eqInfoTmp, "jma", false, playAudio);
-      if (UpdateEQInfoTmp.length > 0) AlertEQInfo(UpdateEQInfoTmp, "jma", true, playAudio);
-      break;
-    case "usgs":
-      dataList = dataList.sort(function (a, b) {
-        return a.OriginTime > b.OriginTime ? -1 : 1;
-      });
-      AlertEQInfo(dataList, "usgs");
-      break;
+        if (eqInfoTmp.length > 0) AlertEQInfo(eqInfoTmp, "jma", false, playAudio);
+        if (UpdateEQInfoTmp.length > 0) AlertEQInfo(UpdateEQInfoTmp, "jma", true, playAudio);
+        break;
+      case "usgs":
+        dataList = dataList.sort(function (a, b) {
+          return a.OriginTime > b.OriginTime ? -1 : 1;
+        });
+        AlertEQInfo(dataList, "usgs");
+        break;
+    }
+  } catch (err) {
+    throw new Error("地震情報データの処理（マージ）に失敗しました。エラーメッセージは以下の通りです。\n" + err);
   }
 }
 
 //時間(ms)を「～分[秒,分,時間,日]」の形にする
 function timeDifference(miliseconds) {
+  if (isNaN(miliseconds)) return "";
   if (miliseconds < 60000) {
     return { num: Math.round(miliseconds / 1000), unit: "秒" };
   } else if (miliseconds < 3600000) {
@@ -3482,129 +3491,141 @@ function speak(str) {
 
 //EEW時読み上げ文章 生成
 function GenerateEEWText(EEWData, update) {
-  if (EEWData.is_cancel) var text = config.notice.voice.EEWCancel;
-  else if (update) var text = config.notice.voice.EEWUpdate;
-  else var text = config.notice.voice.EEW;
+  try {
+    if (EEWData.is_cancel) var text = config.notice.voice.EEWCancel;
+    else if (update) var text = config.notice.voice.EEWUpdate;
+    else var text = config.notice.voice.EEW;
 
-  text = text.replaceAll("{grade}", EEWData.alertflg ? EEWData.alertflg : "");
-  text = text.replaceAll("{serial}", EEWData.serial ? EEWData.serial : "");
-  text = text.replaceAll("{final}", EEWData.is_final ? "最終報" : "");
-  text = text.replaceAll("{location}", config.home.name ? config.home.name : "現在地");
-  text = text.replaceAll("{magnitude}", EEWData.magnitude ? EEWData.magnitude : "");
-  text = text.replaceAll("{maxInt}", EEWData.maxInt ? NormalizeShindo(EEWData.maxInt, 1) : "");
-  text = text.replaceAll("{depth}", EEWData.depth ? EEWData.depth : "");
-  text = text.replaceAll("{training}", EEWData.is_training ? "訓練報。" : "");
-  text = text.replaceAll("{training2}", EEWData.is_training ? "これは訓練報です。" : "");
-  text = text.replaceAll("{region_name}", EEWData.region_name ? EEWData.region_name : "");
-  text = text.replaceAll("{report_time}", EEWData.report_time ? NormalizeDate(8, EEWData.report_time) : "");
-  text = text.replaceAll("{origin_time}", EEWData.origin_time ? NormalizeDate(8, EEWData.origin_time) : "");
-  if (EEWData.warnZones && EEWData.warnZones.length) {
-    var userSect = EEWData.warnZones.find(function (elm2) {
-      return elm2.Name == config.home.Section;
-    });
+    text = text.replaceAll("{grade}", EEWData.alertflg ? EEWData.alertflg : "");
+    text = text.replaceAll("{serial}", EEWData.serial ? EEWData.serial : "");
+    text = text.replaceAll("{final}", EEWData.is_final ? "最終報" : "");
+    text = text.replaceAll("{location}", config.home.name ? config.home.name : "現在地");
+    text = text.replaceAll("{magnitude}", EEWData.magnitude ? EEWData.magnitude : "");
+    text = text.replaceAll("{maxInt}", EEWData.maxInt ? NormalizeShindo(EEWData.maxInt, 1) : "");
+    text = text.replaceAll("{depth}", EEWData.depth ? EEWData.depth : "");
+    text = text.replaceAll("{training}", EEWData.is_training ? "訓練報。" : "");
+    text = text.replaceAll("{training2}", EEWData.is_training ? "これは訓練報です。" : "");
+    text = text.replaceAll("{region_name}", EEWData.region_name ? EEWData.region_name : "");
+    text = text.replaceAll("{report_time}", EEWData.report_time ? NormalizeDate(8, EEWData.report_time) : "");
+    text = text.replaceAll("{origin_time}", EEWData.origin_time ? NormalizeDate(8, EEWData.origin_time) : "");
+    if (EEWData.warnZones && EEWData.warnZones.length) {
+      var userSect = EEWData.warnZones.find(function (elm2) {
+        return elm2.Name == config.home.Section;
+      });
 
-    if (userSect) {
-      var userInt = config.Info.EEW.IntType == "max" ? userSect.IntTo : userSect.IntFrom;
-      text = text.replaceAll("{local_Int}", NormalizeShindo(userInt, 1));
+      if (userSect) {
+        var userInt = config.Info.EEW.IntType == "max" ? userSect.IntTo : userSect.IntFrom;
+        text = text.replaceAll("{local_Int}", NormalizeShindo(userInt, 1));
+      } else text = text.replaceAll("{local_Int}", "不明");
     } else text = text.replaceAll("{local_Int}", "不明");
-  } else text = text.replaceAll("{local_Int}", "不明");
 
-  return text;
+    return text;
+  } catch (err) {
+    return "";
+  }
 }
 //津波情報時読み上げ文章 生成
 function GenerateEQInfoText(EQData) {
-  if (EQData.category == "EEW") return ""; //EEWは専用の読み上げシステムに任せる
-  if (!EQData.epiCenter && !EQData.maxI) return; //震度も震源もわからない（壊れたデータ）をはねる
+  try {
+    if (EQData.category == "EEW") return ""; //EEWは専用の読み上げシステムに任せる
+    if (!EQData.epiCenter && !EQData.maxI) return; //震度も震源もわからない（壊れたデータ）をはねる
 
-  if (EQData.cancel) var text = config.notice.voice.EQInfoCancel;
-  else var text = config.notice.voice.EQInfo;
+    if (EQData.cancel) var text = config.notice.voice.EQInfoCancel;
+    else var text = config.notice.voice.EQInfo;
 
-  var category = EQData.category;
-  if (category == "Tsunami") category = "津波情報に付帯する地震情報";
+    var category = EQData.category;
+    if (category == "Tsunami") category = "津波情報に付帯する地震情報";
 
-  var dif = timeDifference(Number(new Date() - new Date(EQData.OriginTime)));
-  text = text.replaceAll("{category}", category ? category : "");
-  text = text.replaceAll("{training}", EQData.status == "訓練" ? "訓練報。" : "");
-  text = text.replaceAll("{training2}", EQData.status == "訓練" ? "これは訓練報です。" : "");
-  text = text.replaceAll("{report_time}", EQData.reportDateTime ? NormalizeDate(8, EQData.reportDateTime) : "");
-  text = text.replaceAll("{origin_time}", EQData.OriginTime ? NormalizeDate(8, EQData.OriginTime) : "");
-  text = text.replaceAll("{origin_time2}", EQData.OriginTime ? dif.num + dif.unit + "前" : "先ほど");
-  text = text.replaceAll("{region_name}", EQData.epiCenter ? EQData.epiCenter : "");
-  text = text.replaceAll("{magnitude}", EQData.M ? EQData.M : "");
-  text = text.replaceAll("{maxInt}", EQData.maxI ? NormalizeShindo(EQData.maxI, 1) : "");
+    var dif = timeDifference(Number(new Date() - new Date(EQData.OriginTime)));
+    text = text.replaceAll("{category}", category ? category : "");
+    text = text.replaceAll("{training}", EQData.status == "訓練" ? "訓練報。" : "");
+    text = text.replaceAll("{training2}", EQData.status == "訓練" ? "これは訓練報です。" : "");
+    text = text.replaceAll("{report_time}", EQData.reportDateTime ? NormalizeDate(8, EQData.reportDateTime) : "");
+    text = text.replaceAll("{origin_time}", EQData.OriginTime ? NormalizeDate(8, EQData.OriginTime) : "");
+    text = text.replaceAll("{origin_time2}", EQData.OriginTime ? dif.num + dif.unit + "前" : "先ほど");
+    text = text.replaceAll("{region_name}", EQData.epiCenter ? EQData.epiCenter : "");
+    text = text.replaceAll("{magnitude}", EQData.M ? EQData.M : "");
+    text = text.replaceAll("{maxInt}", EQData.maxI ? NormalizeShindo(EQData.maxI, 1) : "");
 
-  if (!EQData.epiCenter) text = text.replace(/\[.*?\]/g, "");
-  if (!EQData.maxI) text = text.replace(/\<.*?\>/g, "");
-  text = text.replace(/\[|\]|<|>/g, "");
+    if (!EQData.epiCenter) text = text.replace(/\[.*?\]/g, "");
+    if (!EQData.maxI) text = text.replace(/\<.*?\>/g, "");
+    text = text.replace(/\[|\]|<|>/g, "");
 
-  return text;
+    return text;
+  } catch (err) {
+    return "";
+  }
 }
 //津波情報時読み上げ文章 生成
 function GenerateTsunamiText(data) {
-  if (data.Torikeshi) var text = config.notice.voice.TsunamiTorikeshi;
-  else if (data.revocation || data.cancelled) var text = config.notice.voice.TsunamiRevocation;
-  else var text = config.notice.voice.Tsunami;
-  var grades = { MajorWarning: false, Warning: false, Watch: false, Yoho: false };
-  var grades_JA = { MajorWarning: "大津波警報", Warning: "津波警報", Watch: "津波注意報", Yoho: "津波予報" };
+  try {
+    if (data.Torikeshi) var text = config.notice.voice.TsunamiTorikeshi;
+    else if (data.revocation || data.cancelled) var text = config.notice.voice.TsunamiRevocation;
+    else var text = config.notice.voice.Tsunami;
+    var grades = { MajorWarning: false, Warning: false, Watch: false, Yoho: false };
+    var grades_JA = { MajorWarning: "大津波警報", Warning: "津波警報", Watch: "津波注意報", Yoho: "津波予報" };
 
-  //自地域（カッコで）　最大波高さ
-  var grade_arr = [];
-  var homeArea;
-  data.areas.forEach(function (area) {
-    if (area.grade) grades[area.grade] = true;
-    if (config.home.TsunamiSect && area.name == config.home.TsunamiSect) homeArea = area;
-  });
+    //自地域（カッコで）　最大波高さ
+    var grade_arr = [];
+    var homeArea;
+    data.areas.forEach(function (area) {
+      if (area.grade) grades[area.grade] = true;
+      if (config.home.TsunamiSect && area.name == config.home.TsunamiSect) homeArea = area;
+    });
 
-  Object.keys(grades).forEach(function (key) {
-    if (grades[key]) grade_arr.push(grades_JA[key]);
-  });
+    Object.keys(grades).forEach(function (key) {
+      if (grades[key]) grade_arr.push(grades_JA[key]);
+    });
 
-  text = text.replaceAll("{max_grade}", grade_arr[0] ? grade_arr[0] : "津波情報");
-  text = text.replaceAll("{all_grade}", grade_arr[0] ? grade_arr.join("、") : "津波情報");
-  text = text.replaceAll("{report_time}", data.issue.time ? NormalizeDate(9, data.issue.time) : "不明な時刻");
-  text = text.replaceAll("{headline}", data.headline ? data.headline : "");
+    text = text.replaceAll("{max_grade}", grade_arr[0] ? grade_arr[0] : "津波情報");
+    text = text.replaceAll("{all_grade}", grade_arr[0] ? grade_arr.join("、") : "津波情報");
+    text = text.replaceAll("{report_time}", data.issue.time ? NormalizeDate(9, data.issue.time) : "不明な時刻");
+    text = text.replaceAll("{headline}", data.headline ? data.headline : "");
 
-  if (homeArea && !homeArea.canceled) {
-    text = text.replaceAll("{home_area}", homeArea.name ? homeArea.name : "設定地点");
-    text = text.replaceAll("{home_grade}", homeArea.grade ? grades_JA[homeArea.grade] : "津波情報");
+    if (homeArea && !homeArea.canceled) {
+      text = text.replaceAll("{home_area}", homeArea.name ? homeArea.name : "設定地点");
+      text = text.replaceAll("{home_grade}", homeArea.grade ? grades_JA[homeArea.grade] : "津波情報");
 
-    var firstHeightTmp = "";
-    if (homeArea.firstHeight) firstHeightTmp = "第１波が" + NormalizeDate(9, homeArea.firstHeight) + "に予想され、";
-    else if (homeArea.firstHeightCondition == "津波到達中と推測") firstHeightTmp = "津波が到達中とみられ、";
-    else if (homeArea.firstHeightCondition == "第１波の到達を確認") firstHeightTmp = "既に第１波が到達し、";
-    else firstHeightTmp = "";
-    text = text.replaceAll("{first_height1}", firstHeightTmp);
+      var firstHeightTmp = "";
+      if (homeArea.firstHeight) firstHeightTmp = "第１波が" + NormalizeDate(9, homeArea.firstHeight) + "に予想され、";
+      else if (homeArea.firstHeightCondition == "津波到達中と推測") firstHeightTmp = "津波が到達中とみられ、";
+      else if (homeArea.firstHeightCondition == "第１波の到達を確認") firstHeightTmp = "既に第１波が到達し、";
+      else firstHeightTmp = "";
+      text = text.replaceAll("{first_height1}", firstHeightTmp);
 
-    var firstHeightTmp2 = "";
-    if (homeArea.firstHeight) firstHeightTmp2 = "到達予想時刻は" + NormalizeDate(9, homeArea.firstHeight);
-    else if (homeArea.firstHeightCondition == "津波到達中と推測") firstHeightTmp2 = "津波到達中と推測";
-    else if (homeArea.firstHeightCondition == "第１波の到達を確認") firstHeightTmp2 = "第１波の到達を確認";
-    else firstHeightTmp2 = "到達時刻は不明";
-    text = text.replaceAll("{first_height2}", firstHeightTmp2);
+      var firstHeightTmp2 = "";
+      if (homeArea.firstHeight) firstHeightTmp2 = "到達予想時刻は" + NormalizeDate(9, homeArea.firstHeight);
+      else if (homeArea.firstHeightCondition == "津波到達中と推測") firstHeightTmp2 = "津波到達中と推測";
+      else if (homeArea.firstHeightCondition == "第１波の到達を確認") firstHeightTmp2 = "第１波の到達を確認";
+      else firstHeightTmp2 = "到達時刻は不明";
+      text = text.replaceAll("{first_height2}", firstHeightTmp2);
 
-    var immediately = "";
-    if (homeArea.firstHeightCondition == "ただちに津波来襲と予測") immediately = "ただちに津波が来襲すると予測されます。";
-    text = text.replaceAll("{immediately}", immediately);
+      var immediately = "";
+      if (homeArea.firstHeightCondition == "ただちに津波来襲と予測") immediately = "ただちに津波が来襲すると予測されます。";
+      text = text.replaceAll("{immediately}", immediately);
 
-    var MaxHeightTmp = "";
-    if (homeArea.maxHeight == "巨大") MaxHeightTmp = "巨大な津波";
-    else if (homeArea.maxHeight == "高い") MaxHeightTmp = "高い津波";
-    else if (homeArea.maxHeight) MaxHeightTmp = "今後最大" + homeArea.maxHeight.replace("m", "メートル") + "の津波";
-    else if (!homeArea.maxHeight && homeArea.grade == "Yoho") MaxHeightTmp = "若干の海面変動";
-    else MaxHeightTmp = "高さ不明の津波";
-    text = text.replaceAll("{max_height1}", MaxHeightTmp);
+      var MaxHeightTmp = "";
+      if (homeArea.maxHeight == "巨大") MaxHeightTmp = "巨大な津波";
+      else if (homeArea.maxHeight == "高い") MaxHeightTmp = "高い津波";
+      else if (homeArea.maxHeight) MaxHeightTmp = "今後最大" + homeArea.maxHeight.replace("m", "メートル") + "の津波";
+      else if (!homeArea.maxHeight && homeArea.grade == "Yoho") MaxHeightTmp = "若干の海面変動";
+      else MaxHeightTmp = "高さ不明の津波";
+      text = text.replaceAll("{max_height1}", MaxHeightTmp);
 
-    var MaxHeightTmp2 = "";
-    if (homeArea.maxHeight == "巨大") MaxHeightTmp2 = "巨大";
-    else if (homeArea.maxHeight == "高い") MaxHeightTmp2 = "高い";
-    else if (homeArea.maxHeight) MaxHeightTmp2 = homeArea.maxHeight.replace("m", "メートル");
-    else if (!homeArea.maxHeight && homeArea.grade == "Yoho") MaxHeightTmp2 = "若干の海面変動";
-    else MaxHeightTmp2 = "不明";
-    text = text.replaceAll("{max_height2}", MaxHeightTmp2);
-  } else text = text.replace(/\[.*?\]/g, "");
+      var MaxHeightTmp2 = "";
+      if (homeArea.maxHeight == "巨大") MaxHeightTmp2 = "巨大";
+      else if (homeArea.maxHeight == "高い") MaxHeightTmp2 = "高い";
+      else if (homeArea.maxHeight) MaxHeightTmp2 = homeArea.maxHeight.replace("m", "メートル");
+      else if (!homeArea.maxHeight && homeArea.grade == "Yoho") MaxHeightTmp2 = "若干の海面変動";
+      else MaxHeightTmp2 = "不明";
+      text = text.replaceAll("{max_height2}", MaxHeightTmp2);
+    } else text = text.replace(/\[.*?\]/g, "");
 
-  text = text.replace(/\[|\]/g, "");
-  return text;
+    text = text.replace(/\[|\]/g, "");
+    return text;
+  } catch (err) {
+    return "";
+  }
 }
 
 //音声再生(WorkerWindow連携)
@@ -3644,165 +3665,177 @@ function ParseJSON(str) {
 
 //日時フォーマット
 function NormalizeDate(type, date) {
-  if (!date) date = new Date();
-  else date = new Date(date);
-  if (Number.isNaN(date.getTime())) return "";
+  try {
+    if (!date) date = new Date();
+    else date = new Date(date);
+    if (Number.isNaN(date.getTime())) return "";
 
-  var YYYY = String(date.getFullYear());
-  var MM = String(date.getMonth() + 1).padStart(2, "0");
-  var DD = String(date.getDate()).padStart(2, "0");
-  var hh = String(date.getHours()).padStart(2, "0");
-  var mm = String(date.getMinutes()).padStart(2, "0");
-  var ss = String(date.getSeconds()).padStart(2, "0");
-  var M = String(date.getMonth() + 1);
-  var D = String(date.getDate());
-  var h = String(date.getHours());
-  var m = String(date.getMinutes());
-  var s = String(date.getSeconds());
-  var isToday = date.toDateString() == new Date().toDateString();
-  switch (type) {
-    case 1:
-      return YYYY + MM + DD + hh + mm + ss;
-    case 2:
-      return YYYY + MM + DD;
-    case 3:
-      return YYYY + "/" + MM + "/" + DD + " " + hh + ":" + mm + ":" + ss;
-    case 4:
-      return YYYY + "/" + MM + "/" + DD + " " + hh + ":" + mm;
-    case 5:
-      return D + "日 " + hh + ":" + mm;
-    case 6:
-      return hh + ":" + mm;
-    case 7:
-      return hh + "時" + mm + "分" + ss + "秒";
-    case 8:
-      return h + "時" + m + "分" + s + "秒";
-    case 9:
-      var date_str = "";
-      if (!isToday) date_str = D + "日 ";
-      return date_str + h + "時" + m + "分";
-    case 10:
-      var date_str = "";
-      if (!isToday) date_str = D + "日 ";
-      return date_str + hh + ":" + mm;
-    default:
-      return new Date().toLocaleString("ja-jp");
+    var YYYY = String(date.getFullYear());
+    var MM = String(date.getMonth() + 1).padStart(2, "0");
+    var DD = String(date.getDate()).padStart(2, "0");
+    var hh = String(date.getHours()).padStart(2, "0");
+    var mm = String(date.getMinutes()).padStart(2, "0");
+    var ss = String(date.getSeconds()).padStart(2, "0");
+    var M = String(date.getMonth() + 1);
+    var D = String(date.getDate());
+    var h = String(date.getHours());
+    var m = String(date.getMinutes());
+    var s = String(date.getSeconds());
+    var isToday = date.toDateString() == new Date().toDateString();
+    switch (type) {
+      case 1:
+        return YYYY + MM + DD + hh + mm + ss;
+      case 2:
+        return YYYY + MM + DD;
+      case 3:
+        return YYYY + "/" + MM + "/" + DD + " " + hh + ":" + mm + ":" + ss;
+      case 4:
+        return YYYY + "/" + MM + "/" + DD + " " + hh + ":" + mm;
+      case 5:
+        return D + "日 " + hh + ":" + mm;
+      case 6:
+        return hh + ":" + mm;
+      case 7:
+        return hh + "時" + mm + "分" + ss + "秒";
+      case 8:
+        return h + "時" + m + "分" + s + "秒";
+      case 9:
+        var date_str = "";
+        if (!isToday) date_str = D + "日 ";
+        return date_str + h + "時" + m + "分";
+      case 10:
+        var date_str = "";
+        if (!isToday) date_str = D + "日 ";
+        return date_str + hh + ":" + mm;
+      default:
+        return new Date().toLocaleString("ja-jp");
+    }
+  } catch (err) {
+    return "";
   }
 }
 //震度の形式変換
 function NormalizeShindo(str, responseType) {
-  var ShindoTmp;
-  if (str === null || str === undefined) ShindoTmp = 11;
-  else if (isNaN(str)) {
-    str = String(str)
-      .replace(/[０-９]/g, function (s) {
-        return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
-      })
-      .replaceAll("＋", "+")
-      .replaceAll("－", "-")
-      .replaceAll("強", "+")
-      .replaceAll("弱", "-")
-      .replace(/\s+/g, "");
-    switch (str) {
-      case "1":
-      case "10":
-        ShindoTmp = 1;
-        break;
-      case "2":
-      case "20":
-        ShindoTmp = 2;
-        break;
-      case "3":
-      case "30":
-        ShindoTmp = 3;
-        break;
-      case "4":
-      case "40":
-        ShindoTmp = 4;
-        break;
-      case "5-":
-      case "45":
-        ShindoTmp = 5;
-        break;
-      case "5+":
-      case "50":
-        ShindoTmp = 6;
-        break;
-      case "6-":
-      case "55":
-        ShindoTmp = 7;
-        break;
-      case "6+":
-      case "60":
-        ShindoTmp = 8;
-        break;
-      case "7":
-      case "70":
-        ShindoTmp = 9;
-        break;
-      case "震度5-以上未入電":
-      case "5+?":
-        ShindoTmp = 10;
-        break;
-      case "-1":
-      case "?":
-      case "不明":
-      default:
-        ShindoTmp = 11;
+  try {
+    var ShindoTmp;
+    if (str === null || str === undefined) ShindoTmp = 11;
+    else if (isNaN(str)) {
+      str = String(str)
+        .replace(/[０-９]/g, function (s) {
+          return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
+        })
+        .replaceAll("＋", "+")
+        .replaceAll("－", "-")
+        .replaceAll("強", "+")
+        .replaceAll("弱", "-")
+        .replace(/\s+/g, "");
+      switch (str) {
+        case "1":
+        case "10":
+          ShindoTmp = 1;
+          break;
+        case "2":
+        case "20":
+          ShindoTmp = 2;
+          break;
+        case "3":
+        case "30":
+          ShindoTmp = 3;
+          break;
+        case "4":
+        case "40":
+          ShindoTmp = 4;
+          break;
+        case "5-":
+        case "45":
+          ShindoTmp = 5;
+          break;
+        case "5+":
+        case "50":
+          ShindoTmp = 6;
+          break;
+        case "6-":
+        case "55":
+          ShindoTmp = 7;
+          break;
+        case "6+":
+        case "60":
+          ShindoTmp = 8;
+          break;
+        case "7":
+        case "70":
+          ShindoTmp = 9;
+          break;
+        case "震度5-以上未入電":
+        case "5+?":
+          ShindoTmp = 10;
+          break;
+        case "-1":
+        case "?":
+        case "不明":
+        default:
+          ShindoTmp = 11;
+      }
+    } else {
+      if (str < 0.5) ShindoTmp = 0;
+      else if (str < 1.5) ShindoTmp = 1;
+      else if (str < 2.5) ShindoTmp = 2;
+      else if (str < 3.5) ShindoTmp = 3;
+      else if (str < 4.5) ShindoTmp = 4;
+      else if (str < 5) ShindoTmp = 5;
+      else if (str < 5.5) ShindoTmp = 6;
+      else if (str < 6) ShindoTmp = 7;
+      else if (str < 6.5) ShindoTmp = 8;
+      else if (6.5 <= str) ShindoTmp = 9;
+      else ShindoTmp = 11;
     }
-  } else {
-    if (str < 0.5) ShindoTmp = 0;
-    else if (str < 1.5) ShindoTmp = 1;
-    else if (str < 2.5) ShindoTmp = 2;
-    else if (str < 3.5) ShindoTmp = 3;
-    else if (str < 4.5) ShindoTmp = 4;
-    else if (str < 5) ShindoTmp = 5;
-    else if (str < 5.5) ShindoTmp = 6;
-    else if (str < 6) ShindoTmp = 7;
-    else if (str < 6.5) ShindoTmp = 8;
-    else if (6.5 <= str) ShindoTmp = 9;
-    else ShindoTmp = 11;
+    switch (responseType) {
+      case 1:
+        var ConvTable = ["0", "1", "2", "3", "4", "5弱", "5強", "6弱", "6強", "7", "５弱以上未入電", "不明"];
+        break;
+      case 2:
+        var ConvTable = [
+          [config.color.Shindo["0"].background, config.color.Shindo["0"].color],
+          [config.color.Shindo["1"].background, config.color.Shindo["1"].color],
+          [config.color.Shindo["2"].background, config.color.Shindo["2"].color],
+          [config.color.Shindo["3"].background, config.color.Shindo["3"].color],
+          [config.color.Shindo["4"].background, config.color.Shindo["4"].color],
+          [config.color.Shindo["5m"].background, config.color.Shindo["5m"].color],
+          [config.color.Shindo["5p"].background, config.color.Shindo["5p"].color],
+          [config.color.Shindo["6m"].background, config.color.Shindo["6m"].color],
+          [config.color.Shindo["6p"].background, config.color.Shindo["6p"].color],
+          [config.color.Shindo["7"].background, config.color.Shindo["7"].color],
+          [config.color.Shindo["5p?"].background, config.color.Shindo["5p?"].color],
+          [config.color.Shindo["?"].background, config.color.Shindo["?"].color],
+        ];
+        break;
+      case 3:
+        var ConvTable = [null, "1", "2", "3", "4", "5m", "5p", "6m", "6p", "7", "5p?", null];
+        break;
+      case 4:
+        var ConvTable = [0, 1, 2, 3, 4, 4.5, 5, 5.5, 6, 7, 4.5, null];
+        break;
+      case 5:
+        var ConvTable = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 4.5, 0];
+        break;
+      case 0:
+      default:
+        var ConvTable = ["0", "1", "2", "3", "4", "5-", "5+", "6-", "6+", "7", "未", "?"];
+        break;
+    }
+    return ConvTable[ShindoTmp];
+  } catch (err) {
+    return "";
   }
-  switch (responseType) {
-    case 1:
-      var ConvTable = ["0", "1", "2", "3", "4", "5弱", "5強", "6弱", "6強", "7", "５弱以上未入電", "不明"];
-      break;
-    case 2:
-      var ConvTable = [
-        [config.color.Shindo["0"].background, config.color.Shindo["0"].color],
-        [config.color.Shindo["1"].background, config.color.Shindo["1"].color],
-        [config.color.Shindo["2"].background, config.color.Shindo["2"].color],
-        [config.color.Shindo["3"].background, config.color.Shindo["3"].color],
-        [config.color.Shindo["4"].background, config.color.Shindo["4"].color],
-        [config.color.Shindo["5m"].background, config.color.Shindo["5m"].color],
-        [config.color.Shindo["5p"].background, config.color.Shindo["5p"].color],
-        [config.color.Shindo["6m"].background, config.color.Shindo["6m"].color],
-        [config.color.Shindo["6p"].background, config.color.Shindo["6p"].color],
-        [config.color.Shindo["7"].background, config.color.Shindo["7"].color],
-        [config.color.Shindo["5p?"].background, config.color.Shindo["5p?"].color],
-        [config.color.Shindo["?"].background, config.color.Shindo["?"].color],
-      ];
-      break;
-    case 3:
-      var ConvTable = [null, "1", "2", "3", "4", "5m", "5p", "6m", "6p", "7", "5p?", null];
-      break;
-    case 4:
-      var ConvTable = [0, 1, 2, 3, 4, 4.5, 5, 5.5, 6, 7, 4.5, null];
-      break;
-    case 5:
-      var ConvTable = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 4.5, 0];
-      break;
-    case 0:
-    default:
-      var ConvTable = ["0", "1", "2", "3", "4", "5-", "5+", "6-", "6+", "7", "未", "?"];
-      break;
-  }
-  return ConvTable[ShindoTmp];
 }
 
 //２地点の緯度経度から距離（km）を算出
 function geosailing(latA, lngA, latB, lngB) {
-  return Math.acos(Math.sin(Math.atan(Math.tan(latA * (Math.PI / 180)))) * Math.sin(Math.atan(Math.tan(latB * (Math.PI / 180)))) + Math.cos(Math.atan(Math.tan(latA * (Math.PI / 180)))) * Math.cos(Math.atan(Math.tan(latB * (Math.PI / 180)))) * Math.cos(lngA * (Math.PI / 180) - lngB * (Math.PI / 180))) * 6371.008;
+  try {
+    return Math.acos(Math.sin(Math.atan(Math.tan(latA * (Math.PI / 180)))) * Math.sin(Math.atan(Math.tan(latB * (Math.PI / 180)))) + Math.cos(Math.atan(Math.tan(latA * (Math.PI / 180)))) * Math.cos(Math.atan(Math.tan(latB * (Math.PI / 180)))) * Math.cos(lngA * (Math.PI / 180) - lngB * (Math.PI / 180))) * 6371.008;
+  } catch (err) {
+    return 0;
+  }
 }
 
 //連想配列オブジェクトのマージ
@@ -3821,11 +3854,15 @@ function mergeDeeply(target, source, opts) {
     }
     return result;
   } catch (err) {
-    throw new Error("JSONのマージでエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
+    throw new Error("内部の情報処理でエラーが発生しました。(JSONのマージ)エラーメッセージは以下の通りです。\n" + err);
   }
 }
 function ConvertJST(time) {
-  return new Date(time.setHours(time.getHours() + 9));
+  try {
+    return new Date(time.setHours(time.getHours() + 9));
+  } catch (err) {
+    throw new Error("内部の情報処理でエラーが発生しました。(タイムゾーンの変換)エラーメッセージは以下の通りです。\n" + err);
+  }
 }
 function depthFilter(depth) {
   if (!isFinite(depth) || depth < 0) return 0;
