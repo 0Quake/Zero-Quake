@@ -908,6 +908,27 @@ function init() {
             features: [],
           },
         },
+        snet_points: {
+          type: "geojson",
+          data: {
+            type: "FeatureCollection",
+            features: [],
+          },
+        },
+        TREMRTS_points: {
+          type: "geojson",
+          data: {
+            type: "FeatureCollection",
+            features: [],
+          },
+        },
+        SEISJS_points: {
+          type: "geojson",
+          data: {
+            type: "FeatureCollection",
+            features: [],
+          },
+        },
       },
       layers: [
         {
@@ -1131,7 +1152,33 @@ function init() {
             "circle-stroke-color": ["match", ["get", "detectLv"], 0, "transparent", 1, "#cb732b", 2, "#cb2b2b", "#0000"],
           },
         },
-
+        {
+          id: "snet_points",
+          type: "circle",
+          source: "snet_points",
+          paint: {
+            "circle-color": ["rgb", ["at", 0, ["get", "rgb"]], ["at", 1, ["get", "rgb"]], ["at", 2, ["get", "rgb"]]],
+            "circle-radius": ["interpolate", ["linear"], ["zoom"], 2, 1, 5, 3.75, 15, 33.75],
+          },
+        },
+        {
+          id: "TREMRTS_points",
+          type: "circle",
+          source: "TREMRTS_points",
+          paint: {
+            "circle-color": ["rgb", ["at", 0, ["get", "rgb"]], ["at", 1, ["get", "rgb"]], ["at", 2, ["get", "rgb"]]],
+            "circle-radius": ["interpolate", ["linear"], ["zoom"], 2, 1, 5, 3.75, 15, 33.75],
+          },
+        },
+        {
+          id: "SEISJS_points",
+          type: "circle",
+          source: "SEISJS_points",
+          paint: {
+            "circle-color": ["rgb", ["at", 0, ["get", "rgb"]], ["at", 1, ["get", "rgb"]], ["at", 2, ["get", "rgb"]]],
+            "circle-radius": ["interpolate", ["linear"], ["zoom"], 2, 1, 5, 3.75, 15, 33.75],
+          },
+        },
         {
           id: "注記シンボル付きソート順100以上",
           type: "symbol",
@@ -1191,6 +1238,27 @@ function init() {
     }
   };
   map.on("click", "knet_points", nied_popup);
+  map.on("click", "snet_points", nied_popup);
+  map.on("click", "TREMRTS_points", function (e) {
+    elm = e.features[0].properties;
+    if (kmoni_popup[elm.Code] && kmoni_popup[elm.Code].isOpen()) return;
+    var popupContent = generatePopupContent_TREM(elm);
+    if (kmoni_popup[elm.Code]) {
+      kmoni_popup[elm.Code].setHTML(popupContent).addTo(map);
+    } else {
+      kmoni_popup[elm.Code] = new maplibregl.Popup().setLngLat(e.features[0].geometry.coordinates).setHTML(popupContent).addTo(map);
+    }
+  });
+  map.on("click", "SEISJS_points", function (e) {
+    elm = e.features[0].properties;
+    if (kmoni_popup[elm.Code] && kmoni_popup[elm.Code].isOpen()) return;
+    var popupContent = generatePopupContent_SEISJS(elm);
+    if (kmoni_popup[elm.Code]) {
+      kmoni_popup[elm.Code].setHTML(popupContent).addTo(map);
+    } else {
+      kmoni_popup[elm.Code] = new maplibregl.Popup().setLngLat(e.features[0].geometry.coordinates).setHTML(popupContent).addTo(map);
+    }
+  });
 
   map.on("sourcedataloading", (e) => {
     var hinanjoCheck = config.data.overlay.includes("hinanjo");
@@ -1419,20 +1487,20 @@ function addPointMarker(elm) {
 var pointData;
 var kmoni_popup = {};
 function kmoniMapUpdate(dataTmp, type) {
-  if (!dataTmp.data) return;
+  if (!dataTmp.data || background) return;
+  geojson = {
+    type: "FeatureCollection",
+    crs: {
+      type: "name",
+      properties: {
+        name: "urn:ogc:def:crs:OGC:1.3:CRS84",
+      },
+    },
+    features: [],
+  };
+
   if (type == "knet") {
     knetMapData = dataTmp;
-    geojson = {
-      type: "FeatureCollection",
-      crs: {
-        type: "name",
-        properties: {
-          name: "urn:ogc:def:crs:OGC:1.3:CRS84",
-        },
-      },
-      features: [],
-    };
-
     dataTmp.data.forEach(function (elm) {
       if (elm.data) {
         geojson.features.push({
@@ -1468,26 +1536,32 @@ function kmoniMapUpdate(dataTmp, type) {
   } else {
     snetMapData = dataTmp;
 
-    for (elm of dataTmp.data) {
-      pointData = points[elm.Code];
+    dataTmp.data.forEach(function (elm) {
       if (elm.data) {
-        if (!pointData) pointData = points[elm.Code] = addPointMarker(elm);
-        pointData.markerElm.style.background = "rgb(" + elm.rgb.join(",") + ")";
-        if (elm.detect) {
-          pointData.markerElm.classList.add("detectingMarker");
-          if (elm.detect2) pointData.markerElm.classList.add("strongDetectingMarker");
-        } else pointData.markerElm.classList.remove("strongDetectingMarker", "detectingMarker");
-
-        pointData.popupContent = "<h3 class='PointName' style='border-bottom-color:rgb(" + elm.rgb.join(",") + ")'>" + (elm.Name ? elm.Name : "") + "<span>" + elm.Type + "_" + elm.Code + "</span></h3>" + (elm.detect ? "<h4 class='detecting'>地震検知中</h4>" : "");
-        if (pointData.popup.isOpen()) pointData.popup.setHTML(pointData.popupContent);
-      } else if (pointData) {
-        pointData.markerElm.style.background = "rgba(128,128,128,0.5)";
-        pointData.markerElm.classList.remove("strongDetectingMarker", "detectingMarker");
-
-        pointData.popupContent = "<h3 class='PointName' style='border-bottom:solid 2px rgba(128,128,128,0.5)'>" + (elm.Name ? elm.Name : "") + "<span>" + elm.Type + "_" + elm.Code + "</span></h3>";
-        if (pointData.popup.isOpen()) pointData.popup.setHTML(pointData.popupContent);
+        geojson.features.push({
+          type: "Feature",
+          properties: {
+            Code: elm.Code,
+            IsSuspended: elm.IsSuspended,
+            Name: elm.Name,
+            Region: elm.Region,
+            Type: elm.Type,
+            data: elm.data,
+            pga: elm.pga,
+            rgb: elm.rgb,
+            shindo: elm.shindo,
+          },
+          geometry: {
+            type: "Point",
+            coordinates: [elm.Location.Longitude, elm.Location.Latitude],
+          },
+        });
       }
-    }
+      if (kmoni_popup[elm.Code] && kmoni_popup[elm.Code].isOpen()) {
+        kmoni_popup[elm.Code].setHTML(generatePopupContent_K(elm));
+      }
+    });
+    if (map) map.getSource("snet_points").setData(geojson);
   }
 }
 function generatePopupContent_K(params) {
@@ -1499,31 +1573,77 @@ function generatePopupContent_K(params) {
   }
 }
 
+function generatePopupContent_TREM(params) {
+  var shindoColor = NormalizeShindo(params.shindo, 2);
+  if (!Array.isArray(params.rgb)) params.rgb = JSON.parse(params.rgb);
+  return `<h3 class='PointName' style='border-bottom-color:rgb(${params.rgb.join(",")})'><span>${params.Type + "_" + params.Code}</span></h3><div class='popupContentWrap'><div class='obsShindoWrap' style='background:${shindoColor[0]};color:${shindoColor[1]};'>震度 ${NormalizeShindo(params.shindo, 1)}<span>${params.shindo.toFixed(2)}</span></div><div class='obsPGAWrap'>PGA ${(Math.floor(params.PGA * 100) / 100).toFixed(2)}</div></div>`;
+}
+
 var TREMRTS_points = {};
 function TREMRTSUpdate(dataTmp) {
   if (!background) {
-    for (key of Object.keys(dataTmp)) {
+    Object.keys(dataTmp).forEach(function (key) {
       elm = dataTmp[key];
-      pointData = TREMRTS_points[elm.Code];
-      var firstTime;
-      if (!pointData) {
-        pointData = TREMRTS_points[elm.Code] = addPointMarker(elm);
-        firstTime = true;
+      geojson.features.push({
+        type: "Feature",
+        properties: {
+          Code: elm.Code,
+          IsSuspended: elm.IsSuspended,
+          Name: elm.Name,
+          Region: elm.Region,
+          Type: elm.Type,
+          PGA: elm.PGA,
+          rgb: elm.rgb,
+          shindo: elm.shindo,
+        },
+        geometry: {
+          type: "Point",
+          coordinates: [elm.Location.Longitude, elm.Location.Latitude],
+        },
+      });
+      if (kmoni_popup[elm.Code] && kmoni_popup[elm.Code].isOpen()) {
+        kmoni_popup[elm.Code].setHTML(generatePopupContent_TREM(elm));
       }
-      if (pointData.rgb.join("") != elm.rgb.join("") || firstTime) {
-        pointData.markerElm.style.background = "rgb(" + elm.rgb.join(",") + ")";
-        var shindoColor = NormalizeShindo(elm.shindo, 2);
-        pointData.popupContent = `<h3 class='PointName' style='border-bottom-color:rgb(${elm.rgb.join(",")})'><span>${elm.Type + "_" + elm.Code}</span></h3><div class='popupContentWrap'><div class='obsShindoWrap' style='background:${shindoColor[0]};color:${shindoColor[1]};'>震度 ${NormalizeShindo(elm.shindo, 1)}<span>${elm.shindo.toFixed(2)}</span></div><div class='obsPGAWrap'>PGA ${(Math.floor(elm.PGA * 100) / 100).toFixed(2)}</div></div>`;
-        if (pointData.popup.isOpen()) pointData.popup.setHTML(pointData.popupContent);
-      }
-      pointData.rgb = elm.rgb;
-    }
+    });
+    if (map) map.getSource("TREMRTS_points").setData(geojson);
   }
+}
+
+function generatePopupContent_SEISJS(params) {
+  var shindoColor = NormalizeShindo(params.shindo, 2);
+  if (!Array.isArray(params.rgb)) params.rgb = JSON.parse(params.rgb);
+  return `<h3 class='PointName' style='border-bottom-color:rgb(${params.rgb.join(",")})'>${params.Name}<span>${params.Type}</span></h3><div class='popupContentWrap'><div class='obsShindoWrap' style='background:${shindoColor[0]};color:${shindoColor[1]};'>震度 ${NormalizeShindo(params.shindo, 1)}<span>${params.shindo.toFixed(2)}</span></div><div class='obsPGAWrap'>PGA ${(Math.floor(params.PGA * 100) / 100).toFixed(2)}</div></div>`;
 }
 
 var SeisJS_points = {};
 function SeisJSUpdate(dataTmp) {
   if (!background) {
+    Object.keys(dataTmp).forEach(function (key) {
+      elm = dataTmp[key];
+      geojson.features.push({
+        type: "Feature",
+        properties: {
+          Code: elm.Code,
+          IsSuspended: elm.IsSuspended,
+          Name: elm.Name,
+          Region: elm.Region,
+          Type: elm.Type,
+          PGA: elm.PGA,
+          rgb: elm.rgb,
+          shindo: elm.shindo,
+        },
+        geometry: {
+          type: "Point",
+          coordinates: [elm.Location.Longitude, elm.Location.Latitude],
+        },
+      });
+      if (kmoni_popup[elm.Code] && kmoni_popup[elm.Code].isOpen()) {
+        kmoni_popup[elm.Code].setHTML(generatePopupContent_SEISJS(elm));
+      }
+    });
+    if (map) map.getSource("SEISJS_points").setData(geojson);
+
+    return;
     for (key of Object.keys(dataTmp)) {
       elm = dataTmp[key];
       if (elm.Location.Longitude == 0 && elm.Location.Latitude == 0) return;
