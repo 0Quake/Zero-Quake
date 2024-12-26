@@ -270,11 +270,20 @@
 }
 .PointName {
   border-bottom: solid 2px transparent;
+  white-space: nowrap;
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .PointName span {
   float: right;
   font-size: 11px;
   font-weight: normal;
+  max-width: 130px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  margin-left: 5px;
   color: #ccc;
 }
 .popupOpen .PointPopup {

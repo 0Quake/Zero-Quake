@@ -685,15 +685,17 @@ var overlayCount = 0;
 function overlaySelect(layerName, checked) {
   var visibility = checked ? "visible" : "none";
   if (layerName == "kmoni_points") {
+    overlaySelect("knet_points", checked);
+    overlaySelect("snet_points", checked);
+    overlaySelect("TREMRTS_points", checked);
+    overlaySelect("SEISJS_points", checked);
+
     config.data.kmoni_points_show = checked;
     window.electronAPI.messageReturn({
       action: "ChangeConfig",
       from: "Other",
       data: config,
     });
-
-    if (checked) document.getElementById("mapcontainer").classList.remove("kmoni_hide");
-    else document.getElementById("mapcontainer").classList.add("kmoni_hide");
     return;
   }
   if (layerName == "hinanjo") {
@@ -720,14 +722,6 @@ function overlaySelect(layerName, checked) {
     } else if (layerName == "over4") {
       over4_visiblity = checked;
       document.getElementById("legend2").style.display = over3_visiblity || over4_visiblity ? "inline-block" : "none";
-    }
-
-    if (!tilemapActive && overlayCount == 0) {
-      map.setLayoutProperty("basemap_fill", "visibility", "visible");
-      map.setLayoutProperty("worldmap_fill", "visibility", "visible");
-    } else {
-      map.setLayoutProperty("basemap_fill", "visibility", "none");
-      map.setLayoutProperty("worldmap_fill", "visibility", "none");
     }
   }
   var selectedLayer = [];
@@ -964,42 +958,6 @@ function init() {
           layout: { visibility: "none" },
         },
         {
-          id: "over0",
-          type: "raster",
-          source: "over0",
-          layout: { visibility: "none" },
-        },
-        {
-          id: "over1",
-          type: "raster",
-          source: "over1",
-          layout: { visibility: "none" },
-        },
-        {
-          id: "over2",
-          type: "raster",
-          source: "over2",
-          layout: { visibility: "none" },
-        },
-        {
-          id: "over3",
-          type: "raster",
-          source: "over3",
-          layout: { visibility: "none" },
-        },
-        {
-          id: "over4",
-          type: "raster",
-          source: "over4",
-          layout: { visibility: "none" },
-        },
-        {
-          id: "over5",
-          type: "raster",
-          source: "over5",
-          layout: { visibility: "none" },
-        },
-        {
           id: "tsunami_Yoho",
           type: "line",
           source: "tsunami",
@@ -1066,6 +1024,42 @@ function init() {
             "fill-color": "#333",
             "fill-opacity": 1,
           },
+        },
+        {
+          id: "over0",
+          type: "raster",
+          source: "over0",
+          layout: { visibility: "none" },
+        },
+        {
+          id: "over1",
+          type: "raster",
+          source: "over1",
+          layout: { visibility: "none" },
+        },
+        {
+          id: "over2",
+          type: "raster",
+          source: "over2",
+          layout: { visibility: "none" },
+        },
+        {
+          id: "over3",
+          type: "raster",
+          source: "over3",
+          layout: { visibility: "none" },
+        },
+        {
+          id: "over4",
+          type: "raster",
+          source: "over4",
+          layout: { visibility: "none" },
+        },
+        {
+          id: "over5",
+          type: "raster",
+          source: "over5",
+          layout: { visibility: "none" },
         },
         {
           id: "basemap_LINE",
@@ -1145,6 +1139,7 @@ function init() {
           id: "knet_points",
           type: "circle",
           source: "knet_points",
+          layout: { visibility: config.data.kmoni_points_show ? "visible" : "none" },
           paint: {
             "circle-color": ["rgb", ["at", 0, ["get", "rgb"]], ["at", 1, ["get", "rgb"]], ["at", 2, ["get", "rgb"]]],
             "circle-radius": ["interpolate", ["linear"], ["zoom"], 2, 1, 5, 3.75, 15, 33.75],
@@ -1156,6 +1151,7 @@ function init() {
           id: "snet_points",
           type: "circle",
           source: "snet_points",
+          layout: { visibility: config.data.kmoni_points_show ? "visible" : "none" },
           paint: {
             "circle-color": ["rgb", ["at", 0, ["get", "rgb"]], ["at", 1, ["get", "rgb"]], ["at", 2, ["get", "rgb"]]],
             "circle-radius": ["interpolate", ["linear"], ["zoom"], 2, 1, 5, 3.75, 15, 33.75],
@@ -1165,6 +1161,7 @@ function init() {
           id: "TREMRTS_points",
           type: "circle",
           source: "TREMRTS_points",
+          layout: { visibility: config.data.kmoni_points_show ? "visible" : "none" },
           paint: {
             "circle-color": ["rgb", ["at", 0, ["get", "rgb"]], ["at", 1, ["get", "rgb"]], ["at", 2, ["get", "rgb"]]],
             "circle-radius": ["interpolate", ["linear"], ["zoom"], 2, 1, 5, 3.75, 15, 33.75],
@@ -1174,6 +1171,7 @@ function init() {
           id: "SEISJS_points",
           type: "circle",
           source: "SEISJS_points",
+          layout: { visibility: config.data.kmoni_points_show ? "visible" : "none" },
           paint: {
             "circle-color": ["rgb", ["at", 0, ["get", "rgb"]], ["at", 1, ["get", "rgb"]], ["at", 2, ["get", "rgb"]]],
             "circle-radius": ["interpolate", ["linear"], ["zoom"], 2, 1, 5, 3.75, 15, 33.75],
@@ -1240,6 +1238,7 @@ function init() {
   map.on("click", "knet_points", nied_popup);
   map.on("click", "snet_points", nied_popup);
   map.on("click", "TREMRTS_points", function (e) {
+    console.log("aaaaaaaaaa", e.features[0]);
     elm = e.features[0].properties;
     if (kmoni_popup[elm.Code] && kmoni_popup[elm.Code].isOpen()) return;
     var popupContent = generatePopupContent_TREM(elm);
@@ -1468,34 +1467,13 @@ function returnToUserPosition() {
   if (userZoom) map.zoomTo(userZoom, { animate: false });
 }
 
-//観測点マーカー追加
-function addPointMarker(elm) {
-  var codeEscaped = elm.Code.replace(".", "_");
-
-  const el = document.createElement("div");
-  el.classList.add("marker-circle", "KmoniPoint_" + codeEscaped);
-  if (elm.Type == "S-net" || elm.Type == "Sagami") el.classList.add("marker-circle-S-net");
-  elm.popupContent = "";
-  elm.popup = new maplibregl.Popup({ offset: 10 }).on("open", () => {
-    elm.popup.setHTML(elm.popupContent);
-  });
-  elm.marker = new maplibregl.Marker({ element: el }).setLngLat([elm.Location.Longitude, elm.Location.Latitude]).setPopup(elm.popup).addTo(map);
-  elm.markerElm = el;
-  return elm;
-}
 //観測点情報更新
 var pointData;
 var kmoni_popup = {};
 function kmoniMapUpdate(dataTmp, type) {
   if (!dataTmp.data || background) return;
-  geojson = {
+  var geojson = {
     type: "FeatureCollection",
-    crs: {
-      type: "name",
-      properties: {
-        name: "urn:ogc:def:crs:OGC:1.3:CRS84",
-      },
-    },
     features: [],
   };
 
@@ -1582,6 +1560,10 @@ function generatePopupContent_TREM(params) {
 var TREMRTS_points = {};
 function TREMRTSUpdate(dataTmp) {
   if (!background) {
+    var geojson = {
+      type: "FeatureCollection",
+      features: [],
+    };
     Object.keys(dataTmp).forEach(function (key) {
       elm = dataTmp[key];
       geojson.features.push({
@@ -1612,12 +1594,17 @@ function TREMRTSUpdate(dataTmp) {
 function generatePopupContent_SEISJS(params) {
   var shindoColor = NormalizeShindo(params.shindo, 2);
   if (!Array.isArray(params.rgb)) params.rgb = JSON.parse(params.rgb);
-  return `<h3 class='PointName' style='border-bottom-color:rgb(${params.rgb.join(",")})'>${params.Name}<span>${params.Type}</span></h3><div class='popupContentWrap'><div class='obsShindoWrap' style='background:${shindoColor[0]};color:${shindoColor[1]};'>震度 ${NormalizeShindo(params.shindo, 1)}<span>${params.shindo.toFixed(2)}</span></div><div class='obsPGAWrap'>PGA ${(Math.floor(params.PGA * 100) / 100).toFixed(2)}</div></div>`;
+  return `<h3 class='PointName' style='border-bottom-color:rgb(${params.rgb.join(",")})'>${params.Name}<span>${params.Code}</span></h3><div class='popupContentWrap'><div class='obsShindoWrap' style='background:${shindoColor[0]};color:${shindoColor[1]};'>震度 ${NormalizeShindo(params.shindo, 1)}<span>${params.shindo.toFixed(2)}</span></div><div class='obsPGAWrap'>PGA ${(Math.floor(params.PGA * 100) / 100).toFixed(2)}</div></div>`;
 }
 
 var SeisJS_points = {};
 function SeisJSUpdate(dataTmp) {
+  SeisJS_points = dataTmp;
   if (!background) {
+    var geojson = {
+      type: "FeatureCollection",
+      features: [],
+    };
     Object.keys(dataTmp).forEach(function (key) {
       elm = dataTmp[key];
       geojson.features.push({
@@ -1642,51 +1629,10 @@ function SeisJSUpdate(dataTmp) {
       }
     });
     if (map) map.getSource("SEISJS_points").setData(geojson);
-
-    return;
-    for (key of Object.keys(dataTmp)) {
-      elm = dataTmp[key];
-      if (elm.Location.Longitude == 0 && elm.Location.Latitude == 0) return;
-      pointData = SeisJS_points[elm.Code];
-      var firstTime;
-      if (!pointData) {
-        pointData = SeisJS_points[elm.Code] = addPointMarker(elm);
-        firstTime = true;
-      }
-      if (pointData.rgb.join("") != elm.rgb.join("") || firstTime) {
-        pointData.markerElm.style.background = "rgb(" + elm.rgb.join(",") + ")";
-        var shindoColor = NormalizeShindo(elm.shindo, 2);
-        pointData.popupContent = `<h3 class='PointName' style='border-bottom-color:rgb(${elm.rgb.join(",")})'>${elm.Name}<span>${elm.Type}</span></h3><div class='popupContentWrap'><div class='obsShindoWrap' style='background:${shindoColor[0]};color:${shindoColor[1]};'>震度 ${NormalizeShindo(elm.shindo, 1)}<span>${elm.shindo.toFixed(2)}</span></div><div class='obsPGAWrap'>PGA ${(Math.floor(elm.PGA * 100) / 100).toFixed(2)}</div></div>`;
-        if (pointData.popup.isOpen()) pointData.popup.setHTML(pointData.popupContent);
-      }
-      pointData.rgb = elm.rgb;
-    }
-
-    Object.keys(SeisJS_points).forEach(function (key) {
-      elm = SeisJS_points[key];
-      if (!Object.keys(dataTmp).includes(key)) {
-        elm.markerElm.style.background = "rgba(128,128,128,0.5)";
-
-        var shindoColor = NormalizeShindo("?", 2);
-        elm.popupContent = `<h3 class='PointName' style='border-bottom-color:rgba(128,128,128,0.5)'>${elm.Name}<span>${elm.Type}</span></h3><div class='popupContentWrap'><div class='obsShindoWrap' style='background:${shindoColor[0]};color:${shindoColor[1]};'>震度 不明<span></span></div><div class='obsPGAWrap'>PGA ?</div></div>`;
-
-        if (elm.popup.isOpen()) elm.popup.setHTML(elm.popupContent);
-      }
-    });
   }
 }
 
-var Int0T = ["any"];
-var Int1T = ["any"];
-var Int2T = ["any"];
-var Int3T = ["any"];
-var Int4T = ["any"];
-var Int5mT = ["any"];
-var Int5pT = ["any"];
-var Int6mT = ["any"];
-var Int6pT = ["any"];
-var Int7T = ["any"];
-var AlertT = ["any"];
+var Int0T = (Int1T = Int2T = Int3T = Int4T = Int5mT = Int5pT = Int6mT = Int6pT = Int7T = AlertT = ["any"]);
 
 function JMAEstShindoControl(data) {
   JMAEstShindoData = {};
