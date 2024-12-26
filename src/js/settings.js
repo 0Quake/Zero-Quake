@@ -78,7 +78,10 @@ function configDataDraw() {
   selectBoxSet(document.getElementById("saibun"), config.home.Section);
   tsunamiSect = config.home.TsunamiSect;
   selectBoxSet(document.getElementById("tsunamiSect"), tsunamiSect);
-  if (map) map.setFilter("tsunami_LINE_selected", ["==", "name", tsunamiSect]);
+  if (map) {
+    map.setFilter("tsunami_LINE_selected", ["==", "name", tsunamiSect]);
+    map.setFilter("tsunami_LINE_selected_2", ["==", "name", tsunamiSect]);
+  }
 
   TTSvolumeSet(config.notice.voice_parameter.volume);
   TTSpitchSet(config.notice.voice_parameter.pitch);
@@ -326,7 +329,7 @@ function mapInit() {
   map = new maplibregl.Map({
     container: "mapcontainer",
     center: [config.home.longitude, config.home.latitude],
-    zoom: 4,
+    zoom: 6,
     attributionControl: true,
     maxBounds: [
       [115, 15],
@@ -388,7 +391,7 @@ function mapInit() {
             "line-cap": "butt",
           },
           paint: {
-            "line-color": "#FFF",
+            "line-color": "#ff9292",
             "line-width": ["interpolate", ["linear"], ["zoom"], 2, 10, 5, 20, 10, 80, 18, 300],
           },
           minzoom: 0,
@@ -427,6 +430,22 @@ function mapInit() {
           },
           minzoom: 0,
           maxzoom: 22,
+        },
+        {
+          id: "tsunami_LINE_selected_2",
+          type: "line",
+          source: "tsunami",
+          layout: {
+            "line-join": "round",
+            "line-cap": "butt",
+          },
+          paint: {
+            "line-color": "#952e2e",
+            "line-width": ["interpolate", ["linear"], ["zoom"], 2, 1, 5, 2, 10, 8, 18, 30],
+          },
+          minzoom: 0,
+          maxzoom: 22,
+          filter: ["==", "name", ""],
         },
         {
           id: "worldmap_fill",
@@ -505,7 +524,10 @@ function mapInit() {
 
   markerElm = new maplibregl.Marker({ element: img }).setLngLat([config.home.longitude, config.home.latitude]).addTo(map);
   map.on("load", function () {
-    if (tsunamiSect) map.setFilter("tsunami_LINE_selected", ["==", "name", tsunamiSect]);
+    if (tsunamiSect) {
+      map.setFilter("tsunami_LINE_selected", ["==", "name", tsunamiSect]);
+      map.setFilter("tsunami_LINE_selected_2", ["==", "name", tsunamiSect]);
+    }
     tsunamiFeatures = map.querySourceFeatures("tsunami");
     EQSectFeatures = map.querySourceFeatures("basemap");
   });
@@ -544,6 +566,7 @@ function MapReDraw() {
   });
 
   map.setFilter("tsunami_LINE_selected", ["==", "name", tsunamiSect]);
+  map.setFilter("tsunami_LINE_selected_2", ["==", "name", tsunamiSect]);
   selectBoxSet(document.getElementById("tsunamiSect"), tsunamiSect);
 
   map.flyTo({
@@ -562,6 +585,7 @@ function MapReDraw() {
 document.getElementById("tsunamiSect").addEventListener("change", function () {
   tsunamiSect = this.value;
   map.setFilter("tsunami_LINE_selected", ["==", "name", this.value]);
+  map.setFilter("tsunami_LINE_selected_2", ["==", "name", this.value]);
 });
 
 var TTSspeed = 1;
