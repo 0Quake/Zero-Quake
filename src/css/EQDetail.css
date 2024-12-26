@@ -14,7 +14,7 @@ body {
   width: 100%;
   height: 80vh;
   position: fixed;
-  border-bottom: solid 2px #999;
+  border-bottom: solid 2px #62626c;
 }
 #mapcontainer {
   width: 100%;
@@ -31,7 +31,6 @@ main {
   top: 80vh;
   background: #222225;
   display: block;
-  border-top: solid 1px #666;
   height: fit-content;
   text-align: center;
 }
@@ -132,6 +131,8 @@ td {
   right: 0;
 }
 
+#homeShindo .ShindoItem:hover,
+#homeShindoL .ShindoItemL:hover,
 .ShindoItem1:hover,
 .ShindoItem2:hover,
 .ShindoItem3:hover,
@@ -139,10 +140,6 @@ td {
 .ShindoItem2L:hover,
 .ShindoItem3L:hover {
   background: #464649;
-}
-#homeShindo .ShindoItem:hover,
-#homeShindoL .ShindoItemL:hover {
-  background-color: #333;
 }
 
 .ShindoItem1,

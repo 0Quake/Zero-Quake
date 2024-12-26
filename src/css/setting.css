@@ -149,7 +149,7 @@ div .tabcontent {
 }
 #BtnWrap {
   line-height: 40px;
-  border-top: solid 1px #666;
+  border-top: solid 1px #62626c;
   text-align: center;
   font-size: 0;
   margin: 0 8px 8px 3px;
@@ -298,7 +298,7 @@ label select {
   padding: 0 10px;
   border-radius: 4px;
   background: #363639;
-  border: solid 1px #888;
+  border: solid 1px #88888b;
   outline: none;
 }
 label input[type="text"]:focus,
@@ -352,16 +352,16 @@ ol {
 #update-detail {
   font-size: 14px;
   line-height: 1.4em;
-  background: #333;
+  background: #3f3f42;
   border-radius: 5px;
   padding: 5px;
-  border: solid 1px #777;
+  border: solid 1px #62626c;
   max-height: 51px;
   overflow: auto;
   max-width: 500px;
 }
 .tableWrap {
-  background: #444;
+  background: #4e4e51;
   padding: 8px;
   border-radius: 5px;
   margin: 8px 0;
@@ -387,33 +387,10 @@ ol {
 #parenthesis_sample {
   margin-top: 10px;
 }
-summary {
-  padding: 2px 10px;
-  margin: 2px 0;
-  border-radius: 10px;
-  border: solid 2px transparent;
-  background: #333;
-  border: solid 2px rgb(149, 46, 46);
-  width: fit-content;
-}
-summary:hover {
-  background: rgb(149, 46, 46);
-}
 .infoType {
   white-space: nowrap;
   overflow-x: scroll;
   font-size: 12px;
-}
-.infoType div {
-  display: inline-block;
-  background: #444;
-  border: solid 1px #666;
-  font-size: 12px;
-  line-height: 24px;
-  border-radius: 4px;
-  padding: 0 6px;
-  color: #eee;
-  margin: 2px;
 }
 .VoiceSettingContent {
   display: none;

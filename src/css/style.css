@@ -142,6 +142,9 @@ main {
   align-items: center;
   z-index: 100000005;
 }
+#splash img {
+  pointer-events: none;
+}
 .EEWMode #alertFrame,
 .TsunamiMode #alertFrame {
   display: block;
@@ -199,7 +202,7 @@ main {
 #offline {
   padding: 0.5em 1em;
   color: #fff;
-  background: #333;
+  background: #3f3f42;
   border: solid 3px rgb(177, 46, 46);
   text-align: center;
 }
@@ -231,8 +234,7 @@ main {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: #444;
-  border-left: solid 1px #444;
+  border-left: solid 1px #4e4e51;
   width: 350px;
 }
 #sideBar.close {
@@ -335,7 +337,7 @@ main {
   float: right;
   margin: 0;
   padding: 0;
-  background: #444;
+  background: #4e4e51;
 }
 #tsunamiCancel button:hover,
 #tsunamiRevocation button:hover {
@@ -357,7 +359,7 @@ h2 {
 .list-item h2 {
   font-size: 16px;
   padding: 3px 0.5em;
-  background: #333;
+  background: #3f3f42;
 }
 .EEWWrap h2,
 .EQDItem h2,
@@ -517,13 +519,13 @@ tr,
 th,
 td {
   border-collapse: collapse;
-  border: solid 1px #666;
+  border: solid 1px #62626c;
 }
 
 #tab1_wrap {
   display: flex;
   height: calc(100% - 60px);
-  border-top: solid 1px #444;
+  border-top: solid 1px #4e4e51;
 }
 
 .EEWMode #tab1_wrap,
@@ -601,7 +603,7 @@ td {
 }
 .tabgroup:hover {
   color: #ccc;
-  background: #333;
+  background: #3f3f42;
 }
 .tabmenu {
   margin: 4px;
@@ -639,7 +641,7 @@ td {
   border: none;
 }
 .active_tabgroup {
-  background: #333;
+  background: #3f3f42;
   color: #fff;
 }
 .active_tabgroup:hover {
@@ -662,61 +664,6 @@ td {
 }
 #tab1_content2 {
   padding: 5px;
-}
-#pointList {
-  list-style: none;
-  padding: 0;
-}
-
-#pointList li {
-  display: flex;
-  align-items: center;
-  padding: 5px;
-  background: #222;
-  border-radius: 5px;
-  margin: 5px;
-}
-
-#pointList li .int {
-  position: relative;
-  width: 45px;
-  height: 25px;
-  line-height: 25px;
-  text-align: center;
-  border-radius: 3px;
-  background: #555;
-  margin-right: 5px;
-  vertical-align: middle;
-  flex-basis: 60px;
-  font-family: "M PLUS 1p";
-}
-#pointList li:nth-child(1) .int {
-  width: 60px;
-  height: 60px;
-  line-height: 50px;
-  margin: 5px 5px 5px 0;
-  font-size: 35px;
-  border-radius: 5px;
-  flex-basis: 60px;
-}
-#pointList li .int .intDetail {
-  position: absolute;
-  bottom: 3px;
-  line-height: normal;
-  left: 0;
-  right: 0;
-  text-align: center;
-  font-size: 12px;
-  font-family: "BIZ UDPGothic", sans-serif;
-}
-
-#pointList li .PGA {
-  font-size: 12px;
-  color: #ccc;
-  vertical-align: middle;
-  text-align: right;
-  margin-left: auto;
-  font-family: "AzeretMono-Regular", ui-monospace;
 }
 #tab2_wrap {
   height: 100%;
@@ -906,7 +853,7 @@ td {
   width: 100px;
   border-radius: 8px;
   border: none;
-  background-color: #333;
+  background-color: #3f3f42;
   border: solid 2px rgb(149, 46, 46);
   font-family: "Material Icons Round";
   font-size: 40px;
@@ -1142,7 +1089,7 @@ summary:focus {
   font-size: 14px;
   border: none;
   background: none;
-  color: #444;
+  color: #4e4e51;
   margin: 0;
   padding: 0;
 }
@@ -1210,6 +1157,7 @@ summary:focus {
   color: #ccc;
 }
 .tip {
+  display: inline-block;
   padding: 1px 6px;
   border-radius: 3px;
   background: #3f3f42;

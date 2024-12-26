@@ -25,7 +25,7 @@ html {
   text-align: left;
   padding: 5px;
   background: #181818;
-  border: solid 1px #666;
+  border: solid 1px #62626c;
   border-radius: 6px;
   overflow-y: auto;
 }
@@ -55,7 +55,7 @@ table td {
 
 table tr th,
 table tr td {
-  border-left: solid 2px #444;
+  border-left: solid 2px #4e4e51;
 }
 
 table tr td:nth-child(1),
@@ -65,7 +65,7 @@ table tr th:nth-child(2) {
   border-left: none;
 }
 tr#tablerow2 th {
-  border-left: solid 2px #444;
+  border-left: solid 2px #4e4e51;
 }
 
 .sub_header {
@@ -229,7 +229,7 @@ header {
   height: 70px;
   line-height: 70px;
   background: #3f3f42;
-  border-bottom: solid 1px #666;
+  border-bottom: solid 1px #62626c;
 }
 h1 {
   display: inline-block;
@@ -249,7 +249,7 @@ header div.TestNotes {
 }
 
 #no-data {
-  background: #444;
+  background: #4e4e51;
   text-align: center;
   height: 50px;
 }
