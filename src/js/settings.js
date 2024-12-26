@@ -688,7 +688,6 @@ document.getElementById("Start_simulation").addEventListener("click", function (
   };
 
   document.getElementById("EEWE_serial").value = EEWData.serial + 1;
-  document.getElementById("EEWE_serial").min = EEWData.serial + 1;
 
   window.electronAPI.messageReturn({
     action: "EEWSimulation",
