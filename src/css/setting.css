@@ -51,7 +51,7 @@ button {
   background: unset;
   display: block;
   padding: 0.1em 0.5em 0.1em 15px;
-  background: #222;
+  background: #222225;
   border: none;
 }
 #tab1_bar .tabmenu:hover {
@@ -153,7 +153,7 @@ div .tabcontent {
   text-align: center;
   font-size: 0;
   margin: 0 8px 8px 3px;
-  background: #222;
+  background: #222225;
 }
 
 #BtnWrap button {

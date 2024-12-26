@@ -165,7 +165,7 @@
 }
 
 .maplibregl-popup-content {
-  background: #222;
+  background: #222225;
   color: #fff;
   font-size: 14px;
   border-radius: 3px;
@@ -401,7 +401,7 @@
 .epiCenterTooltip,
 .epiCenterTooltip2 {
   display: none;
-  background: #222;
+  background: #222225;
   color: #fff;
   font-size: 16px;
   width: 20px;

@@ -455,7 +455,7 @@ h2 {
   width: 44px;
   height: 44px;
   margin: 3px;
-  background: #222;
+  background: #222225;
   overflow: hidden;
 }
 .countDown {
@@ -618,7 +618,7 @@ td {
 }
 #tab2_bar {
   padding: 5px 3px;
-  background: #222;
+  background: #222225;
 }
 #tab2_bar .tabmenu {
   margin: 0 4px;
@@ -631,7 +631,7 @@ td {
 .active_tabmenu,
 .active_tabmenu:hover {
   background: #999;
-  color: #222;
+  color: #222225;
   border: none;
 }
 
@@ -701,7 +701,7 @@ td {
   width: 100%;
   height: 30px;
   border-radius: 5px;
-  background: #222;
+  background: #222225;
 }
 .EQI_detailWrap {
   padding: 5px;
@@ -842,7 +842,7 @@ td {
   cursor: default;
 }
 .EQItem.EQI_canceled:hover {
-  background: #222;
+  background: #222225;
   transition: 0.2s;
 }
 

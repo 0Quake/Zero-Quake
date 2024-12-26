@@ -95,7 +95,7 @@ tr#tablerow2 th {
   position: sticky;
   top: 80px;
   z-index: 101;
-  background: #222;
+  background: #222225;
   height: 50px;
   font-size: 20px;
   display: none;
@@ -109,7 +109,7 @@ table thead {
   position: sticky;
   top: 0;
   z-index: 101;
-  background: #222;
+  background: #222225;
 }
 
 #MajorWarningInfo th,
@@ -290,7 +290,7 @@ header div.TestNotes {
 }
 .rising {
   background: #999;
-  color: #222;
+  color: #222225;
   border-radius: 3px;
   font-size: 0.9em;
   line-height: 1;
