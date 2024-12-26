@@ -1116,6 +1116,8 @@ button:focus {
   border: none;
   background: none;
   color: #444;
+  margin: 0;
+  padding: 0;
 }
 #errorContent {
   padding: 0 10px;
