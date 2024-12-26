@@ -376,7 +376,7 @@ function eqInfoDraw(data, source) {
   }
   removeChild(EQListWrap);
 
-  data.forEach(function (elm) {
+  data.forEach(function (elm, index) {
     var clone = EQTemplate.content.cloneNode(true);
 
     clone.querySelector(".EQI_epiCenter").textContent = elm.epiCenter ? elm.epiCenter : "震源調査中";
@@ -384,6 +384,7 @@ function eqInfoDraw(data, source) {
     clone.querySelector(".EQI_magnitude").textContent = elm.M !== null ? elm.M.toFixed(1) : "不明";
     if (source == "jma") {
       clone.querySelector(".EQItem").setAttribute("id", "EQItem_" + elm.eventId);
+      clone.querySelector(".EQItem").setAttribute("tabindex", Math.max(-1, 0 - index));
       var maxITmp = elm.maxI;
       if (maxITmp == "不明") maxITmp = "?";
       maxITmp = NormalizeShindo(maxITmp, 0);
@@ -417,6 +418,7 @@ function eqInfoDraw(data, source) {
       }
     } else if (source == "usgs") {
       var colorTmp = NormalizeMMI(elm.maxI, 2);
+      clone.querySelector(".EQItem").setAttribute("tabindex", Math.max(-1, 0 - index));
       clone.querySelector(".EQI_maxI").textContent = NormalizeMMI(elm.maxI, 1);
       clone.querySelector(".EQI_maxI").style.background = colorTmp[0];
       clone.querySelector(".EQI_maxI").style.color = colorTmp[1];

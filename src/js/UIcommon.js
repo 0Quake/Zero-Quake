@@ -328,3 +328,26 @@ function latitudeConvert(data) {
     return data;
   }
 }
+const moveFocus = (movement, event) => {
+  console.log(event);
+  const group = event.target.closest("[ZQ-focusgroup]");
+  if (!group) return;
+  const items = group.querySelectorAll("[ZQ-focusgroup-item]");
+  if (items.length == 0) return;
+
+  event.preventDefault();
+  event.stopPropagation();
+
+  for (let index = 0; index < items.length; index++) {
+    if (items.item(index) == event.target) items.item((index + movement + items.length) % items.length)?.focus();
+  }
+};
+
+window.addEventListener("keydown", (event) => {
+  if (event.key == "ArrowDown") moveFocus(+1, event);
+  else if (event.key == "ArrowUp") moveFocus(-1, event);
+  else if ((event.key == "Enter" || event.key == " ") && document.activeElement) {
+    var tagname = document.activeElement.tagName;
+    if (tagname == "DIV" || tagname == "SPAN") document.activeElement.dispatchEvent(new PointerEvent("click"));
+  }
+});

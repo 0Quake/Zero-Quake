@@ -34,23 +34,25 @@
         <h2 class="popup_menubar">レイヤーの切り替え
           <button id="layerSwitch_close" title="閉じる">close</button>
         </h2>
-        <h3>ベースマップ</h3>
-        <div class="radio">
-          <label><input type="radio" name="mapSelect" value="">標準</label>
-          <label><input type="radio" name="mapSelect" value="tile0">地理院地図 (標準)</label>
-          <label><input type="radio" name="mapSelect" value="tile1">地理院地図 (淡色)</label>
-          <label><input type="radio" name="mapSelect" value="tile2">地理院地図 (写真)</label>
-          <label><input type="radio" name="mapSelect" value="tile4">Open Street Map</label>
-        </div>
-        <h3>オーバーレイ</h3>
-        <div class="check">
-          <label><input type="checkbox" name="overlaySelect" value="gsi_vector" id="gsi_vector">詳細地図 (地名・道路等)</label>
-          <label><input type="checkbox" name="overlaySelect" value="over0" id="over0">陰影起伏図</label>
-          <label><input type="checkbox" name="overlaySelect" value="over1" id="over1">火山基本図データ</label>
-          <label><input type="checkbox" name="overlaySelect" value="over2" id="over2">津波浸水想定 ハザードマップ</label>
-          <label><input type="checkbox" name="overlaySelect" value="over3" id="over3">土砂災害警戒区域(急傾斜地の崩壊) ハザードマップ</label>
-          <label><input type="checkbox" name="overlaySelect" value="over4" id="over4">土砂災害警戒区域(地すべり) ハザードマップ</label>
-          <label><input type="checkbox" name="overlaySelect" value="hinanjo" id="hinanjo">避難所（地震/津波）</label>
+        <div id="menu_content">
+          <h3>ベースマップ</h3>
+          <div class="radio">
+            <label><input type="radio" name="mapSelect" value="">標準</label>
+            <label><input type="radio" name="mapSelect" value="tile0">地理院地図 (標準)</label>
+            <label><input type="radio" name="mapSelect" value="tile1">地理院地図 (淡色)</label>
+            <label><input type="radio" name="mapSelect" value="tile2">地理院地図 (写真)</label>
+            <label><input type="radio" name="mapSelect" value="tile4">Open Street Map</label>
+          </div>
+          <h3>オーバーレイ</h3>
+          <div class="check">
+            <label><input type="checkbox" name="overlaySelect" value="gsi_vector" id="gsi_vector">詳細地図 (地名・道路等)</label>
+            <label><input type="checkbox" name="overlaySelect" value="over0" id="over0">陰影起伏図</label>
+            <label><input type="checkbox" name="overlaySelect" value="over1" id="over1">火山基本図データ</label>
+            <label><input type="checkbox" name="overlaySelect" value="over2" id="over2">津波浸水想定 ハザードマップ</label>
+            <label><input type="checkbox" name="overlaySelect" value="over3" id="over3">土砂災害警戒区域(急傾斜地の崩壊) ハザードマップ</label>
+            <label><input type="checkbox" name="overlaySelect" value="over4" id="over4">土砂災害警戒区域(地すべり) ハザードマップ</label>
+            <label><input type="checkbox" name="overlaySelect" value="hinanjo" id="hinanjo">避難所（地震/津波）</label>
+          </div>
         </div>
       </nav>
     </div>
@@ -67,36 +69,20 @@
   </div>
 
   <main>
-    <div id="ShindoSample"><span>震度：</span>
-      <div id="ShindoSample0">0</div>
-      <div id="ShindoSample1">1</div>
-      <div id="ShindoSample2">2</div>
-      <div id="ShindoSample3">3</div>
-      <div id="ShindoSample4">4</div>
-      <div id="ShindoSample5m">5弱</div>
-      <div id="ShindoSample5p">5強</div>
-      <div id="ShindoSample6m">6弱</div>
-      <div id="ShindoSample6p">6強</div>
-      <div id="ShindoSample7">7</div>
+    <div id="plzScroll">
+      <div class="material-icons-round">keyboard_double_arrow_down</div>スクロールして詳細を表示
     </div>
-    <div id="LngIntSample"><span>長周期地震動階級：</span>
-      <div id="LngIntSample1">1</div>
-      <div id="LngIntSample2">2</div>
-      <div id="LngIntSample3">3</div>
-      <div id="LngIntSample4">4</div>
-    </div>
-
     <div id="infoKind">
       <div>受信した情報：</div>
-      <span id="type-1">緊急地震速報</span>
-      <span id="type-2">震度速報</span>
-      <span id="type-3">震源に関する情報</span>
-      <span id="type-4-1">震源・震度情報</span>
-      <span id="type-4-2">遠地地震に関する情報</span>
-      <span id="type-5">顕著な地震の震源要素更新のお知らせ</span>
-      <span id="type-7">長周期地震動に関する観測情報</span>
-      <span id="type-6">推計震度分布</span>
-      <span id="type-8">津波情報 震源</span>
+      <span id="type-1" class="tip">緊急地震速報</span>
+      <span id="type-2" class="tip">震度速報</span>
+      <span id="type-3" class="tip">震源に関する情報</span>
+      <span id="type-4-1" class="tip">震源・震度情報</span>
+      <span id="type-4-2" class="tip">遠地地震に関する情報</span>
+      <span id="type-5" class="tip">顕著な地震の震源要素更新のお知らせ</span>
+      <span id="type-7" class="tip">長周期地震動に関する観測情報</span>
+      <span id="type-6" class="tip">推計震度分布</span>
+      <span id="type-8" class="tip">津波情報 震源</span>
     </div>
 
     <div id="tableWrap">

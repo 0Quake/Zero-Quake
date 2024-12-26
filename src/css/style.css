@@ -104,6 +104,12 @@ body {
   accent-color: rgb(255 146 146);
 }
 
+hr {
+  border: none;
+  border-top: solid 2px #62626c;
+  margin: 20px 0;
+}
+
 a:any-link {
   color: rgb(255 192 192);
 }
@@ -128,7 +134,7 @@ main {
 #splash {
   position: fixed;
   inset: 0;
-  background: #202227;
+  background: #222225;
   color: #fff;
   display: flex;
   flex-direction: column;
@@ -252,6 +258,7 @@ main {
   display: inline-block;
   content: "double_arrow";
   font-family: "Material Icons Round";
+  color: #ccc;
   font-size: 20px;
 }
 #sideBar.close #SideBarToggle::before {
@@ -264,7 +271,7 @@ main {
   height: auto;
   max-height: 300px;
   overflow: auto;
-  background: rgb(28, 15, 15);
+  background: #101013;
 }
 
 .EEWMode #sokuho-Panel,
@@ -291,12 +298,12 @@ main {
 }
 
 .list-item {
-  background: #222;
+  background: #222225;
   border-radius: 5px;
   font-size: 18px;
   overflow: hidden;
   margin: 10px;
-  border: solid 1px #666;
+  border: solid 1px #62626c;
 }
 
 #LWaveWrap,
@@ -515,6 +522,7 @@ td {
 #tab1_wrap {
   display: flex;
   height: calc(100% - 60px);
+  border-top: solid 1px #444;
 }
 
 .EEWMode #tab1_wrap,
@@ -531,7 +539,7 @@ td {
   font-size: 14px;
   writing-mode: vertical-rl;
   text-orientation: sideways;
-  background: #222;
+  background: #222225;
   padding: 0 0 40px 0;
   overflow-y: auto;
   overflow-x: hidden;
@@ -559,7 +567,7 @@ td {
   vertical-align: middle;
   font-family: "Material Icons Round";
   font-size: 18px;
-  color: #999;
+  color: #ccc;
   margin: 0;
   padding: 0;
   writing-mode: horizontal-tb;
@@ -595,8 +603,8 @@ td {
 }
 .tabmenu {
   margin: 4px;
-  background: rgba(128, 128, 128, 0.2);
-  border: solid 1px rgba(128, 128, 128, 0.4);
+  background: #363639;
+  border: solid 1px #62626c;
   border-radius: 4px;
   color: #ccc;
 }
@@ -714,9 +722,11 @@ td {
 #tab2_content {
   height: calc(100% - 30px);
   padding: 0;
+  background: #3f3f42;
 }
-#tab2_content1 {
-  padding: 3px;
+#tab2_content1,
+#tab2_content2 {
+  padding: 3px 0 3px 3px;
 }
 #tab2_content .tabcontent {
   height: 100%;
@@ -749,7 +759,7 @@ td {
   flex: 1;
 }
 .EQI_datetime {
-  margin-bottom: 8px;
+  margin-bottom: 7px;
   font-size: 14px;
   font-family: "AzeretMono-Regular", ui-monospace;
 }
@@ -762,7 +772,8 @@ td {
   align-content: center;
   align-items: center;
   margin: 7px 5px;
-  background: #222;
+  background: #222225;
+  border: solid 1px #181818;
   border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
@@ -806,6 +817,10 @@ td {
   margin-left: 4px;
 }
 
+.EQI_line {
+  display: flex;
+  align-items: flex-end;
+}
 .EQI_maxI {
   width: 50px;
   height: 50px;
@@ -868,8 +883,11 @@ td {
 }
 .EQItem:hover,
 #NankaiTroughInfo_Rinji:hover,
-#NankaiTroughInfo_Teirei:hover {
-  background: #111;
+#NankaiTroughInfo_Teirei:hover,
+.EQItem:focus,
+#NankaiTroughInfo_Rinji:focus,
+#NankaiTroughInfo_Teirei:focus {
+  background: #1c1c1f;
 }
 .EQItem.EQI_canceled:hover {
   cursor: default;
@@ -908,7 +926,11 @@ td {
 }
 
 .EQI_epiCenter {
-  float: left;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
 }
 .EQI_magnitude_unit {
   font-size: 16px;
@@ -916,7 +938,8 @@ td {
 .EQI_magnitude_Wrap {
   font-family: "AzeretMono-Regular", ui-monospace;
   font-size: 18px;
-  float: right;
+  margin-left: auto;
+  padding: 0 0 0 6px;
 }
 .EQI_magnitude {
   font-size: 26px;
@@ -945,7 +968,7 @@ td {
   max-height: 80vh;
   padding: 0;
   z-index: 1000;
-  background: #222;
+  background: #222225;
   font-family: "AzeretMono-Regular", ui-monospace, sans-serif;
   text-align: center;
 }
@@ -996,13 +1019,8 @@ td {
 #UpdateTime_detail {
   position: relative;
   padding: 0;
-  border: none;
-  border-radius: 10px;
-  background: #333;
-  border: solid 1px #999;
 }
 #UpdateTime_detail_content {
-  margin-top: 40px;
   max-height: 80vh;
   overflow: auto;
   padding: 15px;
@@ -1011,17 +1029,9 @@ td {
   text-align: center;
   margin: 25px 0 0 0;
 }
-#UpdateTime_detail {
-  border: none;
-  border-bottom: solid 1px #666;
-}
 .popup_menubar {
-  position: absolute;
-  top: 0;
-  right: 0;
-  left: 0;
   height: 40px;
-  background: #444;
+  background: #4e4e51;
   line-height: 40px;
 }
 .popup_menubar h2 {
@@ -1029,29 +1039,44 @@ td {
   padding: 0 20px;
 }
 .popup_menubar button {
-  height: 40px;
-  width: 40px;
+  height: 34px;
+  width: 34px;
   float: right;
   font-family: "Material Icons Round";
-  font-size: 20px;
-  margin: 0;
+  font-size: 16px;
+  margin: 3px;
   padding: 0;
-  border-radius: 10px;
+  border-radius: 7px;
+  background: #3f3f42;
 }
 dialog {
   user-select: none;
-  outline: solid 1px #777;
+  background: #3f3f42;
+  border-radius: 10px;
+  border: solid 1px #62626c;
 }
 dialog::backdrop {
   background: rgba(0, 0, 0, 0.4);
+}
+:focus,
+.maplibregl-ctrl-group button:focus:focus-visible,
+.menu label:has(:focus-visible) {
+  outline: solid 2px #ff9292;
+  box-shadow: none !important;
+  outline-offset: 3px;
+}
+/* キーボード操作以外でのフォーカス */
+:focus:not(:focus-visible) {
+  outline: none;
 }
 input,
 select,
 textarea {
   background: #2e2e2e;
 }
-button {
-  background: #333;
+button,
+summary {
+  background: #363639;
   color: #fff;
   border: solid 2px rgb(149, 46, 46);
   padding: 0.5em 0.7em;
@@ -1060,16 +1085,16 @@ button {
   cursor: pointer;
   margin: 6px;
 }
-button:hover {
+button:hover,
+summary:hover {
   background-color: rgb(149, 46, 46);
   color: #fff;
 }
 
-button:focus {
+button:focus,
+summary:focus {
   background-color: rgb(149, 46, 46);
   color: #fff;
-  outline: solid 1px rgb(149, 46, 46);
-  outline-offset: 3px;
 }
 
 @keyframes SuccessAnm {
@@ -1181,4 +1206,13 @@ button:focus {
   font-size: 14px;
   margin: 8px 5px 3px 5px;
   color: #ccc;
+}
+.tip {
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: #3f3f42;
+  border: solid 1px #62626c;
+  box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+  font-size: 13px;
+  margin: 2px;
 }

@@ -28,24 +28,26 @@
                         <h2 class="popup_menubar">レイヤーの切り替え
                             <button id="layerSwitch_close" title="閉じる">close</button>
                         </h2>
-                        <h3>ベースマップ</h3>
-                        <div class="radio">
-                            <label><input type="radio" name="mapSelect" value="" checked>標準</label>
-                            <label><input type="radio" name="mapSelect" value="tile0">地理院地図 (標準)</label>
-                            <label><input type="radio" name="mapSelect" value="tile1">地理院地図 (淡色)</label>
-                            <label><input type="radio" name="mapSelect" value="tile2">地理院地図 (写真)</label>
-                            <label><input type="radio" name="mapSelect" value="tile4">Open Street Map</label>
-                        </div>
-                        <h3>オーバーレイ</h3>
-                        <div class="check">
-                            <label><input type="checkbox" name="overlaySelect" value="gsi_vector" id="gsi_vector">詳細地図 (地名・道路等)</label>
-                            <label><input type="checkbox" name="overlaySelect" value="over0" id="over0">陰影起伏図</label>
-                            <label><input type="checkbox" name="overlaySelect" value="over1" id="over1">火山基本図データ</label>
-                            <label><input type="checkbox" name="overlaySelect" value="over2" id="over2">津波浸水想定 ハザードマップ</label>
-                            <label><input type="checkbox" name="overlaySelect" value="over3" id="over3">土砂災害警戒区域(急傾斜地の崩壊) ハザードマップ</label>
-                            <label><input type="checkbox" name="overlaySelect" value="over4" id="over4">土砂災害警戒区域(地すべり) ハザードマップ</label>
-                            <label><input type="checkbox" name="overlaySelect" value="hinanjo" id="hinanjo">避難所（地震/津波）</label>
-                            <label><input type="checkbox" name="overlaySelect" value="kmoni_points" id="kmoni_points">リアルタイム揺れ情報</label>
+                        <div id="menu_content">
+                            <h3>ベースマップ</h3>
+                            <div class="radio">
+                                <label><input type="radio" name="mapSelect" value="" checked>標準</label>
+                                <label><input type="radio" name="mapSelect" value="tile0">地理院地図 (標準)</label>
+                                <label><input type="radio" name="mapSelect" value="tile1">地理院地図 (淡色)</label>
+                                <label><input type="radio" name="mapSelect" value="tile2">地理院地図 (写真)</label>
+                                <label><input type="radio" name="mapSelect" value="tile4">Open Street Map</label>
+                            </div>
+                            <h3>オーバーレイ</h3>
+                            <div class="check">
+                                <label><input type="checkbox" name="overlaySelect" value="gsi_vector" id="gsi_vector">詳細地図 (地名・道路等)</label>
+                                <label><input type="checkbox" name="overlaySelect" value="over0" id="over0">陰影起伏図</label>
+                                <label><input type="checkbox" name="overlaySelect" value="over1" id="over1">火山基本図データ</label>
+                                <label><input type="checkbox" name="overlaySelect" value="over2" id="over2">津波浸水想定 ハザードマップ</label>
+                                <label><input type="checkbox" name="overlaySelect" value="over3" id="over3">土砂災害警戒区域(急傾斜地の崩壊) ハザードマップ</label>
+                                <label><input type="checkbox" name="overlaySelect" value="over4" id="over4">土砂災害警戒区域(地すべり) ハザードマップ</label>
+                                <label><input type="checkbox" name="overlaySelect" value="hinanjo" id="hinanjo">避難所（地震/津波）</label>
+                                <label><input type="checkbox" name="overlaySelect" value="kmoni_points" id="kmoni_points">リアルタイム揺れ情報</label>
+                            </div>
                         </div>
                     </nav>
                 </div>
@@ -95,7 +97,7 @@
                 </div>
             </div>
             <div id="sideBar">
-                <button id="SideBarToggle" aria-label="サイドバーを表示・非表示" title="サイドバーを表示・非表示"></button>
+                <button id="SideBarToggle" aria-label="サイドパネルを表示・非表示" title="サイドパネルを表示・非表示"></button>
                 <div id="sokuho-Panel">
                     <div id="tsunamiRevocation" class="list-item">
                         すべての津波情報が解除されました。
@@ -202,10 +204,10 @@
                 <div id="tab1_wrap" data-tabID="1">
 
                     <div id="tab1_content" class="tabContentWrap">
-                        <div id="tab1_content1" class="tabcontent active_tabcontent">
+                        <div id="tab1_content1" class="tabcontent active_tabcontent" ZQ-focusgroup>
 
                             <template id="EQListTemplate">
-                                <div class="EQItem">
+                                <div class="EQItem" ZQ-focusgroup-item>
                                     <div class="EEWNotes">EEWによる速報値</div>
                                     <div class="trainingNotes">訓練報</div>
                                     <div class="TestNotes">試験報</div>
@@ -217,24 +219,28 @@
                                     </div>
                                     <div class="EQI_detailWrap">
                                         <div class="EQI_datetime"></div>
-                                        <div class="EQI_epiCenter"></div>
-                                        <div class="EQI_magnitude_Wrap">
-                                            M<span class="EQI_magnitude"></span>
+                                        <div class="EQI_line">
+                                            <div class="EQI_epiCenter"></div>
+                                            <div class="EQI_magnitude_Wrap">
+                                                M<span class="EQI_magnitude"></span>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="canceled">取り消されました</div>
                                 </div>
                             </template>
                             <template id="EQListTemplate2">
-                                <div class="EQItem usgs_Item" title="クリックして詳細を表示">
+                                <div class="EQItem usgs_Item" title="クリックして詳細を表示" ZQ-focusgroup-item>
                                     <div class="EQI_IntWrap">
                                         <div class="EQI_maxI"></div>
                                     </div>
                                     <div class="EQI_detailWrap">
                                         <div class="EQI_datetime"></div>
-                                        <div class="EQI_epiCenter"></div>
-                                        <div class="EQI_magnitude_Wrap">
-                                            M<span class="EQI_magnitude"></span>
+                                        <div class="EQI_line">
+                                            <div class="EQI_epiCenter"></div>
+                                            <div class="EQI_magnitude_Wrap">
+                                                M<span class="EQI_magnitude"></span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -242,15 +248,15 @@
 
                             <div id="tab2_wrap" data-tabID="2">
                                 <div id="tab2_bar">
-                                    <div id="tab2_menu1" class="tabmenu active_tabmenu" data-contentid="tab2_content1" title="気象庁の地震情報（日本周辺）">気象庁</div>
-                                    <div id="tab2_menu2" class="tabmenu" data-contentid="tab2_content2" title="USGSの地震情報（全世界）">USGS</div>
+                                    <div id="tab2_menu1" class="tabmenu active_tabmenu" tabindex="0" role="button" data-contentid="tab2_content1" title="気象庁の地震情報（日本周辺）">気象庁</div>
+                                    <div id="tab2_menu2" class="tabmenu" tabindex="0" role="button" data-contentid="tab2_content2" title="USGSの地震情報（全世界）">USGS</div>
                                 </div>
                                 <div id="tab2_content" class="tabContentWrap">
                                     <div id="tab2_content1" class="tabcontent active_tabcontent">
-                                        <div id="NankaiTroughInfo_Rinji">
+                                        <div id="NankaiTroughInfo_Rinji" ZQ-focusgroup-item tabindex="0">
                                             <span id="Nankai_Title_Rinji"></span>
                                         </div>
-                                        <div id="NankaiTroughInfo_Teirei">
+                                        <div id="NankaiTroughInfo_Teirei" ZQ-focusgroup-item tabindex="0">
                                             <span id="Nankai_Title_Teirei"></span>
                                         </div>
 
@@ -351,10 +357,10 @@
                         </div>
 
                     </div>
-                    <div id="tab1_bar">
-                        <div id="tab1_menu1" class="tabmenu active_tabmenu" data-contentid="tab1_content1"><span class="material-icons-round">format_list_bulleted</span>地震情報</div>
+                    <nav id="tab1_bar">
+                        <div id="tab1_menu1" class="tabmenu active_tabmenu" tabindex="0" role="button" data-contentid="tab1_content1"><span class="material-icons-round">format_list_bulleted</span>地震情報</div>
                         <button id="setting" title="設定画面を開く">settings</button>
-                    </div>
+                    </nav>
 
 
                 </div>

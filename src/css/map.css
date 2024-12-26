@@ -13,22 +13,19 @@
 }
 #layerSwitch_toggle {
   border-radius: 5px;
-  background: #444;
-  border: solid 1px #777;
+  background: #3f3f42;
   font-family: "Material Icons Round";
   font-size: 22px;
   width: 45px;
   height: 40px;
   line-height: 40px;
   padding: 0;
-  margin: 5px;
   z-index: 100000001;
 }
 #menu {
   position: absolute;
-  padding: 10px 5px;
-  background: #333;
-  border: solid 1px #777;
+  background: #3f3f42;
+  border: solid 1px #62626c;
   border-radius: 10px;
   max-height: calc(100% - 40px);
   overflow-y: auto;
@@ -40,22 +37,23 @@
   z-index: 100000001;
   background: rgba(0, 0, 0, 0.5);
 }
+#menu_content {
+  padding: 5px;
+}
 #menu_wrap.menu_show {
   display: flex;
   justify-content: center;
   align-items: center;
 }
 .menu label input {
-  display: none;
+  opacity: 0;
+  width: 0;
 }
 .menu h2 {
   text-align: center;
-  margin-bottom: 20px;
 }
 .menu h3 {
   font-size: 16px;
-  margin: 0;
-  font-weight: unset;
   font-family: inherit;
   margin: 10px 0 0 10px;
 }
@@ -65,12 +63,15 @@
   margin: 3px 0;
   font-size: 14px;
   border-radius: 4px;
+  color: #eee;
 }
 .menu label:hover {
   outline: solid 2px rgb(149, 46, 46);
+  color: #fff;
 }
 .menu label:has(input:checked) {
   background: rgb(149, 46, 46);
+  color: #fff;
 }
 .menu .check label::before {
   content: "check_box_outline_blank";
@@ -105,9 +106,9 @@
 }
 
 .maplibregl-ctrl {
-  background: #444;
+  background: #3f3f42;
   color: #fff;
-  border: solid 1px #777;
+  border: solid 1px #62626c;
 }
 .transparent-ctrl {
   background: transparent;
@@ -117,6 +118,10 @@
   margin: 0;
   width: 40px;
   height: 35px;
+  background: #3f3f42 !important;
+}
+.maplibregl-ctrl-group button:hover {
+  background: #3f3f42 !important;
 }
 .maplibregl-ctrl-group button + button {
   border-top: none;
@@ -312,7 +317,7 @@
   height: 25px;
 }
 .maplibregl-ctrl.maplibregl-ctrl-attrib {
-  background: #444;
+  background: #3f3f42;
   color: #ccc;
   border-radius: 5px;
   margin: 5px;
@@ -454,12 +459,13 @@
 }
 .legend {
   display: inline-block;
-  background: #444;
+  background: #3f3f42;
+  color: #fff;
+  border: solid 1px #62626c;
   border-radius: 5px;
   overflow: hidden;
   padding: 8px;
   width: fit-content;
-  border: solid 1px #777;
 }
 
 .legend img {
@@ -541,7 +547,7 @@ body {
 
 #AlertArea {
   background-image: url(../img/AlertOverlay.png);
-  background-color: #999;
+  background-color: #99999b;
   background-size: 10px;
 }
 #fillLegend {
@@ -559,7 +565,7 @@ body {
 }
 #fillLegend hr {
   margin: 2px 0;
-  border: solid 1px #666;
+  border-width: 2px;
 }
 .IntLegend {
   display: inline-block;
@@ -572,7 +578,7 @@ body {
   margin: 2px;
   font-family: "M PLUS 1p";
   vertical-align: middle;
-  outline: solid 1px #777;
+  outline: solid 1px #62626c;
 }
 .IntLegend span {
   font-size: 12px;
@@ -722,4 +728,9 @@ body {
 }
 .maplibregl-ctrl-group {
   box-shadow: none !important;
+  border-radius: 5px;
+  border: solid 1px #62626c;
+}
+.maplibregl-ctrl-group button {
+  border-radius: 0 !important;
 }

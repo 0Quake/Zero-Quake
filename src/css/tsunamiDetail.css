@@ -7,7 +7,7 @@ html,
 body {
   margin: 0;
   padding: 0;
-  background: #222;
+  background: #222225;
   color: #fff;
   text-align: center;
   overflow-x: auto;
@@ -24,7 +24,7 @@ html {
   margin: 20px auto;
   text-align: left;
   padding: 5px;
-  background: #111;
+  background: #181818;
   border: solid 1px #666;
   border-radius: 6px;
   overflow-y: auto;
@@ -142,7 +142,7 @@ table td {
 }
 
 table tr:nth-child(2n) {
-  background: #333;
+  background: #363639;
 }
 table tr:nth-child(2) {
   font-size: 13px;
@@ -228,7 +228,7 @@ table tr:nth-child(2) {
 header {
   height: 70px;
   line-height: 70px;
-  background: #333;
+  background: #3f3f42;
   border-bottom: solid 1px #666;
 }
 h1 {
@@ -283,10 +283,10 @@ header div.TestNotes {
   vertical-align: middle;
 }
 .add-content:focus {
-  outline: solid 2px #fff;
+  outline: solid 2px #ff9292;
   outline-offset: 3px;
   z-index: 100;
-  background: #414141;
+  background: #4e4e51;
 }
 .rising {
   background: #999;

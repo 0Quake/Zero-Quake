@@ -29,6 +29,10 @@ fetch("Resource/PointSeismicIntensityLocation.json")
     pointList = data;
   });
 
+window.addEventListener("scroll", function () {
+  document.getElementById("plzScroll").style.opacity = 0;
+});
+
 var EEWData;
 var axisDatas;
 window.electronAPI.messageSend((event, request) => {
@@ -279,6 +283,25 @@ function Mapinit() {
           layout: { visibility: "none" },
         },
         {
+          id: "basemap_fill",
+          type: "fill",
+          source: "basemap",
+          paint: {
+            "fill-color": "#333",
+            "fill-opacity": 1,
+          },
+        },
+        {
+          id: "basemap_LINE",
+          type: "line",
+          source: "basemap",
+          minzoom: 6,
+          paint: {
+            "line-color": "#666",
+            "line-width": 1,
+          },
+        },
+        {
           id: "over0",
           type: "raster",
           source: "over0",
@@ -313,25 +336,6 @@ function Mapinit() {
           type: "raster",
           source: "over5",
           layout: { visibility: "none" },
-        },
-        {
-          id: "basemap_fill",
-          type: "fill",
-          source: "basemap",
-          paint: {
-            "fill-color": "#333",
-            "fill-opacity": 1,
-          },
-        },
-        {
-          id: "basemap_LINE",
-          type: "line",
-          source: "basemap",
-          minzoom: 6,
-          paint: {
-            "line-color": "#666",
-            "line-width": 1,
-          },
         },
         { id: "Int0", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["0"].background }, filter: ["==", "name", ""] },
         { id: "Int1", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["1"].background }, filter: ["==", "name", ""] },
@@ -538,7 +542,7 @@ function Mapinit() {
   layerMenu.appendChild(checkWrap);
 
   var TLControlWrapper = document.createElement("div");
-  TLControlWrapper.className = "maplibregl-ctrl maplibregl-ctrl-group transparent-ctrl";
+  TLControlWrapper.className = "left_ctrl maplibregl-ctrl maplibregl-ctrl-group transparent-ctrl";
   TLControlWrapper.appendChild(layerButton);
   TLControlWrapper.appendChild(layerMenu);
   map.addControl(
@@ -683,14 +687,6 @@ function overlaySelect(layerName, checked) {
       over4_visiblity = checked;
       document.getElementById("legend2").style.display = over3_visiblity || over4_visiblity ? "inline-block" : "none";
     }
-
-    if (!tilemapActive && overlayCount == 0) {
-      map.setLayoutProperty("basemap_fill", "visibility", "visible");
-      map.setLayoutProperty("worldmap_fill", "visibility", "visible");
-    } else {
-      map.setLayoutProperty("basemap_fill", "visibility", "none");
-      map.setLayoutProperty("worldmap_fill", "visibility", "none");
-    }
   }
   var selectedLayer = [];
   document.getElementsByName("overlaySelect").forEach(function (elm) {
@@ -721,17 +717,17 @@ function mapFillSwitch(val) {
   }
 
   if (LgIntMapDraw) {
-    document.querySelectorAll(".ShindoIcon,.MaxShindoIcon,#ShindoSample").forEach(function (elm) {
+    document.querySelectorAll(".ShindoIcon,.MaxShindoIcon").forEach(function (elm) {
       elm.style.display = "none";
     });
-    document.querySelectorAll(".LgIntIcon,.MaxLgIntIcon,#LngIntSample").forEach(function (elm) {
+    document.querySelectorAll(".LgIntIcon,.MaxLgIntIcon").forEach(function (elm) {
       elm.style.display = "block";
     });
   } else {
-    document.querySelectorAll(".ShindoIcon,.MaxShindoIcon,#ShindoSample").forEach(function (elm) {
+    document.querySelectorAll(".ShindoIcon,.MaxShindoIcon").forEach(function (elm) {
       elm.style.display = "block";
     });
-    document.querySelectorAll(".LgIntIcon,.MaxLgIntIcon,#LngIntSample").forEach(function (elm) {
+    document.querySelectorAll(".LgIntIcon,.MaxLgIntIcon").forEach(function (elm) {
       elm.style.display = "none";
     });
   }
@@ -1397,6 +1393,7 @@ function add_Pref_info(name, maxInt) {
   var color1 = NormalizeShindo(maxInt, 2);
   newDiv.innerHTML = "<span style='background:" + color1[0] + ";color:" + color1[1] + ";'>" + maxInt + "</span>" + name;
   newDiv.classList.add("ShindoItem", "ShindoItem1");
+  newDiv.setAttribute("tabindex", 0);
   newDiv.addEventListener("click", function () {
     this.classList.toggle("has-open");
     this.nextElementSibling.classList.toggle("open");
@@ -1417,6 +1414,7 @@ function add_Area_info(name, maxInt) {
   var color = NormalizeShindo(maxInt, 2);
   newDiv.innerHTML = "<span style='background:" + color[0] + ";color:" + color[1] + ";'>" + maxInt + "</span>" + name;
   newDiv.classList.add("ShindoItem", "ShindoItem2");
+  newDiv.setAttribute("tabindex", 0);
   newDiv.addEventListener("click", function () {
     this.classList.toggle("has-open");
     this.nextElementSibling.classList.toggle("open");
@@ -1432,6 +1430,7 @@ function add_Area_info(name, maxInt) {
     var newDiv3 = document.createElement("div");
     newDiv3.innerHTML = "<span style='background:" + color[0] + ";color:" + color[1] + ";'>" + maxInt + "</span>" + name;
     newDiv3.classList.add("ShindoItem", "ShindoItem2");
+    newDiv.setAttribute("tabindex", 0);
 
     removeChild(document.getElementById("homeShindo"));
     document.getElementById("homeShindoWrap").style.display = "block";
@@ -1495,6 +1494,7 @@ function add_City_info(name, maxInt) {
     var color3 = NormalizeShindo(maxInt, 2);
     newDiv.innerHTML = "<span style='background:" + color3[0] + ";color:" + color3[1] + ";'>" + maxInt + "</span>" + name;
     newDiv.classList.add("ShindoItem", "ShindoItem3");
+    newDiv.setAttribute("tabindex", 0);
     newDiv.addEventListener("click", function () {
       this.classList.toggle("has-open");
       this.nextElementSibling.classList.toggle("open");
