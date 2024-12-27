@@ -283,9 +283,9 @@ function Mapinit() {
           layout: { visibility: "none" },
         },
         {
-          id: "basemap_fill",
+          id: "prefmap_fill",
           type: "fill",
-          source: "basemap",
+          source: "prefmap",
           paint: {
             "fill-color": "#333",
             "fill-opacity": 1,
@@ -645,11 +645,11 @@ function layerSelect(layerName) {
     tilemapActive = true;
     map.setLayoutProperty(layerName, "visibility", "visible");
   } else tilemapActive = false;
-  if (!tilemapActive && overlayCount == 0) {
-    map.setLayoutProperty("basemap_fill", "visibility", "visible");
+  if (!tilemapActive) {
+    map.setLayoutProperty("prefmap_fill", "visibility", "visible");
     map.setLayoutProperty("worldmap_fill", "visibility", "visible");
   } else {
-    map.setLayoutProperty("basemap_fill", "visibility", "none");
+    map.setLayoutProperty("prefmap_fill", "visibility", "none");
     map.setLayoutProperty("worldmap_fill", "visibility", "none");
   }
   config.data.layer = layerName;
@@ -665,7 +665,6 @@ mapSelect.forEach(function (elm) {
     layerSelect(this.value);
   });
 });
-var overlayCount = 0;
 function overlaySelect(layerName, checked) {
   if (layerName == "kmoni_points") return;
   var visibility = checked ? "visible" : "none";
@@ -675,7 +674,6 @@ function overlaySelect(layerName, checked) {
         map.setLayoutProperty(elm, "visibility", visibility);
       });
     } else {
-      overlayCount += checked ? 1 : -1;
       map.setLayoutProperty(layerName, "visibility", visibility);
     }
 

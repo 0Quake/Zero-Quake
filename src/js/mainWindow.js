@@ -668,11 +668,11 @@ function layerSelect(layerName) {
     map.setLayoutProperty(layerName, "visibility", "visible");
   } else tilemapActive = false;
 
-  if (!tilemapActive && overlayCount == 0) {
-    map.setLayoutProperty("basemap_fill", "visibility", "visible");
+  if (!tilemapActive) {
+    map.setLayoutProperty("prefmap_fill", "visibility", "visible");
     map.setLayoutProperty("worldmap_fill", "visibility", "visible");
   } else {
-    map.setLayoutProperty("basemap_fill", "visibility", "none");
+    map.setLayoutProperty("prefmap_fill", "visibility", "none");
     map.setLayoutProperty("worldmap_fill", "visibility", "none");
   }
   config.data.layer = layerName;
@@ -683,7 +683,6 @@ function layerSelect(layerName) {
   });
 }
 
-var overlayCount = 0;
 function overlaySelect(layerName, checked) {
   var visibility = checked ? "visible" : "none";
   if (layerName == "kmoni_points") {
@@ -713,7 +712,6 @@ function overlaySelect(layerName, checked) {
         });
       } catch (e) {}
     } else {
-      overlayCount += checked ? 1 : -1;
       map.setLayoutProperty(layerName, "visibility", visibility);
     }
 
@@ -1019,9 +1017,9 @@ function init() {
         },
 
         {
-          id: "basemap_fill",
+          id: "prefmap_fill",
           type: "fill",
-          source: "basemap",
+          source: "prefmap",
           paint: {
             "fill-color": "#333",
             "fill-opacity": 1,
@@ -1224,7 +1222,7 @@ function init() {
   });
   map.touchZoomRotate.disableRotation();
 
-  map.on("click", "basemap_fill", function (e) {
+  map.on("click", "prefmap_fill", function (e) {
     e.originalEvent.cancelBubble = true;
   });
   var nied_popup = function (e) {
