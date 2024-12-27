@@ -285,7 +285,7 @@ function epiCenterUpdate(elm) {
       epicenterElm.markerElm.setLngLat([longitude, latitude]);
       epicenterElm.latitude = latitude;
       epicenterElm.longitude = longitude;
-      if (tooltipContent) epicenterElm.ESPopup2.setLngLat([longitude, latitude]).setText(tooltipContent);
+      if (tooltipContent) epicenterElm.ESPopup2.setLngLat([longitude, latitude]).setText(tooltipContent).addTo(map);
       else epicenterElm.ESPopup2.remove();
     } else {
       //初報
@@ -299,10 +299,9 @@ function epiCenterUpdate(elm) {
       map.zoomTo(8, { animate: false });
 
       var ESPopup = new maplibregl.Popup({ closeButton: false, closeOnClick: false, className: "epiCenterTooltip", offset: [0, -17] }).setText(EEWIDTmp).setLngLat([longitude, latitude]).addTo(map);
-      var ESPopup2;
-      if (tooltipContent) {
-        ESPopup2 = new maplibregl.Popup({ closeButton: false, closeOnClick: false, className: "epiCenterTooltip2", offset: [0, 37] }).setLngLat([longitude, latitude]).setText(tooltipContent).addTo(map);
-      }
+      var ESPopup2 = new maplibregl.Popup({ closeButton: false, closeOnClick: false, className: "epiCenterTooltip2", offset: [0, 37] }).setLngLat([longitude, latitude]);
+      if (tooltipContent) ESPopup2.setText(tooltipContent).addTo(map);
+
       var ECMarker = new maplibregl.Marker({ element: img }).setLngLat([longitude, latitude]).addTo(map);
 
       epiCenter.push({ eid: eid, markerElm: ECMarker, latitude: latitude, longitude: longitude, EEWID: Number(EEWIDTmp), ESPopup: ESPopup, ESPopup2: ESPopup2 });
@@ -313,29 +312,21 @@ function epiCenterUpdate(elm) {
     }
   }
 
-  var EQElm = psWaveList.find(function (elm) {
+  var pswaveFind = psWaveList.find(function (elm) {
     return elm.id == eid;
   });
-  if (EQElm) {
-    var pswaveFind = psWaveList.find(function (elm2) {
-      return elm2.id == eid;
-    });
-    pswaveFind.data.latitude = latitude;
-    pswaveFind.data.longitude = longitude;
-    pswaveFind.data.originTime = elm.origin_time;
+  if (pswaveFind) {
+    if (latitude) pswaveFind.data.latitude = latitude;
+    if (longitude) pswaveFind.data.longitude = longitude;
+    if (elm.origin_time) pswaveFind.data.originTime = elm.origin_time;
 
-    if (EQElm.SIElm) EQElm.SIElm.setLngLat([longitude, latitude]);
+    if (pswaveFind.SIElm) pswaveFind.SIElm.setLngLat([longitude, latitude]);
   }
   latitudeTmp = latitude;
   longitudeTmp = longitude;
-  if (psWaveList.length > 0) {
-    document.querySelectorAll(".PWave,.SWave").forEach(function (elm) {
-      elm.style.transitionTimingFunction = "step-start";
-    });
-    psWaveList.forEach(function (elm) {
-      psWaveCalc(elm.id);
-    });
-  }
+  psWaveList.forEach(function (elm) {
+    psWaveCalc(elm.id);
+  });
 }
 //震源クリア
 function epiCenterClear(eid) {
@@ -1784,7 +1775,7 @@ function psWaveCalc(eid) {
   if (pswaveFind) {
     var TimeTableTmp = pswaveFind.TimeTable;
     var SWmin;
-    var distance = (new Date() - Replay - pswaveFind.data.originTime) / 1000;
+    var distance = (new Date() - Replay - new Date(pswaveFind.data.originTime)) / 1000;
 
     var PRadius = null;
     var SRadius = null;
