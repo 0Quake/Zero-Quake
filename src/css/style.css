@@ -426,6 +426,12 @@ h2 {
   font-size: 15px;
   text-align: center;
   line-height: 30px;
+  height: 40px;
+  line-height: 40px;
+}
+.NoEpicenterElement {
+  font-size: 14px;
+  color: #ccc;
 }
 .magnitude {
   font-size: 34px;
