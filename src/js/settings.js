@@ -683,10 +683,8 @@ function TTSvolumeSet(val) {
 }
 function selectBoxSet(selectElm, TargetValue) {
   selectElm.querySelectorAll("option").forEach(function (elm) {
-    if (elm.value == TargetValue) {
-      elm.setAttribute("selected", true);
-      return true;
-    }
+    if (elm.value == TargetValue) elm.setAttribute("selected", "");
+    else if (elm.hasAttribute("selected")) elm.removeAttribute("selected");
   });
 }
 
