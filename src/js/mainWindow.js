@@ -1644,7 +1644,7 @@ function JMAEstShindoControl(data) {
       elm.warnZones.forEach(function (elm2) {
         var old_int;
         if (JMAEstShindoData[elm2.Name]) old_int = config.Info.EEW.IntType == "max" ? JMAEstShindoData[elm2.Name].IntTo : JMAEstShindoData[elm2.Name].IntFrom;
-        var new_int = config.Info.EEW.IntType == "max" ? elm2.IntTo : elm2EEW.IntFrom;
+        var new_int = config.Info.EEW.IntType == "max" ? elm2.IntTo : elm2.IntFrom;
         if (!old_int || old_int < new_int) {
           JMAEstShindoData[elm2.Name] = elm2;
         }
