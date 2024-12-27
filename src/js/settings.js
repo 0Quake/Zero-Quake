@@ -399,9 +399,9 @@ function mapInit() {
           filter: ["==", "name", ""],
         },
         {
-          id: "basemap_fill",
+          id: "prefmap_fill",
           type: "fill",
-          source: "basemap",
+          source: "prefmap",
           paint: {
             "fill-color": "#333",
             "fill-opacity": 1,
