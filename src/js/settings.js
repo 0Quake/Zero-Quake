@@ -4,6 +4,7 @@ var markerElm;
 var Replay;
 var openAtLogin = false;
 var tsunamiSect;
+var EQSect;
 var tsunamiFeatures;
 var EQSectFeatures;
 var defaultConfigVal;
@@ -77,10 +78,12 @@ function configDataDraw() {
   selectBoxSet(document.getElementById("EEW_userIntFilter"), config.Info.EEW.userIntThreshold);
   selectBoxSet(document.getElementById("saibun"), config.home.Section);
   tsunamiSect = config.home.TsunamiSect;
+  EQSect = config.home.Section;
   selectBoxSet(document.getElementById("tsunamiSect"), tsunamiSect);
   if (map) {
     map.setFilter("tsunami_LINE_selected", ["==", "name", tsunamiSect]);
     map.setFilter("tsunami_LINE_selected_2", ["==", "name", tsunamiSect]);
+    map.setFilter("selected_sect", ["==", "name", EQSect]);
   }
 
   TTSvolumeSet(config.notice.voice_parameter.volume);
@@ -410,6 +413,19 @@ function mapInit() {
           maxzoom: 22,
         },
         {
+          id: "selected_sect",
+          type: "fill",
+          source: "basemap",
+          paint: {
+            "fill-color": "rgba(255, 146, 146, 0.5)",
+            "fill-opacity": 1,
+          },
+          minzoom: 0,
+          maxzoom: 22,
+          filter: ["==", "name", ""],
+        },
+
+        {
           id: "basemap_LINE",
           type: "line",
           source: "basemap",
@@ -512,7 +528,7 @@ function mapInit() {
   map.touchZoomRotate.disableRotation();
   map.addControl(new maplibregl.NavigationControl(), "top-right");
 
-  map.on("click", "basemap_fill", (e) => {
+  map.on("click", (e) => {
     document.getElementById("latitude").value = e.lngLat.lat;
     document.getElementById("longitude").value = e.lngLat.lng;
     MapReDraw();
@@ -528,8 +544,7 @@ function mapInit() {
       map.setFilter("tsunami_LINE_selected", ["==", "name", tsunamiSect]);
       map.setFilter("tsunami_LINE_selected_2", ["==", "name", tsunamiSect]);
     }
-    tsunamiFeatures = map.querySourceFeatures("tsunami");
-    EQSectFeatures = map.querySourceFeatures("basemap");
+    if (EQSect) map.setFilter("selected_sect", ["==", "name", EQSect]);
   });
 }
 
@@ -540,25 +555,71 @@ function MapReDraw() {
   if (!lat) lat = 0;
   if (!lng) lng = 0;
 
-  var inside_sect = EQSectFeatures.find(function (elm) {
+  tsunamiFeatures = map.querySourceFeatures("tsunami");
+  EQSectFeatures = map.querySourceFeatures("basemap");
+
+  var selected_sect = EQSectFeatures.find(function (elm) {
     return turf.booleanPointInPolygon([lng, lat], elm);
   });
 
-  if (inside_sect) selectBoxSet(document.getElementById("saibun"), inside_sect.properties.name);
-  else {
-    document.getElementById("longitude").value = lng = beforeCordinates[0];
-    document.getElementById("latitude").value = lat = beforeCordinates[1];
-    return;
+  console.log(1111, [lng, lat], selected_sect);
+
+  if (!selected_sect) {
+    var minDistance = Infinity;
+    function calcDist(line) {
+      if (line.geometry.type == "MultiLineString") {
+        var distances = line.geometry.coordinates.map(function (cd) {
+          return turf.pointToLineDistance(turf.point([lng, lat]), turf.lineString(cd), { units: "kilometers" });
+        });
+        return Math.min(...distances);
+      } else if (line.geometry.type == "LineString") {
+        return turf.pointToLineDistance(turf.point([lng, lat]), line, { units: "kilometers" });
+      }
+    }
+    EQSectFeatures.forEach(function (poly) {
+      var elm = turf.polygonToLine(poly);
+      if (elm.type == "Feature") {
+        var distance = calcDist(elm);
+      } else if (elm.type == "FeatureCollection") {
+        var distances = elm.features.map(function (elm2) {
+          return calcDist(elm2);
+        });
+        var distance = Math.min(...distances);
+      }
+      // 距離を求める
+      if (minDistance > distance) {
+        minDistance = distance;
+        selected_sect = elm;
+      }
+    });
+
+    //document.getElementById("longitude").value = lng = beforeCordinates[0];
+    //document.getElementById("latitude").value = lat = beforeCordinates[1];
+    //return;
+  }
+
+  console.log(Boolean(selected_sect), selected_sect);
+  if (selected_sect) {
+    if (selected_sect.type == "FeatureCollection") EQSect = selected_sect.features[0].properties.name;
+    else EQSect = selected_sect.properties.name;
+    map.setFilter("selected_sect", ["==", "name", EQSect]);
+    selectBoxSet(document.getElementById("saibun"), EQSect);
+    console.log(2, EQSect);
   }
 
   beforeCordinates = [lng, lat];
 
-  var tsunamiSect;
   var minDistance = Infinity;
   tsunamiFeatures.forEach(function (elm) {
-    coordinates = turf.centroid(elm).geometry.coordinates;
     // 距離を求める
-    var distance = turf.distance(turf.point([lng, lat]), coordinates);
+    if (elm.geometry.type == "MultiLineString") {
+      var distances = elm.geometry.coordinates.map(function (cd) {
+        return turf.pointToLineDistance(turf.point([lng, lat]), turf.lineString(cd), { units: "kilometers" });
+      });
+      var distance = Math.min(...distances);
+    } else if (elm.geometry.type == "LineString") {
+      var distance = turf.pointToLineDistance(turf.point([lng, lat]), elm, { units: "kilometers" });
+    }
     if (minDistance > distance) {
       minDistance = distance;
       tsunamiSect = elm.properties.name;
@@ -578,14 +639,23 @@ function MapReDraw() {
     .then(function (res) {
       return res.json();
     })
-    .then(function (json) {
-      document.getElementById("arv").value = json.features[0].properties.ARV;
+    .then(function (json, res) {
+      if (json.features && json.features[0].properties) document.getElementById("arv").value = json.features[0].properties.ARV;
+      else document.getElementById("arv").value = 1;
+    })
+    .catch(function () {
+      document.getElementById("arv").value = 1;
     });
 }
 document.getElementById("tsunamiSect").addEventListener("change", function () {
   tsunamiSect = this.value;
   map.setFilter("tsunami_LINE_selected", ["==", "name", this.value]);
   map.setFilter("tsunami_LINE_selected_2", ["==", "name", this.value]);
+});
+
+document.getElementById("saibun").addEventListener("change", function () {
+  EQSect = this.value;
+  map.setFilter("selected_sect", ["==", "name", EQSect]);
 });
 
 var TTSspeed = 1;
