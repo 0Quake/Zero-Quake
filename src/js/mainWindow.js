@@ -1406,7 +1406,7 @@ function init() {
   map.on("load", async () => {
     var image = await map.loadImage("./img/AlertOverlay.png");
     map.addImage("pattern", image.data);
-    map.addLayer({ id: "Alert", type: "fill", source: "basemap", paint: { "fill-pattern": "pattern" }, filter: ["==", "name", ""] });
+    map.addLayer({ id: "Alert", type: "fill", source: "basemap", paint: { "fill-pattern": "pattern" }, filter: ["==", "name", ""] }, "lake_fill");
 
     window.electronAPI.messageReturn({
       action: "tsunamiReqest",
