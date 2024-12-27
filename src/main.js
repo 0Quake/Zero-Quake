@@ -2130,7 +2130,7 @@ function MargeEEW(data) {
     if (data.source == "simulation" && !data.isPlum) {
       var estIntTmp = {};
       if (!data.is_cancel) {
-        if (!data.userIntensity) data.userIntensity = calcInt(data.magnitude, data.depth, data.latitude, data.longitude, config.home.latitude, config.home.longitude, config.home.arv);
+        if (!data.userIntensity) data.userIntensity = calcInt(data.magnitude, data.depth, data.latitude, data.longitude, config.home.latitude, config.home.longitude, config.home.arv, config.Info.EEW.IntType == "max");
         if (!data.arrivalTime) {
           for (let index = 0; index < data.TimeTable.length; index++) {
             var elm = data.TimeTable[index];
@@ -2149,7 +2149,7 @@ function MargeEEW(data) {
           Object.keys(sesmicPoints).forEach(function (key) {
             elm = sesmicPoints[key];
             if (elm.arv && elm.sect) {
-              var estInt = calcInt(data.magnitude, data.depth, data.latitude, data.longitude, elm.location[0], elm.location[1], elm.arv);
+              var estInt = calcInt(data.magnitude, data.depth, data.latitude, data.longitude, elm.location[0], elm.location[1], elm.arv, config.home.arv, config.Info.EEW.IntType == "max");
               if (maxShindo < estInt) maxShindo = estInt;
               if (!estIntTmp[elm.sect] || estInt > estIntTmp[elm.sect]) estIntTmp[elm.sect] = estInt;
             }
@@ -2167,7 +2167,7 @@ function MargeEEW(data) {
             if (!sectData) {
               data.warnZones.push({
                 Name: elm,
-                IntTo: shindo,
+                IntTo: shindo, //通常レンダラープロセスの方で下限・上限選択するが、シミュレーションではこの時点で選択済みのため同値を代入
                 IntFrom: shindo,
                 Alert: data.source == "simulation" ? NormalizeShindo(shindo, 5) >= 5 : null,
               });
@@ -2284,11 +2284,11 @@ function MargeEEW(data) {
   }
 }
 
-function calcInt(magJMA, depth, epiLat, epiLng, pointLat, pointLng, arv) {
+function calcInt(magJMA, depth, epiLat, epiLng, pointLat, pointLng, arv, max) {
   const magW = magJMA - 0.171;
   const long = 10 ** (0.5 * magW - 1.85) / 2;
   const epicenterDistance = geosailing(epiLat, epiLng, pointLat, pointLng);
-  const hypocenterDistance = (depth ** 2 + epicenterDistance ** 2) ** 0.5 - long;
+  const hypocenterDistance = (depth ** 2 + epicenterDistance ** 2) ** 0.5 - (max ? long : 0); //上限なら断層長を引かない
   const x = Math.max(hypocenterDistance, 3);
   const gpv600 = 10 ** (0.58 * magW + 0.0038 * depth - 1.29 - Math.log10(x + 0.0028 * 10 ** (0.5 * magW)) - 0.002 * x);
 
