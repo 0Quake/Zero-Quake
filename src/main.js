@@ -2185,7 +2185,7 @@ function MargeEEW(data) {
 
       //現在地の予想震度・到達予想時刻
       if (userSect) {
-        data.userIntensity = config.Info.EEW.IntType == "max" ? userSect.IntTo : userSect.IntFrom;
+        if (!data.userIntensity) data.userIntensity = config.Info.EEW.IntType == "max" ? userSect.IntTo : userSect.IntFrom;
         if (userSect.ArrivalTime) data.arrivalTime = userSect.ArrivalTime;
       }
     }

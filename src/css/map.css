@@ -578,7 +578,7 @@ body {
   margin: 2px;
   font-family: "M PLUS 1p";
   vertical-align: middle;
-  outline: solid 1px #62626c;
+  outline: solid 1px #999;
 }
 .IntLegend span {
   font-size: 12px;

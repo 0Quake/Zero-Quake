@@ -171,6 +171,7 @@ function EEW_AlertUpdate(data) {
       clone.querySelector(".maxInt").textContent = elm.maxInt ? elm.maxInt : "?";
       clone.querySelector(".maxInt").style.background = NormalizeShindo(elm.maxInt, 2)[0];
       clone.querySelector(".maxInt").style.color = NormalizeShindo(elm.maxInt, 2)[1];
+      clone.querySelector(".userLocation").textContent = config.home.name ? config.home.name : "現在地";
       clone.querySelector(".is_final").style.display = elm.is_final ? "inline" : "none";
       clone.querySelector(".canceled").style.display = elm.is_cancel ? "flex" : "none";
       clone.querySelector(".region_name").textContent = elm.region_name ? elm.region_name : "震源地域不明";
