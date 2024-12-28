@@ -7,7 +7,6 @@ html,
 body {
   margin: 0;
   padding: 0;
-  background: #222225;
   color: #fff;
 }
 #mapcontainer_Wrap {
@@ -544,6 +543,7 @@ td {
   font-family: "M PLUS 1p", sans-serif;
   border-radius: 100px;
   padding: 1px 5px;
+  outline: solid 1px #fff;
 }
 .shindoItem_S {
   border-radius: 4px;

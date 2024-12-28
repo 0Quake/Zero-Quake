@@ -695,7 +695,7 @@ function CreateMainWindow() {
           title: "Zero Quake",
           backgroundThrottling: false,
         },
-        backgroundColor: "#202227",
+        backgroundColor: "#222225",
         alwaysOnTop: config.system.alwaysOnTop,
       });
       if (Replay !== 0) {
@@ -874,7 +874,7 @@ function Create_SettingWindow(update) {
         parent: MainWindow ? MainWindow : null,
         center: true,
       },
-      backgroundColor: "#202227",
+      backgroundColor: "#222225",
       alwaysOnTop: config.system.alwaysOnTop,
     });
 
@@ -929,7 +929,7 @@ function Create_TsunamiWindow() {
         preload: path.join(__dirname, "js/preload.js"),
         title: "津波詳細情報 - Zero Quake",
       },
-      backgroundColor: "#202227",
+      backgroundColor: "#222225",
       alwaysOnTop: config.system.alwaysOnTop,
     });
 
@@ -974,7 +974,7 @@ function Create_NankaiWindow(type) {
           preload: path.join(__dirname, "js/preload.js"),
           title: "南海トラフ地震に関連する情報 - Zero Quake",
         },
-        backgroundColor: "#202227",
+        backgroundColor: "#222225",
         alwaysOnTop: config.system.alwaysOnTop,
       });
 
@@ -1031,7 +1031,7 @@ function EQInfo_createWindow(response, IS_WebURL) {
         preload: path.join(__dirname, "js/preload.js"),
         title: "地震詳細情報 - Zero Quake",
       },
-      backgroundColor: IS_WebURL ? null : "#202227",
+      backgroundColor: IS_WebURL ? null : "#222225",
       alwaysOnTop: config.system.alwaysOnTop,
     });
 
