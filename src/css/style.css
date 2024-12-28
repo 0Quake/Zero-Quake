@@ -464,6 +464,7 @@ h2 {
   margin: 2px;
   background: #222225;
   overflow: hidden;
+  outline: solid 2px rgb(0, 0, 0, 0.2);
 }
 .userLocationWrap {
   color: #ccc;
@@ -480,10 +481,21 @@ h2 {
 .countDown {
   font-size: 16px;
   font-family: "AzeretMono-Regular", ui-monospace;
+  stroke-width: 2px;
+  stroke: #222225;
+  paint-order: stroke;
 }
 .distance {
   font-size: 9px;
   font-family: "AzeretMono-Regular", ui-monospace;
+  stroke-width: 2px;
+  stroke: #222225;
+  paint-order: stroke;
+}
+.arrived {
+  stroke-width: 2px;
+  stroke: #222225;
+  paint-order: stroke;
 }
 
 .maxInt {
