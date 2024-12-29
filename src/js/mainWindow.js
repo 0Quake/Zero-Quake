@@ -1894,15 +1894,18 @@ function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrive
           "line-width": 2,
         },
       });
-      map.addLayer({
-        id: "SCircle_" + EventID + "_FILL",
-        type: "fill",
-        source: "SCircle_" + EventID,
-        paint: {
-          "fill-color": config.color.psWave.SwaveColor,
-          "fill-opacity": 0.15,
+      map.addLayer(
+        {
+          id: "SCircle_" + EventID + "_FILL",
+          type: "fill",
+          source: "SCircle_" + EventID,
+          paint: {
+            "fill-color": config.color.psWave.SwaveColor,
+            "fill-opacity": 0.15,
+          },
         },
-      });
+        "tsunami_Yoho"
+      );
 
       EQElm = psWaveList[psWaveList.length - 1];
 
