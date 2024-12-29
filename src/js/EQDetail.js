@@ -84,7 +84,7 @@ window.electronAPI.messageSend((event, request) => {
     Mapinit();
   } else if (request.action == "setting") {
     config = request.data;
-    document.getElementById("areaName").textContent = config.home.name;
+    document.getElementById("areaName").textContent = config.home.name ? config.home.name : "現在地";
   }
 });
 
@@ -449,6 +449,7 @@ function Mapinit() {
       ],
     },
   });
+  map.getCanvas().setAttribute("aria-label", "地図画面");
   map.touchZoomRotate.disableRotation();
   ZoomBounds = new maplibregl.LngLatBounds();
 
@@ -518,10 +519,12 @@ function Mapinit() {
 
   var layerButton = document.createElement("button");
   layerButton.innerText = "layers";
-  layerButton.title = "レイヤーの切り替え";
+  layerButton.setAttribute("title", "レイヤーの切り替え");
+  layerButton.setAttribute("aria-label", "レイヤー切り替え画面を開く");
   layerButton.setAttribute("id", "layerSwitch_toggle");
   layerButton.addEventListener("click", function () {
-    document.getElementById("menu_wrap").classList.toggle("menu_show");
+    document.getElementById("menu_wrap").classList.add("menu_show");
+    document.getElementById("menu").show();
   });
 
   var layerMenu = document.createElement("div");
@@ -567,7 +570,8 @@ function Mapinit() {
 
   var continueButton = document.createElement("button");
   continueButton.innerText = "sync";
-  continueButton.title = "情報を再取得";
+  continueButton.setAttribute("title", "情報を再取得");
+  continueButton.setAttribute("aria-label", "情報を再取得");
   continueButton.className = "material-icons-round";
   continueButton.addEventListener("click", function () {
     location.reload();
@@ -575,7 +579,9 @@ function Mapinit() {
 
   var homeButton = document.createElement("button");
   homeButton.innerText = "home";
-  homeButton.title = "ズーム範囲をリセット";
+  homeButton.setAttribute("title", "ズーム範囲をリセット");
+  homeButton.setAttribute("aria-label", "地図のズーム範囲をリセット");
+
   homeButton.className = "material-icons-round";
   homeButton.addEventListener("click", mapZoomReset);
 
@@ -619,18 +625,15 @@ function Mapinit() {
     img.src = "./img/homePin.svg";
     img.classList.add("homeIcon");
 
-    new maplibregl.Marker({ element: img }).setLngLat([config.home.longitude, config.home.latitude]).addTo(map);
+    var mkr = new maplibregl.Marker({ element: img }).setLngLat([config.home.longitude, config.home.latitude]).addTo(map);
+    mkr.getElement().removeAttribute("tabindex");
+    mkr.getElement().setAttribute("aria-hidden", true);
   }
 }
 
-document.getElementById("menu_wrap").addEventListener("click", function () {
-  document.getElementById("menu_wrap").classList.remove("menu_show");
-});
 document.getElementById("layerSwitch_close").addEventListener("click", function () {
   document.getElementById("menu_wrap").classList.remove("menu_show");
-});
-document.getElementById("menu").addEventListener("click", function (e) {
-  e.stopPropagation();
+  document.getElementById("menu").hide();
 });
 
 var mapSelect = document.getElementsByName("mapSelect");
@@ -998,8 +1001,6 @@ function jmaL_Fetch(url) {
       return res.json();
     })
     .then(function (json) {
-      InfoType_add("type-7");
-
       document.getElementById("LgInt_radioWrap").style.display = "block";
       if (json.Body.Earthquake) var LatLngDepth = json.Body.Earthquake.Hypocenter.Area.Coordinate.replaceAll("+", "｜+").replaceAll("-", "｜-").replaceAll("/", "").split("｜");
 
@@ -1400,14 +1401,21 @@ function add_Pref_info(name, maxInt) {
   newDiv.innerHTML = "<span style='background:" + color1[0] + ";color:" + color1[1] + ";'>" + maxInt + "</span>" + name;
   newDiv.classList.add("ShindoItem", "ShindoItem1");
   newDiv.setAttribute("tabindex", 0);
+  newDiv.setAttribute("aria-label", `${name}、震度${NormalizeShindo(maxInt, 1)}`);
+  newDiv.setAttribute("aria-expanded", "false");
+  newDiv.setAttribute("role", "treeitem");
   newDiv.addEventListener("click", function () {
     this.classList.toggle("has-open");
     this.nextElementSibling.classList.toggle("open");
+    this.setAttribute("aria-expanded", String(this.nextElementSibling.classList.contains("open")));
   });
 
   var newDiv2 = document.createElement("div");
   newDiv2.innerHTML = "<div></div>";
   newDiv2.classList.add("WrapLevel1", "close");
+  newDiv2.setAttribute("id", "WrapLevel1_" + name);
+  newDiv2.setAttribute("role", "group");
+  newDiv.setAttribute("aria-controls", "WrapLevel1_" + name);
   ShindoFragment.append(newDiv, newDiv2);
 
   document.getElementById("splash").style.display = "none";
@@ -1421,14 +1429,21 @@ function add_Area_info(name, maxInt) {
   newDiv.innerHTML = "<span style='background:" + color[0] + ";color:" + color[1] + ";'>" + maxInt + "</span>" + name;
   newDiv.classList.add("ShindoItem", "ShindoItem2");
   newDiv.setAttribute("tabindex", 0);
+  newDiv.setAttribute("aria-label", `細分区域 ${name}、震度${NormalizeShindo(maxInt, 1)}`);
+  newDiv.setAttribute("aria-expanded", "false");
+  newDiv.setAttribute("role", "treeitem");
   newDiv.addEventListener("click", function () {
     this.classList.toggle("has-open");
     this.nextElementSibling.classList.toggle("open");
+    this.setAttribute("aria-expanded", String(this.nextElementSibling.classList.contains("open")));
   });
 
   var newDiv2 = document.createElement("div");
   newDiv2.innerHTML = "<div></div>";
   newDiv2.classList.add("WrapLevel2", "close");
+  newDiv2.setAttribute("id", "WrapLevel2_" + name);
+  newDiv2.setAttribute("role", "group");
+  newDiv.setAttribute("aria-controls", "WrapLevel2_" + name);
 
   wrap[wrap.length - 1].append(newDiv, newDiv2);
 
@@ -1436,7 +1451,8 @@ function add_Area_info(name, maxInt) {
     var newDiv3 = document.createElement("div");
     newDiv3.innerHTML = "<span style='background:" + color[0] + ";color:" + color[1] + ";'>" + maxInt + "</span>" + name;
     newDiv3.classList.add("ShindoItem", "ShindoItem2");
-    newDiv.setAttribute("tabindex", 0);
+    newDiv3.setAttribute("tabindex", 0);
+    newDiv3.setAttribute("aria-label", `${config.home.name ? config.home.name : "現在地"}エリアの ${name}、震度${NormalizeShindo(maxInt, 1)}`);
 
     removeChild(document.getElementById("homeShindo"));
     document.getElementById("homeShindoWrap").style.display = "block";
@@ -1452,6 +1468,8 @@ function add_Area_info(name, maxInt) {
     var maxIntStr = NormalizeShindo(maxInt, 1);
     var AreaPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<div class='popupContent'><div class='shindoItem_S' style='background:" + color[0] + ";color:" + color[1] + "'>震度 " + maxIntStr + "</div><div class='pointName'>" + name + "</div><div class='pointHead'>細分区域</div></div><div></div>");
     markerElm = new maplibregl.Marker({ element: icon }).setLngLat([pointLocation[1], pointLocation[0]]).setPopup(AreaPopup);
+    markerElm.getElement().removeAttribute("tabindex");
+    markerElm.getElement().setAttribute("aria-hidden", true);
     intensityIcons.push(markerElm);
     ZoomBounds.extend([pointLocation[1], pointLocation[0]]);
   }
@@ -1501,17 +1519,25 @@ function add_City_info(name, maxInt) {
     newDiv.innerHTML = "<span style='background:" + color3[0] + ";color:" + color3[1] + ";'>" + maxInt + "</span>" + name;
     newDiv.classList.add("ShindoItem", "ShindoItem3");
     newDiv.setAttribute("tabindex", 0);
+    newDiv.setAttribute("aria-label", `市町村 ${name}、震度${NormalizeShindo(maxInt, 1)}`);
+    newDiv.setAttribute("aria-expanded", "false");
+    newDiv.setAttribute("role", "treeitem");
     newDiv.addEventListener("click", function () {
       this.classList.toggle("has-open");
       this.nextElementSibling.classList.toggle("open");
+      this.setAttribute("aria-expanded", String(this.nextElementSibling.classList.contains("open")));
     });
   }
 
   var newDiv2 = document.createElement("div");
   newDiv2.innerHTML = "<div></div>";
   newDiv2.classList.add("WrapLevel3");
-  if (name) newDiv2.classList.add("close");
-
+  if (name) {
+    newDiv2.classList.add("close");
+    newDiv2.setAttribute("id", "WrapLevel2_" + name);
+    newDiv2.setAttribute("role", "group");
+    newDiv.setAttribute("aria-controls", "WrapLevel2_" + name);
+  }
   wrap2[wrap2.length - 1].append(newDiv, newDiv2);
 }
 //観測点ごとの情報描画（リスト・地図プロット）
@@ -1525,6 +1551,10 @@ function add_IntensityStation_info(lat, lng, name, int) {
   var color4 = NormalizeShindo(int, 2);
   newDiv.innerHTML = "<span style='background:" + color4[0] + ";color:" + color4[1] + ";'>" + intStr + "</span>" + name;
   newDiv.classList.add("ShindoItem", "ShindoItem4");
+  newDiv.setAttribute("tabindex", 0);
+  newDiv.setAttribute("aria-label", `観測点 ${name}、震度${NormalizeShindo(int, 1)}`);
+  newDiv.setAttribute("role", "treeitem");
+
   const icon = document.createElement("div");
   icon.classList.add("ShindoIcon");
   icon.innerHTML = '<div style="background:' + color4[0] + ";color:" + color4[1] + '">' + intStr + "</div>";
@@ -1532,6 +1562,8 @@ function add_IntensityStation_info(lat, lng, name, int) {
   var mi_description = intStr == "未" ? "<div class = 'description'>震度5弱以上と考えられるが<br>現在震度を入手していない。</div>" : "";
   var PtPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<div class='popupContent'><div class='shindoItem' style='background:" + color4[0] + ";color:" + color4[1] + "'>震度 " + intStrLong + "</div><div class='pointName'>" + name + "</div>" + mi_description + "<div class='pointHead'>震度観測点</div></div><div></div>");
   markerElm = new maplibregl.Marker({ element: icon }).setLngLat([lng, lat]).setPopup(PtPopup).addTo(map);
+  markerElm.getElement().removeAttribute("tabindex");
+  markerElm.getElement().setAttribute("aria-hidden", true);
   intensityIcons.push(markerElm);
 
   wrap3[wrap3.length - 1].append(newDiv);
@@ -1636,14 +1668,22 @@ function add_Pref_infoL(name, lngInt) {
 
   newDiv.innerHTML = "<span style='background:" + color1[0] + ";color:" + color1[1] + ";'>" + lngInt + "</span>" + name;
   newDiv.classList.add("ShindoItemL", "ShindoItem1L");
+  newDiv.setAttribute("tabindex", 0);
+  newDiv.setAttribute("aria-label", `${name}、長周期地震動階級${lngInt}`);
+  newDiv.setAttribute("aria-expanded", "false");
+  newDiv.setAttribute("role", "treeitem");
   newDiv.addEventListener("click", function () {
     this.classList.toggle("has-open");
     this.nextElementSibling.classList.toggle("open");
+    this.setAttribute("aria-expanded", String(this.nextElementSibling.classList.contains("open")));
   });
 
   var newDiv2 = document.createElement("div");
   newDiv2.innerHTML = "<div></div>";
   newDiv2.classList.add("WrapLevel1L", "close");
+  newDiv2.setAttribute("id", "WrapLevel1L_" + name);
+  newDiv2.setAttribute("role", "group");
+  newDiv.setAttribute("aria-controls", "WrapLevel1L_" + name);
   LgIntFragment.append(newDiv, newDiv2);
 
   document.getElementById("splash").style.display = "none";
@@ -1656,14 +1696,22 @@ function add_Area_infoL(name, maxInt) {
   var newDiv = document.createElement("div");
   newDiv.innerHTML = "<span style='background:" + color[0] + ";color:" + color[1] + ";'>" + maxInt + "</span>" + name;
   newDiv.classList.add("ShindoItemL", "ShindoItem2L");
+  newDiv.setAttribute("tabindex", 0);
+  newDiv.setAttribute("aria-label", `細分区域 ${name}、長周期地震動階級${maxInt}`);
+  newDiv.setAttribute("aria-expanded", "false");
+  newDiv.setAttribute("role", "treeitem");
   newDiv.addEventListener("click", function () {
     this.classList.toggle("has-open");
     this.nextElementSibling.classList.toggle("open");
+    this.setAttribute("aria-expanded", String(this.nextElementSibling.classList.contains("open")));
   });
 
   var newDiv2 = document.createElement("div");
   newDiv2.innerHTML = "<div></div>";
   newDiv2.classList.add("WrapLevel2L", "close");
+  newDiv2.setAttribute("id", "WrapLevel2L_" + name);
+  newDiv2.setAttribute("role", "group");
+  newDiv.setAttribute("aria-controls", "WrapLevel2L_" + name);
 
   wrap[wrap.length - 1].append(newDiv, newDiv2);
 
@@ -1671,6 +1719,8 @@ function add_Area_infoL(name, maxInt) {
     var newDiv3 = document.createElement("div");
     newDiv3.innerHTML = "<span style='background:" + color[0] + ";color:" + color[1] + ";'>" + maxInt + "</span>" + name;
     newDiv3.classList.add("ShindoItemL", "ShindoItem2L");
+    newDiv3.setAttribute("tabindex", 0);
+    newDiv3.setAttribute("aria-label", `${config.home.name ? config.home.name : "現在地"}エリアの ${name}、長周期地震動階級${maxInt}`);
 
     removeChild(document.getElementById("homeShindoL"));
     document.getElementById("homeShindoWrap").style.display = "block";
@@ -1685,6 +1735,8 @@ function add_Area_infoL(name, maxInt) {
 
     var AreaPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<div class='popupContent'><div class='shindoItem_S' style='background:" + color[0] + ";color:" + color[1] + "'>長周期地震動階級 " + maxInt + "</div><div class='pointName'>" + name + "</div><div class='pointHead'>細分区域</div></div><div></div>");
     markerElm = new maplibregl.Marker({ element: icon }).setLngLat([pointLocation[1], pointLocation[0]]).setPopup(AreaPopup).addTo(map);
+    markerElm.getElement().removeAttribute("tabindex");
+    markerElm.getElement().setAttribute("aria-hidden", true);
     LgIntIcons.push(markerElm);
     ZoomBounds.extend([pointLocation[1], pointLocation[0]]);
   }
@@ -1716,6 +1768,10 @@ function add_IntensityStation_infoL(lat, lng, name, int) {
   var newDiv = document.createElement("div");
   newDiv.innerHTML = "<span style='background:" + color4[0] + ";color:" + color4[1] + ";'>" + int + "</span>" + name;
   newDiv.classList.add("ShindoItemL", "ShindoItem4L");
+  newDiv.setAttribute("tabindex", 0);
+  newDiv.setAttribute("aria-label", `観測点 ${name}、長周期地震動階級${int}`);
+  newDiv.setAttribute("aria-expanded", "false");
+  newDiv.setAttribute("role", "treeitem");
   wrap3[wrap3.length - 1].append(newDiv);
 
   const icon = document.createElement("div");
@@ -1724,6 +1780,8 @@ function add_IntensityStation_infoL(lat, lng, name, int) {
 
   var PtPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<div class='popupContent'><div class='shindoItem' style='background:" + color4[0] + ";color:" + color4[1] + "'>長周期地震動階級 " + intStr + "</div><div class='pointName'>" + name + "</div><div class='pointHead'>震度観測点</div></div><div></div>");
   markerElm = new maplibregl.Marker({ element: icon }).setLngLat([lng, lat]).setPopup(PtPopup).addTo(map);
+  markerElm.getElement().removeAttribute("tabindex");
+  markerElm.getElement().setAttribute("aria-hidden", true);
   LgIntIcons.push(markerElm);
 
   ZoomBounds.extend([lng, lat]);
@@ -1825,7 +1883,10 @@ function ConvertEQInfo(data) {
   EQInfoMarged = EQInfoTmp;
 
   if (EQInfoMarged.IntData) DrawIntensity(EQInfoMarged.IntData);
-  if (EQInfoMarged.LngIntData) DrawLgIntensity(EQInfoMarged.LngIntData);
+  if (EQInfoMarged.LngIntData) {
+    InfoType_add("type-7");
+    DrawLgIntensity(EQInfoMarged.LngIntData);
+  }
 
   document.getElementById("canceled").style.display = EQInfoMarged.cancel ? "flex" : "none";
 
@@ -1904,10 +1965,10 @@ function ConvertEQInfo(data) {
       }
     }
     if (TsunamiShortMsg) {
-      document.getElementById("TsunamiShortMsg").style.display = "block";
-      document.getElementById("TsunamiShortMsg").style.borderColor = TsunamiColor;
-      document.getElementById("TsunamiShortMsg").style.borderWidth = TsunamiColor ? "2px" : "";
-      document.getElementById("TsunamiShortMsg").style.color = TsunamiColor ? "#FFF" : "";
+      document.getElementById("TsunamiShortMsg_Wrap").style.display = "block";
+      document.getElementById("TsunamiShortMsg_Wrap").style.borderColor = TsunamiColor;
+      document.getElementById("TsunamiShortMsg_Wrap").style.borderWidth = TsunamiColor ? "2px" : "";
+      document.getElementById("TsunamiShortMsg_Wrap").style.color = TsunamiColor ? "#FFF" : "";
       document.getElementById("TsunamiShortMsg").innerText = TsunamiShortMsg;
     }
   }
@@ -1922,6 +1983,8 @@ function ConvertEQInfo(data) {
 
       var ESPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML("<div class='popupContent'><div class='epicenterTitle'>震央</div><div class='pointName'>" + EQInfo.epiCenter + "</div></div>");
       ESmarkerElm = new maplibregl.Marker({ element: img }).setLngLat([EQInfoMarged.lng, EQInfoMarged.lat]).setPopup(ESPopup).addTo(map);
+      ESmarkerElm.getElement().removeAttribute("tabindex");
+      ESmarkerElm.getElement().setAttribute("aria-hidden", true);
     } else ESmarkerElm.setLngLat([EQInfoMarged.lng, EQInfoMarged.lat]);
   }
 

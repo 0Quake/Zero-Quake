@@ -297,17 +297,12 @@ td {
   font-family: "BIZ UDPGothic", sans-serif;
   font-weight: bold;
 }
-.ShindoIcon,
-.MaxShindoIcon,
-.LgIntIcon,
-.MaxLgIntIcon {
-  transition: opacity 300ms;
-}
+
 .zoomLevel_1 .MaxShindoIcon,
 .zoomLevel_2 .MaxShindoIcon,
 .zoomLevel_1 .MaxLgIntIcon,
 .zoomLevel_2 .MaxLgIntIcon {
-  opacity: 1 !important;
+  visibility: visible;
   pointer-events: auto !important;
 }
 .zoomLevel_1 .MaxShindoIcon div,
@@ -329,19 +324,19 @@ td {
 .zoomLevel_1 .LgIntIcon,
 .zoomLevel_2 .LgIntIcon,
 .zoomLevel_3 .LgIntIcon {
-  opacity: 0 !important;
+  visibility: hidden;
   pointer-events: none !important;
 }
 
 .zoomLevel_4 .MaxShindoIcon,
 .zoomLevel_4 .MaxLgIntIcon {
-  opacity: 0 !important;
+  visibility: hidden;
   pointer-events: none !important;
 }
 
 .zoomLevel_4 .ShindoIcon,
 .zoomLevel_4 .LgIntIcon {
-  opacity: 1 !important;
+  visibility: visible;
   pointer-events: auto !important;
 }
 
@@ -571,7 +566,7 @@ td {
   text-align: center;
   color: #999;
 }
-#TsunamiShortMsg {
+#TsunamiShortMsg_Wrap {
   display: none;
   position: absolute;
   top: 5px;
@@ -591,8 +586,8 @@ td {
   padding: 0 10px;
   pointer-events: none;
 }
-#TsunamiShortMsg::before {
-  content: "tsunami";
+#TsunamiShortMsg_Wrap div {
+  display: inline-block;
   font-family: "Material Icons Round";
   vertical-align: middle;
   margin-right: 5px;

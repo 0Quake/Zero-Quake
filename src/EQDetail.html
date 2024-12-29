@@ -31,10 +31,13 @@
   <div id="mapcontainer_Wrap">
     <div id="mapcontainer" class="kmoni_hide"></div>
 
-    <div id="TsunamiShortMsg">震源付近で津波の恐れ</div>
+    <div id="TsunamiShortMsg_Wrap">
+      <div aria-hidden="true">tsunami</div>
+      <span id="TsunamiShortMsg">今後の情報に注意</span>
+    </div>
 
     <div id="menu_wrap">
-      <nav id="menu" class="menu">
+      <dialog id="menu" class="menu">
         <h2 class="popup_menubar">レイヤーの切り替え
           <button id="layerSwitch_close" title="閉じる">close</button>
         </h2>
@@ -58,7 +61,7 @@
             <label><input type="checkbox" name="overlaySelect" value="hinanjo" id="hinanjo">避難所（地震/津波）</label>
           </div>
         </div>
-      </nav>
+      </dialog>
     </div>
 
     <div id="legendWrap">
@@ -73,7 +76,7 @@
   </div>
 
   <main>
-    <div id="plzScroll">
+    <div id="plzScroll" aria-hidden="true">
       <div class="material-icons-round">keyboard_double_arrow_down</div>スクロールして詳細を表示
     </div>
     <div id="infoKind">
@@ -123,7 +126,7 @@
           <div class="NODataCaption">情報がありません</div>
         </div>
         <div id="LinkWrap">
-          <button id="EEWLink">緊急地震速報の内容</button>
+          <button id="EEWLink" aria-label="新しいウィンドウで緊急地震速報の内容を見る">緊急地震速報の内容</button>
         </div>
       </div>
 
@@ -134,21 +137,22 @@
           <div id="homeShindoL"></div>
         </div>
 
+
         <h2>
-          <button id="AllOpen" class="material-icons-round" title="すべて展開">unfold_more</button>
+          <button id="AllOpen" class="material-icons-round" title="すべて展開" aria-label="各地の震度リストをすべて展開する">unfold_more</button>
           各地の震度
-          <button id="AllClose" class="material-icons-round" title="すべて折り畳み">unfold_less</button>
+          <button id="AllClose" class="material-icons-round" title="すべて折り畳み" aria-label="各地の震度リストをすべて折りたたむ">unfold_less</button>
         </h2>
-        <div id="Shindo">
+        <div id="Shindo" role="tree" aria-label="各地の震度">
           <div class="NODataCaption">情報がありません</div>
         </div>
         <div id="lngintListWrap">
           <h2>
-            <button id="AllOpenL" class="material-icons-round" title="すべて展開">unfold_more</button>
+            <button id="AllOpenL" class="material-icons-round" title="すべて展開" aria-label="各地の長周期地震動階級リストをすべて展開する">unfold_more</button>
             各地の長周期地震動階級
-            <button id="AllCloseL" class="material-icons-round" title="すべて折り畳み">unfold_less</button>
+            <button id="AllCloseL" class="material-icons-round" title="すべて折り畳み" aria-label="各地の長周期地震動階級リストをすべて折りたたむ">unfold_less</button>
           </h2>
-          <div id="LngInt">
+          <div id="LngInt" role="tree" aria-label="各地の長周期地震動階級">
             <div class="NODataCaption">情報がありません</div>
           </div>
 

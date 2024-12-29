@@ -50,6 +50,15 @@ function SetShindoColor() {
   root.style.setProperty("--TsunamiYohoColor", config.color.Tsunami.TsunamiYohoColor);
 }
 
+window.addEventListener("load", function () {
+  document.querySelectorAll(".tabmenu").forEach(function (elm2) {
+    elm2.setAttribute("aria-selected", elm2.classList.contains("active_tabmenu"));
+  });
+
+  document.querySelectorAll(".active_tabcontent").forEach(function (elm2) {
+    elm2.setAttribute("aria-selected", elm2.classList.contains("active_tabcontent"));
+  });
+});
 //タブUI
 document.querySelectorAll(".tabmenu").forEach(function (elm) {
   elm.addEventListener("click", function () {
@@ -57,26 +66,32 @@ document.querySelectorAll(".tabmenu").forEach(function (elm) {
 
     document.querySelectorAll("#" + id + "_bar .active_tabmenu").forEach(function (elm2) {
       elm2.classList.remove("active_tabmenu");
+      elm2.setAttribute("aria-selected", false);
     });
 
     document.querySelectorAll("#" + id + "_content > .active_tabcontent").forEach(function (elm2) {
       elm2.classList.remove("active_tabcontent");
+      elm2.setAttribute("aria-selected", false);
     });
     elm.classList.add("active_tabmenu");
-    document.getElementById(elm.dataset.contentid).classList.add("active_tabcontent");
+    document.getElementById(elm.getAttribute("aria-controls")).classList.add("active_tabcontent");
+    document.getElementById(elm.getAttribute("aria-controls")).setAttribute("aria-selected", true);
+    elm.setAttribute("aria-selected", true);
   });
 });
 document.querySelectorAll(".tabgroup").forEach(function (elm) {
   elm.addEventListener("click", function () {
     document.querySelectorAll(".active_tabgroup").forEach(function (elm2) {
       elm2.classList.remove("active_tabgroup");
+      elm2.setAttribute("aria-selected", false);
     });
     document.querySelectorAll(".active_tabgroupContent").forEach(function (elm2) {
       elm2.classList.remove("active_tabgroupContent");
+      elm2.setAttribute("aria-selected", false);
     });
     elm.classList.add("active_tabgroup");
-    document.getElementById(elm.dataset.contentid).classList.add("active_tabgroupContent");
-    document.getElementById(elm.dataset.contentid).querySelector(".tabmenu").click();
+    document.getElementById(elm.getAttribute("aria-controls")).classList.add("active_tabgroupContent");
+    document.getElementById(elm.getAttribute("aria-controls")).querySelector(".tabmenu").click();
   });
 });
 
@@ -233,6 +248,9 @@ function NormalizeMMI(str, responseType) {
         [config.color.Shindo["7"].background, config.color.Shindo["7"].color],
       ];
       break;
+    case 3:
+      var ConvTable = ["不明", "Ⅰ", "Ⅱ", "Ⅲ", "Ⅳ", "Ⅴ", "Ⅵ", "Ⅶ", "Ⅷ", "Ⅸ", "Ⅹ", "Ⅺ", "Ⅻ"];
+      break;
   }
   return ConvTable[ShindoTmp];
 }
@@ -262,6 +280,7 @@ function NormalizeDate(type, date) {
   if (Number.isNaN(date.getTime())) return "";
 
   var YYYY = String(date.getFullYear());
+  var YY = String(date.getFullYear()).slice(-2);
   var MM = String(date.getMonth() + 1).padStart(2, "0");
   var DD = String(date.getDate()).padStart(2, "0");
   var hh = String(date.getHours()).padStart(2, "0");
@@ -273,6 +292,9 @@ function NormalizeDate(type, date) {
   var m = String(date.getMinutes());
   var s = String(date.getSeconds());
   var isToday = date.toDateString() == new Date().toDateString();
+  if (typeof type === "string" || type instanceof String) {
+    return type.replaceAll("YYYY", YYYY).replaceAll("YY", YYYY).replaceAll("MM", MM).replaceAll("DD", DD).replaceAll("hh", hh).replaceAll("mm", mm).replaceAll("ss", ss).replaceAll("M", M).replaceAll("D", D).replaceAll("h", h).replaceAll("m", m).replaceAll("s", s);
+  }
   switch (type) {
     case 1:
       return YYYY + MM + DD + hh + mm + ss;
@@ -346,6 +368,8 @@ const moveFocus = (movement, event) => {
 window.addEventListener("keydown", (event) => {
   if (event.key == "ArrowDown") moveFocus(+1, event);
   else if (event.key == "ArrowUp") moveFocus(-1, event);
+  else if (event.key == "ArrowRight") moveFocus(+1, event);
+  else if (event.key == "ArrowLeft") moveFocus(-1, event);
   else if ((event.key == "Enter" || event.key == " ") && document.activeElement) {
     var tagname = document.activeElement.tagName;
     if (tagname == "DIV" || tagname == "SPAN") document.activeElement.dispatchEvent(new PointerEvent("click"));

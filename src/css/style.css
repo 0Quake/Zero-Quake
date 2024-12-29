@@ -566,7 +566,7 @@ td {
   height: 50vh;
 }
 
-#tab1_bar {
+#bar1 {
   position: relative;
   width: 30px;
   flex-shrink: 0;
@@ -580,13 +580,13 @@ td {
   overflow-x: hidden;
   white-space: nowrap;
 }
-#tab1_bar::-webkit-scrollbar {
+#bar1::-webkit-scrollbar {
   display: none;
 }
-#tab1_bar.tabmenu {
+#bar1.tabmenu {
   width: 30px;
 }
-#tab1_bar .material-icons-round {
+#bar1 .material-icons-round {
   opacity: 0.8;
   margin: 0 5px;
 }
@@ -656,7 +656,7 @@ td {
   margin: 0 4px;
   height: 22px;
 }
-#tab1_bar .tabmenu {
+#bar1 .tabmenu {
   margin: 3px 0;
   border-radius: 0 7px 7px 0;
 }
@@ -686,12 +686,6 @@ td {
   overflow: auto;
 }
 .active_tabcontent {
-  display: block;
-}
-.tabgroupContent {
-  display: none;
-}
-.active_tabgroupContent {
   display: block;
 }
 #tab1_content2 {

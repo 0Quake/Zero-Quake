@@ -3684,6 +3684,9 @@ function NormalizeDate(type, date) {
     var m = String(date.getMinutes());
     var s = String(date.getSeconds());
     var isToday = date.toDateString() == new Date().toDateString();
+    if (typeof type === "string" || type instanceof String) {
+      return type.replaceAll("YYYY", YYYY).replaceAll("YY", YYYY).replaceAll("MM", MM).replaceAll("DD", DD).replaceAll("hh", hh).replaceAll("mm", mm).replaceAll("ss", ss).replaceAll("M", M).replaceAll("D", D).replaceAll("h", h).replaceAll("m", m).replaceAll("s", s);
+    }
     switch (type) {
       case 1:
         return YYYY + MM + DD + hh + mm + ss;

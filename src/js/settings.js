@@ -145,7 +145,27 @@ function configDataDraw() {
         document.getElementById("BoyomiVoiceSelect").appendChild(VoiceOption);
       });
     });
+
+  disabled_control();
 }
+
+function disabled_control() {
+  var a = document.getElementById("NotificationSound").checked;
+  var b = document.getElementById("Bypass_threshold").checked;
+  document.getElementById("M_threshold").disabled = !a || b;
+  document.getElementById("maxI_threshold").disabled = !a || b;
+  document.getElementById("Bypass_threshold").disabled = !a;
+
+  var a = document.getElementById("Tsunami_NotificationSound").checked;
+  var b = document.getElementById("Tsunami_Bypass_threshold").checked;
+  document.getElementById("Tsunami_L_threshold").disabled = !a || b;
+  document.getElementById("Tsunami_threshold").disabled = !a || b;
+  document.getElementById("Tsunami_Bypass_threshold").disabled = !a;
+}
+document.getElementById("NotificationSound").addEventListener("change", disabled_control);
+document.getElementById("Bypass_threshold").addEventListener("change", disabled_control);
+document.getElementById("Tsunami_NotificationSound").addEventListener("change", disabled_control);
+document.getElementById("Tsunami_Bypass_threshold").addEventListener("change", disabled_control);
 
 function UpdateDataDraw(data) {
   document.getElementById("update-check-date").innerText = NormalizeDate(3, data.check_date);

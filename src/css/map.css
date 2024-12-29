@@ -29,6 +29,7 @@
   border-radius: 10px;
   max-height: calc(100% - 40px);
   overflow-y: auto;
+  padding: 0;
 }
 #menu_wrap {
   position: absolute;
@@ -46,8 +47,9 @@
   align-items: center;
 }
 .menu label input {
-  opacity: 0;
-  width: 0;
+  accent-color: #fff;
+  margin: 0 5px 0 3px;
+  vertical-align: text-bottom;
 }
 .menu h2 {
   text-align: center;
@@ -73,6 +75,7 @@
   background: rgb(149, 46, 46);
   color: #fff;
 }
+/*
 .menu .check label::before {
   content: "check_box_outline_blank";
   font-family: "Material Icons Round";
@@ -91,7 +94,7 @@
 .radio label:has(input:checked)::before {
   content: "radio_button_checked";
 }
-
+*/
 #mapcontainer {
   display: inline-block;
   width: 100%;
@@ -733,4 +736,7 @@ body {
 }
 .maplibregl-ctrl-group button {
   border-radius: 0 !important;
+}
+.maplibregl-ctrl-attrib-inner a {
+  display: none !important;
 }

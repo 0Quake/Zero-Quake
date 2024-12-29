@@ -376,7 +376,7 @@ function eqInfoDraw(data, source) {
     clone.querySelector(".EQI_magnitude").textContent = elm.M !== null ? elm.M.toFixed(1) : "不明";
     if (source == "jma") {
       clone.querySelector(".EQItem").setAttribute("id", "EQItem_" + elm.eventId);
-      clone.querySelector(".EQItem").setAttribute("tabindex", Math.max(-1, 0 - index));
+      clone.querySelector(".EQItem").setAttribute("tabindex", index == 0 ? 2 : -1);
       var maxITmp = elm.maxI;
       if (maxITmp == "不明") maxITmp = "?";
       maxITmp = NormalizeShindo(maxITmp, 0);
@@ -395,9 +395,11 @@ function eqInfoDraw(data, source) {
       clone.querySelector(".TestNotes").style.display = elm.status == "試験" ? "block" : "none";
       clone.querySelector(".trainingNotes").style.display = elm.status == "訓練" ? "block" : "none";
 
-      if (elm.cancel) clone.querySelector(".EQItem").classList.add("EQI_canceled");
-      else {
-        clone.querySelector(".EQItem").setAttribute("title", "クリックして詳細を表示");
+      if (elm.cancel) {
+        clone.querySelector(".EQItem").classList.add("EQI_canceled");
+        clone.querySelector(".EQItem").setAttribute("aria-label", "キャンセルされた地震情報");
+      } else {
+        clone.querySelector(".EQItem").setAttribute("aria-label", `過去の地震情報：${elm.status == "訓練" ? "訓練報、" : ""}${elm.status == "試験" ? "試験報、" : ""}最大震度${NormalizeShindo(maxITmp, 1)}、マグニチュード${elm.M !== null ? elm.M.toFixed(1) : "不明"}、震源は${elm.epiCenter ? elm.epiCenter : "調査中"}、発生時刻は${NormalizeDate("M月D日h時m分", elm.OriginTime)}。エンターキーで詳細情報を確認。`);
         clone.querySelector(".EQItem").addEventListener("click", function () {
           window.electronAPI.messageReturn({
             action: "EQInfoWindowOpen",
@@ -410,10 +412,11 @@ function eqInfoDraw(data, source) {
       }
     } else if (source == "usgs") {
       var colorTmp = NormalizeMMI(elm.maxI, 2);
-      clone.querySelector(".EQItem").setAttribute("tabindex", Math.max(-1, 0 - index));
+      clone.querySelector(".EQItem").setAttribute("tabindex", index == 0 ? 2 : -1);
       clone.querySelector(".EQI_maxI").textContent = NormalizeMMI(elm.maxI, 1);
       clone.querySelector(".EQI_maxI").style.background = colorTmp[0];
       clone.querySelector(".EQI_maxI").style.color = colorTmp[1];
+      clone.querySelector(".EQItem").setAttribute("aria-label", `過去の地震情報：最大改正メルカリ震度${NormalizeMMI(elm.maxI, 3)}、マグニチュード${elm.M !== null ? elm.M.toFixed(1) : "不明"}、震源は${elm.epiCenter ? elm.epiCenter : "調査中"}、発生時刻は${NormalizeDate("M月D日h時m分", elm.OriginTime)}。エンターキーで詳細情報を確認。`);
 
       clone.querySelector(".EQItem").addEventListener("click", function () {
         window.electronAPI.messageReturn({
@@ -643,11 +646,8 @@ function psWaveAnm() {
 
 document.getElementById("layerSwitch_close").addEventListener("click", function () {
   document.getElementById("menu_wrap").classList.remove("menu_show");
+  document.getElementById("menu").hide();
 });
-document.getElementById("menu").addEventListener("click", function (e) {
-  e.stopPropagation();
-});
-
 var tilemapActive = false;
 function layerSelect(layerName) {
   map.setLayoutProperty("tile0", "visibility", "none");
@@ -1212,6 +1212,8 @@ function init() {
       ],
     },
   });
+  map.getCanvas().setAttribute("aria-label", "地図画面");
+
   map.touchZoomRotate.disableRotation();
 
   map.on("click", "prefmap_fill", function (e) {
@@ -1310,10 +1312,13 @@ function init() {
 
   var layerButton = document.createElement("button");
   layerButton.innerText = "layers";
-  layerButton.title = "レイヤーの切り替え";
+  layerButton.setAttribute("title", "レイヤーの切り替え");
+  layerButton.setAttribute("aria-label", "レイヤー切り替え画面を開く");
+
   layerButton.setAttribute("id", "layerSwitch_toggle");
   layerButton.addEventListener("click", function () {
-    document.getElementById("menu_wrap").classList.toggle("menu_show");
+    document.getElementById("menu_wrap").classList.add("menu_show");
+    document.getElementById("menu").show();
   });
 
   var TLControlWrapper = document.createElement("div");
@@ -1331,7 +1336,8 @@ function init() {
 
   var homeButton = document.createElement("button");
   homeButton.innerText = "home";
-  homeButton.title = "初期位置に戻る";
+  homeButton.setAttribute("title", "初期位置に戻る");
+  homeButton.setAttribute("aria-label", "地図を初期位置に戻す");
   homeButton.className = "material-icons-round";
   homeButton.addEventListener("click", function () {
     userMotion = true;
@@ -1344,7 +1350,8 @@ function init() {
 
   var returnButton = document.createElement("button");
   returnButton.innerText = "undo";
-  returnButton.title = "直前の操作位置に戻る";
+  returnButton.setAttribute("title", "直前の操作位置に戻る");
+  returnButton.setAttribute("aria-label", "地図を直前の操作位置に戻す");
   returnButton.className = "material-icons-round";
   returnButton.addEventListener("click", function () {
     userMotion = true;

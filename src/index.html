@@ -29,9 +29,9 @@
             <div id="mapcontainer_Wrap">
                 <div id="mapcontainer" class="kmoni_hide"></div>
                 <div id="menu_wrap">
-                    <nav id="menu" class="menu">
+                    <dialog id="menu" class="menu">
                         <h2 class="popup_menubar">レイヤーの切り替え
-                            <button id="layerSwitch_close" title="閉じる">close</button>
+                            <button id="layerSwitch_close" title="閉じる" aria-label="レイヤー切り替え画面を閉じる">close</button>
                         </h2>
                         <div id="menu_content">
                             <h3>ベースマップ</h3>
@@ -54,7 +54,7 @@
                                 <label><input type="checkbox" name="overlaySelect" value="kmoni_points" id="kmoni_points">リアルタイム揺れ情報</label>
                             </div>
                         </div>
-                    </nav>
+                    </dialog>
                 </div>
                 <div id="legendWrap">
                     <div class="legend" id="legend2">
@@ -101,8 +101,8 @@
                     </div>
                 </div>
             </div>
-            <div id="sideBar">
-                <button id="SideBarToggle" aria-label="サイドパネルを表示・非表示" title="サイドパネルを表示・非表示"></button>
+            <nav id="sideBar" aria-label="サイドパネル">
+                <button id="SideBarToggle" aria-label="サイドパネルの表示を切り替え" title="サイドパネルを表示・非表示"></button>
                 <div id="sokuho-Panel">
                     <div id="tsunamiRevocation" class="list-item">
                         すべての津波情報が解除されました。
@@ -207,12 +207,11 @@
 
                 </div>
                 <div id="tab1_wrap" data-tabID="1">
-
                     <div id="tab1_content" class="tabContentWrap">
-                        <div id="tab1_content1" class="tabcontent active_tabcontent" ZQ-focusgroup>
+                        <div id="tab1_content1" role="tabpanel" aria-labelledby="tab1_menu1" class="tabcontent active_tabcontent">
 
                             <template id="EQListTemplate">
-                                <div class="EQItem" ZQ-focusgroup-item>
+                                <div class="EQItem" role="listitem" ZQ-focusgroup-item>
                                     <div class="EEWNotes">EEWによる速報値</div>
                                     <div class="trainingNotes">訓練報</div>
                                     <div class="TestNotes">試験報</div>
@@ -235,7 +234,7 @@
                                 </div>
                             </template>
                             <template id="EQListTemplate2">
-                                <div class="EQItem usgs_Item" title="クリックして詳細を表示" ZQ-focusgroup-item>
+                                <div class="EQItem usgs_Item" role="listitem" title="クリックして詳細を表示" ZQ-focusgroup-item>
                                     <div class="EQI_IntWrap">
                                         <div class="EQI_maxI"></div>
                                     </div>
@@ -252,16 +251,16 @@
                             </template>
 
                             <div id="tab2_wrap" data-tabID="2">
-                                <div id="tab2_bar">
-                                    <div id="tab2_menu1" class="tabmenu active_tabmenu" tabindex="0" role="button" data-contentid="tab2_content1" title="気象庁の地震情報（日本周辺）">気象庁</div>
-                                    <div id="tab2_menu2" class="tabmenu" tabindex="0" role="button" data-contentid="tab2_content2" title="USGSの地震情報（全世界）">USGS</div>
+                                <div id="tab2_bar" role="tablist" aria-label="地震情報 発表機関選択" ZQ-focusgroup>
+                                    <div id="tab2_menu1" role="tab" class="tabmenu active_tabmenu" tabindex="1" aria-controls="tab2_content1" title="気象庁の地震情報（日本周辺）" aria-label="気象庁の情報" ZQ-focusgroup-item>気象庁</div>
+                                    <div id="tab2_menu2" role="tab" class="tabmenu" tabindex="-1" aria-controls="tab2_content2" title="USGSの地震情報（全世界）" aria-label="USGSの情報" ZQ-focusgroup-item>USGS</div>
                                 </div>
                                 <div id="tab2_content" class="tabContentWrap">
-                                    <div id="tab2_content1" class="tabcontent active_tabcontent">
-                                        <div id="NankaiTroughInfo_Rinji" ZQ-focusgroup-item tabindex="0">
+                                    <div id="tab2_content1" role="tabpanel list" aria-labelledby="tab2_menu1" class="tabcontent active_tabcontent" ZQ-focusgroup>
+                                        <div id="NankaiTroughInfo_Rinji" role="listitem" ZQ-focusgroup-item tabindex="0">
                                             <span id="Nankai_Title_Rinji"></span>
                                         </div>
-                                        <div id="NankaiTroughInfo_Teirei" ZQ-focusgroup-item tabindex="0">
+                                        <div id="NankaiTroughInfo_Teirei" role="listitem" ZQ-focusgroup-item tabindex="0">
                                             <span id="Nankai_Title_Teirei"></span>
                                         </div>
 
@@ -269,8 +268,8 @@
                                             <div class="mini-loading-wrap"></div>
                                         </div>
                                     </div>
-                                    <div id="tab2_content2" class="tabcontent">
-                                        <div id="USGS_EqInfo" class="EQInfo">
+                                    <div id="tab2_content2" role="tabpanel" aria-labelledby="tab2_menu2" class="tabcontent" ZQ-focusgroup>
+                                        <div id="USGS_EqInfo" class="EQInfo" role="list">
                                             <div class="mini-loading-wrap"></div>
                                         </div>
                                     </div>
@@ -362,20 +361,20 @@
                         </div>
 
                     </div>
-                    <nav id="tab1_bar">
-                        <div id="tab1_menu1" class="tabmenu active_tabmenu" tabindex="0" role="button" data-contentid="tab1_content1"><span class="material-icons-round">format_list_bulleted</span>地震情報</div>
-                        <button id="setting" title="設定画面を開く">settings</button>
-                    </nav>
-
-
+                    <div id="bar1">
+                        <div id="tab1_bar" role="tablist" aria-label="情報種別選択">
+                            <div id="tab1_menu1" role="tab" class="tabmenu active_tabmenu" tabindex="0" aria-controls="tab1_content1" aria-label="地震情報"><span class="material-icons-round">format_list_bulleted</span>地震情報</div>
+                        </div>
+                        <button id="setting" title="設定画面を開く" tabindex="3" aria-label="設定画面を開く">settings</button>
+                    </div>
                 </div>
-            </div>
+            </nav>
 
-            <dialog id="offline">
+            <dialog id="offline" role="alertdialog" aria-label="オフライン警告">
                 <h2>現在オフラインです</h2>
                 <p>インターネットに接続されていないため、情報を取得することができません。</p>
                 <p>インターネットに再接続してください。</p>
-                <button onclick="document.getElementById('offline').close()" title="この画面を閉じる">閉じる</button>
+                <button onclick="document.getElementById('offline').close()" title="この画面を閉じる" aria-label="オフライン警告を閉じる">閉じる</button>
             </dialog>
             <div id="errorMsg">
                 <span id="errorContent"></span>
