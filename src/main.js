@@ -386,8 +386,6 @@ function checkUpdate() {
 
 //定期実行
 function ScheduledExecution() {
-  checkUpdate();
-
   //axisのアクセストークン確認
   if (config.Source.axis.GetData) {
     if (net.online) {
@@ -464,6 +462,8 @@ app.whenReady().then(() => {
 
   //初期化処理
   start();
+
+  checkUpdate();
 });
 
 let options = {
