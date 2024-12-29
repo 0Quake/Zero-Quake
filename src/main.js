@@ -2123,8 +2123,8 @@ function MargeEEW(data) {
       });
       if (EEWdataTmp) return;
     } else {
-      var EEWdataTmp = EEW_nowList.forEach(function (elm) {
-        if (elm.simulation) EEW_Clear(elm.EQ_id);
+      EEW_nowList.forEach(function (elm) {
+        if (elm.source == "simulation") EEW_Clear(elm.EventID);
       });
     }
     if (data.source == "simulation" && !data.isPlum) {
