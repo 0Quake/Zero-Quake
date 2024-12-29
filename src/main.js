@@ -3508,16 +3508,18 @@ function GenerateEEWText(EEWData, update) {
     text = text.replaceAll("{region_name}", EEWData.region_name ? EEWData.region_name : "");
     text = text.replaceAll("{report_time}", EEWData.report_time ? NormalizeDate(8, EEWData.report_time) : "");
     text = text.replaceAll("{origin_time}", EEWData.origin_time ? NormalizeDate(8, EEWData.origin_time) : "");
-    if (EEWData.warnZones && EEWData.warnZones.length) {
+    var userInt;
+    if (EEWData.userIntensity) {
+      userInt = EEWData.userIntensity;
+    } else if (EEWData.warnZones && EEWData.warnZones.length) {
       var userSect = EEWData.warnZones.find(function (elm2) {
         return elm2.Name == config.home.Section;
       });
 
-      if (userSect) {
-        var userInt = config.Info.EEW.IntType == "max" ? userSect.IntTo : userSect.IntFrom;
-        text = text.replaceAll("{local_Int}", NormalizeShindo(userInt, 1));
-      } else text = text.replaceAll("{local_Int}", "不明");
-    } else text = text.replaceAll("{local_Int}", "不明");
+      if (userSect) userInt = config.Info.EEW.IntType == "max" ? userSect.IntTo : userSect.IntFrom;
+    }
+
+    text = text.replaceAll("{local_Int}", userInt ? NormalizeShindo(userInt, 1) : "不明");
 
     return text;
   } catch (err) {
