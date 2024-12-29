@@ -1108,14 +1108,15 @@ function jmaXMLFetch(url) {
       var infoType = xml.querySelector("Head Title").textContent;
       if (xml.querySelector("Control Title").textContent == "津波情報a" || xml.querySelector("Control Title").textContent == "津波警報・注意報・予報a") infoType = "津波";
 
+      var LngIntData = [];
       var IntData = [];
       if (xml.querySelector("Body Intensity") && xml.querySelector("Body Intensity Observation Pref")) {
         xml.querySelectorAll("Body Intensity Observation Pref").forEach(function (elm) {
           var areaData = [];
+          var areaDataL = [];
           if (elm.querySelectorAll("Area")[0]) {
             elm.querySelectorAll("Area").forEach(function (elm2) {
               var cityData = [];
-              var stData = [];
               if (elm2.querySelectorAll("City")[0]) {
                 elm2.querySelectorAll("City").forEach(function (elm3) {
                   var stData = [];
@@ -1129,15 +1130,21 @@ function jmaXMLFetch(url) {
                 });
               } else if (elm2.querySelectorAll("IntensityStation")[0]) {
                 var stData = [];
+                var stDataL = [];
                 elm2.querySelectorAll("IntensityStation").forEach(function (elm4) {
                   var pointT = pointList[elm4.querySelector("Code").textContent];
-                  if (pointT) stData.push({ lat: pointT.location[0], lng: pointT.location[1], name: elm4.querySelector("Name").textContent, int: elm4.querySelector("Int").textContent });
+                  if (pointT) {
+                    stData.push({ lat: pointT.location[0], lng: pointT.location[1], name: elm4.querySelector("Name").textContent, int: elm4.querySelector("Int").textContent });
+                    if (elm4.querySelector("LgInt")) stDataL.push({ lat: pointT.location[0], lng: pointT.location[1], name: elm4.querySelector("Name").textContent, lgint: elm4.querySelector("LgInt").textContent });
+                  }
                 });
               }
               areaData.push({ name: elm2.querySelector("Name").textContent, int: elm2.querySelector("MaxInt").textContent, city: cityData, station: stData });
+              if (elm2.querySelector("MaxLgInt")) areaDataL.push({ name: elm2.querySelector("Name").textContent, lgint: elm2.querySelector("MaxLgInt").textContent, station: stDataL });
             });
           }
           IntData.push({ name: elm.querySelector("Name").textContent, int: elm.querySelector("MaxInt").textContent, area: areaData });
+          if (elm.querySelector("MaxLgInt")) LngIntData.push({ name: elm.querySelector("Name").textContent, lgint: elm.querySelector("MaxLgInt").textContent, area: areaDataL });
         });
       }
 
@@ -1155,6 +1162,7 @@ function jmaXMLFetch(url) {
         epiCenter: epiCenterTmp,
         comment: commentText,
         cancel: cancelTmp,
+        LngIntData: LngIntData,
         IntData: IntData,
       });
     });
