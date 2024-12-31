@@ -58,6 +58,7 @@ var defaultConfigVal = {
     WindowAutoOpen: true,
     alwaysOnTop: false,
     isFirstRun: false, //初回起動時かどうか判定用（自動起動を設定するため）
+    zoom: 1,
   },
   home: {
     name: "自宅",
@@ -596,12 +597,29 @@ ipcMain.on("message", (_event, response) => {
       }
 
       if (response.from == "ConfigWindow") {
-        if (MainWindow) MainWindow.reload();
-        if (WorkerWindow) WorkerWindow.reload();
-        if (TsunamiWindow) TsunamiWindow.reload();
-        Object.keys(EQI_Window).forEach(function (key) {
-          if (EQI_Window[key] && EQI_Window[key].window) EQI_Window[key].window.reload();
-        });
+        if (MainWindow) {
+          MainWindow.reload();
+          MainWindow.webContents.setZoomFactor(config.system.zoom);
+        }
+        if (WorkerWindow) {
+          WorkerWindow.reload();
+          WorkerWindow.webContents.setZoomFactor(config.system.zoom);
+        }
+        if (TsunamiWindow) {
+          TsunamiWindow.reload();
+          TsunamiWindow.webContents.setZoomFactor(config.system.zoom);
+        }
+        if (NankaiWindow.window) {
+          NankaiWindow.window.reload();
+          NankaiWindow.webContents.setZoomFactor(config.system.zoom);
+        }
+        if (SettingWindow)
+          Object.keys(EQI_Window).forEach(function (key) {
+            if (EQI_Window[key] && EQI_Window[key].window) {
+              EQI_Window[key].window.reload();
+              EQI_Window[key].window.webContents.setZoomFactor(config.system.zoom);
+            }
+          });
       }
       break;
     case "EEWSimulation":
@@ -706,6 +724,8 @@ function CreateMainWindow() {
       }
 
       MainWindow.webContents.on("did-finish-load", () => {
+        MainWindow.webContents.setZoomFactor(config.system.zoom);
+
         if (notifyData) messageToMainWindow(notifyData);
 
         if (Replay !== 0) {
@@ -879,6 +899,8 @@ function Create_SettingWindow(update) {
     });
 
     SettingWindow.webContents.on("did-finish-load", () => {
+      SettingWindow.webContents.setZoomFactor(config.system.zoom);
+
       if (Replay !== 0) {
         SettingWindow.webContents.send("message2", {
           action: "Replay",
@@ -934,6 +956,8 @@ function Create_TsunamiWindow() {
     });
 
     TsunamiWindow.webContents.on("did-finish-load", () => {
+      TsunamiWindow.webContents.setZoomFactor(config.system.zoom);
+
       TsunamiWindow.webContents.send("message2", {
         action: "setting",
         data: config,
@@ -979,6 +1003,8 @@ function Create_NankaiWindow(type) {
       });
 
       NankaiWindow.window.webContents.on("did-finish-load", () => {
+        NankaiWindow.webContents.setZoomFactor(config.system.zoom);
+
         var data = NankaiWindow.type == "rinji" ? NankaiTroughInfo.rinji : NankaiTroughInfo.teirei;
         if (data) {
           NankaiWindow.window.webContents.send("message2", {
@@ -1049,6 +1075,8 @@ function EQInfo_createWindow(response, IS_WebURL) {
       EQI_Window[response.eid] = { window: EQInfoWindow, metadata: metadata };
 
       EQInfoWindow.webContents.on("did-finish-load", () => {
+        EQInfoWindow.webContents.setZoomFactor(config.system.zoom);
+
         EQInfoWindow.webContents.send("message2", {
           action: "setting",
           data: config,
@@ -3276,6 +3304,7 @@ function AlertEQInfo(data, source, update, audioPlay) {
         data = data.sort(function (a, b) {
           return a.OriginTime > b.OriginTime ? -1 : 1;
         });
+        console.log(data);
 
         if (config.Info.EQInfo.NotificationSound && (config.Info.EQInfo.Bypass_threshold || NormalizeShindo(config.Info.EQInfo.maxI_threshold, 5) <= NormalizeShindo(data[0].maxI, 5) || config.Info.EQInfo.M_threshold <= data[0].M)) {
           PlayAudio("EQInfo");

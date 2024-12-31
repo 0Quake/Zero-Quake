@@ -131,6 +131,7 @@ function configDataDraw() {
   selectBoxSet(document.getElementById("Tsunami_threshold"), config.Info.TsunamiInfo.Global_threshold);
   selectBoxSet(document.getElementById("Tsunami_L_threshold"), config.Info.TsunamiInfo.Local_threshold);
   document.getElementById("Tsunami_Bypass_threshold").checked = config.Info.TsunamiInfo.Bypass_threshold;
+  document.getElementById("zoom").value = 100 * config.system.zoom;
 
   fetch("http://localhost:50080/GetVoiceList")
     .then(function (res) {
@@ -297,6 +298,7 @@ function apply() {
   config.Info.TsunamiInfo.Global_threshold = document.getElementById("Tsunami_threshold").value;
   config.Info.TsunamiInfo.Local_threshold = document.getElementById("Tsunami_L_threshold").value;
   config.Info.TsunamiInfo.Bypass_threshold = document.getElementById("Tsunami_Bypass_threshold").checked;
+  config.system.zoom = Number(document.getElementById("zoom").value) / 100;
 
   window.electronAPI.messageReturn({
     action: "ChangeConfig",
