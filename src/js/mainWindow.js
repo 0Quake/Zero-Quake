@@ -286,6 +286,7 @@ function epiCenterUpdate(elm) {
       epicenterElm.markerElm.setLngLat([longitude, latitude]);
       epicenterElm.latitude = latitude;
       epicenterElm.longitude = longitude;
+      if (epicenterElm.ESPopup) epicenterElm.ESPopup.setLngLat([longitude, latitude]);
       if (tooltipContent) epicenterElm.ESPopup2.setLngLat([longitude, latitude]).setText(tooltipContent).addTo(map);
       else epicenterElm.ESPopup2.remove();
     } else {
