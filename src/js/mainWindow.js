@@ -62,13 +62,17 @@ window.electronAPI.messageSend((event, request) => {
   } else if (request.action == "Replay") {
     Replay = request.data;
     document.getElementById("replayFrame").style.display = Replay == 0 ? "none" : "block";
-    Object.keys(points).forEach(function (elm) {
-      pointData = points[elm];
-      pointData.markerElm.style.background = "rgba(128,128,128,0.5)";
-      pointData.markerElm.classList.remove("strongDetectingMarker", "detectingMarker", "marker_Int");
-      pointData.popupContent = "<h3 class='PointName' style='border-bottom:solid 2px rgba(128,128,128,0.5)'>" + (elm.Name ? elm.Name : "") + "<span>" + elm.Type + "_" + elm.Code + "</span></h3>";
-      if (pointData.popup.isOpen()) pointData.popup.setHTML(pointData.popupContent);
-    });
+
+    var geojson = {
+      type: "FeatureCollection",
+      features: [],
+    };
+    if (map) {
+      map.getSource("SEISJS_points").setData(geojson);
+      map.getSource("TREMRTS_points").setData(geojson);
+      map.getSource("snet_points").setData(geojson);
+      map.getSource("knet_points").setData(geojson);
+    }
     psWaveEntry();
   } else if (request.action == "EQInfo") eqInfoDraw(request.data, request.source);
   else if (request.action == "notification_Update") show_errorMsg(request.data);
@@ -130,14 +134,6 @@ window.addEventListener("offline", () => {
   document.getElementById("offline2").style.display = "block";
   UpdateStatus(new Date(), new Date(), "Internet", "Error");
 });
-
-function replay(date) {
-  if (date) date = new Date(date);
-  window.electronAPI.messageReturn({
-    action: "replay",
-    date: date,
-  });
-}
 
 //🔴緊急地震速報🔴
 var template = document.getElementById("EEWTemplate");
@@ -1516,7 +1512,7 @@ function kmoniMapUpdate(dataTmp, type) {
 function generatePopupContent_K(params) {
   if (params.data) {
     if (!Array.isArray(params.rgb)) params.rgb = JSON.parse(params.rgb);
-    return "<h3 class='PointName' style='border-bottom-color:rgb(" + params.rgb.join(",") + ")'>" + (params.Name ? params.Name : "") + "<span>" + params.Type + "_" + params.Code + "</span></h3>" + (params.detect ? "<h4 class='detecting'>地震検知中</h4>" : "");
+    return "<h3 class='PointName' style='border-bottom-color:rgb(" + params.rgb.join(",") + ")'>" + (params.Name ? params.Name : "") + "<span>" + params.Type + "_" + params.Code + "</span></h3>";
   } else {
     return "<h3 class='PointName' style='border-bottom:solid 2px rgba(128,128,128,0.5)'>" + (params.Name ? params.Name : "") + "<span>" + params.Type + "_" + params.Code + "</span></h3>";
   }

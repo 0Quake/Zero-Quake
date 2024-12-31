@@ -298,11 +298,6 @@
   display: block;
 }
 
-.detecting {
-  margin: 3px 0;
-  text-align: center;
-}
-
 .zoomLevel_1 .marker-circle {
   width: 3px;
   height: 3px;

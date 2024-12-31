@@ -277,17 +277,6 @@ main {
   flex-shrink: 0;
 }
 
-#DetectEEWion {
-  display: none;
-  font-size: 20px;
-  font-family: "M PLUS 1p", sans-serif;
-  margin: 5px 0;
-
-  font-size: 16px;
-  background: rgb(175, 54, 54);
-  color: #fff;
-  padding: 5px 0.5em;
-}
 #noEEW {
   text-align: center;
   line-height: 50px;
@@ -302,17 +291,12 @@ main {
   border: solid 1px #62626c;
 }
 
-#LWaveWrap,
 #tsunamiWrap,
 #tsunamiRevocation,
 #tsunamiCancel {
   display: none;
 }
 
-#LWaveWrap .Alert_content_wrap {
-  max-height: 130px;
-  overflow: scroll;
-}
 #tsunamiCancel,
 #tsunamiRevocation {
   text-align: center;
