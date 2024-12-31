@@ -15,6 +15,7 @@ button {
   display: flex;
   height: 100%;
   overflow: hidden;
+  flex-direction: row;
 }
 
 #tab1_content {

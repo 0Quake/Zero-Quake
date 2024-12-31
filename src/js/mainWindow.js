@@ -146,88 +146,59 @@ var EEW_LocalIDs = [];
 //EEW追加・更新
 function EEW_AlertUpdate(data) {
   data.forEach((elm) => {
-    var sameEQ = now_EEW.find(function (elm2) {
-      return elm.EventID == elm2.EventID;
-    });
-
-    if (!sameEQ) {
-      //新しい地震、新しい報
-      if (elm.is_cancel) return;
-
-      var clone = template.content.cloneNode(true);
-
-      var alertflgTmp = "(" + elm.alertflg + ")";
-      if (elm.alertflg) clone.querySelector(".alertflg").textContent = alertflgTmp;
-
-      if (elm.alertflg == "警報") clone.querySelector(".EEWWrap").classList.add("keihou");
-      else if (elm.alertflg == "予報") clone.querySelector(".EEWWrap").classList.add("yohou");
-      else if (elm.alertflg == "EarlyEst") clone.querySelector(".EEWWrap").classList.add("EarlyEst");
-
+    var is_update;
+    if (document.getElementById("EEW-" + elm.EventID)) {
+      var clone = document.getElementById("EEW-" + elm.EventID);
+      is_update = true;
+    } else {
+      var clone = template.content.cloneNode(true).querySelector(".EEWWrap");
       EEWID++;
       EEW_LocalIDs[elm.EventID] = EEWID;
+    }
+    if (!is_update && elm.is_cancel) return;
 
-      clone.querySelector(".EEWLocalID").textContent = EEWID;
-      clone.querySelector(".serial").textContent = elm.serial;
-      clone.querySelector(".maxInt").textContent = elm.maxInt ? elm.maxInt : "?";
-      clone.querySelector(".maxInt").style.background = NormalizeShindo(elm.maxInt, 2)[0];
-      clone.querySelector(".maxInt").style.color = NormalizeShindo(elm.maxInt, 2)[1];
-      clone.querySelector(".userLocation").textContent = config.home.name ? config.home.name : "現在地";
-      clone.querySelector(".is_final").style.display = elm.is_final ? "inline" : "none";
-      clone.querySelector(".canceled").style.display = elm.is_cancel ? "flex" : "none";
-      clone.querySelector(".region_name").textContent = elm.region_name ? elm.region_name : "震源地域不明";
-      clone.querySelector(".origin_time").textContent = NormalizeDate(3, elm.origin_time);
-      clone.querySelector(".magnitude").textContent = elm.magnitude ? Math.round(elm.magnitude * 10) / 10 : "不明";
-      clone.querySelector(".depth").textContent = elm.depth ? Math.round(elm.depth) : "不明";
-      clone.querySelector(".training").style.display = elm.is_training ? "block" : "none";
-      clone.querySelector(".EpicenterElement").style.display = !elm.isPlum ? "block" : "none";
-      clone.querySelector(".NoEpicenterElement").style.display = elm.isPlum ? "block" : "none";
-      clone.querySelector(".userIntensity").textContent = elm.userIntensity ? NormalizeShindo(elm.userIntensity) : "?";
-      clone.querySelector(".userDataWrap").style.background = NormalizeShindo(elm.userIntensity, 2)[0];
-      clone.querySelector(".userDataWrap").style.color = NormalizeShindo(elm.userIntensity, 2)[1];
-      if (elm.distance < 10000) distanceTmp = Math.round(elm.distance);
-      else distanceTmp = Math.round(elm.distance / 1000) / 10 + "万";
-      clone.querySelector(".distance").textContent = elm.distance ? distanceTmp + "km" : "";
-      clone.querySelector(".EEWWrap").setAttribute("id", "EEW-" + elm.EventID);
+    if (elm.alertflg == "警報" || elm.alertflg == "予報") var textForReader = GenerateEEWText(elm, "緊急地震速報アイテム。{training}{grade}、第{serial}報。{location}の予想震度は{local_Int}。予想マグニチュード、{magnitude}。予想最大震度、{maxInt}。{region_name}の、深さ{depth}キロメートルで、{origin_time}に発生。{final}");
+    else var textForReader = GenerateEEWText(elm, "アーリエスト地震情報アイテム。第{serial}報。予想マグニチュード、{magnitude}。{region_name}の、深さ{depth}キロメートルで、{origin_time}に発生。{final}");
 
+    var alertflgTmp = "(" + elm.alertflg + ")";
+    if (elm.alertflg) clone.querySelector(".alertflg").textContent = alertflgTmp;
+
+    clone.classList.remove("keihou", "yohou", "EarlyEst");
+    if (elm.alertflg == "警報") clone.classList.add("keihou");
+    else if (elm.alertflg == "予報") clone.classList.add("yohou");
+    else if (elm.alertflg == "EarlyEst") clone.classList.add("EarlyEst");
+
+    clone.setAttribute("aria-label", textForReader);
+    clone.querySelector(".EEWLocalID").textContent = EEWID;
+    clone.querySelector(".serial").textContent = elm.serial;
+    clone.querySelector(".maxInt").textContent = elm.maxInt ? elm.maxInt : "?";
+    clone.querySelector(".maxInt").style.background = NormalizeShindo(elm.maxInt, 2)[0];
+    clone.querySelector(".maxInt").style.color = NormalizeShindo(elm.maxInt, 2)[1];
+    clone.querySelector(".userLocation").textContent = config.home.name ? config.home.name : "現在地";
+    clone.querySelector(".is_final").style.display = elm.is_final ? "inline" : "none";
+    clone.querySelector(".canceled").style.display = elm.is_cancel ? "flex" : "none";
+    clone.querySelector(".region_name").textContent = elm.region_name ? elm.region_name : "震源地域不明";
+    clone.querySelector(".origin_time").textContent = NormalizeDate(3, elm.origin_time);
+    clone.querySelector(".magnitude").textContent = elm.magnitude || elm.magnitude == 0 ? Math.round(elm.magnitude * 10) / 10 : "不明";
+    if (elm.magnitude || elm.magnitude == 0) clone.querySelector(".magnitude").classList.remove("UnknownMag");
+    else clone.querySelector(".magnitude").classList.add("UnknownMag");
+    clone.querySelector(".depth").textContent = elm.depth || elm.depth == 0 ? Math.round(elm.depth) : "不明";
+    if (elm.depth || elm.depth == 0) clone.querySelector(".depth").classList.remove("UnknownDepth");
+    else clone.querySelector(".depth").classList.add("UnknownDepth");
+    clone.querySelector(".training").style.display = elm.is_training ? "block" : "none";
+    clone.querySelector(".EpicenterElement").style.display = !elm.isPlum ? "block" : "none";
+    clone.querySelector(".NoEpicenterElement").style.display = elm.isPlum ? "block" : "none";
+    clone.querySelector(".userIntensity").textContent = elm.userIntensity ? NormalizeShindo(elm.userIntensity) : "?";
+    clone.querySelector(".userDataWrap").style.background = NormalizeShindo(elm.userIntensity, 2)[0];
+    clone.querySelector(".userDataWrap").style.color = NormalizeShindo(elm.userIntensity, 2)[1];
+    if (elm.distance < 10000) distanceTmp = Math.round(elm.distance);
+    else distanceTmp = Math.round(elm.distance / 1000) / 10 + "万";
+    clone.querySelector(".distance").textContent = elm.distance ? distanceTmp + "km" : "";
+
+    if (!is_update) {
+      clone.setAttribute("id", "EEW-" + elm.EventID);
       document.getElementById("EEW-Panel").appendChild(clone);
       document.getElementById("sokuho-Panel").scroll(0, 0);
-    } else {
-      //既知の地震、新しい報もしくは情報更新
-      var EQMenu = document.getElementById("EEW-" + elm.EventID);
-
-      if (EQMenu) {
-        alertflgTmp = "(" + elm.alertflg + ")";
-        if (!elm.alertflg) alertflgTmp = "";
-        EQMenu.querySelector(".alertflg").textContent = alertflgTmp;
-        EQMenu.querySelector(".serial").textContent = elm.serial;
-
-        if (elm.alertflg == "警報") {
-          EQMenu.classList.add("keihou");
-          EQMenu.classList.remove("yohou");
-        } else if (elm.alertflg == "予報") {
-          EQMenu.classList.add("yohou");
-          EQMenu.classList.remove("keihou");
-        }
-
-        EQMenu.querySelector(".maxInt").textContent = elm.maxInt ? elm.maxInt : "?";
-        EQMenu.querySelector(".maxInt").style.background = NormalizeShindo(elm.maxInt, 2)[0];
-        EQMenu.querySelector(".maxInt").style.color = NormalizeShindo(elm.maxInt, 2)[1];
-        EQMenu.querySelector(".is_final").style.display = elm.is_final ? "inline" : "none";
-        EQMenu.querySelector(".canceled").style.display = elm.is_cancel ? "flex" : "none";
-        EQMenu.querySelector(".region_name").textContent = elm.region_name ? elm.region_name : "震源地域不明";
-        EQMenu.querySelector(".origin_time").textContent = NormalizeDate(3, elm.origin_time);
-        EQMenu.querySelector(".magnitude").textContent = elm.magnitude ? Math.round(elm.magnitude * 10) / 10 : "不明";
-        EQMenu.querySelector(".depth").textContent = elm.depth ? Math.round(elm.depth) : "不明";
-        EQMenu.querySelector(".EpicenterElement").style.display = !elm.isPlum ? "block" : "none";
-        EQMenu.querySelector(".NoEpicenterElement").style.display = elm.isPlum ? "block" : "none";
-        EQMenu.querySelector(".userIntensity").textContent = elm.userIntensity ? NormalizeShindo(elm.userIntensity) : "?";
-        EQMenu.querySelector(".userDataWrap").style.background = NormalizeShindo(elm.userIntensity, 2)[0];
-        EQMenu.querySelector(".userDataWrap").style.color = NormalizeShindo(elm.userIntensity, 2)[1];
-
-        if (elm.distance < 10000) distanceTmp = Math.round(elm.distance);
-        else distanceTmp = Math.round(elm.distance / 1000) / 10 + "万";
-        EQMenu.querySelector(".distance").textContent = elm.distance ? distanceTmp + "km" : "";
-      }
     }
     epiCenterUpdate(elm);
 
@@ -600,7 +571,7 @@ function kmoniTimeRedraw(updateTime, LocalTime, type, condition) {
 
 var UTDialogShow = false;
 //接続状況ダイアログ表示
-document.getElementById("UpdateTimeWrap").addEventListener("click", function () {
+document.getElementById("all_UpdateTime").addEventListener("click", function () {
   updateTimeDialog.showModal();
   UTDialogShow = true;
   Object.keys(UpdateTime).forEach(function (elm) {
@@ -2364,4 +2335,38 @@ function radioSet(name, val) {
   document.getElementsByName(name).forEach(function (elm) {
     if (elm.value == val) elm.checked = true;
   });
+}
+function GenerateEEWText(EEWData, form) {
+  try {
+    var text = form;
+
+    text = text.replaceAll("{grade}", EEWData.alertflg ? EEWData.alertflg : "");
+    text = text.replaceAll("{serial}", EEWData.serial ? EEWData.serial : "");
+    text = text.replaceAll("{final}", EEWData.is_final ? "最終報" : "");
+    text = text.replaceAll("{location}", config.home.name ? config.home.name : "現在地");
+    text = text.replaceAll("{magnitude}", EEWData.magnitude ? EEWData.magnitude : "");
+    text = text.replaceAll("{maxInt}", EEWData.maxInt ? NormalizeShindo(EEWData.maxInt, 1) : "");
+    text = text.replaceAll("{depth}", EEWData.depth ? EEWData.depth : "");
+    text = text.replaceAll("{training}", EEWData.is_training ? "訓練報。" : "");
+    text = text.replaceAll("{training2}", EEWData.is_training ? "これは訓練報です。" : "");
+    text = text.replaceAll("{region_name}", EEWData.region_name ? EEWData.region_name : "");
+    text = text.replaceAll("{report_time}", EEWData.report_time ? NormalizeDate(8, EEWData.report_time) : "");
+    text = text.replaceAll("{origin_time}", EEWData.origin_time ? NormalizeDate(8, EEWData.origin_time) : "");
+    var userInt;
+    if (EEWData.userIntensity) {
+      userInt = EEWData.userIntensity;
+    } else if (EEWData.warnZones && EEWData.warnZones.length) {
+      var userSect = EEWData.warnZones.find(function (elm2) {
+        return elm2.Name == config.home.Section;
+      });
+
+      if (userSect) userInt = config.Info.EEW.IntType == "max" ? userSect.IntTo : userSect.IntFrom;
+    }
+
+    text = text.replaceAll("{local_Int}", userInt ? NormalizeShindo(userInt, 1) : "不明");
+
+    return text;
+  } catch (err) {
+    return "";
+  }
 }

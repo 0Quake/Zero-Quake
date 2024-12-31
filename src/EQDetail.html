@@ -22,22 +22,22 @@
 
 <body>
   <div id="splash">
-    <img src="./img/icon.svg" width="256" height="256">
-    <div id="loading-wrap"></div>
+    <img src="./img/icon.svg" width="256" height="256" alt="Zero Quakeロゴ" aria-hidden="true">
+    <div id="loading-wrap" aria-label="読み込み中"></div>
   </div>
   <canvas id="estimated_intensity_map_canvas" width="800" height="800"></canvas>
 
 
-  <div id="mapcontainer_Wrap">
+  <div id="mapcontainer_Wrap" aria-label="地図表現による地震情報">
     <div id="mapcontainer" class="kmoni_hide"></div>
 
-    <div id="TsunamiShortMsg_Wrap">
+    <div id="TsunamiShortMsg_Wrap" aria-label="津波の情報" tabindex="-1">
       <div aria-hidden="true">tsunami</div>
       <span id="TsunamiShortMsg">今後の情報に注意</span>
     </div>
 
     <div id="menu_wrap">
-      <dialog id="menu" class="menu">
+      <dialog id="menu" class="menu" aria-label="地図レイヤーの切り替え">
         <h2 class="popup_menubar">レイヤーの切り替え
           <button id="layerSwitch_close" title="閉じる">close</button>
         </h2>
@@ -75,7 +75,7 @@
 
   </div>
 
-  <main>
+  <main aria-label="テキスト表現による詳細地震情報">
     <div id="plzScroll" aria-hidden="true">
       <div class="material-icons-round">keyboard_double_arrow_down</div>スクロールして詳細を表示
     </div>
@@ -96,6 +96,7 @@
 
 
       <div id="leftSide">
+        <div id="EEWCaption">緊急地震速報による速報値</div>
         <table id="EQInfo">
           <caption class="h2">震源要素など</caption>
           <tr>
@@ -108,7 +109,7 @@
           </tr>
           <tr>
             <th>マグニチュード</th>
-            <td><span id="data_MT">M</span> <span id="data_M">不明</span></td>
+            <td id="data_M">不明</td>
           </tr>
           <tr>
             <th>深さ</th>
@@ -119,14 +120,13 @@
             <td id="data_center">不明</td>
           </tr>
         </table>
-        <div id="EEWCaption">緊急地震速報による速報値</div>
+        <div id="LinkWrap">
+          <a id="EEWLink" href="javascript:void(0)" aria-label="新しいウィンドウで緊急地震速報の内容を見る"><span class="material-icons-round" aria-hidden="true">open_in_new</span>緊急地震速報の内容</a>
+        </div>
 
         <h2>付加文</h2>
         <div id="data_comment">
           <div class="NODataCaption">情報がありません</div>
-        </div>
-        <div id="LinkWrap">
-          <button id="EEWLink" aria-label="新しいウィンドウで緊急地震速報の内容を見る">緊急地震速報の内容</button>
         </div>
       </div>
 

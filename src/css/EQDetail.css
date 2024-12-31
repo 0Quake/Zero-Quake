@@ -155,8 +155,8 @@ td {
   cursor: default;
 }
 
-.ShindoItem::before,
-.ShindoItemL::before {
+.ShindoItem span::before,
+.ShindoItemL span::before {
   content: "";
   display: inline-block;
   font-size: 16px;
@@ -165,21 +165,21 @@ td {
   vertical-align: middle;
 }
 
-.ShindoItem1::before,
-.ShindoItem2::before,
-.ShindoItem3::before,
-.ShindoItem1L::before,
-.ShindoItem2L::before,
-.ShindoItem3L::before {
+.ShindoItem1 span::before,
+.ShindoItem2 span::before,
+.ShindoItem3 span::before,
+.ShindoItem1L span::before,
+.ShindoItem2L span::before,
+.ShindoItem3L span::before {
   content: "chevron_right";
 }
 
-.ShindoItem1.has-open::before,
-.ShindoItem2.has-open::before,
-.ShindoItem3.has-open::before,
-.ShindoItem1L.has-open::before,
-.ShindoItem2L.has-open::before,
-.ShindoItem3L.has-open::before {
+.ShindoItem1.has-open span::before,
+.ShindoItem2.has-open span::before,
+.ShindoItem3.has-open span::before,
+.ShindoItem1L.has-open span::before,
+.ShindoItem2L.has-open span::before,
+.ShindoItem3L.has-open span::before {
   content: "expand_more";
 }
 
@@ -188,8 +188,8 @@ td {
   content: "";
 }
 
-.ShindoItem span,
-.ShindoItemL span {
+.ShindoItem div,
+.ShindoItemL div {
   display: inline-block;
   width: 30px;
   height: 30px;
@@ -594,6 +594,11 @@ td {
 }
 #EEWLink {
   display: none;
+}
+#EEWLink span {
+  margin-right: 3px;
+  font-size: 16px;
+  vertical-align: bottom;
 }
 #LinkWrap {
   margin-top: 20px;

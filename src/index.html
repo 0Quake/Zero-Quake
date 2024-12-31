@@ -19,8 +19,8 @@
 <body>
     <main>
         <div id="splash">
-            <img src="./img/icon.svg" width="256" height="256">
-            <div id="loading-wrap"></div>
+            <img src="./img/icon.svg" width="256" height="256" alt="Zero Quakeロゴ" aria-hidden="true">
+            <div id="loading-wrap" aria-label="読み込み中"></div>
         </div>
         <div id="alertFrame"></div>
         <div id="replayFrame"></div>
@@ -58,13 +58,13 @@
                 </div>
                 <div id="legendWrap">
                     <div class="legend" id="legend2">
-                        <img src="./img/dosha_scale.svg">
+                        <img src="./img/dosha_scale.svg" alt="地図凡例 土砂災害警戒区域">
                     </div>
                     <div class="legend" id="legend1">
-                        <img src="./img/tsunami_scale.svg">
+                        <img src="./img/tsunami_scale.svg" alt="地図凡例 土砂災害警戒区域">
                     </div>
                     <div class="legend">
-                        <img src="./img/nied_jma_s_w_scale.svg">
+                        <img src="./img/nied_jma_s_w_scale.svg" alt="地図凡例 震度">
                     </div>
                     <div class="legend" id="fillLegend">
                         <div>
@@ -103,7 +103,7 @@
             </div>
             <nav id="sideBar" aria-label="サイドパネル">
                 <button id="SideBarToggle" aria-label="サイドパネルの表示を切り替え" title="サイドパネルを表示・非表示"></button>
-                <div id="sokuho-Panel">
+                <div id="sokuho-Panel" aria-label="速報パネル">
                     <div id="tsunamiRevocation" class="list-item">
                         すべての津波情報が解除されました。
                         <button id="CloseTsunamiRevocation">close</button>
@@ -146,7 +146,7 @@
                     <div id="EEW-Panel">
                         <div id="offline2">現在オフラインです。<br>最新の情報ではありません</div>
                         <template id="EEWTemplate">
-                            <div class="EEWWrap list-item">
+                            <div class="EEWWrap list-item" role="group" tabindex="0">
 
                                 <h2 class="training">訓練</h2>
                                 <h2>
@@ -157,27 +157,34 @@
                                 <div class="Alert_content_wrap EEW_content_wrap">
 
                                     <div class="GraphicalDataWrap">
-                                        <div class="maxInt">0</div>
+                                        <div class="maxInt_Wrap" role="group">
+                                            <div class="maxInt_description">最大震度</div>
+                                            <div class="maxInt">0</div>
+                                        </div>
+                                        <div role="group" aria-label="設定地点の情報" tabindex="-1">
+                                            <div class="userLocationWrap"><span class="userLocation">場所</span><span class="material-icons-round" role="presentation" aria-hidden="true">keyboard_arrow_down</span></div>
+                                            <div class="userDataWrap">
+                                                <div class="userIntensity"></div>
+                                                <div class="graphWrap">
+                                                    <svg width="44" height="44" aria-hidden="true">
+                                                        <circle cx="22" cy="22" r="20" stroke-width="5px" stroke-linecap="round" stroke="#4e4e51" fill="none"></circle>
 
-                                        <div class="userLocationWrap"><span class="userLocation">場所</span><span class="material-icons-round">keyboard_arrow_down</span></div>
-                                        <div class="userDataWrap">
-                                            <div class="userIntensity"></div>
-                                            <div class="graphWrap">
-                                                <svg width="44" height="44">
-                                                    <circle cx="22" cy="22" r="20" stroke-width="5px" stroke-linecap="round" stroke="#4e4e51" fill="none"></circle>
-
-                                                    <circle class="PWave_value" cx="22" cy="22" r="20" stroke-width="5px" stroke-linecap="round" stroke-dasharray="125.66" stroke-dashoffset="125.66" transform="rotate(270 22 22)" fill="none"></circle>
-                                                    <circle class="SWave_value" cx="22" cy="22" r="20" stroke-width="5px" stroke-linecap="round" stroke-dasharray="125.66" stroke-dashoffset="125.66" transform="rotate(270 22 22)" fill="none"></circle>
-                                                    <text class="countDown" x="50%" y="42%" text-anchor="middle" dominant-baseline="central" fill="#FFF" font-size="20"></text>
-                                                    <text class="distance" x="50%" y="75%" text-anchor="middle" dominant-baseline="central" fill="#CCC" font-size="12"></text>
-                                                    <text class="arrived" x="50%" y="42%" text-anchor="middle" dominant-baseline="central" fill="#CCC" font-size="11">未到達</text>
-                                                </svg>
+                                                        <circle class="PWave_value" cx="22" cy="22" r="20" stroke-width="5px" stroke-linecap="round" stroke-dasharray="125.66" stroke-dashoffset="125.66" transform="rotate(270 22 22)" fill="none"></circle>
+                                                        <circle class="SWave_value" cx="22" cy="22" r="20" stroke-width="5px" stroke-linecap="round" stroke-dasharray="125.66" stroke-dashoffset="125.66" transform="rotate(270 22 22)" fill="none"></circle>
+                                                        <text class="countDown" x="50%" y="42%" text-anchor="middle" dominant-baseline="central" fill="#FFF" font-size="20"></text>
+                                                        <text class="distance" x="50%" y="75%" text-anchor="middle" dominant-baseline="central" fill="#CCC" font-size="12"></text>
+                                                        <text class="arrived" x="50%" y="42%" text-anchor="middle" dominant-baseline="central" fill="#CCC" font-size="11">未到達</text>
+                                                    </svg>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="detail_text">
+                                    <div class="detail_text" role="group" aria-label="震源などの情報" tabindex="-1">
                                         <div class="dataGroup1">
-                                            <div class="EpicenterElement">M<span class="magnitude">0</span>深さ<span class="depth">0</span>km</div>
+                                            <div class="EpicenterElement">
+                                                <div>M<span class="magnitude">0</span></div>
+                                                <div>深さ<span class="depth">0</span><span class="depth_unit">㎞</span></div>
+                                            </div>
                                             <div class="NoEpicenterElement">仮定震源要素</div>
                                         </div>
                                         <div class="region_name">地域</div>
@@ -207,6 +214,11 @@
 
                 </div>
                 <div id="tab1_wrap" data-tabID="1">
+                    <div id="bar1">
+                        <div id="tab1_bar" role="tablist" aria-label="情報種別選択">
+                            <div id="tab1_menu1" role="tab" class="tabmenu active_tabmenu" tabindex="0" aria-controls="tab1_content1" aria-label="地震情報"><span class="material-icons-round" aria-hidden="true">format_list_bulleted</span>地震情報</div>
+                        </div>
+                    </div>
                     <div id="tab1_content" class="tabContentWrap">
                         <div id="tab1_content1" role="tabpanel" aria-labelledby="tab1_menu1" class="tabcontent active_tabcontent">
 
@@ -265,111 +277,104 @@
                                         </div>
 
                                         <div id="JMA_EqInfo" class="EQInfo">
-                                            <div class="mini-loading-wrap"></div>
+                                            <div class="mini-loading-wrap" aria-label="読み込み中"></div>
                                         </div>
                                     </div>
                                     <div id="tab2_content2" role="tabpanel" aria-labelledby="tab2_menu2" class="tabcontent" ZQ-focusgroup>
                                         <div id="USGS_EqInfo" class="EQInfo" role="list">
-                                            <div class="mini-loading-wrap"></div>
+                                            <div class="mini-loading-wrap" aria-label="読み込み中"></div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <dialog id="UpdateTime_detail">
-                            <div class="popup_menubar">
-                                <h2>接続状況</h2>
-                                <button id="UpdateTimeClose" title="このダイアログを閉じる">close</button>
-                            </div>
-                            <div id="UpdateTime_detail_content">
-
-                                <div>
-                                    <div class="statusIcon" id="Internet_ICN"></div>
-                                    <span>インターネット接続状況</span>
-                                    <div class="timeView"><span id="PC_TIME">読み込み中...</span> (PC時刻)</div>
-                                    <div id="Internet_UT" class="timeView"></div>
-                                </div>
-
-
-
-
-                                <div class="timeItem">
-                                    <div class="statusIcon" id="wolfx_ICN"></div>
-                                    <span>Wolfx</span>
-                                    <div id="wolfx_UT" class="timeView">読み込み中...</div>
-                                </div>
-                                <div class="timeItem">
-                                    <div class="statusIcon" id="ProjectBS_ICN"></div>
-                                    <span>ProjectBS</span>
-                                    <div id="ProjectBS_UT" class="timeView">読み込み中...</div>
-                                </div>
-                                <div class="timeItem">
-                                    <div class="statusIcon" id="TREM-RTS_ICN"></div>
-                                    <span>TREM-RTS</span>
-                                    <div id="TREM-RTS_UT" class="timeView">読み込み中...</div>
-                                </div>
-                                <div class="timeItem">
-                                    <div class="statusIcon" id="axis_ICN"></div>
-                                    <span>Axis</span>
-                                    <div id="axis_UT" class="timeView">読み込み中...</div>
-                                </div>
-                                <div class="timeItem">
-                                    <div class="statusIcon" id="P2P_EEW_ICN"></div>
-                                    <span>P2P地震情報 API</span>
-                                    <div id="P2P_EEW_UT" class="timeView">読み込み中...</div>
-                                </div>
-
-                                <div class="timeItem">
-                                    <div class="statusIcon" id="kmoniImg_ICN"></div>
-                                    <span>強震モニタ</span>
-                                    <div id="kmoniImg_UT" class="timeView">読み込み中...</div>
-                                    <div id="kmoni_Message"></div>
-                                </div>
-                                <div class="timeItem">
-                                    <div class="statusIcon" id="msilImg_ICN"></div>
-                                    <span>海しる</span>
-                                    <div id="msilImg_UT" class="timeView">読み込み中...</div>
-                                </div>
-                                <div class="timeItem">
-                                    <div class="statusIcon" id="Early-est_ICN"></div>
-                                    <span>Early-est</span>
-                                    <div id="Early-est_UT" class="timeView">読み込み中...</div>
-                                </div>
-                                <div class="timeItem">
-                                    <div class="statusIcon" id="JMAXML_ICN"></div>
-                                    <span>気象庁防災情報XML</span>
-                                    <div id="JMAXML_UT" class="timeView">読み込み中...</div>
-                                </div>
-                                <div class="timeItem">
-                                    <div class="statusIcon" id="ntool_ICN"></div>
-                                    <span>nTool Earthquake API</span>
-                                    <div id="ntool_UT" class="timeView">読み込み中...</div>
-                                </div>
-                                <div class="timeItem">
-                                    <div class="statusIcon" id="USGS_ICN"></div>
-                                    <span>Earthquake Catalog (USGS)</span>
-                                    <div id="USGS_UT" class="timeView">読み込み中...</div>
-                                </div>
-
-
-                            </div>
-
-                        </dialog>
-                        <div id="UpdateTimeWrap">
-                            <div id="all_UpdateTime">読み込み中...</div>
-
-                        </div>
-
                     </div>
-                    <div id="bar1">
-                        <div id="tab1_bar" role="tablist" aria-label="情報種別選択">
-                            <div id="tab1_menu1" role="tab" class="tabmenu active_tabmenu" tabindex="0" aria-controls="tab1_content1" aria-label="地震情報"><span class="material-icons-round">format_list_bulleted</span>地震情報</div>
-                        </div>
-                        <button id="setting" title="設定画面を開く" tabindex="3" aria-label="設定画面を開く">settings</button>
-                    </div>
+                </div>
+                <div id="UpdateTimeWrap">
+                    <div id="all_UpdateTime">読み込み中...</div>
+                    <button id="setting" title="設定画面を開く" tabindex="3" aria-label="設定画面を開く">settings</button>
                 </div>
             </nav>
 
+            <dialog id="UpdateTime_detail">
+                <div class="popup_menubar">
+                    <h2>接続状況</h2>
+                    <button id="UpdateTimeClose" title="このダイアログを閉じる">close</button>
+                </div>
+                <div id="UpdateTime_detail_content">
+
+                    <div>
+                        <div class="statusIcon" id="Internet_ICN"></div>
+                        <span>インターネット接続状況</span>
+                        <div class="timeView"><span id="PC_TIME">読み込み中...</span> (PC時刻)</div>
+                        <div id="Internet_UT" class="timeView"></div>
+                    </div>
+
+
+
+
+                    <div class="timeItem">
+                        <div class="statusIcon" id="wolfx_ICN"></div>
+                        <span>Wolfx</span>
+                        <div id="wolfx_UT" class="timeView">読み込み中...</div>
+                    </div>
+                    <div class="timeItem">
+                        <div class="statusIcon" id="ProjectBS_ICN"></div>
+                        <span>ProjectBS</span>
+                        <div id="ProjectBS_UT" class="timeView">読み込み中...</div>
+                    </div>
+                    <div class="timeItem">
+                        <div class="statusIcon" id="TREM-RTS_ICN"></div>
+                        <span>TREM-RTS</span>
+                        <div id="TREM-RTS_UT" class="timeView">読み込み中...</div>
+                    </div>
+                    <div class="timeItem">
+                        <div class="statusIcon" id="axis_ICN"></div>
+                        <span>Axis</span>
+                        <div id="axis_UT" class="timeView">読み込み中...</div>
+                    </div>
+                    <div class="timeItem">
+                        <div class="statusIcon" id="P2P_EEW_ICN"></div>
+                        <span>P2P地震情報 API</span>
+                        <div id="P2P_EEW_UT" class="timeView">読み込み中...</div>
+                    </div>
+
+                    <div class="timeItem">
+                        <div class="statusIcon" id="kmoniImg_ICN"></div>
+                        <span>強震モニタ</span>
+                        <div id="kmoniImg_UT" class="timeView">読み込み中...</div>
+                        <div id="kmoni_Message"></div>
+                    </div>
+                    <div class="timeItem">
+                        <div class="statusIcon" id="msilImg_ICN"></div>
+                        <span>海しる</span>
+                        <div id="msilImg_UT" class="timeView">読み込み中...</div>
+                    </div>
+                    <div class="timeItem">
+                        <div class="statusIcon" id="Early-est_ICN"></div>
+                        <span>Early-est</span>
+                        <div id="Early-est_UT" class="timeView">読み込み中...</div>
+                    </div>
+                    <div class="timeItem">
+                        <div class="statusIcon" id="JMAXML_ICN"></div>
+                        <span>気象庁防災情報XML</span>
+                        <div id="JMAXML_UT" class="timeView">読み込み中...</div>
+                    </div>
+                    <div class="timeItem">
+                        <div class="statusIcon" id="ntool_ICN"></div>
+                        <span>nTool Earthquake API</span>
+                        <div id="ntool_UT" class="timeView">読み込み中...</div>
+                    </div>
+                    <div class="timeItem">
+                        <div class="statusIcon" id="USGS_ICN"></div>
+                        <span>Earthquake Catalog (USGS)</span>
+                        <div id="USGS_UT" class="timeView">読み込み中...</div>
+                    </div>
+
+
+                </div>
+
+            </dialog>
             <dialog id="offline" role="alertdialog" aria-label="オフライン警告">
                 <h2>現在オフラインです</h2>
                 <p>インターネットに接続されていないため、情報を取得することができません。</p>
@@ -378,7 +383,7 @@
             </dialog>
             <div id="errorMsg">
                 <span id="errorContent"></span>
-                <button id="errorMsg_close" class="material-icons-round" title="この通知を閉じる">close</button>
+                <button id="errorMsg_close" class="material-icons-round" title="この通知を閉じる" aria-label="この警告を閉じる">close</button>
             </div>
         </div>
 

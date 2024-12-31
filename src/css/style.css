@@ -231,7 +231,7 @@ main {
 
 #sideBar {
   position: relative;
-  height: 100%;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   border-left: solid 1px #4e4e51;
@@ -271,16 +271,10 @@ main {
   padding: 5px;
   min-height: 60px;
   height: auto;
-  max-height: 300px;
+  max-height: 45%;
   overflow: auto;
   background: #101013;
-}
-
-.EEWMode #sokuho-Panel,
-.TsunamiMode #sokuho-Panel,
-.EQDetecting #sokuho-Panel {
-  height: 50vh;
-  max-height: none;
+  flex-shrink: 0;
 }
 
 #DetectEEWion {
@@ -350,16 +344,30 @@ h2 {
 }
 .Alert_content_wrap {
   position: relative;
-  padding: 10px;
+  padding: 8px 10px 10px 10px;
 }
 .EEW_content_wrap {
   display: flex;
+  align-items: center;
 }
 
 .list-item h2 {
   font-size: 16px;
   padding: 3px 0.5em;
   background: #3f3f42;
+}
+.maxInt_Wrap {
+  display: flex;
+  margin-bottom: 5px;
+}
+.EEWWrap .maxInt_description {
+  color: #999;
+  font-size: 11px;
+  margin: 0;
+  writing-mode: vertical-rl;
+  align-items: center;
+  line-height: 1em;
+  padding-right: 4px;
 }
 .EEWWrap h2,
 .EQDItem h2,
@@ -409,7 +417,8 @@ h2 {
 }
 .detail_text {
   flex: 1;
-  padding: 10px 5px;
+  margin: 0 0 0 10px;
+  max-width: 200px;
 }
 .GraphicalDataWrap {
   text-align: center;
@@ -423,31 +432,55 @@ h2 {
 }
 
 .dataGroup1 {
-  margin-bottom: 15px;
+  margin-bottom: 10px;
   font-size: 15px;
   text-align: center;
-  line-height: 30px;
-  height: 40px;
   line-height: 40px;
+}
+.EpicenterElement {
+  color: #ccc;
+  font-size: 14px;
+}
+.EpicenterElement div {
+  display: inline-block;
+  white-space: nowrap;
 }
 .NoEpicenterElement {
   font-size: 14px;
   color: #ccc;
+  white-space: nowrap;
 }
 .magnitude {
-  font-size: 34px;
-  margin: 0 10px 0 5px;
+  font-size: 32px;
+  margin: 0 14px 0 6px;
   font-family: "AzeretMono-Regular", ui-monospace;
   font-weight: bold;
+  color: #fff;
+}
+.magnitude.UnknownMag {
+  color: #ccc;
+  font-size: 21px;
 }
 .depth {
-  font-size: 22px;
+  font-size: 21px;
   font-family: "AzeretMono-Regular", ui-monospace;
   font-weight: bold;
+  margin: 0 3px;
+  color: #fff;
+}
+.depth.UnknownDepth {
+  color: #ccc;
+  font-size: 18px;
+}
+.depth_unit {
+  color: #fff;
 }
 .region_name {
   text-align: center;
   margin-bottom: 15px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .origin_time {
@@ -502,7 +535,6 @@ h2 {
   width: 60px;
   height: 60px;
   border-radius: 15px;
-  margin: 0 auto 5px auto;
   font-size: 40px;
   text-align: center;
   line-height: 58px;
@@ -556,14 +588,10 @@ td {
 
 #tab1_wrap {
   display: flex;
-  height: calc(100% - 60px);
+  height: 100%;
   border-top: solid 1px #4e4e51;
-}
-
-.EEWMode #tab1_wrap,
-.TsunamiMode #tab1_wrap,
-.EQDetecting #tab1_wrap {
-  height: 50vh;
+  flex-direction: row-reverse;
+  overflow: hidden;
 }
 
 #bar1 {
@@ -575,7 +603,6 @@ td {
   writing-mode: vertical-rl;
   text-orientation: sideways;
   background: #222225;
-  padding: 0 0 40px 0;
   overflow-y: auto;
   overflow-x: hidden;
   white-space: nowrap;
@@ -591,9 +618,6 @@ td {
   margin: 0 5px;
 }
 #setting {
-  position: absolute;
-  bottom: 0;
-  right: 0;
   background: transparent;
   border: none;
   width: 30px;
@@ -681,7 +705,7 @@ td {
 }
 .tabcontent {
   display: none;
-  height: calc(100% - 30px);
+  height: 100%;
   padding: 5px;
   overflow: auto;
 }
@@ -935,10 +959,6 @@ td {
   padding: 0.2em 0.5em;
 }
 #UpdateTimeWrap {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  left: 0;
   height: 30px;
   line-height: 30px;
   overflow-y: auto;
@@ -948,8 +968,12 @@ td {
   background: #222225;
   font-family: "AzeretMono-Regular", ui-monospace, sans-serif;
   text-align: center;
+  display: flex;
+  flex-shrink: 0;
 }
 #all_UpdateTime {
+  display: inline-block;
+  width: 100%;
   font-family: "AzeretMono-Regular", ui-monospace, sans-serif;
 }
 .statusIcon {

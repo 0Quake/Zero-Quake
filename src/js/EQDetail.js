@@ -39,11 +39,11 @@ window.electronAPI.messageSend((event, request) => {
   if (request.action == "metaData") {
     eid = request.eid;
 
-    if (document.getElementById("EEWLink").style.display != "block") {
+    if (document.getElementById("EEWLink").style.display != "inline") {
       var EEWURL = "https://www.data.jma.go.jp/svd/eew/data/nc/fc_hist/" + String(eid).slice(0, 4) + "/" + String(eid).slice(4, 6) + "/" + eid + "/index.html";
       fetch(EEWURL).then(function (res) {
         if (res.status == 200) {
-          document.getElementById("EEWLink").style.display = "block";
+          document.getElementById("EEWLink").style.display = "inline";
           document.getElementById("EEWLink").addEventListener("click", function () {
             window.open(EEWURL);
           });
@@ -449,7 +449,7 @@ function Mapinit() {
       ],
     },
   });
-  map.getCanvas().setAttribute("aria-label", "地図画面");
+  map.getCanvas().setAttribute("aria-label", "地図表現による地震情報");
   map.touchZoomRotate.disableRotation();
   ZoomBounds = new maplibregl.LngLatBounds();
 
@@ -520,15 +520,16 @@ function Mapinit() {
   var layerButton = document.createElement("button");
   layerButton.innerText = "layers";
   layerButton.setAttribute("title", "レイヤーの切り替え");
-  layerButton.setAttribute("aria-label", "レイヤー切り替え画面を開く");
+  layerButton.setAttribute("aria-label", "地図レイヤー切り替え画面を開く");
   layerButton.setAttribute("id", "layerSwitch_toggle");
   layerButton.addEventListener("click", function () {
     document.getElementById("menu_wrap").classList.add("menu_show");
     document.getElementById("menu").show();
   });
 
-  var layerMenu = document.createElement("div");
+  var layerMenu = document.createElement("nav");
   layerMenu.setAttribute("id", "estimated_intensity_map_toggle");
+  layerMenu.setAttribute("aria-label", "地図に表示する地震情報を選択");
   layerMenu.classList.add("menu");
   layerMenu.innerHTML = "<h3>地震情報選択</h3>";
   var radioWrap = document.createElement("div");
@@ -1398,7 +1399,7 @@ var ShindoFragment;
 function add_Pref_info(name, maxInt) {
   var newDiv = document.createElement("div");
   var color1 = NormalizeShindo(maxInt, 2);
-  newDiv.innerHTML = "<span style='background:" + color1[0] + ";color:" + color1[1] + ";'>" + maxInt + "</span>" + name;
+  newDiv.innerHTML = "<span aria-hidden='true'></span><div style='background:" + color1[0] + ";color:" + color1[1] + ";' aria-hidden='true'>" + maxInt + "</div>" + name;
   newDiv.classList.add("ShindoItem", "ShindoItem1");
   newDiv.setAttribute("tabindex", 0);
   newDiv.setAttribute("aria-label", `${name}、震度${NormalizeShindo(maxInt, 1)}`);
@@ -1426,7 +1427,7 @@ function add_Area_info(name, maxInt) {
 
   var newDiv = document.createElement("div");
   var color = NormalizeShindo(maxInt, 2);
-  newDiv.innerHTML = "<span style='background:" + color[0] + ";color:" + color[1] + ";'>" + maxInt + "</span>" + name;
+  newDiv.innerHTML = "<span aria-hidden='true'></span><div style='background:" + color[0] + ";color:" + color[1] + ";' aria-hidden='true'>" + maxInt + "</div>" + name;
   newDiv.classList.add("ShindoItem", "ShindoItem2");
   newDiv.setAttribute("tabindex", 0);
   newDiv.setAttribute("aria-label", `細分区域 ${name}、震度${NormalizeShindo(maxInt, 1)}`);
@@ -1449,7 +1450,7 @@ function add_Area_info(name, maxInt) {
 
   if (name == config.home.Section) {
     var newDiv3 = document.createElement("div");
-    newDiv3.innerHTML = "<span style='background:" + color[0] + ";color:" + color[1] + ";'>" + maxInt + "</span>" + name;
+    newDiv3.innerHTML = "<span aria-hidden='true'></span><div style='background:" + color[0] + ";color:" + color[1] + ";' aria-hidden='true'>" + maxInt + "</div>" + name;
     newDiv3.classList.add("ShindoItem", "ShindoItem2");
     newDiv3.setAttribute("tabindex", 0);
     newDiv3.setAttribute("aria-label", `${config.home.name ? config.home.name : "現在地"}エリアの ${name}、震度${NormalizeShindo(maxInt, 1)}`);
@@ -1516,7 +1517,7 @@ function add_City_info(name, maxInt) {
   var newDiv = document.createElement("div");
   if (name) {
     var color3 = NormalizeShindo(maxInt, 2);
-    newDiv.innerHTML = "<span style='background:" + color3[0] + ";color:" + color3[1] + ";'>" + maxInt + "</span>" + name;
+    newDiv.innerHTML = "<span aria-hidden='true'></span><div style='background:" + color3[0] + ";color:" + color3[1] + ";' aria-hidden='true'>" + maxInt + "</div>" + name;
     newDiv.classList.add("ShindoItem", "ShindoItem3");
     newDiv.setAttribute("tabindex", 0);
     newDiv.setAttribute("aria-label", `市町村 ${name}、震度${NormalizeShindo(maxInt, 1)}`);
@@ -1549,7 +1550,7 @@ function add_IntensityStation_info(lat, lng, name, int) {
 
   var newDiv = document.createElement("div");
   var color4 = NormalizeShindo(int, 2);
-  newDiv.innerHTML = "<span style='background:" + color4[0] + ";color:" + color4[1] + ";'>" + intStr + "</span>" + name;
+  newDiv.innerHTML = "<span aria-hidden='true'></span><div style='background:" + color4[0] + ";color:" + color4[1] + ";' aria-hidden='true'>" + intStr + "</div>" + name;
   newDiv.classList.add("ShindoItem", "ShindoItem4");
   newDiv.setAttribute("tabindex", 0);
   newDiv.setAttribute("aria-label", `観測点 ${name}、震度${NormalizeShindo(int, 1)}`);
@@ -1666,7 +1667,7 @@ function add_Pref_infoL(name, lngInt) {
   var newDiv = document.createElement("div");
   var color1 = LgIntConvert(lngInt);
 
-  newDiv.innerHTML = "<span style='background:" + color1[0] + ";color:" + color1[1] + ";'>" + lngInt + "</span>" + name;
+  newDiv.innerHTML = "<span aria-hidden='true'></span><div style='background:" + color1[0] + ";color:" + color1[1] + ";' aria-hidden='true'>" + lngInt + "</div>" + name;
   newDiv.classList.add("ShindoItemL", "ShindoItem1L");
   newDiv.setAttribute("tabindex", 0);
   newDiv.setAttribute("aria-label", `${name}、長周期地震動階級${lngInt}`);
@@ -1694,7 +1695,7 @@ function add_Area_infoL(name, maxInt) {
   var color = LgIntConvert(maxInt);
 
   var newDiv = document.createElement("div");
-  newDiv.innerHTML = "<span style='background:" + color[0] + ";color:" + color[1] + ";'>" + maxInt + "</span>" + name;
+  newDiv.innerHTML = "<span aria-hidden='true'></span><div style='background:" + color[0] + ";color:" + color[1] + ";' aria-hidden='true'>" + maxInt + "</div>" + name;
   newDiv.classList.add("ShindoItemL", "ShindoItem2L");
   newDiv.setAttribute("tabindex", 0);
   newDiv.setAttribute("aria-label", `細分区域 ${name}、長周期地震動階級${maxInt}`);
@@ -1717,7 +1718,7 @@ function add_Area_infoL(name, maxInt) {
 
   if (name == config.home.Section) {
     var newDiv3 = document.createElement("div");
-    newDiv3.innerHTML = "<span style='background:" + color[0] + ";color:" + color[1] + ";'>" + maxInt + "</span>" + name;
+    newDiv3.innerHTML = "<span aria-hidden='true'></span><div style='background:" + color[0] + ";color:" + color[1] + ";' aria-hidden='true'>" + maxInt + "</div>" + name;
     newDiv3.classList.add("ShindoItemL", "ShindoItem2L");
     newDiv3.setAttribute("tabindex", 0);
     newDiv3.setAttribute("aria-label", `${config.home.name ? config.home.name : "現在地"}エリアの ${name}、長周期地震動階級${maxInt}`);
@@ -1766,7 +1767,7 @@ function add_IntensityStation_infoL(lat, lng, name, int) {
   var intStr = int;
 
   var newDiv = document.createElement("div");
-  newDiv.innerHTML = "<span style='background:" + color4[0] + ";color:" + color4[1] + ";'>" + int + "</span>" + name;
+  newDiv.innerHTML = "<span aria-hidden='true'></span><div style='background:" + color4[0] + ";color:" + color4[1] + ";' aria-hidden='true'>" + int + "</div>" + name;
   newDiv.classList.add("ShindoItemL", "ShindoItem4L");
   newDiv.setAttribute("tabindex", 0);
   newDiv.setAttribute("aria-label", `観測点 ${name}、長周期地震動階級${int}`);
@@ -1893,9 +1894,6 @@ function ConvertEQInfo(data) {
   if (EQInfoMarged.originTime) EQInfo.originTime = EQInfoMarged.originTime;
   if (EQInfoMarged.maxI) EQInfo.maxI = EQInfoMarged.maxI;
   if (EQInfoMarged.mag) EQInfo.mag = EQInfoMarged.mag;
-  if (EQInfoMarged.magType) EQInfo.magType = EQInfoMarged.magType;
-  else if (!EQInfo.magType) EQInfo.magType = "M";
-  data_MT.innerText = EQInfo.magType;
 
   if (EQInfoMarged.depth || EQInfoMarged.depth === 0) EQInfo.depth = Math.abs(EQInfoMarged.depth);
   if (EQInfoMarged.epiCenter) EQInfo.epiCenter = EQInfoMarged.epiCenter;
@@ -1903,7 +1901,9 @@ function ConvertEQInfo(data) {
   if (EQInfo.originTime) data_time.innerText = NormalizeDate(4, EQInfo.originTime);
   if (EQInfo.maxI) data_maxI.innerText = NormalizeShindo(EQInfo.maxI, 1);
   if (EQInfo.maxI) data_maxI.style.borderBottom = "solid 2px " + NormalizeShindo(EQInfo.maxI, 2)[0];
-  if (EQInfo.mag) data_M.innerText = EQInfo.mag;
+  if (EQInfoMarged.magType) EQInfo.magType = EQInfoMarged.magType;
+  else if (!EQInfo.magType) EQInfo.magType = "M";
+  if (EQInfo.mag) data_M.innerText = EQInfo.magType + " " + EQInfo.mag;
 
   if (EQInfo.depth == 0) data_depth.innerText = "ごく浅い";
   else if (EQInfo.depth == 700) data_depth.innerText = "700km以上";

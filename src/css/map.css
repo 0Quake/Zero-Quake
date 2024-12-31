@@ -334,10 +334,6 @@
 .maplibregl-ctrl-attrib-inner {
   display: block !important;
 }
-.maplibregl-ctrl-attrib-inner::before {
-  content: "Map: ";
-  font-size: 11px;
-}
 .maplibregl-ctrl-attrib-button {
   display: none !important;
 }
