@@ -3026,9 +3026,9 @@ function Req_NarikakunList(url, num, first, count) {
             var monthTmp = new Date().getMonth();
             if (monthTmp == 0) {
               yearTmp = new Date().getFullYear() - 1;
-              monthTmp = 1;
+              monthTmp = 11;
             }
-            Req_NarikakunList("https://ntool.online/api/earthquakeList?year=" + yearTmp + "&month=" + monthTmp, config.Info.EQInfo.ItemCount - json.lists.length, false);
+            Req_NarikakunList("https://ntool.online/api/earthquakeList?year=" + yearTmp + "&month=" + (monthTmp + 1), config.Info.EQInfo.ItemCount - json.lists.length, false);
           }
           for (let elm of narikakun_URLs) {
             var eidTmp = String(elm).split("_")[2];
