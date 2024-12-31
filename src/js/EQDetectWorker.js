@@ -309,6 +309,16 @@ function calcDifference(lat, lng, stations, data, originTime, dep) {
 }
 
 //緯度・経度から2地点間の距離を産出
+var dist_cache = {};
 function geosailing(latA, lngA, latB, lngB) {
-  return Math.acos(Math.sin(Math.atan(Math.tan(latA * (Math.PI / 180)))) * Math.sin(Math.atan(Math.tan(latB * (Math.PI / 180)))) + Math.cos(Math.atan(Math.tan(latA * (Math.PI / 180)))) * Math.cos(Math.atan(Math.tan(latB * (Math.PI / 180)))) * Math.cos(lngA * (Math.PI / 180) - lngB * (Math.PI / 180))) * 6371.008;
+  if (dist_cache[latA][lngA][latB][lngB]) {
+    return dist_cache[latA][lngA][latB][lngB];
+  } else {
+    var dist = Math.acos(Math.sin(Math.atan(Math.tan(latA * (Math.PI / 180)))) * Math.sin(Math.atan(Math.tan(latB * (Math.PI / 180)))) + Math.cos(Math.atan(Math.tan(latA * (Math.PI / 180)))) * Math.cos(Math.atan(Math.tan(latB * (Math.PI / 180)))) * Math.cos(lngA * (Math.PI / 180) - lngB * (Math.PI / 180))) * 6371.008;
+    if (!dist_cache[latA]) dist_cache[latA] = {};
+    if (!dist_cache[latA][lngA]) dist_cache[latA][lngA] = {};
+    if (!dist_cache[latA][lngA][latB]) dist_cache[latA][lngA][latB] = {};
+    dist_cache[latA][lngA][latB][lngB] = dist;
+    return dist;
+  }
 }
