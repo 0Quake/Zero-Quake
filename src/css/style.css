@@ -605,6 +605,7 @@ td {
   margin: 0;
   padding: 0;
   writing-mode: horizontal-tb;
+  flex-shrink: 0;
 }
 #setting:hover,
 #setting:focus {
@@ -662,14 +663,14 @@ td {
 .active_tabmenu,
 .active_tabmenu:hover {
   background: #999;
+  border-color: #999;
   color: #222225;
-  border: none;
 }
 
 .active_tabmenu:hover {
   background: #a3a3a3;
+  border-color: #999;
   color: #111;
-  border: none;
 }
 .active_tabgroup {
   background: #3f3f42;
@@ -1061,6 +1062,7 @@ summary {
   border-radius: 10px;
   cursor: pointer;
   margin: 6px;
+  overflow: hidden;
 }
 button:hover,
 summary:hover {
@@ -1193,4 +1195,37 @@ summary:focus {
   box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
   font-size: 13px;
   margin: 2px;
+}
+@media (forced-colors: active) {
+  #tab2_wrap {
+    border-right-style: solid;
+    border-bottom-style: solid;
+    border-width: 1px;
+  }
+  #tab1_bar .tabmenu {
+    border-style: solid;
+    border-width: 1px;
+  }
+  #tab2_bar {
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+  }
+  #setting {
+    border-style: solid;
+    border-width: 1px;
+  }
+  .active_tabmenu,
+  .active_tabmenu:hover {
+    border-width: 2px;
+  }
+  .tabmenu::before {
+    content: "☐ ";
+  }
+  .active_tabmenu::before {
+    content: "☑ ";
+  }
+  dialog::backdrop,
+  #menu_wrap {
+    background: #000;
+  }
 }

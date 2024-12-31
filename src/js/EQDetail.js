@@ -20,6 +20,7 @@ var EQInfo = { originTime: null, maxI: null, mag: null, lat: null, lng: null, de
 var hinanjoLayers = [];
 var hinanjoCheck = document.getElementById("hinanjo");
 var ZoomBounds;
+var high_contrast = window.matchMedia("(forced-colors: active)").matches;
 
 fetch("Resource/PointSeismicIntensityLocation.json")
   .then(function (res) {
@@ -257,6 +258,7 @@ function Mapinit() {
           id: "submarine",
           type: "raster",
           source: "submarine",
+          layout: { visibility: high_contrast ? "none" : "visible" },
         },
         {
           id: "tile0",
@@ -287,7 +289,7 @@ function Mapinit() {
           type: "fill",
           source: "prefmap",
           paint: {
-            "fill-color": "#333",
+            "fill-color": high_contrast ? "#000" : "#333",
             "fill-opacity": 1,
           },
         },
@@ -297,7 +299,7 @@ function Mapinit() {
           source: "basemap",
           minzoom: 6,
           paint: {
-            "line-color": "#666",
+            "line-color": high_contrast ? "#FFF" : "#666",
             "line-width": 1,
           },
         },
@@ -357,7 +359,7 @@ function Mapinit() {
           type: "line",
           source: "prefmap",
           paint: {
-            "line-color": "#999",
+            "line-color": high_contrast ? "#FFF" : "#999",
             "line-width": 1,
           },
         },
@@ -366,7 +368,7 @@ function Mapinit() {
           type: "fill",
           source: "worldmap",
           paint: {
-            "fill-color": "#333",
+            "fill-color": high_contrast ? "#000" : "#333",
             "fill-opacity": 1,
           },
         },
@@ -375,7 +377,7 @@ function Mapinit() {
           type: "line",
           source: "worldmap",
           paint: {
-            "line-color": "#666",
+            "line-color": high_contrast ? "#FFF" : "#666",
             "line-width": 1,
           },
         },
@@ -384,8 +386,8 @@ function Mapinit() {
           type: "fill",
           source: "lake",
           paint: {
-            "fill-color": "#325385",
-            "fill-opacity": 0.5,
+            "fill-color": high_contrast ? "#FFF" : "#325385",
+            "fill-opacity": high_contrast ? 1 : 0.5,
           },
           minzoom: 6,
         },

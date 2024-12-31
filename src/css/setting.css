@@ -417,3 +417,28 @@ ol {
   opacity: 0.8;
   cursor: not-allowed;
 }
+@media (forced-colors: active) {
+  #tab1_bar {
+    border-right-style: solid;
+    border-right-width: 1px;
+  }
+  #update-wrap {
+    border-style: solid;
+    border-width: 1px;
+  }
+  .tableWrap {
+    border-style: solid;
+    border-width: 1px;
+  }
+  .tabmenu::before,
+  .active_tabmenu::before {
+    content: "";
+  }
+  #tab1_bar .active_tabmenu,
+  #tab1_bar .active_tabmenu:hover {
+    border-width: 2px;
+  }
+  .active_tabmenu::after {
+    font-size: 22px;
+  }
+}

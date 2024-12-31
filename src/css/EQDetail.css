@@ -32,6 +32,8 @@ main {
   display: block;
   height: fit-content;
   text-align: center;
+  border-top-style: solid;
+  border-top-width: 1px;
 }
 
 main h2,

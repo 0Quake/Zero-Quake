@@ -15,6 +15,8 @@ var userPosition = [138.46, 32.99125];
 var userZoom = 4;
 var userMotion;
 
+var high_contrast = window.matchMedia("(forced-colors: active)").matches;
+
 document.body.addEventListener("mouseover", function () {
   background = false;
 });
@@ -892,6 +894,7 @@ function init() {
           paint: {
             "raster-fade-duration": 500,
           },
+          layout: { visibility: high_contrast ? "none" : "visible" },
         },
         {
           id: "tile0",
@@ -981,7 +984,7 @@ function init() {
           type: "fill",
           source: "prefmap",
           paint: {
-            "fill-color": "#333",
+            "fill-color": high_contrast ? "#000" : "#333",
             "fill-opacity": 1,
           },
         },
@@ -1027,7 +1030,7 @@ function init() {
           source: "basemap",
           minzoom: 6,
           paint: {
-            "line-color": "#666",
+            "line-color": high_contrast ? "#FFF" : "#666",
             "line-width": 1,
           },
         },
@@ -1045,7 +1048,7 @@ function init() {
           type: "line",
           source: "prefmap",
           paint: {
-            "line-color": "#999",
+            "line-color": high_contrast ? "#FFF" : "#999",
             "line-width": 1,
           },
         },
@@ -1054,7 +1057,7 @@ function init() {
           type: "fill",
           source: "worldmap",
           paint: {
-            "fill-color": "#333",
+            "fill-color": high_contrast ? "#000" : "#333",
             "fill-opacity": 1,
           },
         },
@@ -1063,7 +1066,7 @@ function init() {
           type: "line",
           source: "worldmap",
           paint: {
-            "line-color": "#666",
+            "line-color": high_contrast ? "#FFF" : "#666",
             "line-width": 1,
           },
         },
@@ -1072,8 +1075,8 @@ function init() {
           type: "fill",
           source: "lake",
           paint: {
-            "fill-color": "#325385",
-            "fill-opacity": 0.5,
+            "fill-color": high_contrast ? "#FFF" : "#325385",
+            "fill-opacity": high_contrast ? 1 : 0.5,
           },
           minzoom: 6,
         },

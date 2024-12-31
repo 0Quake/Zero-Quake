@@ -731,3 +731,26 @@ body {
 .maplibregl-ctrl-attrib-inner a {
   display: none !important;
 }
+@media (forced-colors: active) {
+  .maplibregl-popup-anchor-bottom .maplibregl-popup-tip,
+  .maplibregl-popup-anchor-top .maplibregl-popup-tip,
+  .maplibregl-popup-anchor-left .maplibregl-popup-tip,
+  .maplibregl-popup-anchor-right .maplibregl-popup-tip {
+    forced-color-adjust: none;
+  }
+  .maplibregl-popup-anchor-bottom .maplibregl-popup-tip {
+    border-top-color: #fff !important;
+  }
+  .maplibregl-popup-anchor-top .maplibregl-popup-tip {
+    border-bottom-color: #fff !important;
+  }
+  .maplibregl-popup-anchor-left .maplibregl-popup-tip {
+    border-right-color: #fff !important;
+  }
+  .maplibregl-popup-anchor-right .maplibregl-popup-tip {
+    border-left-color: #fff !important;
+  }
+  #menu_wrap {
+    background: #000;
+  }
+}
