@@ -1201,6 +1201,7 @@ function init() {
     } else {
       kmoni_popup[elm.Code] = new maplibregl.Popup().setLngLat(e.features[0].geometry.coordinates).setHTML(popupContent).addTo(map);
     }
+    e.originalEvent.cancelBubble = true;
   };
   map.on("click", "knet_points", nied_popup);
   map.on("click", "snet_points", nied_popup);
@@ -1213,6 +1214,7 @@ function init() {
     } else {
       kmoni_popup[elm.Code] = new maplibregl.Popup().setLngLat(e.features[0].geometry.coordinates).setHTML(popupContent).addTo(map);
     }
+    e.originalEvent.cancelBubble = true;
   });
   map.on("click", "SEISJS_points", function (e) {
     elm = e.features[0].properties;
@@ -1223,6 +1225,7 @@ function init() {
     } else {
       kmoni_popup[elm.Code] = new maplibregl.Popup().setLngLat(e.features[0].geometry.coordinates).setHTML(popupContent).addTo(map);
     }
+    e.originalEvent.cancelBubble = true;
   });
 
   map.on("sourcedataloading", (e) => {
@@ -2322,6 +2325,9 @@ function NankaiTroughInfo(data) {
 }
 
 function hinanjoPopup(e) {
+  if (e.originalEvent.cancelBubble) return;
+  e.originalEvent.cancelBubble = true;
+
   var DataTmp = e.features[0].properties;
   var supportType = [];
   if (e.features[0].properties.disaster1 == 1) supportType.push("洪水");
