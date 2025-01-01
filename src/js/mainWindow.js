@@ -195,7 +195,7 @@ function EEW_AlertUpdate(data) {
 
     if (!is_update) {
       clone.setAttribute("id", "EEW-" + elm.EventID);
-      document.getElementById("EEW-Panel").appendChild(clone);
+      document.getElementById("EEW-Panel").prepend(clone);
       document.getElementById("sokuho-Panel").scroll(0, 0);
     }
     epiCenterUpdate(elm);

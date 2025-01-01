@@ -1805,7 +1805,6 @@ function RegularExecution(roop) {
     //EEW解除
     EEW_nowList.forEach(function (elm) {
       if (new Date() - Replay - new Date(elm.origin_time) > 300000) EEW_Clear(elm.EventID);
-      console.log(new Date() - Replay - new Date(elm.origin_time), elm.origin_time, elm.EventID);
     });
 
     //津波情報解除
