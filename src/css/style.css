@@ -413,6 +413,7 @@ h2 {
   height: 50px;
   border-radius: 25px;
   border: solid 1px rgba(255, 255, 255, 0.15);
+  forced-color-adjust: none;
 }
 
 .dataGroup1 {
@@ -524,6 +525,7 @@ h2 {
   line-height: 58px;
   font-family: "M PLUS 1p";
   border: solid 1px rgba(255, 255, 255, 0.15);
+  forced-color-adjust: none;
 }
 .userIntensity {
   width: 40px;
@@ -806,6 +808,7 @@ td {
   margin: auto 5px auto 0;
   font-family: "M PLUS 1p";
   border: solid 1px rgba(255, 255, 255, 0.15);
+  forced-color-adjust: none;
 }
 .EQI_LgInt {
   width: 50px;
@@ -1227,5 +1230,12 @@ summary:focus {
   dialog::backdrop,
   #menu_wrap {
     background: #000;
+  }
+
+  .EEWWrap.yohou h2,
+  .EQDItem.lv1 h2,
+  .EEWWrap.keihou h2,
+  .EQDItem.lv2 h2 {
+    border-bottom: solid 1px;
   }
 }

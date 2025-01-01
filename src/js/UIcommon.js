@@ -351,7 +351,6 @@ function latitudeConvert(data) {
   }
 }
 const moveFocus = (movement, event) => {
-  console.log(event);
   const group = event.target.closest("[ZQ-focusgroup]");
   if (!group) return;
   const items = group.querySelectorAll("[ZQ-focusgroup-item]");

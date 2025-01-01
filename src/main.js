@@ -1003,7 +1003,7 @@ function Create_NankaiWindow(type) {
       });
 
       NankaiWindow.window.webContents.on("did-finish-load", () => {
-        NankaiWindow.webContents.setZoomFactor(config.system.zoom);
+        NankaiWindow.window.webContents.setZoomFactor(config.system.zoom);
 
         var data = NankaiWindow.type == "rinji" ? NankaiTroughInfo.rinji : NankaiTroughInfo.teirei;
         if (data) {
@@ -3304,7 +3304,6 @@ function AlertEQInfo(data, source, update, audioPlay) {
         data = data.sort(function (a, b) {
           return a.OriginTime > b.OriginTime ? -1 : 1;
         });
-        console.log(data);
 
         if (config.Info.EQInfo.NotificationSound && (config.Info.EQInfo.Bypass_threshold || NormalizeShindo(config.Info.EQInfo.maxI_threshold, 5) <= NormalizeShindo(data[0].maxI, 5) || config.Info.EQInfo.M_threshold <= data[0].M)) {
           PlayAudio("EQInfo");

@@ -584,8 +584,6 @@ function MapReDraw() {
     return turf.booleanPointInPolygon([lng, lat], elm);
   });
 
-  console.log(1111, [lng, lat], selected_sect);
-
   if (!selected_sect) {
     var minDistance = Infinity;
     function calcDist(line) {
@@ -614,19 +612,13 @@ function MapReDraw() {
         selected_sect = elm;
       }
     });
-
-    //document.getElementById("longitude").value = lng = beforeCordinates[0];
-    //document.getElementById("latitude").value = lat = beforeCordinates[1];
-    //return;
   }
 
-  console.log(Boolean(selected_sect), selected_sect);
   if (selected_sect) {
     if (selected_sect.type == "FeatureCollection") EQSect = selected_sect.features[0].properties.name;
     else EQSect = selected_sect.properties.name;
     map.setFilter("selected_sect", ["==", "name", EQSect]);
     selectBoxSet(document.getElementById("saibun"), EQSect);
-    console.log(2, EQSect);
   }
 
   beforeCordinates = [lng, lat];

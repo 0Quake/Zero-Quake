@@ -274,6 +274,7 @@ function epiCenterUpdate(elm) {
       if (tooltipContent) ESPopup2.setText(tooltipContent).addTo(map);
 
       var ECMarker = new maplibregl.Marker({ element: img }).setLngLat([longitude, latitude]).addTo(map);
+      ECMarker.getElement().removeAttribute("tabindex");
 
       epiCenter.push({ eid: eid, markerElm: ECMarker, latitude: latitude, longitude: longitude, EEWID: Number(EEWIDTmp), ESPopup: ESPopup, ESPopup2: ESPopup2 });
       displayTmp = epiCenter.length > 1 ? "inline-block" : "none";
@@ -448,6 +449,7 @@ function EQDetect(data) {
     img.classList.add("epicenterIcon");
 
     var ECMarker = new maplibregl.Marker({ element: img }).setLngLat([data.lng, data.lat]).addTo(map);
+    ECMarker.getElement().removeAttribute("tabindex");
 
     EQDetectItem.push({
       id: data.id,
@@ -1203,7 +1205,6 @@ function init() {
   map.on("click", "knet_points", nied_popup);
   map.on("click", "snet_points", nied_popup);
   map.on("click", "TREMRTS_points", function (e) {
-    console.log("aaaaaaaaaa", e.features[0]);
     elm = e.features[0].properties;
     if (kmoni_popup[elm.Code] && kmoni_popup[elm.Code].isOpen()) return;
     var popupContent = generatePopupContent_TREM(elm);
@@ -1428,7 +1429,8 @@ function init() {
     const img = document.createElement("img");
     img.src = "./img/homePin.svg";
     img.classList.add("homeIcon");
-    new maplibregl.Marker({ element: img }).setLngLat([config.home.longitude, config.home.latitude]).addTo(map);
+    var mkr = new maplibregl.Marker({ element: img }).setLngLat([config.home.longitude, config.home.latitude]).addTo(map);
+    mkr.getElement().removeAttribute("tabindex");
   }
 }
 
@@ -1905,6 +1907,7 @@ function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrive
       el.innerHTML = '<svg width="50" height="50"><circle cx="25" cy="25" r="22" fill="none" stroke-width="5px" stroke="#777"/><circle id="SWprogressValue_' + EventID + '" class="SWprogressValue" cx="25" cy="25" r="22" fill="none" stroke-width="5px" stroke-linecap="round" stroke-dasharray="138" stroke-dashoffset="' + Number(138 - 138 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect))) + '"/></svg>';
 
       SIElm = new maplibregl.Marker({ element: el }).setLngLat([longitude, latitude]).addTo(map);
+      SIElm.getElement().removeAttribute("tabindex");
 
       EQElm.SIElm = SIElm;
 
@@ -1991,6 +1994,8 @@ function tsunamiDataUpdate(data) {
         EQInfoLink.dataset.eventid = link.join(",");
       }
     }
+
+    document.getElementById("tsunamiWrap").setAttribute("aria-label", GenerateTsunamiText(data, "津波情報アイテム。情報内容を読み上げます。{max_grade}発令中。[{home_area}には{home_grade}が発表。{home_area}への{first_height2}、最大波予想は{max_height2}。{immediately}]{report_time}発表。"));
     if (config.home.TsunamiSect) {
       var sectData = data.areas.find(function (elm) {
         return elm.name == config.home.TsunamiSect;
@@ -2140,6 +2145,7 @@ function tsunamiDataUpdate(data) {
 
               var TsunamiPopup = new maplibregl.Popup().setHTML(popupContent);
               tsunamiSTMarkers.push(new maplibregl.Marker({ element: tsunamiST }).setLngLat([st.lng, st.lat]).setPopup(TsunamiPopup).addTo(map));
+              tsunamiST.removeAttribute("tabindex");
             }
           }
         });
@@ -2196,6 +2202,7 @@ EQInfoLink.addEventListener("click", function (e) {
         },
         500
       );
+      EQItemElm.focus();
     }
   });
   EQinfo_Index++;
@@ -2278,6 +2285,7 @@ function NankaiTroughInfo(data) {
     });
     document.getElementById("NankaiTroughInfo_Rinji").style.display = "block";
     document.getElementById("NankaiTroughInfo_Rinji").setAttribute("title", "クリックして詳細を表示\n" + data.rinji.HeadLine);
+    document.getElementById("NankaiTroughInfo_Rinji").setAttribute("aria-label", "地震情報アイテム：" + data.rinji.title + "、" + data.rinji.kind + "、エンターキーで詳細情報を確認。");
     var serialStr = data.rinji.Serial ? "<span class='nankai_serial'>#" + data.rinji.Serial + "</span>" : "";
     document.getElementById("Nankai_Title_Rinji").innerHTML = data.rinji.title + " (" + data.rinji.kind + ") " + serialStr;
     document.getElementById("NankaiTroughInfo_Rinji").classList.remove("nankaiAlert", "nankaiWarn", "nankaiInfo");
@@ -2304,6 +2312,7 @@ function NankaiTroughInfo(data) {
     });
     document.getElementById("NankaiTroughInfo_Teirei").style.display = "block";
     document.getElementById("NankaiTroughInfo_Teirei").setAttribute("title", "クリックして詳細を表示\n" + data.teirei.HeadLine);
+    document.getElementById("NankaiTroughInfo_Teirei").setAttribute("aria-label", "地震情報アイテム：" + data.teirei.title + "、" + data.teirei.kind + "、エンターキーで詳細情報を確認。");
     var serialStr = data.teirei.Serial ? "<span class='nankai_serial'>#" + data.teirei.Serial + "</span>" : "";
     document.getElementById("Nankai_Title_Teirei").innerHTML = data.teirei.title + " (" + data.teirei.kind + ")" + serialStr;
     document.getElementById("NankaiTroughInfo_Teirei").classList.remove("nankaiAlert", "nankaiWarn", "nankaiInfo");
@@ -2364,6 +2373,73 @@ function GenerateEEWText(EEWData, form) {
 
     text = text.replaceAll("{local_Int}", userInt ? NormalizeShindo(userInt, 1) : "不明");
 
+    return text;
+  } catch (err) {
+    return "";
+  }
+}
+function GenerateTsunamiText(data, text) {
+  try {
+    var grades = { MajorWarning: false, Warning: false, Watch: false, Yoho: false };
+    var grades_JA = { MajorWarning: "大津波警報", Warning: "津波警報", Watch: "津波注意報", Yoho: "津波予報" };
+
+    //自地域（カッコで）　最大波高さ
+    var grade_arr = [];
+    var homeArea;
+    data.areas.forEach(function (area) {
+      if (area.grade) grades[area.grade] = true;
+      if (config.home.TsunamiSect && area.name == config.home.TsunamiSect) homeArea = area;
+    });
+
+    Object.keys(grades).forEach(function (key) {
+      if (grades[key]) grade_arr.push(grades_JA[key]);
+    });
+
+    text = text.replaceAll("{max_grade}", grade_arr[0] ? grade_arr[0] : "津波情報");
+    text = text.replaceAll("{all_grade}", grade_arr[0] ? grade_arr.join("、") : "津波情報");
+    text = text.replaceAll("{report_time}", data.issue.time ? NormalizeDate(9, data.issue.time) : "不明な時刻");
+    text = text.replaceAll("{headline}", data.headline ? data.headline : "");
+
+    if (homeArea && !homeArea.canceled) {
+      text = text.replaceAll("{home_area}", homeArea.name ? homeArea.name : "設定地点");
+      text = text.replaceAll("{home_grade}", homeArea.grade ? grades_JA[homeArea.grade] : "津波情報");
+
+      var firstHeightTmp = "";
+      if (homeArea.firstHeight) firstHeightTmp = "第１波が" + NormalizeDate(9, homeArea.firstHeight) + "に予想され、";
+      else if (homeArea.firstHeightCondition == "津波到達中と推測") firstHeightTmp = "津波が到達中とみられ、";
+      else if (homeArea.firstHeightCondition == "第１波の到達を確認") firstHeightTmp = "既に第１波が到達し、";
+      else firstHeightTmp = "";
+      text = text.replaceAll("{first_height1}", firstHeightTmp);
+
+      var firstHeightTmp2 = "";
+      if (homeArea.firstHeight) firstHeightTmp2 = "到達予想時刻は" + NormalizeDate(9, homeArea.firstHeight);
+      else if (homeArea.firstHeightCondition == "津波到達中と推測") firstHeightTmp2 = "津波到達中と推測";
+      else if (homeArea.firstHeightCondition == "第１波の到達を確認") firstHeightTmp2 = "第１波の到達を確認";
+      else firstHeightTmp2 = "到達時刻は不明";
+      text = text.replaceAll("{first_height2}", firstHeightTmp2);
+
+      var immediately = "";
+      if (homeArea.firstHeightCondition == "ただちに津波来襲と予測") immediately = "ただちに津波が来襲すると予測されます。";
+      text = text.replaceAll("{immediately}", immediately);
+
+      var MaxHeightTmp = "";
+      if (homeArea.maxHeight == "巨大") MaxHeightTmp = "巨大な津波";
+      else if (homeArea.maxHeight == "高い") MaxHeightTmp = "高い津波";
+      else if (homeArea.maxHeight) MaxHeightTmp = "今後最大" + homeArea.maxHeight.replace("m", "メートル") + "の津波";
+      else if (!homeArea.maxHeight && homeArea.grade == "Yoho") MaxHeightTmp = "若干の海面変動";
+      else MaxHeightTmp = "高さ不明の津波";
+      text = text.replaceAll("{max_height1}", MaxHeightTmp);
+
+      var MaxHeightTmp2 = "";
+      if (homeArea.maxHeight == "巨大") MaxHeightTmp2 = "巨大";
+      else if (homeArea.maxHeight == "高い") MaxHeightTmp2 = "高い";
+      else if (homeArea.maxHeight) MaxHeightTmp2 = homeArea.maxHeight.replace("m", "メートル");
+      else if (!homeArea.maxHeight && homeArea.grade == "Yoho") MaxHeightTmp2 = "若干の海面変動";
+      else MaxHeightTmp2 = "不明";
+      text = text.replaceAll("{max_height2}", MaxHeightTmp2);
+    } else text = text.replace(/\[.*?\]/g, "");
+
+    text = text.replace(/\[|\]/g, "");
     return text;
   } catch (err) {
     return "";

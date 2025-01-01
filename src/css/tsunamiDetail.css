@@ -134,6 +134,7 @@ table thead th {
   line-height: 25px;
   vertical-align: middle;
   font-size: 16px;
+  border: solid 1px #181818;
 }
 
 table td {
@@ -254,17 +255,22 @@ header div.TestNotes {
   height: 50px;
 }
 
-.disabled-cell {
+.disabled-cell,
+td:empty,
+.disabled-wrap {
   text-align: center;
   font-size: 16px;
   color: #999;
 }
+td:empty::before {
+  content: "-";
+}
+td:first-child::before {
+  content: "";
+}
 
 .disabled-wrap {
   display: block;
-  text-align: center;
-  font-size: 16px;
-  color: #999;
 }
 
 .TxtIcon {
@@ -294,4 +300,15 @@ header div.TestNotes {
   border-radius: 3px;
   font-size: 0.9em;
   line-height: 1;
+}
+@media (forced-colors: active) {
+  table td {
+    border-top-style: solid;
+    border-bottom-style: solid;
+    border-width: 1px;
+  }
+  .ListItem_detail td {
+    border-top: none;
+    border-bottom: none;
+  }
 }

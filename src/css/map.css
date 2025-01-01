@@ -348,6 +348,8 @@
   width: 20px;
   vertical-align: middle;
   margin: 0 5px;
+  forced-color-adjust: none;
+  border: solid 1px #181818;
 }
 
 #tsunami_MajorWarning span {
@@ -430,9 +432,10 @@
 .EEWLocalID {
   width: 20px;
   height: 20px;
-  line-height: 20px;
+  line-height: 18px;
   text-align: center;
   background: #3f3f42;
+  border: solid 1px #363639;
   color: #fff;
   display: inline-block;
   margin: 0 3px 0 0;
@@ -599,6 +602,7 @@ body {
   border-radius: 50%;
   border: solid 2px #fff;
   left: 0;
+  forced-color-adjust: none;
 }
 .tsunami_st span {
   display: none;
@@ -752,5 +756,18 @@ body {
   }
   #menu_wrap {
     background: #000;
+  }
+  .legend {
+    background: #000;
+    color: #fff;
+    border: solid 1px #fff;
+    forced-color-adjust: none;
+  }
+  .legend hr {
+    border-color: #fff;
+  }
+  .legend .IntLegend {
+    forced-color-adjust: none;
+    border-color: #fff;
   }
 }

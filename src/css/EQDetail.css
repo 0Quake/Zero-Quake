@@ -201,6 +201,7 @@ td {
   margin-right: 10px;
   font-family: "M PLUS 1p";
   outline: solid 1px #fff;
+  forced-color-adjust: none;
 }
 
 .ShindoItem4 span,
@@ -235,6 +236,7 @@ td {
   width: 23px;
   height: 23px;
   padding: 3.5px;
+  forced-color-adjust: none;
 }
 
 .LgIntIcon div::before {
@@ -275,6 +277,10 @@ td {
   width: 35px;
 }
 
+.MaxShindoIcon,
+.MaxLgIntIcon {
+  forced-color-adjust: none;
+}
 .MaxShindoIcon div,
 .MaxLgIntIcon div {
   display: block;

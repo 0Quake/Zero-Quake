@@ -104,19 +104,19 @@
             <nav id="sideBar" aria-label="サイドパネル">
                 <button id="SideBarToggle" aria-label="サイドパネルの表示を切り替え" title="サイドパネルを表示・非表示"></button>
                 <div id="sokuho-Panel" aria-label="速報パネル">
-                    <div id="tsunamiRevocation" class="list-item">
+                    <div id="tsunamiRevocation" class="list-item" tabindex="0" aria-label="解除された津波アイテム">
                         すべての津波情報が解除されました。
-                        <button id="CloseTsunamiRevocation">close</button>
+                        <button id="CloseTsunamiRevocation" aria-label="この情報を閉じる">close</button>
                     </div>
-                    <div id="tsunamiCancel" class="list-item">
+                    <div id="tsunamiCancel" class="list-item" tabindex="0" aria-label="解除された津波アイテム">
                         すべての津波情報が解除されました。
-                        <button id="CloseTsunamiCancel">close</button>
+                        <button id="CloseTsunamiCancel" aria-label="この情報を閉じる">close</button>
                     </div>
-                    <div id="tsunamiCancel" class="list-item">
+                    <div id="tsunamiCancel" class="list-item" tabindex="0" aria-label="取り消された津波アイテム">
                         津波情報が取り消されました。
-                        <button id="CloseTsunamiCancel">close</button>
+                        <button id="CloseTsunamiCancel" aria-label="この情報を閉じる">close</button>
                     </div>
-                    <div id="tsunamiWrap" class="list-item">
+                    <div id="tsunamiWrap" class="list-item" tabindex="0">
                         <h2 id="tsunamiTitle">津波情報
                         </h2>
                         <div class="trainingNotes">訓練報</div>
@@ -124,7 +124,7 @@
 
                         <div id="tsunamiHeadline"></div>
 
-                        <ul id="tsunamiSample">
+                        <ul id="tsunamiSample" aria-hidden="true">
                             <li id="tsunami_MajorWarning"><span></span>大津波警報</li>
                             <li id="tsunami_Warning"><span></span>津波警報</li>
                             <li id="tsunami_Watch"><span></span>津波注意報</li>
@@ -136,8 +136,8 @@
                             <div id="firstHeightCondition">直ちに津波到達と予測</div>
                         </div>
                         <div id="tsunami_button_wrap">
-                            <button id="TsunamiDetail" title="津波情報の詳細を見る">詳細情報</button>
-                            <button id="EQInfoLink" data-eventid="#" title="この津波の原因となった地震の情報">
+                            <button id="TsunamiDetail" title="津波情報の詳細を見る" aria-label="新しい画面で津波情報の詳細を確認">詳細情報</button>
+                            <button id="EQInfoLink" data-eventid="#" title="この津波の原因となった地震の情報" aria-label="津波の原因の地震にフォーカス">
                                 関連する地震 <span id="EQCount"></span>
                             </button>
                         </div>
@@ -199,7 +199,7 @@
                     </div>
                     <div id="EQDetect-Panel">
                         <template id="EQDetectTemplate">
-                            <div class="EQDItem list-item">
+                            <div class="EQDItem list-item" tabindex="0" aria-label="地震を検知中">
 
                                 <h2>地震検知</h2>
                                 <div class="EQD_Regions"></div>
@@ -269,10 +269,10 @@
                                 </div>
                                 <div id="tab2_content" class="tabContentWrap">
                                     <div id="tab2_content1" role="tabpanel list" aria-labelledby="tab2_menu1" class="tabcontent active_tabcontent" ZQ-focusgroup>
-                                        <div id="NankaiTroughInfo_Rinji" role="listitem" ZQ-focusgroup-item tabindex="0">
+                                        <div id="NankaiTroughInfo_Rinji" role="listitem" ZQ-focusgroup-item tabindex="2">
                                             <span id="Nankai_Title_Rinji"></span>
                                         </div>
-                                        <div id="NankaiTroughInfo_Teirei" role="listitem" ZQ-focusgroup-item tabindex="0">
+                                        <div id="NankaiTroughInfo_Teirei" role="listitem" ZQ-focusgroup-item tabindex="2">
                                             <span id="Nankai_Title_Teirei"></span>
                                         </div>
 

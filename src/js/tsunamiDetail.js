@@ -37,6 +37,7 @@ function tsunamiUpdate(dataTmp) {
       var condition = "";
       var arrivalTime = "";
       var maxHeight = "";
+      var maxHeightStr = "";
       if (elm.firstHeight) {
         arrivalTime = NormalizeDate(10, elm.firstHeight);
         if (elm.firstHeightCondition == "早いところでは既に津波到達と推定") condition = "早いところでは到達と推定";
@@ -50,41 +51,49 @@ function tsunamiUpdate(dataTmp) {
 
       if (elm.maxHeight) {
         maxHeight = elm.maxHeight;
+        maxHeightStr = elm.maxHeight.replace("m", "メートル");
         if (maxHeight.match(/未満/)) maxHeight = "<" + maxHeight.replace("未満", "");
         else if (maxHeight.match(/超/)) maxHeight = ">" + maxHeight.replace("超", "");
       }
       var IconTxt = "";
+      var FullTxt = "";
       switch (elm.grade) {
         case "MajorWarning":
           Tsunami_MajorWarning = true;
           IconTxt = "大";
+          FullTxt = "大津波警報";
           break;
         case "Warning":
           Tsunami_Warning = true;
           IconTxt = "警";
+          FullTxt = "津波警報";
           break;
         case "Watch":
           Tsunami_Watch = true;
           IconTxt = "注";
+          FullTxt = "津波注意報";
           break;
         case "Yoho":
           Tsunami_Yoho = true;
-          arrivalTime = "<span class='disabled-wrap'>-</span>";
-          if (!maxHeight) maxHeight = "若干の海面変動";
+          if (!maxHeight) {
+            maxHeight = "若干の海面変動";
+            maxHeightStr = "若干の海面変動";
+          }
           IconTxt = "予";
+          FullTxt = "津波予報";
           break;
       }
 
       var new_tr = document.createElement("tr");
       var ihtml = "";
-      ihtml += "<td><div class='ListIcon_" + elm.grade + "'>" + IconTxt + "</div></td>";
-      ihtml += "<td>" + elm.name + "</td>";
-      ihtml += "<td>" + arrivalTime + "</td>";
-      ihtml += "<td>" + maxHeight + "</td>";
-      ihtml += "<td class='disabled-cell obs_item'>-</td>";
-      ihtml += "<td class='disabled-cell obs_item'>-</td>";
-      ihtml += "<td class='disabled-cell tide_item'>-</td>";
-      ihtml += "<td class='condition_item'>" + condition + "</td>";
+      ihtml += "<td aria-hidden='true'><div class='ListIcon_" + elm.grade + "'>" + IconTxt + "</div></td>";
+      ihtml += "<td aria-label='予報区：" + elm.name + "、" + FullTxt + "発表中'>" + elm.name + "</td>";
+      ihtml += "<td " + (arrivalTime ? `aria-label='予想第一波時刻：${arrivalTime}'` : "aria-hidden='true'") + ">" + (arrivalTime ? arrivalTime : "<span class='disabled-wrap'>-</span>") + "</td>";
+      ihtml += "<td " + (maxHeight ? `aria-label='予想最大波高さ：${maxHeightStr}'` : "aria-hidden='true'") + ">" + maxHeight + "</td>";
+      ihtml += "<td aria-hidden='true' class='obs_item'></td>";
+      ihtml += "<td aria-hidden='true' class='obs_item'></td>";
+      ihtml += "<td aria-hidden='true' class='tide_item'></td>";
+      ihtml += "<td " + (condition ? `aria-label='${condition}'` : "aria-hidden='true'") + " class='condition_item'>" + condition + "</td>";
       new_tr.innerHTML = ihtml;
       new_tr.classList.add("add-content");
       new_tr.classList.add("ListItem_" + elm.grade);
@@ -106,12 +115,13 @@ function tsunamiUpdate(dataTmp) {
 
         elm.stations.forEach(function (elm2) {
           var condition = "";
-          var arrivalTime = "-";
+          var arrivalTime = "";
           var ArrivedTime = "";
           var HighTideDateTime = "";
           var omaxHeight = "";
           var maxHeightTime = "";
           var rising = "";
+          var risingStr = "";
 
           if (elm2.Conditions) condition = elm2.Conditions;
 
@@ -127,8 +137,10 @@ function tsunamiUpdate(dataTmp) {
           else if (elm2.maxHeightCondition && elm2.maxHeightCondition.includes("微弱")) omaxHeight = "微弱";
           else if (elm2.maxHeightCondition && elm2.maxHeightCondition.includes("欠測")) omaxHeight = "欠測";
           else if (elm2.maxHeightCondition) omaxHeight = elm2.maxHeightCondition;
-          if (elm2.maxHeightRising) rising = " <span class='rising'>上昇中↗</span>";
-
+          if (elm2.maxHeightRising) {
+            rising = " <span class='rising'>上昇中↗</span>";
+            risingStr = "上昇中";
+          }
           if (elm2.maxHeightTime) maxHeightTime = "（" + NormalizeDate(10, elm2.maxHeightTime) + "）";
 
           if (elm2.ArrivedTime) ArrivedTime = NormalizeDate(10, elm2.ArrivedTime);
@@ -141,15 +153,16 @@ function tsunamiUpdate(dataTmp) {
 
           var new_tr2 = document.createElement("tr");
           var ihtml = "";
-          ihtml += "<td></td>";
-          ihtml += "<td>" + elm2.name + "</td>";
-          ihtml += "<td" + (arrivalTime ? " class='disabled-cell'" : "") + ">" + arrivalTime + "</td>";
-          ihtml += "<td class='disabled-cell'>-</td>";
-          ihtml += "<td class='obs_item'>" + ArrivedTime + "</td>";
-          ihtml += "<td class='obs_item'>" + omaxHeight + maxHeightTime + rising + "</td>";
-          ihtml += "<td class='tide_item'>" + HighTideDateTime + "</td>";
-          ihtml += "<td class='condition_item'>" + condition + "</td>";
+          ihtml += "<td aria-hidden='true'></td>";
+          ihtml += "<td aria-label='観測点：" + elm2.name + "'>" + elm2.name + "</td>";
+          ihtml += "<td " + (arrivalTime ? `aria-label='第一波予想：${arrivalTime}'` : "aria-hidden='true'") + ">" + arrivalTime + "</td>";
+          ihtml += "<td aria-hidden='true'></td>";
+          ihtml += "<td class='obs_item' " + (ArrivedTime ? `aria-label='第一波観測：${ArrivedTime}'` : "aria-hidden='true'") + ">" + ArrivedTime + "</td>";
+          ihtml += "<td class='obs_item'" + (omaxHeight || maxHeightTime || rising ? `aria-label='最大波観測：${omaxHeight}、${maxHeightTime}、${risingStr}'` : "aria-hidden='true'") + ">" + omaxHeight + maxHeightTime + rising + "</td>";
+          ihtml += "<td class='tide_item'" + (HighTideDateTime ? `aria-label='満潮時刻：${HighTideDateTime}'` : "aria-hidden='true'") + ">" + HighTideDateTime + "</td>";
+          ihtml += "<td class='condition_item'" + (condition ? `aria-label='コメント：${condition}'` : "aria-hidden='true'") + ">" + condition + "</td>";
           new_tr2.innerHTML = ihtml;
+          new_tr2.setAttribute("tabindex", 0);
 
           if (ArrivedTime || omaxHeight || maxHeightTime || rising) has_obs = true;
 

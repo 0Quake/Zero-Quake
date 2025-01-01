@@ -42,14 +42,14 @@
       <div id="comment"></div>
     </div>
 
-    <table>
+    <table aria-label="予報区および観測点ごとの津波情報">
       <thead>
         <tr>
           <th rowspan="2" colspan="2">津波予報区<br>観測点名</th>
-          <th colspan="2" class="sub_header">
+          <th colspan="2" class="sub_header" aria-hidden="true">
             <div class="sub_header_item">予想</div>
           </th>
-          <th colspan="2" class="obs_item sub_header">
+          <th colspan="2" class="obs_item sub_header" aria-hidden="true">
             <div class="sub_header_item">観測</div>
           </th>
           <th rowspan="2" class="tide_item">満潮<br>時刻</th>
@@ -84,16 +84,16 @@
         </tr>
       </thead>
       <tbody>
-        <tr id="MajorWarningInfo">
+        <tr id="MajorWarningInfo" aria-hidden="true">
           <th colspan="9">大津波警報</th>
         </tr>
-        <tr id="WarningInfo">
+        <tr id="WarningInfo" aria-hidden="true">
           <th colspan="9">津波警報</th>
         </tr>
-        <tr id="WatchInfo">
+        <tr id="WatchInfo" aria-hidden="true">
           <th colspan="9">津波注意報</th>
         </tr>
-        <tr id="YohoInfo">
+        <tr id="YohoInfo" aria-hidden="true">
           <th colspan="9">津波予報</th>
         </tr>
         <tr id="no-data">
