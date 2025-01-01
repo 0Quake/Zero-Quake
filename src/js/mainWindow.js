@@ -118,6 +118,15 @@ window.addEventListener("load", () => {
       layerSelect(this.value);
     });
   });
+  document.getElementById("globeView").addEventListener("change", function () {
+    config.data.globeView = this.checked;
+    map.setProjection({ type: config.data.globeView ? "globe" : "mercator" });
+    window.electronAPI.messageReturn({
+      action: "ChangeConfig",
+      from: "Other",
+      data: config,
+    });
+  });
   document.getElementsByName("overlaySelect").forEach(function (elm) {
     elm.addEventListener("change", function () {
       overlaySelect(this.value, this.checked);
@@ -1403,6 +1412,9 @@ function init() {
       if (document.getElementById(elm)) document.getElementById(elm).checked = true;
       overlaySelect(elm, true);
     });
+    map.setProjection({ type: config.data.globeView ? "globe" : "mercator" });
+    document.getElementById("globeView").checked = config.data.globeView;
+
     overlaySelect("kmoni_points", config.data.kmoni_points_show);
     document.getElementById("kmoni_points").checked = config.data.kmoni_points_show;
 

@@ -642,7 +642,7 @@ td {
   border: solid 1px #62626c;
   border-radius: 5px !important;
 }
-.menu h3 {
+#estimated_intensity_map_toggle h3 {
   font-weight: normal;
   margin: 5px 5px 7px 5px;
 }

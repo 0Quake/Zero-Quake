@@ -615,6 +615,9 @@ function Mapinit() {
     mapFillSwitch();
     layerSelect(config.data.layer);
     radioSet("mapSelect", config.data.layer);
+    map.setProjection({ type: config.data.globeView ? "globe" : "mercator" });
+    document.getElementById("globeView").checked = config.data.globeView;
+
     InfoFetch();
 
     config.data.overlay.forEach(function (elm) {
@@ -671,6 +674,16 @@ mapSelect.forEach(function (elm) {
     layerSelect(this.value);
   });
 });
+document.getElementById("globeView").addEventListener("change", function () {
+  config.data.globeView = this.checked;
+  map.setProjection({ type: config.data.globeView ? "globe" : "mercator" });
+  window.electronAPI.messageReturn({
+    action: "ChangeConfig",
+    from: "Other",
+    data: config,
+  });
+});
+
 function overlaySelect(layerName, checked) {
   if (layerName == "kmoni_points") return;
   var visibility = checked ? "visible" : "none";
