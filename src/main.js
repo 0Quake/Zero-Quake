@@ -613,13 +613,16 @@ ipcMain.on("message", (_event, response) => {
           NankaiWindow.window.reload();
           NankaiWindow.webContents.setZoomFactor(config.system.zoom);
         }
-        if (SettingWindow)
-          Object.keys(EQI_Window).forEach(function (key) {
-            if (EQI_Window[key] && EQI_Window[key].window) {
-              EQI_Window[key].window.reload();
-              EQI_Window[key].window.webContents.setZoomFactor(config.system.zoom);
-            }
-          });
+        if (SettingWindow) {
+          SettingWindow.reload();
+          SettingWindow.webContents.setZoomFactor(config.system.zoom);
+        }
+        Object.keys(EQI_Window).forEach(function (key) {
+          if (EQI_Window[key] && EQI_Window[key].window) {
+            EQI_Window[key].window.reload();
+            EQI_Window[key].window.webContents.setZoomFactor(config.system.zoom);
+          }
+        });
       }
       break;
     case "EEWSimulation":
