@@ -167,7 +167,7 @@ function EEW_AlertUpdate(data) {
     else if (elm.alertflg == "EarlyEst") clone.classList.add("EarlyEst");
 
     clone.setAttribute("aria-label", textForReader);
-    clone.querySelector(".EEWLocalID").textContent = EEWID;
+    clone.querySelector(".EEWLocalID").textContent = EEW_LocalIDs[elm.EventID];
     clone.querySelector(".serial").textContent = elm.serial;
     clone.querySelector(".maxInt").textContent = elm.maxInt ? elm.maxInt : "?";
     clone.querySelector(".maxInt").style.background = NormalizeShindo(elm.maxInt, 2)[0];
@@ -1438,6 +1438,7 @@ function init() {
 }
 
 function returnToUserPosition() {
+  console.log("aa");
   if (userPosition) map.panTo(userPosition, { animate: false });
   if (userZoom) map.zoomTo(userZoom, { animate: false });
 }
