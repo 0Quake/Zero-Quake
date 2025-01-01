@@ -1805,6 +1805,7 @@ function RegularExecution(roop) {
     //EEW解除
     EEW_nowList.forEach(function (elm) {
       if (new Date() - Replay - new Date(elm.origin_time) > 300000) EEW_Clear(elm.EventID);
+      console.log(new Date() - Replay - new Date(elm.origin_time), elm.origin_time, elm.EventID);
     });
 
     //津波情報解除
@@ -2140,12 +2141,16 @@ function MargeEEW(data) {
     if (!config.Info.EEW.showtraining && data.is_training && data.source != "simulation") return; //訓練法を受信するかどうか（設定に準拠）
     if (!data.origin_time || !data.EventID || !data.serial || !data.latitude || !data.longitude) return;
 
-    //５分以上前の地震／未来の地震（リプレイ時）を除外
-    var pastTime = new Date() - Replay - data.origin_time;
-    if (pastTime > 300000 || pastTime < 0) return;
-
     //現在地との距離
     if (data.latitude && data.longitude) data.distance = geosailing(data.latitude, data.longitude, config.home.latitude, config.home.longitude);
+
+    var EQJSON = EEW_Data.find(function (elm) {
+      return elm.EQ_id == data.EventID;
+    });
+
+    //５分以上前の地震／未来の地震（リプレイ時）を除外
+    var pastTime = new Date() - Replay - data.origin_time;
+    if (EQJSON && (pastTime > 300000 || pastTime < 0)) return;
 
     data.TimeTable = TimeTable_JMA2001[depthFilter(data.depth)];
     if (data.source == "simulation") {
@@ -2221,9 +2226,6 @@ function MargeEEW(data) {
       }
     }
 
-    var EQJSON = EEW_Data.find(function (elm) {
-      return elm.EQ_id == data.EventID;
-    });
     if (EQJSON) {
       //同一地震のデータが既に存在する場合
       var EEWJSON = EQJSON.data.find(function (elm2) {

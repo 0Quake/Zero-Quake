@@ -304,6 +304,7 @@ function epiCenterUpdate(elm) {
 function epiCenterClear(eid) {
   eid = Number(eid);
   if (map) {
+    var epicenterElm;
     epiCenter = epiCenter.filter(function (elm2) {
       if (elm2.eid == eid) {
         epicenterElm = elm2;
