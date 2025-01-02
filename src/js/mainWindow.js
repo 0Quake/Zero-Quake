@@ -82,6 +82,7 @@ window.electronAPI.messageSend((event, request) => {
   else if (request.action == "EQDetectFinish") EQDetectFinish(request.data);
   else if (request.action == "tsunamiUpdate") tsunamiDataUpdate(request.data);
   else if (request.action == "NankaiTroughInfo") NankaiTroughInfo(request.data);
+  else if (request.action == "Return_gaikyo") draw_gaikyo(request.data);
 
   document.getElementById("splash").style.display = "none";
   return true;
@@ -1378,6 +1379,14 @@ function init() {
     }
   }, 2500);
 
+  setInterval(function () {
+    if (new Date() - gaikyo_lastUpdate > 1800000 && document.getElementById("tab1_menu2").classList.contains("active_tabmenu")) {
+      window.electronAPI.messageReturn({
+        action: "Request_gaikyo",
+      });
+    }
+  }, 10000);
+
   var zoomLevelContinue = function () {
     var currentZoom = map.getZoom();
     document.getElementById("mapcontainer").classList.remove("zoomLevel_1", "zoomLevel_2", "zoomLevel_3", "zoomLevel_4", "popup_show");
@@ -2336,6 +2345,37 @@ function NankaiTroughInfo(data) {
 
     if (data.teirei.kind == "臨時解説") document.getElementById("NankaiTroughInfo_Teirei").classList.add("nankaiWarn");
   } else document.getElementById("NankaiTroughInfo_Teirei").style.display = "none";
+}
+
+document.getElementById("tab1_menu2").addEventListener("click", function () {
+  if (new Date() - gaikyo_lastUpdate > 60000) {
+    window.electronAPI.messageReturn({
+      action: "Request_gaikyo",
+    });
+  }
+});
+
+var gaikyo_lastUpdate = 0;
+var gaikyo_history = [];
+function draw_gaikyo(data) {
+  gaikyo_lastUpdate = new Date();
+  document.getElementById("gaikyo_update_time").innerText = "更新：" + NormalizeDate("hh:mm:ss", new Date());
+  if (gaikyo_history.length == data.length) return;
+  gaikyo_history = data;
+  removeChild(document.getElementById("gaikyo-Wrao"));
+  data.forEach(function (elm, index) {
+    if (index <= 25) {
+      var clone = document.getElementById("gaikyo-item").content.cloneNode(true).querySelector(".EQItem");
+      if (index == 0) clone.setAttribute("tabindex", 2);
+      clone.querySelector(".EQI_datetime").textContent = elm.dateStr;
+      clone.querySelector(".EQI_headline").textContent = elm.headline;
+      clone.setAttribute("aria-label", "気象庁による解説情報：" + elm.title + "、" + NormalizeDate("YY年M月D日", elm.date));
+      clone.addEventListener("click", function () {
+        window.open(elm.url);
+      });
+      document.getElementById("gaikyo-Wrao").appendChild(clone);
+    }
+  });
 }
 
 function hinanjoPopup(e) {

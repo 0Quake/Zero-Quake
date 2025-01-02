@@ -570,6 +570,9 @@ td {
   flex-direction: row-reverse;
   overflow: hidden;
 }
+#tab1_wrap .tabcontent {
+  background: #3f3f42;
+}
 
 #bar1 {
   position: relative;
@@ -702,7 +705,8 @@ td {
   background: #3f3f42;
 }
 #tab2_content1,
-#tab2_content2 {
+#tab2_content2,
+#tab1_content2 {
   padding: 3px 0 3px 3px;
 }
 #tab2_content .tabcontent {
@@ -1198,6 +1202,18 @@ summary:focus {
   box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
   font-size: 13px;
   margin: 2px;
+}
+#gaikyo_update_time {
+  font-size: 14px;
+  text-align: center;
+  color: #ccc;
+  margin-top: 3px;
+}
+.EQI_gaikyo .EQI_datetime {
+  color: #ccc;
+}
+.EQI_headline {
+  font-size: 14px;
 }
 @media (forced-colors: active) {
   #tab2_wrap {

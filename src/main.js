@@ -659,6 +659,9 @@ ipcMain.on("message", (_event, response) => {
         Req_TremRts_sta();
       }
       break;
+    case "Request_gaikyo":
+      Req_JMA_gaikyo();
+      break;
   }
 });
 
@@ -1131,6 +1134,81 @@ function start() {
 
   //一回限り
   Req_TremRts_sta();
+}
+
+function Req_JMA_gaikyo() {
+  if (net.online) {
+    var request = net.request("https://www.data.jma.go.jp/svd/eqev/data/gaikyo/?_=" + Number(new Date()));
+    request.on("response", (res) => {
+      var text = "";
+      res.on("data", (chunk) => {
+        text += chunk;
+      });
+      res.on("end", function () {
+        try {
+          const parser = new new JSDOM().window.DOMParser();
+          const doc = parser.parseFromString(text, "text/html");
+          var data = [];
+          doc.querySelectorAll("ul.subMenu li a").forEach(function (elm) {
+            var href = elm.getAttribute("href");
+            if (href.includes("monthly/")) {
+              data.push({
+                date: new Date(elm.textContent.substring(0, 4), elm.textContent.substring(5, 7) - 1),
+                dateStr: `${elm.textContent.substring(0, 4)}/${elm.textContent.substring(5, 7)}`,
+                title: "地震・火山月報（防災編）",
+                headline: "地震・火山月報（防災編）",
+                url: "https://www.data.jma.go.jp/svd/eqev/data/gaikyo/" + href,
+              });
+            } else if (href.includes("press/") || href.includes("oshirase/")) {
+              data.push({
+                date: new Date(elm.textContent.substring(0, 4), elm.textContent.substring(5, 7) - 1, elm.textContent.substring(8, 10), elm.textContent.substring(11, 13), elm.textContent.substring(14, 16)),
+                dateStr: `${elm.textContent.substring(0, 4)}/${elm.textContent.substring(5, 7)}/${elm.textContent.substring(8, 10)} ${elm.textContent.substring(11, 13)}:${elm.textContent.substring(14, 16)}`,
+                title: "地震解説資料",
+                headline: "地震解説資料\n" + elm.textContent.substring(17).trim(),
+                url: "https:" + href,
+              });
+            } else if (href.includes("weekly/zenkoku/")) {
+              var year = Number(elm.textContent.substring(0, 4));
+              var number = Number(elm.textContent.substring(8, 10));
+              if (number == 1 && Number(elm.textContent.substring(19, 21)) == 12) year -= 1;
+              data.push({
+                date: new Date(elm.textContent.substring(0, 4), elm.textContent.substring(31, 33) - 1, elm.textContent.substring(34, 36)),
+                dateStr: `${year}/${elm.textContent.substring(19, 21)}/${elm.textContent.substring(22, 24)}～${elm.textContent.substring(31, 33)}/${elm.textContent.substring(34, 36)}`,
+                title: "週間地震概況（全国）",
+                headline: "週間地震概況（全国）No." + number,
+                url: "https://www.data.jma.go.jp/svd/eqev/data/gaikyo/" + href,
+              });
+            } else if (href.includes("weekly/nt/")) {
+              var year = Number(elm.textContent.substring(0, 4));
+              var number = Number(elm.textContent.substring(8, 10));
+              if (number == 1 && Number(elm.textContent.substring(19, 21)) == 12) year -= 1;
+              data.push({
+                date: new Date(elm.textContent.substring(0, 4), elm.textContent.substring(31, 33) - 1, elm.textContent.substring(34, 36)),
+                dateStr: `${year}/${elm.textContent.substring(19, 21)}/${elm.textContent.substring(22, 24)}～${elm.textContent.substring(31, 33)}/${elm.textContent.substring(34, 36)}`,
+                title: "週間地震活動概況（南海トラフ周辺）",
+                headline: "週間地震活動概況（南海トラフ周辺）No." + number,
+                url: "https://www.data.jma.go.jp/svd/eqev/data/gaikyo/" + href,
+              });
+            }
+          });
+          data.sort(function (a, b) {
+            return a.date < b.date ? 1 : -1;
+          });
+          console.log();
+          messageToMainWindow({
+            action: "Return_gaikyo",
+            data: data,
+          });
+        } catch (err) {
+          console.log(111111111);
+        }
+      });
+    });
+    request.on("error", () => {
+      console.log(111111111);
+    });
+    request.end();
+  }
 }
 
 var TremRts_sta;

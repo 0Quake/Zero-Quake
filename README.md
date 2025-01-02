@@ -75,6 +75,15 @@
   </ul>
   </details>
 
+- ### 解説情報
+
+  各月の地震活動のまとめ
+  <details>
+  <summary>出典・情報源</summary>
+    <ul><li>出典：<a href="https://www.data.jma.go.jp/svd/eqev/data/gaikyo/">気象庁ホームページ「各月の地震活動のまとめ」</a></li>
+  </ul>
+  </details>
+
 - ### 海外の地震情報
 
   1. USGS Earthquake Catalog
