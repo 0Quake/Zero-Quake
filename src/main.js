@@ -1194,18 +1194,23 @@ function Req_JMA_gaikyo() {
           data.sort(function (a, b) {
             return a.date < b.date ? 1 : -1;
           });
-          console.log();
           messageToMainWindow({
             action: "Return_gaikyo",
             data: data,
           });
         } catch (err) {
-          console.log(111111111);
+          messageToMainWindow({
+            action: "Return_gaikyo",
+            data: [],
+          });
         }
       });
     });
     request.on("error", () => {
-      console.log(111111111);
+      messageToMainWindow({
+        action: "Return_gaikyo",
+        data: [],
+      });
     });
     request.end();
   }
@@ -2549,7 +2554,8 @@ function EEW_Alert(data, first, update) {
         },
       ],
       "jma",
-      true
+      true,
+      999
     );
 
     //スリープ回避開始
@@ -3138,7 +3144,7 @@ function Req_NarikakunList(url, num, first, count) {
               yearTmp = new Date().getFullYear() - 1;
               monthTmp = 11;
             }
-            Req_NarikakunList("https://ntool.online/api/earthquakeList?year=" + yearTmp + "&month=" + (monthTmp + 1), config.Info.EQInfo.ItemCount - json.lists.length, false);
+            Req_NarikakunList("https://ntool.online/api/earthquakeList?year=" + yearTmp + "&month=" + (monthTmp + 1), config.Info.EQInfo.ItemCount - json.lists.length, false, count);
           }
           for (let elm of narikakun_URLs) {
             var eidTmp = String(elm).split("_")[2];

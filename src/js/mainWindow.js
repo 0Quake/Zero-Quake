@@ -1460,7 +1460,6 @@ function init() {
 }
 
 function returnToUserPosition() {
-  console.log("aa");
   if (userPosition) map.panTo(userPosition, { animate: false });
   if (userZoom) map.zoomTo(userZoom, { animate: false });
 }
@@ -2359,7 +2358,9 @@ var gaikyo_lastUpdate = 0;
 var gaikyo_history = [];
 function draw_gaikyo(data) {
   gaikyo_lastUpdate = new Date();
-  document.getElementById("gaikyo_update_time").innerText = "更新：" + NormalizeDate("hh:mm:ss", new Date());
+  if (!data || data.length == 0) document.getElementById("gaikyo_update_time").innerText = "更新失敗：" + NormalizeDate("hh:mm:ss", new Date());
+  else document.getElementById("gaikyo_update_time").innerText = "更新：" + NormalizeDate("hh:mm:ss", new Date());
+
   if (gaikyo_history.length == data.length) return;
   gaikyo_history = data;
   removeChild(document.getElementById("gaikyo-Wrao"));
