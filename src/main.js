@@ -1152,8 +1152,9 @@ function Req_JMA_gaikyo() {
           doc.querySelectorAll("ul.subMenu li a").forEach(function (elm) {
             var href = elm.getAttribute("href");
             if (href.includes("monthly/")) {
+              var date = new Date(elm.textContent.substring(0, 4), elm.textContent.substring(5, 7) - 1 + 1, 0); //月の最終日を取得
               data.push({
-                date: new Date(elm.textContent.substring(0, 4), elm.textContent.substring(5, 7) - 1),
+                date: date,
                 dateStr: `${elm.textContent.substring(0, 4)}/${elm.textContent.substring(5, 7)}`,
                 title: "地震・火山月報（防災編）",
                 headline: "地震・火山月報（防災編）",
@@ -2914,6 +2915,7 @@ function Req_JMAXML(url, count) {
                         case 72:
                         case 73:
                           gradeTmp = "Yoho";
+                          rR;
                           break;
                         case 50:
                         case 60:
