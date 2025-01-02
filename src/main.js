@@ -2227,7 +2227,7 @@ function MargeEEW(data) {
 
     //５分以上前の地震／未来の地震（リプレイ時）を除外
     var pastTime = new Date() - Replay - data.origin_time;
-    if (EQJSON && (pastTime > 300000 || pastTime < 0)) return;
+    if (!EQJSON && (pastTime > 300000 || pastTime < 0)) return;
 
     data.TimeTable = TimeTable_JMA2001[depthFilter(data.depth)];
     if (data.source == "simulation") {
