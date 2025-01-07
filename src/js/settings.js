@@ -598,12 +598,20 @@ function MapReDraw() {
     var minDistance = Infinity;
     function calcDist(line) {
       if (line.geometry.type == "MultiLineString") {
-        var distances = line.geometry.coordinates.map(function (cd) {
-          return turf.pointToLineDistance(turf.point([lng, lat]), turf.lineString(cd), { units: "kilometers" });
-        });
+        try {
+          var distances = line.geometry.coordinates.map(function (cd) {
+            return turf.pointToLineDistance(turf.point([lng, lat]), lineString(cd), { units: "kilometers" });
+          });
+        } catch (err) {
+          return Infinity;
+        }
         return Math.min(...distances);
       } else if (line.geometry.type == "LineString") {
-        return turf.pointToLineDistance(turf.point([lng, lat]), line, { units: "kilometers" });
+        try {
+          return turf.pointToLineDistance(turf.point([lng, lat]), lineString(line.geometry.coordinates), { units: "kilometers" });
+        } catch (err) {
+          return Infinity;
+        }
       }
     }
     EQSectFeatures.forEach(function (poly) {
@@ -638,11 +646,19 @@ function MapReDraw() {
     // 距離を求める
     if (elm.geometry.type == "MultiLineString") {
       var distances = elm.geometry.coordinates.map(function (cd) {
-        return turf.pointToLineDistance(turf.point([lng, lat]), lineString(cd), { units: "kilometers" });
+        try {
+          return turf.pointToLineDistance(turf.point([lng, lat]), lineString(cd), { units: "kilometers" });
+        } catch (err) {
+          return Infinity;
+        }
       });
       var distance = Math.min(...distances);
     } else if (elm.geometry.type == "LineString") {
-      var distance = turf.pointToLineDistance(turf.point([lng, lat]), lineString(elm.geometry.coordinates), { units: "kilometers" });
+      try {
+        var distance = turf.pointToLineDistance(turf.point([lng, lat]), lineString(elm.geometry.coordinates), { units: "kilometers" });
+      } catch (err) {
+        return Infinity;
+      }
     }
     if (minDistance > distance) {
       minDistance = distance;
