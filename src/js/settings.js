@@ -570,6 +570,16 @@ function mapInit() {
   });
 }
 
+function lineString(arr) {
+  if (arr.length == 2 && arr[0][0] == arr[1][0] && arr[0][1] == arr[1][1]) {
+    arr[1][0] += 0.0001;
+    arr[1][1] += 0.0001;
+    return turf.lineString(arr);
+  } else {
+    return turf.lineString(arr);
+  }
+}
+
 var beforeCordinates = [0, 0];
 function MapReDraw() {
   lat = Number(document.getElementById("latitude").value);
@@ -628,11 +638,11 @@ function MapReDraw() {
     // 距離を求める
     if (elm.geometry.type == "MultiLineString") {
       var distances = elm.geometry.coordinates.map(function (cd) {
-        return turf.pointToLineDistance(turf.point([lng, lat]), turf.lineString(cd), { units: "kilometers" });
+        return turf.pointToLineDistance(turf.point([lng, lat]), lineString(cd), { units: "kilometers" });
       });
       var distance = Math.min(...distances);
     } else if (elm.geometry.type == "LineString") {
-      var distance = turf.pointToLineDistance(turf.point([lng, lat]), elm, { units: "kilometers" });
+      var distance = turf.pointToLineDistance(turf.point([lng, lat]), lineString(elm.geometry.coordinates), { units: "kilometers" });
     }
     if (minDistance > distance) {
       minDistance = distance;
