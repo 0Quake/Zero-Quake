@@ -611,7 +611,7 @@ ipcMain.on("message", (_event, response) => {
         }
         if (NankaiWindow.window) {
           NankaiWindow.window.reload();
-          NankaiWindow.webContents.setZoomFactor(config.system.zoom);
+          NankaiWindow.window.webContents.setZoomFactor(config.system.zoom);
         }
         if (SettingWindow) {
           SettingWindow.reload();
@@ -1009,7 +1009,7 @@ function Create_NankaiWindow(type) {
       });
 
       NankaiWindow.window.webContents.on("did-finish-load", () => {
-        NankaiWindow.webContents.setZoomFactor(config.system.zoom);
+        NankaiWindow.window.webContents.setZoomFactor(config.system.zoom);
 
         var data = NankaiWindow.type == "rinji" ? NankaiTroughInfo.rinji : NankaiTroughInfo.teirei;
         if (data) {
