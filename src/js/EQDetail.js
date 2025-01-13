@@ -63,7 +63,7 @@ window.electronAPI.messageSend((event, request) => {
     }
     if (request.axisData && Array.isArray(request.axisData)) axisDatas = request.axisData;
 
-    if (request.eew && !request.eew.canceled) {
+    if (request.eew && !request.eew.cancelled) {
       var eewItem = request.eew.data[request.eew.data.length - 1];
 
       EEWData = {
@@ -1904,7 +1904,7 @@ function ConvertEQInfo(data) {
     DrawLgIntensity(EQInfoMarged.LngIntData);
   }
 
-  document.getElementById("canceled").style.display = EQInfoMarged.cancel ? "flex" : "none";
+  document.getElementById("cancelled").style.display = EQInfoMarged.cancel ? "flex" : "none";
 
   if (EQInfoMarged.originTime) EQInfo.originTime = EQInfoMarged.originTime;
   if (EQInfoMarged.maxI) EQInfo.maxI = EQInfoMarged.maxI;

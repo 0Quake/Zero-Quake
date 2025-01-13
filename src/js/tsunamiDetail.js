@@ -19,10 +19,8 @@ function tsunamiUpdate(dataTmp) {
   if (dataTmp.issue.time) document.getElementById("dateTime").textContent = NormalizeDate(5, dataTmp.issue.time);
   if (dataTmp.ValidDateTime) document.getElementById("validdateTime").textContent = NormalizeDate(5, dataTmp.ValidDateTime);
 
-  if (dataTmp.comment) {
-    document.getElementById("headline").innerText = dataTmp.headline;
-    document.getElementById("comment").innerText = dataTmp.comment;
-  }
+  document.getElementById("headline").innerText = dataTmp.headline ? dataTmp.headline : "";
+  document.getElementById("comment").innerText = dataTmp.comment ? dataTmp.comment : "";
 
   document.querySelectorAll(".add-content").forEach(function (elm) {
     elm.remove();
@@ -33,7 +31,7 @@ function tsunamiUpdate(dataTmp) {
   var has_obs = false;
   dataTmp.areas.reverse();
   dataTmp.areas.forEach((elm) => {
-    if (!elm.canceled) {
+    if (!elm.cancelled) {
       var condition = "";
       var arrivalTime = "";
       var maxHeight = "";

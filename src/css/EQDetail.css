@@ -377,7 +377,7 @@ td {
   font-family: "M PLUS 1p";
 }
 
-#canceled {
+#cancelled {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.7);

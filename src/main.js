@@ -1559,13 +1559,11 @@ function P2P() {
               break;
             case 552:
               //津波情報
-              if (data.canceled) {
-                data.forEach(function (elm) {
-                  elm.canceled = true;
-                });
-                data.revocation = false;
-                data.source = "P2P";
-              }
+              data.issue.time = new Date(data.issue.time);
+              data.cancelled = false;
+              data.revocation = false;
+              data.source = "P2P";
+
               data.areas.forEach((elm) => {
                 if (elm.firstHeight) {
                   if (elm.firstHeight.condition) elm.firstHeightCondition = elm.firstHeight.condition;
@@ -1895,14 +1893,7 @@ function RegularExecution(roop) {
     Tsunami_Data.forEach(function (elm) {
       if (elm.ValidDateTime <= new Date() && !elm.revocation) {
         elm.revocation = true;
-        ConvertTsunamiInfo({
-          issue: { time: new Date(), EventID: elm.issue.EventID, EarthQuake: null },
-          revocation: true,
-          cancelled: false,
-          areas: [],
-          source: null,
-          ValidDateTime: null,
-        });
+        ConvertTsunamiInfo(elm); //ダミーデータを送信、再度マージ処理
       }
     });
 
@@ -2196,7 +2187,7 @@ function DetectEEW(type, json) {
         magnitude: magnitudeTmp,
         maxInt: NormalizeShindo(maxIntTmp, 0),
         depth: depthTmp,
-        is_cancel: Boolean(json.canceled),
+        is_cancel: Boolean(json.cancelled),
         is_final: null,
         is_training: Boolean(json.test),
         latitude: latitudeTmp,
@@ -2371,7 +2362,7 @@ function MargeEEW(data) {
             return elm.EQ_id == data.EventID;
           });
           EQJSON.data.push(data); //データ追加
-          if (data.is_cancel) EQJSON.canceled = true;
+          if (data.is_cancel) EQJSON.cancelled = true;
           EEW_Alert(data, false); //警報処理
         }
       }
@@ -2388,7 +2379,7 @@ function MargeEEW(data) {
       //データ追加
       EEW_Data.push({
         EQ_id: data.EventID,
-        canceled: false,
+        cancelled: false,
         simulation: data.source == "simulation",
         data: [data],
       });
@@ -2454,7 +2445,7 @@ function MargeEarlyEst(data) {
           EarlyEst_Alert(data, false);
           EQJSON.data.push(data);
           if (data.is_cancel) {
-            EQJSON.canceled = true;
+            EQJSON.cancelled = true;
           }
         }
       }
@@ -2463,7 +2454,7 @@ function MargeEarlyEst(data) {
       EarlyEst_Alert(data, true);
       EarlyEst_Data.push({
         EQ_id: data.EventID,
-        canceled: false,
+        cancelled: false,
         data: [data],
       });
     }
@@ -2653,6 +2644,7 @@ function Req_JMAXMLList(LongPeriodFeed, count) {
             if (urlElm) url = urlElm[0].textContent;
             if (!url) return;
             var title = elm.getElementsByTagName("title")[0].textContent;
+            if (title == "津波情報a" || title == "津波警報・注意報・予報a") return;
             if (title == "震度速報" || title == "震源に関する情報" || title == "震源・震度に関する情報" || title == "長周期地震動に関する観測情報" || title == "顕著な地震の震源要素更新のお知らせ") {
               if (EQInfoCount <= config.Info.EQInfo.ItemCount) Req_JMAXML(url, count);
               if (title == "震源・震度に関する情報") EQInfoCount++; //「震源・震度に関する情報」の件数≒地震の数 のためカウント
@@ -2881,9 +2873,12 @@ function Req_JMAXML(url, count) {
                   }
                 } catch (err) {}
 
+                //P2PのAPIとの整合性のため、津波情報においてのみ、Control > DateTimeを発表時刻として扱う
+                var dateTime = new Date(xml.getElementsByTagName("Control")[0].getElementsByTagName("DateTime")[0].textContent);
+
                 tsunamiDataTmp = {
                   status: xml.getElementsByTagName("Status")[0].textContent,
-                  issue: { time: new Date(xml.getElementsByTagName("ReportDateTime")[0].textContent), EventID: EventID, EarthQuake: EQData },
+                  issue: { time: dateTime, EventID: EventID, EarthQuake: EQData },
                   areas: [],
                   revocation: false,
                   headline: headline,
@@ -2900,7 +2895,7 @@ function Req_JMAXML(url, count) {
                   if (forecastElm) {
                     Array.prototype.forEach.call(forecastElm.getElementsByTagName("Item"), function (elm) {
                       var gradeTmp;
-                      var canceledTmp = false;
+                      var cancelledTmp = false;
                       if (elm.getElementsByTagName("Category")[0]) {
                         switch (Number(elm.getElementsByTagName("Category")[0].getElementsByTagName("Kind")[0].getElementsByTagName("Code")[0].textContent)) {
                           case 52:
@@ -2920,7 +2915,7 @@ function Req_JMAXML(url, count) {
                             break;
                           case 50:
                           case 60:
-                            canceledTmp = true;
+                            cancelledTmp = true;
                             break;
                         }
                       }
@@ -2972,7 +2967,7 @@ function Req_JMAXML(url, count) {
                         code: codeTmp,
                         grade: gradeTmp,
                         name: elm.getElementsByTagName("Name")[0].textContent,
-                        canceled: canceledTmp,
+                        cancelled: cancelledTmp,
                         firstHeight: firstHeightTmp,
                         firstHeightCondition: firstHeightConditionTmp,
                         stations: stations,
@@ -3450,16 +3445,12 @@ var Tsunami_Data = [];
 var Tsunami_data_Marged;
 function ConvertTsunamiInfo(data) {
   try {
-    console.log(data);
     if (!config.Info.TsunamiInfo.GetData) return;
     if (!config.Info.TsunamiInfo.showtraining && data.status == "訓練") return;
     if (!config.Info.TsunamiInfo.showTest && data.status == "試験") return;
 
-    //情報の有効期限
-    if (data.ValidDateTime && data.ValidDateTime < new Date()) return;
-
     let tsunamiItem = Tsunami_Data.find(function (elm) {
-      return elm.issue.time == data.issue.time && (!elm.issue.EventID || !data.issue.EventID || elm.issue.EventID == data.issue.EventID);
+      return Number(new Date(elm.issue.time)) == Number(new Date(data.issue.time)) && (!elm.issue.EventID || !data.issue.EventID || elm.issue.EventID == data.issue.EventID);
     });
 
     if (tsunamiItem) {
@@ -3483,7 +3474,7 @@ function ConvertTsunamiInfo(data) {
         if (areaItem) {
           if (elm.code) areaItem.code = elm.code;
           if (elm.grade) areaItem.grade = elm.grade;
-          if (elm.canceled) areaItem.canceled = elm.canceled;
+          if (elm.cancelled) areaItem.cancelled = elm.cancelled;
           if (elm.firstHeight) areaItem.firstHeight = elm.firstHeight;
           if (elm.firstHeightCondition) areaItem.firstHeightCondition = elm.firstHeightCondition;
           if (elm.maxHeight) areaItem.maxHeight = elm.maxHeight;
@@ -3533,7 +3524,8 @@ function ConvertTsunamiInfo(data) {
     }
 
     Tsunami_data_Marged = { issue: {}, areas: [] };
-    Tsunami_Data = Tsunami_Data.sort((a, b) => (a.issue.time > b.issue.time ? 1 : -1));
+    Tsunami_Data = Tsunami_Data.sort((a, b) => (Number(new Date(a.issue.time)) > Number(new Date(b.issue.time)) ? 1 : -1));
+
     Tsunami_Data.forEach(function (elm0) {
       Tsunami_data_Marged.revocation = elm0.revocation;
       Tsunami_data_Marged.cancelled = elm0.cancelled;
@@ -3556,7 +3548,7 @@ function ConvertTsunamiInfo(data) {
         if (areaItem) {
           if (elm.code) areaItem.code = elm.code;
           if (elm.grade) areaItem.grade = elm.grade;
-          if (elm.canceled) areaItem.canceled = elm.canceled;
+          if (elm.cancelled) areaItem.cancelled = elm.cancelled;
           if (elm.firstHeight) areaItem.firstHeight = elm.firstHeight;
           if (elm.firstHeightCondition) areaItem.firstHeightCondition = elm.firstHeightCondition;
           if (elm.maxHeight) areaItem.maxHeight = elm.maxHeight;
@@ -3707,7 +3699,7 @@ function GenerateTsunamiText(data) {
     text = text.replaceAll("{report_time}", data.issue.time ? NormalizeDate(9, data.issue.time) : "不明な時刻");
     text = text.replaceAll("{headline}", data.headline ? data.headline : "");
 
-    if (homeArea && !homeArea.canceled) {
+    if (homeArea && !homeArea.cancelled) {
       text = text.replaceAll("{home_area}", homeArea.name ? homeArea.name : "設定地点");
       text = text.replaceAll("{home_grade}", homeArea.grade ? grades_JA[homeArea.grade] : "津波情報");
 

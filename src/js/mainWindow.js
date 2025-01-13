@@ -184,7 +184,7 @@ function EEW_AlertUpdate(data) {
     clone.querySelector(".maxInt").style.color = NormalizeShindo(elm.maxInt, 2)[1];
     clone.querySelector(".userLocation").textContent = config.home.name ? config.home.name : "現在地";
     clone.querySelector(".is_final").style.display = elm.is_final ? "inline" : "none";
-    clone.querySelector(".canceled").style.display = elm.is_cancel ? "flex" : "none";
+    clone.querySelector(".cancelled").style.display = elm.is_cancel ? "flex" : "none";
     clone.querySelector(".region_name").textContent = elm.region_name ? elm.region_name : "震源地域不明";
     clone.querySelector(".origin_time").textContent = NormalizeDate(3, elm.origin_time);
     clone.querySelector(".magnitude").textContent = elm.magnitude || elm.magnitude == 0 ? Math.round(elm.magnitude * 10) / 10 : "不明";
@@ -372,13 +372,13 @@ function eqInfoDraw(data, source) {
       clone.querySelector(".EQI_LgIntBody").textContent = elm.maxLgInt;
       clone.querySelector(".EQI_LgInt").style.background = LgIntColor[0];
       clone.querySelector(".EQI_LgInt").style.color = LgIntColor[1];
-      clone.querySelector(".canceled").style.display = elm.cancel ? "flex" : "none";
+      clone.querySelector(".cancelled").style.display = elm.cancel ? "flex" : "none";
       clone.querySelector(".EEWNotes").style.display = elm.category == "EEW" ? "block" : "none";
       clone.querySelector(".TestNotes").style.display = elm.status == "試験" ? "block" : "none";
       clone.querySelector(".trainingNotes").style.display = elm.status == "訓練" ? "block" : "none";
 
       if (elm.cancel) {
-        clone.querySelector(".EQItem").classList.add("EQI_canceled");
+        clone.querySelector(".EQItem").classList.add("EQI_cancelled");
         clone.querySelector(".EQItem").setAttribute("aria-label", "キャンセルされた地震情報");
       } else {
         clone.querySelector(".EQItem").setAttribute("aria-label", `過去の地震情報：${elm.status == "訓練" ? "訓練報、" : ""}${elm.status == "試験" ? "試験報、" : ""}最大震度${NormalizeShindo(maxITmp, 1)}、マグニチュード${elm.M !== null ? elm.M.toFixed(1) : "不明"}、震源は${elm.epiCenter ? elm.epiCenter : "調査中"}、発生時刻は${NormalizeDate("M月D日h時m分", elm.OriginTime)}。エンターキーで詳細情報を確認。`);
@@ -2076,6 +2076,7 @@ function tsunamiDataUpdate(data) {
 
     document.body.classList.add("TsunamiMode");
     var alertNowTmp = false;
+    if (!data.areas || !data.areas.length) alertNowTmp = true; //P2Pからの情報（津波予報が取れない）でareasが空の場合
 
     var MajorWarningList = ["any"];
     var WarningList = ["any"];
@@ -2205,6 +2206,7 @@ function tsunamiDataUpdate(data) {
     else if (Tsunami_Warning) document.getElementById("tsunamiTitle").style.borderColor = tsunamiColorConv("Warning");
     else if (Tsunami_Watch) document.getElementById("tsunamiTitle").style.borderColor = tsunamiColorConv("Watch");
     else if (Tsunami_Yoho) document.getElementById("tsunamiTitle").style.borderColor = tsunamiColorConv("Yoho");
+    else document.getElementById("tsunamiTitle").style.borderColor = tsunamiColorConv("Yoho");
   }
   document.getElementById("noEEW").style.display = now_EEW.length == 0 && !now_tsunami && EQDetectItem.length == 0 ? "block" : "none";
 }
@@ -2461,7 +2463,7 @@ function GenerateTsunamiText(data, text) {
     text = text.replaceAll("{report_time}", data.issue.time ? NormalizeDate(9, data.issue.time) : "不明な時刻");
     text = text.replaceAll("{headline}", data.headline ? data.headline : "");
 
-    if (homeArea && !homeArea.canceled) {
+    if (homeArea && !homeArea.cancelled) {
       text = text.replaceAll("{home_area}", homeArea.name ? homeArea.name : "設定地点");
       text = text.replaceAll("{home_grade}", homeArea.grade ? grades_JA[homeArea.grade] : "津波情報");
 
