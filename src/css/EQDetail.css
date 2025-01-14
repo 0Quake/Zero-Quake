@@ -209,11 +209,6 @@ td {
   border-radius: 50%;
 }
 
-.ShindoItemL span::before {
-  content: "長";
-  font-size: 12px;
-}
-
 .close {
   display: none;
 }
@@ -497,6 +492,10 @@ td {
 #homeShindo .ShindoItem,
 #homeShindoL .ShindoItemL {
   cursor: default;
+}
+#homeShindo .ShindoItem span,
+#homeShindoL .ShindoItemL span {
+  visibility: hidden;
 }
 #infoKind {
   text-align: center;
