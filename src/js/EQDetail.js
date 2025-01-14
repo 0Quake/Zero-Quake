@@ -945,8 +945,11 @@ function jma_Fetch(url) {
     })
     .then(function (json) {
       var LatLngDepth, originTimeTmp, epiCenterTmp, magnitudeTmp, maxIntTmp, LatTmp, LngTmp, depthTmp;
-      if (json.Body.Earthquake) LatLngDepth = json.Body.Earthquake.Hypocenter.Area.Coordinate.replaceAll("+", "｜+").replaceAll("-", "｜-").replaceAll("/", "").split("｜");
-
+      if (json.Body.Earthquake) {
+        LatLngDepth = json.Body.Earthquake.Hypocenter.Area.Coordinate;
+        if (json.Body.Earthquake.Hypocenter.Area.Coordinate_WGS) LatLngDepth = json.Body.Earthquake.Hypocenter.Area.Coordinate_WGS;
+        LatLngDepth = LatLngDepth.replaceAll("+", "｜+").replaceAll("-", "｜-").replaceAll("/", "").split("｜");
+      }
       if (json.Body.Earthquake) {
         if (json.Body.Earthquake.OriginTime) originTimeTmp = new Date(json.Body.Earthquake.OriginTime);
         if (json.Body.Earthquake.Hypocenter.Area.Name) epiCenterTmp = json.Body.Earthquake.Hypocenter.Area.Name;
@@ -1018,8 +1021,11 @@ function jmaL_Fetch(url) {
     })
     .then(function (json) {
       document.getElementById("LgInt_radioWrap").style.display = "block";
-      if (json.Body.Earthquake) var LatLngDepth = json.Body.Earthquake.Hypocenter.Area.Coordinate.replaceAll("+", "｜+").replaceAll("-", "｜-").replaceAll("/", "").split("｜");
-
+      if (json.Body.Earthquake) {
+        var LatLngDepth = json.Body.Earthquake.Hypocenter.Area.Coordinate;
+        if (json.Body.Earthquake.Hypocenter.Area.Coordinate_WGS) LatLngDepth = json.Body.Earthquake.Hypocenter.Area.Coordinate_WGS;
+        LatLngDepth = LatLngDepth.replaceAll("+", "｜+").replaceAll("-", "｜-").replaceAll("/", "").split("｜");
+      }
       if (json.Body.Earthquake) {
         if (json.Body.Earthquake.OriginTime) var originTimeTmp = new Date(json.Body.Earthquake.OriginTime);
         if (json.Body.Earthquake.Hypocenter.Area.Name) var epiCenterTmp = json.Body.Earthquake.Hypocenter.Area.Name;
