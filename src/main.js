@@ -2707,7 +2707,9 @@ function Req_JMAXML(url, count) {
             if (EarthquakeElm) {
               originTimeTmp = new Date(EarthquakeElm.getElementsByTagName("OriginTime")[0].textContent);
               epiCenterTmp = EarthquakeElm.getElementsByTagName("Name")[0].textContent;
-              magnitudeTmp = Number(EarthquakeElm.getElementsByTagName("jmx_eb:Magnitude")[0].textContent);
+              var magElm = EarthquakeElm.getElementsByTagName("jmx_eb:Magnitude")[0];
+              if (magElm) magnitudeTmp = Number(magElm.textContent);
+              if (!Boolean2(magnitudeTmp)) magnitudeTmp = null;
             }
 
             if (!originTimeTmp) originTimeTmp = new Date(xml.getElementsByTagName("TargetDateTime")[0].textContent);
@@ -2727,7 +2729,7 @@ function Req_JMAXML(url, count) {
                   category: xml.getElementsByTagName("Title")[0].textContent,
                   OriginTime: originTimeTmp,
                   epiCenter: epiCenterTmp,
-                  M: Number(magnitudeTmp),
+                  M: magnitudeTmp,
                   maxI: NormalizeShindo(maxIntTmp),
                   maxLgInt: maxLgInt,
                   cancel: Boolean(cancel),
@@ -3192,7 +3194,7 @@ function Req_Narikakun(url, count) {
           if (!originTimeTmp) originTimeTmp = new Date(json.Head.TargetDateTime);
 
           var epiCenterTmp = json.Body.Earthquake ? json.Body.Earthquake.Hypocenter.Name : null;
-          var MagnitudeTmp = json.Body.Earthquake ? json.Body.Earthquake.Magnitude : null;
+          var MagnitudeTmp = json.Body.Earthquake && json.Body.Earthquake.Magnitude ? Number(json.Body.Earthquake.Magnitude) : null;
           var MaxITmp = json.Body.Intensity ? json.Body.Intensity.Observation.MaxInt : null;
           var cancel = json.Head.InfoType == "取消";
           var dataTmp2 = [
@@ -3202,7 +3204,7 @@ function Req_Narikakun(url, count) {
               category: json.Head.Title,
               OriginTime: new Date(originTimeTmp),
               epiCenter: epiCenterTmp,
-              M: Number(MagnitudeTmp),
+              M: MagnitudeTmp,
               maxI: NormalizeShindo(MaxITmp),
               cancel: Boolean(cancel),
               reportDateTime: new Date(json.Head.ReportDateTime),
