@@ -157,7 +157,7 @@ var defaultConfigVal = {
     },
     window: {
       EEW: "openWindow",
-      EEW_Update: "openWindow",
+      EEW_Update: "push",
     },
   },
   color: {
@@ -3623,6 +3623,8 @@ function GenerateEEWText(EEWData, update) {
     text = text.replaceAll("{region_name}", EEWData.region_name ? EEWData.region_name : "");
     text = text.replaceAll("{report_time}", EEWData.report_time ? NormalizeDate(8, EEWData.report_time) : "");
     text = text.replaceAll("{origin_time}", EEWData.origin_time ? NormalizeDate(8, EEWData.origin_time) : "");
+    if (EEWData.source == "simulation") text = "シミュレーションです。" + text;
+
     var userInt;
     if (EEWData.userIntensity) {
       userInt = EEWData.userIntensity;
