@@ -692,15 +692,15 @@
                                 </tr>
                                 <tr>
                                     <td>一般向け</td>
-                                    <td>{training2}緊急地震速報です。{region_name}で最大の震度、{maxInt}の地震が発生しました。{location}の予想震度は{local_Int}です。</td>
+                                    <td>{training2}緊急地震速報です。{region_name}で最大の震度、{maxInt}の地震が発生しました。[{location}の予想震度は{local_Int}です。]</td>
                                 </tr>
                                 <tr>
                                     <td>一般向け 詳細</td>
-                                    <td>{training} 緊急地震速報、{grade}。{location}の予想震度は{local_Int}。地震の規模を表すマグニチュードは、{magnitude}と予想されます。この地震で予想される最大の震度は、{maxInt}です。{region_name}の、深さ{depth}キロメートルで発生しました。</td>
+                                    <td>{training} 緊急地震速報、{grade}。[{location}の予想震度は{local_Int}。]地震の規模を表すマグニチュードは、{magnitude}と予想されます。この地震で予想される最大の震度は、{maxInt}です。{region_name}の、深さ{depth}キロメートルで発生しました。</td>
                                 </tr>
                                 <tr>
                                     <td>詳細</td>
-                                    <td>{training}{training}緊急地震速報、{grade}、第{serial}報。{location}の予想震度は{local_Int}。予想マグニチュード、{magnitude}。予想最大震度、{maxInt}。{region_name}の、深さ{depth}キロメートルで、{origin_time}に発生。{final}</td>
+                                    <td>{training}{training}緊急地震速報、{grade}、第{serial}報。[{location}の予想震度は{local_Int}。]予想マグニチュード、{magnitude}。予想最大震度、{maxInt}。{region_name}の、深さ{depth}キロメートルで、{origin_time}に発生。{final}</td>
                                 </tr>
                                 <tr>
                                     <td>キャンセル</td>
@@ -798,7 +798,18 @@
                             </table>
                             <div class="smalltext">※データがない場合、基本的に値は ""（空白）となります。</div>
 
+                            <table class="tagTable" id="parenthesis_sample">
+                                <caption>カッコ</caption>
+                                <tr>
+                                    <th>カッコ</th>
+                                    <th>動作</th>
+                                </tr>
 
+                                <tr>
+                                    <td>[]</td>
+                                    <td>このカッコに囲まれた部分は、上の表の「設定地点の予想震度」（{local_Int}）が分かっている場合のみ読み上げられます。</td>
+                                </tr>
+                            </table>
                         </div>
                     </details>
                 </section>

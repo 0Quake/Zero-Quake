@@ -3638,6 +3638,9 @@ function GenerateEEWText(EEWData, update) {
 
     text = text.replaceAll("{local_Int}", userInt ? NormalizeShindo(userInt, 1) : "不明");
 
+    if (!userInt) text = text.replace(/\[.*?\]/g, "");
+    text = text.replace(/\[|\]/g, "");
+
     return text;
   } catch (err) {
     return "";
