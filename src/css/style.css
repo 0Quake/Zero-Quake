@@ -746,7 +746,8 @@ td {
 }
 .EQItem,
 #NankaiTroughInfo_Rinji,
-#NankaiTroughInfo_Teirei {
+#NankaiTroughInfo_Teirei,
+#HokkaidoSanrikuInfo {
   position: relative;
   display: flex;
   flex-wrap: wrap;
@@ -763,7 +764,8 @@ td {
   padding: 6px;
 }
 #NankaiTroughInfo_Rinji,
-#NankaiTroughInfo_Teirei {
+#NankaiTroughInfo_Teirei,
+#HokkaidoSanrikuInfo {
   display: none;
   font-size: 14px;
   padding: 5px 10px;
@@ -782,7 +784,8 @@ td {
   font-family: "M PLUS 1p";
 }
 #NankaiTroughInfo_Rinji.nankaiWarn,
-#NankaiTroughInfo_Teirei.nankaiWarn {
+#NankaiTroughInfo_Teirei.nankaiWarn,
+#HokkaidoSanrikuInfo {
   border: solid 2px var(--TsunamiWatchColor);
   color: #fff;
   font-family: "M PLUS 1p";
@@ -868,9 +871,11 @@ td {
 .EQItem:hover,
 #NankaiTroughInfo_Rinji:hover,
 #NankaiTroughInfo_Teirei:hover,
+#HokkaidoSanrikuInfo:hover,
 .EQItem:focus,
 #NankaiTroughInfo_Rinji:focus,
-#NankaiTroughInfo_Teirei:focus {
+#NankaiTroughInfo_Teirei:focus,
+#HokkaidoSanrikuInfo:focus {
   background: #1c1c1f;
 }
 .EQItem.EQI_cancelled:hover {

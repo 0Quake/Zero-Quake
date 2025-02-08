@@ -82,6 +82,7 @@ window.electronAPI.messageSend((event, request) => {
   else if (request.action == "EQDetectFinish") EQDetectFinish(request.data);
   else if (request.action == "tsunamiUpdate") tsunamiDataUpdate(request.data);
   else if (request.action == "NankaiTroughInfo") NankaiTroughInfo(request.data);
+  else if (request.action == "HokkaidoSanrikuInfo") HokkaidoSanrikuInfo(request.data);
   else if (request.action == "Return_gaikyo") draw_gaikyo(request.data);
 
   document.getElementById("splash").style.display = "none";
@@ -2346,6 +2347,21 @@ function NankaiTroughInfo(data) {
 
     if (data.teirei.kind == "臨時解説") document.getElementById("NankaiTroughInfo_Teirei").classList.add("nankaiWarn");
   } else document.getElementById("NankaiTroughInfo_Teirei").style.display = "none";
+}
+
+//北海道・三陸沖後発地震注意情報
+function HokkaidoSanrikuInfo(data) {
+  if (data) {
+    document.getElementById("HokkaidoSanrikuInfo").addEventListener("click", function () {
+      window.electronAPI.messageReturn({
+        action: "HokkaidoSanrikuWindowOpen",
+      });
+    });
+    document.getElementById("HokkaidoSanrikuInfo").style.display = "block";
+    document.getElementById("HokkaidoSanrikuInfo").setAttribute("title", "クリックして詳細を表示\n" + data.HeadLine);
+    document.getElementById("HokkaidoSanrikuInfo").setAttribute("aria-label", "地震情報アイテム：" + data.title + "、エンターキーで詳細情報を確認。");
+    document.getElementById("HokkaidoSanriku_Title").innerHTML = data.title;
+  } else document.getElementById("HokkaidoSanrikuInfo").style.display = "none";
 }
 
 document.getElementById("tab1_menu2").addEventListener("click", function () {

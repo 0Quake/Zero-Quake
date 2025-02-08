@@ -651,6 +651,9 @@ ipcMain.on("message", (_event, response) => {
     case "NankaiWindowOpen":
       Create_NankaiWindow(response.type);
       break;
+    case "HokkaidoSanrikuWindowOpen":
+      Create_HokkaidoSanrikuWindow();
+      break;
     case "internetConnection":
       if (response.internetConnection) {
         UpdateEQInfo();
@@ -792,6 +795,12 @@ function CreateMainWindow() {
           messageToMainWindow({
             action: "NankaiTroughInfo",
             data: NankaiTroughInfo,
+          });
+        }
+        if (HokkaidoSanrikuInfoAll[0]) {
+          messageToMainWindow({
+            action: "HokkaidoSanrikuInfo",
+            data: HokkaidoSanrikuInfoAll[0],
           });
         }
 
@@ -1035,6 +1044,54 @@ function Create_NankaiWindow(type) {
     throw new Error("南海トラフ関連情報ウィンドウの作成でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
   }
 }
+
+//北海道・三陸沖後発地震注意情報ウィンドウ
+var HokkaidoSanrikuWindow;
+function Create_HokkaidoSanrikuWindow() {
+  try {
+    if (HokkaidoSanrikuWindow) {
+      if (HokkaidoSanrikuWindow.isMinimized()) HokkaidoSanrikuWindow.restore();
+      if (!HokkaidoSanrikuWindow.isFocused()) HokkaidoSanrikuWindow.focus();
+      return false;
+    }
+
+    HokkaidoSanrikuWindow = new BrowserWindow({
+      minWidth: 650,
+      minHeight: 400,
+      icon: path.join(__dirname, "img/icon.ico"),
+      webPreferences: {
+        preload: path.join(__dirname, "js/preload.js"),
+        title: "北海道・三陸沖後発地震注意情報 - Zero Quake",
+      },
+      backgroundColor: "#222225",
+      alwaysOnTop: config.system.alwaysOnTop,
+    });
+
+    HokkaidoSanrikuWindow.webContents.on("did-finish-load", () => {
+      HokkaidoSanrikuWindow.webContents.setZoomFactor(config.system.zoom);
+
+      if (HokkaidoSanrikuInfoAll[0]) {
+        HokkaidoSanrikuWindow.webContents.send("message2", {
+          action: "HokkaidoSanrikuInfo",
+          data: HokkaidoSanrikuInfoAll[0],
+        });
+        HokkaidoSanrikuWindow.webContents.send("message2", {
+          action: "setting",
+          data: config,
+        });
+      }
+    });
+
+    HokkaidoSanrikuWindow.on("closed", () => {
+      HokkaidoSanrikuWindow = null;
+    });
+
+    HokkaidoSanrikuWindow.loadFile("src/HokkaidoSanriku.html");
+  } catch (err) {
+    throw new Error("北海道・三陸沖後発地震注意情報ウィンドウの作成でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
+  }
+}
+
 function messageToMainWindow(message) {
   if (MainWindow) MainWindow.webContents.send("message2", message);
 }
@@ -3061,6 +3118,45 @@ function Req_JMAXML(url, count) {
               console.log(e);
             }
             ConvertTsunamiInfo(tsunamiDataTmp);
+          } else if (title == "北海道・三陸沖後発地震注意情報") {
+            var data = {
+              title: title, //北海道・三陸沖後発地震注意情報
+              reportDate: new Date(xml.getElementsByTagName("ReportDateTime")[0].textContent), //時刻
+              HeadLine: xml.getElementsByTagName("Headline")[0].getElementsByTagName("Text")[0].textContent, //要約
+              Text: "",
+              Appendix: "",
+              Text2: "",
+            };
+
+            var Body = xml.getElementsByTagName("Body")[0];
+            var EarthQuakeInfo = Body.getElementsByTagName("EarthquakeInfo")[0];
+            if (EarthQuakeInfo) {
+              data.Text = EarthQuakeInfo.getElementsByTagName("Text")[0].textContent;
+              if (EarthQuakeInfo.getElementsByTagName("Appendix")[0]) data.Appendix = EarthQuakeInfo.getElementsByTagName("Appendix")[0].textContent;
+            }
+
+            var Text2Elm = Array.from(xml.getElementsByTagName("Body")[0].children).find(function (elm) {
+              return elm.tagName == "Text";
+            });
+            if (Text2Elm) data.Text2 = Text2Elm.textContent;
+
+            HokkaidoSanrikuInfoAll.push(data);
+            HokkaidoSanrikuInfoAll = HokkaidoSanrikuInfoAll.sort(function (a, b) {
+              return a.reportDate > b.reportDate ? -1 : 1;
+            });
+
+            messageToMainWindow({
+              action: "HokkaidoSanrikuInfo",
+              data: HokkaidoSanrikuInfoAll[0],
+            });
+            if (HokkaidoSanrikuWindow && HokkaidoSanrikuInfoAll[0]) {
+              if (data) {
+                HokkaidoSanrikuWindow.webContents.send("message2", {
+                  action: "HokkaidoSanrikuInfo",
+                  data: HokkaidoSanrikuInfoAll[0],
+                });
+              }
+            }
           }
           UpdateStatus(new Date() - Replay, "JMAXML", "success");
           jmaXML_Fetched.push(url);
@@ -3078,6 +3174,7 @@ function Req_JMAXML(url, count) {
 
 var NankaiTroughInfo = { rinji: null, teirei: null };
 var NankaiTroughInfoAll = [];
+var HokkaidoSanrikuInfoAll = [];
 
 //USGS 取得・フォーマット変更→ConvertEQInfo
 var usgsLastGenerated = 0;

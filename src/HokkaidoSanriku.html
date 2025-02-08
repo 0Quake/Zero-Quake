@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>北海道・三陸沖後発地震注意情報 - Zero Quake</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel='stylesheet' href='../node_modules/maplibre-gl/dist/maplibre-gl.css'>
+    <link rel="stylesheet" href="./css/map.css">
+    <link rel="stylesheet" href="./css/setting.css">
+    <meta name="color-scheme" content="dark">
+    <style>
+        body {
+            background: #222225;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="alertFrame"></div>
+
+    <div id="splash">
+        <img src="./img/icon.svg" width="256" height="256" alt="Zero Quakeロゴ" aria-hidden="true">
+        <div id="loading-wrap" aria-label="読み込み中"></div>
+    </div>
+
+    <header>
+        <h1 id="title"></h1>
+        <div id="headline"></div>
+    </header>
+    <hr>
+    <section id="Text">
+        <h2>本文</h2>
+        <div id="Text_body"></div>
+    </section>
+    <section id="Appendix">
+        <h2>参考情報</h2>
+        <div id="Appendix_body"></div>
+    </section>
+    <section id="Text2">
+        <h2>追加情報</h2>
+        <div id="Text2_body"></div>
+    </section>
+
+    <script src="./js/UIcommon.js"></script>
+    <script>
+        window.electronAPI.messageSend((event, request) => {
+            if (request.action == "HokkaidoSanrikuInfo") {
+                document.title = request.data.title + " - Zero Quake"
+
+                document.getElementById("title").innerText = request.data.title;
+                document.getElementById("headline").innerText = request.data.HeadLine + " (" + NormalizeDate(4, request.data.reportDate) + ")"
+                document.getElementById("Text_body").innerText = removeFirstBR(request.data.Text)
+                document.getElementById("Appendix_body").innerText = removeFirstBR(request.data.Appendix)
+                document.getElementById("Text2_body").innerText = removeFirstBR(request.data.Text2)
+
+                if (request.data.Text) document.getElementById("Text").style.display = "block"
+                if (request.data.Appendix) document.getElementById("Appendix").style.display = "block"
+                if (request.data.Text2) document.getElementById("Text2").style.display = "block"
+
+                document.getElementById("splash").style.display = "none";
+            }
+        });
+
+        function removeFirstBR(str) {
+            if (str.startsWith("\n")) return str.replace("\n", "")
+            else return str
+        }
+    </script>
+
+    <style>
+        section {
+            padding: 20px 10px;
+        }
+
+        section h2 {
+            margin: 10px 3px;
+            background: #3f3f42;
+            padding: 2px 10px 2px 17px;
+            border-radius: 5px;
+        }
+
+        section div {
+            padding: 0 20px;
+        }
+
+        h1 {
+            text-align: center;
+            border-radius: 5px;
+        }
+
+        #headline {
+            color: #CCC;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        body {
+            overflow: auto;
+            font-size: 16px;
+            letter-spacing: .8px;
+            line-height: 1.7;
+            padding: 15px;
+        }
+
+        #Text,
+        #Appendix,
+        #Text2 {
+            display: none;
+        }
+
+
+        h1 {
+            border: solid 2px var(--TsunamiWatchColor);
+        }
+    </style>
+
+</body>
+
+</html>
