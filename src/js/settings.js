@@ -14,6 +14,17 @@ window.addEventListener("load", function () {
   this.document.getElementById("EEWE_report_time").value = NormalizeDate(3, new Date()).replaceAll("/", "-");
   this.document.getElementById("EEWE_origin_time").value = NormalizeDate(3, new Date()).replaceAll("/", "-");
 });
+
+var origin_time_edited = false;
+document.getElementById("EEWE_origin_time").addEventListener("input", function () {
+  origin_time_edited = true;
+});
+
+document.getElementById("tab1_menu13").addEventListener("click", function () {
+  //シミュレーションタブを開いたとき、発生時刻が未編集なら現在時刻を設定
+  if (!origin_time_edited) document.getElementById("EEWE_origin_time").value = NormalizeDate(3, new Date()).replaceAll("/", "-");
+});
+
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "Replay") {
     Replay = request.data;
