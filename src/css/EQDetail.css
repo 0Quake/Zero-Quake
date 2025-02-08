@@ -120,6 +120,9 @@ td {
   border-radius: 4px;
   margin: 4px;
   background: #3f3f42;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .ShindoItem::after,
