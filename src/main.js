@@ -2520,8 +2520,8 @@ function EEW_Alert(data, first, update) {
       var notice_setting = first ? config.notice.window.EEW : config.notice.window.EEW_Update;
       if (notice_setting == "push" && (!MainWindow || MainWindow.isMinimized() || !MainWindow.isFocused() || !MainWindow.isVisible())) {
         var EEWNotification = new Notification({
-          title: "緊急地震速報" + data.alertflg + "#" + data.serial,
-          body: data.region_name + "\n予想最大震度：" + NormalizeShindo(data.maxInt, 1) + "  M" + (data.magnitude ? data.magnitude : "不明") + "  深さ：" + (data.depth ? data.depth + "km" : "不明") + (data.userIntensity ? "\n現在地の予想震度：" + data.userIntensity : ""),
+          title: "緊急地震速報 " + data.alertflg + " #" + data.serial,
+          body: data.region_name + "\n予想最大震度：" + NormalizeShindo(data.maxInt, 1) + " ／ M" + (data.magnitude ? data.magnitude : "不明") + " ／ 深さ：" + (data.depth ? data.depth + "km" : "不明") + (data.userIntensity ? "\n現在地の予想震度：" + NormalizeShindo(data.userIntensity, 1) : ""),
           icon: path.join(__dirname, "img/icon.ico"),
         });
         EEWNotification.show();
