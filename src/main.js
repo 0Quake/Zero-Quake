@@ -1659,6 +1659,7 @@ function AXIS() {
                     maxI: NormalizeShindo(IntensityElm.Observation.MaxInt),
                     cancel: data.message.Head.InfoType == "取消",
                     DetailURL: [],
+                    headline: data.message.Head.Headline.Text,
                     axisData: data,
                   },
                 ],
@@ -2722,6 +2723,8 @@ function Req_JMAXML(url, count) {
               if (IntensityElm.getElementsByTagName("Observation")[0].getElementsByTagName("MaxLgInt")[0]) maxLgInt = IntensityElm.getElementsByTagName("Observation")[0].getElementsByTagName("MaxLgInt")[0].textContent;
             }
             if (maxIntTmp == "[objectHTMLUnknownElement]") maxIntTmp = null;
+            var headline = xml.getElementsByTagName("Head")[0].getElementsByTagName("Headline")[0].getElementsByTagName("Text")[0].textContent;
+
             ConvertEQInfo(
               [
                 {
@@ -2736,6 +2739,7 @@ function Req_JMAXML(url, count) {
                   cancel: Boolean(cancel),
                   reportDateTime: new Date(xml.getElementsByTagName("ReportDateTime")[0].textContent),
                   DetailURL: [url],
+                  headline: headline,
                   axisData: null,
                 },
               ],
@@ -2828,6 +2832,7 @@ function Req_JMAXML(url, count) {
                   cancel: Boolean(cancel),
                   reportDateTime: new Date(xml.getElementsByTagName("ReportDateTime")[0].textContent),
                   DetailURL: [url],
+                  Headline: "",
                   axisData: null,
                 });
               });
@@ -3210,6 +3215,7 @@ function Req_Narikakun(url, count) {
               cancel: Boolean(cancel),
               reportDateTime: new Date(json.Head.ReportDateTime),
               DetailURL: [url],
+              headline: json.Head.Headline,
               axisData: null,
             },
           ];
@@ -3255,6 +3261,7 @@ function ConvertEQInfo(dataList, type, EEW, count) {
               maxI: null,
               maxLgInt: null,
               DetailURL: [],
+              headline: null,
               axisData: [],
             };
             EQElm.raw_data.push(data);
@@ -3290,6 +3297,7 @@ function ConvertEQInfo(dataList, type, EEW, count) {
                   maxI: null,
                   maxLgInt: null,
                   DetailURL: [],
+                  headline: null,
                   axisData: [],
                 };
               }
@@ -3302,6 +3310,7 @@ function ConvertEQInfo(dataList, type, EEW, count) {
               if (Boolean2(elm.M) && elm.M != "Ｍ不明" && elm.M != "NaN") EQInfo_Item.M = elm.M;
               if (Boolean2(elm.maxI) && elm.maxI !== "?") EQInfo_Item.maxI = elm.maxI;
               if (Boolean2(elm.maxLgInt) && elm.maxLgInt !== "?") EQInfo_Item.maxLgInt = elm.maxLgInt;
+              if (Boolean2(elm.headline)) EQInfo_Item.headline = elm.headline;
 
               if (Array.isArray(elm.DetailURL)) {
                 elm.DetailURL.forEach(function (elm2) {
@@ -3324,6 +3333,7 @@ function ConvertEQInfo(dataList, type, EEW, count) {
             if (EQElm.M !== EQInfo_Item.M) changed = true;
             if (EQElm.maxI !== EQInfo_Item.maxI) changed = true;
             if (EQElm.maxLgInt !== EQInfo_Item.maxLgInt) changed = true;
+            if (EQElm.headline !== EQInfo_Item.headline) changed = true;
             if (EQElm.DetailURL.length !== EQInfo_Item.DetailURL.length) changed = true;
             if (EQInfo_Item.axisData) changed = true;
 
@@ -3337,6 +3347,7 @@ function ConvertEQInfo(dataList, type, EEW, count) {
             EQElm.M = EQInfo_Item.M;
             EQElm.maxI = EQInfo_Item.maxI;
             EQElm.maxLgInt = EQInfo_Item.maxLgInt;
+            EQElm.headline = EQInfo_Item.headline;
             EQElm.DetailURL = EQElm.DetailURL.concat(EQInfo_Item.DetailURL);
             if (EQInfo_Item.axisData) EQElm.axisData = EQInfo_Item.axisData;
 
@@ -3669,6 +3680,7 @@ function GenerateEQInfoText(EQData) {
     text = text.replaceAll("{region_name}", EQData.epiCenter ? EQData.epiCenter : "");
     text = text.replaceAll("{magnitude}", EQData.M ? EQData.M : "");
     text = text.replaceAll("{maxInt}", EQData.maxI ? NormalizeShindo(EQData.maxI, 1) : "");
+    text = text.replaceAll("{headline}", EQData.headline ? EQData.headline : "");
 
     if (!EQData.epiCenter) text = text.replace(/\[.*?\]/g, "");
     if (!EQData.maxI) text = text.replace(/\<.*?\>/g, "");
