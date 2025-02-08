@@ -2790,7 +2790,9 @@ function Req_JMAXML(url, count) {
                 return elm.title.startsWith("南海トラフ地震関連解説情報") && new Date(rinji.reportDate) <= new Date(elm.reportDate);
               });
             } else {
-              teirei = NankaiTroughInfoAll[0];
+              teirei = NankaiTroughInfoAll.find(function (elm) {
+                return elm.title.startsWith("南海トラフ地震関連解説情報");
+              });
             }
 
             NankaiTroughInfo = { rinji: rinji, teirei: teirei };
