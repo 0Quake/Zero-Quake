@@ -46,6 +46,7 @@ window.electronAPI.messageSend((event, request) => {
 
     configDataDraw();
     mapInit();
+    SetShindoColor();
   } else if (request.action == "Update_Data") UpdateDataDraw(request.data);
 });
 
@@ -143,6 +144,7 @@ function configDataDraw() {
   selectBoxSet(document.getElementById("Tsunami_L_threshold"), config.Info.TsunamiInfo.Local_threshold);
   document.getElementById("Tsunami_Bypass_threshold").checked = config.Info.TsunamiInfo.Bypass_threshold;
   document.getElementById("zoom").value = 100 * config.system.zoom;
+  selectBoxSet(document.getElementById("shindoColor"), config.color.IntColorTheme);
 
   fetch("http://localhost:50080/GetVoiceList")
     .then(function (res) {
@@ -310,6 +312,10 @@ function apply() {
   config.Info.TsunamiInfo.Local_threshold = document.getElementById("Tsunami_L_threshold").value;
   config.Info.TsunamiInfo.Bypass_threshold = document.getElementById("Tsunami_Bypass_threshold").checked;
   config.system.zoom = Number(document.getElementById("zoom").value) / 100;
+
+  config.color.IntColorTheme = document.getElementById("shindoColor").value;
+  config.color.Shindo = intColor[document.getElementById("shindoColor").value].Shindo;
+  config.color.LgInt = intColor[document.getElementById("shindoColor").value].LgInt;
 
   window.electronAPI.messageReturn({
     action: "ChangeConfig",
@@ -837,3 +843,265 @@ document.getElementById("Start_simulation").addEventListener("click", function (
     data: EEWData,
   });
 });
+
+document.getElementById("shindoColor").addEventListener("change", function () {
+  var colorTmp = intColor[this.value];
+  document.getElementById("ShindoSampleQ").style.background = colorTmp.Shindo["?"].background;
+  document.getElementById("ShindoSample0").style.background = colorTmp.Shindo["0"].background;
+  document.getElementById("ShindoSample1").style.background = colorTmp.Shindo["1"].background;
+  document.getElementById("ShindoSample2").style.background = colorTmp.Shindo["2"].background;
+  document.getElementById("ShindoSample3").style.background = colorTmp.Shindo["3"].background;
+  document.getElementById("ShindoSample4").style.background = colorTmp.Shindo["4"].background;
+  document.getElementById("ShindoSample5m").style.background = colorTmp.Shindo["5m"].background;
+  document.getElementById("ShindoSample5p").style.background = colorTmp.Shindo["5p"].background;
+  document.getElementById("ShindoSample6m").style.background = colorTmp.Shindo["6m"].background;
+  document.getElementById("ShindoSample6p").style.background = colorTmp.Shindo["6p"].background;
+  document.getElementById("ShindoSample7").style.background = colorTmp.Shindo["7"].background;
+  document.getElementById("LngIntSampleQ").style.background = colorTmp.LgInt["?"].background;
+  document.getElementById("LngIntSample1").style.background = colorTmp.LgInt["1"].background;
+  document.getElementById("LngIntSample2").style.background = colorTmp.LgInt["2"].background;
+  document.getElementById("LngIntSample3").style.background = colorTmp.LgInt["3"].background;
+  document.getElementById("LngIntSample4").style.background = colorTmp.LgInt["4"].background;
+
+  document.getElementById("ShindoSampleQ").style.color = colorTmp.Shindo["?"].color;
+  document.getElementById("ShindoSample0").style.color = colorTmp.Shindo["0"].color;
+  document.getElementById("ShindoSample1").style.color = colorTmp.Shindo["1"].color;
+  document.getElementById("ShindoSample2").style.color = colorTmp.Shindo["2"].color;
+  document.getElementById("ShindoSample3").style.color = colorTmp.Shindo["3"].color;
+  document.getElementById("ShindoSample4").style.color = colorTmp.Shindo["4"].color;
+  document.getElementById("ShindoSample5m").style.color = colorTmp.Shindo["5m"].color;
+  document.getElementById("ShindoSample5p").style.color = colorTmp.Shindo["5p"].color;
+  document.getElementById("ShindoSample6m").style.color = colorTmp.Shindo["6m"].color;
+  document.getElementById("ShindoSample6p").style.color = colorTmp.Shindo["6p"].color;
+  document.getElementById("ShindoSample7").style.color = colorTmp.Shindo["7"].color;
+  document.getElementById("LngIntSampleQ").style.color = colorTmp.LgInt["?"].color;
+  document.getElementById("LngIntSample1").style.color = colorTmp.LgInt["1"].color;
+  document.getElementById("LngIntSample2").style.color = colorTmp.LgInt["2"].color;
+  document.getElementById("LngIntSample3").style.color = colorTmp.LgInt["3"].color;
+  document.getElementById("LngIntSample4").style.color = colorTmp.LgInt["4"].color;
+});
+
+var intColor = {
+  "0quake": {
+    Shindo: {
+      0: {
+        background: "rgb(80, 81, 83)",
+        color: "rgb(194, 195, 197)",
+      },
+      1: {
+        background: "rgb(157, 175, 194)",
+        color: "rgb(61, 64, 89)",
+      },
+      2: {
+        background: "rgb(89, 123, 171)",
+        color: "rgb(12, 12, 15)",
+      },
+      3: {
+        background: "rgb(69, 72, 130)",
+        color: "rgb(195, 198, 230)",
+      },
+      4: {
+        background: "rgb(217, 215, 98)",
+        color: "rgb(72, 72, 76)",
+      },
+      7: {
+        background: "rgb(165, 0, 194)",
+        color: "rgb(255, 255, 255)",
+      },
+      "5m": {
+        background: "rgb(224, 157, 0)",
+        color: "rgb(43, 43, 43)",
+      },
+      "5p": {
+        background: "rgb(232, 93, 19)",
+        color: "rgb(0, 0, 0)",
+      },
+      "6m": {
+        background: "rgb(194, 26, 0)",
+        color: "rgb(255, 255, 255)",
+      },
+      "6p": {
+        background: "rgb(128, 0, 21)",
+        color: "rgb(255, 255, 255)",
+      },
+      "?": {
+        background: "rgb(191, 191, 191)",
+        color: "rgb(68, 68, 68)",
+      },
+      "5p?": {
+        background: "rgb(232, 93, 19)",
+        color: "rgb(0, 0, 0)",
+      },
+    },
+    LgInt: {
+      1: {
+        background: "rgb(69, 72, 130)",
+        color: "rgb(195, 198, 230)",
+      },
+      2: {
+        background: "rgb(224, 157, 0)",
+        color: "rgb(43, 43, 43)",
+      },
+      3: {
+        background: "rgb(194, 26, 0)",
+        color: "rgb(255, 255, 255)",
+      },
+      4: {
+        background: "rgb(165, 0, 194)",
+        color: "rgb(255, 255, 255)",
+      },
+      "?": {
+        background: "rgb(191, 191, 191)",
+        color: "rgb(68, 68, 68)",
+      },
+    },
+  },
+  "0quake_old": {
+    Shindo: {
+      0: {
+        background: "rgb(80, 86, 102)",
+        color: "rgb(204, 204, 204)",
+      },
+      1: {
+        background: "rgb(134, 168, 198)",
+        color: "rgb(51, 51, 51)",
+      },
+      2: {
+        background: "rgb(56, 120, 193)",
+        color: "rgb(255, 255, 255)",
+      },
+      3: {
+        background: "rgb(80, 186, 84)",
+        color: "rgb(34, 34, 34)",
+      },
+      4: {
+        background: "rgb(204, 209, 74)",
+        color: "rgb(34, 34, 34)",
+      },
+      "5m": {
+        background: "rgb(231, 150, 21)",
+        color: "rgb(0, 0, 0)",
+      },
+      "5p": {
+        background: "rgb(255, 91, 22)",
+        color: "rgb(0, 0, 0)",
+      },
+      "6m": {
+        background: "rgb(237, 0, 0)",
+        color: "rgb(255, 255, 255)",
+      },
+      "6p": {
+        background: "rgb(128, 9, 9)",
+        color: "rgb(255, 255, 255)",
+      },
+      7: {
+        background: "rgb(196, 0, 222)",
+        color: "rgb(255, 255, 255)",
+      },
+      "?": {
+        background: "rgb(191, 191, 191)",
+        color: "rgb(68, 68, 68)",
+      },
+      "5p?": {
+        background: "rgb(231, 150, 21)",
+        color: "rgb(0, 0, 0)",
+      },
+    },
+    LgInt: {
+      1: {
+        background: "rgb(80, 186, 84)",
+        color: "rgb(34, 34, 34)",
+      },
+      2: {
+        background: "rgb(231, 150, 21)",
+        color: "rgb(0, 0, 0)",
+      },
+      3: {
+        background: "rgb(237, 0, 0)",
+        color: "rgb(255, 255, 255)",
+      },
+      4: {
+        background: "rgb(196, 0, 222)",
+        color: "rgb(255, 255, 255)",
+      },
+      "?": {
+        background: "rgb(191, 191, 191)",
+        color: "rgb(68, 68, 68)",
+      },
+    },
+  },
+  jma: {
+    Shindo: {
+      0: {
+        background: "rgb(255, 255, 255)",
+        color: "rgb(0, 0, 0)",
+      },
+      1: {
+        background: "rgb(242, 242, 255)",
+        color: "rgb(0, 0, 0)",
+      },
+      2: {
+        background: "rgb(0, 170, 255)",
+        color: "rgb(0, 0, 0)",
+      },
+      3: {
+        background: "rgb(0, 65, 255)",
+        color: "rgb(255, 255, 255)",
+      },
+      4: {
+        background: "rgb(250, 230, 150)",
+        color: "rgb(0, 0, 0)",
+      },
+      7: {
+        background: "rgb(180, 0, 104)",
+        color: "rgb(255, 255, 255)",
+      },
+      "5m": {
+        background: "rgb(255, 230, 0)",
+        color: "rgb(0, 0, 0)",
+      },
+      "5p": {
+        background: "rgb(255, 153, 0)",
+        color: "rgb(0, 0, 0)",
+      },
+      "6m": {
+        background: "rgb(255, 40, 0)",
+        color: "rgb(255, 255, 255)",
+      },
+      "6p": {
+        background: "rgb(165, 0, 33)",
+        color: "rgb(255, 255, 255)",
+      },
+      "?": {
+        background: "rgb(200, 200, 203)",
+        color: "rgb(0, 0, 0)",
+      },
+      "5p?": {
+        background: "rgb(255, 230, 0)",
+        color: "rgb(0, 0, 0)",
+      },
+    },
+    LgInt: {
+      1: {
+        background: "rgb(0, 65, 255)",
+        color: "rgb(255, 255, 255)",
+      },
+      2: {
+        background: "rgb(255, 230, 0)",
+        color: "rgb(0, 0, 0)",
+      },
+      3: {
+        background: "rgb(255, 40, 0)",
+        color: "rgb(255, 255, 255)",
+      },
+      4: {
+        background: "rgb(165, 0, 33)",
+        color: "rgb(255, 255, 255)",
+      },
+      "?": {
+        background: "rgb(200, 200, 203)",
+        color: "rgb(0, 0, 0)",
+      },
+    },
+  },
+};

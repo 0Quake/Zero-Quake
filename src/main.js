@@ -161,6 +161,7 @@ var defaultConfigVal = {
     },
   },
   color: {
+    IntColorTheme: "0quake_old",
     psWave: {
       PwaveColor: "rgb(48, 148, 255)",
       SwaveColor: "rgb(255, 62, 48)",

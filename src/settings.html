@@ -1262,6 +1262,55 @@
                 <section>
                     <label>表示倍率（％）<input id="zoom" type="number" min="10" max="1000" value="100" step="1" placeholder="表示倍率（10~1000％）"></label>
                 </section>
+                <h4>配色</h4>
+                <section>
+                    <div id="IntColor_Wrap">
+                        <label>震度・長周期地震動階級の配色<select id="shindoColor">
+                                <option value="0quake">Zero Quake 独自</option>
+                                <option value="0quake_old">Zero Quake 独自 （旧）</option>
+                                <option value="jma">気象庁ホームページ</option>
+                            </select></label>
+
+                        <div id="IntSample_wrap" aria-hidden="true">
+                            <h5>サンプル</h5>
+                            <table id="IntSample_table">
+                                <tr>
+                                    <th>震度：</th>
+                                    <td>
+                                        <div id="ShindoSample">
+                                            <div id="ShindoSampleQ"><span>不明</span></div>
+                                            <div id="ShindoSample0">0</div>
+                                            <div id="ShindoSample1">1</div>
+                                            <div id="ShindoSample2">2</div>
+                                            <div id="ShindoSample3">3</div>
+                                            <div id="ShindoSample4">4</div>
+                                            <div id="ShindoSample5m">5<span>弱</span></div>
+                                            <div id="ShindoSample5p">5<span>強</span></div>
+                                            <div id="ShindoSample6m">6<span>弱</span></div>
+                                            <div id="ShindoSample6p">6<span>強</span></div>
+                                            <div id="ShindoSample7">7</div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th><span>長周期</span><span>地震動</span><span>階級</span>：</th>
+                                    <td>
+                                        <div id="LngIntSample">
+                                            <div id="LngIntSampleQ"><span>不明</span></div>
+                                            <div id="LngIntSample1">1</div>
+                                            <div id="LngIntSample2">2</div>
+                                            <div id="LngIntSample3">3</div>
+                                            <div id="LngIntSample4">4</div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+
+                        </div>
+                    </div>
+
+
+                </section>
                 <h4>その他</h4>
                 <section>
                     <div>
