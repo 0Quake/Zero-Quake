@@ -61,6 +61,7 @@
     "jsdom": "^26.0.0",
     "maplibre-gl": "^5.1.0",
     "path": "^0.12.7",
+    "pmtiles": "^4.2.1",
     "websocket": "^1.0.35"
   }
 }

@@ -719,6 +719,13 @@ var over4_visiblity = false;
 //マップ初期化など
 function init() {
   if (map) return;
+
+  const protocol = new pmtiles.Protocol();
+  maplibregl.addProtocol("pmtiles", protocol.tile);
+  const PMTILES_URL = "https://cyberjapandata.gsi.go.jp/xyz/optimal_bvmap-v1/optimal_bvmap-v1.pmtiles";
+  const p = new pmtiles.PMTiles(PMTILES_URL);
+  protocol.add(p);
+
   map = new maplibregl.Map({
     container: "mapcontainer",
     center: [138.46, 32.99125],
@@ -736,7 +743,7 @@ function init() {
       sources: {
         v: {
           type: "vector",
-          tiles: ["https://cyberjapandata.gsi.go.jp/xyz/optimal_bvmap-v1/{z}/{x}/{y}.pbf"],
+          url: `pmtiles://${PMTILES_URL}`,
           attribution: "国土地理院",
           minzoom: 4,
           maxzoom: 16,
