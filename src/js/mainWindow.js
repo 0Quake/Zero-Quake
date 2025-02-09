@@ -622,9 +622,10 @@ function psWaveAnm() {
   }
   if (background) setTimeout(psWaveAnm, 1000);
   else {
+    var interval = currentZoom < 5 ? 400 : 200;
     setTimeout(function () {
       requestAnimationFrame(psWaveAnm);
-    }, 250);
+    }, interval);
   }
 }
 
@@ -715,6 +716,7 @@ function overlaySelect(layerName, checked) {
 
 var over3_visiblity = false;
 var over4_visiblity = false;
+var currentZoom = 4;
 
 //マップ初期化など
 function init() {
@@ -729,7 +731,7 @@ function init() {
   map = new maplibregl.Map({
     container: "mapcontainer",
     center: [138.46, 32.99125],
-    zoom: 4,
+    zoom: currentZoom,
     attributionControl: true,
     pitchWithRotate: false,
     dragRotate: false,
@@ -1445,6 +1447,7 @@ function init() {
   });
 
   map.on("zoom", function (e) {
+    currentZoom = map.getZoom();
     zoomLevelContinue();
     if (e.originalEvent) userZoom = map.getZoom();
   });
