@@ -373,10 +373,6 @@ function mapInit() {
     center: [config.home.longitude, config.home.latitude],
     zoom: 6,
     attributionControl: true,
-    maxBounds: [
-      [115, 15],
-      [155, 52],
-    ],
     pitchWithRotate: false,
     dragRotate: false,
     style: {
