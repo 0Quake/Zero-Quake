@@ -424,7 +424,7 @@ ol {
   display: inline-block;
 }
 #IntSample_wrap h5 {
-  background: #62626c;
+  border-bottom: solid 2px #62626c;
   padding: 1px 5px;
   margin: 0 0 4px 0;
 }

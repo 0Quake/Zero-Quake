@@ -1763,9 +1763,27 @@ function draw_gaikyo(data) {
     if (index <= 25) {
       var clone = document.getElementById("gaikyo-item").content.cloneNode(true).querySelector(".EQItem");
       if (index == 0) clone.setAttribute("tabindex", 2);
-      clone.querySelector(".EQI_datetime").textContent = elm.dateStr;
       clone.querySelector(".EQI_headline").textContent = elm.headline;
-      clone.setAttribute("aria-label", "気象庁による解説情報：" + elm.title + "、" + NormalizeDate("YY年M月D日", elm.date));
+      if (elm.title == "地震・火山月報（防災編）") {
+        var dateToSpeak = NormalizeDate("YY年M月", elm.date);
+        var dateStr = NormalizeDate("YYYY/MM", elm.date);
+      } else {
+        var startDateToSpeak = elm.date0 ? NormalizeDate("YY年M月D日", elm.date0) + "から" : "";
+        var startDateStr = elm.date0 ? NormalizeDate("YYYY/MM/DD", elm.date0) + "～" : "";
+        if (!elm.date0 || elm.date0.getFullYear() != elm.date.getFullYear()) {
+          var dateFormToSpeak = "YY年M月D日";
+          var dateFormStr = "YYYY/MM/DD";
+        } else {
+          var dateFormToSpeak = "M月D日";
+          var dateFormStr = "MM/DD";
+        }
+        var dateToSpeak = startDateToSpeak + NormalizeDate(dateFormToSpeak, elm.date);
+        var dateStr = startDateStr + NormalizeDate(dateFormStr, elm.date);
+      }
+      console.log(elm, dateToSpeak, dateStr);
+      clone.querySelector(".EQI_datetime").textContent = dateStr;
+
+      clone.setAttribute("aria-label", "気象庁による解説情報：" + elm.title + "、" + dateToSpeak);
       clone.addEventListener("click", function () {
         window.open(elm.url);
       });
