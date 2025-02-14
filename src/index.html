@@ -29,17 +29,18 @@
             <div id="mapcontainer_Wrap">
                 <div id="mapcontainer" class="kmoni_hide"></div>
                 <div id="menu_wrap">
-                    <dialog id="menu" class="menu">
-                        <h2 class="popup_menubar">レイヤーの切り替え
-                            <button id="layerSwitch_close" title="閉じる" aria-label="レイヤー切り替え画面を閉じる">close</button>
-                        </h2>
+                    <dialog id="menu" class="menu" aria-label="地図レイヤー切り替え画面">
+                        <div class="popup_menubar">
+                            <h2>レイヤーの切り替え</h2>
+                            <button id="layerSwitch_close" title="閉じる" aria-label="地図レイヤー切り替え画面を閉じる">close</button>
+                        </div>
                         <div id="menu_content">
                             <h3>ベースマップ</h3>
                             <div class="check">
                                 <label><input type="checkbox" id="globeView">地球 球体表示</label>
                             </div>
                             <div class="radio">
-                                <label><input type="radio" name="mapSelect" value="" checked>標準</label>
+                                <label><input type="radio" name="mapSelect" value="" checked>標準地図</label>
                                 <label><input type="radio" name="mapSelect" value="tile0">地理院地図 (標準)</label>
                                 <label><input type="radio" name="mapSelect" value="tile1">地理院地図 (淡色)</label>
                                 <label><input type="radio" name="mapSelect" value="tile2">地理院地図 (写真)</label>
@@ -105,7 +106,9 @@
                 </div>
             </div>
             <nav id="sideBar" aria-label="サイドパネル">
-                <button id="SideBarToggle" aria-label="サイドパネルの表示を切り替え" title="サイドパネルを表示・非表示"></button>
+                <button id="SideBarToggle" aria-label="サイドパネルの表示を切り替え" title="サイドパネルを表示・非表示">
+                    <span aria-hidden="true">double_arrow</span>
+                </button>
                 <div id="sokuho-Panel" aria-label="速報パネル">
                     <div id="tsunamiRevocation" class="list-item" tabindex="0" aria-label="解除された津波アイテム">
                         すべての津波情報が解除されました。
@@ -147,7 +150,7 @@
                     </div>
 
                     <div id="EEW-Panel">
-                        <div id="offline2">現在オフラインです。<br>最新の情報ではありません</div>
+                        <div id="offline2">現在オフラインです。<br>最新の情報が表示できません。</div>
                         <template id="EEWTemplate">
                             <div class="EEWWrap list-item" role="group" tabindex="0">
 
@@ -212,7 +215,7 @@
                     </div>
 
                     <div id="noEEW">
-                        現在発表中の情報はありません
+                        ここに速報が表示されます
                     </div>
 
                 </div>
@@ -273,18 +276,20 @@
                                 </div>
                                 <div id="tab2_content" class="tabContentWrap">
                                     <div id="tab2_content1" role="tabpanel list" aria-labelledby="tab2_menu1" class="tabcontent active_tabcontent" ZQ-focusgroup>
-                                        <div id="NankaiTroughInfo_Rinji" role="listitem" ZQ-focusgroup-item tabindex="2">
-                                            <span id="Nankai_Title_Rinji"></span>
-                                        </div>
-                                        <div id="NankaiTroughInfo_Teirei" role="listitem" ZQ-focusgroup-item tabindex="2">
-                                            <span id="Nankai_Title_Teirei"></span>
-                                        </div>
-                                        <div id="HokkaidoSanrikuInfo" role="listitem" ZQ-focusgroup-item tabindex="2">
-                                            <span id="HokkaidoSanriku_Title"></span>
-                                        </div>
+                                        <div role="list">
+                                            <div id="NankaiTroughInfo_Rinji" role="listitem" ZQ-focusgroup-item tabindex="2">
+                                                <span id="Nankai_Title_Rinji"></span>
+                                            </div>
+                                            <div id="NankaiTroughInfo_Teirei" role="listitem" ZQ-focusgroup-item tabindex="2">
+                                                <span id="Nankai_Title_Teirei"></span>
+                                            </div>
+                                            <div id="HokkaidoSanrikuInfo" role="listitem" ZQ-focusgroup-item tabindex="2">
+                                                <span id="HokkaidoSanriku_Title"></span>
+                                            </div>
 
-                                        <div id="JMA_EqInfo" class="EQInfo">
-                                            <div class="mini-loading-wrap" aria-label="読み込み中"></div>
+                                            <div id="JMA_EqInfo" class="EQInfo">
+                                                <div class="mini-loading-wrap" aria-label="読み込み中"></div>
+                                            </div>
                                         </div>
                                     </div>
                                     <div id="tab2_content2" role="tabpanel" aria-labelledby="tab2_menu2" class="tabcontent" ZQ-focusgroup>
@@ -317,10 +322,10 @@
                 </div>
             </nav>
 
-            <dialog id="UpdateTime_detail">
+            <dialog id="UpdateTime_detail" aria-label="接続状況画面">
                 <div class="popup_menubar">
                     <h2>接続状況</h2>
-                    <button id="UpdateTimeClose" title="このダイアログを閉じる">close</button>
+                    <button id="UpdateTimeClose" title="接続状況画面を閉じる">close</button>
                 </div>
                 <div id="UpdateTime_detail_content">
 
@@ -398,7 +403,7 @@
             </dialog>
             <dialog id="offline" role="alertdialog" aria-label="オフライン警告">
                 <h2>現在オフラインです</h2>
-                <p>インターネットに接続されていないため、情報を取得することができません。</p>
+                <p>インターネットに接続されていないため、最新の情報を取得できません。</p>
                 <p>インターネットに再接続してください。</p>
                 <button onclick="document.getElementById('offline').close()" title="この画面を閉じる" aria-label="オフライン警告を閉じる">閉じる</button>
             </dialog>

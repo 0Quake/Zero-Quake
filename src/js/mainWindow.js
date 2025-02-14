@@ -65,10 +65,7 @@ window.electronAPI.messageSend((event, request) => {
     Replay = request.data;
     document.getElementById("replayFrame").style.display = Replay == 0 ? "none" : "block";
 
-    var geojson = {
-      type: "FeatureCollection",
-      features: [],
-    };
+    var geojson = { type: "FeatureCollection", features: [] };
     if (map) {
       map.getSource("SEISJS_points").setData(geojson);
       map.getSource("TREMRTS_points").setData(geojson);
@@ -123,11 +120,7 @@ window.addEventListener("load", () => {
   document.getElementById("globeView").addEventListener("change", function () {
     config.data.globeView = this.checked;
     map.setProjection({ type: config.data.globeView ? "globe" : "mercator" });
-    window.electronAPI.messageReturn({
-      action: "ChangeConfig",
-      from: "Other",
-      data: config,
-    });
+    window.electronAPI.messageReturn({ action: "ChangeConfig", from: "Other", data: config });
   });
   document.getElementsByName("overlaySelect").forEach(function (elm) {
     elm.addEventListener("change", function () {
@@ -384,13 +377,7 @@ function eqInfoDraw(data, source) {
       } else {
         clone.querySelector(".EQItem").setAttribute("aria-label", `過去の地震情報：${elm.status == "訓練" ? "訓練報、" : ""}${elm.status == "試験" ? "試験報、" : ""}最大震度${NormalizeShindo(maxITmp, 1)}、マグニチュード${elm.M || elm.M === 0 ? elm.M.toFixed(1) : "不明"}、震源は${elm.epiCenter ? elm.epiCenter : "調査中"}、発生時刻は${NormalizeDate("M月D日h時m分", elm.OriginTime)}。エンターキーで詳細情報を確認。`);
         clone.querySelector(".EQItem").addEventListener("click", function () {
-          window.electronAPI.messageReturn({
-            action: "EQInfoWindowOpen",
-            url: "src/EQDetail.html",
-            eid: elm.eventId,
-            urls: elm.DetailURL,
-            axisData: elm.axisData,
-          });
+          window.electronAPI.messageReturn({ action: "EQInfoWindowOpen", url: "src/EQDetail.html", eid: elm.eventId, urls: elm.DetailURL, axisData: elm.axisData });
         });
       }
     } else if (source == "usgs") {
@@ -402,10 +389,7 @@ function eqInfoDraw(data, source) {
       clone.querySelector(".EQItem").setAttribute("aria-label", `過去の地震情報：最大改正メルカリ震度${NormalizeMMI(elm.maxI, 3)}、マグニチュード${elm.M || elm.M === 0 ? elm.M.toFixed(1) : "不明"}、震源は${elm.epiCenter ? elm.epiCenter : "調査中"}、発生時刻は${NormalizeDate("M月D日h時m分", elm.OriginTime)}。エンターキーで詳細情報を確認。`);
 
       clone.querySelector(".EQItem").addEventListener("click", function () {
-        window.electronAPI.messageReturn({
-          action: "EQInfoWindowOpen_IS_WebURL",
-          url: String(elm.DetailURL),
-        });
+        window.electronAPI.messageReturn({ action: "EQInfoWindowOpen_IS_WebURL", url: String(elm.DetailURL) });
       });
     }
     EQListWrap.appendChild(clone);
@@ -433,10 +417,7 @@ function EQDetect(data) {
 
     let _center = turf.point([data.lng, data.lat]);
     let _radius = data.Radius + 5;
-    let _options = {
-      steps: 80,
-      units: "kilometers",
-    };
+    let _options = { steps: 80, units: "kilometers" };
 
     let _circle = turf.circle(_center, _radius, _options);
     if (map && map.getSource("EQDItem_" + data.id)) map.getSource("EQDItem_" + data.id).setData(_circle);
@@ -463,36 +444,17 @@ function EQDetect(data) {
     var ECMarker = new maplibregl.Marker({ element: img }).setLngLat([data.lng, data.lat]).addTo(map);
     ECMarker.getElement().removeAttribute("tabindex");
 
-    EQDetectItem.push({
-      id: data.id,
-      lat: data.lat,
-      lng: data.lng,
-      ECMarker: ECMarker,
-    });
+    EQDetectItem.push({ id: data.id, lat: data.lat, lng: data.lng, ECMarker: ECMarker });
 
     let _center = turf.point([data.lng, data.lat]);
     let _radius = data.Radius + 5;
-    let _options = {
-      steps: 80,
-      units: "kilometers",
-    };
+    let _options = { steps: 80, units: "kilometers" };
 
     let _circle = turf.circle(_center, _radius, _options);
 
-    map.addSource("EQDItem_" + data.id, {
-      type: "geojson",
-      data: _circle,
-    });
+    map.addSource("EQDItem_" + data.id, { type: "geojson", data: _circle });
 
-    map.addLayer({
-      id: "EQDItemF_" + data.id,
-      type: "fill",
-      source: "EQDItem_" + data.id,
-      paint: {
-        "fill-color": "#FFF",
-        "fill-opacity": 0.3,
-      },
-    });
+    map.addLayer({ id: "EQDItemF_" + data.id, type: "fill", source: "EQDItem_" + data.id, paint: { "fill-color": "#FFF", "fill-opacity": 0.3 } });
 
     map.panTo([data.lng, data.lat], { animate: false });
     map.fitBounds(turf.bbox(_circle), { maxZoom: 7, animate: false, padding: 100 });
@@ -537,15 +499,11 @@ document.getElementById("sideBar").addEventListener("transitionend", function ()
 
 //津波情報ウィンドウ表示
 document.getElementById("TsunamiDetail").addEventListener("click", function () {
-  window.electronAPI.messageReturn({
-    action: "TsunamiWindowOpen",
-  });
+  window.electronAPI.messageReturn({ action: "TsunamiWindowOpen" });
 });
 //設定ウィンドウ表示
 document.getElementById("setting").addEventListener("click", function () {
-  window.electronAPI.messageReturn({
-    action: "SettingWindowOpen",
-  });
+  window.electronAPI.messageReturn({ action: "SettingWindowOpen" });
 });
 
 //情報更新時刻更新
@@ -653,11 +611,7 @@ function layerSelect(layerName) {
     map.setLayoutProperty("worldmap_fill", "visibility", "none");
   }
   config.data.layer = layerName;
-  window.electronAPI.messageReturn({
-    action: "ChangeConfig",
-    from: "Other",
-    data: config,
-  });
+  window.electronAPI.messageReturn({ action: "ChangeConfig", from: "Other", data: config });
 }
 
 function overlaySelect(layerName, checked) {
@@ -669,11 +623,7 @@ function overlaySelect(layerName, checked) {
     overlaySelect("SEISJS_points", checked);
 
     config.data.kmoni_points_show = checked;
-    window.electronAPI.messageReturn({
-      action: "ChangeConfig",
-      from: "Other",
-      data: config,
-    });
+    window.electronAPI.messageReturn({ action: "ChangeConfig", from: "Other", data: config });
     return;
   }
   if (layerName == "hinanjo") {
@@ -707,11 +657,7 @@ function overlaySelect(layerName, checked) {
   });
 
   config.data.overlay = selectedLayer;
-  window.electronAPI.messageReturn({
-    action: "ChangeConfig",
-    from: "Other",
-    data: config,
-  });
+  window.electronAPI.messageReturn({ action: "ChangeConfig", from: "Other", data: config });
 }
 
 var over3_visiblity = false;
@@ -738,325 +684,29 @@ function init() {
     style: {
       version: 8,
       glyphs: "https://gsi-cyberjapan.github.io/optimal_bvmap/glyphs/{fontstack}/{range}.pbf",
-      transition: {
-        duration: 0,
-        delay: 0,
-      },
-      sources: {
-        v: {
-          type: "vector",
-          url: `pmtiles://${PMTILES_URL}`,
-          attribution: "国土地理院",
-          minzoom: 4,
-          maxzoom: 16,
-        },
-        worldmap: {
-          type: "geojson",
-          data: "./Resource/World.json",
-          tolerance: 2,
-          attribution: "Natural Earth",
-        },
-        basemap: {
-          type: "geojson",
-          data: "./Resource/basemap.json",
-          tolerance: 0.9,
-          attribution: "気象庁",
-        },
-        prefmap: {
-          type: "geojson",
-          data: "./Resource/prefectures.json",
-          tolerance: 0.9,
-          attribution: "気象庁",
-        },
-        lake: {
-          type: "geojson",
-          data: "./Resource/lake.json",
-          tolerance: 1.7,
-          attribution: "国土数値情報",
-        },
-        tsunami: {
-          type: "geojson",
-          data: "./Resource/tsunami.json",
-          tolerance: 1.6,
-          attribution: "気象庁",
-        },
-        plate: {
-          type: "geojson",
-          data: "./Resource/plate.json",
-          tolerance: 2,
-        },
-        submarine: {
-          type: "raster",
-          tiles: ["./Resource/Submarine/{z}/{x}/{y}.jpg"],
-          tileSize: 256,
-          attribution: "NOAA, Peter Bird",
-          minzoom: 0,
-          maxzoom: 5,
-        },
-        tile0: {
-          type: "raster",
-          tiles: ["https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png"],
-          tileSize: 256,
-          attribution: "国土地理院",
-          minzoom: 2,
-          maxzoom: 18,
-        },
-        tile1: {
-          type: "raster",
-          tiles: ["https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png"],
-          tileSize: 256,
-          attribution: "国土地理院",
-          minzoom: 2,
-          maxzoom: 18,
-        },
-        tile2: {
-          type: "raster",
-          tiles: ["https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg"],
-          tileSize: 256,
-          attribution: "国土地理院",
-          minzoom: 2,
-          maxzoom: 18,
-        },
-        tile4: {
-          type: "raster",
-          tiles: ["http://tile.openstreetmap.org/{z}/{x}/{y}.png"],
-          tileSize: 256,
-          attribution: "OpenStreetMap contributors",
-          minzoom: 0,
-          maxzoom: 19,
-        },
-        over0: {
-          type: "raster",
-          tiles: ["https://cyberjapandata.gsi.go.jp/xyz/hillshademap/{z}/{x}/{y}.png"],
-          tileSize: 256,
-          attribution: "国土地理院",
-          minzoom: 2,
-          maxzoom: 16,
-        },
-        over1: {
-          type: "raster",
-          tiles: ["https://cyberjapandata.gsi.go.jp/xyz/vbmd_colorrel/{z}/{x}/{y}.png"],
-          tileSize: 256,
-          attribution: "国土地理院",
-          minzoom: 11,
-          maxzoom: 18,
-        },
-        over2: {
-          type: "raster",
-          tiles: ["https://disaportaldata.gsi.go.jp/raster/04_tsunami_newlegend_data/{z}/{x}/{y}.png"],
-          tileSize: 256,
-          attribution: "国土地理院",
-          minzoom: 7,
-          maxzoom: 12,
-        },
-        over3: {
-          type: "raster",
-          tiles: ["https://disaportaldata.gsi.go.jp/raster/05_kyukeishakeikaikuiki/{z}/{x}/{y}.png"],
-          tileSize: 256,
-          attribution: "国土地理院",
-          minzoom: 7,
-          maxzoom: 12,
-        },
-        over4: {
-          type: "raster",
-          tiles: ["https://disaportaldata.gsi.go.jp/raster/05_jisuberikeikaikuiki/{z}/{x}/{y}.png"],
-          tileSize: 256,
-          attribution: "国土地理院",
-          minzoom: 7,
-          maxzoom: 11,
-        },
-        over5: {
-          type: "raster",
-          tiles: ["https://www.jma.go.jp/tile/jma/transparent-cities/{z}/{x}/{y}.png"],
-          tileSize: 256,
-          attribution: "気象庁",
-          minzoom: 2,
-          maxzoom: 11,
-        },
-        hinanjo: {
-          type: "raster",
-          tiles: ["data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVQI12NgYAAAAAMAASDVlMcAAAAASUVORK5CYII="],
-          attribution: "国土地理院",
-          minzoom: 10,
-          maxzoom: 10,
-        },
-        knet_points: {
-          type: "geojson",
-          data: {
-            type: "FeatureCollection",
-            features: [],
-          },
-        },
-        snet_points: {
-          type: "geojson",
-          data: {
-            type: "FeatureCollection",
-            features: [],
-          },
-        },
-        TREMRTS_points: {
-          type: "geojson",
-          data: {
-            type: "FeatureCollection",
-            features: [],
-          },
-        },
-        SEISJS_points: {
-          type: "geojson",
-          data: {
-            type: "FeatureCollection",
-            features: [],
-          },
-        },
-      },
+      transition: { duration: 0, delay: 0 },
+      sources: { v: { type: "vector", url: `pmtiles://${PMTILES_URL}`, attribution: "国土地理院", minzoom: 4, maxzoom: 16 }, worldmap: { type: "geojson", data: "./Resource/World.json", tolerance: 2, attribution: "Natural Earth" }, basemap: { type: "geojson", data: "./Resource/basemap.json", tolerance: 0.9, attribution: "気象庁" }, prefmap: { type: "geojson", data: "./Resource/prefectures.json", tolerance: 0.9, attribution: "気象庁" }, lake: { type: "geojson", data: "./Resource/lake.json", tolerance: 1.7, attribution: "国土数値情報" }, tsunami: { type: "geojson", data: "./Resource/tsunami.json", tolerance: 1.6, attribution: "気象庁" }, plate: { type: "geojson", data: "./Resource/plate.json", tolerance: 2 }, submarine: { type: "raster", tiles: ["./Resource/Submarine/{z}/{x}/{y}.jpg"], tileSize: 256, attribution: "NOAA, Peter Bird", minzoom: 0, maxzoom: 5 }, tile0: { type: "raster", tiles: ["https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png"], tileSize: 256, attribution: "国土地理院", minzoom: 2, maxzoom: 18 }, tile1: { type: "raster", tiles: ["https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png"], tileSize: 256, attribution: "国土地理院", minzoom: 2, maxzoom: 18 }, tile2: { type: "raster", tiles: ["https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg"], tileSize: 256, attribution: "国土地理院", minzoom: 2, maxzoom: 18 }, tile4: { type: "raster", tiles: ["http://tile.openstreetmap.org/{z}/{x}/{y}.png"], tileSize: 256, attribution: "OpenStreetMap contributors", minzoom: 0, maxzoom: 19 }, over0: { type: "raster", tiles: ["https://cyberjapandata.gsi.go.jp/xyz/hillshademap/{z}/{x}/{y}.png"], tileSize: 256, attribution: "国土地理院", minzoom: 2, maxzoom: 16 }, over1: { type: "raster", tiles: ["https://cyberjapandata.gsi.go.jp/xyz/vbmd_colorrel/{z}/{x}/{y}.png"], tileSize: 256, attribution: "国土地理院", minzoom: 11, maxzoom: 18 }, over2: { type: "raster", tiles: ["https://disaportaldata.gsi.go.jp/raster/04_tsunami_newlegend_data/{z}/{x}/{y}.png"], tileSize: 256, attribution: "国土地理院", minzoom: 7, maxzoom: 12 }, over3: { type: "raster", tiles: ["https://disaportaldata.gsi.go.jp/raster/05_kyukeishakeikaikuiki/{z}/{x}/{y}.png"], tileSize: 256, attribution: "国土地理院", minzoom: 7, maxzoom: 12 }, over4: { type: "raster", tiles: ["https://disaportaldata.gsi.go.jp/raster/05_jisuberikeikaikuiki/{z}/{x}/{y}.png"], tileSize: 256, attribution: "国土地理院", minzoom: 7, maxzoom: 11 }, over5: { type: "raster", tiles: ["https://www.jma.go.jp/tile/jma/transparent-cities/{z}/{x}/{y}.png"], tileSize: 256, attribution: "気象庁", minzoom: 2, maxzoom: 11 }, hinanjo: { type: "raster", tiles: ["data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVQI12NgYAAAAAMAASDVlMcAAAAASUVORK5CYII="], attribution: "国土地理院", minzoom: 10, maxzoom: 10 }, knet_points: { type: "geojson", data: { type: "FeatureCollection", features: [] } }, snet_points: { type: "geojson", data: { type: "FeatureCollection", features: [] } }, TREMRTS_points: { type: "geojson", data: { type: "FeatureCollection", features: [] } }, SEISJS_points: { type: "geojson", data: { type: "FeatureCollection", features: [] } } },
       layers: [
-        {
-          id: "submarine",
-          type: "raster",
-          source: "submarine",
-          paint: {
-            "raster-fade-duration": 500,
-          },
-          layout: { visibility: high_contrast ? "none" : "visible" },
-        },
-        {
-          id: "tile0",
-          type: "raster",
-          source: "tile0",
-          layout: { visibility: "none" },
-        },
-        {
-          id: "tile1",
-          type: "raster",
-          source: "tile1",
-          layout: { visibility: "none" },
-        },
-        {
-          id: "tile2",
-          type: "raster",
-          source: "tile2",
-          layout: { visibility: "none" },
-        },
-        {
-          id: "tile4",
-          type: "raster",
-          source: "tile4",
-          layout: { visibility: "none" },
-        },
-        {
-          id: "tsunami_Yoho",
-          type: "line",
-          source: "tsunami",
-          layout: {
-            "line-join": "round",
-            "line-cap": "round",
-          },
-          paint: {
-            "line-color": config.color.Tsunami.TsunamiYohoColor,
-            "line-width": ["interpolate", ["linear"], ["zoom"], 2, 10, 5, 20, 10, 80, 18, 300],
-          },
-          filter: ["==", "name", ""],
-        },
+        { id: "submarine", type: "raster", source: "submarine", paint: { "raster-fade-duration": 500 }, layout: { visibility: high_contrast ? "none" : "visible" } },
+        { id: "tile0", type: "raster", source: "tile0", layout: { visibility: "none" } },
+        { id: "tile1", type: "raster", source: "tile1", layout: { visibility: "none" } },
+        { id: "tile2", type: "raster", source: "tile2", layout: { visibility: "none" } },
+        { id: "tile4", type: "raster", source: "tile4", layout: { visibility: "none" } },
+        { id: "tsunami_Yoho", type: "line", source: "tsunami", layout: { "line-join": "round", "line-cap": "round" }, paint: { "line-color": config.color.Tsunami.TsunamiYohoColor, "line-width": ["interpolate", ["linear"], ["zoom"], 2, 10, 5, 20, 10, 80, 18, 300] }, filter: ["==", "name", ""] },
 
-        {
-          id: "tsunami_Watch",
-          type: "line",
-          source: "tsunami",
-          layout: {
-            "line-join": "round",
-            "line-cap": "round",
-          },
-          paint: {
-            "line-color": config.color.Tsunami.TsunamiWatchColor,
-            "line-width": ["interpolate", ["linear"], ["zoom"], 2, 10, 5, 20, 10, 80, 18, 300],
-          },
-          filter: ["==", "name", ""],
-        },
-        {
-          id: "tsunami_Warn",
-          type: "line",
-          source: "tsunami",
-          layout: {
-            "line-join": "round",
-            "line-cap": "round",
-          },
-          paint: {
-            "line-color": config.color.Tsunami.TsunamiWarningColor,
-            "line-width": ["interpolate", ["linear"], ["zoom"], 2, 10, 5, 20, 10, 80, 18, 300],
-          },
-          filter: ["==", "name", ""],
-        },
+        { id: "tsunami_Watch", type: "line", source: "tsunami", layout: { "line-join": "round", "line-cap": "round" }, paint: { "line-color": config.color.Tsunami.TsunamiWatchColor, "line-width": ["interpolate", ["linear"], ["zoom"], 2, 10, 5, 20, 10, 80, 18, 300] }, filter: ["==", "name", ""] },
+        { id: "tsunami_Warn", type: "line", source: "tsunami", layout: { "line-join": "round", "line-cap": "round" }, paint: { "line-color": config.color.Tsunami.TsunamiWarningColor, "line-width": ["interpolate", ["linear"], ["zoom"], 2, 10, 5, 20, 10, 80, 18, 300] }, filter: ["==", "name", ""] },
 
-        {
-          id: "tsunami_MajorWarn",
-          type: "line",
-          source: "tsunami",
-          layout: {
-            "line-join": "round",
-            "line-cap": "round",
-          },
-          paint: {
-            "line-color": config.color.Tsunami.TsunamiMajorWarningColor,
-            "line-width": ["interpolate", ["linear"], ["zoom"], 2, 10, 5, 20, 10, 80, 18, 300],
-          },
-          filter: ["==", "name", ""],
-        },
+        { id: "tsunami_MajorWarn", type: "line", source: "tsunami", layout: { "line-join": "round", "line-cap": "round" }, paint: { "line-color": config.color.Tsunami.TsunamiMajorWarningColor, "line-width": ["interpolate", ["linear"], ["zoom"], 2, 10, 5, 20, 10, 80, 18, 300] }, filter: ["==", "name", ""] },
 
-        {
-          id: "prefmap_fill",
-          type: "fill",
-          source: "prefmap",
-          paint: {
-            "fill-color": high_contrast ? "#000" : "#333",
-            "fill-opacity": 1,
-          },
-        },
-        {
-          id: "over0",
-          type: "raster",
-          source: "over0",
-          layout: { visibility: "none" },
-        },
-        {
-          id: "over1",
-          type: "raster",
-          source: "over1",
-          layout: { visibility: "none" },
-        },
-        {
-          id: "over2",
-          type: "raster",
-          source: "over2",
-          layout: { visibility: "none" },
-        },
-        {
-          id: "over3",
-          type: "raster",
-          source: "over3",
-          layout: { visibility: "none" },
-        },
-        {
-          id: "over4",
-          type: "raster",
-          source: "over4",
-          layout: { visibility: "none" },
-        },
-        {
-          id: "over5",
-          type: "raster",
-          source: "over5",
-          layout: { visibility: "none" },
-        },
-        {
-          id: "basemap_LINE",
-          type: "line",
-          source: "basemap",
-          minzoom: 6,
-          paint: {
-            "line-color": high_contrast ? "#FFF" : "#666",
-            "line-width": 1,
-          },
-        },
+        { id: "prefmap_fill", type: "fill", source: "prefmap", paint: { "fill-color": high_contrast ? "#000" : "#333", "fill-opacity": 1 } },
+        { id: "over0", type: "raster", source: "over0", layout: { visibility: "none" } },
+        { id: "over1", type: "raster", source: "over1", layout: { visibility: "none" } },
+        { id: "over2", type: "raster", source: "over2", layout: { visibility: "none" } },
+        { id: "over3", type: "raster", source: "over3", layout: { visibility: "none" } },
+        { id: "over4", type: "raster", source: "over4", layout: { visibility: "none" } },
+        { id: "over5", type: "raster", source: "over5", layout: { visibility: "none" } },
+        { id: "basemap_LINE", type: "line", source: "basemap", minzoom: 6, paint: { "line-color": high_contrast ? "#FFF" : "#666", "line-width": 1 } },
         { id: "Int1", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["1"].background }, filter: ["==", "name", ""] },
         { id: "Int2", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["2"].background }, filter: ["==", "name", ""] },
         { id: "Int3", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["3"].background }, filter: ["==", "name", ""] },
@@ -1066,43 +716,10 @@ function init() {
         { id: "Int6-", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["6m"].background }, filter: ["==", "name", ""] },
         { id: "Int6+", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["6p"].background }, filter: ["==", "name", ""] },
         { id: "Int7", type: "fill", source: "basemap", paint: { "fill-color": config.color.Shindo["7"].background }, filter: ["==", "name", ""] },
-        {
-          id: "prefmap_LINE",
-          type: "line",
-          source: "prefmap",
-          paint: {
-            "line-color": high_contrast ? "#FFF" : "#999",
-            "line-width": 1,
-          },
-        },
-        {
-          id: "worldmap_fill",
-          type: "fill",
-          source: "worldmap",
-          paint: {
-            "fill-color": high_contrast ? "#000" : "#333",
-            "fill-opacity": 1,
-          },
-        },
-        {
-          id: "worldmap_LINE",
-          type: "line",
-          source: "worldmap",
-          paint: {
-            "line-color": high_contrast ? "#FFF" : "#666",
-            "line-width": 1,
-          },
-        },
-        {
-          id: "lake_fill",
-          type: "fill",
-          source: "lake",
-          paint: {
-            "fill-color": high_contrast ? "#FFF" : "#325385",
-            "fill-opacity": high_contrast ? 1 : 0.5,
-          },
-          minzoom: 6,
-        },
+        { id: "prefmap_LINE", type: "line", source: "prefmap", paint: { "line-color": high_contrast ? "#FFF" : "#999", "line-width": 1 } },
+        { id: "worldmap_fill", type: "fill", source: "worldmap", paint: { "fill-color": high_contrast ? "#000" : "#333", "fill-opacity": 1 } },
+        { id: "worldmap_LINE", type: "line", source: "worldmap", paint: { "line-color": high_contrast ? "#FFF" : "#666", "line-width": 1 } },
+        { id: "lake_fill", type: "fill", source: "lake", paint: { "fill-color": high_contrast ? "#FFF" : "#325385", "fill-opacity": high_contrast ? 1 : 0.5 }, minzoom: 6 },
         { id: "河川中心線", type: "line", source: "v", "source-layer": "RvrCL", filter: ["!", ["in", ["get", "vt_code"], ["literal", [5302, 5322]]]], paint: { "line-color": "#2468cb66", "line-width": 2 }, layout: { visibility: "none" } },
         { id: "水涯線", type: "line", source: "v", "source-layer": "WL", paint: { "line-color": "#2468cb66", "line-width": 2 }, layout: { visibility: "none" } },
         { id: "道路中心線ZL4-10国道・高速", maxzoom: 11, minzoom: 9, type: "line", source: "v", "source-layer": "RdCL", filter: ["any", ["in", ["get", "vt_rdctg"], ["literal", ["主要道路", "国道", "都道府県道", "市区町村道等"]]], ["==", ["get", "vt_rdctg"], "高速自動車国道等"]], layout: { "line-cap": "round", "line-join": "round", "line-sort-key": ["get", "vt_drworder"], visibility: "none" }, paint: { "line-color": "#80808066", "line-width": 3 } },
@@ -1121,88 +738,12 @@ function init() {
           layout: { visibility: "none" },
           minzoom: 10,
         },
-        {
-          id: "knet_points",
-          type: "circle",
-          source: "knet_points",
-          layout: { visibility: config.data.kmoni_points_show ? "visible" : "none" },
-          paint: {
-            "circle-color": ["rgb", ["at", 0, ["get", "rgb"]], ["at", 1, ["get", "rgb"]], ["at", 2, ["get", "rgb"]]],
-            "circle-radius": ["interpolate", ["linear"], ["zoom"], 2, 1, 5, 3.75, 15, 33.75],
-            "circle-stroke-width": 2,
-            "circle-stroke-color": ["match", ["get", "detectLv"], 0, "transparent", 1, "#cb732b", 2, "#cb2b2b", "#0000"],
-          },
-        },
-        {
-          id: "snet_points",
-          type: "circle",
-          source: "snet_points",
-          layout: { visibility: config.data.kmoni_points_show ? "visible" : "none" },
-          paint: {
-            "circle-color": ["rgb", ["at", 0, ["get", "rgb"]], ["at", 1, ["get", "rgb"]], ["at", 2, ["get", "rgb"]]],
-            "circle-radius": ["interpolate", ["linear"], ["zoom"], 2, 1, 5, 3.75, 15, 33.75],
-          },
-        },
-        {
-          id: "TREMRTS_points",
-          type: "circle",
-          source: "TREMRTS_points",
-          layout: { visibility: config.data.kmoni_points_show ? "visible" : "none" },
-          paint: {
-            "circle-color": ["rgb", ["at", 0, ["get", "rgb"]], ["at", 1, ["get", "rgb"]], ["at", 2, ["get", "rgb"]]],
-            "circle-radius": ["interpolate", ["linear"], ["zoom"], 2, 1, 5, 3.75, 15, 33.75],
-          },
-        },
-        {
-          id: "SEISJS_points",
-          type: "circle",
-          source: "SEISJS_points",
-          layout: { visibility: config.data.kmoni_points_show ? "visible" : "none" },
-          paint: {
-            "circle-color": ["rgb", ["at", 0, ["get", "rgb"]], ["at", 1, ["get", "rgb"]], ["at", 2, ["get", "rgb"]]],
-            "circle-radius": ["interpolate", ["linear"], ["zoom"], 2, 1, 5, 3.75, 15, 33.75],
-          },
-        },
-        {
-          id: "注記シンボル付きソート順100以上",
-          type: "symbol",
-          source: "v",
-          "source-layer": "Anno",
-          filter: ["step", ["zoom"], ["all", ["==", ["geometry-type"], "Point"], ["in", ["get", "vt_code"], ["literal", [653, 661, 662, 3201, 3202, 3203, 3204, 3211, 3215, 3216, 3217, 3218, 3231, 3232, 3242, 3243, 3244, 3261, 4101, 4102, 4103, 4104, 4105, 6301, 6311, 6312, 6313, 6314, 6321, 6322, 6323, 6324, 6325, 6326, 6327, 6332, 6342, 6351, 6362, 7101, 7102, 7103, 7711, 8103, 8105]]]], 16, ["all", ["==", ["geometry-type"], "Point"], ["in", ["get", "vt_flag17"], ["literal", [0, 1]]], ["in", ["get", "vt_code"], ["literal", [653, 661, 662, 3201, 3202, 3203, 3204, 3211, 3215, 3216, 3217, 3218, 3231, 3232, 3242, 3243, 3244, 3261, 4101, 4102, 4103, 4104, 4105, 6301, 6311, 6312, 6313, 6314, 6321, 6322, 6323, 6324, 6325, 6326, 6327, 6332, 6342, 6351, 6362, 7101, 7102, 7103, 7711, 8103, 8105]]]], 17, ["all", ["==", ["geometry-type"], "Point"], ["in", ["get", "vt_flag17"], ["literal", [1, 2]]], ["in", ["get", "vt_code"], ["literal", [653, 661, 662, 3201, 3202, 3203, 3204, 3211, 3215, 3216, 3217, 3218, 3231, 3232, 3242, 3243, 3244, 3261, 4101, 4102, 4103, 4104, 4105, 6301, 6311, 6312, 6313, 6314, 6321, 6322, 6323, 6324, 6325, 6326, 6327, 6332, 6342, 6351, 6362, 7101, 7102, 7103, 7711, 8103, 8105]]]]],
-          layout: {
-            visibility: "none",
-            "text-allow-overlap": false,
-            "text-font": ["match", ["get", "vt_code"], [321, 322, 341, 342, 344, 345, 347, 820, 840, 841, 842], ["literal", ["NotoSerifJP-SemiBold"]], ["literal", ["NotoSansJP-Regular"]]],
-            "text-justify": "auto",
-            "text-size": ["let", "size", ["match", ["get", "vt_code"], [361, 1403, 7101, 7102, 7103, 7201, 7221], 10, [334, 730], 11, [312, 313, 314, 315, 316, 322, 323, 332, 342, 353, 412, 533, 621, 631, 632, 633, 634, 653, 654, 720, 999, 2941, 2942, 2943, 2944, 2945], 12, [343, 1402, 7711], 13, [311, 346, 347, 413, 422, 1303], 14, [210, 220, 321, 331, 352, 411, 421, 423, 431, 432, 441, 511, 521, 522, 523, 531, 532, 534, 611, 612, 613, 615, 651, 661, 662, 671, 672, 673, 681, 1302], 15, [130, 1301, 1401], 16, [140, 333, 351], 18, [110, 120, 341, 344, 345], 20, [348, 800, 810, 820, 822, 830, 831, 832, 833, 840, 841, 842, 843, 850, 860, 870, 880, 881, 882, 883, 884, 885, 886, 887, 888, 889, 890, 899], 24, 10], ["interpolate", ["linear"], ["zoom"], 4, ["*", 0.6, ["var", "size"]], 8, ["var", "size"], 11, ["match", ["get", "vt_code"], [1401, 1402, 1403], 20, 422, ["*", 0.7, ["var", "size"]], ["var", "size"]], 12, ["var", "size"], 14, ["var", "size"], 17, ["match", ["get", "vt_code"], [412, 422], ["*", 2, ["var", "size"]], ["var", "size"]]]],
-            "text-field": ["get", "vt_text"],
-            "text-max-width": 100,
-            "text-radial-offset": 0.5,
-            "text-variable-anchor": ["top", "bottom", "left", "right"],
-            "text-writing-mode": ["horizontal"],
-          },
-          paint: { "text-color": ["let", "color", ["match", ["get", "vt_code"], 521, "rgba(80,80,80,1)", 348, "rgba(150,150,150,1)", [411, 412, 413, 421, 422, 423, 431, 432, 441, 860, 2941, 2942, 2943, 2944, 2945], "rgba(230,230,230,1)", [7372, 7711], "rgba(80,80,80,1)", 7352, "rgba(50,50,50,1)", [2901, 2903, 2904], "rgba(255,255,255,1)", [321, 322, 341, 344, 345, 820, 840, 841], "rgba(80,80,80,1)", 220, "rgba(150,150,150,1)", 312, "rgba(150,150,150,1)", [333, 346], "rgba(150,150,150,1)", [511, 522, 523, 531, 532, 534, 611, 612, 613, 614, 615, 621, 623, 631, 632, 633, 634, 641, 642, 651, 652, 653, 654, 661, 662, 671, 672, 673, 681, 720, 730, 870, 880, 881, 882, 883, 884, 885, 886, 887, 888, 889, 890, 899, 999, 3201, 3202, 3203, 3204, 3205, 3206, 3211, 3212, 3213, 3214, 3215, 3216, 3217, 3218, 3221, 3231, 3232, 3241, 3242, 3243, 3244], "rgba(150,150,150,1)", "rgba(200,200,200,1)"], ["step", ["zoom"], ["match", ["get", "vt_code"], [661, 662], "rgba(200,200,200,0)", ["var", "color"]], 14, ["match", ["get", "vt_code"], [3201, 3204, 3215, 3216, 3217, 3218, 3243], "rgba(200,200,200,0)", ["var", "color"]]]], "text-halo-color": ["step", ["zoom"], ["match", ["get", "vt_code"], [661, 662], "rgba(50,50,50,0)", "rgba(50,50,50,1)"], 14, ["match", ["get", "vt_code"], [3201, 3204, 3215, 3216, 3217, 3218, 3243], "rgba(50,50,50,0)", "rgba(50,50,50,1)"]], "text-halo-width": 1 },
-        },
-        {
-          id: "注記シンボル付きソート順100未満",
-          type: "symbol",
-          source: "v",
-          "source-layer": "Anno",
-          filter: ["step", ["zoom"], ["all", ["==", ["geometry-type"], "Point"], ["in", ["get", "vt_code"], ["literal", [621, 631, 632, 633, 1301, 1302, 1303, 1401, 1402, 1403, 2941, 2942, 2945, 3205, 3206, 3212, 3213, 3214, 3221, 3241, 6331, 6361, 6367, 6368, 6371, 6373, 6375, 6376, 6381, 7201, 7221]]]], 16, ["all", ["==", ["geometry-type"], "Point"], ["in", ["get", "vt_flag17"], ["literal", [0, 1]]], ["in", ["get", "vt_code"], ["literal", [621, 631, 632, 633, 1301, 1302, 1303, 1401, 1402, 1403, 2941, 2942, 2945, 3205, 3206, 3212, 3213, 3214, 3221, 3241, 6331, 6361, 6367, 6368, 6371, 6373, 6375, 6376, 6381, 7201, 7221]]]], 17, ["all", ["==", ["geometry-type"], "Point"], ["in", ["get", "vt_flag17"], ["literal", [1, 2]]], ["in", ["get", "vt_code"], ["literal", [621, 631, 632, 633, 1301, 1302, 1303, 1401, 1402, 1403, 2941, 2942, 2945, 3205, 3206, 3212, 3213, 3214, 3221, 3241, 6331, 6361, 6367, 6368, 6371, 6373, 6375, 6376, 6381, 7201, 7221]]]]],
-          layout: {
-            visibility: "none",
-            "text-allow-overlap": false,
-            "text-font": ["match", ["get", "vt_code"], [321, 322, 341, 342, 344, 345, 347, 820, 840, 841, 842], ["literal", ["NotoSerifJP-SemiBold"]], ["literal", ["NotoSansJP-Regular"]]],
-            "text-justify": "auto",
-            "text-size": ["let", "size", ["match", ["get", "vt_code"], [361, 1403, 7101, 7102, 7103, 7201, 7221], 10, [334, 730], 11, [312, 313, 314, 315, 316, 322, 323, 332, 342, 353, 412, 533, 621, 631, 632, 633, 634, 653, 654, 720, 999, 2941, 2942, 2943, 2944, 2945], 12, [343, 1402, 7711], 13, [311, 346, 347, 413, 422, 1303], 14, [210, 220, 321, 331, 352, 411, 421, 423, 431, 432, 441, 511, 521, 522, 523, 531, 532, 534, 611, 612, 613, 615, 651, 661, 662, 671, 672, 673, 681, 1302], 15, [130, 1301, 1401], 16, [140, 333, 351], 18, [110, 120, 341, 344, 345], 20, [348, 800, 810, 820, 822, 830, 831, 832, 833, 840, 841, 842, 843, 850, 860, 870, 880, 881, 882, 883, 884, 885, 886, 887, 888, 889, 890, 899], 24, 10], ["interpolate", ["linear"], ["zoom"], 4, ["*", 0.6, ["var", "size"]], 8, ["var", "size"], 11, ["match", ["get", "vt_code"], [1401, 1402, 1403], 20, 422, ["*", 0.7, ["var", "size"]], ["var", "size"]], 12, ["var", "size"], 14, ["match", ["get", "vt_code"], [2941, 2942], ["*", 1.3, ["var", "size"]], ["var", "size"]], 17, ["match", ["get", "vt_code"], [412, 422], ["*", 2, ["var", "size"]], ["var", "size"]]]],
-            "text-field": ["get", "vt_text"],
-            "text-max-width": 100,
-            "text-radial-offset": 0.5,
-            "text-variable-anchor": ["top", "bottom", "left", "right"],
-            "text-writing-mode": ["horizontal"],
-          },
-          paint: { "text-color": ["let", "color", ["match", ["get", "vt_code"], 521, "rgba(80,80,80,1)", 348, "rgba(150,150,150,1)", [411, 412, 413, 421, 422, 423, 431, 432, 441, 860, 2941, 2942, 2943, 2944, 2945], "rgba(230,230,230,1)", [7372, 7711], "rgba(80,80,80,1)", 7352, "rgba(50,50,50,1)", [2901, 2903, 2904], "rgba(255,255,255,1)", [321, 322, 341, 344, 345, 820, 840, 841], "rgba(80,80,80,1)", 220, "rgba(150,150,150,1)", 312, "rgba(150,150,150,1)", [333, 346], "rgba(150,150,150,1)", [511, 522, 523, 531, 532, 534, 611, 612, 613, 614, 615, 621, 623, 631, 632, 633, 634, 641, 642, 651, 652, 653, 654, 661, 662, 671, 672, 673, 681, 720, 730, 870, 880, 881, 882, 883, 884, 885, 886, 887, 888, 889, 890, 899, 999, 3201, 3202, 3203, 3204, 3205, 3206, 3211, 3212, 3213, 3214, 3215, 3216, 3217, 3218, 3221, 3231, 3232, 3241, 3242, 3243, 3244], "rgba(150,150,150,1)", "rgba(200,200,200,1)"], ["step", ["zoom"], ["match", ["get", "vt_code"], [631, 632, 633, 6368, 6376], "rgba(200,200,200,0)", ["var", "color"]], 14, ["match", ["get", "vt_code"], [3212, 3213, 3214], "rgba(200,200,200,0)", ["var", "color"]]]], "text-halo-color": ["step", ["zoom"], ["match", ["get", "vt_code"], [631, 632, 633, 6368, 6376], "rgba(50,50,50,0)", "rgba(50,50,50,1)"], 14, ["match", ["get", "vt_code"], [3212, 3213, 3214], "rgba(50,50,50,0)", "rgba(50,50,50,1)"]], "text-halo-width": 1 },
-        },
+        { id: "knet_points", type: "circle", source: "knet_points", layout: { visibility: config.data.kmoni_points_show ? "visible" : "none" }, paint: { "circle-color": ["rgb", ["at", 0, ["get", "rgb"]], ["at", 1, ["get", "rgb"]], ["at", 2, ["get", "rgb"]]], "circle-radius": ["interpolate", ["linear"], ["zoom"], 2, 1, 5, 3.75, 15, 33.75], "circle-stroke-width": 2, "circle-stroke-color": ["match", ["get", "detectLv"], 0, "transparent", 1, "#cb732b", 2, "#cb2b2b", "#0000"] } },
+        { id: "snet_points", type: "circle", source: "snet_points", layout: { visibility: config.data.kmoni_points_show ? "visible" : "none" }, paint: { "circle-color": ["rgb", ["at", 0, ["get", "rgb"]], ["at", 1, ["get", "rgb"]], ["at", 2, ["get", "rgb"]]], "circle-radius": ["interpolate", ["linear"], ["zoom"], 2, 1, 5, 3.75, 15, 33.75] } },
+        { id: "TREMRTS_points", type: "circle", source: "TREMRTS_points", layout: { visibility: config.data.kmoni_points_show ? "visible" : "none" }, paint: { "circle-color": ["rgb", ["at", 0, ["get", "rgb"]], ["at", 1, ["get", "rgb"]], ["at", 2, ["get", "rgb"]]], "circle-radius": ["interpolate", ["linear"], ["zoom"], 2, 1, 5, 3.75, 15, 33.75] } },
+        { id: "SEISJS_points", type: "circle", source: "SEISJS_points", layout: { visibility: config.data.kmoni_points_show ? "visible" : "none" }, paint: { "circle-color": ["rgb", ["at", 0, ["get", "rgb"]], ["at", 1, ["get", "rgb"]], ["at", 2, ["get", "rgb"]]], "circle-radius": ["interpolate", ["linear"], ["zoom"], 2, 1, 5, 3.75, 15, 33.75] } },
+        { id: "注記シンボル付きソート順100以上", type: "symbol", source: "v", "source-layer": "Anno", filter: ["step", ["zoom"], ["all", ["==", ["geometry-type"], "Point"], ["in", ["get", "vt_code"], ["literal", [653, 661, 662, 3201, 3202, 3203, 3204, 3211, 3215, 3216, 3217, 3218, 3231, 3232, 3242, 3243, 3244, 3261, 4101, 4102, 4103, 4104, 4105, 6301, 6311, 6312, 6313, 6314, 6321, 6322, 6323, 6324, 6325, 6326, 6327, 6332, 6342, 6351, 6362, 7101, 7102, 7103, 7711, 8103, 8105]]]], 16, ["all", ["==", ["geometry-type"], "Point"], ["in", ["get", "vt_flag17"], ["literal", [0, 1]]], ["in", ["get", "vt_code"], ["literal", [653, 661, 662, 3201, 3202, 3203, 3204, 3211, 3215, 3216, 3217, 3218, 3231, 3232, 3242, 3243, 3244, 3261, 4101, 4102, 4103, 4104, 4105, 6301, 6311, 6312, 6313, 6314, 6321, 6322, 6323, 6324, 6325, 6326, 6327, 6332, 6342, 6351, 6362, 7101, 7102, 7103, 7711, 8103, 8105]]]], 17, ["all", ["==", ["geometry-type"], "Point"], ["in", ["get", "vt_flag17"], ["literal", [1, 2]]], ["in", ["get", "vt_code"], ["literal", [653, 661, 662, 3201, 3202, 3203, 3204, 3211, 3215, 3216, 3217, 3218, 3231, 3232, 3242, 3243, 3244, 3261, 4101, 4102, 4103, 4104, 4105, 6301, 6311, 6312, 6313, 6314, 6321, 6322, 6323, 6324, 6325, 6326, 6327, 6332, 6342, 6351, 6362, 7101, 7102, 7103, 7711, 8103, 8105]]]]], layout: { visibility: "none", "text-allow-overlap": false, "text-font": ["match", ["get", "vt_code"], [321, 322, 341, 342, 344, 345, 347, 820, 840, 841, 842], ["literal", ["NotoSerifJP-SemiBold"]], ["literal", ["NotoSansJP-Regular"]]], "text-justify": "auto", "text-size": ["let", "size", ["match", ["get", "vt_code"], [361, 1403, 7101, 7102, 7103, 7201, 7221], 10, [334, 730], 11, [312, 313, 314, 315, 316, 322, 323, 332, 342, 353, 412, 533, 621, 631, 632, 633, 634, 653, 654, 720, 999, 2941, 2942, 2943, 2944, 2945], 12, [343, 1402, 7711], 13, [311, 346, 347, 413, 422, 1303], 14, [210, 220, 321, 331, 352, 411, 421, 423, 431, 432, 441, 511, 521, 522, 523, 531, 532, 534, 611, 612, 613, 615, 651, 661, 662, 671, 672, 673, 681, 1302], 15, [130, 1301, 1401], 16, [140, 333, 351], 18, [110, 120, 341, 344, 345], 20, [348, 800, 810, 820, 822, 830, 831, 832, 833, 840, 841, 842, 843, 850, 860, 870, 880, 881, 882, 883, 884, 885, 886, 887, 888, 889, 890, 899], 24, 10], ["interpolate", ["linear"], ["zoom"], 4, ["*", 0.6, ["var", "size"]], 8, ["var", "size"], 11, ["match", ["get", "vt_code"], [1401, 1402, 1403], 20, 422, ["*", 0.7, ["var", "size"]], ["var", "size"]], 12, ["var", "size"], 14, ["var", "size"], 17, ["match", ["get", "vt_code"], [412, 422], ["*", 2, ["var", "size"]], ["var", "size"]]]], "text-field": ["get", "vt_text"], "text-max-width": 100, "text-radial-offset": 0.5, "text-variable-anchor": ["top", "bottom", "left", "right"], "text-writing-mode": ["horizontal"] }, paint: { "text-color": ["let", "color", ["match", ["get", "vt_code"], 521, "rgba(80,80,80,1)", 348, "rgba(150,150,150,1)", [411, 412, 413, 421, 422, 423, 431, 432, 441, 860, 2941, 2942, 2943, 2944, 2945], "rgba(230,230,230,1)", [7372, 7711], "rgba(80,80,80,1)", 7352, "rgba(50,50,50,1)", [2901, 2903, 2904], "rgba(255,255,255,1)", [321, 322, 341, 344, 345, 820, 840, 841], "rgba(80,80,80,1)", 220, "rgba(150,150,150,1)", 312, "rgba(150,150,150,1)", [333, 346], "rgba(150,150,150,1)", [511, 522, 523, 531, 532, 534, 611, 612, 613, 614, 615, 621, 623, 631, 632, 633, 634, 641, 642, 651, 652, 653, 654, 661, 662, 671, 672, 673, 681, 720, 730, 870, 880, 881, 882, 883, 884, 885, 886, 887, 888, 889, 890, 899, 999, 3201, 3202, 3203, 3204, 3205, 3206, 3211, 3212, 3213, 3214, 3215, 3216, 3217, 3218, 3221, 3231, 3232, 3241, 3242, 3243, 3244], "rgba(150,150,150,1)", "rgba(200,200,200,1)"], ["step", ["zoom"], ["match", ["get", "vt_code"], [661, 662], "rgba(200,200,200,0)", ["var", "color"]], 14, ["match", ["get", "vt_code"], [3201, 3204, 3215, 3216, 3217, 3218, 3243], "rgba(200,200,200,0)", ["var", "color"]]]], "text-halo-color": ["step", ["zoom"], ["match", ["get", "vt_code"], [661, 662], "rgba(50,50,50,0)", "rgba(50,50,50,1)"], 14, ["match", ["get", "vt_code"], [3201, 3204, 3215, 3216, 3217, 3218, 3243], "rgba(50,50,50,0)", "rgba(50,50,50,1)"]], "text-halo-width": 1 } },
+        { id: "注記シンボル付きソート順100未満", type: "symbol", source: "v", "source-layer": "Anno", filter: ["step", ["zoom"], ["all", ["==", ["geometry-type"], "Point"], ["in", ["get", "vt_code"], ["literal", [621, 631, 632, 633, 1301, 1302, 1303, 1401, 1402, 1403, 2941, 2942, 2945, 3205, 3206, 3212, 3213, 3214, 3221, 3241, 6331, 6361, 6367, 6368, 6371, 6373, 6375, 6376, 6381, 7201, 7221]]]], 16, ["all", ["==", ["geometry-type"], "Point"], ["in", ["get", "vt_flag17"], ["literal", [0, 1]]], ["in", ["get", "vt_code"], ["literal", [621, 631, 632, 633, 1301, 1302, 1303, 1401, 1402, 1403, 2941, 2942, 2945, 3205, 3206, 3212, 3213, 3214, 3221, 3241, 6331, 6361, 6367, 6368, 6371, 6373, 6375, 6376, 6381, 7201, 7221]]]], 17, ["all", ["==", ["geometry-type"], "Point"], ["in", ["get", "vt_flag17"], ["literal", [1, 2]]], ["in", ["get", "vt_code"], ["literal", [621, 631, 632, 633, 1301, 1302, 1303, 1401, 1402, 1403, 2941, 2942, 2945, 3205, 3206, 3212, 3213, 3214, 3221, 3241, 6331, 6361, 6367, 6368, 6371, 6373, 6375, 6376, 6381, 7201, 7221]]]]], layout: { visibility: "none", "text-allow-overlap": false, "text-font": ["match", ["get", "vt_code"], [321, 322, 341, 342, 344, 345, 347, 820, 840, 841, 842], ["literal", ["NotoSerifJP-SemiBold"]], ["literal", ["NotoSansJP-Regular"]]], "text-justify": "auto", "text-size": ["let", "size", ["match", ["get", "vt_code"], [361, 1403, 7101, 7102, 7103, 7201, 7221], 10, [334, 730], 11, [312, 313, 314, 315, 316, 322, 323, 332, 342, 353, 412, 533, 621, 631, 632, 633, 634, 653, 654, 720, 999, 2941, 2942, 2943, 2944, 2945], 12, [343, 1402, 7711], 13, [311, 346, 347, 413, 422, 1303], 14, [210, 220, 321, 331, 352, 411, 421, 423, 431, 432, 441, 511, 521, 522, 523, 531, 532, 534, 611, 612, 613, 615, 651, 661, 662, 671, 672, 673, 681, 1302], 15, [130, 1301, 1401], 16, [140, 333, 351], 18, [110, 120, 341, 344, 345], 20, [348, 800, 810, 820, 822, 830, 831, 832, 833, 840, 841, 842, 843, 850, 860, 870, 880, 881, 882, 883, 884, 885, 886, 887, 888, 889, 890, 899], 24, 10], ["interpolate", ["linear"], ["zoom"], 4, ["*", 0.6, ["var", "size"]], 8, ["var", "size"], 11, ["match", ["get", "vt_code"], [1401, 1402, 1403], 20, 422, ["*", 0.7, ["var", "size"]], ["var", "size"]], 12, ["var", "size"], 14, ["match", ["get", "vt_code"], [2941, 2942], ["*", 1.3, ["var", "size"]], ["var", "size"]], 17, ["match", ["get", "vt_code"], [412, 422], ["*", 2, ["var", "size"]], ["var", "size"]]]], "text-field": ["get", "vt_text"], "text-max-width": 100, "text-radial-offset": 0.5, "text-variable-anchor": ["top", "bottom", "left", "right"], "text-writing-mode": ["horizontal"] }, paint: { "text-color": ["let", "color", ["match", ["get", "vt_code"], 521, "rgba(80,80,80,1)", 348, "rgba(150,150,150,1)", [411, 412, 413, 421, 422, 423, 431, 432, 441, 860, 2941, 2942, 2943, 2944, 2945], "rgba(230,230,230,1)", [7372, 7711], "rgba(80,80,80,1)", 7352, "rgba(50,50,50,1)", [2901, 2903, 2904], "rgba(255,255,255,1)", [321, 322, 341, 344, 345, 820, 840, 841], "rgba(80,80,80,1)", 220, "rgba(150,150,150,1)", 312, "rgba(150,150,150,1)", [333, 346], "rgba(150,150,150,1)", [511, 522, 523, 531, 532, 534, 611, 612, 613, 614, 615, 621, 623, 631, 632, 633, 634, 641, 642, 651, 652, 653, 654, 661, 662, 671, 672, 673, 681, 720, 730, 870, 880, 881, 882, 883, 884, 885, 886, 887, 888, 889, 890, 899, 999, 3201, 3202, 3203, 3204, 3205, 3206, 3211, 3212, 3213, 3214, 3215, 3216, 3217, 3218, 3221, 3231, 3232, 3241, 3242, 3243, 3244], "rgba(150,150,150,1)", "rgba(200,200,200,1)"], ["step", ["zoom"], ["match", ["get", "vt_code"], [631, 632, 633, 6368, 6376], "rgba(200,200,200,0)", ["var", "color"]], 14, ["match", ["get", "vt_code"], [3212, 3213, 3214], "rgba(200,200,200,0)", ["var", "color"]]]], "text-halo-color": ["step", ["zoom"], ["match", ["get", "vt_code"], [631, 632, 633, 6368, 6376], "rgba(50,50,50,0)", "rgba(50,50,50,1)"], 14, ["match", ["get", "vt_code"], [3212, 3213, 3214], "rgba(50,50,50,0)", "rgba(50,50,50,1)"]], "text-halo-width": 1 } },
       ],
     },
   });
@@ -1258,45 +799,13 @@ function init() {
       if (map.getLayer("hinanjo_ts_" + ca.x + ca.y + ca.z)) map.removeLayer("hinanjo_ts_" + ca.x + ca.y + ca.z);
       if (map && map.getSource("hinanjo_ts_" + ca.x + ca.y + ca.z)) map.removeSource("hinanjo_ts_" + ca.x + ca.y + ca.z);
 
-      map.addSource("hinanjo_eq_" + ca.x + ca.y + ca.z, {
-        type: "geojson",
-        data: "https://cyberjapandata.gsi.go.jp/xyz/skhb04/" + ca.z + "/" + ca.x + "/" + ca.y + ".geojson",
-      });
+      map.addSource("hinanjo_eq_" + ca.x + ca.y + ca.z, { type: "geojson", data: "https://cyberjapandata.gsi.go.jp/xyz/skhb04/" + ca.z + "/" + ca.x + "/" + ca.y + ".geojson" });
 
-      map.addLayer({
-        id: "hinanjo_eq_" + ca.x + ca.y + ca.z,
-        type: "circle",
-        source: "hinanjo_eq_" + ca.x + ca.y + ca.z,
-        layout: { visibility: hinanjoCheck ? "visible" : "none" },
-        paint: {
-          "circle-color": "#bf8715",
-          "circle-radius": 6,
-          "circle-stroke-width": 1,
-          "circle-stroke-color": "#222",
-        },
-        minzoom: 10,
-        maxzoom: 22,
-      });
+      map.addLayer({ id: "hinanjo_eq_" + ca.x + ca.y + ca.z, type: "circle", source: "hinanjo_eq_" + ca.x + ca.y + ca.z, layout: { visibility: hinanjoCheck ? "visible" : "none" }, paint: { "circle-color": "#bf8715", "circle-radius": 6, "circle-stroke-width": 1, "circle-stroke-color": "#222" }, minzoom: 10, maxzoom: 22 });
 
-      map.addSource("hinanjo_ts_" + ca.x + ca.y + ca.z, {
-        type: "geojson",
-        data: "https://cyberjapandata.gsi.go.jp/xyz/skhb05/" + ca.z + "/" + ca.x + "/" + ca.y + ".geojson",
-      });
+      map.addSource("hinanjo_ts_" + ca.x + ca.y + ca.z, { type: "geojson", data: "https://cyberjapandata.gsi.go.jp/xyz/skhb05/" + ca.z + "/" + ca.x + "/" + ca.y + ".geojson" });
 
-      map.addLayer({
-        id: "hinanjo_ts_" + ca.x + ca.y + ca.z,
-        type: "circle",
-        source: "hinanjo_ts_" + ca.x + ca.y + ca.z,
-        layout: { visibility: hinanjoCheck ? "visible" : "none" },
-        paint: {
-          "circle-color": "#2488c7",
-          "circle-radius": 6,
-          "circle-stroke-width": 1,
-          "circle-stroke-color": "#222",
-        },
-        minzoom: 10,
-        maxzoom: 22,
-      });
+      map.addLayer({ id: "hinanjo_ts_" + ca.x + ca.y + ca.z, type: "circle", source: "hinanjo_ts_" + ca.x + ca.y + ca.z, layout: { visibility: hinanjoCheck ? "visible" : "none" }, paint: { "circle-color": "#2488c7", "circle-radius": 6, "circle-stroke-width": 1, "circle-stroke-color": "#222" }, minzoom: 10, maxzoom: 22 });
 
       map.on("click", "hinanjo_eq_" + ca.x + ca.y + ca.z, hinanjoPopup);
       map.on("click", "hinanjo_ts_" + ca.x + ca.y + ca.z, hinanjoPopup);
@@ -1309,12 +818,13 @@ function init() {
   var layerButton = document.createElement("button");
   layerButton.innerText = "layers";
   layerButton.setAttribute("title", "レイヤーの切り替え");
-  layerButton.setAttribute("aria-label", "レイヤー切り替え画面を開く");
+  layerButton.setAttribute("aria-label", "地図レイヤー切り替え画面を開く");
 
   layerButton.setAttribute("id", "layerSwitch_toggle");
   layerButton.addEventListener("click", function () {
     document.getElementById("menu_wrap").classList.add("menu_show");
     document.getElementById("menu").show();
+    document.getElementById("menu").focus();
   });
 
   var TLControlWrapper = document.createElement("div");
@@ -1391,9 +901,7 @@ function init() {
 
   setInterval(function () {
     if (new Date() - gaikyo_lastUpdate > 1800000 && document.getElementById("tab1_menu2").classList.contains("active_tabmenu")) {
-      window.electronAPI.messageReturn({
-        action: "Request_gaikyo",
-      });
+      window.electronAPI.messageReturn({ action: "Request_gaikyo" });
     }
   }, 10000);
 
@@ -1420,9 +928,7 @@ function init() {
     map.addImage("pattern", image.data);
     map.addLayer({ id: "Alert", type: "fill", source: "basemap", paint: { "fill-pattern": "pattern" }, filter: ["==", "name", ""] }, "lake_fill");
 
-    window.electronAPI.messageReturn({
-      action: "tsunamiReqest",
-    });
+    window.electronAPI.messageReturn({ action: "tsunamiReqest" });
     zoomLevelContinue();
     JMAEstShindoDraw();
     layerSelect(config.data.layer);
@@ -1441,9 +947,7 @@ function init() {
       epiCenterUpdate(elm);
     });
 
-    window.electronAPI.messageReturn({
-      action: "mapLoaded",
-    });
+    window.electronAPI.messageReturn({ action: "mapLoaded" });
   });
 
   map.on("zoom", function (e) {
@@ -1467,6 +971,7 @@ function init() {
     img.classList.add("homeIcon");
     var mkr = new maplibregl.Marker({ element: img }).setLngLat([config.home.longitude, config.home.latitude]).addTo(map);
     mkr.getElement().removeAttribute("tabindex");
+    mkr.getElement().setAttribute("aria-hidden", "true");
   }
 }
 
@@ -1480,37 +985,13 @@ var pointData;
 var kmoni_popup = {};
 function kmoniMapUpdate(dataTmp, type) {
   if (!dataTmp.data || background) return;
-  var geojson = {
-    type: "FeatureCollection",
-    features: [],
-  };
+  var geojson = { type: "FeatureCollection", features: [] };
 
   if (type == "knet") {
     knetMapData = dataTmp;
     dataTmp.data.forEach(function (elm) {
       if (elm.data) {
-        geojson.features.push({
-          type: "Feature",
-          properties: {
-            Code: elm.Code,
-            IsSuspended: elm.IsSuspended,
-            Name: elm.Name,
-            Region: elm.Region,
-            Type: elm.Type,
-            checked: elm.checked,
-            data: elm.data,
-            detect: elm.detect,
-            detect2: elm.detect2,
-            detectLv: elm.detect2 ? 2 : elm.detect ? 1 : 0,
-            pga: elm.pga,
-            rgb: elm.rgb,
-            shindo: elm.shindo,
-          },
-          geometry: {
-            type: "Point",
-            coordinates: [elm.Location.Longitude, elm.Location.Latitude],
-          },
-        });
+        geojson.features.push({ type: "Feature", properties: { Code: elm.Code, IsSuspended: elm.IsSuspended, Name: elm.Name, Region: elm.Region, Type: elm.Type, checked: elm.checked, data: elm.data, detect: elm.detect, detect2: elm.detect2, detectLv: elm.detect2 ? 2 : elm.detect ? 1 : 0, pga: elm.pga, rgb: elm.rgb, shindo: elm.shindo }, geometry: { type: "Point", coordinates: [elm.Location.Longitude, elm.Location.Latitude] } });
       }
       if (kmoni_popup[elm.Code] && kmoni_popup[elm.Code].isOpen()) {
         kmoni_popup[elm.Code].setHTML(generatePopupContent_K(elm));
@@ -1524,24 +1005,7 @@ function kmoniMapUpdate(dataTmp, type) {
 
     dataTmp.data.forEach(function (elm) {
       if (elm.data) {
-        geojson.features.push({
-          type: "Feature",
-          properties: {
-            Code: elm.Code,
-            IsSuspended: elm.IsSuspended,
-            Name: elm.Name,
-            Region: elm.Region,
-            Type: elm.Type,
-            data: elm.data,
-            pga: elm.pga,
-            rgb: elm.rgb,
-            shindo: elm.shindo,
-          },
-          geometry: {
-            type: "Point",
-            coordinates: [elm.Location.Longitude, elm.Location.Latitude],
-          },
-        });
+        geojson.features.push({ type: "Feature", properties: { Code: elm.Code, IsSuspended: elm.IsSuspended, Name: elm.Name, Region: elm.Region, Type: elm.Type, data: elm.data, pga: elm.pga, rgb: elm.rgb, shindo: elm.shindo }, geometry: { type: "Point", coordinates: [elm.Location.Longitude, elm.Location.Latitude] } });
       }
       if (kmoni_popup[elm.Code] && kmoni_popup[elm.Code].isOpen()) {
         kmoni_popup[elm.Code].setHTML(generatePopupContent_K(elm));
@@ -1568,29 +1032,10 @@ function generatePopupContent_TREM(params) {
 var TREMRTS_points = {};
 function TREMRTSUpdate(dataTmp) {
   if (!background) {
-    var geojson = {
-      type: "FeatureCollection",
-      features: [],
-    };
+    var geojson = { type: "FeatureCollection", features: [] };
     Object.keys(dataTmp).forEach(function (key) {
       elm = dataTmp[key];
-      geojson.features.push({
-        type: "Feature",
-        properties: {
-          Code: elm.Code,
-          IsSuspended: elm.IsSuspended,
-          Name: elm.Name,
-          Region: elm.Region,
-          Type: elm.Type,
-          PGA: elm.PGA,
-          rgb: elm.rgb,
-          shindo: elm.shindo,
-        },
-        geometry: {
-          type: "Point",
-          coordinates: [elm.Location.Longitude, elm.Location.Latitude],
-        },
-      });
+      geojson.features.push({ type: "Feature", properties: { Code: elm.Code, IsSuspended: elm.IsSuspended, Name: elm.Name, Region: elm.Region, Type: elm.Type, PGA: elm.PGA, rgb: elm.rgb, shindo: elm.shindo }, geometry: { type: "Point", coordinates: [elm.Location.Longitude, elm.Location.Latitude] } });
       if (kmoni_popup[elm.Code] && kmoni_popup[elm.Code].isOpen()) {
         kmoni_popup[elm.Code].setHTML(generatePopupContent_TREM(elm));
       }
@@ -1609,29 +1054,10 @@ var SeisJS_points = {};
 function SeisJSUpdate(dataTmp) {
   SeisJS_points = dataTmp;
   if (!background) {
-    var geojson = {
-      type: "FeatureCollection",
-      features: [],
-    };
+    var geojson = { type: "FeatureCollection", features: [] };
     Object.keys(dataTmp).forEach(function (key) {
       elm = dataTmp[key];
-      geojson.features.push({
-        type: "Feature",
-        properties: {
-          Code: elm.Code,
-          IsSuspended: elm.IsSuspended,
-          Name: elm.Name,
-          Region: elm.Region,
-          Type: elm.Type,
-          PGA: elm.PGA,
-          rgb: elm.rgb,
-          shindo: elm.shindo,
-        },
-        geometry: {
-          type: "Point",
-          coordinates: [elm.Location.Longitude, elm.Location.Latitude],
-        },
-      });
+      geojson.features.push({ type: "Feature", properties: { Code: elm.Code, IsSuspended: elm.IsSuspended, Name: elm.Name, Region: elm.Region, Type: elm.Type, PGA: elm.PGA, rgb: elm.rgb, shindo: elm.shindo }, geometry: { type: "Point", coordinates: [elm.Location.Longitude, elm.Location.Latitude] } });
       if (kmoni_popup[elm.Code] && kmoni_popup[elm.Code].isOpen()) {
         kmoni_popup[elm.Code].setHTML(generatePopupContent_SEISJS(elm));
       }
@@ -1759,11 +1185,7 @@ function psWaveEntry() {
         pswaveFind.data.latitude = elm.latitude;
         pswaveFind.TimeTable = elm.TimeTable;
       } else {
-        psWaveList.push({
-          id: elm.EventID,
-          data: { latitude: elm.latitude, longitude: elm.longitude, originTime: elm.origin_time },
-          TimeTable: elm.TimeTable,
-        });
+        psWaveList.push({ id: elm.EventID, data: { latitude: elm.latitude, longitude: elm.longitude, originTime: elm.origin_time }, TimeTable: elm.TimeTable });
       }
       psWaveCalc(elm.EventID);
     }
@@ -1843,10 +1265,7 @@ function psWaveCalc(eid) {
   }
 }
 
-let circle_options = {
-  steps: 60,
-  units: "kilometers",
-};
+let circle_options = { steps: 60, units: "kilometers" };
 //予報円描画
 function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrived, SArriveTime, nowDistance) {
   if (!map) return;
@@ -1878,50 +1297,15 @@ function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrive
         } else map.setPaintProperty("SCircle_" + EventID, "line-width", 0);
       }
     } else {
-      map.addSource("PCircle_" + EventID, {
-        type: "geojson",
-        data: turf.circle(_center, pRadius / 1000, circle_options),
-        tolerance: 0.6,
-      });
+      map.addSource("PCircle_" + EventID, { type: "geojson", data: turf.circle(_center, pRadius / 1000, circle_options), tolerance: 0.6 });
 
-      map.addLayer({
-        id: "PCircle_" + EventID,
-        type: "line",
-        source: "PCircle_" + EventID,
-        paint: {
-          "line-color": config.color.psWave.PwaveColor,
-          "line-width": 2,
-        },
-      });
+      map.addLayer({ id: "PCircle_" + EventID, type: "line", source: "PCircle_" + EventID, paint: { "line-color": config.color.psWave.PwaveColor, "line-width": 2 } });
 
       sRadTmp = sRadius ? sRadius / 1000 : 0;
-      map.addSource("SCircle_" + EventID, {
-        type: "geojson",
-        data: turf.circle(_center, sRadTmp, circle_options),
-        tolerance: 0.6,
-      });
+      map.addSource("SCircle_" + EventID, { type: "geojson", data: turf.circle(_center, sRadTmp, circle_options), tolerance: 0.6 });
 
-      map.addLayer({
-        id: "SCircle_" + EventID,
-        type: "line",
-        source: "SCircle_" + EventID,
-        paint: {
-          "line-color": config.color.psWave.SwaveColor,
-          "line-width": 2,
-        },
-      });
-      map.addLayer(
-        {
-          id: "SCircle_" + EventID + "_FILL",
-          type: "fill",
-          source: "SCircle_" + EventID,
-          paint: {
-            "fill-color": config.color.psWave.SwaveColor,
-            "fill-opacity": 0.15,
-          },
-        },
-        "tsunami_Yoho"
-      );
+      map.addLayer({ id: "SCircle_" + EventID, type: "line", source: "SCircle_" + EventID, paint: { "line-color": config.color.psWave.SwaveColor, "line-width": 2 } });
+      map.addLayer({ id: "SCircle_" + EventID + "_FILL", type: "fill", source: "SCircle_" + EventID, paint: { "fill-color": config.color.psWave.SwaveColor, "fill-opacity": 0.15 } }, "tsunami_Yoho");
 
       EQElm = psWaveList[psWaveList.length - 1];
 
@@ -2230,16 +1614,9 @@ EQInfoLink.addEventListener("click", function (e) {
     var EQItemElm = document.querySelector(elm);
     if (EQItemElm) {
       if (index == EQinfo_Index) {
-        EQItemElm.scrollIntoView({
-          block: "center",
-        });
+        EQItemElm.scrollIntoView({ block: "center" });
       }
-      EQItemElm.animate(
-        {
-          boxShadow: ["0 0 0 0 rgba(203, 27, 27, 1)", "0 0 0 15px rgba(203, 27, 27, 0)"],
-        },
-        500
-      );
+      EQItemElm.animate({ boxShadow: ["0 0 0 0 rgba(203, 27, 27, 1)", "0 0 0 15px rgba(203, 27, 27, 0)"] }, 500);
       EQItemElm.focus();
     }
   });
@@ -2316,10 +1693,7 @@ function tsunamiPopup(e) {
 function NankaiTroughInfo(data) {
   if (data.rinji) {
     document.getElementById("NankaiTroughInfo_Rinji").addEventListener("click", function () {
-      window.electronAPI.messageReturn({
-        action: "NankaiWindowOpen",
-        type: "rinji",
-      });
+      window.electronAPI.messageReturn({ action: "NankaiWindowOpen", type: "rinji" });
     });
     document.getElementById("NankaiTroughInfo_Rinji").style.display = "block";
     document.getElementById("NankaiTroughInfo_Rinji").setAttribute("title", "クリックして詳細を表示\n" + data.rinji.HeadLine);
@@ -2343,10 +1717,7 @@ function NankaiTroughInfo(data) {
 
   if (data.teirei) {
     document.getElementById("NankaiTroughInfo_Teirei").addEventListener("click", function () {
-      window.electronAPI.messageReturn({
-        action: "NankaiWindowOpen",
-        type: "teirei",
-      });
+      window.electronAPI.messageReturn({ action: "NankaiWindowOpen", type: "teirei" });
     });
     document.getElementById("NankaiTroughInfo_Teirei").style.display = "block";
     document.getElementById("NankaiTroughInfo_Teirei").setAttribute("title", "クリックして詳細を表示\n" + data.teirei.HeadLine);
@@ -2363,9 +1734,7 @@ function NankaiTroughInfo(data) {
 function HokkaidoSanrikuInfo(data) {
   if (data) {
     document.getElementById("HokkaidoSanrikuInfo").addEventListener("click", function () {
-      window.electronAPI.messageReturn({
-        action: "HokkaidoSanrikuWindowOpen",
-      });
+      window.electronAPI.messageReturn({ action: "HokkaidoSanrikuWindowOpen" });
     });
     document.getElementById("HokkaidoSanrikuInfo").style.display = "block";
     document.getElementById("HokkaidoSanrikuInfo").setAttribute("title", "クリックして詳細を表示\n" + data.HeadLine);
@@ -2376,9 +1745,7 @@ function HokkaidoSanrikuInfo(data) {
 
 document.getElementById("tab1_menu2").addEventListener("click", function () {
   if (new Date() - gaikyo_lastUpdate > 60000) {
-    window.electronAPI.messageReturn({
-      action: "Request_gaikyo",
-    });
+    window.electronAPI.messageReturn({ action: "Request_gaikyo" });
   }
 });
 

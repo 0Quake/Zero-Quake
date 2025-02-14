@@ -256,9 +256,8 @@ main {
   padding: 0;
   z-index: 100000002;
 }
-#SideBarToggle::before {
+#SideBarToggle span {
   display: inline-block;
-  content: "double_arrow";
   font-family: "Material Icons Round";
   color: #ccc;
   font-size: 20px;
@@ -280,6 +279,7 @@ main {
 #noEEW {
   text-align: center;
   line-height: 50px;
+  color: #ccc;
 }
 
 .list-item {
@@ -624,23 +624,14 @@ td {
   height: 100%;
 }
 
-.tabmenu,
-.tabgroup {
+.tabmenu {
   display: inline-block;
   padding: 0.5em 0;
   color: #999;
   cursor: pointer;
 }
-.tabmenu:hover,
-.tabgroup:hover {
+.tabmenu:hover {
   color: #ccc;
-}
-.tabgroup {
-  border-radius: 100px;
-}
-.tabgroup:hover {
-  color: #ccc;
-  background: #3f3f42;
 }
 .tabmenu {
   margin: 4px;
@@ -1020,13 +1011,15 @@ td {
   margin: 25px 0 0 0;
 }
 .popup_menubar {
+  display: flex;
   height: 40px;
   background: #4e4e51;
   line-height: 40px;
 }
 .popup_menubar h2 {
-  display: inline-block;
+  width: 100%;
   padding: 0 20px;
+  flex: 1;
 }
 .popup_menubar button {
   height: 34px;

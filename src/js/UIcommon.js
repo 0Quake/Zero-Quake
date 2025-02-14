@@ -57,9 +57,7 @@ window.addEventListener("load", function () {
     elm2.setAttribute("aria-selected", elm2.classList.contains("active_tabmenu"));
   });
 
-  document.querySelectorAll(".active_tabcontent").forEach(function (elm2) {
-    elm2.setAttribute("aria-selected", elm2.classList.contains("active_tabcontent"));
-  });
+  document.querySelectorAll(".active_tabcontent").forEach(function (elm2) {});
 });
 //タブUI
 document.querySelectorAll(".tabmenu").forEach(function (elm) {
@@ -73,27 +71,10 @@ document.querySelectorAll(".tabmenu").forEach(function (elm) {
 
     document.querySelectorAll("#" + id + "_content > .active_tabcontent").forEach(function (elm2) {
       elm2.classList.remove("active_tabcontent");
-      elm2.setAttribute("aria-selected", false);
     });
     elm.classList.add("active_tabmenu");
     document.getElementById(elm.getAttribute("aria-controls")).classList.add("active_tabcontent");
-    document.getElementById(elm.getAttribute("aria-controls")).setAttribute("aria-selected", true);
     elm.setAttribute("aria-selected", true);
-  });
-});
-document.querySelectorAll(".tabgroup").forEach(function (elm) {
-  elm.addEventListener("click", function () {
-    document.querySelectorAll(".active_tabgroup").forEach(function (elm2) {
-      elm2.classList.remove("active_tabgroup");
-      elm2.setAttribute("aria-selected", false);
-    });
-    document.querySelectorAll(".active_tabgroupContent").forEach(function (elm2) {
-      elm2.classList.remove("active_tabgroupContent");
-      elm2.setAttribute("aria-selected", false);
-    });
-    elm.classList.add("active_tabgroup");
-    document.getElementById(elm.getAttribute("aria-controls")).classList.add("active_tabgroupContent");
-    document.getElementById(elm.getAttribute("aria-controls")).querySelector(".tabmenu").click();
   });
 });
 
