@@ -160,13 +160,12 @@ main {
   pointer-events: none;
   text-align: center;
 }
-#replayFrame::before {
+#replayFrame span {
   position: absolute;
   top: -30px;
   left: 0;
   right: 0;
   line-height: 30px;
-  content: "リプレイ中";
 }
 
 ::-webkit-scrollbar {
@@ -179,7 +178,6 @@ main {
   border-radius: 10px;
 }
 ::-webkit-scrollbar-track:hover {
-  border-radius: 10px;
   background: rgba(128, 128, 128, 0.1);
 }
 
@@ -1214,12 +1212,16 @@ summary:focus {
   font-size: 14px;
 }
 @media (forced-colors: active) {
-  #tab2_wrap {
+  #tab1_content {
     border-right-style: solid;
     border-bottom-style: solid;
     border-width: 1px;
   }
-  #tab1_bar .tabmenu {
+  .popup_menubar {
+    border-bottom-style: solid;
+    border-width: 3px;
+  }
+  .tabmenu {
     border-style: solid;
     border-width: 1px;
   }
@@ -1231,9 +1233,21 @@ summary:focus {
     border-style: solid;
     border-width: 1px;
   }
-  .active_tabmenu,
-  .active_tabmenu:hover {
-    border-width: 2px;
+
+  .EQItem:hover {
+    outline: solid 2px;
+    filter: invert(1);
+  }
+
+  /*⇑に重ね掛けで色反転回避*/
+  .EQItem:hover .EQI_maxI {
+    filter: invert(1);
+  }
+
+  .tabmenu:hover,
+  .active_tabmenu {
+    background: #000;
+    filter: invert(1);
   }
   .tabmenu::before {
     content: "☐ ";
@@ -1251,5 +1265,44 @@ summary:focus {
   .EEWWrap.keihou h2,
   .EQDItem.lv2 h2 {
     border-bottom: solid 1px;
+  }
+  #replayFrame span {
+    bottom: 2px;
+    left: 2px;
+    top: auto;
+    width: fit-content;
+    height: fit-content;
+    border-width: 1px;
+    border-style: solid;
+    outline-offset: 2px;
+    outline-width: 1px;
+    outline-style: solid;
+    background: #000;
+    font-size: 18px;
+    padding: 0 8px;
+    border-radius: 4px;
+  }
+  .maplibregl-ctrl-group {
+    border-style: solid;
+    border-width: 1px;
+  }
+  .maplibregl-ctrl button:hover {
+    filter: invert(1);
+  }
+  .menu label:has(input:checked) {
+    filter: invert(1);
+  }
+  .menu label:has(input:checked) input {
+    filter: invert(1);
+  }
+  ::-webkit-scrollbar-track:hover {
+    border-width: 1px;
+    border-style: solid;
+  }
+  ::-webkit-scrollbar-thumb {
+    border-width: 2px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    border-width: 5px;
   }
 }

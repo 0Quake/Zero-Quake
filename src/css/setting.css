@@ -400,7 +400,8 @@ ol {
 }
 .VoiceEngine_Wrap:has(input:checked),
 #notify_setting_wrap:has(#NotificationSound:checked) #notify_threshold,
-#T_notify_setting_wrap:has(#Tsunami_NotificationSound:checked) #T_notify_threshold {
+#T_notify_setting_wrap:has(#Tsunami_NotificationSound:checked)
+  #T_notify_threshold {
   border: solid 1px #ff9292;
   background: #ff929220;
   color: #ccc;
@@ -576,13 +577,15 @@ ol {
   }
   #tab1_bar .active_tabmenu,
   #tab1_bar .active_tabmenu:hover {
-    border-width: 2px;
+    filter: invert(1);
   }
   .active_tabmenu::after {
     font-size: 22px;
   }
   #ShindoSample div,
-  #ShindoSample div * {
+  #ShindoSample div *,
+  #LngIntSample div,
+  #LngIntSample div * {
     forced-color-adjust: none;
     border-color: #fff;
   }

@@ -682,3 +682,27 @@ td {
     opacity: 0;
   }
 }
+@media (forced-colors: active) {
+  #homeShindo .ShindoItem:hover,
+  #homeShindoL .ShindoItemL:hover,
+  .ShindoItem1:hover,
+  .ShindoItem2:hover,
+  .ShindoItem3:hover,
+  .ShindoItem1L:hover,
+  .ShindoItem2L:hover,
+  .ShindoItem3L:hover {
+    filter: invert(1);
+  }
+
+  /*重ね掛けで震度職の反転を回避*/
+  #homeShindo .ShindoItem:hover div,
+  #homeShindoL .ShindoItemL:hover div,
+  .ShindoItem1:hover div,
+  .ShindoItem2:hover div,
+  .ShindoItem3:hover div,
+  .ShindoItem1L:hover div,
+  .ShindoItem2L:hover div,
+  .ShindoItem3L:hover div {
+    filter: invert(1);
+  }
+}
