@@ -626,7 +626,7 @@
                 </section>
 
                 <h4>受信条件</h4>
-                <div class="smalltext">続報による下方修正で 条件を下回った場合でも、その地震については情報の表示・更新を続けます。</div>
+                <div class="smalltext">続報により 条件を満たさなくなった場合でも、その地震については情報の表示・更新を続けます。</div>
                 <section>
                     <h5>予想最大震度</h5>
                     <label>しきい値
@@ -645,7 +645,6 @@
                     </label>
 
                     <label><input type="checkbox" id="EEW_IntQ">予想最大震度 不明時も通知</label>
-                    <div class="smalltext">一度でも予想最大震度が発表された場合、以降 震度不明であっても通知します。</div>
 
                     <h5>現在地の予想震度</h5>
                     <label>しきい値
@@ -664,7 +663,6 @@
                     </label>
 
                     <label><input type="checkbox" id="EEW_userIntQ">予想震度 不明時も通知</label>
-                    <div class="smalltext">一度でも予想震度が発表された場合、以降 予想震度情報がない場合も通知します。</div>
                 </section>
 
                 <h4>音声合成文</h4>
@@ -1272,9 +1270,9 @@
                 <section>
                     <div id="IntColor_Wrap">
                         <label>震度・長周期地震動階級の配色<select id="shindoColor">
-                                <option value="0quake">Zero Quake 独自</option>
-                                <option value="0quake_old">Zero Quake 独自 （旧）</option>
-                                <option value="jma">気象庁ホームページ</option>
+                                <option value="0quake">Zero Quake 独自 - 色覚特性対応 UIデザインとマッチ</option>
+                                <option value="jma">気象庁ホームページ - 広く使われる 見やすく優れた配色</option>
+                                <option value="0quake_old">Zero Quake 旧版 - 従来の配色</option>
                             </select></label>
 
                         <div id="IntSample_wrap" aria-hidden="true">
@@ -1597,7 +1595,7 @@
                 <section>
                     <label><input type="checkbox" id="TREM-RTS_GetData">データを取得</label>
                     <label> 情報取得間隔（秒）<input id="TREM-RTS_Interval" type="number" min="1" max="30" value="1" step="1" placeholder="情報を取得する間隔（秒）"></label>
-
+                    <span class="smalltext">台湾を中心に運営されるコミュニティ観測網によるリアルタイム震度を取得します。政府機関等運営の物よりも精度は劣ります。</span>
                 </section>
             </div>
 

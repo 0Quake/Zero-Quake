@@ -234,7 +234,7 @@ var defaultConfigVal = {
       Boyomi_Voice: "auto",
     },
     voice: {
-      EEW: "緊急地震速報です。強い揺れに警戒してください。",
+      EEW: "{training2}緊急地震速報です。{region_name}で最大の震度、{maxInt}の地震が発生しました。[{location}の予想震度は{local_Int}です。]",
       EEWUpdate: "緊急地震速報が更新されました。",
       EEWCancel: "緊急地震速報が取り消されました。",
       EQInfo:
