@@ -186,7 +186,7 @@ function EEW_AlertUpdate(data) {
     if (elm.alertflg == "警報" || elm.alertflg == "予報")
       var textForReader = GenerateEEWText(
         elm,
-        "緊急地震速報アイテム。{training}{grade}、第{serial}報。{location}の予想震度は{local_Int}。予想マグニチュード、{magnitude}。予想最大震度、{maxInt}。{region_name}の、深さ{depth}キロメートルで、{origin_time}に発生。{final}"
+        "緊急地震速報アイテム。{training}{grade}、第{serial}報。[{location}の予想震度は{local_Int}。]予想マグニチュード、{magnitude}。予想最大震度、{maxInt}。{region_name}の、深さ{depth}キロメートルで、{origin_time}に発生。{final}"
       );
     else
       var textForReader = GenerateEEWText(
@@ -501,13 +501,15 @@ function eqInfoDraw(data, source) {
           .querySelector(".EQItem")
           .setAttribute(
             "aria-label",
-            `過去の地震情報：${elm.status == "訓練" ? "訓練報、" : ""}${
+            `過去の地震情報アイテム：${elm.status == "訓練" ? "訓練報、" : ""}${
               elm.status == "試験" ? "試験報、" : ""
-            }最大震度${NormalizeShindo(maxITmp, 1)}、マグニチュード${
-              elm.M || elm.M === 0 ? elm.M.toFixed(1) : "不明"
-            }、震源は${
-              elm.epiCenter ? elm.epiCenter : "調査中"
-            }、発生時刻は${NormalizeDate(
+            }${maxITmp != "?" ? "最大震度" + NormalizeShindo(maxITmp, 1) + "、" : ""}${
+              elm.M || elm.M === 0
+                ? "マグニチュード" + elm.M.toFixed(1) + "、"
+                : ""
+            }${
+              elm.epiCenter ? "震源は" + elm.epiCenter + "、" : ""
+            }発生時刻は${NormalizeDate(
               "M月D日h時m分",
               elm.OriginTime
             )}。エンターキーで詳細情報を確認。`
@@ -530,18 +532,20 @@ function eqInfoDraw(data, source) {
       clone.querySelector(".EQI_maxI").textContent = NormalizeMMI(elm.maxI, 1);
       clone.querySelector(".EQI_maxI").style.background = colorTmp[0];
       clone.querySelector(".EQI_maxI").style.color = colorTmp[1];
+      var MMIStr = elm.maxI
+        ? `最大改正メルカリ震度${NormalizeMMI(elm.maxI, 3)}`
+        : "";
       clone
         .querySelector(".EQItem")
         .setAttribute(
           "aria-label",
-          `過去の地震情報：最大改正メルカリ震度${NormalizeMMI(
-            elm.maxI,
-            3
-          )}、マグニチュード${
-            elm.M || elm.M === 0 ? elm.M.toFixed(1) : "不明"
-          }、震源は${
-            elm.epiCenter ? elm.epiCenter : "調査中"
-          }、発生時刻は${NormalizeDate(
+          `過去の地震情報アイテム：${MMIStr}、${
+            elm.M || elm.M === 0
+              ? "マグニチュード" + elm.M.toFixed(1) + "、"
+              : ""
+          }${
+            elm.epiCenter ? "震源は" + elm.epiCenter + "、" : ""
+          }発生時刻は${NormalizeDate(
             "M月D日h時m分",
             elm.OriginTime
           )}。エンターキーで詳細情報を確認。`
