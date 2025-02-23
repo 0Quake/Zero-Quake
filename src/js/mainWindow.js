@@ -2903,11 +2903,17 @@ function psWaveEntry() {
       return elm2.EventID == elm.id;
     });
     if (!stillEEW || stillEEW.is_cancel) {
-      if (map.getLayer("PCircle_" + elm.id)) {
+      if (map.getLayer("PCircle_" + elm.id))
         map.removeLayer("PCircle_" + elm.id);
+      if (map.getLayer("SCircle_" + elm.id))
         map.removeLayer("SCircle_" + elm.id);
+      if (map.getLayer("SCircle_" + elm.id + "_FILL"))
         map.removeLayer("SCircle_" + elm.id + "_FILL");
-      }
+
+      if (map.getLayer("PCircle_" + elm.id))
+        map.removeSource("PCircle_" + elm.id);
+      if (map.getLayer("SCircle_" + elm.id))
+        map.removeSource("SCircle_" + elm.id);
     }
     return stillEEW;
   });
