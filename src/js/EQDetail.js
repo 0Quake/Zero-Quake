@@ -1354,17 +1354,19 @@ function Mapinit() {
   layerMenu.appendChild(radioWrap);
   layerMenu.appendChild(checkWrap);
 
-  var TLControlWrapper = document.createElement("div");
-  TLControlWrapper.className =
-    "left_ctrl maplibregl-ctrl maplibregl-ctrl-group";
-  TLControlWrapper.appendChild(layerButton);
-  TLControlWrapper.appendChild(layerMenu);
   map.addControl(
     {
       onAdd: function () {
-        return TLControlWrapper;
+        return layerButton;
       },
-      onRemove: function () {},
+    },
+    "top-left"
+  );
+  map.addControl(
+    {
+      onAdd: function () {
+        return layerMenu;
+      },
     },
     "top-left"
   );

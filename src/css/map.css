@@ -728,6 +728,12 @@ body {
 .maplibregl-ctrl-attrib-inner a {
   display: none !important;
 }
+.maplibregl-ctrl-top-right .maplibregl-ctrl {
+  margin: 8px 8px 0 0;
+}
+.maplibregl-ctrl-top-left .maplibregl-ctrl {
+  margin: 8px 0 0 8px;
+}
 @media (forced-colors: active) {
   .maplibregl-popup-anchor-bottom .maplibregl-popup-tip,
   .maplibregl-popup-anchor-top .maplibregl-popup-tip,
