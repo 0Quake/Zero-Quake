@@ -1467,7 +1467,7 @@ document
   .getElementById("layerSwitch_close")
   .addEventListener("click", function () {
     document.getElementById("menu_wrap").classList.remove("menu_show");
-    document.getElementById("menu").hide();
+    document.getElementById("menu").close();
   });
 
 var mapSelect = document.getElementsByName("mapSelect");
