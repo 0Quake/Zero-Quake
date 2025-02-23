@@ -135,23 +135,21 @@ td {
   right: 0;
 }
 
-#homeShindo .ShindoItem:hover,
-#homeShindoL .ShindoItemL:hover,
-.ShindoItem1:hover,
-.ShindoItem2:hover,
-.ShindoItem3:hover,
-.ShindoItem1L:hover,
-.ShindoItem2L:hover,
-.ShindoItem3L:hover {
+#Shindo .ShindoItem1:hover,
+#Shindo .ShindoItem2:hover,
+#Shindo .ShindoItem3:hover,
+#lngintListWrap .ShindoItem1L:hover,
+#lngintListWrap .ShindoItem2L:hover,
+#lngintListWrap .ShindoItem3L:hover {
   background: #464649;
 }
 
-.ShindoItem1,
-.ShindoItem2,
-.ShindoItem3,
-.ShindoItem1L,
-.ShindoItem2L,
-.ShindoItem3L {
+#Shindo .ShindoItem1,
+#Shindo .ShindoItem2,
+#Shindo .ShindoItem3,
+#lngintListWrap .ShindoItem1L,
+#lngintListWrap .ShindoItem2L,
+#lngintListWrap .ShindoItem3L {
   cursor: pointer;
 }
 
@@ -205,6 +203,11 @@ td {
   font-family: "M PLUS 1p";
   outline: solid 1px #fff;
   forced-color-adjust: none;
+}
+
+.ShindoItem4 div,
+.ShindoItem4L div {
+  border-radius: 50%;
 }
 
 .ShindoItem4 span,
@@ -492,10 +495,7 @@ td {
 #homeShindoWrap {
   display: none;
 }
-#homeShindo .ShindoItem,
-#homeShindoL .ShindoItemL {
-  cursor: default;
-}
+
 #homeShindo .ShindoItem span,
 #homeShindoL .ShindoItemL span {
   visibility: hidden;
@@ -683,26 +683,22 @@ td {
   }
 }
 @media (forced-colors: active) {
-  #homeShindo .ShindoItem:hover,
-  #homeShindoL .ShindoItemL:hover,
-  .ShindoItem1:hover,
-  .ShindoItem2:hover,
-  .ShindoItem3:hover,
-  .ShindoItem1L:hover,
-  .ShindoItem2L:hover,
-  .ShindoItem3L:hover {
+  #Shindo .ShindoItem1:hover,
+  #Shindo .ShindoItem2:hover,
+  #Shindo .ShindoItem3:hover,
+  #lngintListWrap .ShindoItem1L:hover,
+  #lngintListWrap .ShindoItem2L:hover,
+  #lngintListWrap .ShindoItem3L:hover {
     filter: invert(1);
   }
 
   /*重ね掛けで震度職の反転を回避*/
-  #homeShindo .ShindoItem:hover div,
-  #homeShindoL .ShindoItemL:hover div,
-  .ShindoItem1:hover div,
-  .ShindoItem2:hover div,
-  .ShindoItem3:hover div,
-  .ShindoItem1L:hover div,
-  .ShindoItem2L:hover div,
-  .ShindoItem3L:hover div {
+  #Shindo .ShindoItem1:hover div,
+  #Shindo .ShindoItem2:hover div,
+  #Shindo .ShindoItem3:hover div,
+  #lngintListWrap .ShindoItem1L:hover div,
+  #lngintListWrap .ShindoItem2L:hover div,
+  #lngintListWrap .ShindoItem3L:hover div {
     filter: invert(1);
   }
 }

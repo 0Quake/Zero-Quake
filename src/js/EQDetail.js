@@ -2626,6 +2626,7 @@ function add_Area_info(name, maxInt) {
     "aria-label",
     `細分区域 ${name}、震度${NormalizeShindo(maxInt, 1)}`
   );
+  newDiv.setAttribute("title", `細分区域：${name}`);
   newDiv.setAttribute("aria-expanded", "false");
   newDiv.setAttribute("role", "treeitem");
   newDiv.addEventListener("click", function () {
@@ -2659,12 +2660,13 @@ function add_Area_info(name, maxInt) {
       name;
     newDiv3.classList.add("ShindoItem", "ShindoItem2");
     newDiv3.setAttribute("tabindex", 0);
+
+    var homeName = config.home.name ? config.home.name : "現在地";
     newDiv3.setAttribute(
       "aria-label",
-      `${
-        config.home.name ? config.home.name : "現在地"
-      }エリアの ${name}、震度${NormalizeShindo(maxInt, 1)}`
+      `${homeName}エリアの ${name}、震度${NormalizeShindo(maxInt, 1)}`
     );
+    newDiv3.setAttribute("title", `細分区域（${homeName}周辺）：${name}`);
 
     removeChild(document.getElementById("homeShindo"));
     document.getElementById("homeShindoWrap").style.display = "block";
@@ -2760,8 +2762,9 @@ function add_City_info(name, maxInt) {
     newDiv.setAttribute("tabindex", 0);
     newDiv.setAttribute(
       "aria-label",
-      `市町村 ${name}、震度${NormalizeShindo(maxInt, 1)}`
+      `市区町村 ${name}、震度${NormalizeShindo(maxInt, 1)}`
     );
+    newDiv.setAttribute("title", `市区町村：${name}`);
     newDiv.setAttribute("aria-expanded", "false");
     newDiv.setAttribute("role", "treeitem");
     newDiv.addEventListener("click", function () {
@@ -2809,6 +2812,7 @@ function add_IntensityStation_info(lat, lng, name, int) {
     "aria-label",
     `観測点 ${name}、震度${NormalizeShindo(int, 1)}`
   );
+  newDiv.setAttribute("title", `観測点：${name}`);
   newDiv.setAttribute("role", "treeitem");
 
   const icon = document.createElement("div");
@@ -3011,6 +3015,7 @@ function add_Area_infoL(name, maxInt) {
     "aria-label",
     `細分区域 ${name}、長周期地震動階級${maxInt}`
   );
+  newDiv.setAttribute("title", `細分区域：${name}`);
   newDiv.setAttribute("aria-expanded", "false");
   newDiv.setAttribute("role", "treeitem");
   newDiv.addEventListener("click", function () {
@@ -3044,12 +3049,12 @@ function add_Area_infoL(name, maxInt) {
       name;
     newDiv3.classList.add("ShindoItemL", "ShindoItem2L");
     newDiv3.setAttribute("tabindex", 0);
+    var homeName = config.home.name ? config.home.name : "現在地";
     newDiv3.setAttribute(
       "aria-label",
-      `${
-        config.home.name ? config.home.name : "現在地"
-      }エリアの ${name}、長周期地震動階級${maxInt}`
+      `${homeName}エリアの ${name}、長周期地震動階級${maxInt}`
     );
+    newDiv3.setAttribute("title", `細分区域（${homeName}周辺）：${name}`);
 
     removeChild(document.getElementById("homeShindoL"));
     document.getElementById("homeShindoWrap").style.display = "block";
@@ -3127,6 +3132,7 @@ function add_IntensityStation_infoL(lat, lng, name, int) {
   newDiv.classList.add("ShindoItemL", "ShindoItem4L");
   newDiv.setAttribute("tabindex", 0);
   newDiv.setAttribute("aria-label", `観測点 ${name}、長周期地震動階級${int}`);
+  newDiv.setAttribute("title", `観測点：${name}`);
   newDiv.setAttribute("aria-expanded", "false");
   newDiv.setAttribute("role", "treeitem");
   wrap3[wrap3.length - 1].append(newDiv);
