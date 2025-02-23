@@ -121,6 +121,9 @@ h4,
 h5 {
   font-family: "M PLUS 1p", sans-serif;
 }
+img {
+  pointer-events: none;
+}
 main {
   position: relative;
   height: 100vh;
@@ -239,7 +242,8 @@ main {
   width: 0;
 }
 #sideBar.close #tab1_wrap,
-#sideBar.close #sokuho-Panel {
+#sideBar.close #sokuho-Panel,
+#sideBar.close #UpdateTimeWrap {
   display: none;
 }
 #SideBarToggle {

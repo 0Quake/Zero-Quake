@@ -111,18 +111,12 @@
   color: #fff;
   border: solid 1px #62626c;
 }
-.transparent-ctrl {
-  background: transparent;
-  border: none;
-}
-.maplibregl-ctrl-group button {
+.maplibregl-ctrl-group button,
+.maplibregl-ctrl-group button:hover {
   margin: 0;
   width: 40px;
   height: 35px;
-  background: #3f3f42 !important;
-}
-.maplibregl-ctrl-group button:hover {
-  background: #3f3f42 !important;
+  background: transparent !important;
 }
 .maplibregl-ctrl-group button + button {
   border-top: none;

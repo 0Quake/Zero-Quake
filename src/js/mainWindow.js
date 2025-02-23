@@ -2360,8 +2360,7 @@ function init() {
   });
 
   var TLControlWrapper = document.createElement("div");
-  TLControlWrapper.className =
-    "maplibregl-ctrl maplibregl-ctrl-group transparent-ctrl";
+  TLControlWrapper.className = "maplibregl-ctrl maplibregl-ctrl-group";
   TLControlWrapper.appendChild(layerButton);
   map.addControl(
     {

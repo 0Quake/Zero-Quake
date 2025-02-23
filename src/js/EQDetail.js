@@ -1356,7 +1356,7 @@ function Mapinit() {
 
   var TLControlWrapper = document.createElement("div");
   TLControlWrapper.className =
-    "left_ctrl maplibregl-ctrl maplibregl-ctrl-group transparent-ctrl";
+    "left_ctrl maplibregl-ctrl maplibregl-ctrl-group";
   TLControlWrapper.appendChild(layerButton);
   TLControlWrapper.appendChild(layerMenu);
   map.addControl(

@@ -563,6 +563,25 @@ summary {
   background: var(--LngIntTheme_4_BgColor);
   color: var(--LngIntTheme_4_color);
 }
+#flex_wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 10px 0;
+}
+#flex_wrap div {
+  padding: 0 30px;
+}
+#flex_wrap div p {
+  margin: 10px 0;
+}
+#flex_wrap div:first-child {
+  border-right: solid 1px #666;
+}
+#ud_logo {
+  width: 60px;
+  width: 60px;
+}
 @media (forced-colors: active) {
   #tab1_bar {
     border-right-style: solid;
