@@ -338,8 +338,13 @@ ol {
   overflow: auto;
   max-width: 500px;
 }
+summary {
+  margin-left: 0;
+  margin-right: 0;
+}
 .tableWrap {
-  background: #4e4e51;
+  border: solid 1px #88888b;
+  background: none;
   padding: 8px;
   border-radius: 5px;
   margin: 8px 0;

@@ -1790,15 +1790,15 @@ var intColor = {
       },
       2: {
         background: "rgb(89, 123, 171)",
-        color: "rgb(12, 12, 15)",
+        color: "rgb(0, 1, 6)",
       },
       3: {
         background: "rgb(69, 72, 130)",
-        color: "rgb(195, 198, 230)",
+        color: "rgb(216, 217, 235)",
       },
       4: {
         background: "rgb(217, 215, 98)",
-        color: "rgb(72, 72, 76)",
+        color: "rgb(67, 67, 71)",
       },
       7: {
         background: "rgb(165, 0, 194)",
@@ -1806,7 +1806,7 @@ var intColor = {
       },
       "5m": {
         background: "rgb(224, 157, 0)",
-        color: "rgb(43, 43, 43)",
+        color: "rgb(38, 38, 38)",
       },
       "5p": {
         background: "rgb(232, 93, 19)",
@@ -1832,11 +1832,11 @@ var intColor = {
     LgInt: {
       1: {
         background: "rgb(69, 72, 130)",
-        color: "rgb(195, 198, 230)",
+        color: "rgb(216, 217, 235)",
       },
       2: {
         background: "rgb(224, 157, 0)",
-        color: "rgb(43, 43, 43)",
+        color: "rgb(38, 38, 38)",
       },
       3: {
         background: "rgb(194, 26, 0)",
