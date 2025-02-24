@@ -469,25 +469,22 @@ function ScheduledExecution() {
               if (json.token) {
                 config.Source.axis.AccessToken = String(json.token);
                 store.set("config", config);
-                Window_notification(
-                  "Axisのアクセストークンを更新しました。",
-                  "info"
+                SystemNotification(
+                  "Axisのアクセストークンを自動で更新しました。"
                 );
               }
             } else if (json.status == "contract has expired") {
               //トークン期限切れ
               config.Source.axis.GetData = false;
               store.set("config", config);
-              Window_notification(
-                "Axisのアクセストークンの期限が切れました。手動でトークンを更新しください。",
-                "warn"
+              SystemNotification(
+                "Axisのアクセストークンの期限が切れました。手動でトークンを更新しください。"
               );
             } else if (json.status == "invalid header authorization") {
               config.Source.axis.GetData = false;
               store.set("config", config);
-              Window_notification(
-                "Axisのアクセストークンが不正です。",
-                "error"
+              SystemNotification(
+                "Axisのアクセストークンが不正です。設定を修正してください。"
               );
             }
           } catch (err) {
@@ -565,7 +562,7 @@ process.on("uncaughtException", function (err) {
         errorResolve(result.response);
       });
 
-      Window_notification("予期しないエラーが発生しました。", "error");
+      SystemNotification("予期しないエラーが発生しました。");
     }
   } catch (err) {
     return;
@@ -4778,12 +4775,14 @@ function PlayAudio(name) {
 
 //メインウィンドウ内通知
 var notifyData;
-function Window_notification(message, type) {
-  notifyData = {
-    action: "notification_Update",
-    data: { type: type, message: message, time: new Date() },
-  };
-  messageToMainWindow(notifyData);
+function SystemNotification(message, callback) {
+  var Push = new Notification({
+    title: "Zero Quake システム通知",
+    body: message,
+    icon: path.join(__dirname, "img/icon.ico"),
+  });
+
+  Push.show();
 }
 
 //JSONパース（拡張）

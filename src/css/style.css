@@ -1094,45 +1094,6 @@ summary:focus {
     box-shadow: 0 0 0 0px rgb(16, 243, 0);
   }
 }
-#errorMsg {
-  display: none;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 30px;
-  line-height: 30px;
-  z-index: 999999999;
-  border-bottom: solid 1px rgb(0, 0, 0);
-}
-#errorMsg.errorMsg {
-  background: rgb(248, 98, 98);
-  color: #000;
-}
-#errorMsg.warnMsg {
-  background: rgb(201, 203, 89);
-  color: #000;
-}
-#errorMsg.infoMsg {
-  background: rgb(89, 169, 203);
-  color: #000;
-}
-#errorMsg_close {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  width: 30px;
-  font-size: 14px;
-  border: none;
-  background: none;
-  color: #4e4e51;
-  margin: 0;
-  padding: 0;
-}
-#errorContent {
-  padding: 0 10px;
-}
 #tsunami_button_wrap {
   display: flex;
   justify-content: center;

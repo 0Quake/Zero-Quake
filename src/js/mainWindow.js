@@ -82,7 +82,6 @@ window.electronAPI.messageSend((event, request) => {
     psWaveEntry();
   } else if (request.action == "EQInfo")
     eqInfoDraw(request.data, request.source);
-  else if (request.action == "notification_Update") show_errorMsg(request.data);
   else if (request.action == "EQDetect") EQDetect(request.data);
   else if (request.action == "EQDetectFinish") EQDetectFinish(request.data);
   else if (request.action == "tsunamiUpdate") tsunamiDataUpdate(request.data);
@@ -766,18 +765,6 @@ document
   .addEventListener("click", function () {
     updateTimeDialog.close();
     UTDialogShow = false;
-  });
-
-var errorMsgBox = document.getElementById("errorMsg");
-function show_errorMsg(data) {
-  errorMsgBox.style.display = "block";
-  errorMsgBox.className = data.type + "Msg";
-  document.getElementById("errorContent").innerText = data.message;
-}
-document
-  .getElementById("errorMsg_close")
-  .addEventListener("click", function () {
-    errorMsgBox.style.display = "none";
   });
 
 document
@@ -3777,7 +3764,6 @@ function draw_gaikyo(data) {
           startDateToSpeak + NormalizeDate(dateFormToSpeak, elm.date);
         var dateStr = startDateStr + NormalizeDate(dateFormStr, elm.date);
       }
-      console.log(elm, dateToSpeak, dateStr);
       clone.querySelector(".EQI_datetime").textContent = dateStr;
 
       clone.setAttribute(
