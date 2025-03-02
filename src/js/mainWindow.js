@@ -921,7 +921,7 @@ function init() {
     container: "mapcontainer",
     center: [138.46, 32.99125],
     zoom: currentZoom,
-    attributionControl: true,
+    attributionControl: false,
     pitchWithRotate: false,
     dragRotate: false,
     style: {
@@ -2204,6 +2204,12 @@ function init() {
       ],
     },
   });
+  map.addControl(
+    new maplibregl.AttributionControl({
+      compact: true,
+    }),
+    "bottom-right"
+  );
   map.getCanvas().setAttribute("aria-label", "地図画面");
 
   map.touchZoomRotate.disableRotation();

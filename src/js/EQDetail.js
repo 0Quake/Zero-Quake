@@ -139,7 +139,7 @@ function Mapinit() {
     container: "mapcontainer",
     center: [138.46, 32.99125],
     zoom: 4,
-    attributionControl: true,
+    attributionControl: false,
     pitchWithRotate: false,
     dragRotate: false,
     style: {
@@ -1225,6 +1225,12 @@ function Mapinit() {
       ],
     },
   });
+  map.addControl(
+    new maplibregl.AttributionControl({
+      compact: true,
+    }),
+    "bottom-right"
+  );
   map.getCanvas().setAttribute("aria-label", "地図表現による地震情報");
   map.touchZoomRotate.disableRotation();
   ZoomBounds = new maplibregl.LngLatBounds();

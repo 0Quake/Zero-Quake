@@ -525,7 +525,7 @@ function mapInit() {
     container: "mapcontainer",
     center: [config.home.longitude, config.home.latitude],
     zoom: 6,
-    attributionControl: true,
+    attributionControl: false,
     pitchWithRotate: false,
     dragRotate: false,
     style: {
@@ -1385,6 +1385,12 @@ function mapInit() {
       ],
     },
   });
+  map.addControl(
+    new maplibregl.AttributionControl({
+      compact: true,
+    }),
+    "bottom-right"
+  );
   map.touchZoomRotate.disableRotation();
   map.addControl(new maplibregl.NavigationControl(), "top-right");
 
