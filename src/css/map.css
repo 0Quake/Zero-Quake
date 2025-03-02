@@ -725,9 +725,6 @@ body {
 .maplibregl-ctrl-group button {
   border-radius: 0 !important;
 }
-.maplibregl-ctrl-attrib-inner a {
-  display: none !important;
-}
 .maplibregl-ctrl-top-right .maplibregl-ctrl {
   margin: 8px 8px 0 0;
 }
