@@ -337,7 +337,7 @@ td {
   pointer-events: none !important;
 }
 
-.zoomLevel_4 .MaxShindoIcon,
+.has_StaShindo.zoomLevel_4 .MaxShindoIcon,
 .zoomLevel_4 .MaxLgIntIcon {
   visibility: hidden;
   pointer-events: none !important;
