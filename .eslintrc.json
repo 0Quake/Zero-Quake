@@ -6,10 +6,12 @@
   },
   "extends": "eslint:recommended",
   "parserOptions": {
-    "ecmaVersion": "latest"
+    "ecmaVersion": "latest",
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true,
+      "ecmaVersion": 2015
+    }
   },
-  "rules": {
-    "no-redeclare": "off",
-    "no-undef": "error"
-  }
+  "rules": {}
 }

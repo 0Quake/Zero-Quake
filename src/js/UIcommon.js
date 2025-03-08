@@ -56,8 +56,6 @@ window.addEventListener("load", function () {
   document.querySelectorAll(".tabmenu").forEach(function (elm2) {
     elm2.setAttribute("aria-selected", elm2.classList.contains("active_tabmenu"));
   });
-
-  document.querySelectorAll(".active_tabcontent").forEach(function (elm2) {});
 });
 //タブUI
 document.querySelectorAll(".tabmenu").forEach(function (elm) {
@@ -87,12 +85,7 @@ function NormalizeShindo(str, responseType) {
     str = String(str)
       .replace(/[０-９]/g, function (s) {
         return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
-      })
-      .replaceAll("＋", "+")
-      .replaceAll("－", "-")
-      .replaceAll("強", "+")
-      .replaceAll("弱", "-")
-      .replace(/\s+/g, "");
+      }).replaceAll("＋", "+").replaceAll("－", "-").replaceAll("強", "+").replaceAll("弱", "-").replace(/\s+/g, "");
     switch (str) {
       case "1":
       case "10":
@@ -276,7 +269,7 @@ function NormalizeDate(type, date) {
   var s = String(date.getSeconds());
   var isToday = date.toDateString() == new Date().toDateString();
   if (typeof type === "string" || type instanceof String) {
-    return type.replaceAll("YYYY", YYYY).replaceAll("YY", YYYY).replaceAll("MM", MM).replaceAll("DD", DD).replaceAll("hh", hh).replaceAll("mm", mm).replaceAll("ss", ss).replaceAll("M", M).replaceAll("D", D).replaceAll("h", h).replaceAll("m", m).replaceAll("s", s);
+    return type.replaceAll("YYYY", YYYY).replaceAll("YY", YY).replaceAll("MM", MM).replaceAll("DD", DD).replaceAll("hh", hh).replaceAll("mm", mm).replaceAll("ss", ss).replaceAll("M", M).replaceAll("D", D).replaceAll("h", h).replaceAll("m", m).replaceAll("s", s);
   }
   switch (type) {
     case 1:

@@ -1,5 +1,5 @@
+/* global NormalizeDate NormalizeShindo NormalizeMMI LgIntConvert maplibregl turf pmtiles removeChild config */
 var map;
-var points = {};
 var Tsunami_MajorWarning, Tsunami_Warning, Tsunami_Watch, Tsunami_Yoho;
 
 var psWaveList = [];
@@ -23,9 +23,7 @@ document.body.addEventListener("mouseover", function () {
 var tsunamiStations = [];
 
 fetch("./Resource/TsunamiStations.json")
-  .then(function (res) {
-    return res.json();
-  })
+  .then(function (res) { return res.json(); })
   .then(function (data) {
     tsunamiStations = data;
   });
@@ -48,13 +46,7 @@ window.electronAPI.messageSend((event, request) => {
     psWaveEntry();
     JMAEstShindoControl(request.data);
   } else if (request.action == "UpdateStatus") {
-    UpdateStatus(
-      request.Updatetime,
-      request.LocalTime,
-      request.type,
-      request.condition,
-      request.vendor
-    );
+    UpdateStatus(request.Updatetime, request.LocalTime, request.type, request.condition, request.vendor);
   } else if (request.action == "kmoniUpdate") {
     UpdateStatus(request.Updatetime, request.LocalTime, "kmoniImg", "success");
     if (!background || !knet_already_draw) kmoniMapUpdate(request.data, "knet");
@@ -69,8 +61,7 @@ window.electronAPI.messageSend((event, request) => {
     SeisJSUpdate(request.data);
   } else if (request.action == "Replay") {
     Replay = request.data;
-    document.getElementById("replayFrame").style.display =
-      Replay == 0 ? "none" : "block";
+    document.getElementById("replayFrame").style.display = Replay == 0 ? "none" : "block";
 
     var geojson = { type: "FeatureCollection", features: [] };
     if (map) {
@@ -80,14 +71,12 @@ window.electronAPI.messageSend((event, request) => {
       map.getSource("knet_points").setData(geojson);
     }
     psWaveEntry();
-  } else if (request.action == "EQInfo")
-    eqInfoDraw(request.data, request.source);
+  } else if (request.action == "EQInfo") eqInfoDraw(request.data, request.source);
   else if (request.action == "EQDetect") EQDetect(request.data);
   else if (request.action == "EQDetectFinish") EQDetectFinish(request.data);
   else if (request.action == "tsunamiUpdate") tsunamiDataUpdate(request.data);
   else if (request.action == "NankaiTroughInfo") NankaiTroughInfo(request.data);
-  else if (request.action == "HokkaidoSanrikuInfo")
-    HokkaidoSanrikuInfo(request.data);
+  else if (request.action == "HokkaidoSanrikuInfo") HokkaidoSanrikuInfo(request.data);
   else if (request.action == "Return_gaikyo") draw_gaikyo(request.data);
 
   document.getElementById("splash").style.display = "none";
@@ -96,8 +85,7 @@ window.electronAPI.messageSend((event, request) => {
 
 window.addEventListener("load", () => {
   //オフライン警告表示・非表示
-  if (navigator.onLine)
-    UpdateStatus(new Date(), new Date(), "Internet", "success");
+  if (navigator.onLine) UpdateStatus(new Date(), new Date(), "Internet", "success");
   else {
     document.getElementById("offline").showModal();
     document.getElementById("offline2").style.display = "block";
@@ -105,13 +93,8 @@ window.addEventListener("load", () => {
   }
 
   //強震モニタお知らせ取得
-  fetch(
-    "http://www.kmoni.bosai.go.jp/webservice/maintenance/message.json?_=" +
-      Number(new Date())
-  )
-    .then(function (res) {
-      return res.json();
-    })
+  fetch("http://www.kmoni.bosai.go.jp/webservice/maintenance/message.json?_=" + Number(new Date()))
+    .then(function (res) { return res.json(); })
     .then(function (json) {
       document.getElementById("kmoni_Message").innerHTML = json.message;
     });
@@ -120,14 +103,8 @@ window.addEventListener("load", () => {
   setInterval(function () {
     //時計（ローカル時刻）更新
     if (UTDialogShow && !background)
-      document.getElementById("PC_TIME").textContent = NormalizeDate(
-        3,
-        new Date() - Replay
-      );
-    document.getElementById("all_UpdateTime").textContent = NormalizeDate(
-      3,
-      new Date() - Replay
-    );
+      document.getElementById("PC_TIME").textContent = NormalizeDate(3, new Date() - Replay);
+    document.getElementById("all_UpdateTime").textContent = NormalizeDate(3, new Date() - Replay);
   }, 500);
 
   var mapSelect = document.getElementsByName("mapSelect");
@@ -183,19 +160,12 @@ function EEW_AlertUpdate(data) {
     if (!is_update && elm.is_cancel) return;
 
     if (elm.alertflg == "警報" || elm.alertflg == "予報")
-      var textForReader = GenerateEEWText(
-        elm,
-        "緊急地震速報アイテム。{training}{grade}、第{serial}報。[{location}の予想震度は{local_Int}。]予想マグニチュード、{magnitude}。予想最大震度、{maxInt}。{region_name}の、深さ{depth}キロメートルで、{origin_time}に発生。{final}"
-      );
+      var textForReader = GenerateEEWText(elm, "緊急地震速報アイテム。{training}{grade}、第{serial}報。[{location}の予想震度は{local_Int}。]予想マグニチュード、{magnitude}。予想最大震度、{maxInt}。{region_name}の、深さ{depth}キロメートルで、{origin_time}に発生。{final}");
     else
-      var textForReader = GenerateEEWText(
-        elm,
-        "アーリエスト地震情報アイテム。第{serial}報。予想マグニチュード、{magnitude}。{region_name}の、深さ{depth}キロメートルで、{origin_time}に発生。{final}"
-      );
+      var textForReader = GenerateEEWText(elm, "アーリエスト地震情報アイテム。第{serial}報。予想マグニチュード、{magnitude}。{region_name}の、深さ{depth}キロメートルで、{origin_time}に発生。{final}");
 
     var alertflgTmp = "(" + elm.alertflg + ")";
-    if (elm.alertflg)
-      clone.querySelector(".alertflg").textContent = alertflgTmp;
+    if (elm.alertflg) clone.querySelector(".alertflg").textContent = alertflgTmp;
 
     clone.classList.remove("keihou", "yohou", "EarlyEst");
     if (elm.alertflg == "警報") clone.classList.add("keihou");
@@ -206,67 +176,33 @@ function EEW_AlertUpdate(data) {
     clone.querySelector(".EEWLocalID").textContent = EEW_LocalIDs[elm.EventID];
     clone.querySelector(".serial").textContent = elm.serial;
     clone.querySelector(".maxInt").textContent = elm.maxInt ? elm.maxInt : "?";
-    clone.querySelector(".maxInt").style.background = NormalizeShindo(
-      elm.maxInt,
-      2
-    )[0];
-    clone.querySelector(".maxInt").style.color = NormalizeShindo(
-      elm.maxInt,
-      2
-    )[1];
-    clone.querySelector(".userLocation").textContent = config.home.name
-      ? config.home.name
-      : "現在地";
-    clone.querySelector(".is_final").style.display = elm.is_final
-      ? "inline"
-      : "none";
-    clone.querySelector(".cancelled").style.display = elm.is_cancel
-      ? "flex"
-      : "none";
-    clone.querySelector(".region_name").textContent = elm.region_name
-      ? elm.region_name
-      : "震源地域不明";
-    clone.querySelector(".origin_time").textContent = NormalizeDate(
-      3,
-      elm.origin_time
-    );
-    clone.querySelector(".magnitude").textContent =
-      elm.magnitude || elm.magnitude == 0
-        ? Math.round(elm.magnitude * 10) / 10
-        : "不明";
+    clone.querySelector(".maxInt").style.background = NormalizeShindo(elm.maxInt, 2)[0];
+    clone.querySelector(".maxInt").style.color = NormalizeShindo(elm.maxInt, 2)[1];
+    clone.querySelector(".userLocation").textContent = config.home.name ? config.home.name : "現在地";
+    clone.querySelector(".is_final").style.display = elm.is_final ? "inline" : "none";
+    clone.querySelector(".cancelled").style.display = elm.is_cancel ? "flex" : "none";
+    clone.querySelector(".region_name").textContent = elm.region_name ? elm.region_name : "震源地域不明";
+    clone.querySelector(".origin_time").textContent = NormalizeDate(3, elm.origin_time);
+    clone.querySelector(".magnitude").textContent = elm.magnitude || elm.magnitude == 0 ? Math.round(elm.magnitude * 10) / 10 : "不明";
     if (elm.magnitude || elm.magnitude == 0)
       clone.querySelector(".magnitude").classList.remove("UnknownMag");
     else clone.querySelector(".magnitude").classList.add("UnknownMag");
-    clone.querySelector(".depth").textContent =
-      elm.depth || elm.depth == 0 ? Math.round(elm.depth) : "不明";
+
+    clone.querySelector(".depth").textContent = elm.depth || elm.depth == 0 ? Math.round(elm.depth) : "不明";
     if (elm.depth || elm.depth == 0)
       clone.querySelector(".depth").classList.remove("UnknownDepth");
     else clone.querySelector(".depth").classList.add("UnknownDepth");
-    clone.querySelector(".training").style.display = elm.is_training
-      ? "block"
-      : "none";
-    clone.querySelector(".EpicenterElement").style.display = !elm.isPlum
-      ? "block"
-      : "none";
-    clone.querySelector(".NoEpicenterElement").style.display = elm.isPlum
-      ? "block"
-      : "none";
-    clone.querySelector(".userIntensity").textContent = elm.userIntensity
-      ? NormalizeShindo(elm.userIntensity)
-      : "?";
-    clone.querySelector(".userDataWrap").style.background = NormalizeShindo(
-      elm.userIntensity,
-      2
-    )[0];
-    clone.querySelector(".userDataWrap").style.color = NormalizeShindo(
-      elm.userIntensity,
-      2
-    )[1];
-    if (elm.distance < 10000) distanceTmp = Math.round(elm.distance);
-    else distanceTmp = Math.round(elm.distance / 1000) / 10 + "万";
-    clone.querySelector(".distance").textContent = elm.distance
-      ? distanceTmp + "km"
-      : "";
+
+    clone.querySelector(".training").style.display = elm.is_training ? "block" : "none";
+    clone.querySelector(".EpicenterElement").style.display = !elm.isPlum ? "block" : "none";
+    clone.querySelector(".NoEpicenterElement").style.display = elm.isPlum ? "block" : "none";
+    clone.querySelector(".userIntensity").textContent = elm.userIntensity ? NormalizeShindo(elm.userIntensity) : "?";
+    clone.querySelector(".userDataWrap").style.background = NormalizeShindo(elm.userIntensity, 2)[0];
+    clone.querySelector(".userDataWrap").style.color = NormalizeShindo(elm.userIntensity, 2)[1];
+    if (elm.distance < 10000) var distanceTmp = Math.round(elm.distance);
+    else var distanceTmp = Math.round(elm.distance / 1000) / 10 + "万";
+
+    clone.querySelector(".distance").textContent = elm.distance ? distanceTmp + "km" : "";
 
     if (!is_update) {
       clone.setAttribute("id", "EEW-" + elm.EventID);
@@ -306,18 +242,15 @@ function EEW_AlertUpdate(data) {
   if (EEWData.length == 0) document.body.classList.remove("EEWMode");
   else document.body.classList.add("EEWMode");
 
-  document.getElementById("noEEW").style.display =
-    now_EEW.length == 0 && !now_tsunami && EQDetectItem.length == 0
-      ? "block"
-      : "none";
+  document.getElementById("noEEW").style.display = now_EEW.length == 0 && !now_tsunami && EQDetectItem.length == 0 ? "block" : "none";
 }
 
 var EEWID = 0;
 //震源更新
 function epiCenterUpdate(elm) {
-  eid = Number(elm.EventID);
-  latitude = elm.latitude;
-  longitude = elm.longitude;
+  var eid = Number(elm.EventID);
+  var latitude = elm.latitude;
+  var longitude = elm.longitude;
 
   if (map && latitude && longitude) {
     var epicenterElm = epiCenter.find(function (elm2) {
@@ -333,12 +266,10 @@ function epiCenterUpdate(elm) {
       epicenterElm.markerElm.setLngLat([longitude, latitude]);
       epicenterElm.latitude = latitude;
       epicenterElm.longitude = longitude;
-      if (epicenterElm.ESPopup)
-        epicenterElm.ESPopup.setLngLat([longitude, latitude]);
+      if (epicenterElm.ESPopup) epicenterElm.ESPopup.setLngLat([longitude, latitude]);
       if (tooltipContent)
         epicenterElm.ESPopup2.setLngLat([longitude, latitude])
-          .setText(tooltipContent)
-          .addTo(map);
+          .setText(tooltipContent).addTo(map);
       else epicenterElm.ESPopup2.remove();
     } else {
       //初報
@@ -356,16 +287,15 @@ function epiCenterUpdate(elm) {
         closeOnClick: false,
         className: "epiCenterTooltip",
         offset: [0, -17],
-      })
-        .setText(EEWIDTmp)
-        .setLngLat([longitude, latitude])
-        .addTo(map);
+      }).setText(EEWIDTmp).setLngLat([longitude, latitude]).addTo(map);
+
       var ESPopup2 = new maplibregl.Popup({
         closeButton: false,
         closeOnClick: false,
         className: "epiCenterTooltip2",
         offset: [0, 37],
       }).setLngLat([longitude, latitude]);
+
       if (tooltipContent) ESPopup2.setText(tooltipContent).addTo(map);
 
       var ECMarker = new maplibregl.Marker({ element: img })
@@ -382,12 +312,10 @@ function epiCenterUpdate(elm) {
         ESPopup: ESPopup,
         ESPopup2: ESPopup2,
       });
-      displayTmp = epiCenter.length > 1 ? "inline-block" : "none";
-      document
-        .querySelectorAll(".epiCenterTooltip,.EEWLocalID")
-        .forEach(function (elm3) {
-          elm3.style.display = displayTmp;
-        });
+      var displayTmp = epiCenter.length > 1 ? "inline-block" : "none";
+      document.querySelectorAll(".epiCenterTooltip,.EEWLocalID").forEach(function (elm3) {
+        elm3.style.display = displayTmp;
+      });
     }
   }
 
@@ -401,8 +329,6 @@ function epiCenterUpdate(elm) {
 
     if (pswaveFind.SIElm) pswaveFind.SIElm.setLngLat([longitude, latitude]);
   }
-  latitudeTmp = latitude;
-  longitudeTmp = longitude;
   psWaveList.forEach(function (elm) {
     psWaveCalc(elm.id);
   });
@@ -413,17 +339,16 @@ function epiCenterClear(eid) {
   if (map) {
     var epicenterElm;
     epiCenter = epiCenter.filter(function (elm2) {
-      if (elm2.eid == eid) {
-        epicenterElm = elm2;
-      }
+      if (elm2.eid == eid) epicenterElm = elm2;
+
       return elm2.eid !== eid;
     });
     if (epicenterElm) {
       if (epicenterElm.markerElm) epicenterElm.markerElm.remove();
-      epicenterElm.markerElm = null;
       if (epicenterElm.ESPopup) epicenterElm.ESPopup.remove();
-      epicenterElm.ESPopup = null;
       if (epicenterElm.ESPopup2) epicenterElm.ESPopup2.remove();
+      epicenterElm.markerElm = null;
+      epicenterElm.ESPopup = null;
       epicenterElm.ESPopup2 = null;
     }
 
@@ -435,6 +360,7 @@ function epiCenterClear(eid) {
 var template2 = document.getElementById("EQListTemplate");
 var template2_2 = document.getElementById("EQListTemplate2");
 var EQListWrap;
+var eqInfoDataJMA;
 function eqInfoDraw(data, source) {
   var EQTemplate;
   if (source == "jma") {
@@ -450,21 +376,12 @@ function eqInfoDraw(data, source) {
   data.forEach(function (elm, index) {
     var clone = EQTemplate.content.cloneNode(true);
 
-    clone.querySelector(".EQI_epiCenter").textContent = elm.epiCenter
-      ? elm.epiCenter
-      : "震源調査中";
-    clone.querySelector(".EQI_datetime").textContent = elm.OriginTime
-      ? NormalizeDate(4, elm.OriginTime)
-      : "発生時刻不明";
-    clone.querySelector(".EQI_magnitude").textContent =
-      elm.M || elm.M === 0 ? elm.M.toFixed(1) : "不明";
+    clone.querySelector(".EQI_epiCenter").textContent = elm.epiCenter ? elm.epiCenter : "震源調査中";
+    clone.querySelector(".EQI_datetime").textContent = elm.OriginTime ? NormalizeDate(4, elm.OriginTime) : "発生時刻不明";
+    clone.querySelector(".EQI_magnitude").textContent = elm.M || elm.M === 0 ? elm.M.toFixed(1) : "不明";
     if (source == "jma") {
-      clone
-        .querySelector(".EQItem")
-        .setAttribute("id", "EQItem_" + elm.eventId);
-      clone
-        .querySelector(".EQItem")
-        .setAttribute("tabindex", index == 0 ? 2 : -1);
+      clone.querySelector(".EQItem").setAttribute("id", "EQItem_" + elm.eventId);
+      clone.querySelector(".EQItem").setAttribute("tabindex", index == 0 ? 2 : -1);
       var maxITmp = elm.maxI;
       if (maxITmp == "不明") maxITmp = "?";
       maxITmp = NormalizeShindo(maxITmp, 0);
@@ -474,44 +391,24 @@ function eqInfoDraw(data, source) {
       clone.querySelector(".EQI_maxI").textContent = maxITmp;
       clone.querySelector(".EQI_maxI").style.background = shindoColor[0];
       clone.querySelector(".EQI_maxI").style.color = shindoColor[1];
-      clone.querySelector(".EQI_LgInt").style.display = Boolean(elm.maxLgInt)
-        ? "block"
-        : "none";
+      clone.querySelector(".EQI_LgInt").style.display = elm.maxLgInt ? "block" : "none";
       clone.querySelector(".EQI_LgIntBody").textContent = elm.maxLgInt;
       clone.querySelector(".EQI_LgInt").style.background = LgIntColor[0];
       clone.querySelector(".EQI_LgInt").style.color = LgIntColor[1];
-      clone.querySelector(".cancelled").style.display = elm.cancel
-        ? "flex"
-        : "none";
-      clone.querySelector(".EEWNotes").style.display =
-        elm.category == "EEW" ? "block" : "none";
-      clone.querySelector(".TestNotes").style.display =
-        elm.status == "試験" ? "block" : "none";
-      clone.querySelector(".trainingNotes").style.display =
-        elm.status == "訓練" ? "block" : "none";
+      clone.querySelector(".cancelled").style.display = elm.cancel ? "flex" : "none";
+      clone.querySelector(".EEWNotes").style.display = elm.category == "EEW" ? "block" : "none";
+      clone.querySelector(".TestNotes").style.display = elm.status == "試験" ? "block" : "none";
+      clone.querySelector(".trainingNotes").style.display = elm.status == "訓練" ? "block" : "none";
 
       if (elm.cancel) {
         clone.querySelector(".EQItem").classList.add("EQI_cancelled");
-        clone
-          .querySelector(".EQItem")
-          .setAttribute("aria-label", "キャンセルされた地震情報");
+        clone.querySelector(".EQItem").setAttribute("aria-label", "キャンセルされた地震情報");
       } else {
-        clone
-          .querySelector(".EQItem")
-          .setAttribute(
-            "aria-label",
-            `過去の地震情報アイテム：${elm.status == "訓練" ? "訓練報、" : ""}${
-              elm.status == "試験" ? "試験報、" : ""
-            }${maxITmp != "?" ? "最大震度" + NormalizeShindo(maxITmp, 1) + "、" : ""}${
-              elm.M || elm.M === 0
-                ? "マグニチュード" + elm.M.toFixed(1) + "、"
-                : ""
-            }${
-              elm.epiCenter ? "震源は" + elm.epiCenter + "、" : ""
-            }発生時刻は${NormalizeDate(
-              "M月D日h時m分",
-              elm.OriginTime
-            )}。エンターキーで詳細情報を確認。`
+        clone.querySelector(".EQItem")
+          .setAttribute("aria-label",
+            `過去の地震情報アイテム：${elm.status == "訓練" ? "訓練報、" : ""}${elm.status == "試験" ? "試験報、" : ""}
+            ${maxITmp != "?" ? "最大震度" + NormalizeShindo(maxITmp, 1) + "、" : ""}${elm.M || elm.M === 0 ? "マグニチュード" + elm.M.toFixed(1) + "、" : ""}
+            ${elm.epiCenter ? "震源は" + elm.epiCenter + "、" : ""}発生時刻は${NormalizeDate("M月D日h時m分", elm.OriginTime)}。エンターキーで詳細情報を確認。`
           );
         clone.querySelector(".EQItem").addEventListener("click", function () {
           window.electronAPI.messageReturn({
@@ -525,29 +422,15 @@ function eqInfoDraw(data, source) {
       }
     } else if (source == "usgs") {
       var colorTmp = NormalizeMMI(elm.maxI, 2);
-      clone
-        .querySelector(".EQItem")
-        .setAttribute("tabindex", index == 0 ? 2 : -1);
+      clone.querySelector(".EQItem").setAttribute("tabindex", index == 0 ? 2 : -1);
       clone.querySelector(".EQI_maxI").textContent = NormalizeMMI(elm.maxI, 1);
       clone.querySelector(".EQI_maxI").style.background = colorTmp[0];
       clone.querySelector(".EQI_maxI").style.color = colorTmp[1];
-      var MMIStr = elm.maxI
-        ? `最大改正メルカリ震度${NormalizeMMI(elm.maxI, 3)}`
-        : "";
-      clone
-        .querySelector(".EQItem")
-        .setAttribute(
-          "aria-label",
-          `過去の地震情報アイテム：${MMIStr}、${
-            elm.M || elm.M === 0
-              ? "マグニチュード" + elm.M.toFixed(1) + "、"
-              : ""
-          }${
-            elm.epiCenter ? "震源は" + elm.epiCenter + "、" : ""
-          }発生時刻は${NormalizeDate(
-            "M月D日h時m分",
-            elm.OriginTime
-          )}。エンターキーで詳細情報を確認。`
+      var MMIStr = elm.maxI ? `最大改正メルカリ震度${NormalizeMMI(elm.maxI, 3)}` : "";
+      clone.querySelector(".EQItem")
+        .setAttribute("aria-label",
+          `過去の地震情報アイテム：${MMIStr}、${elm.M || elm.M === 0 ? "マグニチュード" + elm.M.toFixed(1) + "、" : ""}
+          ${elm.epiCenter ? "震源は" + elm.epiCenter + "、" : ""}発生時刻は${NormalizeDate("M月D日h時m分", elm.OriginTime)}。エンターキーで詳細情報を確認。`
         );
 
       clone.querySelector(".EQItem").addEventListener("click", function () {
@@ -585,8 +468,7 @@ function EQDetect(data) {
     let _options = { steps: 80, units: "kilometers" };
 
     let _circle = turf.circle(_center, _radius, _options);
-    if (map && map.getSource("EQDItem_" + data.id))
-      map.getSource("EQDItem_" + data.id).setData(_circle);
+    if (map && map.getSource("EQDItem_" + data.id)) map.getSource("EQDItem_" + data.id).setData(_circle);
 
     EQD_Item.ECMarker.setLngLat([data.lng, data.lat]);
 
@@ -641,10 +523,7 @@ function EQDetect(data) {
       padding: 100,
     });
   }
-  document.getElementById("noEEW").style.display =
-    now_EEW.length == 0 && !now_tsunami && EQDetectItem.length == 0
-      ? "block"
-      : "none";
+  document.getElementById("noEEW").style.display = now_EEW.length == 0 && !now_tsunami && EQDetectItem.length == 0 ? "block" : "none";
 
   if (EQDetectItem.length != 0) document.body.classList.add("EQDetecting");
 }
@@ -652,10 +531,8 @@ function EQDetect(data) {
 function EQDetectFinish(id) {
   EQDetectItem.find(function (elmA, index) {
     if (elmA.id == id) {
-      if (map && map.getLayer("EQDItemF_" + id))
-        map.removeLayer("EQDItemF_" + id);
-      if (map && map.getSource("EQDItem_" + id))
-        map.removeSource("EQDItem_" + id);
+      if (map && map.getLayer("EQDItemF_" + id)) map.removeLayer("EQDItemF_" + id);
+      if (map && map.getSource("EQDItem_" + id)) map.removeSource("EQDItem_" + id);
       elmA.ECMarker.remove();
 
       EQDetectItem.splice(index, 1);
@@ -665,10 +542,7 @@ function EQDetectFinish(id) {
 
   var eqdItem = document.getElementById("EQDItem_" + id);
   if (eqdItem) eqdItem.remove();
-  document.getElementById("noEEW").style.display =
-    now_EEW.length == 0 && !now_tsunami && EQDetectItem.length == 0
-      ? "block"
-      : "none";
+  document.getElementById("noEEW").style.display = now_EEW.length == 0 && !now_tsunami && EQDetectItem.length == 0 ? "block" : "none";
 
   if (EQDetectItem.length == 0) document.body.classList.remove("EQDetecting");
 
@@ -683,11 +557,9 @@ document.getElementById("SideBarToggle").addEventListener("click", function () {
   document.getElementById("sideBar").classList.toggle("close");
   window.dispatchEvent(new Event("resize"));
 });
-document
-  .getElementById("sideBar")
-  .addEventListener("transitionend", function () {
-    window.dispatchEvent(new Event("resize"));
-  });
+document.getElementById("sideBar").addEventListener("transitionend", function () {
+  window.dispatchEvent(new Event("resize"));
+});
 
 //津波情報ウィンドウ表示
 document.getElementById("TsunamiDetail").addEventListener("click", function () {
@@ -713,10 +585,7 @@ function UpdateStatus(updateTime, LocalTime, type, condition, vendor) {
     kmoniTimeRedraw(updateTime, LocalTime, type, condition, vendor);
 }
 function kmoniTimeRedraw(updateTime, LocalTime, type, condition) {
-  document.getElementById(type + "_UT").textContent = NormalizeDate(
-    3,
-    updateTime
-  );
+  document.getElementById(type + "_UT").textContent = NormalizeDate(3, updateTime);
   var iconElm = document.getElementById(type + "_ICN");
 
   switch (condition) {
@@ -743,44 +612,36 @@ function kmoniTimeRedraw(updateTime, LocalTime, type, condition) {
 
 var UTDialogShow = false;
 //接続状況ダイアログ表示
-document
-  .getElementById("all_UpdateTime")
-  .addEventListener("click", function () {
-    updateTimeDialog.showModal();
-    UTDialogShow = true;
-    Object.keys(UpdateTime).forEach(function (elm) {
-      var utData = UpdateTime[elm];
-      kmoniTimeRedraw(
-        utData.updateTime,
-        utData.LocalTime,
-        utData.type,
-        utData.condition,
-        utData.vendor
-      );
-    });
+document.getElementById("all_UpdateTime").addEventListener("click", function () {
+  updateTimeDialog.showModal();
+  UTDialogShow = true;
+  Object.keys(UpdateTime).forEach(function (elm) {
+    var utData = UpdateTime[elm];
+    kmoniTimeRedraw(
+      utData.updateTime,
+      utData.LocalTime,
+      utData.type,
+      utData.condition,
+      utData.vendor
+    );
   });
+});
 //接続状況ダイアログ非表示
-document
-  .getElementById("UpdateTimeClose")
-  .addEventListener("click", function () {
-    updateTimeDialog.close();
-    UTDialogShow = false;
-  });
+document.getElementById("UpdateTimeClose").addEventListener("click", function () {
+  updateTimeDialog.close();
+  UTDialogShow = false;
+});
 
-document
-  .getElementById("CloseTsunamiCancel")
-  .addEventListener("click", function () {
-    document.getElementById("tsunamiCancel").style.display = "none";
-  });
-document
-  .getElementById("CloseTsunamiRevocation")
-  .addEventListener("click", function () {
-    document.getElementById("tsunamiRevocation").style.display = "none";
-  });
+document.getElementById("CloseTsunamiCancel").addEventListener("click", function () {
+  document.getElementById("tsunamiCancel").style.display = "none";
+});
+document.getElementById("CloseTsunamiRevocation").addEventListener("click", function () {
+  document.getElementById("tsunamiRevocation").style.display = "none";
+});
 
 function psWaveAnm() {
   if (now_EEW.length > 0) {
-    for (elm of now_EEW) {
+    for (var elm of now_EEW) {
       if (!elm.is_cancel) psWaveCalc(elm.EventID);
     }
   }
@@ -793,12 +654,10 @@ function psWaveAnm() {
   }
 }
 
-document
-  .getElementById("layerSwitch_close")
-  .addEventListener("click", function () {
-    document.getElementById("menu_wrap").classList.remove("menu_show");
-    document.getElementById("menu").close();
-  });
+document.getElementById("layerSwitch_close").addEventListener("click", function () {
+  document.getElementById("menu_wrap").classList.remove("menu_show");
+  document.getElementById("menu").close();
+});
 var tilemapActive = false;
 function layerSelect(layerName) {
   map.setLayoutProperty("tile0", "visibility", "none");
@@ -843,50 +702,31 @@ function overlaySelect(layerName, checked) {
     return;
   }
   if (layerName == "hinanjo") {
-    map.setLayoutProperty(
-      "hinanjo",
-      "visibility",
-      checked ? "visible" : "none"
-    );
+    map.setLayoutProperty("hinanjo", "visibility", checked ? "visible" : "none");
     hinanjoLayers.forEach(function (elm) {
       map.setLayoutProperty(elm, "visibility", checked ? "visible" : "none");
     });
   } else {
     if (layerName == "gsi_vector") {
       try {
-        [
-          "河川中心線",
-          "水涯線",
-          "道路中心線ZL4-10国道・高速",
-          "道路中心線色0",
-          "鉄道中心線",
-          "建築物0",
-          "道路中心線色1",
-          "道路中心線色橋1",
-          "道路縁",
-          "行政区画界線25000市区町村界",
-          "注記シンボル付きソート順100以上",
-          "注記シンボル付きソート順100未満",
-        ].forEach(function (elm) {
-          map.setLayoutProperty(elm, "visibility", visibility);
-        });
-      } catch (e) {}
+        ["河川中心線", "水涯線", "道路中心線ZL4-10国道・高速", "道路中心線色0", "鉄道中心線", "建築物0", "道路中心線色1", "道路中心線色橋1", "道路縁", "行政区画界線25000市区町村界", "注記シンボル付きソート順100以上", "注記シンボル付きソート順100未満",]
+          .forEach(function (elm) {
+            map.setLayoutProperty(elm, "visibility", visibility);
+          });
+        // eslint-disable-next-line no-empty
+      } catch { }
     } else {
       map.setLayoutProperty(layerName, "visibility", visibility);
     }
 
-    if (layerName == "over2")
-      document.getElementById("legend1").style.display = checked
-        ? "inline-block"
-        : "none";
-    else if (layerName == "over3") {
+    if (layerName == "over2") {
+      document.getElementById("legend1").style.display = checked ? "inline-block" : "none";
+    } else if (layerName == "over3") {
       over3_visiblity = checked;
-      document.getElementById("legend2").style.display =
-        over3_visiblity || over4_visiblity ? "inline-block" : "none";
+      document.getElementById("legend2").style.display = over3_visiblity || over4_visiblity ? "inline-block" : "none";
     } else if (layerName == "over4") {
       over4_visiblity = checked;
-      document.getElementById("legend2").style.display =
-        over3_visiblity || over4_visiblity ? "inline-block" : "none";
+      document.getElementById("legend2").style.display = over3_visiblity || over4_visiblity ? "inline-block" : "none";
     }
   }
   var selectedLayer = [];
@@ -912,8 +752,7 @@ function init() {
 
   const protocol = new pmtiles.Protocol();
   maplibregl.addProtocol("pmtiles", protocol.tile);
-  const PMTILES_URL =
-    "https://cyberjapandata.gsi.go.jp/xyz/optimal_bvmap-v1/optimal_bvmap-v1.pmtiles";
+  const PMTILES_URL = "https://cyberjapandata.gsi.go.jp/xyz/optimal_bvmap-v1/optimal_bvmap-v1.pmtiles";
   const p = new pmtiles.PMTiles(PMTILES_URL);
   protocol.add(p);
 
@@ -994,9 +833,7 @@ function init() {
         },
         tile2: {
           type: "raster",
-          tiles: [
-            "https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg",
-          ],
+          tiles: ["https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg"],
           tileSize: 256,
           attribution: "国土地理院",
           minzoom: 2,
@@ -1012,9 +849,7 @@ function init() {
         },
         over0: {
           type: "raster",
-          tiles: [
-            "https://cyberjapandata.gsi.go.jp/xyz/hillshademap/{z}/{x}/{y}.png",
-          ],
+          tiles: ["https://cyberjapandata.gsi.go.jp/xyz/hillshademap/{z}/{x}/{y}.png"],
           tileSize: 256,
           attribution: "国土地理院",
           minzoom: 2,
@@ -1022,9 +857,7 @@ function init() {
         },
         over1: {
           type: "raster",
-          tiles: [
-            "https://cyberjapandata.gsi.go.jp/xyz/vbmd_colorrel/{z}/{x}/{y}.png",
-          ],
+          tiles: ["https://cyberjapandata.gsi.go.jp/xyz/vbmd_colorrel/{z}/{x}/{y}.png"],
           tileSize: 256,
           attribution: "国土地理院",
           minzoom: 11,
@@ -1062,9 +895,7 @@ function init() {
         },
         over5: {
           type: "raster",
-          tiles: [
-            "https://www.jma.go.jp/tile/jma/transparent-cities/{z}/{x}/{y}.png",
-          ],
+          tiles: ["https://www.jma.go.jp/tile/jma/transparent-cities/{z}/{x}/{y}.png"],
           tileSize: 256,
           attribution: "気象庁",
           minzoom: 2,
@@ -1135,19 +966,7 @@ function init() {
           layout: { "line-join": "round", "line-cap": "round" },
           paint: {
             "line-color": config.color.Tsunami.TsunamiYohoColor,
-            "line-width": [
-              "interpolate",
-              ["linear"],
-              ["zoom"],
-              2,
-              10,
-              5,
-              20,
-              10,
-              80,
-              18,
-              300,
-            ],
+            "line-width": ["interpolate", ["linear"], ["zoom"], 2, 10, 5, 20, 10, 80, 18, 300,],
           },
           filter: ["==", "name", ""],
         },
@@ -1159,19 +978,7 @@ function init() {
           layout: { "line-join": "round", "line-cap": "round" },
           paint: {
             "line-color": config.color.Tsunami.TsunamiWatchColor,
-            "line-width": [
-              "interpolate",
-              ["linear"],
-              ["zoom"],
-              2,
-              10,
-              5,
-              20,
-              10,
-              80,
-              18,
-              300,
-            ],
+            "line-width": ["interpolate", ["linear"], ["zoom"], 2, 10, 5, 20, 10, 80, 18, 300,],
           },
           filter: ["==", "name", ""],
         },
@@ -1182,19 +989,7 @@ function init() {
           layout: { "line-join": "round", "line-cap": "round" },
           paint: {
             "line-color": config.color.Tsunami.TsunamiWarningColor,
-            "line-width": [
-              "interpolate",
-              ["linear"],
-              ["zoom"],
-              2,
-              10,
-              5,
-              20,
-              10,
-              80,
-              18,
-              300,
-            ],
+            "line-width": ["interpolate", ["linear"], ["zoom"], 2, 10, 5, 20, 10, 80, 18, 300,],
           },
           filter: ["==", "name", ""],
         },
@@ -1206,19 +1001,7 @@ function init() {
           layout: { "line-join": "round", "line-cap": "round" },
           paint: {
             "line-color": config.color.Tsunami.TsunamiMajorWarningColor,
-            "line-width": [
-              "interpolate",
-              ["linear"],
-              ["zoom"],
-              2,
-              10,
-              5,
-              20,
-              10,
-              80,
-              18,
-              300,
-            ],
+            "line-width": ["interpolate", ["linear"], ["zoom"], 2, 10, 5, 20, 10, 80, 18, 300,],
           },
           filter: ["==", "name", ""],
         },
@@ -1379,218 +1162,136 @@ function init() {
           minzoom: 6,
         },
         {
-          id: "河川中心線",
-          type: "line",
-          source: "v",
+          "id": "河川中心線",
+          "type": "line",
+          "source": "v",
           "source-layer": "RvrCL",
-          filter: ["!", ["in", ["get", "vt_code"], ["literal", [5302, 5322]]]],
-          paint: { "line-color": "#2468cb66", "line-width": 2 },
-          layout: { visibility: "none" },
+          "filter": ["!", ["in", ["get", "vt_code"], ["literal", [5302, 5322]]]],
+          "paint": { "line-color": "#2468cb66", "line-width": 2 },
+          "layout": { visibility: "none" },
         },
         {
-          id: "水涯線",
-          type: "line",
-          source: "v",
+          "id": "水涯線",
+          "type": "line",
+          "source": "v",
           "source-layer": "WL",
-          paint: { "line-color": "#2468cb66", "line-width": 2 },
-          layout: { visibility: "none" },
+          "paint": { "line-color": "#2468cb66", "line-width": 2 },
+          "layout": { visibility: "none" },
         },
         {
-          id: "道路中心線ZL4-10国道・高速",
-          maxzoom: 11,
-          minzoom: 9,
-          type: "line",
-          source: "v",
+          "id": "道路中心線ZL4-10国道・高速",
+          "maxzoom": 11,
+          "minzoom": 9,
+          "type": "line",
+          "source": "v",
           "source-layer": "RdCL",
-          filter: [
-            "any",
-            [
-              "in",
-              ["get", "vt_rdctg"],
-              ["literal", ["主要道路", "国道", "都道府県道", "市区町村道等"]],
-            ],
-            ["==", ["get", "vt_rdctg"], "高速自動車国道等"],
+          "filter": ["any", ["in", ["get", "vt_rdctg"], ["literal", ["主要道路", "国道", "都道府県道", "市区町村道等"]],], ["==", ["get", "vt_rdctg"], "高速自動車国道等"],
           ],
-          layout: {
+          "layout": {
             "line-cap": "round",
             "line-join": "round",
             "line-sort-key": ["get", "vt_drworder"],
-            visibility: "none",
+            "visibility": "none",
           },
-          paint: { "line-color": "#80808066", "line-width": 3 },
+          "paint": { "line-color": "#80808066", "line-width": 3 },
         },
         {
-          id: "道路中心線色0",
-          minzoom: 11,
-          maxzoom: 17,
-          type: "line",
-          source: "v",
+          "id": "道路中心線色0",
+          "minzoom": 11,
+          "maxzoom": 17,
+          "type": "line",
+          "source": "v",
           "source-layer": "RdCL",
-          filter: [
-            "any",
-            [
-              "step",
-              ["zoom"],
-              [
-                "all",
-                ["==", ["get", "vt_lvorder"], 0],
-                [
-                  "!",
-                  [
-                    "in",
-                    ["get", "vt_code"],
-                    ["literal", [2703, 2713, 2723, 2733, 2724, 2734]],
-                  ],
-                ],
-              ],
-              17,
-              [
-                "all",
-                ["in", ["get", "vt_flag17"], ["literal", [1, 2]]],
-                ["!", ["in", ["get", "vt_code"], ["literal", [2724, 2734]]]],
-              ],
-            ],
-            [
-              "all",
-              ["==", ["get", "vt_lvorder"], 0],
-              ["in", ["get", "vt_code"], ["literal", [2703, 2713, 2723, 2733]]],
-            ],
-          ],
-          layout: {
+          "filter": ["any", ["step", ["zoom"], ["all", ["==", ["get", "vt_lvorder"], 0], ["!", ["in", ["get", "vt_code"], ["literal", [2703, 2713, 2723, 2733, 2724, 2734]],],],], 17, ["all", ["in", ["get", "vt_flag17"], ["literal", [1, 2]]], ["!", ["in", ["get", "vt_code"], ["literal", [2724, 2734]]]],],], ["all", ["==", ["get", "vt_lvorder"], 0], ["in", ["get", "vt_code"], ["literal", [2703, 2713, 2723, 2733]]],],],
+          "layout": {
             "line-join": "round",
             "line-round-limit": 1.57,
             "line-sort-key": ["get", "vt_drworder"],
-            visibility: "none",
+            "visibility": "none",
           },
-          paint: { "line-color": "#80808066", "line-width": 2 },
+          "paint": { "line-color": "#80808066", "line-width": 2 },
         },
         {
-          id: "鉄道中心線",
-          minzoom: 11,
-          maxzoom: 17,
-          type: "line",
-          source: "v",
+          "id": "鉄道中心線",
+          "minzoom": 11,
+          "maxzoom": 17,
+          "type": "line",
+          "source": "v",
           "source-layer": "RailCL",
-          filter: [
-            "any",
-            [
-              "all",
-              [
-                "!",
-                [
-                  "in",
-                  ["get", "vt_railstate"],
-                  ["literal", ["トンネル", "雪覆い", "地下", "橋・高架"]],
-                ],
-              ],
-              ["==", ["get", "vt_lvorder"], 0],
-            ],
-            [
-              "all",
-              ["==", ["get", "vt_railstate"], "橋・高架"],
-              ["==", ["get", "vt_lvorder"], 0],
-            ],
-            [
-              "all",
-              [
-                "!",
-                [
-                  "in",
-                  ["get", "vt_railstate"],
-                  ["literal", ["トンネル", "雪覆い", "地下", "橋・高架"]],
-                ],
-              ],
-              ["==", ["get", "vt_lvorder"], 1],
-            ],
-          ],
-          paint: {
+          "filter": ["any", ["all", ["!", ["in", ["get", "vt_railstate"], ["literal", ["トンネル", "雪覆い", "地下", "橋・高架"]],],], ["==", ["get", "vt_lvorder"], 0],], ["all", ["==", ["get", "vt_railstate"], "橋・高架"], ["==", ["get", "vt_lvorder"], 0],], ["all", ["!", ["in", ["get", "vt_railstate"], ["literal", ["トンネル", "雪覆い", "地下", "橋・高架"]],],], ["==", ["get", "vt_lvorder"], 1],],],
+          "paint": {
             "line-color": "#80808066",
             "line-width": 2.5,
             "line-dasharray": [1, 1],
           },
-          layout: { visibility: "none" },
+          "layout": { visibility: "none" },
         },
         {
-          id: "建築物0",
-          type: "fill",
-          source: "v",
+          "id": "建築物0",
+          "type": "fill",
+          "source": "v",
           "source-layer": "BldA",
-          filter: ["==", ["get", "vt_lvorder"], 0],
-          paint: { "fill-color": "#80808033" },
-          layout: { visibility: "none" },
+          "filter": ["==", ["get", "vt_lvorder"], 0],
+          "paint": { "fill-color": "#80808033" },
+          "layout": { visibility: "none" },
         },
         {
-          id: "道路中心線色1",
-          minzoom: 11,
-          maxzoom: 17,
-          type: "line",
-          source: "v",
+          "id": "道路中心線色1",
+          "minzoom": 11,
+          "maxzoom": 17,
+          "type": "line",
+          "source": "v",
           "source-layer": "RdCL",
-          filter: [
-            "all",
-            ["==", ["get", "vt_lvorder"], 1],
-            [
-              "!",
-              [
-                "in",
-                ["get", "vt_code"],
-                ["literal", [2703, 2713, 2723, 2733, 2724, 2734]],
-              ],
-            ],
-          ],
-          layout: {
-            visibility: "none",
+          "filter": ["all", ["==", ["get", "vt_lvorder"], 1], ["!", ["in", ["get", "vt_code"], ["literal", [2703, 2713, 2723, 2733, 2724, 2734]],],],],
+          "layout": {
+            "visibility": "none",
             "line-join": "round",
             "line-round-limit": 1.57,
             "line-sort-key": ["get", "vt_drworder"],
           },
-          paint: {
+          "paint": {
             "line-color": "#80808066",
             "line-width": 4,
             "line-dasharray": [1, 1],
           },
         },
         {
-          id: "道路中心線色橋1",
-          minzoom: 11,
-          maxzoom: 17,
-          type: "line",
-          source: "v",
+          "id": "道路中心線色橋1",
+          "minzoom": 11,
+          "maxzoom": 17,
+          "type": "line",
+          "source": "v",
           "source-layer": "RdCL",
-          filter: [
-            "all",
-            ["==", ["get", "vt_lvorder"], 1],
-            ["in", ["get", "vt_code"], ["literal", [2703, 2713, 2723, 2733]]],
-          ],
-          layout: {
+          "filter": ["all", ["==", ["get", "vt_lvorder"], 1], ["in", ["get", "vt_code"], ["literal", [2703, 2713, 2723, 2733]]],],
+          "layout": {
             "line-join": "round",
             "line-round-limit": 1.57,
             "line-sort-key": ["get", "vt_drworder"],
-            visibility: "none",
+            "visibility": "none",
           },
-          paint: { "line-color": "#80808066", "line-width": 1.5 },
+          "paint": { "line-color": "#80808066", "line-width": 1.5 },
         },
         {
-          id: "道路縁",
-          minzoom: 17,
-          type: "line",
-          source: "v",
+          "id": "道路縁",
+          "minzoom": 17,
+          "type": "line",
+          "source": "v",
           "source-layer": "RdEdg",
-          layout: {
+          "layout": {
             "line-cap": "square",
             "line-sort-key": ["get", "vt_drworder"],
-            visibility: "none",
+            "visibility": "none",
           },
-          paint: { "line-color": "#80808066", "line-width": 1.5 },
+          "paint": { "line-color": "#80808066", "line-width": 1.5 },
         },
         {
-          id: "行政区画界線25000市区町村界",
-          type: "line",
-          source: "v",
+          "id": "行政区画界線25000市区町村界",
+          "type": "line",
+          "source": "v",
           "source-layer": "AdmBdry",
-          filter: ["==", ["get", "vt_code"], 1212],
-          layout: { "line-cap": "square", visibility: "none" },
-          paint: { "line-color": "#666666", "line-width": 1 },
+          "filter": ["==", ["get", "vt_code"], 1212],
+          "layout": { "line-cap": "square", "visibility": "none" },
+          "paint": { "line-color": "#666666", "line-width": 1 },
         },
         // prettier-ignore
         {
@@ -1614,29 +1315,9 @@ function init() {
               ["at", 1, ["get", "rgb"]],
               ["at", 2, ["get", "rgb"]],
             ],
-            "circle-radius": [
-              "interpolate",
-              ["linear"],
-              ["zoom"],
-              2,
-              1,
-              5,
-              3.75,
-              15,
-              33.75,
-            ],
+            "circle-radius": ["interpolate", ["linear"], ["zoom"], 2, 1, 5, 3.75, 15, 33.75,],
             "circle-stroke-width": 2,
-            "circle-stroke-color": [
-              "match",
-              ["get", "detectLv"],
-              0,
-              "transparent",
-              1,
-              "#cb732b",
-              2,
-              "#cb2b2b",
-              "#0000",
-            ],
+            "circle-stroke-color": ["match", ["get", "detectLv"], 0, "transparent", 1, "#cb732b", 2, "#cb2b2b", "#0000",],
           },
         },
         {
@@ -1653,17 +1334,7 @@ function init() {
               ["at", 1, ["get", "rgb"]],
               ["at", 2, ["get", "rgb"]],
             ],
-            "circle-radius": [
-              "interpolate",
-              ["linear"],
-              ["zoom"],
-              2,
-              1,
-              5,
-              3.75,
-              15,
-              33.75,
-            ],
+            "circle-radius": ["interpolate", ["linear"], ["zoom"], 2, 1, 5, 3.75, 15, 33.75,],
           },
         },
         {
@@ -1680,17 +1351,7 @@ function init() {
               ["at", 1, ["get", "rgb"]],
               ["at", 2, ["get", "rgb"]],
             ],
-            "circle-radius": [
-              "interpolate",
-              ["linear"],
-              ["zoom"],
-              2,
-              1,
-              5,
-              3.75,
-              15,
-              33.75,
-            ],
+            "circle-radius": ["interpolate", ["linear"], ["zoom"], 2, 1, 5, 3.75, 15, 33.75,],
           },
         },
         {
@@ -1707,507 +1368,16 @@ function init() {
               ["at", 1, ["get", "rgb"]],
               ["at", 2, ["get", "rgb"]],
             ],
-            "circle-radius": [
-              "interpolate",
-              ["linear"],
-              ["zoom"],
-              2,
-              1,
-              5,
-              3.75,
-              15,
-              33.75,
-            ],
+            "circle-radius": ["interpolate", ["linear"], ["zoom"], 2, 1, 5, 3.75, 15, 33.75,],
           },
         },
-        {
-          id: "注記シンボル付きソート順100以上",
-          type: "symbol",
-          source: "v",
-          "source-layer": "Anno",
-          filter: [
-            "step",
-            ["zoom"],
-            [
-              "all",
-              ["==", ["geometry-type"], "Point"],
-              [
-                "in",
-                ["get", "vt_code"],
-                [
-                  "literal",
-                  [
-                    653, 661, 662, 3201, 3202, 3203, 3204, 3211, 3215, 3216,
-                    3217, 3218, 3231, 3232, 3242, 3243, 3244, 3261, 4101, 4102,
-                    4103, 4104, 4105, 6301, 6311, 6312, 6313, 6314, 6321, 6322,
-                    6323, 6324, 6325, 6326, 6327, 6332, 6342, 6351, 6362, 7101,
-                    7102, 7103, 7711, 8103, 8105,
-                  ],
-                ],
-              ],
-            ],
-            16,
-            [
-              "all",
-              ["==", ["geometry-type"], "Point"],
-              ["in", ["get", "vt_flag17"], ["literal", [0, 1]]],
-              [
-                "in",
-                ["get", "vt_code"],
-                [
-                  "literal",
-                  [
-                    653, 661, 662, 3201, 3202, 3203, 3204, 3211, 3215, 3216,
-                    3217, 3218, 3231, 3232, 3242, 3243, 3244, 3261, 4101, 4102,
-                    4103, 4104, 4105, 6301, 6311, 6312, 6313, 6314, 6321, 6322,
-                    6323, 6324, 6325, 6326, 6327, 6332, 6342, 6351, 6362, 7101,
-                    7102, 7103, 7711, 8103, 8105,
-                  ],
-                ],
-              ],
-            ],
-            17,
-            [
-              "all",
-              ["==", ["geometry-type"], "Point"],
-              ["in", ["get", "vt_flag17"], ["literal", [1, 2]]],
-              [
-                "in",
-                ["get", "vt_code"],
-                [
-                  "literal",
-                  [
-                    653, 661, 662, 3201, 3202, 3203, 3204, 3211, 3215, 3216,
-                    3217, 3218, 3231, 3232, 3242, 3243, 3244, 3261, 4101, 4102,
-                    4103, 4104, 4105, 6301, 6311, 6312, 6313, 6314, 6321, 6322,
-                    6323, 6324, 6325, 6326, 6327, 6332, 6342, 6351, 6362, 7101,
-                    7102, 7103, 7711, 8103, 8105,
-                  ],
-                ],
-              ],
-            ],
-          ],
-          layout: {
-            visibility: "none",
-            "text-allow-overlap": false,
-            "text-font": [
-              "match",
-              ["get", "vt_code"],
-              [321, 322, 341, 342, 344, 345, 347, 820, 840, 841, 842],
-              ["literal", ["NotoSerifJP-SemiBold"]],
-              ["literal", ["NotoSansJP-Regular"]],
-            ],
-            "text-justify": "auto",
-            "text-size": [
-              "let",
-              "size",
-              [
-                "match",
-                ["get", "vt_code"],
-                [361, 1403, 7101, 7102, 7103, 7201, 7221],
-                10,
-                [334, 730],
-                11,
-                [
-                  312, 313, 314, 315, 316, 322, 323, 332, 342, 353, 412, 533,
-                  621, 631, 632, 633, 634, 653, 654, 720, 999, 2941, 2942, 2943,
-                  2944, 2945,
-                ],
-                12,
-                [343, 1402, 7711],
-                13,
-                [311, 346, 347, 413, 422, 1303],
-                14,
-                [
-                  210, 220, 321, 331, 352, 411, 421, 423, 431, 432, 441, 511,
-                  521, 522, 523, 531, 532, 534, 611, 612, 613, 615, 651, 661,
-                  662, 671, 672, 673, 681, 1302,
-                ],
-                15,
-                [130, 1301, 1401],
-                16,
-                [140, 333, 351],
-                18,
-                [110, 120, 341, 344, 345],
-                20,
-                [
-                  348, 800, 810, 820, 822, 830, 831, 832, 833, 840, 841, 842,
-                  843, 850, 860, 870, 880, 881, 882, 883, 884, 885, 886, 887,
-                  888, 889, 890, 899,
-                ],
-                24,
-                10,
-              ],
-              [
-                "interpolate",
-                ["linear"],
-                ["zoom"],
-                4,
-                ["*", 0.6, ["var", "size"]],
-                8,
-                ["var", "size"],
-                11,
-                [
-                  "match",
-                  ["get", "vt_code"],
-                  [1401, 1402, 1403],
-                  20,
-                  422,
-                  ["*", 0.7, ["var", "size"]],
-                  ["var", "size"],
-                ],
-                12,
-                ["var", "size"],
-                14,
-                ["var", "size"],
-                17,
-                [
-                  "match",
-                  ["get", "vt_code"],
-                  [412, 422],
-                  ["*", 2, ["var", "size"]],
-                  ["var", "size"],
-                ],
-              ],
-            ],
-            "text-field": ["get", "vt_text"],
-            "text-max-width": 100,
-            "text-radial-offset": 0.5,
-            "text-variable-anchor": ["top", "bottom", "left", "right"],
-            "text-writing-mode": ["horizontal"],
-          },
-          paint: {
-            "text-color": [
-              "let",
-              "color",
-              [
-                "match",
-                ["get", "vt_code"],
-                521,
-                "rgba(80,80,80,1)",
-                348,
-                "rgba(150,150,150,1)",
-                [
-                  411, 412, 413, 421, 422, 423, 431, 432, 441, 860, 2941, 2942,
-                  2943, 2944, 2945,
-                ],
-                "rgba(230,230,230,1)",
-                [7372, 7711],
-                "rgba(80,80,80,1)",
-                7352,
-                "rgba(50,50,50,1)",
-                [2901, 2903, 2904],
-                "rgba(255,255,255,1)",
-                [321, 322, 341, 344, 345, 820, 840, 841],
-                "rgba(80,80,80,1)",
-                220,
-                "rgba(150,150,150,1)",
-                312,
-                "rgba(150,150,150,1)",
-                [333, 346],
-                "rgba(150,150,150,1)",
-                [
-                  511, 522, 523, 531, 532, 534, 611, 612, 613, 614, 615, 621,
-                  623, 631, 632, 633, 634, 641, 642, 651, 652, 653, 654, 661,
-                  662, 671, 672, 673, 681, 720, 730, 870, 880, 881, 882, 883,
-                  884, 885, 886, 887, 888, 889, 890, 899, 999, 3201, 3202, 3203,
-                  3204, 3205, 3206, 3211, 3212, 3213, 3214, 3215, 3216, 3217,
-                  3218, 3221, 3231, 3232, 3241, 3242, 3243, 3244,
-                ],
-                "rgba(150,150,150,1)",
-                "rgba(200,200,200,1)",
-              ],
-              [
-                "step",
-                ["zoom"],
-                [
-                  "match",
-                  ["get", "vt_code"],
-                  [661, 662],
-                  "rgba(200,200,200,0)",
-                  ["var", "color"],
-                ],
-                14,
-                [
-                  "match",
-                  ["get", "vt_code"],
-                  [3201, 3204, 3215, 3216, 3217, 3218, 3243],
-                  "rgba(200,200,200,0)",
-                  ["var", "color"],
-                ],
-              ],
-            ],
-            "text-halo-color": [
-              "step",
-              ["zoom"],
-              [
-                "match",
-                ["get", "vt_code"],
-                [661, 662],
-                "rgba(50,50,50,0)",
-                "rgba(50,50,50,1)",
-              ],
-              14,
-              [
-                "match",
-                ["get", "vt_code"],
-                [3201, 3204, 3215, 3216, 3217, 3218, 3243],
-                "rgba(50,50,50,0)",
-                "rgba(50,50,50,1)",
-              ],
-            ],
-            "text-halo-width": 1,
-          },
-        },
-        {
-          id: "注記シンボル付きソート順100未満",
-          type: "symbol",
-          source: "v",
-          "source-layer": "Anno",
-          filter: [
-            "step",
-            ["zoom"],
-            [
-              "all",
-              ["==", ["geometry-type"], "Point"],
-              [
-                "in",
-                ["get", "vt_code"],
-                [
-                  "literal",
-                  [
-                    621, 631, 632, 633, 1301, 1302, 1303, 1401, 1402, 1403,
-                    2941, 2942, 2945, 3205, 3206, 3212, 3213, 3214, 3221, 3241,
-                    6331, 6361, 6367, 6368, 6371, 6373, 6375, 6376, 6381, 7201,
-                    7221,
-                  ],
-                ],
-              ],
-            ],
-            16,
-            [
-              "all",
-              ["==", ["geometry-type"], "Point"],
-              ["in", ["get", "vt_flag17"], ["literal", [0, 1]]],
-              [
-                "in",
-                ["get", "vt_code"],
-                [
-                  "literal",
-                  [
-                    621, 631, 632, 633, 1301, 1302, 1303, 1401, 1402, 1403,
-                    2941, 2942, 2945, 3205, 3206, 3212, 3213, 3214, 3221, 3241,
-                    6331, 6361, 6367, 6368, 6371, 6373, 6375, 6376, 6381, 7201,
-                    7221,
-                  ],
-                ],
-              ],
-            ],
-            17,
-            [
-              "all",
-              ["==", ["geometry-type"], "Point"],
-              ["in", ["get", "vt_flag17"], ["literal", [1, 2]]],
-              [
-                "in",
-                ["get", "vt_code"],
-                [
-                  "literal",
-                  [
-                    621, 631, 632, 633, 1301, 1302, 1303, 1401, 1402, 1403,
-                    2941, 2942, 2945, 3205, 3206, 3212, 3213, 3214, 3221, 3241,
-                    6331, 6361, 6367, 6368, 6371, 6373, 6375, 6376, 6381, 7201,
-                    7221,
-                  ],
-                ],
-              ],
-            ],
-          ],
-          layout: {
-            visibility: "none",
-            "text-allow-overlap": false,
-            "text-font": [
-              "match",
-              ["get", "vt_code"],
-              [321, 322, 341, 342, 344, 345, 347, 820, 840, 841, 842],
-              ["literal", ["NotoSerifJP-SemiBold"]],
-              ["literal", ["NotoSansJP-Regular"]],
-            ],
-            "text-justify": "auto",
-            "text-size": [
-              "let",
-              "size",
-              [
-                "match",
-                ["get", "vt_code"],
-                [361, 1403, 7101, 7102, 7103, 7201, 7221],
-                10,
-                [334, 730],
-                11,
-                [
-                  312, 313, 314, 315, 316, 322, 323, 332, 342, 353, 412, 533,
-                  621, 631, 632, 633, 634, 653, 654, 720, 999, 2941, 2942, 2943,
-                  2944, 2945,
-                ],
-                12,
-                [343, 1402, 7711],
-                13,
-                [311, 346, 347, 413, 422, 1303],
-                14,
-                [
-                  210, 220, 321, 331, 352, 411, 421, 423, 431, 432, 441, 511,
-                  521, 522, 523, 531, 532, 534, 611, 612, 613, 615, 651, 661,
-                  662, 671, 672, 673, 681, 1302,
-                ],
-                15,
-                [130, 1301, 1401],
-                16,
-                [140, 333, 351],
-                18,
-                [110, 120, 341, 344, 345],
-                20,
-                [
-                  348, 800, 810, 820, 822, 830, 831, 832, 833, 840, 841, 842,
-                  843, 850, 860, 870, 880, 881, 882, 883, 884, 885, 886, 887,
-                  888, 889, 890, 899,
-                ],
-                24,
-                10,
-              ],
-              [
-                "interpolate",
-                ["linear"],
-                ["zoom"],
-                4,
-                ["*", 0.6, ["var", "size"]],
-                8,
-                ["var", "size"],
-                11,
-                [
-                  "match",
-                  ["get", "vt_code"],
-                  [1401, 1402, 1403],
-                  20,
-                  422,
-                  ["*", 0.7, ["var", "size"]],
-                  ["var", "size"],
-                ],
-                12,
-                ["var", "size"],
-                14,
-                [
-                  "match",
-                  ["get", "vt_code"],
-                  [2941, 2942],
-                  ["*", 1.3, ["var", "size"]],
-                  ["var", "size"],
-                ],
-                17,
-                [
-                  "match",
-                  ["get", "vt_code"],
-                  [412, 422],
-                  ["*", 2, ["var", "size"]],
-                  ["var", "size"],
-                ],
-              ],
-            ],
-            "text-field": ["get", "vt_text"],
-            "text-max-width": 100,
-            "text-radial-offset": 0.5,
-            "text-variable-anchor": ["top", "bottom", "left", "right"],
-            "text-writing-mode": ["horizontal"],
-          },
-          paint: {
-            "text-color": [
-              "let",
-              "color",
-              [
-                "match",
-                ["get", "vt_code"],
-                521,
-                "rgba(80,80,80,1)",
-                348,
-                "rgba(150,150,150,1)",
-                [
-                  411, 412, 413, 421, 422, 423, 431, 432, 441, 860, 2941, 2942,
-                  2943, 2944, 2945,
-                ],
-                "rgba(230,230,230,1)",
-                [7372, 7711],
-                "rgba(80,80,80,1)",
-                7352,
-                "rgba(50,50,50,1)",
-                [2901, 2903, 2904],
-                "rgba(255,255,255,1)",
-                [321, 322, 341, 344, 345, 820, 840, 841],
-                "rgba(80,80,80,1)",
-                220,
-                "rgba(150,150,150,1)",
-                312,
-                "rgba(150,150,150,1)",
-                [333, 346],
-                "rgba(150,150,150,1)",
-                [
-                  511, 522, 523, 531, 532, 534, 611, 612, 613, 614, 615, 621,
-                  623, 631, 632, 633, 634, 641, 642, 651, 652, 653, 654, 661,
-                  662, 671, 672, 673, 681, 720, 730, 870, 880, 881, 882, 883,
-                  884, 885, 886, 887, 888, 889, 890, 899, 999, 3201, 3202, 3203,
-                  3204, 3205, 3206, 3211, 3212, 3213, 3214, 3215, 3216, 3217,
-                  3218, 3221, 3231, 3232, 3241, 3242, 3243, 3244,
-                ],
-                "rgba(150,150,150,1)",
-                "rgba(200,200,200,1)",
-              ],
-              [
-                "step",
-                ["zoom"],
-                [
-                  "match",
-                  ["get", "vt_code"],
-                  [631, 632, 633, 6368, 6376],
-                  "rgba(200,200,200,0)",
-                  ["var", "color"],
-                ],
-                14,
-                [
-                  "match",
-                  ["get", "vt_code"],
-                  [3212, 3213, 3214],
-                  "rgba(200,200,200,0)",
-                  ["var", "color"],
-                ],
-              ],
-            ],
-            "text-halo-color": [
-              "step",
-              ["zoom"],
-              [
-                "match",
-                ["get", "vt_code"],
-                [631, 632, 633, 6368, 6376],
-                "rgba(50,50,50,0)",
-                "rgba(50,50,50,1)",
-              ],
-              14,
-              [
-                "match",
-                ["get", "vt_code"],
-                [3212, 3213, 3214],
-                "rgba(50,50,50,0)",
-                "rgba(50,50,50,1)",
-              ],
-            ],
-            "text-halo-width": 1,
-          },
-        },
+        { "id": "注記シンボル付きソート順100以上", "type": "symbol", "source": "v", "source-layer": "Anno", "filter": ["step", ["zoom"], ["all", ["==", ["geometry-type"], "Point"], ["in", ["get", "vt_code"], ["literal", [653, 661, 662, 3201, 3202, 3203, 3204, 3211, 3215, 3216, 3217, 3218, 3231, 3232, 3242, 3243, 3244, 3261, 4101, 4102, 4103, 4104, 4105, 6301, 6311, 6312, 6313, 6314, 6321, 6322, 6323, 6324, 6325, 6326, 6327, 6332, 6342, 6351, 6362, 7101, 7102, 7103, 7711, 8103, 8105]]]], 16, ["all", ["==", ["geometry-type"], "Point"], ["in", ["get", "vt_flag17"], ["literal", [0, 1]]], ["in", ["get", "vt_code"], ["literal", [653, 661, 662, 3201, 3202, 3203, 3204, 3211, 3215, 3216, 3217, 3218, 3231, 3232, 3242, 3243, 3244, 3261, 4101, 4102, 4103, 4104, 4105, 6301, 6311, 6312, 6313, 6314, 6321, 6322, 6323, 6324, 6325, 6326, 6327, 6332, 6342, 6351, 6362, 7101, 7102, 7103, 7711, 8103, 8105]]]], 17, ["all", ["==", ["geometry-type"], "Point"], ["in", ["get", "vt_flag17"], ["literal", [1, 2]]], ["in", ["get", "vt_code"], ["literal", [653, 661, 662, 3201, 3202, 3203, 3204, 3211, 3215, 3216, 3217, 3218, 3231, 3232, 3242, 3243, 3244, 3261, 4101, 4102, 4103, 4104, 4105, 6301, 6311, 6312, 6313, 6314, 6321, 6322, 6323, 6324, 6325, 6326, 6327, 6332, 6342, 6351, 6362, 7101, 7102, 7103, 7711, 8103, 8105]]]]], "layout": { "visibility": "none", "text-allow-overlap": false, "text-font": ["match", ["get", "vt_code"], [321, 322, 341, 342, 344, 345, 347, 820, 840, 841, 842], ["literal", ["NotoSerifJP-SemiBold"]], ["literal", ["NotoSansJP-Regular"]]], "text-justify": "auto", "text-size": ["let", "size", ["match", ["get", "vt_code"], [361, 1403, 7101, 7102, 7103, 7201, 7221], 10, [334, 730], 11, [312, 313, 314, 315, 316, 322, 323, 332, 342, 353, 412, 533, 621, 631, 632, 633, 634, 653, 654, 720, 999, 2941, 2942, 2943, 2944, 2945], 12, [343, 1402, 7711], 13, [311, 346, 347, 413, 422, 1303], 14, [210, 220, 321, 331, 352, 411, 421, 423, 431, 432, 441, 511, 521, 522, 523, 531, 532, 534, 611, 612, 613, 615, 651, 661, 662, 671, 672, 673, 681, 1302], 15, [130, 1301, 1401], 16, [140, 333, 351], 18, [110, 120, 341, 344, 345], 20, [348, 800, 810, 820, 822, 830, 831, 832, 833, 840, 841, 842, 843, 850, 860, 870, 880, 881, 882, 883, 884, 885, 886, 887, 888, 889, 890, 899], 24, 10], ["interpolate", ["linear"], ["zoom"], 4, ["*", 0.6, ["var", "size"]], 8, ["var", "size"], 11, ["match", ["get", "vt_code"], [1401, 1402, 1403], 20, 422, ["*", 0.7, ["var", "size"]], ["var", "size"]], 12, ["var", "size"], 14, ["var", "size"], 17, ["match", ["get", "vt_code"], [412, 422], ["*", 2, ["var", "size"]], ["var", "size"]]]], "text-field": ["get", "vt_text"], "text-max-width": 100, "text-radial-offset": 0.5, "text-variable-anchor": ["top", "bottom", "left", "right"], "text-writing-mode": ["horizontal"] }, "paint": { "text-color": ["let", "color", ["match", ["get", "vt_code"], 521, "rgba(80,80,80,1)", 348, "rgba(150,150,150,1)", [411, 412, 413, 421, 422, 423, 431, 432, 441, 860, 2941, 2942, 2943, 2944, 2945], "rgba(230,230,230,1)", [7372, 7711], "rgba(80,80,80,1)", 7352, "rgba(50,50,50,1)", [2901, 2903, 2904], "rgba(255,255,255,1)", [321, 322, 341, 344, 345, 820, 840, 841], "rgba(80,80,80,1)", 220, "rgba(150,150,150,1)", 312, "rgba(150,150,150,1)", [333, 346], "rgba(150,150,150,1)", [511, 522, 523, 531, 532, 534, 611, 612, 613, 614, 615, 621, 623, 631, 632, 633, 634, 641, 642, 651, 652, 653, 654, 661, 662, 671, 672, 673, 681, 720, 730, 870, 880, 881, 882, 883, 884, 885, 886, 887, 888, 889, 890, 899, 999, 3201, 3202, 3203, 3204, 3205, 3206, 3211, 3212, 3213, 3214, 3215, 3216, 3217, 3218, 3221, 3231, 3232, 3241, 3242, 3243, 3244], "rgba(150,150,150,1)", "rgba(200,200,200,1)"], ["step", ["zoom"], ["match", ["get", "vt_code"], [661, 662], "rgba(200,200,200,0)", ["var", "color"]], 14, ["match", ["get", "vt_code"], [3201, 3204, 3215, 3216, 3217, 3218, 3243], "rgba(200,200,200,0)", ["var", "color"]]]], "text-halo-color": ["step", ["zoom"], ["match", ["get", "vt_code"], [661, 662], "rgba(50,50,50,0)", "rgba(50,50,50,1)"], 14, ["match", ["get", "vt_code"], [3201, 3204, 3215, 3216, 3217, 3218, 3243], "rgba(50,50,50,0)", "rgba(50,50,50,1)"]], "text-halo-width": 1 } },
+        { "id": "注記シンボル付きソート順100未満", "type": "symbol", "source": "v", "source-layer": "Anno", "filter": ["step", ["zoom"], ["all", ["==", ["geometry-type"], "Point"], ["in", ["get", "vt_code"], ["literal", [621, 631, 632, 633, 1301, 1302, 1303, 1401, 1402, 1403, 2941, 2942, 2945, 3205, 3206, 3212, 3213, 3214, 3221, 3241, 6331, 6361, 6367, 6368, 6371, 6373, 6375, 6376, 6381, 7201, 7221]]]], 16, ["all", ["==", ["geometry-type"], "Point"], ["in", ["get", "vt_flag17"], ["literal", [0, 1]]], ["in", ["get", "vt_code"], ["literal", [621, 631, 632, 633, 1301, 1302, 1303, 1401, 1402, 1403, 2941, 2942, 2945, 3205, 3206, 3212, 3213, 3214, 3221, 3241, 6331, 6361, 6367, 6368, 6371, 6373, 6375, 6376, 6381, 7201, 7221]]]], 17, ["all", ["==", ["geometry-type"], "Point"], ["in", ["get", "vt_flag17"], ["literal", [1, 2]]], ["in", ["get", "vt_code"], ["literal", [621, 631, 632, 633, 1301, 1302, 1303, 1401, 1402, 1403, 2941, 2942, 2945, 3205, 3206, 3212, 3213, 3214, 3221, 3241, 6331, 6361, 6367, 6368, 6371, 6373, 6375, 6376, 6381, 7201, 7221]]]]], "layout": { "visibility": "none", "text-allow-overlap": false, "text-font": ["match", ["get", "vt_code"], [321, 322, 341, 342, 344, 345, 347, 820, 840, 841, 842], ["literal", ["NotoSerifJP-SemiBold"]], ["literal", ["NotoSansJP-Regular"]]], "text-justify": "auto", "text-size": ["let", "size", ["match", ["get", "vt_code"], [361, 1403, 7101, 7102, 7103, 7201, 7221], 10, [334, 730], 11, [312, 313, 314, 315, 316, 322, 323, 332, 342, 353, 412, 533, 621, 631, 632, 633, 634, 653, 654, 720, 999, 2941, 2942, 2943, 2944, 2945], 12, [343, 1402, 7711], 13, [311, 346, 347, 413, 422, 1303], 14, [210, 220, 321, 331, 352, 411, 421, 423, 431, 432, 441, 511, 521, 522, 523, 531, 532, 534, 611, 612, 613, 615, 651, 661, 662, 671, 672, 673, 681, 1302], 15, [130, 1301, 1401], 16, [140, 333, 351], 18, [110, 120, 341, 344, 345], 20, [348, 800, 810, 820, 822, 830, 831, 832, 833, 840, 841, 842, 843, 850, 860, 870, 880, 881, 882, 883, 884, 885, 886, 887, 888, 889, 890, 899], 24, 10], ["interpolate", ["linear"], ["zoom"], 4, ["*", 0.6, ["var", "size"]], 8, ["var", "size"], 11, ["match", ["get", "vt_code"], [1401, 1402, 1403], 20, 422, ["*", 0.7, ["var", "size"]], ["var", "size"]], 12, ["var", "size"], 14, ["match", ["get", "vt_code"], [2941, 2942], ["*", 1.3, ["var", "size"]], ["var", "size"]], 17, ["match", ["get", "vt_code"], [412, 422], ["*", 2, ["var", "size"]], ["var", "size"]]]], "text-field": ["get", "vt_text"], "text-max-width": 100, "text-radial-offset": 0.5, "text-variable-anchor": ["top", "bottom", "left", "right"], "text-writing-mode": ["horizontal"] }, "paint": { "text-color": ["let", "color", ["match", ["get", "vt_code"], 521, "rgba(80,80,80,1)", 348, "rgba(150,150,150,1)", [411, 412, 413, 421, 422, 423, 431, 432, 441, 860, 2941, 2942, 2943, 2944, 2945], "rgba(230,230,230,1)", [7372, 7711], "rgba(80,80,80,1)", 7352, "rgba(50,50,50,1)", [2901, 2903, 2904], "rgba(255,255,255,1)", [321, 322, 341, 344, 345, 820, 840, 841], "rgba(80,80,80,1)", 220, "rgba(150,150,150,1)", 312, "rgba(150,150,150,1)", [333, 346], "rgba(150,150,150,1)", [511, 522, 523, 531, 532, 534, 611, 612, 613, 614, 615, 621, 623, 631, 632, 633, 634, 641, 642, 651, 652, 653, 654, 661, 662, 671, 672, 673, 681, 720, 730, 870, 880, 881, 882, 883, 884, 885, 886, 887, 888, 889, 890, 899, 999, 3201, 3202, 3203, 3204, 3205, 3206, 3211, 3212, 3213, 3214, 3215, 3216, 3217, 3218, 3221, 3231, 3232, 3241, 3242, 3243, 3244], "rgba(150,150,150,1)", "rgba(200,200,200,1)"], ["step", ["zoom"], ["match", ["get", "vt_code"], [631, 632, 633, 6368, 6376], "rgba(200,200,200,0)", ["var", "color"]], 14, ["match", ["get", "vt_code"], [3212, 3213, 3214], "rgba(200,200,200,0)", ["var", "color"]]]], "text-halo-color": ["step", ["zoom"], ["match", ["get", "vt_code"], [631, 632, 633, 6368, 6376], "rgba(50,50,50,0)", "rgba(50,50,50,1)"], 14, ["match", ["get", "vt_code"], [3212, 3213, 3214], "rgba(50,50,50,0)", "rgba(50,50,50,1)"]], "text-halo-width": 1 } }
       ],
     },
   });
   map.addControl(
-    new maplibregl.AttributionControl({
-      compact: true,
-    }),
+    new maplibregl.AttributionControl({ compact: true, }),
     "bottom-right"
   );
   map.getCanvas().setAttribute("aria-label", "地図画面");
@@ -2218,7 +1388,7 @@ function init() {
     e.originalEvent.cancelBubble = true;
   });
   var nied_popup = function (e) {
-    elm = e.features[0].properties;
+    var elm = e.features[0].properties;
     if (kmoni_popup[elm.Code] && kmoni_popup[elm.Code].isOpen()) return;
     var popupContent = generatePopupContent_K(elm);
     if (kmoni_popup[elm.Code]) {
@@ -2234,7 +1404,7 @@ function init() {
   map.on("click", "knet_points", nied_popup);
   map.on("click", "snet_points", nied_popup);
   map.on("click", "TREMRTS_points", function (e) {
-    elm = e.features[0].properties;
+    var elm = e.features[0].properties;
     if (kmoni_popup[elm.Code] && kmoni_popup[elm.Code].isOpen()) return;
     var popupContent = generatePopupContent_TREM(elm);
     if (kmoni_popup[elm.Code]) {
@@ -2248,7 +1418,7 @@ function init() {
     e.originalEvent.cancelBubble = true;
   });
   map.on("click", "SEISJS_points", function (e) {
-    elm = e.features[0].properties;
+    var elm = e.features[0].properties;
     if (kmoni_popup[elm.Code] && kmoni_popup[elm.Code].isOpen()) return;
     var popupContent = generatePopupContent_SEISJS(elm);
     if (kmoni_popup[elm.Code]) {
@@ -2277,14 +1447,7 @@ function init() {
 
       map.addSource("hinanjo_eq_" + ca.x + ca.y + ca.z, {
         type: "geojson",
-        data:
-          "https://cyberjapandata.gsi.go.jp/xyz/skhb04/" +
-          ca.z +
-          "/" +
-          ca.x +
-          "/" +
-          ca.y +
-          ".geojson",
+        data: "https://cyberjapandata.gsi.go.jp/xyz/skhb04/" + ca.z + "/" + ca.x + "/" + ca.y + ".geojson",
       });
 
       map.addLayer({
@@ -2304,14 +1467,7 @@ function init() {
 
       map.addSource("hinanjo_ts_" + ca.x + ca.y + ca.z, {
         type: "geojson",
-        data:
-          "https://cyberjapandata.gsi.go.jp/xyz/skhb05/" +
-          ca.z +
-          "/" +
-          ca.x +
-          "/" +
-          ca.y +
-          ".geojson",
+        data: "https://cyberjapandata.gsi.go.jp/xyz/skhb05/" + ca.z + "/" + ca.x + "/" + ca.y + ".geojson",
       });
 
       map.addLayer({
@@ -2355,15 +1511,9 @@ function init() {
   var TLControlWrapper = document.createElement("div");
   TLControlWrapper.className = "maplibregl-ctrl maplibregl-ctrl-group";
   TLControlWrapper.appendChild(layerButton);
-  map.addControl(
-    {
-      onAdd: function () {
-        return TLControlWrapper;
-      },
-      onRemove: function () {},
-    },
-    "top-left"
-  );
+  map.addControl({
+    onAdd: function () { return TLControlWrapper; },
+  }, "top-left");
 
   var homeButton = document.createElement("button");
   homeButton.innerText = "home";
@@ -2398,10 +1548,7 @@ function init() {
   cbWrapper.appendChild(returnButton);
 
   map.addControl({
-    onAdd: function () {
-      return cbWrapper;
-    },
-    onRemove: function () {},
+    onAdd: function () { return cbWrapper; },
   });
 
   map.on("click", "tsunami_Yoho", tsunamiPopup);
@@ -2437,13 +1584,7 @@ function init() {
     var currentZoom = map.getZoom();
     document
       .getElementById("mapcontainer")
-      .classList.remove(
-        "zoomLevel_1",
-        "zoomLevel_2",
-        "zoomLevel_3",
-        "zoomLevel_4",
-        "popup_show"
-      );
+      .classList.remove("zoomLevel_1", "zoomLevel_2", "zoomLevel_3", "zoomLevel_4", "popup_show");
 
     if (currentZoom < 4.3) {
       document.getElementById("mapcontainer").classList.add("zoomLevel_1");
@@ -2479,16 +1620,14 @@ function init() {
     layerSelect(config.data.layer);
     radioSet("mapSelect", config.data.layer);
     config.data.overlay.forEach(function (elm) {
-      if (document.getElementById(elm))
-        document.getElementById(elm).checked = true;
+      if (document.getElementById(elm)) document.getElementById(elm).checked = true;
       overlaySelect(elm, true);
     });
     map.setProjection({ type: config.data.globeView ? "globe" : "mercator" });
     document.getElementById("globeView").checked = config.data.globeView;
 
     overlaySelect("kmoni_points", config.data.kmoni_points_show);
-    document.getElementById("kmoni_points").checked =
-      config.data.kmoni_points_show;
+    document.getElementById("kmoni_points").checked = config.data.kmoni_points_show;
 
     now_EEW.forEach(function (elm) {
       epiCenterUpdate(elm);
@@ -2509,8 +1648,7 @@ function init() {
       nowAtUserPosition = true;
     }
 
-    document.getElementById("returnToUserPosition").style.display =
-      nowAtUserPosition ? "none" : "block";
+    document.getElementById("returnToUserPosition").style.display = nowAtUserPosition ? "none" : "block";
   });
 
   if (config.home.ShowPin) {
@@ -2531,7 +1669,6 @@ function returnToUserPosition() {
 }
 
 //観測点情報更新
-var pointData;
 var kmoni_popup = {};
 function kmoniMapUpdate(dataTmp, type) {
   if (!dataTmp.data || background) return;
@@ -2606,25 +1743,15 @@ function generatePopupContent_K(params) {
   if (params.data) {
     if (!Array.isArray(params.rgb)) params.rgb = JSON.parse(params.rgb);
     return (
-      "<h3 class='PointName' style='border-bottom-color:rgb(" +
-      params.rgb.join(",") +
-      ")'>" +
+      "<h3 class='PointName' style='border-bottom-color:rgb(" + params.rgb.join(",") + ")'>" +
       (params.Name ? params.Name : "") +
-      "<span>" +
-      params.Type +
-      "_" +
-      params.Code +
-      "</span></h3>"
+      "<span>" + params.Type + "_" + params.Code + "</span></h3>"
     );
   } else {
     return (
       "<h3 class='PointName' style='border-bottom:solid 2px rgba(128,128,128,0.5)'>" +
       (params.Name ? params.Name : "") +
-      "<span>" +
-      params.Type +
-      "_" +
-      params.Code +
-      "</span></h3>"
+      "<span>" + params.Type + "_" + params.Code + "</span></h3>"
     );
   }
 }
@@ -2632,28 +1759,18 @@ function generatePopupContent_K(params) {
 function generatePopupContent_TREM(params) {
   var shindoColor = NormalizeShindo(params.shindo, 2);
   if (!Array.isArray(params.rgb)) params.rgb = JSON.parse(params.rgb);
-  return `<h3 class='PointName' style='border-bottom-color:rgb(${params.rgb.join(
-    ","
-  )})'><span>${
-    params.Type + "_" + params.Code
-  }</span></h3><div class='popupContentWrap'><div class='obsShindoWrap' style='background:${
-    shindoColor[0]
-  };color:${shindoColor[1]};'>震度 ${NormalizeShindo(
-    params.shindo,
-    1
-  )}<span>${params.shindo.toFixed(
-    2
-  )}</span></div><div class='obsPGAWrap'>PGA ${(
-    Math.floor(params.PGA * 100) / 100
-  ).toFixed(2)}</div></div>`;
+  return `<h3 class='PointName' style='border-bottom-color:rgb(${params.rgb.join(",")})'>
+  <span>${params.Type + "_" + params.Code}</span></h3><div class='popupContentWrap'>
+  <div class='obsShindoWrap' style='background:${shindoColor[0]};color:${shindoColor[1]};'>震度 ${NormalizeShindo(params.shindo, 1)}
+  <span>${params.shindo.toFixed(2)}</span></div>
+  <div class='obsPGAWrap'>PGA ${(Math.floor(params.PGA * 100) / 100).toFixed(2)}</div></div>`;
 }
 
-var TREMRTS_points = {};
 function TREMRTSUpdate(dataTmp) {
   if (!background) {
     var geojson = { type: "FeatureCollection", features: [] };
     Object.keys(dataTmp).forEach(function (key) {
-      elm = dataTmp[key];
+      var elm = dataTmp[key];
       geojson.features.push({
         type: "Feature",
         properties: {
@@ -2682,29 +1799,18 @@ function TREMRTSUpdate(dataTmp) {
 function generatePopupContent_SEISJS(params) {
   var shindoColor = NormalizeShindo(params.shindo, 2);
   if (!Array.isArray(params.rgb)) params.rgb = JSON.parse(params.rgb);
-  return `<h3 class='PointName' style='border-bottom-color:rgb(${params.rgb.join(
-    ","
-  )})'>${params.Name}<span>${
-    params.Code
-  }</span></h3><div class='popupContentWrap'><div class='obsShindoWrap' style='background:${
-    shindoColor[0]
-  };color:${shindoColor[1]};'>震度 ${NormalizeShindo(
-    params.shindo,
-    1
-  )}<span>${params.shindo.toFixed(
-    2
-  )}</span></div><div class='obsPGAWrap'>PGA ${(
-    Math.floor(params.PGA * 100) / 100
-  ).toFixed(2)}</div></div>`;
+  return `<h3 class='PointName' style='border-bottom-color:rgb(${params.rgb.join(",")})'>${params.Name}
+  <span>${params.Code}</span></h3>
+  <div class='popupContentWrap'><div class='obsShindoWrap' style='background:${shindoColor[0]};color:${shindoColor[1]};'>震度 ${NormalizeShindo(params.shindo, 1)}
+  <span>${params.shindo.toFixed(2)}</span></div>
+  <div class='obsPGAWrap'>PGA ${(Math.floor(params.PGA * 100) / 100).toFixed(2)}</div></div>`;
 }
 
-var SeisJS_points = {};
 function SeisJSUpdate(dataTmp) {
-  SeisJS_points = dataTmp;
   if (!background) {
     var geojson = { type: "FeatureCollection", features: [] };
     Object.keys(dataTmp).forEach(function (key) {
-      elm = dataTmp[key];
+      var elm = dataTmp[key];
       geojson.features.push({
         type: "Feature",
         properties: {
@@ -2730,21 +1836,10 @@ function SeisJSUpdate(dataTmp) {
   }
 }
 
-var Int0T =
-  (Int1T =
-  Int2T =
-  Int3T =
-  Int4T =
-  Int5mT =
-  Int5pT =
-  Int6mT =
-  Int6pT =
-  Int7T =
-  AlertT =
-    ["any"]);
+var Int0T = ["any"], Int1T = ["any"], Int2T = ["any"], Int3T = ["any"], Int4T = ["any"], Int5mT = ["any"], Int5pT = ["any"], Int6mT = ["any"], Int6pT = ["any"], Int7T = ["any"], AlertT = ["any"];
 
 function JMAEstShindoControl(data) {
-  JMAEstShindoData = {};
+  var JMAEstShindoData = {};
   Int0T = ["any"];
   Int1T = ["any"];
   Int2T = ["any"];
@@ -2761,13 +1856,10 @@ function JMAEstShindoControl(data) {
     if (elm.warnZones && Array.isArray(elm.warnZones)) {
       elm.warnZones.forEach(function (elm2) {
         var old_int;
-        if (JMAEstShindoData[elm2.Name])
-          old_int =
-            config.Info.EEW.IntType == "max"
-              ? JMAEstShindoData[elm2.Name].IntTo
-              : JMAEstShindoData[elm2.Name].IntFrom;
-        var new_int =
-          config.Info.EEW.IntType == "max" ? elm2.IntTo : elm2.IntFrom;
+        if (JMAEstShindoData[elm2.Name]) old_int = config.Info.EEW.IntType == "max" ? JMAEstShindoData[elm2.Name].IntTo : JMAEstShindoData[elm2.Name].IntFrom;
+
+        var new_int = config.Info.EEW.IntType == "max" ? elm2.IntTo : elm2.IntFrom;
+
         if (!old_int || old_int < new_int) {
           JMAEstShindoData[elm2.Name] = elm2;
         }
@@ -2779,8 +1871,7 @@ function JMAEstShindoControl(data) {
     var sectData = JMAEstShindoData[elm];
     if (sectData.Alert) AlertT.push(["==", "name", elm]);
 
-    IntData =
-      config.Info.EEW.IntType == "max" ? sectData.IntTo : sectData.IntFrom;
+    var IntData = config.Info.EEW.IntType == "max" ? sectData.IntTo : sectData.IntFrom;
     switch (NormalizeShindo(IntData)) {
       case "0":
         Int0T.push(["==", "name", elm]);
@@ -2816,8 +1907,7 @@ function JMAEstShindoControl(data) {
         break;
     }
   });
-  document.getElementById("fillLegend").style.display =
-    Object.keys(JMAEstShindoData) == 0 ? "none" : "inline-block";
+  document.getElementById("fillLegend").style.display = Object.keys(JMAEstShindoData) == 0 ? "none" : "inline-block";
   JMAEstShindoDraw();
 }
 
@@ -2851,22 +1941,13 @@ function psWaveEntry() {
             var countDown_min = Math.floor(countDown / 60);
             var countDown_sec = Math.floor(countDown % 60);
             if (countDown_min == 0) countDownElm.textContent = countDown_sec;
-            else
-              countDownElm.textContent =
-                countDown_min + ":" + String(countDown_sec).padStart(2, "0");
+            else countDownElm.textContent = countDown_min + ":" + String(countDown_sec).padStart(2, "0");
           } else countDownElm.textContent = "0";
         }
       }
     }
 
-    if (
-      !elm.is_cancel &&
-      elm.origin_time &&
-      elm.depth &&
-      elm.latitude &&
-      elm.longitude &&
-      elm.depth <= 700
-    ) {
+    if (!elm.is_cancel && elm.origin_time && elm.depth && elm.latitude && elm.longitude && elm.depth <= 700) {
       var pswaveFind = psWaveList.find(function (elm2) {
         return elm2.id == elm.EventID;
       });
@@ -2896,17 +1977,12 @@ function psWaveEntry() {
       return elm2.EventID == elm.id;
     });
     if (!stillEEW || stillEEW.is_cancel) {
-      if (map.getLayer("PCircle_" + elm.id))
-        map.removeLayer("PCircle_" + elm.id);
-      if (map.getLayer("SCircle_" + elm.id))
-        map.removeLayer("SCircle_" + elm.id);
-      if (map.getLayer("SCircle_" + elm.id + "_FILL"))
-        map.removeLayer("SCircle_" + elm.id + "_FILL");
+      if (map.getLayer("PCircle_" + elm.id)) map.removeLayer("PCircle_" + elm.id);
+      if (map.getLayer("SCircle_" + elm.id)) map.removeLayer("SCircle_" + elm.id);
+      if (map.getLayer("SCircle_" + elm.id + "_FILL")) map.removeLayer("SCircle_" + elm.id + "_FILL");
 
-      if (map.getLayer("PCircle_" + elm.id))
-        map.removeSource("PCircle_" + elm.id);
-      if (map.getLayer("SCircle_" + elm.id))
-        map.removeSource("SCircle_" + elm.id);
+      if (map.getLayer("PCircle_" + elm.id)) map.removeSource("PCircle_" + elm.id);
+      if (map.getLayer("SCircle_" + elm.id)) map.removeSource("SCircle_" + elm.id);
     }
     return stillEEW;
   });
@@ -2919,8 +1995,7 @@ function psWaveCalc(eid) {
   if (pswaveFind) {
     var TimeTableTmp = pswaveFind.TimeTable;
     var SWmin;
-    var distance =
-      (new Date() - Replay - new Date(pswaveFind.data.originTime)) / 1000;
+    var distance = (new Date() - Replay - new Date(pswaveFind.data.originTime)) / 1000;
 
     var PRadius = null;
     var SRadius = null;
@@ -2933,9 +2008,8 @@ function psWaveCalc(eid) {
           PRadius = elm.R;
           if (SRadius || SWmin > distance) break;
         } else if (elm.P > distance) {
-          elm2 = TimeTableTmp[Math.max(i - 1, 0)];
-          PRadius =
-            elm.R + ((elm2.R - elm.R) * (distance - elm.P)) / (elm2.P - elm.P);
+          var elm2 = TimeTableTmp[Math.max(i - 1, 0)];
+          PRadius = elm.R + ((elm2.R - elm.R) * (distance - elm.P)) / (elm2.P - elm.P);
           if (SRadius || SWmin > distance) break;
         }
       }
@@ -2945,8 +2019,7 @@ function psWaveCalc(eid) {
           if (PRadius) break;
         } else if (elm.S > distance) {
           elm2 = TimeTableTmp[Math.max(i - 1, 0)];
-          SRadius =
-            elm.R + ((elm2.R - elm.R) * (distance - elm.S)) / (elm2.S - elm.S);
+          SRadius = elm.R + ((elm2.R - elm.R) * (distance - elm.S)) / (elm2.S - elm.S);
           if (PRadius) break;
         }
       }
@@ -2981,16 +2054,7 @@ function psWaveCalc(eid) {
 
 let circle_options = { steps: 60, units: "kilometers" };
 //予報円描画
-function psWaveReDraw(
-  EventID,
-  latitude,
-  longitude,
-  pRadius,
-  sRadius,
-  SnotArrived,
-  SArriveTime,
-  nowDistance
-) {
+function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrived, SArriveTime, nowDistance) {
   if (!map) return;
   var EQElm = psWaveList.find(function (elm) {
     return elm.id == EventID;
@@ -3016,11 +2080,7 @@ function psWaveReDraw(
         if (sRadius) {
           var scircle = turf.circle(_center, sRadius / 1000, circle_options);
           SCircleElm.setData(scircle);
-          map.setPaintProperty(
-            "SCircle_" + EventID,
-            "line-width",
-            SnotArrived ? 0 : 2
-          );
+          map.setPaintProperty("SCircle_" + EventID, "line-width", SnotArrived ? 0 : 2);
         } else map.setPaintProperty("SCircle_" + EventID, "line-width", 0);
       }
     } else {
@@ -3040,7 +2100,7 @@ function psWaveReDraw(
         },
       });
 
-      sRadTmp = sRadius ? sRadius / 1000 : 0;
+      var sRadTmp = sRadius ? sRadius / 1000 : 0;
       map.addSource("SCircle_" + EventID, {
         type: "geojson",
         data: turf.circle(_center, sRadTmp, circle_options),
@@ -3076,18 +2136,11 @@ function psWaveReDraw(
 
     if (EQElm.SIElm) {
       if (SnotArrived) {
-        var SWprogressValue = document.getElementById(
-          "SWprogressValue_" + EventID
-        );
+        var SWprogressValue = document.getElementById("SWprogressValue_" + EventID);
         if (SWprogressValue)
           SWprogressValue.setAttribute(
             "stroke-dashoffset",
-            Number(
-              138 -
-                138 *
-                  ((nowDistance - EQElm.firstDetect) /
-                    (SArriveTime - EQElm.firstDetect))
-            )
+            (138 - 138 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect)))
           );
       } else EQElm.SIElm.remove();
     } else if (SnotArrived) {
@@ -3098,16 +2151,9 @@ function psWaveReDraw(
       const el = document.createElement("div");
       el.classList.add("SWaveProgress");
       el.innerHTML =
-        '<svg width="50" height="50"><circle cx="25" cy="25" r="22" fill="none" stroke-width="5px" stroke="#777"/><circle id="SWprogressValue_' +
-        EventID +
-        '" class="SWprogressValue" cx="25" cy="25" r="22" fill="none" stroke-width="5px" stroke-linecap="round" stroke-dasharray="138" stroke-dashoffset="' +
-        Number(
-          138 -
-            138 *
-              ((nowDistance - EQElm.firstDetect) /
-                (SArriveTime - EQElm.firstDetect))
-        ) +
-        '"/></svg>';
+        `<svg width="50" height="50"><circle cx="25" cy="25" r="22" fill="none" stroke-width="5px" stroke="#777"/>
+        <circle id="SWprogressValue_${EventID}" class="SWprogressValue" cx="25" cy="25" r="22" fill="none" stroke-width="5px" stroke-linecap="round" stroke-dasharray="138"
+          stroke-dashoffset="${(138 - 138 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect)))}"/></svg>`;
 
       SIElm = new maplibregl.Marker({ element: el })
         .setLngLat([longitude, latitude])
@@ -3121,11 +2167,7 @@ function psWaveReDraw(
         if (SCircleElm) {
           var scircle = turf.circle(_center, 0, circle_options);
           SCircleElm.setData(scircle);
-          map.setPaintProperty(
-            "SCircle_" + EventID,
-            "line-width",
-            SnotArrived ? 0 : 2
-          );
+          map.setPaintProperty("SCircle_" + EventID, "line-width", SnotArrived ? 0 : 2);
         }
       }
     }
@@ -3135,12 +2177,10 @@ function psWaveReDraw(
 
   if (EQElm2 && EQElm2.distance && EEWPanelElm) {
     EEWPanelElm.querySelector(".PWave_value").setAttribute(
-      "stroke-dashoffset",
-      125.66 - 125.66 * Math.min(pRadius / 1000 / EQElm2.distance, 1)
+      "stroke-dashoffset", 125.66 - 125.66 * Math.min(pRadius / 1000 / EQElm2.distance, 1)
     );
     EEWPanelElm.querySelector(".SWave_value").setAttribute(
-      "stroke-dashoffset",
-      125.66 - 125.66 * Math.min(sRadius / 1000 / EQElm2.distance, 1)
+      "stroke-dashoffset", 125.66 - 125.66 * Math.min(sRadius / 1000 / EQElm2.distance, 1)
     );
 
     var countDownElm = EEWPanelElm.querySelector(".countDown");
@@ -3152,14 +2192,13 @@ function psWaveReDraw(
 
         if (countDown_min == 0) countDownElm.textContent = countDown_sec;
         else
-          countDownElm.textContent =
-            countDown_min + ":" + String(countDown_sec).padStart(2, "0");
+          countDownElm.textContent = countDown_min + ":" + String(countDown_sec).padStart(2, "0");
       } else countDownElm.textContent = "到達";
+
       EEWPanelElm.querySelector(".arrived").style.display = "none";
       countDownElm.style.display = "block";
     } else {
-      EEWPanelElm.querySelector(".arrived").textContent =
-        sRadius / 1000 >= EQElm2.distance ? "到達" : "未到達";
+      EEWPanelElm.querySelector(".arrived").textContent = sRadius / 1000 >= EQElm2.distance ? "到達" : "未到達";
       EEWPanelElm.querySelector(".arrived").style.display = "block";
       countDownElm.style.display = "none";
     }
@@ -3180,16 +2219,11 @@ function tsunamiDataUpdate(data) {
   map.setFilter("tsunami_Yoho", ["==", "name", ""]);
   Tsunami_MajorWarning = Tsunami_Warning = Tsunami_Watch = Tsunami_Yoho = false;
 
-  document.getElementById("tsunamiCancel").style.display = data.Torikeshi
-    ? "block"
-    : "none";
-  document.getElementById("tsunamiRevocation").style.display =
-    data.revocation || data.cancelled ? "block" : "none";
+  document.getElementById("tsunamiCancel").style.display = data.Torikeshi ? "block" : "none";
+  document.getElementById("tsunamiRevocation").style.display = data.revocation || data.cancelled ? "block" : "none";
 
-  document.querySelector("#tsunamiWrap .TestNotes").style.display =
-    data.status == "試験" ? "block" : "none";
-  document.querySelector("#tsunamiWrap .trainingNotes").style.display =
-    data.status == "訓練" ? "block" : "none";
+  document.querySelector("#tsunamiWrap .TestNotes").style.display = data.status == "試験" ? "block" : "none";
+  document.querySelector("#tsunamiWrap .trainingNotes").style.display = data.status == "訓練" ? "block" : "none";
 
   now_tsunami = true;
 
@@ -3207,9 +2241,7 @@ function tsunamiDataUpdate(data) {
       var link = [];
       EQinfo_Index = 0;
       document.getElementById("EQCount").innerText =
-        data.issue.EventID.length > 1
-          ? "(" + data.issue.EventID.length + ")"
-          : "";
+        data.issue.EventID.length > 1 ? "(" + data.issue.EventID.length + ")" : "";
       eqInfoDataJMA.forEach(function (elm) {
         if (data.issue.EventID.includes(Number(elm.eventId))) {
           link.push("#EQItem_" + elm.eventId);
@@ -3225,10 +2257,7 @@ function tsunamiDataUpdate(data) {
       .getElementById("tsunamiWrap")
       .setAttribute(
         "aria-label",
-        GenerateTsunamiText(
-          data,
-          "津波情報アイテム。情報内容を読み上げます。{max_grade}発令中。[{home_area}には{home_grade}が発表。{home_area}への{first_height2}、最大波予想は{max_height2}。{immediately}]{report_time}発表。"
-        )
+        GenerateTsunamiText(data, "津波情報アイテム。情報内容を読み上げます。{max_grade}発令中。[{home_area}には{home_grade}が発表。{home_area}への{first_height2}、最大波予想は{max_height2}。{immediately}]{report_time}発表。")
       );
     if (config.home.TsunamiSect) {
       var sectData = data.areas.find(function (elm) {
@@ -3237,19 +2266,19 @@ function tsunamiDataUpdate(data) {
       if (sectData) {
         switch (sectData.grade) {
           case "MajorWarning":
-            gradeJa = "大津波警報";
+            var gradeJa = "大津波警報";
             break;
           case "Warning":
-            gradeJa = "津波警報";
+            var gradeJa = "津波警報";
             break;
           case "Watch":
-            gradeJa = "津波注意報";
+            var gradeJa = "津波注意報";
             break;
           case "Yoho":
-            gradeJa = "津波予報";
+            var gradeJa = "津波予報";
             break;
           default:
-            gradeJa = "";
+            var gradeJa = "";
             break;
         }
 
@@ -3257,9 +2286,7 @@ function tsunamiDataUpdate(data) {
         var maxWave = "";
         if (sectData.firstHeight)
           firstWave =
-            "第1波予想<span>" +
-            NormalizeDate(10, sectData.firstHeight) +
-            "</span>";
+            "第1波予想<span>" + NormalizeDate(10, sectData.firstHeight) + "</span>";
         else {
           switch (sectData.firstHeightCondition) {
             case "津波到達中と推測":
@@ -3273,26 +2300,17 @@ function tsunamiDataUpdate(data) {
           }
         }
 
-        if (sectData.maxHeight)
-          maxWave =
-            "<div>最大波予想<span>" + sectData.maxHeight + "</span></div>";
-        else if (sectData.grade == "Yoho")
-          maxWave = "<div>最大波予想<span>若干の海面変動</span></div>";
+        if (sectData.maxHeight) maxWave = "<div>最大波予想<span>" + sectData.maxHeight + "</span></div>";
+        else if (sectData.grade == "Yoho") maxWave = "<div>最大波予想<span>若干の海面変動</span></div>";
 
-        document.getElementById("tsunamiSectTitle").innerText =
-          sectData.name + " " + gradeJa;
+        document.getElementById("tsunamiSectTitle").innerText = sectData.name + " " + gradeJa;
         document.getElementById("firstHeightData").innerHTML = firstWave;
         document.getElementById("maxHeightData").innerHTML = maxWave;
-        document.getElementById("firstHeightCondition").style.display =
-          sectData.firstHeightCondition == "ただちに津波来襲と予測"
-            ? "block"
-            : "none";
+        document.getElementById("firstHeightCondition").style.display = sectData.firstHeightCondition == "ただちに津波来襲と予測" ? "block" : "none";
 
-        document.getElementById("TsunamiMySectData").style.border =
-          "solid 1px " + tsunamiColorConv(sectData.grade);
+        document.getElementById("TsunamiMySectData").style.border = "solid 1px " + tsunamiColorConv(sectData.grade);
         document.getElementById("TsunamiMySectData").style.display = "block";
-      } else
-        document.getElementById("TsunamiMySectData").style.display = "none";
+      } else document.getElementById("TsunamiMySectData").style.display = "none";
     }
     document.getElementById("tsunamiWrap").style.display = "block";
 
@@ -3338,17 +2356,17 @@ function tsunamiDataUpdate(data) {
               );
 
               if (omaxHeight < 0.2) {
-                classname = "TsunamiST02";
-                color = config.color.Tsunami.TsunamiYohoColor;
+                var classname = "TsunamiST02";
+                var color = config.color.Tsunami.TsunamiYohoColor;
               } else if (omaxHeight <= 1) {
-                classname = "TsunamiST10";
-                color = config.color.Tsunami.TsunamiWatchColor;
+                var classname = "TsunamiST10";
+                var color = config.color.Tsunami.TsunamiWatchColor;
               } else if (omaxHeight <= 3) {
-                classname = "TsunamiST30";
-                color = config.color.Tsunami.TsunamiWarningColor;
+                var classname = "TsunamiST30";
+                var color = config.color.Tsunami.TsunamiWarningColor;
               } else {
-                classname = "TsunamiST99";
-                color = config.color.Tsunami.TsunamiMajorWarningColor;
+                var classname = "TsunamiST99";
+                var color = config.color.Tsunami.TsunamiMajorWarningColor;
               }
 
               var tsunamiST = document.createElement("div");
@@ -3357,10 +2375,8 @@ function tsunamiDataUpdate(data) {
               var tsunamiSTCap = document.createElement("span");
               tsunamiSTCap.innerText = elm2.omaxHeight;
               if (elm2.omaxHeight.includes("以上"))
-                tsunamiSTCap.innerText =
-                  ">" + elm2.omaxHeight.replace("以上", "");
-              if (elm2.maxHeightRising)
-                tsunamiSTCap.innerText = elm2.omaxHeight + "↗";
+                tsunamiSTCap.innerText = ">" + elm2.omaxHeight.replace("以上", "");
+              if (elm2.maxHeightRising) tsunamiSTCap.innerText = elm2.omaxHeight + "↗";
               tsunamiST.appendChild(tsunamiSTCap);
 
               var tsunamiSTMarker = document.createElement("div");
@@ -3375,15 +2391,13 @@ function tsunamiDataUpdate(data) {
               if (elm2.Conditions) condition = elm2.Conditions;
 
               if (elm2.HighTideDateTime)
-                HighTideDateTime =
-                  "満潮：" + NormalizeDate(6, elm2.HighTideDateTime);
+                HighTideDateTime = "満潮：" + NormalizeDate(6, elm2.HighTideDateTime);
 
               if (elm2.omaxHeight) {
                 omaxHeight = elm2.omaxHeight;
                 if (elm2.firstHeightInitial)
                   omaxHeight = elm2.omaxHeight + " " + elm2.firstHeightInitial;
-              } else if (elm2.maxHeightCondition)
-                omaxHeight = elm2.maxHeightCondition;
+              } else if (elm2.maxHeightCondition) omaxHeight = elm2.maxHeightCondition;
 
               if (elm2.maxHeightTime)
                 omaxHeight += " " + NormalizeDate(10, elm2.maxHeightTime);
@@ -3391,38 +2405,20 @@ function tsunamiDataUpdate(data) {
               if (omaxHeight) omaxHeight = "観測最大波：" + omaxHeight;
               if (elm2.maxHeightRising) omaxHeight += " （上昇中）";
 
-              if (elm2.ArrivedTime)
-                ArrivedTime =
-                  "第１波観測時刻：" + NormalizeDate(10, elm2.ArrivedTime);
-              else if (elm2.Condition == "第１波の到達を確認")
-                ArrivedTime = "第1波到達";
-              else if (elm2.Condition == "津波到達中と推測")
-                ArrivedTime = "津波到達中と推測";
-              else if (elm2.firstHeightCondition == "第１波識別不能")
-                ArrivedTime = "第1波識別不能";
-              if (elm2.firstHeightInitial)
-                ArrivedTime += " " + elm2.firstHeightInitial;
-              if (elm2.ArrivalTime)
-                arrivalTime =
-                  "第1波予想：" + NormalizeDate(10, elm2.ArrivalTime);
+              if (elm2.ArrivedTime) ArrivedTime = "第１波観測時刻：" + NormalizeDate(10, elm2.ArrivedTime);
+              else if (elm2.Condition == "第１波の到達を確認") ArrivedTime = "第1波到達";
+              else if (elm2.Condition == "津波到達中と推測") ArrivedTime = "津波到達中と推測";
+              else if (elm2.firstHeightCondition == "第１波識別不能") ArrivedTime = "第1波識別不能";
 
-              var content = [
-                arrivalTime,
-                omaxHeight,
-                ArrivedTime,
-                HighTideDateTime,
-                condition,
-              ]
+              if (elm2.firstHeightInitial) ArrivedTime += " " + elm2.firstHeightInitial;
+              if (elm2.ArrivalTime) arrivalTime = "第1波予想：" + NormalizeDate(10, elm2.ArrivalTime);
+
+              var content = [arrivalTime, omaxHeight, ArrivedTime, HighTideDateTime, condition,]
                 .filter(Boolean)
                 .join("<br>");
               var popupContent =
-                "<h3 style='border-bottom:solid 2px " +
-                color +
-                "'>" +
-                elm2.name +
-                "</h3><div class='tsunamidetailwrap'>" +
-                content +
-                "</div>";
+                "<h3 style='border-bottom:solid 2px " + color + "'>" + elm2.name +
+                "</h3><div class='tsunamidetailwrap'>" + content + "</div>";
 
               var TsunamiPopup = new maplibregl.Popup().setHTML(popupContent);
               tsunamiSTMarkers.push(
@@ -3459,38 +2455,24 @@ function tsunamiDataUpdate(data) {
     document.getElementById("tsunamiHeadline").innerText =
       (data.headline ? data.headline : "") +
       (data.issue.time ? ` (${NormalizeDate(10, data.issue.time)})` : "");
-    document.getElementById("tsunami_MajorWarning").style.display =
-      Tsunami_MajorWarning ? "inline-block" : "none";
-    document.getElementById("tsunami_Warning").style.display = Tsunami_Warning
-      ? "inline-block"
-      : "none";
-    document.getElementById("tsunami_Watch").style.display = Tsunami_Watch
-      ? "inline-block"
-      : "none";
-    document.getElementById("tsunami_Yoho").style.display = Tsunami_Yoho
-      ? "inline-block"
-      : "none";
+    document.getElementById("tsunami_MajorWarning").style.display = Tsunami_MajorWarning ? "inline-block" : "none";
+    document.getElementById("tsunami_Warning").style.display = Tsunami_Warning ? "inline-block" : "none";
+    document.getElementById("tsunami_Watch").style.display = Tsunami_Watch ? "inline-block" : "none";
+    document.getElementById("tsunami_Yoho").style.display = Tsunami_Yoho ? "inline-block" : "none";
 
     if (Tsunami_MajorWarning)
-      document.getElementById("tsunamiTitle").style.borderColor =
-        tsunamiColorConv("MajorWarning");
+      document.getElementById("tsunamiTitle").style.borderColor = tsunamiColorConv("MajorWarning");
     else if (Tsunami_Warning)
-      document.getElementById("tsunamiTitle").style.borderColor =
-        tsunamiColorConv("Warning");
+      document.getElementById("tsunamiTitle").style.borderColor = tsunamiColorConv("Warning");
     else if (Tsunami_Watch)
-      document.getElementById("tsunamiTitle").style.borderColor =
-        tsunamiColorConv("Watch");
+      document.getElementById("tsunamiTitle").style.borderColor = tsunamiColorConv("Watch");
     else if (Tsunami_Yoho)
-      document.getElementById("tsunamiTitle").style.borderColor =
-        tsunamiColorConv("Yoho");
+      document.getElementById("tsunamiTitle").style.borderColor = tsunamiColorConv("Yoho");
     else
-      document.getElementById("tsunamiTitle").style.borderColor =
-        tsunamiColorConv("Yoho");
+      document.getElementById("tsunamiTitle").style.borderColor = tsunamiColorConv("Yoho");
   }
   document.getElementById("noEEW").style.display =
-    now_EEW.length == 0 && !now_tsunami && EQDetectItem.length == 0
-      ? "block"
-      : "none";
+    (now_EEW.length == 0 && !now_tsunami && EQDetectItem.length) == 0 ? "block" : "none";
 }
 
 var EQinfo_Index = 0;
@@ -3503,15 +2485,7 @@ EQInfoLink.addEventListener("click", function (e) {
       if (index == EQinfo_Index) {
         EQItemElm.scrollIntoView({ block: "center" });
       }
-      EQItemElm.animate(
-        {
-          boxShadow: [
-            "0 0 0 0 rgba(203, 27, 27, 1)",
-            "0 0 0 15px rgba(203, 27, 27, 0)",
-          ],
-        },
-        500
-      );
+      EQItemElm.animate({ boxShadow: ["0 0 0 0 rgba(203, 27, 27, 1)", "0 0 0 15px rgba(203, 27, 27, 0)"], }, 500);
       EQItemElm.focus();
     }
   });
@@ -3546,23 +2520,23 @@ function tsunamiPopup(e) {
   if (e.originalEvent.cancelBubble) return;
 
   if (tsunamiData.areas) {
-    elm = tsunamiData.areas.find(function (elm) {
+    var elm = tsunamiData.areas.find(function (elm) {
       return elm.name == e.features[0].properties.name;
     });
     if (elm) {
       if (!elm.cancelled) {
         switch (elm.grade) {
           case "MajorWarning":
-            gradeJa = "大津波警報";
+            var gradeJa = "大津波警報";
             break;
           case "Warning":
-            gradeJa = "津波警報";
+            var gradeJa = "津波警報";
             break;
           case "Watch":
-            gradeJa = "津波注意報";
+            var gradeJa = "津波注意報";
             break;
           case "Yoho":
-            gradeJa = "津波予報";
+            var gradeJa = "津波予報";
             break;
           default:
             break;
@@ -3572,32 +2546,18 @@ function tsunamiPopup(e) {
         var maxWave = "";
         var firstCondition = "";
         if (elm.firstHeight)
-          firstWave =
-            "<div>第１波予想:" + NormalizeDate(10, elm.firstHeight) + "</div>";
+          firstWave = "<div>第１波予想:" + NormalizeDate(10, elm.firstHeight) + "</div>";
 
-        if (elm.maxHeight)
-          maxWave = "<div>最大波予想:" + elm.maxHeight + "</div>";
-        else if (elm.grade == "Yoho")
-          maxWave = "<div>最大波予想:若干の海面変動</div>";
+        if (elm.maxHeight) maxWave = "<div>最大波予想:" + elm.maxHeight + "</div>";
+        else if (elm.grade == "Yoho") maxWave = "<div>最大波予想:若干の海面変動</div>";
 
         if (elm.firstHeightCondition)
           firstCondition = "<div>" + elm.firstHeightCondition + "</div>";
-        var popupContent =
-          "<h3 style='border-bottom:solid 2px " +
-          tsunamiColorConv(elm.grade) +
-          "'>" +
-          elm.name +
-          "</h3><div class='tsunamidetailwrap'><p> " +
-          gradeJa +
-          " 発令中</p>" +
-          firstWave +
-          maxWave +
-          firstCondition +
-          "</div>";
-        new maplibregl.Popup()
-          .setLngLat(e.lngLat)
-          .setHTML(popupContent)
-          .addTo(map);
+
+        var popupContent = "<h3 style='border-bottom:solid 2px " + tsunamiColorConv(elm.grade) + "'>" + elm.name +
+          "</h3><div class='tsunamidetailwrap'><p> " + gradeJa + " 発令中</p>" +
+          firstWave + maxWave + firstCondition + "</div>";
+        new maplibregl.Popup().setLngLat(e.lngLat).setHTML(popupContent).addTo(map);
       }
     }
   }
@@ -3615,108 +2575,63 @@ function NankaiTroughInfo(data) {
         });
       });
     document.getElementById("NankaiTroughInfo_Rinji").style.display = "block";
-    document
-      .getElementById("NankaiTroughInfo_Rinji")
+    document.getElementById("NankaiTroughInfo_Rinji")
       .setAttribute("title", "クリックして詳細を表示\n" + data.rinji.HeadLine);
-    document
-      .getElementById("NankaiTroughInfo_Rinji")
-      .setAttribute(
-        "aria-label",
-        "地震情報アイテム：" +
-          data.rinji.title +
-          "、" +
-          data.rinji.kind +
-          "、エンターキーで詳細情報を確認。"
-      );
-    var serialStr = data.rinji.Serial
-      ? "<span class='nankai_serial'>#" + data.rinji.Serial + "</span>"
-      : "";
-    document.getElementById("Nankai_Title_Rinji").innerHTML =
-      data.rinji.title + " (" + data.rinji.kind + ") " + serialStr;
-    document
-      .getElementById("NankaiTroughInfo_Rinji")
-      .classList.remove("nankaiAlert", "nankaiWarn", "nankaiInfo");
+    document.getElementById("NankaiTroughInfo_Rinji")
+      .setAttribute("aria-label", "地震情報アイテム：" + data.rinji.title + "、" + data.rinji.kind + "、エンターキーで詳細情報を確認。");
+
+    var serialStr = data.rinji.Serial ? "<span class='nankai_serial'>#" + data.rinji.Serial + "</span>" : "";
+    document.getElementById("Nankai_Title_Rinji").innerHTML = data.rinji.title + " (" + data.rinji.kind + ") " + serialStr;
+    document.getElementById("NankaiTroughInfo_Rinji").classList.remove("nankaiAlert", "nankaiWarn", "nankaiInfo");
     switch (data.rinji.kind) {
       case "巨大地震警戒":
-        document
-          .getElementById("NankaiTroughInfo_Rinji")
-          .classList.add("nankaiAlert");
+        document.getElementById("NankaiTroughInfo_Rinji").classList.add("nankaiAlert");
         break;
       case "巨大地震注意":
-        document
-          .getElementById("NankaiTroughInfo_Rinji")
-          .classList.add("nankaiWarn");
+        document.getElementById("NankaiTroughInfo_Rinji").classList.add("nankaiWarn");
         break;
       case "調査終了":
       case "調査中":
-        document
-          .getElementById("NankaiTroughInfo_Rinji")
-          .classList.add("nankaiInfo");
+        document.getElementById("NankaiTroughInfo_Rinji").classList.add("nankaiInfo");
         break;
     }
-  } else
-    document.getElementById("NankaiTroughInfo_Rinji").style.display = "none";
+  } else document.getElementById("NankaiTroughInfo_Rinji").style.display = "none";
 
   if (data.teirei) {
-    document
-      .getElementById("NankaiTroughInfo_Teirei")
-      .addEventListener("click", function () {
-        window.electronAPI.messageReturn({
-          action: "NankaiWindowOpen",
-          type: "teirei",
-        });
+    document.getElementById("NankaiTroughInfo_Teirei").addEventListener("click", function () {
+      window.electronAPI.messageReturn({
+        action: "NankaiWindowOpen",
+        type: "teirei",
       });
+    });
     document.getElementById("NankaiTroughInfo_Teirei").style.display = "block";
-    document
-      .getElementById("NankaiTroughInfo_Teirei")
+    document.getElementById("NankaiTroughInfo_Teirei")
       .setAttribute("title", "クリックして詳細を表示\n" + data.teirei.HeadLine);
-    document
-      .getElementById("NankaiTroughInfo_Teirei")
-      .setAttribute(
-        "aria-label",
-        "地震情報アイテム：" +
-          data.teirei.title +
-          "、" +
-          data.teirei.kind +
-          "、エンターキーで詳細情報を確認。"
-      );
-    var serialStr = data.teirei.Serial
-      ? "<span class='nankai_serial'>#" + data.teirei.Serial + "</span>"
-      : "";
-    document.getElementById("Nankai_Title_Teirei").innerHTML =
-      data.teirei.title + " (" + data.teirei.kind + ")" + serialStr;
-    document
-      .getElementById("NankaiTroughInfo_Teirei")
-      .classList.remove("nankaiAlert", "nankaiWarn", "nankaiInfo");
+    document.getElementById("NankaiTroughInfo_Teirei").setAttribute("aria-label",
+      "地震情報アイテム：" + data.teirei.title + "、" + data.teirei.kind + "、エンターキーで詳細情報を確認。");
+
+    var serialStr = data.teirei.Serial ? "<span class='nankai_serial'>#" + data.teirei.Serial + "</span>" : "";
+    document.getElementById("Nankai_Title_Teirei").innerHTML = data.teirei.title + " (" + data.teirei.kind + ")" + serialStr;
+    document.getElementById("NankaiTroughInfo_Teirei").classList.remove("nankaiAlert", "nankaiWarn", "nankaiInfo");
 
     if (data.teirei.kind == "臨時解説")
-      document
-        .getElementById("NankaiTroughInfo_Teirei")
-        .classList.add("nankaiWarn");
-  } else
-    document.getElementById("NankaiTroughInfo_Teirei").style.display = "none";
+      document.getElementById("NankaiTroughInfo_Teirei").classList.add("nankaiWarn");
+  } else document.getElementById("NankaiTroughInfo_Teirei").style.display = "none";
 }
 
 //北海道・三陸沖後発地震注意情報
 function HokkaidoSanrikuInfo(data) {
   if (data) {
-    document
-      .getElementById("HokkaidoSanrikuInfo")
-      .addEventListener("click", function () {
-        window.electronAPI.messageReturn({
-          action: "HokkaidoSanrikuWindowOpen",
-        });
+    document.getElementById("HokkaidoSanrikuInfo").addEventListener("click", function () {
+      window.electronAPI.messageReturn({
+        action: "HokkaidoSanrikuWindowOpen",
       });
+    });
     document.getElementById("HokkaidoSanrikuInfo").style.display = "block";
-    document
-      .getElementById("HokkaidoSanrikuInfo")
+    document.getElementById("HokkaidoSanrikuInfo")
       .setAttribute("title", "クリックして詳細を表示\n" + data.HeadLine);
-    document
-      .getElementById("HokkaidoSanrikuInfo")
-      .setAttribute(
-        "aria-label",
-        "地震情報アイテム：" + data.title + "、エンターキーで詳細情報を確認。"
-      );
+    document.getElementById("HokkaidoSanrikuInfo").setAttribute("aria-label",
+      "地震情報アイテム：" + data.title + "、エンターキーで詳細情報を確認。");
     document.getElementById("HokkaidoSanriku_Title").innerHTML = data.title;
   } else document.getElementById("HokkaidoSanrikuInfo").style.display = "none";
 }
@@ -3732,33 +2647,26 @@ var gaikyo_history = [];
 function draw_gaikyo(data) {
   gaikyo_lastUpdate = new Date();
   if (!data || data.length == 0)
-    document.getElementById("gaikyo_update_time").innerText =
-      "更新失敗：" + NormalizeDate("hh:mm:ss", new Date());
+    document.getElementById("gaikyo_update_time").innerText = "更新失敗：" + NormalizeDate("hh:mm:ss", new Date());
   else
-    document.getElementById("gaikyo_update_time").innerText =
-      "更新：" + NormalizeDate("hh:mm:ss", new Date());
+    document.getElementById("gaikyo_update_time").innerText = "更新：" + NormalizeDate("hh:mm:ss", new Date());
 
   if (gaikyo_history.length == data.length) return;
   gaikyo_history = data;
   removeChild(document.getElementById("gaikyo-Wrao"));
   data.forEach(function (elm, index) {
     if (index <= 25) {
-      var clone = document
-        .getElementById("gaikyo-item")
-        .content.cloneNode(true)
-        .querySelector(".EQItem");
+      var clone = document.getElementById("gaikyo-item")
+        .content.cloneNode(true).querySelector(".EQItem");
+
       if (index == 0) clone.setAttribute("tabindex", 2);
       clone.querySelector(".EQI_headline").textContent = elm.headline;
       if (elm.title == "地震・火山月報（防災編）") {
         var dateToSpeak = NormalizeDate("YY年M月", elm.date);
         var dateStr = NormalizeDate("YYYY/MM", elm.date);
       } else {
-        var startDateToSpeak = elm.date0
-          ? NormalizeDate("YY年M月D日", elm.date0) + "から"
-          : "";
-        var startDateStr = elm.date0
-          ? NormalizeDate("YYYY/MM/DD", elm.date0) + "～"
-          : "";
+        var startDateToSpeak = elm.date0 ? NormalizeDate("YY年M月D日", elm.date0) + "から" : "";
+        var startDateStr = elm.date0 ? NormalizeDate("YYYY/MM/DD", elm.date0) + "～" : "";
         if (!elm.date0 || elm.date0.getFullYear() != elm.date.getFullYear()) {
           var dateFormToSpeak = "YY年M月D日";
           var dateFormStr = "YYYY/MM/DD";
@@ -3766,16 +2674,13 @@ function draw_gaikyo(data) {
           var dateFormToSpeak = "M月D日";
           var dateFormStr = "MM/DD";
         }
-        var dateToSpeak =
-          startDateToSpeak + NormalizeDate(dateFormToSpeak, elm.date);
+        var dateToSpeak = startDateToSpeak + NormalizeDate(dateFormToSpeak, elm.date);
         var dateStr = startDateStr + NormalizeDate(dateFormStr, elm.date);
       }
       clone.querySelector(".EQI_datetime").textContent = dateStr;
 
-      clone.setAttribute(
-        "aria-label",
-        "気象庁による解説情報：" + elm.title + "、" + dateToSpeak
-      );
+      clone.setAttribute("aria-label",
+        "気象庁による解説情報：" + elm.title + "、" + dateToSpeak);
       clone.addEventListener("click", function () {
         window.open(elm.url);
       });
@@ -3791,8 +2696,7 @@ function hinanjoPopup(e) {
   var DataTmp = e.features[0].properties;
   var supportType = [];
   if (e.features[0].properties.disaster1 == 1) supportType.push("洪水");
-  if (e.features[0].properties.disaster2 == 1)
-    supportType.push("崖崩れ・土石流・地滑り");
+  if (e.features[0].properties.disaster2 == 1) supportType.push("崖崩れ・土石流・地滑り");
   if (e.features[0].properties.disaster3 == 1) supportType.push("高潮");
   if (e.features[0].properties.disaster4 == 1) supportType.push("地震");
   if (e.features[0].properties.disaster5 == 1) supportType.push("津波");
@@ -3802,14 +2706,8 @@ function hinanjoPopup(e) {
   supportType = supportType.join(", ");
   new maplibregl.Popup({ offset: 20 })
     .setLngLat(e.lngLat)
-    .setHTML(
-      `<div class='popupContent'><div class='hinanjoTitle'>指定緊急避難場所</div><div class="pointName">${
-        DataTmp.name
-      }</div><div class='popupContent'>対応：${
-        supportType +
-        (DataTmp.remarks ? "<div>" + DataTmp.remarks + "</div>" : "")
-      }</div></div>`
-    )
+    .setHTML(`<div class='popupContent'><div class='hinanjoTitle'>指定緊急避難場所</div><div class="pointName">${DataTmp.name}</div>
+      <div class='popupContent'>対応：${supportType + (DataTmp.remarks ? "<div>" + DataTmp.remarks + "</div>" : "")}</div></div>`)
     .addTo(map);
 }
 
@@ -3825,36 +2723,15 @@ function GenerateEEWText(EEWData, form) {
     text = text.replaceAll("{grade}", EEWData.alertflg ? EEWData.alertflg : "");
     text = text.replaceAll("{serial}", EEWData.serial ? EEWData.serial : "");
     text = text.replaceAll("{final}", EEWData.is_final ? "最終報" : "");
-    text = text.replaceAll(
-      "{location}",
-      config.home.name ? config.home.name : "現在地"
-    );
-    text = text.replaceAll(
-      "{magnitude}",
-      EEWData.magnitude ? EEWData.magnitude : ""
-    );
-    text = text.replaceAll(
-      "{maxInt}",
-      EEWData.maxInt ? NormalizeShindo(EEWData.maxInt, 1) : ""
-    );
+    text = text.replaceAll("{location}", config.home.name ? config.home.name : "現在地");
+    text = text.replaceAll("{magnitude}", EEWData.magnitude ? EEWData.magnitude : "");
+    text = text.replaceAll("{maxInt}", EEWData.maxInt ? NormalizeShindo(EEWData.maxInt, 1) : "");
     text = text.replaceAll("{depth}", EEWData.depth ? EEWData.depth : "");
     text = text.replaceAll("{training}", EEWData.is_training ? "訓練報。" : "");
-    text = text.replaceAll(
-      "{training2}",
-      EEWData.is_training ? "これは訓練報です。" : ""
-    );
-    text = text.replaceAll(
-      "{region_name}",
-      EEWData.region_name ? EEWData.region_name : ""
-    );
-    text = text.replaceAll(
-      "{report_time}",
-      EEWData.report_time ? NormalizeDate(8, EEWData.report_time) : ""
-    );
-    text = text.replaceAll(
-      "{origin_time}",
-      EEWData.origin_time ? NormalizeDate(8, EEWData.origin_time) : ""
-    );
+    text = text.replaceAll("{training2}", EEWData.is_training ? "これは訓練報です。" : "");
+    text = text.replaceAll("{region_name}", EEWData.region_name ? EEWData.region_name : "");
+    text = text.replaceAll("{report_time}", EEWData.report_time ? NormalizeDate(8, EEWData.report_time) : "");
+    text = text.replaceAll("{origin_time}", EEWData.origin_time ? NormalizeDate(8, EEWData.origin_time) : "");
     var userInt;
     if (EEWData.userIntensity) {
       userInt = EEWData.userIntensity;
@@ -3863,18 +2740,13 @@ function GenerateEEWText(EEWData, form) {
         return elm2.Name == config.home.Section;
       });
 
-      if (userSect)
-        userInt =
-          config.Info.EEW.IntType == "max" ? userSect.IntTo : userSect.IntFrom;
+      if (userSect) userInt = config.Info.EEW.IntType == "max" ? userSect.IntTo : userSect.IntFrom;
     }
 
-    text = text.replaceAll(
-      "{local_Int}",
-      userInt ? NormalizeShindo(userInt, 1) : "不明"
-    );
+    text = text.replaceAll("{local_Int}", userInt ? NormalizeShindo(userInt, 1) : "不明");
 
     return text;
-  } catch (err) {
+  } catch {
     return "";
   }
 }
@@ -3893,7 +2765,7 @@ function GenerateTsunamiText(data, text) {
       Yoho: "津波予報",
     };
 
-    //自地域（カッコで）　最大波高さ
+    //自地域（カッコで） 最大波高さ
     var grade_arr = [];
     var homeArea;
     data.areas.forEach(function (area) {
@@ -3906,34 +2778,18 @@ function GenerateTsunamiText(data, text) {
       if (grades[key]) grade_arr.push(grades_JA[key]);
     });
 
-    text = text.replaceAll(
-      "{max_grade}",
-      grade_arr[0] ? grade_arr[0] : "津波情報"
-    );
-    text = text.replaceAll(
-      "{all_grade}",
-      grade_arr[0] ? grade_arr.join("、") : "津波情報"
-    );
-    text = text.replaceAll(
-      "{report_time}",
-      data.issue.time ? NormalizeDate(9, data.issue.time) : "不明な時刻"
-    );
+    text = text.replaceAll("{max_grade}", grade_arr[0] ? grade_arr[0] : "津波情報");
+    text = text.replaceAll("{all_grade}", grade_arr[0] ? grade_arr.join("、") : "津波情報");
+    text = text.replaceAll("{report_time}", data.issue.time ? NormalizeDate(9, data.issue.time) : "不明な時刻");
     text = text.replaceAll("{headline}", data.headline ? data.headline : "");
 
     if (homeArea && !homeArea.cancelled) {
-      text = text.replaceAll(
-        "{home_area}",
-        homeArea.name ? homeArea.name : "設定地点"
-      );
-      text = text.replaceAll(
-        "{home_grade}",
-        homeArea.grade ? grades_JA[homeArea.grade] : "津波情報"
-      );
+      text = text.replaceAll("{home_area}", homeArea.name ? homeArea.name : "設定地点");
+      text = text.replaceAll("{home_grade}", homeArea.grade ? grades_JA[homeArea.grade] : "津波情報");
 
       var firstHeightTmp = "";
       if (homeArea.firstHeight)
-        firstHeightTmp =
-          "第１波が" + NormalizeDate(9, homeArea.firstHeight) + "に予想され、";
+        firstHeightTmp = "第１波が" + NormalizeDate(9, homeArea.firstHeight) + "に予想され、";
       else if (homeArea.firstHeightCondition == "津波到達中と推測")
         firstHeightTmp = "津波が到達中とみられ、";
       else if (homeArea.firstHeightCondition == "第１波の到達を確認")
@@ -3943,8 +2799,7 @@ function GenerateTsunamiText(data, text) {
 
       var firstHeightTmp2 = "";
       if (homeArea.firstHeight)
-        firstHeightTmp2 =
-          "到達予想時刻は" + NormalizeDate(9, homeArea.firstHeight);
+        firstHeightTmp2 = "到達予想時刻は" + NormalizeDate(9, homeArea.firstHeight);
       else if (homeArea.firstHeightCondition == "津波到達中と推測")
         firstHeightTmp2 = "津波到達中と推測";
       else if (homeArea.firstHeightCondition == "第１波の到達を確認")
@@ -3961,8 +2816,7 @@ function GenerateTsunamiText(data, text) {
       if (homeArea.maxHeight == "巨大") MaxHeightTmp = "巨大な津波";
       else if (homeArea.maxHeight == "高い") MaxHeightTmp = "高い津波";
       else if (homeArea.maxHeight)
-        MaxHeightTmp =
-          "今後最大" + homeArea.maxHeight.replace("m", "メートル") + "の津波";
+        MaxHeightTmp = "今後最大" + homeArea.maxHeight.replace("m", "メートル") + "の津波";
       else if (!homeArea.maxHeight && homeArea.grade == "Yoho")
         MaxHeightTmp = "若干の海面変動";
       else MaxHeightTmp = "高さ不明の津波";
@@ -3981,7 +2835,7 @@ function GenerateTsunamiText(data, text) {
 
     text = text.replace(/\[|\]/g, "");
     return text;
-  } catch (err) {
+  } catch {
     return "";
   }
 }

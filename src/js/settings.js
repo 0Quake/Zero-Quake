@@ -1,3 +1,4 @@
+/* global NormalizeDate maplibregl turf pmtiles SetShindoColor*/
 var map;
 var config;
 var markerElm;
@@ -9,22 +10,10 @@ var tsunamiFeatures;
 var EQSectFeatures;
 var defaultConfigVal;
 window.addEventListener("load", function () {
-  this.document.getElementById("replay").value = NormalizeDate(
-    3,
-    new Date()
-  ).replaceAll("/", "-");
-  this.document.getElementById("EEWE_EventID").value = NormalizeDate(
-    1,
-    new Date()
-  ).replaceAll("/", "-");
-  this.document.getElementById("EEWE_report_time").value = NormalizeDate(
-    3,
-    new Date()
-  ).replaceAll("/", "-");
-  this.document.getElementById("EEWE_origin_time").value = NormalizeDate(
-    3,
-    new Date()
-  ).replaceAll("/", "-");
+  this.document.getElementById("replay").value = NormalizeDate(3, new Date()).replaceAll("/", "-");
+  this.document.getElementById("EEWE_EventID").value = NormalizeDate(1, new Date()).replaceAll("/", "-");
+  this.document.getElementById("EEWE_report_time").value = NormalizeDate(3, new Date()).replaceAll("/", "-");
+  this.document.getElementById("EEWE_origin_time").value = NormalizeDate(3, new Date()).replaceAll("/", "-");
 });
 
 var confirm_edit = false;
@@ -47,10 +36,7 @@ document
 document.getElementById("tab1_menu13").addEventListener("click", function () {
   //シミュレーションタブを開いたとき、発生時刻が未編集なら現在時刻を設定
   if (!origin_time_edited)
-    document.getElementById("EEWE_origin_time").value = NormalizeDate(
-      3,
-      new Date()
-    ).replaceAll("/", "-");
+    document.getElementById("EEWE_origin_time").value = NormalizeDate(3, new Date()).replaceAll("/", "-");
 });
 
 window.electronAPI.messageSend((event, request) => {
@@ -103,7 +89,6 @@ function configDataDraw() {
   document.getElementById("HomeName").value = config.home.name;
   document.getElementById("latitude").value = config.home.latitude;
   document.getElementById("longitude").value = config.home.longitude;
-  beforeCordinates = [config.home.longitude, config.home.latitude];
   document.getElementById("EEW_Voice").value = config.notice.voice.EEW;
   document.getElementById("EEW2_Voice").value = config.notice.voice.EEWUpdate;
   document.getElementById("EEW3_Voice").value = config.notice.voice.EEWCancel;
@@ -365,111 +350,69 @@ function apply() {
   config.notice.voice.EEWUpdate = document.getElementById("EEW2_Voice").value;
   config.notice.voice.EEWCancel = document.getElementById("EEW3_Voice").value;
   config.notice.voice.Tsunami = document.getElementById("Tsunami_Voice").value;
-  config.notice.voice.TsunamiRevocation =
-    document.getElementById("Tsunami_Voice2").value;
-  config.notice.voice.TsunamiTorikeshi =
-    document.getElementById("Tsunami_Voice3").value;
+  config.notice.voice.TsunamiRevocation = document.getElementById("Tsunami_Voice2").value;
+  config.notice.voice.TsunamiTorikeshi = document.getElementById("Tsunami_Voice3").value;
   config.notice.voice.EQInfo = document.getElementById("EQInfo_Voice1").value;
-  config.notice.voice.EQInfoCancel =
-    document.getElementById("EQInfo_Voice2").value;
-  config.Info.EQInfo.ItemCount = Number(
-    document.getElementById("EQInfo_ItemCount").value
-  );
-  config.Info.EEW.showtraining =
-    document.getElementById("EEW_training").checked;
+  config.notice.voice.EQInfoCancel = document.getElementById("EQInfo_Voice2").value;
+  config.Info.EQInfo.ItemCount = Number(document.getElementById("EQInfo_ItemCount").value);
+  config.Info.EEW.showtraining = document.getElementById("EEW_training").checked;
   config.Info.EEW.IntQuestion = document.getElementById("EEW_IntQ").checked;
-  config.Info.EEW.userIntQuestion =
-    document.getElementById("EEW_userIntQ").checked;
+  config.Info.EEW.userIntQuestion = document.getElementById("EEW_userIntQ").checked;
   config.Info.EEW.IntThreshold = document.getElementById("EEW_IntFilter").value;
-  config.Info.EEW.userIntThreshold =
-    document.getElementById("EEW_userIntFilter").value;
+  config.Info.EEW.userIntThreshold = document.getElementById("EEW_userIntFilter").value;
   config.notice.window.EEW = document.getElementById("EEW_Window").value;
-  config.notice.window.EEW_Update =
-    document.getElementById("EEW_Window_Update").value;
+  config.notice.window.EEW_Update = document.getElementById("EEW_Window_Update").value;
 
-  config.Info.EQInfo.Interval =
-    Number(document.getElementById("EQInfoInterval").value) * 1000;
+  config.Info.EQInfo.Interval = Number(document.getElementById("EQInfoInterval").value) * 1000;
   config.Source.axis.GetData = document.getElementById("Axis_GetData").checked;
-  config.Source.axis.AccessToken =
-    document.getElementById("Axis_AccessToken").value;
-  config.Source.wolfx.GetData =
-    document.getElementById("Wolfx_GetData").checked;
-  config.Source.wolfx.GetDataFromSeisJS = document.getElementById(
-    "Wolfx_SeisJS_GetData"
-  ).checked;
-  config.Source.ProjectBS.GetData =
-    document.getElementById("ProjectBS_GetData").checked;
-  config.Source.EarlyEst.GetData =
-    document.getElementById("EarlyEst_GetData").checked;
+  config.Source.axis.AccessToken = document.getElementById("Axis_AccessToken").value;
+  config.Source.wolfx.GetData = document.getElementById("Wolfx_GetData").checked;
+  config.Source.wolfx.GetDataFromSeisJS = document.getElementById("Wolfx_SeisJS_GetData").checked;
+  config.Source.ProjectBS.GetData = document.getElementById("ProjectBS_GetData").checked;
+  config.Source.EarlyEst.GetData = document.getElementById("EarlyEst_GetData").checked;
   config.Source.msil.GetData = document.getElementById("msil_GetData").checked;
-  config.Source.kmoni.kmoni.GetData =
-    document.getElementById("kmoni_GetData").checked;
-  config.Source.EarlyEst.Interval =
-    Number(document.getElementById("EarlyEstInterval").value) * 1000;
-  config.Source.kmoni.kmoni.Interval =
-    Number(document.getElementById("kmoniInterval").value) * 1000;
-  config.Source.msil.Interval =
-    Number(document.getElementById("msilInterval").value) * 1000;
+  config.Source.kmoni.kmoni.GetData = document.getElementById("kmoni_GetData").checked;
+  config.Source.EarlyEst.Interval = Number(document.getElementById("EarlyEstInterval").value) * 1000;
+  config.Source.kmoni.kmoni.Interval = Number(document.getElementById("kmoniInterval").value) * 1000;
+  config.Source.msil.Interval = Number(document.getElementById("msilInterval").value) * 1000;
 
   config.notice.voice_parameter.rate = TTSspeed;
   config.notice.voice_parameter.pitch = TTSpitch;
   config.notice.voice_parameter.volume = TTSvolume;
   config.notice.voice_parameter.voice = TTSVoiceSelect.value;
 
-  config.Info.TsunamiInfo.showTest =
-    document.getElementById("Tsunami_Test").checked;
-  config.Info.TsunamiInfo.showtraining =
-    document.getElementById("Tsunami_training").checked;
+  config.Info.TsunamiInfo.showTest = document.getElementById("Tsunami_Test").checked;
+  config.Info.TsunamiInfo.showtraining = document.getElementById("Tsunami_training").checked;
 
   config.Info.EQInfo.showTest = document.getElementById("EQInfo_Test").checked;
-  config.Info.EQInfo.showtraining =
-    document.getElementById("EQInfo_training").checked;
+  config.Info.EQInfo.showtraining = document.getElementById("EQInfo_training").checked;
 
-  config.Source.TREMRTS.GetData =
-    document.getElementById("TREM-RTS_GetData").checked;
-  config.Source.TREMRTS.Interval =
-    Number(document.getElementById("TREM-RTS_Interval").value) * 1000;
+  config.Source.TREMRTS.GetData = document.getElementById("TREM-RTS_GetData").checked;
+  config.Source.TREMRTS.Interval = Number(document.getElementById("TREM-RTS_Interval").value) * 1000;
 
   let VoiceEngine_Elm = document.getElementsByName("VoiceEngine");
   for (let i = 0; i < VoiceEngine_Elm.length; i++) {
-    if (VoiceEngine_Elm.item(i).checked)
-      config.notice.voice_parameter.engine = VoiceEngine_Elm.item(i).value;
+    if (VoiceEngine_Elm.item(i).checked) config.notice.voice_parameter.engine = VoiceEngine_Elm.item(i).value;
   }
-  config.notice.voice_parameter.Boyomi_Port = Math.floor(
-    Number(document.getElementById("Boyomi_Port").value)
-  );
-  config.notice.voice_parameter.Boyomi_Voice =
-    document.getElementById("BoyomiVoiceSelect").value;
+  config.notice.voice_parameter.Boyomi_Port = Math.floor(Number(document.getElementById("Boyomi_Port").value));
+  config.notice.voice_parameter.Boyomi_Voice = document.getElementById("BoyomiVoiceSelect").value;
 
-  config.Info.EQInfo.NotificationSound =
-    document.getElementById("NotificationSound").checked;
-  config.Info.EQInfo.maxI_threshold =
-    document.getElementById("maxI_threshold").value;
+  config.Info.EQInfo.NotificationSound = document.getElementById("NotificationSound").checked;
+  config.Info.EQInfo.maxI_threshold = document.getElementById("maxI_threshold").value;
   config.Info.EQInfo.M_threshold = document.getElementById("M_threshold").value;
-  config.Info.EQInfo.Bypass_threshold =
-    document.getElementById("Bypass_threshold").checked;
+  config.Info.EQInfo.Bypass_threshold = document.getElementById("Bypass_threshold").checked;
 
-  config.Info.TsunamiInfo.NotificationSound = document.getElementById(
-    "Tsunami_NotificationSound"
-  ).checked;
-  config.Info.TsunamiInfo.Global_threshold =
-    document.getElementById("Tsunami_threshold").value;
-  config.Info.TsunamiInfo.Local_threshold = document.getElementById(
-    "Tsunami_L_threshold"
-  ).value;
-  config.Info.TsunamiInfo.Bypass_threshold = document.getElementById(
-    "Tsunami_Bypass_threshold"
-  ).checked;
+  config.Info.TsunamiInfo.NotificationSound = document.getElementById("Tsunami_NotificationSound").checked;
+  config.Info.TsunamiInfo.Global_threshold = document.getElementById("Tsunami_threshold").value;
+  config.Info.TsunamiInfo.Local_threshold = document.getElementById("Tsunami_L_threshold").value;
+  config.Info.TsunamiInfo.Bypass_threshold = document.getElementById("Tsunami_Bypass_threshold").checked;
   config.system.zoom = Number(document.getElementById("zoom").value) / 100;
 
   config.color.IntColorTheme = document.getElementById("shindoColor").value;
-  config.color.Shindo =
-    intColor[document.getElementById("shindoColor").value].Shindo;
-  config.color.LgInt =
-    intColor[document.getElementById("shindoColor").value].LgInt;
+  config.color.Shindo = intColor[document.getElementById("shindoColor").value].Shindo;
+  config.color.LgInt = intColor[document.getElementById("shindoColor").value].LgInt;
 
-  config.system.powerSaveBlocking =
-    document.getElementById("powerSaveBlocking").checked;
+  config.system.powerSaveBlocking = document.getElementById("powerSaveBlocking").checked;
 
   window.electronAPI.messageReturn({
     action: "ChangeConfig",
@@ -489,10 +432,7 @@ document.getElementById("cancel").addEventListener("click", function () {
   window.close();
 });
 document.getElementById("replayReset").addEventListener("click", function () {
-  document.getElementById("replay").value = NormalizeDate(
-    3,
-    new Date()
-  ).replaceAll("/", "-");
+  document.getElementById("replay").value = NormalizeDate(3, new Date()).replaceAll("/", "-");
   window.electronAPI.messageReturn({
     action: "replay",
     date: null,
@@ -501,13 +441,10 @@ document.getElementById("replayReset").addEventListener("click", function () {
 });
 
 document.getElementById("replayJump").addEventListener("click", function () {
-  repVal = new Date(document.getElementById("replay").value);
+  var repVal = new Date(document.getElementById("replay").value);
   if (repVal > new Date()) {
     repVal = new Date();
-    document.getElementById("replay").value = NormalizeDate(
-      3,
-      repVal
-    ).replaceAll("/", "-");
+    document.getElementById("replay").value = NormalizeDate(3, repVal).replaceAll("/", "-");
   }
   window.electronAPI.messageReturn({
     action: "replay",
@@ -523,16 +460,14 @@ function offsetCalc() {
     var hours = Math.floor((Replay / 1000 / 60 / 60) % 24);
     var minutes = Math.floor((Replay / 1000 / 60) % 60);
     var seconds = Math.floor((((Replay / 1000) % 24) % 60) % 60);
-    document.getElementById("replayOffset").innerText =
-      "- " + day + "日 " + hours + "時間" + minutes + "分" + seconds + "秒";
+    document.getElementById("replayOffset").innerText = "- " + day + "日 " + hours + "時間" + minutes + "分" + seconds + "秒";
   }
 }
 
 function mapInit() {
   const protocol = new pmtiles.Protocol();
   maplibregl.addProtocol("pmtiles", protocol.tile);
-  const PMTILES_URL =
-    "https://cyberjapandata.gsi.go.jp/xyz/optimal_bvmap-v1/optimal_bvmap-v1.pmtiles";
+  const PMTILES_URL = "https://cyberjapandata.gsi.go.jp/xyz/optimal_bvmap-v1/optimal_bvmap-v1.pmtiles";
   const p = new pmtiles.PMTiles(PMTILES_URL);
   protocol.add(p);
 
@@ -600,19 +535,7 @@ function mapInit() {
           },
           paint: {
             "line-color": "#ff9292",
-            "line-width": [
-              "interpolate",
-              ["linear"],
-              ["zoom"],
-              2,
-              10,
-              5,
-              20,
-              10,
-              80,
-              18,
-              300,
-            ],
+            "line-width": ["interpolate", ["linear"], ["zoom"], 2, 10, 5, 20, 10, 80, 18, 300,],
           },
           minzoom: 0,
           maxzoom: 22,
@@ -674,19 +597,7 @@ function mapInit() {
           },
           paint: {
             "line-color": "#952e2e",
-            "line-width": [
-              "interpolate",
-              ["linear"],
-              ["zoom"],
-              2,
-              1,
-              5,
-              2,
-              10,
-              8,
-              18,
-              30,
-            ],
+            "line-width": ["interpolate", ["linear"], ["zoom"], 2, 1, 5, 2, 10, 8, 18, 30,],
           },
           minzoom: 0,
           maxzoom: 22,
@@ -759,36 +670,7 @@ function mapInit() {
           type: "line",
           source: "v",
           "source-layer": "RdCL",
-          filter: [
-            "any",
-            [
-              "step",
-              ["zoom"],
-              [
-                "all",
-                ["==", ["get", "vt_lvorder"], 0],
-                [
-                  "!",
-                  [
-                    "in",
-                    ["get", "vt_code"],
-                    ["literal", [2703, 2713, 2723, 2733, 2724, 2734]],
-                  ],
-                ],
-              ],
-              17,
-              [
-                "all",
-                ["in", ["get", "vt_flag17"], ["literal", [1, 2]]],
-                ["!", ["in", ["get", "vt_code"], ["literal", [2724, 2734]]]],
-              ],
-            ],
-            [
-              "all",
-              ["==", ["get", "vt_lvorder"], 0],
-              ["in", ["get", "vt_code"], ["literal", [2703, 2713, 2723, 2733]]],
-            ],
-          ],
+          filter: ["any", ["step", ["zoom"], ["all", ["==", ["get", "vt_lvorder"], 0], ["!", ["in", ["get", "vt_code"], ["literal", [2703, 2713, 2723, 2733, 2724, 2734]],],],], 17, ["all", ["in", ["get", "vt_flag17"], ["literal", [1, 2]]], ["!", ["in", ["get", "vt_code"], ["literal", [2724, 2734]]]],],], ["all", ["==", ["get", "vt_lvorder"], 0], ["in", ["get", "vt_code"], ["literal", [2703, 2713, 2723, 2733]]],],],
           layout: {
             "line-join": "round",
             "line-round-limit": 1.57,
@@ -803,38 +685,7 @@ function mapInit() {
           type: "line",
           source: "v",
           "source-layer": "RailCL",
-          filter: [
-            "any",
-            [
-              "all",
-              [
-                "!",
-                [
-                  "in",
-                  ["get", "vt_railstate"],
-                  ["literal", ["トンネル", "雪覆い", "地下", "橋・高架"]],
-                ],
-              ],
-              ["==", ["get", "vt_lvorder"], 0],
-            ],
-            [
-              "all",
-              ["==", ["get", "vt_railstate"], "橋・高架"],
-              ["==", ["get", "vt_lvorder"], 0],
-            ],
-            [
-              "all",
-              [
-                "!",
-                [
-                  "in",
-                  ["get", "vt_railstate"],
-                  ["literal", ["トンネル", "雪覆い", "地下", "橋・高架"]],
-                ],
-              ],
-              ["==", ["get", "vt_lvorder"], 1],
-            ],
-          ],
+          filter: ["any", ["all", ["!", ["in", ["get", "vt_railstate"], ["literal", ["トンネル", "雪覆い", "地下", "橋・高架"]],],], ["==", ["get", "vt_lvorder"], 0],], ["all", ["==", ["get", "vt_railstate"], "橋・高架"], ["==", ["get", "vt_lvorder"], 0],], ["all", ["!", ["in", ["get", "vt_railstate"], ["literal", ["トンネル", "雪覆い", "地下", "橋・高架"]],],], ["==", ["get", "vt_lvorder"], 1],],],
           paint: {
             "line-color": "#80808066",
             "line-width": 2.5,
@@ -856,18 +707,7 @@ function mapInit() {
           type: "line",
           source: "v",
           "source-layer": "RdCL",
-          filter: [
-            "all",
-            ["==", ["get", "vt_lvorder"], 1],
-            [
-              "!",
-              [
-                "in",
-                ["get", "vt_code"],
-                ["literal", [2703, 2713, 2723, 2733, 2724, 2734]],
-              ],
-            ],
-          ],
+          filter: ["all", ["==", ["get", "vt_lvorder"], 1], ["!", ["in", ["get", "vt_code"], ["literal", [2703, 2713, 2723, 2733, 2724, 2734]],],],],
           layout: {
             "line-join": "round",
             "line-round-limit": 1.57,
@@ -886,11 +726,7 @@ function mapInit() {
           type: "line",
           source: "v",
           "source-layer": "RdCL",
-          filter: [
-            "all",
-            ["==", ["get", "vt_lvorder"], 1],
-            ["in", ["get", "vt_code"], ["literal", [2703, 2713, 2723, 2733]]],
-          ],
+          filter: ["all", ["==", ["get", "vt_lvorder"], 1], ["in", ["get", "vt_code"], ["literal", [2703, 2713, 2723, 2733]]],],
           layout: {
             "line-join": "round",
             "line-round-limit": 1.57,
@@ -924,150 +760,12 @@ function mapInit() {
           type: "symbol",
           source: "v",
           "source-layer": "Anno",
-          filter: [
-            "step",
-            ["zoom"],
-            [
-              "all",
-              ["==", ["geometry-type"], "Point"],
-              [
-                "in",
-                ["get", "vt_code"],
-                [
-                  "literal",
-                  [
-                    653, 661, 662, 3201, 3202, 3203, 3204, 3211, 3215, 3216,
-                    3217, 3218, 3231, 3232, 3242, 3243, 3244, 3261, 4101, 4102,
-                    4103, 4104, 4105, 6301, 6311, 6312, 6313, 6314, 6321, 6322,
-                    6323, 6324, 6325, 6326, 6327, 6332, 6342, 6351, 6362, 7101,
-                    7102, 7103, 7711, 8103, 8105,
-                  ],
-                ],
-              ],
-            ],
-            16,
-            [
-              "all",
-              ["==", ["geometry-type"], "Point"],
-              ["in", ["get", "vt_flag17"], ["literal", [0, 1]]],
-              [
-                "in",
-                ["get", "vt_code"],
-                [
-                  "literal",
-                  [
-                    653, 661, 662, 3201, 3202, 3203, 3204, 3211, 3215, 3216,
-                    3217, 3218, 3231, 3232, 3242, 3243, 3244, 3261, 4101, 4102,
-                    4103, 4104, 4105, 6301, 6311, 6312, 6313, 6314, 6321, 6322,
-                    6323, 6324, 6325, 6326, 6327, 6332, 6342, 6351, 6362, 7101,
-                    7102, 7103, 7711, 8103, 8105,
-                  ],
-                ],
-              ],
-            ],
-            17,
-            [
-              "all",
-              ["==", ["geometry-type"], "Point"],
-              ["in", ["get", "vt_flag17"], ["literal", [1, 2]]],
-              [
-                "in",
-                ["get", "vt_code"],
-                [
-                  "literal",
-                  [
-                    653, 661, 662, 3201, 3202, 3203, 3204, 3211, 3215, 3216,
-                    3217, 3218, 3231, 3232, 3242, 3243, 3244, 3261, 4101, 4102,
-                    4103, 4104, 4105, 6301, 6311, 6312, 6313, 6314, 6321, 6322,
-                    6323, 6324, 6325, 6326, 6327, 6332, 6342, 6351, 6362, 7101,
-                    7102, 7103, 7711, 8103, 8105,
-                  ],
-                ],
-              ],
-            ],
-          ],
+          filter: ["step", ["zoom"], ["all", ["==", ["geometry-type"], "Point"], ["in", ["get", "vt_code"], ["literal", [653, 661, 662, 3201, 3202, 3203, 3204, 3211, 3215, 3216, 3217, 3218, 3231, 3232, 3242, 3243, 3244, 3261, 4101, 4102, 4103, 4104, 4105, 6301, 6311, 6312, 6313, 6314, 6321, 6322, 6323, 6324, 6325, 6326, 6327, 6332, 6342, 6351, 6362, 7101, 7102, 7103, 7711, 8103, 8105,],],],], 16, ["all", ["==", ["geometry-type"], "Point"], ["in", ["get", "vt_flag17"], ["literal", [0, 1]]], ["in", ["get", "vt_code"], ["literal", [653, 661, 662, 3201, 3202, 3203, 3204, 3211, 3215, 3216, 3217, 3218, 3231, 3232, 3242, 3243, 3244, 3261, 4101, 4102, 4103, 4104, 4105, 6301, 6311, 6312, 6313, 6314, 6321, 6322, 6323, 6324, 6325, 6326, 6327, 6332, 6342, 6351, 6362, 7101, 7102, 7103, 7711, 8103, 8105,],],],], 17, ["all", ["==", ["geometry-type"], "Point"], ["in", ["get", "vt_flag17"], ["literal", [1, 2]]], ["in", ["get", "vt_code"], ["literal", [653, 661, 662, 3201, 3202, 3203, 3204, 3211, 3215, 3216, 3217, 3218, 3231, 3232, 3242, 3243, 3244, 3261, 4101, 4102, 4103, 4104, 4105, 6301, 6311, 6312, 6313, 6314, 6321, 6322, 6323, 6324, 6325, 6326, 6327, 6332, 6342, 6351, 6362, 7101, 7102, 7103, 7711, 8103, 8105,],],],],],
           layout: {
             "text-allow-overlap": false,
-            "text-font": [
-              "match",
-              ["get", "vt_code"],
-              [321, 322, 341, 342, 344, 345, 347, 820, 840, 841, 842],
-              ["literal", ["NotoSerifJP-SemiBold"]],
-              ["literal", ["NotoSansJP-Regular"]],
-            ],
+            "text-font": ["match", ["get", "vt_code"], [321, 322, 341, 342, 344, 345, 347, 820, 840, 841, 842], ["literal", ["NotoSerifJP-SemiBold"]], ["literal", ["NotoSansJP-Regular"]],],
             "text-justify": "auto",
-            "text-size": [
-              "let",
-              "size",
-              [
-                "match",
-                ["get", "vt_code"],
-                [361, 1403, 7101, 7102, 7103, 7201, 7221],
-                10,
-                [334, 730],
-                11,
-                [
-                  312, 313, 314, 315, 316, 322, 323, 332, 342, 353, 412, 533,
-                  621, 631, 632, 633, 634, 653, 654, 720, 999, 2941, 2942, 2943,
-                  2944, 2945,
-                ],
-                12,
-                [343, 1402, 7711],
-                13,
-                [311, 346, 347, 413, 422, 1303],
-                14,
-                [
-                  210, 220, 321, 331, 352, 411, 421, 423, 431, 432, 441, 511,
-                  521, 522, 523, 531, 532, 534, 611, 612, 613, 615, 651, 661,
-                  662, 671, 672, 673, 681, 1302,
-                ],
-                15,
-                [130, 1301, 1401],
-                16,
-                [140, 333, 351],
-                18,
-                [110, 120, 341, 344, 345],
-                20,
-                [
-                  348, 800, 810, 820, 822, 830, 831, 832, 833, 840, 841, 842,
-                  843, 850, 860, 870, 880, 881, 882, 883, 884, 885, 886, 887,
-                  888, 889, 890, 899,
-                ],
-                24,
-                10,
-              ],
-              [
-                "interpolate",
-                ["linear"],
-                ["zoom"],
-                4,
-                ["*", 0.6, ["var", "size"]],
-                8,
-                ["var", "size"],
-                11,
-                [
-                  "match",
-                  ["get", "vt_code"],
-                  [1401, 1402, 1403],
-                  20,
-                  422,
-                  ["*", 0.7, ["var", "size"]],
-                  ["var", "size"],
-                ],
-                12,
-                ["var", "size"],
-                14,
-                ["var", "size"],
-                17,
-                [
-                  "match",
-                  ["get", "vt_code"],
-                  [412, 422],
-                  ["*", 2, ["var", "size"]],
-                  ["var", "size"],
-                ],
-              ],
-            ],
+            "text-size": ["let", "size", ["match", ["get", "vt_code"], [361, 1403, 7101, 7102, 7103, 7201, 7221], 10, [334, 730], 11, [312, 313, 314, 315, 316, 322, 323, 332, 342, 353, 412, 533, 621, 631, 632, 633, 634, 653, 654, 720, 999, 2941, 2942, 2943, 2944, 2945,], 12, [343, 1402, 7711], 13, [311, 346, 347, 413, 422, 1303], 14, [210, 220, 321, 331, 352, 411, 421, 423, 431, 432, 441, 511, 521, 522, 523, 531, 532, 534, 611, 612, 613, 615, 651, 661, 662, 671, 672, 673, 681, 1302,], 15, [130, 1301, 1401], 16, [140, 333, 351], 18, [110, 120, 341, 344, 345], 20, [348, 800, 810, 820, 822, 830, 831, 832, 833, 840, 841, 842, 843, 850, 860, 870, 880, 881, 882, 883, 884, 885, 886, 887, 888, 889, 890, 899,], 24, 10,], ["interpolate", ["linear"], ["zoom"], 4, ["*", 0.6, ["var", "size"]], 8, ["var", "size"], 11, ["match", ["get", "vt_code"], [1401, 1402, 1403], 20, 422, ["*", 0.7, ["var", "size"]], ["var", "size"],], 12, ["var", "size"], 14, ["var", "size"], 17, ["match", ["get", "vt_code"], [412, 422], ["*", 2, ["var", "size"]], ["var", "size"],],],],
             "text-field": ["get", "vt_text"],
             "text-max-width": 100,
             "text-radial-offset": 0.5,
@@ -1075,85 +773,8 @@ function mapInit() {
             "text-writing-mode": ["horizontal"],
           },
           paint: {
-            "text-color": [
-              "let",
-              "color",
-              [
-                "match",
-                ["get", "vt_code"],
-                521,
-                "rgba(80,80,80,1)",
-                348,
-                "rgba(150,150,150,1)",
-                [
-                  411, 412, 413, 421, 422, 423, 431, 432, 441, 860, 2941, 2942,
-                  2943, 2944, 2945,
-                ],
-                "rgba(230,230,230,1)",
-                [7372, 7711],
-                "rgba(80,80,80,1)",
-                7352,
-                "rgba(50,50,50,1)",
-                [2901, 2903, 2904],
-                "rgba(255,255,255,1)",
-                [321, 322, 341, 344, 345, 820, 840, 841],
-                "rgba(80,80,80,1)",
-                220,
-                "rgba(150,150,150,1)",
-                312,
-                "rgba(150,150,150,1)",
-                [333, 346],
-                "rgba(150,150,150,1)",
-                [
-                  511, 522, 523, 531, 532, 534, 611, 612, 613, 614, 615, 621,
-                  623, 631, 632, 633, 634, 641, 642, 651, 652, 653, 654, 661,
-                  662, 671, 672, 673, 681, 720, 730, 870, 880, 881, 882, 883,
-                  884, 885, 886, 887, 888, 889, 890, 899, 999, 3201, 3202, 3203,
-                  3204, 3205, 3206, 3211, 3212, 3213, 3214, 3215, 3216, 3217,
-                  3218, 3221, 3231, 3232, 3241, 3242, 3243, 3244,
-                ],
-                "rgba(150,150,150,1)",
-                "rgba(200,200,200,1)",
-              ],
-              [
-                "step",
-                ["zoom"],
-                [
-                  "match",
-                  ["get", "vt_code"],
-                  [661, 662],
-                  "rgba(200,200,200,0)",
-                  ["var", "color"],
-                ],
-                14,
-                [
-                  "match",
-                  ["get", "vt_code"],
-                  [3201, 3204, 3215, 3216, 3217, 3218, 3243],
-                  "rgba(200,200,200,0)",
-                  ["var", "color"],
-                ],
-              ],
-            ],
-            "text-halo-color": [
-              "step",
-              ["zoom"],
-              [
-                "match",
-                ["get", "vt_code"],
-                [661, 662],
-                "rgba(50,50,50,0)",
-                "rgba(50,50,50,1)",
-              ],
-              14,
-              [
-                "match",
-                ["get", "vt_code"],
-                [3201, 3204, 3215, 3216, 3217, 3218, 3243],
-                "rgba(50,50,50,0)",
-                "rgba(50,50,50,1)",
-              ],
-            ],
+            "text-color": ["let", "color", ["match", ["get", "vt_code"], 521, "rgba(80,80,80,1)", 348, "rgba(150,150,150,1)", [411, 412, 413, 421, 422, 423, 431, 432, 441, 860, 2941, 2942, 2943, 2944, 2945,], "rgba(230,230,230,1)", [7372, 7711], "rgba(80,80,80,1)", 7352, "rgba(50,50,50,1)", [2901, 2903, 2904], "rgba(255,255,255,1)", [321, 322, 341, 344, 345, 820, 840, 841], "rgba(80,80,80,1)", 220, "rgba(150,150,150,1)", 312, "rgba(150,150,150,1)", [333, 346], "rgba(150,150,150,1)", [511, 522, 523, 531, 532, 534, 611, 612, 613, 614, 615, 621, 623, 631, 632, 633, 634, 641, 642, 651, 652, 653, 654, 661, 662, 671, 672, 673, 681, 720, 730, 870, 880, 881, 882, 883, 884, 885, 886, 887, 888, 889, 890, 899, 999, 3201, 3202, 3203, 3204, 3205, 3206, 3211, 3212, 3213, 3214, 3215, 3216, 3217, 3218, 3221, 3231, 3232, 3241, 3242, 3243, 3244,], "rgba(150,150,150,1)", "rgba(200,200,200,1)",], ["step", ["zoom"], ["match", ["get", "vt_code"], [661, 662], "rgba(200,200,200,0)", ["var", "color"],], 14, ["match", ["get", "vt_code"], [3201, 3204, 3215, 3216, 3217, 3218, 3243], "rgba(200,200,200,0)", ["var", "color"],],],],
+            "text-halo-color": ["step", ["zoom"], ["match", ["get", "vt_code"], [661, 662], "rgba(50,50,50,0)", "rgba(50,50,50,1)",], 14, ["match", ["get", "vt_code"], [3201, 3204, 3215, 3216, 3217, 3218, 3243], "rgba(50,50,50,0)", "rgba(50,50,50,1)",],],
             "text-halo-width": 1,
           },
         },
@@ -1162,153 +783,12 @@ function mapInit() {
           type: "symbol",
           source: "v",
           "source-layer": "Anno",
-          filter: [
-            "step",
-            ["zoom"],
-            [
-              "all",
-              ["==", ["geometry-type"], "Point"],
-              [
-                "in",
-                ["get", "vt_code"],
-                [
-                  "literal",
-                  [
-                    621, 631, 632, 633, 1301, 1302, 1303, 1401, 1402, 1403,
-                    2941, 2942, 2945, 3205, 3206, 3212, 3213, 3214, 3221, 3241,
-                    6331, 6361, 6367, 6368, 6371, 6373, 6375, 6376, 6381, 7201,
-                    7221,
-                  ],
-                ],
-              ],
-            ],
-            16,
-            [
-              "all",
-              ["==", ["geometry-type"], "Point"],
-              ["in", ["get", "vt_flag17"], ["literal", [0, 1]]],
-              [
-                "in",
-                ["get", "vt_code"],
-                [
-                  "literal",
-                  [
-                    621, 631, 632, 633, 1301, 1302, 1303, 1401, 1402, 1403,
-                    2941, 2942, 2945, 3205, 3206, 3212, 3213, 3214, 3221, 3241,
-                    6331, 6361, 6367, 6368, 6371, 6373, 6375, 6376, 6381, 7201,
-                    7221,
-                  ],
-                ],
-              ],
-            ],
-            17,
-            [
-              "all",
-              ["==", ["geometry-type"], "Point"],
-              ["in", ["get", "vt_flag17"], ["literal", [1, 2]]],
-              [
-                "in",
-                ["get", "vt_code"],
-                [
-                  "literal",
-                  [
-                    621, 631, 632, 633, 1301, 1302, 1303, 1401, 1402, 1403,
-                    2941, 2942, 2945, 3205, 3206, 3212, 3213, 3214, 3221, 3241,
-                    6331, 6361, 6367, 6368, 6371, 6373, 6375, 6376, 6381, 7201,
-                    7221,
-                  ],
-                ],
-              ],
-            ],
-          ],
+          filter: ["step", ["zoom"], ["all", ["==", ["geometry-type"], "Point"], ["in", ["get", "vt_code"], ["literal", [621, 631, 632, 633, 1301, 1302, 1303, 1401, 1402, 1403, 2941, 2942, 2945, 3205, 3206, 3212, 3213, 3214, 3221, 3241, 6331, 6361, 6367, 6368, 6371, 6373, 6375, 6376, 6381, 7201, 7221,],],],], 16, ["all", ["==", ["geometry-type"], "Point"], ["in", ["get", "vt_flag17"], ["literal", [0, 1]]], ["in", ["get", "vt_code"], ["literal", [621, 631, 632, 633, 1301, 1302, 1303, 1401, 1402, 1403, 2941, 2942, 2945, 3205, 3206, 3212, 3213, 3214, 3221, 3241, 6331, 6361, 6367, 6368, 6371, 6373, 6375, 6376, 6381, 7201, 7221,],],],], 17, ["all", ["==", ["geometry-type"], "Point"], ["in", ["get", "vt_flag17"], ["literal", [1, 2]]], ["in", ["get", "vt_code"], ["literal", [621, 631, 632, 633, 1301, 1302, 1303, 1401, 1402, 1403, 2941, 2942, 2945, 3205, 3206, 3212, 3213, 3214, 3221, 3241, 6331, 6361, 6367, 6368, 6371, 6373, 6375, 6376, 6381, 7201, 7221,],],],],],
           layout: {
             "text-allow-overlap": false,
-            "text-font": [
-              "match",
-              ["get", "vt_code"],
-              [321, 322, 341, 342, 344, 345, 347, 820, 840, 841, 842],
-              ["literal", ["NotoSerifJP-SemiBold"]],
-              ["literal", ["NotoSansJP-Regular"]],
-            ],
+            "text-font": ["match", ["get", "vt_code"], [321, 322, 341, 342, 344, 345, 347, 820, 840, 841, 842], ["literal", ["NotoSerifJP-SemiBold"]], ["literal", ["NotoSansJP-Regular"]],],
             "text-justify": "auto",
-            "text-size": [
-              "let",
-              "size",
-              [
-                "match",
-                ["get", "vt_code"],
-                [361, 1403, 7101, 7102, 7103, 7201, 7221],
-                10,
-                [334, 730],
-                11,
-                [
-                  312, 313, 314, 315, 316, 322, 323, 332, 342, 353, 412, 533,
-                  621, 631, 632, 633, 634, 653, 654, 720, 999, 2941, 2942, 2943,
-                  2944, 2945,
-                ],
-                12,
-                [343, 1402, 7711],
-                13,
-                [311, 346, 347, 413, 422, 1303],
-                14,
-                [
-                  210, 220, 321, 331, 352, 411, 421, 423, 431, 432, 441, 511,
-                  521, 522, 523, 531, 532, 534, 611, 612, 613, 615, 651, 661,
-                  662, 671, 672, 673, 681, 1302,
-                ],
-                15,
-                [130, 1301, 1401],
-                16,
-                [140, 333, 351],
-                18,
-                [110, 120, 341, 344, 345],
-                20,
-                [
-                  348, 800, 810, 820, 822, 830, 831, 832, 833, 840, 841, 842,
-                  843, 850, 860, 870, 880, 881, 882, 883, 884, 885, 886, 887,
-                  888, 889, 890, 899,
-                ],
-                24,
-                10,
-              ],
-              [
-                "interpolate",
-                ["linear"],
-                ["zoom"],
-                4,
-                ["*", 0.6, ["var", "size"]],
-                8,
-                ["var", "size"],
-                11,
-                [
-                  "match",
-                  ["get", "vt_code"],
-                  [1401, 1402, 1403],
-                  20,
-                  422,
-                  ["*", 0.7, ["var", "size"]],
-                  ["var", "size"],
-                ],
-                12,
-                ["var", "size"],
-                14,
-                [
-                  "match",
-                  ["get", "vt_code"],
-                  [2941, 2942],
-                  ["*", 1.3, ["var", "size"]],
-                  ["var", "size"],
-                ],
-                17,
-                [
-                  "match",
-                  ["get", "vt_code"],
-                  [412, 422],
-                  ["*", 2, ["var", "size"]],
-                  ["var", "size"],
-                ],
-              ],
-            ],
+            "text-size": ["let", "size", ["match", ["get", "vt_code"], [361, 1403, 7101, 7102, 7103, 7201, 7221], 10, [334, 730], 11, [312, 313, 314, 315, 316, 322, 323, 332, 342, 353, 412, 533, 621, 631, 632, 633, 634, 653, 654, 720, 999, 2941, 2942, 2943, 2944, 2945,], 12, [343, 1402, 7711], 13, [311, 346, 347, 413, 422, 1303], 14, [210, 220, 321, 331, 352, 411, 421, 423, 431, 432, 441, 511, 521, 522, 523, 531, 532, 534, 611, 612, 613, 615, 651, 661, 662, 671, 672, 673, 681, 1302,], 15, [130, 1301, 1401], 16, [140, 333, 351], 18, [110, 120, 341, 344, 345], 20, [348, 800, 810, 820, 822, 830, 831, 832, 833, 840, 841, 842, 843, 850, 860, 870, 880, 881, 882, 883, 884, 885, 886, 887, 888, 889, 890, 899,], 24, 10,], ["interpolate", ["linear"], ["zoom"], 4, ["*", 0.6, ["var", "size"]], 8, ["var", "size"], 11, ["match", ["get", "vt_code"], [1401, 1402, 1403], 20, 422, ["*", 0.7, ["var", "size"]], ["var", "size"],], 12, ["var", "size"], 14, ["match", ["get", "vt_code"], [2941, 2942], ["*", 1.3, ["var", "size"]], ["var", "size"],], 17, ["match", ["get", "vt_code"], [412, 422], ["*", 2, ["var", "size"]], ["var", "size"],],],],
             "text-field": ["get", "vt_text"],
             "text-max-width": 100,
             "text-radial-offset": 0.5,
@@ -1316,85 +796,8 @@ function mapInit() {
             "text-writing-mode": ["horizontal"],
           },
           paint: {
-            "text-color": [
-              "let",
-              "color",
-              [
-                "match",
-                ["get", "vt_code"],
-                521,
-                "rgba(80,80,80,1)",
-                348,
-                "rgba(150,150,150,1)",
-                [
-                  411, 412, 413, 421, 422, 423, 431, 432, 441, 860, 2941, 2942,
-                  2943, 2944, 2945,
-                ],
-                "rgba(230,230,230,1)",
-                [7372, 7711],
-                "rgba(80,80,80,1)",
-                7352,
-                "rgba(50,50,50,1)",
-                [2901, 2903, 2904],
-                "rgba(255,255,255,1)",
-                [321, 322, 341, 344, 345, 820, 840, 841],
-                "rgba(80,80,80,1)",
-                220,
-                "rgba(150,150,150,1)",
-                312,
-                "rgba(150,150,150,1)",
-                [333, 346],
-                "rgba(150,150,150,1)",
-                [
-                  511, 522, 523, 531, 532, 534, 611, 612, 613, 614, 615, 621,
-                  623, 631, 632, 633, 634, 641, 642, 651, 652, 653, 654, 661,
-                  662, 671, 672, 673, 681, 720, 730, 870, 880, 881, 882, 883,
-                  884, 885, 886, 887, 888, 889, 890, 899, 999, 3201, 3202, 3203,
-                  3204, 3205, 3206, 3211, 3212, 3213, 3214, 3215, 3216, 3217,
-                  3218, 3221, 3231, 3232, 3241, 3242, 3243, 3244,
-                ],
-                "rgba(150,150,150,1)",
-                "rgba(200,200,200,1)",
-              ],
-              [
-                "step",
-                ["zoom"],
-                [
-                  "match",
-                  ["get", "vt_code"],
-                  [631, 632, 633, 6368, 6376],
-                  "rgba(200,200,200,0)",
-                  ["var", "color"],
-                ],
-                14,
-                [
-                  "match",
-                  ["get", "vt_code"],
-                  [3212, 3213, 3214],
-                  "rgba(200,200,200,0)",
-                  ["var", "color"],
-                ],
-              ],
-            ],
-            "text-halo-color": [
-              "step",
-              ["zoom"],
-              [
-                "match",
-                ["get", "vt_code"],
-                [631, 632, 633, 6368, 6376],
-                "rgba(50,50,50,0)",
-                "rgba(50,50,50,1)",
-              ],
-              14,
-              [
-                "match",
-                ["get", "vt_code"],
-                [3212, 3213, 3214],
-                "rgba(50,50,50,0)",
-                "rgba(50,50,50,1)",
-              ],
-            ],
+            "text-color": ["let", "color", ["match", ["get", "vt_code"], 521, "rgba(80,80,80,1)", 348, "rgba(150,150,150,1)", [411, 412, 413, 421, 422, 423, 431, 432, 441, 860, 2941, 2942, 2943, 2944, 2945,], "rgba(230,230,230,1)", [7372, 7711], "rgba(80,80,80,1)", 7352, "rgba(50,50,50,1)", [2901, 2903, 2904], "rgba(255,255,255,1)", [321, 322, 341, 344, 345, 820, 840, 841], "rgba(80,80,80,1)", 220, "rgba(150,150,150,1)", 312, "rgba(150,150,150,1)", [333, 346], "rgba(150,150,150,1)", [511, 522, 523, 531, 532, 534, 611, 612, 613, 614, 615, 621, 623, 631, 632, 633, 634, 641, 642, 651, 652, 653, 654, 661, 662, 671, 672, 673, 681, 720, 730, 870, 880, 881, 882, 883, 884, 885, 886, 887, 888, 889, 890, 899, 999, 3201, 3202, 3203, 3204, 3205, 3206, 3211, 3212, 3213, 3214, 3215, 3216, 3217, 3218, 3221, 3231, 3232, 3241, 3242, 3243, 3244,], "rgba(150,150,150,1)", "rgba(200,200,200,1)",], ["step", ["zoom"], ["match", ["get", "vt_code"], [631, 632, 633, 6368, 6376], "rgba(200,200,200,0)", ["var", "color"],], 14, ["match", ["get", "vt_code"], [3212, 3213, 3214], "rgba(200,200,200,0)", ["var", "color"],],],],
+            "text-halo-color": ["step", ["zoom"], ["match", ["get", "vt_code"], [631, 632, 633, 6368, 6376], "rgba(50,50,50,0)", "rgba(50,50,50,1)",], 14, ["match", ["get", "vt_code"], [3212, 3213, 3214], "rgba(50,50,50,0)", "rgba(50,50,50,1)",],],
             "text-halo-width": 1,
           },
         },
@@ -1402,9 +805,7 @@ function mapInit() {
     },
   });
   map.addControl(
-    new maplibregl.AttributionControl({
-      compact: true,
-    }),
+    new maplibregl.AttributionControl({ compact: true, }),
     "bottom-right"
   );
   map.touchZoomRotate.disableRotation();
@@ -1442,10 +843,9 @@ function lineString(arr) {
   }
 }
 
-var beforeCordinates = [0, 0];
 function MapReDraw() {
-  lat = Number(document.getElementById("latitude").value);
-  lng = Number(document.getElementById("longitude").value);
+  var lat = Number(document.getElementById("latitude").value);
+  var lng = Number(document.getElementById("longitude").value);
   if (!lat) lat = 0;
   if (!lng) lng = 0;
 
@@ -1468,7 +868,7 @@ function MapReDraw() {
               { units: "kilometers" }
             );
           });
-        } catch (err) {
+        } catch {
           return Infinity;
         }
         return Math.min(...distances);
@@ -1479,7 +879,7 @@ function MapReDraw() {
             lineString(line.geometry.coordinates),
             { units: "kilometers" }
           );
-        } catch (err) {
+        } catch {
           return Infinity;
         }
       }
@@ -1510,8 +910,6 @@ function MapReDraw() {
     selectBoxSet(document.getElementById("saibun"), EQSect);
   }
 
-  beforeCordinates = [lng, lat];
-
   var minDistance = Infinity;
   tsunamiFeatures.forEach(function (elm) {
     // 距離を求める
@@ -1523,7 +921,7 @@ function MapReDraw() {
             lineString(cd),
             { units: "kilometers" }
           );
-        } catch (err) {
+        } catch {
           return Infinity;
         }
       });
@@ -1535,7 +933,7 @@ function MapReDraw() {
           lineString(elm.geometry.coordinates),
           { units: "kilometers" }
         );
-      } catch (err) {
+      } catch {
         return Infinity;
       }
     }
@@ -1554,17 +952,9 @@ function MapReDraw() {
   });
 
   markerElm.setLngLat([lng, lat]);
-  fetch(
-    "https://www.j-shis.bosai.go.jp/map/api/sstrct/V4/meshinfo.geojson?position=" +
-      lng +
-      "," +
-      lat +
-      "&epsg=4612&attr=ARV"
-  )
-    .then(function (res) {
-      return res.json();
-    })
-    .then(function (json, res) {
+  fetch("https://www.j-shis.bosai.go.jp/map/api/sstrct/V4/meshinfo.geojson?position=" + lng + "," + lat + "&epsg=4612&attr=ARV")
+    .then(function (res) { return res.json(); })
+    .then(function (json) {
       if (json.features && json.features[0].properties)
         document.getElementById("arv").value = json.features[0].properties.ARV;
       else document.getElementById("arv").value = 1;
@@ -1597,14 +987,7 @@ speechSynthesis.onvoiceschanged = () => {
     if (config && elm.name == config.notice.voice_parameter.voice)
       selectedT = " selected";
 
-    opts +=
-      "<option" +
-      selectedT +
-      " value='" +
-      elm.name +
-      "'>" +
-      elm.name +
-      "</option>";
+    opts += "<option" + selectedT + " value='" + elm.name + "'>" + elm.name + "</option>";
   });
   TTSVoiceSelect.innerHTML = opts;
 };
@@ -1624,32 +1007,25 @@ function speak(text, engine) {
   }
   if (engine == "Boyomichan") {
     if (document.getElementById("BoyomiVoiceSelect").value == "auto") {
-      fetch(
-        `http://localhost:${document.getElementById("Boyomi_Port").value}/Talk?text=${text}&speed=${TTSspeed * 100}&volume=${TTSvolume * 100}&tone=${TTSpitch * 100}`
-      ).catch(function (err) {
-        speak(text, "Default");
-      });
+      fetch(`http://localhost:${document.getElementById("Boyomi_Port").value}/Talk?text=${text}&speed=${TTSspeed * 100}&volume=${TTSvolume * 100}&tone=${TTSpitch * 100}`)
+        .catch(function () {
+          speak(text, "Default");
+        });
     } else {
       fetch("http://localhost:50080/GetVoiceList")
-        .then(function (res) {
-          return res.json();
-        })
+        .then(function (res) { return res.json(); })
         .then(function (json) {
           var voice_parameter = "";
           var voiceElm = json.voiceList.find(function (elm) {
             return elm.id == document.getElementById("BoyomiVoiceSelect").value;
           });
-          if (voiceElm)
-            voice_parameter =
-              "&voice=" + document.getElementById("BoyomiVoiceSelect").value;
+          if (voiceElm) voice_parameter = "&voice=" + document.getElementById("BoyomiVoiceSelect").value;
 
-          fetch(
-            `http://localhost:${document.getElementById("Boyomi_Port").value}/Talk?text=${text}${voice_parameter}&speed=${TTSspeed * 100}&volume=${TTSvolume * 100}&tone=${TTSpitch * 100}`
-          ).catch(function (err) {
-            speak(text, "Default");
-          });
+          fetch(`http://localhost:${document.getElementById("Boyomi_Port").value}/Talk?text=${text}${voice_parameter}&speed=${TTSspeed * 100}&volume=${TTSvolume * 100}&tone=${TTSpitch * 100}`)
+            .catch(function () {
+              speak(text, "Default");
+            });
         })
-        .catch(function (err) {});
     }
   } else if (engine == "Default") {
     speechSynthesis.cancel();
@@ -1657,7 +1033,7 @@ function speak(text, engine) {
     const uttr = new SpeechSynthesisUtterance();
 
     if (TTSVoiceSelect.value) {
-      Svoice = voices.find(function (elm) {
+      var Svoice = voices.find(function (elm) {
         return elm.name == TTSVoiceSelect.value;
       });
       uttr.voice = Svoice;
@@ -1732,71 +1108,39 @@ document
 
 document.getElementById("shindoColor").addEventListener("change", function () {
   var colorTmp = intColor[this.value];
-  document.getElementById("ShindoSampleQ").style.background =
-    colorTmp.Shindo["?"].background;
-  document.getElementById("ShindoSample0").style.background =
-    colorTmp.Shindo["0"].background;
-  document.getElementById("ShindoSample1").style.background =
-    colorTmp.Shindo["1"].background;
-  document.getElementById("ShindoSample2").style.background =
-    colorTmp.Shindo["2"].background;
-  document.getElementById("ShindoSample3").style.background =
-    colorTmp.Shindo["3"].background;
-  document.getElementById("ShindoSample4").style.background =
-    colorTmp.Shindo["4"].background;
-  document.getElementById("ShindoSample5m").style.background =
-    colorTmp.Shindo["5m"].background;
-  document.getElementById("ShindoSample5p").style.background =
-    colorTmp.Shindo["5p"].background;
-  document.getElementById("ShindoSample6m").style.background =
-    colorTmp.Shindo["6m"].background;
-  document.getElementById("ShindoSample6p").style.background =
-    colorTmp.Shindo["6p"].background;
-  document.getElementById("ShindoSample7").style.background =
-    colorTmp.Shindo["7"].background;
-  document.getElementById("LngIntSampleQ").style.background =
-    colorTmp.LgInt["?"].background;
-  document.getElementById("LngIntSample1").style.background =
-    colorTmp.LgInt["1"].background;
-  document.getElementById("LngIntSample2").style.background =
-    colorTmp.LgInt["2"].background;
-  document.getElementById("LngIntSample3").style.background =
-    colorTmp.LgInt["3"].background;
-  document.getElementById("LngIntSample4").style.background =
-    colorTmp.LgInt["4"].background;
+  document.getElementById("ShindoSampleQ").style.background = colorTmp.Shindo["?"].background;
+  document.getElementById("ShindoSample0").style.background = colorTmp.Shindo["0"].background;
+  document.getElementById("ShindoSample1").style.background = colorTmp.Shindo["1"].background;
+  document.getElementById("ShindoSample2").style.background = colorTmp.Shindo["2"].background;
+  document.getElementById("ShindoSample3").style.background = colorTmp.Shindo["3"].background;
+  document.getElementById("ShindoSample4").style.background = colorTmp.Shindo["4"].background;
+  document.getElementById("ShindoSample5m").style.background = colorTmp.Shindo["5m"].background;
+  document.getElementById("ShindoSample5p").style.background = colorTmp.Shindo["5p"].background;
+  document.getElementById("ShindoSample6m").style.background = colorTmp.Shindo["6m"].background;
+  document.getElementById("ShindoSample6p").style.background = colorTmp.Shindo["6p"].background;
+  document.getElementById("ShindoSample7").style.background = colorTmp.Shindo["7"].background;
+  document.getElementById("LngIntSampleQ").style.background = colorTmp.LgInt["?"].background;
+  document.getElementById("LngIntSample1").style.background = colorTmp.LgInt["1"].background;
+  document.getElementById("LngIntSample2").style.background = colorTmp.LgInt["2"].background;
+  document.getElementById("LngIntSample3").style.background = colorTmp.LgInt["3"].background;
+  document.getElementById("LngIntSample4").style.background = colorTmp.LgInt["4"].background;
 
-  document.getElementById("ShindoSampleQ").style.color =
-    colorTmp.Shindo["?"].color;
-  document.getElementById("ShindoSample0").style.color =
-    colorTmp.Shindo["0"].color;
-  document.getElementById("ShindoSample1").style.color =
-    colorTmp.Shindo["1"].color;
-  document.getElementById("ShindoSample2").style.color =
-    colorTmp.Shindo["2"].color;
-  document.getElementById("ShindoSample3").style.color =
-    colorTmp.Shindo["3"].color;
-  document.getElementById("ShindoSample4").style.color =
-    colorTmp.Shindo["4"].color;
-  document.getElementById("ShindoSample5m").style.color =
-    colorTmp.Shindo["5m"].color;
-  document.getElementById("ShindoSample5p").style.color =
-    colorTmp.Shindo["5p"].color;
-  document.getElementById("ShindoSample6m").style.color =
-    colorTmp.Shindo["6m"].color;
-  document.getElementById("ShindoSample6p").style.color =
-    colorTmp.Shindo["6p"].color;
-  document.getElementById("ShindoSample7").style.color =
-    colorTmp.Shindo["7"].color;
-  document.getElementById("LngIntSampleQ").style.color =
-    colorTmp.LgInt["?"].color;
-  document.getElementById("LngIntSample1").style.color =
-    colorTmp.LgInt["1"].color;
-  document.getElementById("LngIntSample2").style.color =
-    colorTmp.LgInt["2"].color;
-  document.getElementById("LngIntSample3").style.color =
-    colorTmp.LgInt["3"].color;
-  document.getElementById("LngIntSample4").style.color =
-    colorTmp.LgInt["4"].color;
+  document.getElementById("ShindoSampleQ").style.color = colorTmp.Shindo["?"].color;
+  document.getElementById("ShindoSample0").style.color = colorTmp.Shindo["0"].color;
+  document.getElementById("ShindoSample1").style.color = colorTmp.Shindo["1"].color;
+  document.getElementById("ShindoSample2").style.color = colorTmp.Shindo["2"].color;
+  document.getElementById("ShindoSample3").style.color = colorTmp.Shindo["3"].color;
+  document.getElementById("ShindoSample4").style.color = colorTmp.Shindo["4"].color;
+  document.getElementById("ShindoSample5m").style.color = colorTmp.Shindo["5m"].color;
+  document.getElementById("ShindoSample5p").style.color = colorTmp.Shindo["5p"].color;
+  document.getElementById("ShindoSample6m").style.color = colorTmp.Shindo["6m"].color;
+  document.getElementById("ShindoSample6p").style.color = colorTmp.Shindo["6p"].color;
+  document.getElementById("ShindoSample7").style.color = colorTmp.Shindo["7"].color;
+  document.getElementById("LngIntSampleQ").style.color = colorTmp.LgInt["?"].color;
+  document.getElementById("LngIntSample1").style.color = colorTmp.LgInt["1"].color;
+  document.getElementById("LngIntSample2").style.color = colorTmp.LgInt["2"].color;
+  document.getElementById("LngIntSample3").style.color = colorTmp.LgInt["3"].color;
+  document.getElementById("LngIntSample4").style.color = colorTmp.LgInt["4"].color;
 });
 
 var intColor = {

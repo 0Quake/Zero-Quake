@@ -126,7 +126,7 @@ self.addEventListener("message", (event) => {
           let reader = new FileReader();
           reader.readAsDataURL(blob);
           reader.onload = function () {
-            dataUrl = reader.result;
+            var dataUrl = reader.result;
             self.postMessage({
               data: dataUrl,
               index: event.data.index,
