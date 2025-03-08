@@ -1,6 +1,5 @@
 const root = document.querySelector(":root");
 
-//eslint-disable-next-line
 var config;
 window.electronAPI.messageSend((event, request) => {
   if (request.action == "setting") {
@@ -311,7 +310,6 @@ function removeChild(element) {
 //緯度経度フォーマット
 //eslint-disable-next-line
 function latitudeConvert(data) {
-  // eslint-disable-line
   if (!isNaN(data)) {
     return Number(data);
   } else if (data.match(/N/)) {

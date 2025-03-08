@@ -426,6 +426,8 @@ function apply() {
       data: document.getElementById("startup").checked,
     });
   }
+
+  confirm_edit = false;
 }
 
 document.getElementById("cancel").addEventListener("click", function () {
