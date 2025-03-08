@@ -313,12 +313,12 @@ var thresholds;
 if (app.isPackaged) {
   //メニューバー非表示
   Menu.setApplicationMenu(false);
+}
 
-  //多重起動防止
-  const gotTheLock = app.requestSingleInstanceLock();
-  if (!gotTheLock) {
-    app.exit(0);
-  }
+//多重起動防止
+const gotTheLock = app.requestSingleInstanceLock();
+if (!gotTheLock) {
+  app.exit(0);
 }
 
 var update_data;
@@ -633,6 +633,14 @@ electron.app.on("ready", () => {
     if (WolfxConnection) WolfxConnection.sendUTF("query_jmaeew");
     if (ProjectBS_Connection) ProjectBS_Connection.sendUTF("queryjson");
   });
+});
+
+app.on("second-instance", () => {
+  if (MainWindow) {
+    if (MainWindow.isMinimized()) MainWindow.restore();
+    if (!MainWindow.isFocused()) MainWindow.focus();
+    if (!MainWindow.isVisible()) MainWindow.show();
+  }
 });
 
 //レンダラープロセスからのメッセージ
@@ -2899,10 +2907,8 @@ function EEW_Clear(EventID) {
     if (EEW_nowList.length == 0) {
       EEWNow = false;
       //パワーセーブ再開
-      console.log("ps", psBlock, powerSaveBlocker.isStarted(psBlock));
       if (psBlock && powerSaveBlocker.isStarted(psBlock)) {
         powerSaveBlocker.stop(psBlock);
-        console.log("ps2", powerSaveBlocker.isStarted(psBlock));
       }
       worker.postMessage({ action: "EEWNow", data: EEWNow });
     }
