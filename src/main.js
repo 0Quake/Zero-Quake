@@ -1013,6 +1013,19 @@ function Create_SettingWindow(update) {
         });
       }
     });
+    SettingWindow.webContents.on("will-prevent-unload", (event) => {
+      const choice = dialog.showMessageBoxSync(SettingWindow, {
+        type: "question",
+        title: "確認",
+        message:
+          "変更した設定を保存していません。\n設定を破棄して設定画面を閉じますか？",
+        buttons: ["閉じる", "画面に戻る"],
+        noLink: true,
+        defaultId: 1,
+        cancelId: 1,
+      });
+      if (choice == 0) event.preventDefault();
+    });
     SettingWindow.on("closed", () => {
       SettingWindow = null;
     });

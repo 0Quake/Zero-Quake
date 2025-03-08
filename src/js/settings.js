@@ -27,6 +27,16 @@ window.addEventListener("load", function () {
   ).replaceAll("/", "-");
 });
 
+var confirm_edit = false;
+document.querySelectorAll("input,select,textarea").forEach(function (el) {
+  el.addEventListener("input", function () {
+    confirm_edit = true;
+  });
+});
+window.addEventListener("beforeunload", function (e) {
+  if (confirm_edit) e.preventDefault();
+});
+
 var origin_time_edited = false;
 document
   .getElementById("EEWE_origin_time")
