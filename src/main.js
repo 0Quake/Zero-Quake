@@ -3325,6 +3325,9 @@ function Req_JMAXML(url, count,) {
               }
             }
           } else if (title == "地震の活動状況等に関する情報") {
+            var headline = xml.getElementsByTagName("Headline")[0].getElementsByTagName("Text")[0].textContent
+            if (headline.includes("南海トラフ地震に関連する情報")) return;//南海トラフ地震関連解説情報（移行措置電文）の重複をはじく
+
             var data = {
               title: title, //地震の活動状況等に関する情報
               kind: xml.getElementsByTagName("Head")[0].getElementsByTagName("InfoType")[0].textContent,//発表/取消
