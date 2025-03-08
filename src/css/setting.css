@@ -11,6 +11,11 @@ button {
   color: #ccc;
 }
 
+label .smalltext {
+  display: inline-block;
+  margin-left: 4px;
+}
+
 #tab1_wrap {
   display: flex;
   height: 100%;

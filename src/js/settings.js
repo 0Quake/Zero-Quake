@@ -227,6 +227,9 @@ function configDataDraw() {
     config.color.IntColorTheme
   );
 
+  document.getElementById("powerSaveBlocking").checked =
+    config.system.powerSaveBlocking;
+
   fetch("http://localhost:50080/GetVoiceList")
     .then(function (res) {
       return res.json();
@@ -454,6 +457,9 @@ function apply() {
     intColor[document.getElementById("shindoColor").value].Shindo;
   config.color.LgInt =
     intColor[document.getElementById("shindoColor").value].LgInt;
+
+  config.system.powerSaveBlocking =
+    document.getElementById("powerSaveBlocking").checked;
 
   window.electronAPI.messageReturn({
     action: "ChangeConfig",

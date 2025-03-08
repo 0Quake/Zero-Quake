@@ -173,6 +173,7 @@ var defaultConfigVal = {
     WindowAutoOpen: true,
     alwaysOnTop: false,
     isFirstRun: false, //初回起動時かどうか判定用（自動起動を設定するため）
+    powerSaveBlocking: true,
     zoom: 1,
   },
   home: {
@@ -2898,8 +2899,11 @@ function EEW_Clear(EventID) {
     if (EEW_nowList.length == 0) {
       EEWNow = false;
       //パワーセーブ再開
-      if (psBlock && powerSaveBlocker.isStarted(psBlock))
+      console.log("ps", psBlock, powerSaveBlocker.isStarted(psBlock));
+      if (psBlock && powerSaveBlocker.isStarted(psBlock)) {
         powerSaveBlocker.stop(psBlock);
+        console.log("ps2", powerSaveBlocker.isStarted(psBlock));
+      }
       worker.postMessage({ action: "EEWNow", data: EEWNow });
     }
   } catch (err) {
@@ -2994,8 +2998,12 @@ function EEW_Alert(data, first, update) {
     );
 
     //スリープ回避開始
-    if (!psBlock || !powerSaveBlocker.isStarted(psBlock))
+    if (
+      config.system.powerSaveBlocking &&
+      (!psBlock || !powerSaveBlocker.isStarted(psBlock))
+    ) {
       psBlock = powerSaveBlocker.start("prevent-display-sleep");
+    }
   } catch (err) {
     throw new Error(
       "緊急地震速報の通知処理でエラーが発生しました。エラーメッセージは以下の通りです。\n" +
@@ -3051,8 +3059,12 @@ function EarlyEst_Alert(data, first, update) {
     }
 
     //スリープ回避開始
-    if (!psBlock || !powerSaveBlocker.isStarted(psBlock))
+    if (
+      config.system.powerSaveBlocking &&
+      (!psBlock || !powerSaveBlocker.isStarted(psBlock))
+    ) {
       psBlock = powerSaveBlocker.start("prevent-display-sleep");
+    }
   } catch (err) {
     throw new Error(
       "Early-Est地震情報の通知処理でエラーが発生しました。エラーメッセージは以下の通りです。\n" +
