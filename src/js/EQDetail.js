@@ -2706,7 +2706,7 @@ function add_Area_info(name, maxInt) {
         name +
         "</div><div class='pointHead'>細分区域</div></div><div></div>"
     );
-    markerElm = new maplibregl.Marker({ element: icon })
+    markerElm = new maplibregl.Marker({ element: icon, opacityWhenCovered: 0 })
       .setLngLat([pointLocation[1], pointLocation[0]])
       .setPopup(AreaPopup);
     markerElm.getElement().removeAttribute("tabindex");
@@ -2851,7 +2851,7 @@ function add_IntensityStation_info(lat, lng, name, int) {
       mi_description +
       "<div class='pointHead'>震度観測点</div></div><div></div>"
   );
-  markerElm = new maplibregl.Marker({ element: icon })
+  markerElm = new maplibregl.Marker({ element: icon, opacityWhenCovered: 0 })
     .setLngLat([lng, lat])
     .setPopup(PtPopup)
     .addTo(map);
@@ -3093,7 +3093,7 @@ function add_Area_infoL(name, maxInt) {
         name +
         "</div><div class='pointHead'>細分区域</div></div><div></div>"
     );
-    markerElm = new maplibregl.Marker({ element: icon })
+    markerElm = new maplibregl.Marker({ element: icon, opacityWhenCovered: 0 })
       .setLngLat([pointLocation[1], pointLocation[0]])
       .setPopup(AreaPopup)
       .addTo(map);
@@ -3167,7 +3167,7 @@ function add_IntensityStation_infoL(lat, lng, name, int) {
       name +
       "</div><div class='pointHead'>震度観測点</div></div><div></div>"
   );
-  markerElm = new maplibregl.Marker({ element: icon })
+  markerElm = new maplibregl.Marker({ element: icon, opacityWhenCovered: 0 })
     .setLngLat([lng, lat])
     .setPopup(PtPopup)
     .addTo(map);
