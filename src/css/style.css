@@ -740,7 +740,8 @@ td {
 .EQItem,
 #NankaiTroughInfo_Rinji,
 #NankaiTroughInfo_Teirei,
-#HokkaidoSanrikuInfo {
+#HokkaidoSanrikuInfo,
+#KatsudoJokyoInfo {
   position: relative;
   display: flex;
   flex-wrap: wrap;
@@ -758,7 +759,8 @@ td {
 }
 #NankaiTroughInfo_Rinji,
 #NankaiTroughInfo_Teirei,
-#HokkaidoSanrikuInfo {
+#HokkaidoSanrikuInfo,
+#KatsudoJokyoInfo {
   display: none;
   font-size: 14px;
   padding: 5px 10px;
@@ -778,7 +780,7 @@ td {
 }
 #NankaiTroughInfo_Rinji.nankaiWarn,
 #NankaiTroughInfo_Teirei.nankaiWarn,
-#HokkaidoSanrikuInfo {
+#HokkaidoSanrikuInfo.happyo {
   border: solid 2px var(--TsunamiWatchColor);
   color: #fff;
   font-family: "M PLUS 1p";
@@ -787,6 +789,11 @@ td {
 #NankaiTroughInfo_Teirei.nankaiInfo {
   border: solid 1px var(--TsunamiYohoColor);
   color: #fff;
+}
+
+#NankaiTroughInfo_Rinji.torikeshi,
+#NankaiTroughInfo_Teirei.torikeshi {
+  border: none;
 }
 .nankai_serial {
   font-size: 13px;
@@ -865,10 +872,12 @@ td {
 #NankaiTroughInfo_Rinji:hover,
 #NankaiTroughInfo_Teirei:hover,
 #HokkaidoSanrikuInfo:hover,
+#KatsudoJokyoInfo:hover,
 .EQItem:focus,
 #NankaiTroughInfo_Rinji:focus,
 #NankaiTroughInfo_Teirei:focus,
-#HokkaidoSanrikuInfo:focus {
+#HokkaidoSanrikuInfo:focus,
+#KatsudoJokyoInfo:focus {
   background: #1c1c1f;
 }
 .EQItem.EQI_cancelled:hover {

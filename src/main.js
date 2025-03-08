@@ -603,6 +603,9 @@ ipcMain.on("message", (_event, response) => {
     case "HokkaidoSanrikuWindowOpen":
       Create_HokkaidoSanrikuWindow();
       break;
+    case "KatsudoJokyoInfoWindowOpen":
+      Create_KatsudoJokyoWindow()
+      break;
     case "internetConnection":
       if (response.internetConnection) {
         UpdateEQInfo();
@@ -732,6 +735,12 @@ function CreateMainWindow() {
           messageToMainWindow({
             action: "HokkaidoSanrikuInfo",
             data: HokkaidoSanrikuInfoAll[0],
+          });
+        }
+        if (KatsudoJokyoInfoAll[0]) {
+          messageToMainWindow({
+            action: "KatsudoJokyoInfo",
+            data: KatsudoJokyoInfoAll[0],
           });
         }
 
@@ -1034,6 +1043,53 @@ function Create_HokkaidoSanrikuWindow() {
     HokkaidoSanrikuWindow.loadFile("src/HokkaidoSanriku.html");
   } catch (err) {
     throw new Error("北海道・三陸沖後発地震注意情報ウィンドウの作成でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
+  }
+}
+
+//地震の活動状況等に関する情報ウィンドウ
+var KatsudoJokyoWindow
+function Create_KatsudoJokyoWindow() {
+  try {
+    if (KatsudoJokyoWindow) {
+      if (KatsudoJokyoWindow.isMinimized()) KatsudoJokyoWindow.restore();
+      if (!KatsudoJokyoWindow.isFocused()) KatsudoJokyoWindow.focus();
+      return false;
+    }
+
+    KatsudoJokyoWindow = new BrowserWindow({
+      minWidth: 650,
+      minHeight: 400,
+      icon: path.join(__dirname, "img/icon.ico"),
+      webPreferences: {
+        preload: path.join(__dirname, "js/preload.js"),
+        title: "地震の活動状況等に関する情報 - Zero Quake",
+      },
+      backgroundColor: "#222225",
+      alwaysOnTop: config.system.alwaysOnTop,
+    });
+
+    KatsudoJokyoWindow.webContents.on("did-finish-load", () => {
+      KatsudoJokyoWindow.webContents.setZoomFactor(config.system.zoom);
+
+      if (KatsudoJokyoInfoAll[0]) {
+        KatsudoJokyoWindow.webContents.send("message2", {
+          action: "KatsudoJokyoInfo",
+          data: KatsudoJokyoInfoAll[0],
+        });
+        KatsudoJokyoWindow.webContents.send("message2", {
+          action: "setting",
+          data: config,
+        });
+      }
+    });
+
+    KatsudoJokyoWindow.on("closed", () => {
+      KatsudoJokyoWindow = null;
+    });
+
+    KatsudoJokyoWindow.loadFile("src/KatsudoJokyo.html");
+  } catch (err) {
+    throw new Error("地震の活動状況等に関する情報ウィンドウの作成でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
   }
 }
 
@@ -2770,7 +2826,7 @@ function Req_JMAXMLList(LongPeriodFeed, count) {
 }
 
 //気象庁XML 取得・フォーマット変更→ConvertEQInfo
-function Req_JMAXML(url, count) {
+function Req_JMAXML(url, count,) {
   if (!url || jmaXML_Fetched.includes(url)) return;
 
   if (net.online) {
@@ -2852,6 +2908,7 @@ function Req_JMAXML(url, count) {
             var data = {
               title: title, //南海トラフ地震関連解説情報など
               kind: null, //定例など
+              reportKind: xml.getElementsByTagName("Head")[0].getElementsByTagName("InfoType")[0].textContent, //発表/取消
               reportDate: new Date(xml.getElementsByTagName("ReportDateTime")[0].textContent), //時刻
               Serial: null,
               HeadLine: xml.getElementsByTagName("Headline")[0].getElementsByTagName("Text")[0].textContent, //要約
@@ -3230,6 +3287,7 @@ function Req_JMAXML(url, count) {
           } else if (title == "北海道・三陸沖後発地震注意情報") {
             var data = {
               title: title, //北海道・三陸沖後発地震注意情報
+              kind: xml.getElementsByTagName("Head")[0].getElementsByTagName("InfoType")[0].textContent,//発表/取消
               reportDate: new Date(xml.getElementsByTagName("ReportDateTime")[0].textContent), //時刻
               HeadLine: xml.getElementsByTagName("Headline")[0].getElementsByTagName("Text")[0].textContent, //要約
               Text: "",
@@ -3269,8 +3327,11 @@ function Req_JMAXML(url, count) {
           } else if (title == "地震の活動状況等に関する情報") {
             var data = {
               title: title, //地震の活動状況等に関する情報
+              kind: xml.getElementsByTagName("Head")[0].getElementsByTagName("InfoType")[0].textContent,//発表/取消
               reportDate: new Date(xml.getElementsByTagName("ReportDateTime")[0].textContent), //時刻
               HeadLine: xml.getElementsByTagName("Headline")[0].getElementsByTagName("Text")[0].textContent, //要約
+              Naming: null,
+              NamingEn: null,
               Text: "",
               Comments: "",
             };
@@ -3281,6 +3342,34 @@ function Req_JMAXML(url, count) {
             var commentsEl = Body.getElementsByTagName("Comments")[0];
             if (commentsEl && commentsEl.getElementsByTagName("FreeFormComment")[0])
               data.Comments = commentsEl.getElementsByTagName("FreeFormComment")[0].textContent;
+
+            var NamingElm = Body.getElementsByTagName("Naming")[0]
+            if (NamingElm) {
+              data.Naming = NamingElm.textContent
+              if (NamingElm.getAttribute("english")) data.NamingEn = NamingElm.getAttribute("english")
+            }
+
+
+
+            KatsudoJokyoInfoAll.push(data);
+            KatsudoJokyoInfoAll = KatsudoJokyoInfoAll.sort(function (a, b) {
+              return a.reportDate > b.reportDate ? -1 : 1;
+            });
+
+            messageToMainWindow({
+              action: "KatsudoJokyoInfo",
+              data: KatsudoJokyoInfoAll[0],
+            });
+
+            if (KatsudoJokyoWindow && KatsudoJokyoInfoAll[0]) {
+              if (data) {
+                KatsudoJokyoWindow.webContents.send("message2", {
+                  action: "KatsudoJokyoInfo",
+                  data: KatsudoJokyoInfoAll[0],
+                });
+              }
+            }
+
           }
           UpdateStatus(new Date() - Replay, "JMAXML", "success");
           jmaXML_Fetched.push(url);
@@ -3299,6 +3388,7 @@ function Req_JMAXML(url, count) {
 var NankaiTroughInfo = { rinji: null, teirei: null };
 var NankaiTroughInfoAll = [];
 var HokkaidoSanrikuInfoAll = [];
+var KatsudoJokyoInfoAll = [];
 
 //USGS 取得・フォーマット変更→ConvertEQInfo
 var usgsLastGenerated = 0;

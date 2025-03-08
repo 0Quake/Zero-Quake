@@ -52,9 +52,13 @@
     <script>
         window.electronAPI.messageSend((event, request) => {
             if (request.action == "NankaiTroughInfo") {
-                document.title = request.data.title + " (" + request.data.kind + ") - Zero Quake"
+                document.title = (request.data.reportKind == "取消" ? "取消／" : "") + request.data.title + " (" + request.data.kind + ") - Zero Quake"
 
-                document.getElementById("title").innerText = request.data.title + " (" + request.data.kind + ")"
+                document.getElementById("title").innerText = (request.data.reportKind == "取消" ? "取消／" : "") + request.data.title + " (" + request.data.kind + ")"
+
+                if (request.data.reportKind == "取消") document.getElementById("title").classList.remove("happyo")
+                else document.getElementById("title").classList.add("happyo")
+
                 var SerialStr = request.data.Serial ? ", 情報番号#" + request.data.Serial : ""
                 document.getElementById("headline").innerText = request.data.HeadLine + " (" + NormalizeDate(4, request.data.reportDate) + SerialStr + ")"
                 document.getElementById("Text_body").innerText = removeFirstBR(request.data.Text)
@@ -62,10 +66,10 @@
                 document.getElementById("NextAdvisory_body").innerText = removeFirstBR(request.data.NextAdvisory)
                 document.getElementById("Text2_body").innerText = removeFirstBR(request.data.Text2)
 
-                if (request.data.Text) document.getElementById("Text").style.display = "block"
-                if (request.data.Appendix) document.getElementById("Appendix").style.display = "block"
-                if (request.data.NextAdvisory) document.getElementById("NextAdvisory").style.display = "block"
-                if (request.data.Text2) document.getElementById("Text2").style.display = "block"
+                document.getElementById("Text").style.display = request.data.Text ? "block" : "none"
+                document.getElementById("Appendix").style.display = request.data.Appendix ? "block" : "none"
+                document.getElementById("NextAdvisory").style.display = request.data.NextAdvisory ? "block" : "none"
+                document.getElementById("Text2").style.display = request.data.Text2 ? "block" : "none"
 
                 document.getElementById("splash").style.display = "none";
 
@@ -133,15 +137,19 @@
             display: none;
         }
 
-        .nankaiAlert h1 {
+        h1 {
+            border: solid 2px #62626c;
+        }
+
+        .nankaiAlert h1.happyo {
             border: solid 2px var(--TsunamiWarningColor);
         }
 
-        .nankaiWarn h1 {
+        .nankaiWarn h1.happyo {
             border: solid 2px var(--TsunamiWatchColor);
         }
 
-        .nankaiInfo h1 {
+        .nankaiInfo h1.happyo {
             border: solid 2px var(--TsunamiYohoColor);
         }
     </style>

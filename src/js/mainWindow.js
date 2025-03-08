@@ -77,6 +77,7 @@ window.electronAPI.messageSend((event, request) => {
   else if (request.action == "tsunamiUpdate") tsunamiDataUpdate(request.data);
   else if (request.action == "NankaiTroughInfo") NankaiTroughInfo(request.data);
   else if (request.action == "HokkaidoSanrikuInfo") HokkaidoSanrikuInfo(request.data);
+  else if (request.action == "KatsudoJokyoInfo") KatsudoJokyoInfo(request.data);
   else if (request.action == "Return_gaikyo") draw_gaikyo(request.data);
 
   document.getElementById("splash").style.display = "none";
@@ -402,7 +403,7 @@ function eqInfoDraw(data, source) {
 
       if (elm.cancel) {
         clone.querySelector(".EQItem").classList.add("EQI_cancelled");
-        clone.querySelector(".EQItem").setAttribute("aria-label", "キャンセルされた地震情報");
+        clone.querySelector(".EQItem").setAttribute("aria-label", "取り消された地震情報アイテム");
       } else {
         clone.querySelector(".EQItem")
           .setAttribute("aria-label",
@@ -2566,8 +2567,7 @@ function tsunamiPopup(e) {
 //🔴南海トラフ情報🔴
 function NankaiTroughInfo(data) {
   if (data.rinji) {
-    document
-      .getElementById("NankaiTroughInfo_Rinji")
+    document.getElementById("NankaiTroughInfo_Rinji")
       .addEventListener("click", function () {
         window.electronAPI.messageReturn({
           action: "NankaiWindowOpen",
@@ -2578,10 +2578,16 @@ function NankaiTroughInfo(data) {
     document.getElementById("NankaiTroughInfo_Rinji")
       .setAttribute("title", "クリックして詳細を表示\n" + data.rinji.HeadLine);
     document.getElementById("NankaiTroughInfo_Rinji")
-      .setAttribute("aria-label", "地震情報アイテム：" + data.rinji.title + "、" + data.rinji.kind + "、エンターキーで詳細情報を確認。");
+      .setAttribute("aria-label", (data.rinji.reportKind == "取消" ? "取り消された" : "") + "地震情報アイテム：" + data.rinji.title + "、" + data.rinji.kind + "、エンターキーで詳細情報を確認。");
 
     var serialStr = data.rinji.Serial ? "<span class='nankai_serial'>#" + data.rinji.Serial + "</span>" : "";
-    document.getElementById("Nankai_Title_Rinji").innerHTML = data.rinji.title + " (" + data.rinji.kind + ") " + serialStr;
+
+    if (data.rinji.reportKind == "取消") document.getElementById("NankaiTroughInfo_Rinji").classList.add("torikeshi")
+    else document.getElementById("NankaiTroughInfo_Rinji").classList.remove("torikeshi")
+
+    var kindStr = data.rinji.kind;
+    if (data.rinji.reportKind == "取消") kindStr = "取消"
+    document.getElementById("Nankai_Title_Rinji").innerHTML = data.rinji.title + " (" + kindStr + ") " + serialStr;
     document.getElementById("NankaiTroughInfo_Rinji").classList.remove("nankaiAlert", "nankaiWarn", "nankaiInfo");
     switch (data.rinji.kind) {
       case "巨大地震警戒":
@@ -2608,10 +2614,16 @@ function NankaiTroughInfo(data) {
     document.getElementById("NankaiTroughInfo_Teirei")
       .setAttribute("title", "クリックして詳細を表示\n" + data.teirei.HeadLine);
     document.getElementById("NankaiTroughInfo_Teirei").setAttribute("aria-label",
-      "地震情報アイテム：" + data.teirei.title + "、" + data.teirei.kind + "、エンターキーで詳細情報を確認。");
+      (data.teirei.reportKind == "取消" ? "取り消された" : "") + "地震情報アイテム：" + data.teirei.title + "、" + data.teirei.kind + "、エンターキーで詳細情報を確認。");
 
     var serialStr = data.teirei.Serial ? "<span class='nankai_serial'>#" + data.teirei.Serial + "</span>" : "";
-    document.getElementById("Nankai_Title_Teirei").innerHTML = data.teirei.title + " (" + data.teirei.kind + ")" + serialStr;
+
+    if (data.teirei.reportKind == "取消") document.getElementById("NankaiTroughInfo_Teirei").classList.add("torikeshi")
+    else document.getElementById("NankaiTroughInfo_Teirei").classList.remove("torikeshi")
+
+    var kindStr = data.teirei.kind;
+    if (data.teirei.reportKind == "取消") kindStr = "取消"
+    document.getElementById("Nankai_Title_Teirei").innerHTML = data.teirei.title + " (" + kindStr + ")" + serialStr;
     document.getElementById("NankaiTroughInfo_Teirei").classList.remove("nankaiAlert", "nankaiWarn", "nankaiInfo");
 
     if (data.teirei.kind == "臨時解説")
@@ -2628,12 +2640,33 @@ function HokkaidoSanrikuInfo(data) {
       });
     });
     document.getElementById("HokkaidoSanrikuInfo").style.display = "block";
+
+    if (data.kind == "取消") document.getElementById("HokkaidoSanrikuInfo").classList.remove("happyo")
+    else document.getElementById("HokkaidoSanrikuInfo").classList.add("happyo")
+
     document.getElementById("HokkaidoSanrikuInfo")
       .setAttribute("title", "クリックして詳細を表示\n" + data.HeadLine);
     document.getElementById("HokkaidoSanrikuInfo").setAttribute("aria-label",
-      "地震情報アイテム：" + data.title + "、エンターキーで詳細情報を確認。");
-    document.getElementById("HokkaidoSanriku_Title").innerHTML = data.title;
+      (data.kind == "取消" ? "取り消された" : "") + "地震情報アイテム：" + data.title + "、エンターキーで詳細情報を確認。");
+    document.getElementById("HokkaidoSanriku_Title").innerHTML = (data.kind == "取消" ? "取消／" : "") + data.title;
   } else document.getElementById("HokkaidoSanrikuInfo").style.display = "none";
+}
+
+//地震の活動状況等に関する情報
+function KatsudoJokyoInfo(data) {
+  if (data) {
+    document.getElementById("KatsudoJokyoInfo").addEventListener("click", function () {
+      window.electronAPI.messageReturn({
+        action: "KatsudoJokyoInfoWindowOpen",
+      });
+    });
+    document.getElementById("KatsudoJokyoInfo").style.display = "block";
+    document.getElementById("KatsudoJokyoInfo")
+      .setAttribute("title", "クリックして詳細を表示\n" + data.HeadLine);
+    document.getElementById("KatsudoJokyoInfo").setAttribute("aria-label",
+      (data.kind == "取消" ? "取り消された" : "") + "地震情報アイテム：" + data.title + "、エンターキーで詳細情報を確認。");
+    document.getElementById("KatsudoJokyoInfo_Title").innerHTML = (data.kind == "取消" ? "取消／" : "") + data.title;
+  } else document.getElementById("KatsudoJokyoInfo").style.display = "none";
 }
 
 document.getElementById("tab1_menu2").addEventListener("click", function () {

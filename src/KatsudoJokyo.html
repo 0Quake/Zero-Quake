@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>北海道・三陸沖後発地震注意情報 - Zero Quake</title>
+    <title>地震の活動状況等に関する情報 - Zero Quake</title>
     <link rel="stylesheet" href="./css/style.css">
     <link rel='stylesheet' href='../node_modules/maplibre-gl/dist/maplibre-gl.css'>
     <link rel="stylesheet" href="./css/map.css">
@@ -16,8 +16,25 @@
             background: #222225;
         }
 
-        h1 {
-            font-size: 30px;
+        #Naming {
+            text-align: center;
+        }
+
+        #Naming h2 {
+            text-align: left;
+        }
+
+        #EQ_NamingWrap {
+            font-size: 26px;
+            ruby-position: under;
+            line-height: 65px;
+        }
+
+        #EQ_NamingEN {
+            font-size: 14px;
+            text-align: center;
+            padding-top: 6px;
+            color: #CCC;
         }
     </style>
 </head>
@@ -33,13 +50,15 @@
         <div id="headline"></div>
     </header>
     <hr>
+    <section id="Naming">
+        <h2>地震の命名</h2>
+        <ruby id="EQ_NamingWrap"><span id="EQ_Naming"></span>
+            <rt id="EQ_NamingEN"></rt>
+        </ruby>
+    </section>
     <section id="Text">
         <h2>本文</h2>
         <div id="Text_body"></div>
-    </section>
-    <section id="Appendix">
-        <h2>参考情報</h2>
-        <div id="Appendix_body"></div>
     </section>
     <section id="Text2">
         <h2>追加情報</h2>
@@ -49,21 +68,20 @@
     <script src="./js/UIcommon.js"></script>
     <script>
         window.electronAPI.messageSend((event, request) => {
-            if (request.action == "HokkaidoSanrikuInfo") {
+            if (request.action == "KatsudoJokyoInfo") {
                 document.title = (request.data.kind == "取消" ? "取消／" : "") + request.data.title + " - Zero Quake"
-
-                if (request.data.kind == "取消") document.getElementById("title").classList.remove("happyo")
-                else document.getElementById("title").classList.add("happyo")
 
                 document.getElementById("title").innerText = (request.data.kind == "取消" ? "取消／" : "") + request.data.title;
                 document.getElementById("headline").innerText = request.data.HeadLine + " (" + NormalizeDate(4, request.data.reportDate) + ")"
                 document.getElementById("Text_body").innerText = removeFirstBR(request.data.Text)
-                document.getElementById("Appendix_body").innerText = removeFirstBR(request.data.Appendix)
-                document.getElementById("Text2_body").innerText = removeFirstBR(request.data.Text2)
+                document.getElementById("Text2_body").innerText = removeFirstBR(request.data.Comments)
 
+                document.getElementById("EQ_Naming").innerText = request.data.Naming
+                document.getElementById("EQ_NamingEN").innerText = request.data.NamingEn
+
+                document.getElementById("Naming").style.display = (request.data.Naming || request.data.NamingEn) ? "block" : "none"
                 document.getElementById("Text").style.display = request.data.Text ? "block" : "none"
-                document.getElementById("Appendix").style.display = request.data.Appendix ? "block" : "none"
-                document.getElementById("Text2").style.display = request.data.Text2 ? "block" : "none"
+                document.getElementById("Text2").style.display = request.data.Comments ? "block" : "none"
 
                 document.getElementById("splash").style.display = "none";
             }
@@ -119,10 +137,6 @@
 
         h1 {
             border: solid 2px #62626c;
-        }
-
-        h1.happyo {
-            border-color: var(--TsunamiWatchColor);
         }
     </style>
 
