@@ -7,6 +7,15 @@
     "start": "electron . --develop --debug-mode"
   },
   "build": {
+    "asar": false,
+    "files": [
+      "!CODE_OF_CONDUCT.md",
+      "!CONTRIBUTING.md",
+      "!SECURITY.md",
+      "!PULL_REQUEST_TEMPLATE.md",
+      "!tools/*",
+      "!eslint.config.js"
+    ],
     "win": {
       "icon": "src/img/icon.ico",
       "publish": {
