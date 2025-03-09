@@ -2,12 +2,13 @@
   "name": "zeroquake",
   "productName": "Zero Quake",
   "version": "0.9.0",
-  "description": "地震に関する情報を即座に受信できるアプリケーションです。緊急地震速報に加え、津波情報や地震情報の受信に対応しています。このアプリ一つで、様々な種類の情報を、迅速に、分かりやすく表示します。",
+  "description": "Zero Quake",
   "scripts": {
     "start": "electron . --develop --debug-mode"
   },
   "build": {
     "asar": false,
+    "productName": "Zero Quake",
     "files": [
       "!CODE_OF_CONDUCT.md",
       "!CONTRIBUTING.md",
@@ -40,9 +41,7 @@
       "applicationId": "Benidate.ZeroQuake",
       "publisherDisplayName": "Benidate",
       "publisher": "CN=0FCA04CE-D29D-4DB6-BA68-14F151A28AD4",
-      "languages": [
-        "JA-JP"
-      ],
+      "languages": [ "JA-JP" ],
       "backgroundColor": "#202227"
     }
   },

@@ -1,5 +1,7 @@
 // eslint-disable-next-line no-undef
 process.env.TZ = "Asia/Tokyo";
+// eslint-disable-next-line no-undef
+process.title = 'Zero Quake';
 
 //リプレイ
 var Replay = 0;
