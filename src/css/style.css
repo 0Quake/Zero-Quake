@@ -647,8 +647,9 @@ td {
   border: solid 1px rgba(128, 128, 128, 0.8);
 }
 #tab2_bar {
-  padding: 5px 3px;
+  padding: 4px 3px;
   background: #222225;
+  border-bottom: solid 1px #4e4e51;
 }
 #tab2_bar .tabmenu {
   margin: 0 4px;
@@ -951,7 +952,6 @@ td {
 }
 #UpdateTimeWrap {
   height: 30px;
-  line-height: 30px;
   overflow-y: auto;
   max-height: 80vh;
   padding: 0;
@@ -966,6 +966,8 @@ td {
   display: inline-block;
   width: 100%;
   font-family: "AzeretMono-Regular", ui-monospace, sans-serif;
+  border-top: solid 1px #4e4e51;
+  line-height: 29px;/*border-topぶんの1pxひく*/
 }
 .statusIcon {
   display: inline-block;
