@@ -2431,7 +2431,7 @@ function ConvertEQInfo(data) {
           TsunamiColor = "";
           break;
         case "この地震による日本への津波の影響はありません。":
-          TsunamiShortMsg = "津波の影響 なし";
+          TsunamiShortMsg = "日本への津波 なし";
           TsunamiColor = "";
           break;
         case "津波警報等（大津波警報・津波警報あるいは津波注意報）を発表中です。":
