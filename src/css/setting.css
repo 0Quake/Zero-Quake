@@ -160,6 +160,10 @@ div .tabcontent {
   border: solid 1px #62626c;
   border-radius: 10px;
 }
+#mapcontainer canvas {
+  outline: none;
+  filter: none;
+}
 
 .ActiveSaibun {
   fill: rgb(167, 40, 40);

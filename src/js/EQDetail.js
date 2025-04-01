@@ -497,7 +497,7 @@ function Mapinit() {
           type: "line",
           source: "worldmap",
           paint: {
-            "line-color": high_contrast ? "#FFF" : "#666",
+            "line-color": high_contrast ? "#FFF" : "#999",
             "line-width": 1,
           },
         },

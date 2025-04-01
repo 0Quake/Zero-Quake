@@ -621,8 +621,8 @@ function mapInit() {
           type: "line",
           source: "worldmap",
           paint: {
-            "line-color": "#FFF",
-            "line-width": high_contrast ? 1 : 0,
+            "line-color": high_contrast ? "#FFF" : "#999",
+            "line-width": 1,
           },
           minzoom: 0,
           maxzoom: 22,
