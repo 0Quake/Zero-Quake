@@ -7,7 +7,6 @@
     "start": "electron . --develop --debug-mode"
   },
   "build": {
-    "asar": false,
     "productName": "Zero Quake",
     "files": [
       "!CODE_OF_CONDUCT.md",
