@@ -3657,11 +3657,11 @@ function ConvertEQInfo(dataList, type, EEW, count) {
               if (new Date(elm.reportDateTime) > new Date() - Replay) return;
 
               //EEW以外の情報が既に入っているとき、EEWによる情報を破棄
-              if (elm.category == "EEW" && EQElm.EEW == false) return;
+              if (elm.category == "EEW" && EQElm.EEW === false) return;
               else if (elm.category == "EEW") EQElm.EEW = true;
               else if (elm.category != "EEW" && EQElm.EEW == true) {
                 //EEW以外の情報が入ってきたとき、EEWによる情報を破棄
-                EQElm.EEW == false;
+                EQElm.EEW = false;
                 EQInfo_Item = {
                   eventId: EQElm.eventId,
                   category: null,
@@ -3679,8 +3679,6 @@ function ConvertEQInfo(dataList, type, EEW, count) {
               }
 
               EQInfo_Item.category = elm.category;
-              if (!elm.maxI) elm.maxI = null;
-              if (!elm.maxLgInt) elm.maxLgInt = null;
               if (Boolean2(elm.OriginTime)) EQInfo_Item.OriginTime = elm.OriginTime;
               if (Boolean2(elm.epiCenter)) EQInfo_Item.epiCenter = elm.epiCenter;
               if (Boolean2(elm.M) && elm.M != "Ｍ不明" && elm.M != "NaN") EQInfo_Item.M = elm.M;
