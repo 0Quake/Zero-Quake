@@ -93,23 +93,17 @@ function configDataDraw() {
   document.getElementById("EEW2_Voice").value = config.notice.voice.EEWUpdate;
   document.getElementById("EEW3_Voice").value = config.notice.voice.EEWCancel;
   document.getElementById("Tsunami_Voice").value = config.notice.voice.Tsunami;
-  document.getElementById("Tsunami_Voice2").value =
-    config.notice.voice.TsunamiRevocation;
-  document.getElementById("Tsunami_Voice3").value =
-    config.notice.voice.TsunamiTorikeshi;
+  document.getElementById("Tsunami_Voice2").value = config.notice.voice.TsunamiRevocation;
+  document.getElementById("Tsunami_Voice3").value = config.notice.voice.TsunamiTorikeshi;
 
   document.getElementById("EQInfo_Voice1").value = config.notice.voice.EQInfo;
-  document.getElementById("EQInfo_Voice2").value =
-    config.notice.voice.EQInfoCancel;
-  document.getElementById("EQInfo_ItemCount").value =
-    config.Info.EQInfo.ItemCount;
-  document.getElementById("EEW_training").checked =
-    config.Info.EEW.showtraining;
+  document.getElementById("EQInfo_Voice2").value = config.notice.voice.EQInfoCancel;
+  document.getElementById("EQInfo_ItemCount").value = config.Info.EQInfo.ItemCount;
+  document.getElementById("EEW_training").checked = config.Info.EEW.showtraining;
   document.getElementById("EEW_IntQ").checked = config.Info.EEW.IntQuestion;
-  document.getElementById("EEW_userIntQ").checked =
-    config.Info.EEW.userIntQuestion;
-  document.getElementById("EQInfoInterval").value =
-    config.Info.EQInfo.Interval / 1000;
+  document.getElementById("EEW_userIntQ").checked = config.Info.EEW.userIntQuestion;
+  document.getElementById("EQInfoInterval").value = config.Info.EQInfo.Interval / 1000;
+  document.getElementById("EEW_kodoriyou").checked = config.Info.EEW.kodoriyou;
 
   selectBoxSet(document.getElementById("EEW_Window"), config.notice.window.EEW);
   selectBoxSet(
@@ -150,8 +144,7 @@ function configDataDraw() {
     config.system.WindowAutoOpen;
   document.getElementById("alwaysOnTop").checked = config.system.alwaysOnTop;
   document.getElementById("HomePinShow").checked = config.home.ShowPin;
-  document.getElementById("Tsunami_GetData").checked =
-    config.Info.TsunamiInfo.GetData;
+  document.getElementById("Tsunami_GetData").checked = config.Info.TsunamiInfo.GetData;
   document.getElementById("Axis_GetData").checked = config.Source.axis.GetData;
   document.getElementById("Wolfx_GetData").checked =
     config.Source.wolfx.GetData;
@@ -362,6 +355,7 @@ function apply() {
   config.Info.EEW.userIntThreshold = document.getElementById("EEW_userIntFilter").value;
   config.notice.window.EEW = document.getElementById("EEW_Window").value;
   config.notice.window.EEW_Update = document.getElementById("EEW_Window_Update").value;
+  config.Info.EEW.kodoriyou = document.getElementById("EEW_kodoriyou").checked;
 
   config.Info.EQInfo.Interval = Number(document.getElementById("EQInfoInterval").value) * 1000;
   config.Source.axis.GetData = document.getElementById("Axis_GetData").checked;

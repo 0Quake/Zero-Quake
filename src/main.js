@@ -76,6 +76,7 @@ var defaultConfigVal = {
   },
   Info: {
     EEW: {
+      kodoriyou: true,
       showtraining: false,
       IntThreshold: 0,
       IntQuestion: true,
@@ -2328,6 +2329,7 @@ function MargeEEW(data) {
   if (!data) return; //データがない場合、処理終了
   try {
     if (!config.Info.EEW.showtraining && data.is_training && data.source != "simulation") return; //訓練法を受信するかどうか（設定に準拠）
+    if (!config.Info.EEW.kodoriyou && data.alertflg == "予報") return; //高度利用者向けを受信するかどうか（設定に準拠）
     if (!data.origin_time || !data.EventID || !data.serial || !data.latitude || !data.longitude) return;
 
     //現在地との距離
