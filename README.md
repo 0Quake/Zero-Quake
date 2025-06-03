@@ -21,10 +21,10 @@
   <details>
   <summary>出典・情報源</summary>
   <ul>
-    <li>Wolfx © Wolfx Project.</li>
-    <li>ProjectBS © CrossRoad</li>
-    <li>Axis © Prioris（無料登録必須）</li>
-    <li>P2P 地震情報 API © P2P地震情報（警報のみ）</li>
+    <li>Wolfx (By: Wolfx Project)</li>
+    <li>ProjectBS (By: CrossRoad)</li>
+    <li>Axis (By:Prioris)（無料登録必須）</li>
+    <li>P2P 地震情報 API (By: P2P地震情報)（警報のみ）</li>
   </ul>
   </details>
 
@@ -33,7 +33,7 @@
   震度速報 ／ 震源に関する情報 ／ 震度・震源に関する情報[震度・震源情報/遠地地震に関する情報]  
   長周期地震動に関する観測情報※ ／ 顕著な地震の震源要素更新のお知らせ ／ 推計震度分布※  
   南海トラフ地震に関連する情報[南海トラフ地震臨時情報/南海トラフ地震関連解説情報]
-  北海道・三陸沖後発地震注意情報
+  北海道・三陸沖後発地震注意情報／地震回数に関する情報
   <details>
   <summary>出典・情報源</summary>
   <ul>
