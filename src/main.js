@@ -3732,6 +3732,8 @@ function ConvertEQInfo(dataList, type, EEW, count) {
               eqInfo.jma[i] = EQElm;
             }
           } else {
+            data.EEW = data.category == "EEW"
+
             EQInfoData[data.eventId] = Object.assign({}, data);
             EQInfoData[data.eventId].raw_data = [Object.assign({}, data)];
 
