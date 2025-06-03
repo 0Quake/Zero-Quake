@@ -3685,6 +3685,7 @@ function ConvertEQInfo(dataList, type, EEW, count) {
               if (Boolean2(elm.maxI) && elm.maxI !== "?") EQInfo_Item.maxI = elm.maxI;
               if (Boolean2(elm.maxLgInt) && elm.maxLgInt !== "?") EQInfo_Item.maxLgInt = elm.maxLgInt;
               if (Boolean2(elm.headline)) EQInfo_Item.headline = elm.headline;
+              EQInfo_Item.cancel = elm.cancel;
 
               if (Array.isArray(elm.DetailURL)) {
                 elm.DetailURL.forEach(function (elm2) {
@@ -3696,10 +3697,7 @@ function ConvertEQInfo(dataList, type, EEW, count) {
               if (elm.axisData) EQInfo_Item.axisData.push(elm.axisData);
             });
 
-            EQElm.cancel = !rawData.find(function (elm) {
-              return !elm.cancel;
-            });
-
+            if (EQElm.cancel !== EQInfo_Item.cancel) changed = true;
             if (EQElm.category !== EQInfo_Item.category) changed = true;
             if (EQElm.EEW !== EQInfo_Item.EEW) changed = true;
             if (EQElm.OriginTime !== EQInfo_Item.OriginTime) changed = true;
@@ -3713,6 +3711,7 @@ function ConvertEQInfo(dataList, type, EEW, count) {
 
             if (EQElm.category == "EEW" && EQInfo_Item.category != "EEW") playAudio = true;
 
+            EQElm.cancel = EQInfo_Item.cancel;
             EQElm.category = EQInfo_Item.category;
             EQElm.EEW = EQInfo_Item.EEW;
             EQElm.reportDateTime = EQInfo_Item.reportDateTime;
