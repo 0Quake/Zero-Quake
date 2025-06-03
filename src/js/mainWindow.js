@@ -2154,7 +2154,11 @@ function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrive
           var scircle = turf.circle(_center, sRadius / 1000, circle_options);
           SCircleElm.setData(scircle);
           map.setPaintProperty("SCircle_" + EventID, "line-width", SnotArrived ? 0 : 2);
-        } else map.setPaintProperty("SCircle_" + EventID, "line-width", 0);
+          map.setPaintProperty("SCircle_" + EventID + "_FILL", "fill-opacity", SnotArrived ? 0 : 0.15);
+        } else {
+          map.setPaintProperty("SCircle_" + EventID, "line-width", 0);
+          map.setPaintProperty("SCircle_" + EventID + "_FILL", "fill-opacity", 0);
+        }
       }
     } else {
       map.addSource("PCircle_" + EventID, {
@@ -2215,7 +2219,10 @@ function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrive
             "stroke-dashoffset",
             (138 - 138 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect)))
           );
-      } else EQElm.SIElm.remove();
+      } else {
+        EQElm.SIElm.remove();
+        EQElm.SIElm = null
+      }
     } else if (SnotArrived) {
       var SIElm;
 
