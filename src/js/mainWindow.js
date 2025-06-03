@@ -288,14 +288,14 @@ function epiCenterUpdate(elm) {
         closeButton: false,
         closeOnClick: false,
         className: "epiCenterTooltip",
-        offset: [0, -17],
+        offset: [0, -29],
       }).setText(EEWIDTmp).setLngLat([longitude, latitude]).addTo(map);
 
       var ESPopup2 = new maplibregl.Popup({
         closeButton: false,
         closeOnClick: false,
         className: "epiCenterTooltip2",
-        offset: [0, 37],
+        offset: [0, 47],
       }).setLngLat([longitude, latitude]);
 
       if (tooltipContent) ESPopup2.setText(tooltipContent).addTo(map);
