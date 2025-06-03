@@ -1729,7 +1729,7 @@ function AXIS() {
               //地震情報
               var EarthquakeElm = {
                 Hypocenter: { Area: { Name: null } },
-                Magnitude: null,
+                Magnitude: [{ valueOf_: null }],
               };
               var IntensityElm = { Observation: { MaxInt: null } };
               var OriginTimeTmp;
