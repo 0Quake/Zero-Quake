@@ -72,6 +72,7 @@ window.electronAPI.messageSend((event, request) => {
     }
     psWaveEntry();
   } else if (request.action == "EQInfo") eqInfoDraw(request.data, request.source);
+  else if (request.action == "EQCount") eqCountDraw(request.data);
   else if (request.action == "EQDetect") EQDetect(request.data);
   else if (request.action == "EQDetectFinish") EQDetectFinish(request.data);
   else if (request.action == "tsunamiUpdate") tsunamiDataUpdate(request.data);
@@ -360,6 +361,7 @@ function epiCenterClear(eid) {
 //🔴地震情報🔴
 var template2 = document.getElementById("EQListTemplate");
 var template2_2 = document.getElementById("EQListTemplate2");
+var template2_3 = document.getElementById("EQListTemplate3");
 var EQListWrap;
 var eqInfoDataJMA;
 function eqInfoDraw(data, source) {
@@ -374,76 +376,158 @@ function eqInfoDraw(data, source) {
   }
   removeChild(EQListWrap);
 
-  data.forEach(function (elm, index) {
-    var clone = EQTemplate.content.cloneNode(true);
 
-    clone.querySelector(".EQI_epiCenter").textContent = elm.epiCenter ? elm.epiCenter : "震源調査中";
-    clone.querySelector(".EQI_datetime").textContent = elm.OriginTime ? NormalizeDate(4, elm.OriginTime) : "発生時刻不明";
-    clone.querySelector(".EQI_magnitude").textContent = elm.M || elm.M === 0 ? elm.M.toFixed(1) : "不明";
-    if (source == "jma") {
+  data.concat(eqCount).forEach(function (elm, index) {
+    if (elm.category == "地震回数に関する情報" && source == "jma") {
+      var clone = template2_3.content.cloneNode(true);
+
       clone.querySelector(".EQItem").setAttribute("id", "EQItem_" + elm.eventId);
       clone.querySelector(".EQItem").setAttribute("tabindex", index == 0 ? 2 : -1);
-      var maxITmp = elm.maxI;
-      if (maxITmp == "不明") maxITmp = "?";
-      maxITmp = NormalizeShindo(maxITmp, 0);
-      var shindoColor = NormalizeShindo(maxITmp, 2);
-      var LgIntColor = LgIntConvert(elm.maxLgInt);
 
-      clone.querySelector(".EQI_maxI").textContent = maxITmp;
-      clone.querySelector(".EQI_maxI").style.background = shindoColor[0];
-      clone.querySelector(".EQI_maxI").style.color = shindoColor[1];
-      clone.querySelector(".EQI_LgInt").style.display = elm.maxLgInt ? "block" : "none";
-      clone.querySelector(".EQI_LgIntBody").textContent = elm.maxLgInt;
-      clone.querySelector(".EQI_LgInt").style.background = LgIntColor[0];
-      clone.querySelector(".EQI_LgInt").style.color = LgIntColor[1];
-      clone.querySelector(".cancelled").style.display = elm.cancel ? "flex" : "none";
-      clone.querySelector(".EEWNotes").style.display = elm.category == "EEW" ? "block" : "none";
-      clone.querySelector(".TestNotes").style.display = elm.status == "試験" ? "block" : "none";
-      clone.querySelector(".trainingNotes").style.display = elm.status == "訓練" ? "block" : "none";
+      var dataToUse;
 
-      if (elm.cancel) {
-        clone.querySelector(".EQItem").classList.add("EQI_cancelled");
-        clone.querySelector(".EQItem").setAttribute("aria-label", "取り消された地震情報アイテム");
-      } else {
-        clone.querySelector(".EQItem")
-          .setAttribute("aria-label",
-            `過去の地震情報アイテム：${elm.status == "訓練" ? "訓練報、" : ""}${elm.status == "試験" ? "試験報、" : ""}
+      if (elm.std) {
+        dataToUse = elm.std
+      } else if (elm.sum) {
+        dataToUse = elm.sum
+      } else if (elm.hourly[0]) {
+        dataToUse = elm.hourly[0]
+      }
+
+      if (dataToUse.StartTime && dataToUse.EndTime && dataToUse.Number) {
+        var StartTime = NormalizeDate("YYYY/M/D h時", new Date(dataToUse.StartTime))
+        var sameDate = NormalizeDate("YYYYMMDD", new Date(dataToUse.StartTime)) == NormalizeDate("YYYYMMDD", new Date(dataToUse.EndTime))
+        if (sameDate) var EndTime = NormalizeDate("h時", new Date(dataToUse.EndTime))
+        else var EndTime = NormalizeDate("M/D h時", new Date(dataToUse.EndTime))
+        var dateRangeStr = StartTime + " ～ " + EndTime
+
+        if (dataToUse.FeltNumber || dataToUse.FeltNumber == 0) {
+          var content = `${dataToUse.Number}回 （うち有感${dataToUse.FeltNumber}回）`
+        } else {
+          var content = `${dataToUse.Number}回`
+        }
+
+        clone.querySelector(".EQI_datetime").textContent = dateRangeStr;
+        clone.querySelector(".cancelled").style.display = elm.cancel ? "flex" : "none";
+        clone.querySelector(".TestNotes").style.display = elm.status == "試験" ? "block" : "none";
+        clone.querySelector(".trainingNotes").style.display = elm.status == "訓練" ? "block" : "none";
+
+        clone.querySelector(".EQI_detail").innerText = "地震回数：" + content;
+
+        if (elm.cancel) {
+          clone.querySelector(".EQItem").classList.add("EQI_cancelled");
+          clone.querySelector(".EQItem").setAttribute("aria-label", "取り消された地震情報アイテム");
+        } else {
+          clone.querySelector(".EQItem")
+            .setAttribute("aria-label",
+              `過去の地震情報アイテム：${elm.status == "訓練" ? "訓練報、" : ""}${elm.status == "試験" ? "試験報、" : ""}${elm.headline}${content}
+            `//エンターキーで詳細情報を確認。
+            );
+          clone.querySelector(".EQItem").addEventListener("click", function () {
+            window.electronAPI.messageReturn({
+              action: "EQInfoWindowOpen",
+              url: "src/EQCountDetail.html",
+              eid: elm.eventId,
+              data: elm,
+            });
+          });
+        }
+
+        document.getElementById("JMA_EqInfo").appendChild(clone);
+      }
+
+      //EQI_detail
+    } else {
+      var clone = EQTemplate.content.cloneNode(true);
+
+      clone.querySelector(".EQI_epiCenter").textContent = elm.epiCenter ? elm.epiCenter : "震源調査中";
+      clone.querySelector(".EQI_datetime").textContent = elm.OriginTime ? NormalizeDate(4, elm.OriginTime) : "発生時刻不明";
+      clone.querySelector(".EQI_magnitude").textContent = elm.M || elm.M === 0 ? elm.M.toFixed(1) : "不明";
+      if (source == "jma") {
+        clone.querySelector(".EQItem").setAttribute("id", "EQItem_" + elm.eventId);
+        clone.querySelector(".EQItem").setAttribute("tabindex", index == 0 ? 2 : -1);
+        var maxITmp = elm.maxI;
+        if (maxITmp == "不明") maxITmp = "?";
+        maxITmp = NormalizeShindo(maxITmp, 0);
+        var shindoColor = NormalizeShindo(maxITmp, 2);
+        var LgIntColor = LgIntConvert(elm.maxLgInt);
+
+        clone.querySelector(".EQI_maxI").textContent = maxITmp;
+        clone.querySelector(".EQI_maxI").style.background = shindoColor[0];
+        clone.querySelector(".EQI_maxI").style.color = shindoColor[1];
+        clone.querySelector(".EQI_LgInt").style.display = elm.maxLgInt ? "block" : "none";
+        clone.querySelector(".EQI_LgIntBody").textContent = elm.maxLgInt;
+        clone.querySelector(".EQI_LgInt").style.background = LgIntColor[0];
+        clone.querySelector(".EQI_LgInt").style.color = LgIntColor[1];
+        clone.querySelector(".cancelled").style.display = elm.cancel ? "flex" : "none";
+        clone.querySelector(".EEWNotes").style.display = elm.category == "EEW" ? "block" : "none";
+        clone.querySelector(".TestNotes").style.display = elm.status == "試験" ? "block" : "none";
+        clone.querySelector(".trainingNotes").style.display = elm.status == "訓練" ? "block" : "none";
+
+        if (elm.cancel) {
+          clone.querySelector(".EQItem").classList.add("EQI_cancelled");
+          clone.querySelector(".EQItem").setAttribute("aria-label", "取り消された地震情報アイテム");
+        } else {
+          clone.querySelector(".EQItem")
+            .setAttribute("aria-label",
+              `過去の地震情報アイテム：${elm.status == "訓練" ? "訓練報、" : ""}${elm.status == "試験" ? "試験報、" : ""}
             ${maxITmp != "?" ? "最大震度" + NormalizeShindo(maxITmp, 1) + "、" : ""}${elm.M || elm.M === 0 ? "マグニチュード" + elm.M.toFixed(1) + "、" : ""}
             ${elm.epiCenter ? "震源は" + elm.epiCenter + "、" : ""}発生時刻は${NormalizeDate("M月D日h時m分", elm.OriginTime)}。エンターキーで詳細情報を確認。`
+            );
+          clone.querySelector(".EQItem").addEventListener("click", function () {
+            window.electronAPI.messageReturn({
+              action: "EQInfoWindowOpen",
+              url: "src/EQDetail.html",
+              eid: elm.eventId,
+              urls: elm.DetailURL,
+              axisData: elm.axisData,
+            });
+          });
+        }
+      } else if (source == "usgs") {
+        var colorTmp = NormalizeMMI(elm.maxI, 2);
+        clone.querySelector(".EQItem").setAttribute("tabindex", index == 0 ? 2 : -1);
+        clone.querySelector(".EQI_maxI").textContent = NormalizeMMI(elm.maxI, 1);
+        clone.querySelector(".EQI_maxI").style.background = colorTmp[0];
+        clone.querySelector(".EQI_maxI").style.color = colorTmp[1];
+        var MMIStr = elm.maxI ? `最大改正メルカリ震度${NormalizeMMI(elm.maxI, 3)}` : "";
+        clone.querySelector(".EQItem")
+          .setAttribute("aria-label",
+            `過去の地震情報アイテム：${MMIStr}、${elm.M || elm.M === 0 ? "マグニチュード" + elm.M.toFixed(1) + "、" : ""}
+          ${elm.epiCenter ? "震源は" + elm.epiCenter + "、" : ""}発生時刻は${NormalizeDate("M月D日h時m分", elm.OriginTime)}。エンターキーで詳細情報を確認。`
           );
+
         clone.querySelector(".EQItem").addEventListener("click", function () {
           window.electronAPI.messageReturn({
-            action: "EQInfoWindowOpen",
-            url: "src/EQDetail.html",
-            eid: elm.eventId,
-            urls: elm.DetailURL,
-            axisData: elm.axisData,
+            action: "EQInfoWindowOpen_IS_WebURL",
+            url: String(elm.DetailURL),
           });
         });
       }
-    } else if (source == "usgs") {
-      var colorTmp = NormalizeMMI(elm.maxI, 2);
-      clone.querySelector(".EQItem").setAttribute("tabindex", index == 0 ? 2 : -1);
-      clone.querySelector(".EQI_maxI").textContent = NormalizeMMI(elm.maxI, 1);
-      clone.querySelector(".EQI_maxI").style.background = colorTmp[0];
-      clone.querySelector(".EQI_maxI").style.color = colorTmp[1];
-      var MMIStr = elm.maxI ? `最大改正メルカリ震度${NormalizeMMI(elm.maxI, 3)}` : "";
-      clone.querySelector(".EQItem")
-        .setAttribute("aria-label",
-          `過去の地震情報アイテム：${MMIStr}、${elm.M || elm.M === 0 ? "マグニチュード" + elm.M.toFixed(1) + "、" : ""}
-          ${elm.epiCenter ? "震源は" + elm.epiCenter + "、" : ""}発生時刻は${NormalizeDate("M月D日h時m分", elm.OriginTime)}。エンターキーで詳細情報を確認。`
-        );
-
-      clone.querySelector(".EQItem").addEventListener("click", function () {
-        window.electronAPI.messageReturn({
-          action: "EQInfoWindowOpen_IS_WebURL",
-          url: String(elm.DetailURL),
-        });
-      });
+      EQListWrap.appendChild(clone);
     }
-    EQListWrap.appendChild(clone);
   });
 }
+
+var eqCount = []
+function eqCountDraw(data) {
+  eqCount = data
+  eqInfoDraw(eqInfoDataJMA, "jma")
+}
+/*({
+status: xml.getElementsByTagName("Status")[0].textContent,
+eventId: xml.getElementsByTagName("EventID")[0].textContent,
+category: xml.getElementsByTagName("Title")[0].textContent,
+cancel: Boolean(cancel),
+reportDateTime: new Date(
+  xml.getElementsByTagName("ReportDateTime")[0].textContent
+),
+headline: headline,
+hourly: hourly,
+sum: sum,
+std: std
+})*/
+
 
 //🔴地震検知🔴
 var EQDetectItem = [];

@@ -758,6 +758,9 @@ td {
 .EQItem {
   padding: 6px;
 }
+.EQCount{
+  display: block;
+}
 #NankaiTroughInfo_Rinji,
 #NankaiTroughInfo_Teirei,
 #HokkaidoSanrikuInfo,

@@ -717,6 +717,7 @@ function CreateMainWindow() {
           source: "usgs",
           data: eqInfo.usgs.slice(0, config.Info.EQInfo.ItemCount),
         });
+        EQCount_process(null)
 
         EQDetect_List.forEach(function (elm) {
           var threshold01Tmp = elm.isCity ? thresholds.threshold01C : thresholds.threshold01;
@@ -1136,6 +1137,7 @@ function EQInfo_createWindow(response, IS_WebURL) {
         action: "metaData",
         eid: response.eid,
         urls: response.urls,
+        data: response.data,
         eew: EEWDataItem,
         axisData: response.axisData,
       };
@@ -2906,6 +2908,58 @@ function Req_JMAXML(url, count,) {
                 },
               ], "jma", false, count
             );
+          } else if (title == "地震回数に関する情報") {
+            if (xml.getElementsByTagName("EarthquakeCount")[0]) {
+              var hourly = []
+              var sum, std;
+              xml.querySelectorAll("EarthquakeCount Item").forEach(function (el) {
+                var type = el.getAttribute("type")
+
+                if (el.getElementsByTagName("StartTime")[0]) var StartTime = new Date(el.getElementsByTagName("StartTime")[0].textContent)
+                if (el.getElementsByTagName("EndTime")[0]) var EndTime = new Date(el.getElementsByTagName("EndTime")[0].textContent)
+                if (el.getElementsByTagName("Number")[0] && Number(el.getElementsByTagName("Number")[0].textContent) !== -1) var _Number = Number(el.getElementsByTagName("Number")[0].textContent)
+                if (el.getElementsByTagName("FeltNumber")[0] && Number(el.getElementsByTagName("FeltNumber")[0].textContent) !== -1) var FeltNumber = Number(el.getElementsByTagName("FeltNumber")[0].textContent)
+
+                var data = {
+                  StartTime: StartTime,
+                  EndTime: EndTime,
+                  Number: _Number,
+                  FeltNumber: FeltNumber
+                }
+
+                if (type == "１時間地震回数") {
+                  hourly.push(data)
+                } else if (type == "累積地震回数") {
+                  sum = data
+                } else if (type == "地震回数") {
+                  std = data
+                }
+              })
+
+              var headline = xml.getElementsByTagName("Head")[0].getElementsByTagName("Headline")[0].getElementsByTagName("Text")[0].textContent;
+              var Text = xml.querySelector("Body Text") ? xml.querySelector("Body Text").textContent : ""
+              var NextAdvisory = xml.querySelector("NextAdvisory") ? xml.querySelector("NextAdvisory").textContent : ""
+              var FreeFormComment = xml.querySelector("Comments FreeFormComment") ? xml.querySelector("Comments FreeFormComment").textContent : ""
+
+
+              EQCount_process({
+                status: xml.getElementsByTagName("Status")[0].textContent,
+                eventId: xml.getElementsByTagName("EventID")[0].textContent,
+                category: xml.getElementsByTagName("Title")[0].textContent,
+                cancel: Boolean(cancel),
+                reportDateTime: new Date(
+                  xml.getElementsByTagName("ReportDateTime")[0].textContent
+                ),
+                headline: headline ? headline : "",
+                hourly: hourly,
+                sum: sum,
+                std: std,
+                Text: Text,
+                NextAdvisory: NextAdvisory,
+                FreeFormComment: FreeFormComment
+              })
+            }
+
           } else if (title == "南海トラフ地震関連解説情報" || title == "南海トラフ地震臨時情報") {
             var data = {
               title: title, //南海トラフ地震関連解説情報など
@@ -3701,6 +3755,24 @@ function ConvertEQInfo(dataList, type, EEW, count) {
   } catch (err) {
     throw new Error("地震情報データの処理（マージ）に失敗しました。エラーメッセージは以下の通りです。\n" + err);
   }
+}
+
+
+var EQCount_data = {};
+function EQCount_process(data) {
+  if (data) EQCount_data[data.eventId] = data
+  var EQCount_data_array = [];
+  Object.keys(EQCount_data).forEach(function (key) {
+    EQCount_data_array.push(EQCount_data[key])
+  })
+
+  EQCount_data_array = EQCount_data_array.sort(function (a, b) { return Number(a.reportDateTime) - Number(b.reportDateTime) })
+
+  messageToMainWindow({
+    action: "EQCount",
+    source: "jma",
+    data: EQCount_data_array,
+  });
 }
 
 //時間(ms)を「～分[秒,分,時間,日]」の形にする
