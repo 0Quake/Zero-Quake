@@ -514,19 +514,6 @@ function eqCountDraw(data) {
   eqCount = data
   eqInfoDraw(eqInfoDataJMA, "jma")
 }
-/*({
-status: xml.getElementsByTagName("Status")[0].textContent,
-eventId: xml.getElementsByTagName("EventID")[0].textContent,
-category: xml.getElementsByTagName("Title")[0].textContent,
-cancel: Boolean(cancel),
-reportDateTime: new Date(
-  xml.getElementsByTagName("ReportDateTime")[0].textContent
-),
-headline: headline,
-hourly: hourly,
-sum: sum,
-std: std
-})*/
 
 
 //🔴地震検知🔴
@@ -621,6 +608,8 @@ function EQDetectFinish(id) {
       elmA.ECMarker.remove();
 
       EQDetectItem.splice(index, 1);
+      returnToUserPosition();
+
       return true;
     }
   });
@@ -630,8 +619,6 @@ function EQDetectFinish(id) {
   document.getElementById("noEEW").style.display = now_EEW.length == 0 && !now_tsunami && EQDetectItem.length == 0 ? "block" : "none";
 
   if (EQDetectItem.length == 0) document.body.classList.remove("EQDetecting");
-
-  returnToUserPosition();
 }
 
 //🔴UI🔴
@@ -1751,6 +1738,7 @@ function init() {
 function returnToUserPosition() {
   if (userPosition) map.panTo(userPosition, { animate: false });
   if (userZoom) map.zoomTo(userZoom, { animate: false });
+  document.getElementById("returnToUserPosition").style.display = "none"
 }
 
 //観測点情報更新
