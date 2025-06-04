@@ -2328,7 +2328,7 @@ var sesmicPoints = JSON.parse(
 function MargeEEW(data) {
   if (!data) return; //データがない場合、処理終了
   try {
-    if (!config.Info.EEW.showtraining && data.is_training && data.source != "simulation") return; //訓練法を受信するかどうか（設定に準拠）
+    if (!config.Info.EEW.showtraining && data.is_training) return; //訓練法を受信するかどうか（設定に準拠）
     if (!config.Info.EEW.kodoriyou && data.alertflg == "予報") return; //高度利用者向けを受信するかどうか（設定に準拠）
     if (!data.origin_time || !data.EventID || !data.serial || !data.latitude || !data.longitude) return;
 
@@ -2651,7 +2651,7 @@ function EEW_Alert(data, first, update) {
       var notice_setting = first ? config.notice.window.EEW : config.notice.window.EEW_Update;
       if (notice_setting == "push" && (!MainWindow || MainWindow.isMinimized() || !MainWindow.isFocused() || !MainWindow.isVisible())) {
         var EEWNotification = new Notification({
-          title: "緊急地震速報 " + data.alertflg + " #" + data.serial,
+          title: (data.is_training ? "【訓練報】 " : "") + "緊急地震速報 " + data.alertflg + " #" + data.serial,
           body:
             data.region_name +
             "\n予想最大震度：" + NormalizeShindo(data.maxInt, 1) +

@@ -1084,7 +1084,7 @@ document
       depth: Number(document.getElementById("EEWE_depth").value),
       is_cancel: document.getElementById("EEWE_is_cancel").checked,
       is_final: document.getElementById("EEWE_is_final").checked,
-      is_training: true,
+      is_training: document.getElementById("EEWE_is_training").checked,
       latitude: Number(document.getElementById("EEWE_latitude").value),
       longitude: Number(document.getElementById("EEWE_longitude").value),
       region_code: "",
