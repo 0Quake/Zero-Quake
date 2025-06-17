@@ -837,8 +837,8 @@ function init() {
     dragRotate: false,
     style: {
       version: 8,
-      glyphs:
-        "https://gsi-cyberjapan.github.io/optimal_bvmap/glyphs/{fontstack}/{range}.pbf",
+      projection: { type: config.data.globeView ? "globe" : "mercator" },
+      glyphs: "https://gsi-cyberjapan.github.io/optimal_bvmap/glyphs/{fontstack}/{range}.pbf",
       transition: { duration: 0, delay: 0 },
       sources: {
         v: {
@@ -1695,7 +1695,6 @@ function init() {
       if (document.getElementById(elm)) document.getElementById(elm).checked = true;
       overlaySelect(elm, true);
     });
-    map.setProjection({ type: config.data.globeView ? "globe" : "mercator" });
     document.getElementById("globeView").checked = config.data.globeView;
 
     overlaySelect("kmoni_points", config.data.kmoni_points_show);

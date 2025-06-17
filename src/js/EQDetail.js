@@ -135,8 +135,8 @@ function Mapinit() {
     dragRotate: false,
     style: {
       version: 8,
-      glyphs:
-        "https://gsi-cyberjapan.github.io/optimal_bvmap/glyphs/{fontstack}/{range}.pbf",
+      projection: { type: config.data.globeView ? "globe" : "mercator" },
+      glyphs: "https://gsi-cyberjapan.github.io/optimal_bvmap/glyphs/{fontstack}/{range}.pbf",
       sources: {
         submarine: {
           type: "raster",
@@ -863,7 +863,6 @@ function Mapinit() {
     mapFillSwitch();
     layerSelect(config.data.layer);
     radioSet("mapSelect", config.data.layer);
-    map.setProjection({ type: config.data.globeView ? "globe" : "mercator" });
     document.getElementById("globeView").checked = config.data.globeView;
 
     InfoFetch();
