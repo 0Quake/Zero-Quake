@@ -4068,8 +4068,8 @@ function GenerateEQInfoText(EQData) {
     text = text.replaceAll("{category}", category ? category : "");
     text = text.replaceAll("{training}", EQData.status == "訓練" ? "訓練報。" : "");
     text = text.replaceAll("{training2}", EQData.status == "訓練" ? "これは訓練報です。" : "");
-    text = text.replaceAll("{report_time}", EQData.reportDateTime ? NormalizeDate(8, EQData.reportDateTime) : "");
-    text = text.replaceAll("{origin_time}", EQData.OriginTime ? NormalizeDate(8, EQData.OriginTime) : "");
+    text = text.replaceAll("{report_time}", EQData.reportDateTime ? NormalizeDate(9, EQData.reportDateTime) : "");
+    text = text.replaceAll("{origin_time}", EQData.OriginTime ? NormalizeDate(9, EQData.OriginTime) : "");
     text = text.replaceAll("{origin_time2}", EQData.OriginTime ? dif.num + dif.unit + "前" : "先ほど");
     text = text.replaceAll("{region_name}", EQData.epiCenter ? EQData.epiCenter : "");
     text = text.replaceAll("{magnitude}", EQData.M ? EQData.M : "");
