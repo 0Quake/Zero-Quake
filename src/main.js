@@ -214,7 +214,7 @@ var update_data;
 var downloadURL;
 
 //アップデートの確認
-function checkUpdate() {
+function checkUpdate(userAction) {
   try {
     if (net.online) {
       var UpdateError = function () {
@@ -276,20 +276,23 @@ function checkUpdate() {
                   if (latest_v[2] > current_v[2]) {
                     update_available = true;
 
-                    var options4 = {
-                      type: "question",
-                      title: "アプリケーションの更新",
-                      message: "Zero Quake で更新が利用可能です。",
-                      detail: "v." + current_verTmp + " > v." + latest_verTmp + "\n操作を選択してください。",
-                      buttons: ["詳細を確認", "後で確認"],
-                      noLink: true,
-                    };
+                    if (!userAction) {
+                      var options4 = {
+                        type: "question",
+                        title: "アプリケーションの更新",
+                        message: "Zero Quake で更新が利用可能です。",
+                        detail: "v." + current_verTmp + " > v." + latest_verTmp + "\n操作を選択してください。",
+                        buttons: ["後で確認", "詳細を確認"],
+                        noLink: true,
+                      };
 
-                    dialog.showMessageBox(MainWindow, options4).then(function (result) {
-                      if (result.response == 0) {
-                        Create_SettingWindow(true);
-                      }
-                    });
+                      dialog.showMessageBox(MainWindow, options4).then(function (result) {
+                        if (result.response == 1) {
+                          Create_SettingWindow(true);
+                          console.log(result.response)
+                        }
+                      });
+                    }
                   }
                 }
               }
@@ -582,7 +585,7 @@ ipcMain.on("message", (_event, response) => {
       MargeEEW(response.data);
       break;
     case "checkForUpdate":
-      checkUpdate();
+      checkUpdate(true);
       break;
     case "tsunamiReqest":
       if (Tsunami_data_Marged) {
