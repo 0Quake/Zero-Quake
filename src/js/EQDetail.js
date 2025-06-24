@@ -2299,9 +2299,12 @@ function ConvertEQInfo(data) {
 
   EQInfoData.push(data);
 
-  EQInfoData = EQInfoData.sort(function (a, b) {
+  var sortByReportDT = function (a, b) {
     return new Date(a.reportTime) < new Date(b.reportTime) ? -1 : 1;
-  });
+  }
+  var EQI_EEW = EQInfoData.filter((e) => { return e.category == "EEW" }).sort(sortByReportDT);
+  var EQI_NOT_EEW = EQInfoData.filter((e) => { return e.category != "EEW" }).sort(sortByReportDT);
+  EQInfoData = EQI_EEW.concat(EQI_NOT_EEW)
 
   EQInfoData.forEach(function (elm, index) {
     if (elm.cancel) {
@@ -2313,23 +2316,18 @@ function ConvertEQInfo(data) {
 
   var EQInfoTmp = {};
   EQInfoData.forEach(function (elm) {
-    if (elm.cancel) {
-      if (elm.category == "EEW") InfoType_remove("type-1");
-      else if (elm.category == "震度速報") InfoType_remove("type-2");
-      else if (elm.category == "震源に関する情報") InfoType_remove("type-3");
-      else if (elm.category == "震源・震度情報") InfoType_remove("type-4-1");
-      else if (elm.category == "遠地地震に関する情報") InfoType_remove("type-4-2");
-      else if (elm.category == "顕著な地震の震源要素更新のお知らせ") InfoType_remove("type-5");
-      else if (elm.category == "津波") InfoType_remove("type-8");
-    } else {
-      if (elm.category == "EEW") InfoType_add("type-1");
-      else if (elm.category == "震度速報") InfoType_add("type-2");
-      else if (elm.category == "震源に関する情報") InfoType_add("type-3");
-      else if (elm.category == "震源・震度情報") InfoType_add("type-4-1");
-      else if (elm.category == "遠地地震に関する情報") InfoType_add("type-4-2");
-      else if (elm.category == "顕著な地震の震源要素更新のお知らせ") InfoType_add("type-5");
-      else if (elm.category == "津波") InfoType_add("type-8");
-    }
+    var infoTypeTmp;
+    if (elm.category == "EEW") infoTypeTmp = "type-1";
+    else if (elm.category == "震度速報") infoTypeTmp = "type-2";
+    else if (elm.category == "震源に関する情報") infoTypeTmp = "type-3";
+    else if (elm.category == "震源・震度情報") infoTypeTmp = "type-4-1";
+    else if (elm.category == "遠地地震に関する情報") infoTypeTmp = "type-4-2";
+    else if (elm.category == "顕著な地震の震源要素更新のお知らせ") infoTypeTmp = "type-5";
+    else if (elm.category == "津波") infoTypeTmp = "type-8";
+
+    if (elm.cancel) InfoType_remove(infoTypeTmp);
+    else InfoType_add(infoTypeTmp);
+
 
     if (!config.Info.EQInfo.showtraining && elm.status == "訓練") return;
     if (!config.Info.EQInfo.showTest && elm.status == "試験") return;
