@@ -400,11 +400,13 @@
   text-align: center;
   border: none;
   z-index: 1000;
+  pointer-events: none;
 }
 .epiCenterTooltip .maplibregl-popup-content,
 .epiCenterTooltip2 .maplibregl-popup-content {
   padding: 0;
   min-width: 0;
+  pointer-events: none;
 }
 .epiCenterTooltip2 .maplibregl-popup-content {
   padding: 0 5px;
