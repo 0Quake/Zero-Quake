@@ -45,8 +45,6 @@ workerThreads.parentPort.on("message", (message) => {
 });
 
 function EQDetect(data, date, detect) {
-  var changedData = [];
-
   var ptData, detect0, pgaAvr;
   for (const elm of data) {
     //ポイントごとの処理
@@ -87,9 +85,6 @@ function EQDetect(data, date, detect) {
         if (detect0) ptData.detectCount++;
         else ptData.detectCount = 0;
       }
-
-      //前回からの変化の有無（描画時の負荷軽減のため）
-      if (elm.pga != ptData.SUMTmp[ptData.SUMTmp.length - 1]) changedData.push(elm);
 
       //PGA平均を求めるためのデータ追加
       ptData.SUMTmp = ptData.SUMTmp.slice(1);
@@ -220,7 +215,6 @@ function EQDetect(data, date, detect) {
     action: "PointsData_Update",
     data: data,
     date: date,
-    changedData: changedData,
     EQDetect_List: EQDetect_List,
   });
 }

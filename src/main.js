@@ -1503,7 +1503,7 @@ function ConvertSnet(data, date) {
     action: "SnetUpdate",
     Updatetime: new Date(date),
     LocalTime: new Date(),
-    data: { data: data, changedData: data },
+    data: { data: data },
   };
   messageToMainWindow(SnetPointsDataTmp);
 }
