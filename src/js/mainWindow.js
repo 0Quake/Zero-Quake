@@ -42,6 +42,7 @@ window.electronAPI.messageSend((event, request) => {
   } else if (request.action == "unactivate") {
     background = true;
   } else if (request.action == "EEW_AlertUpdate") {
+    console.log("EEW Updated", request.data)
     EEW_AlertUpdate(request.data);
     psWaveEntry();
     JMAEstShindoControl(request.data);
@@ -346,9 +347,12 @@ function epiCenterClear(eid) {
       return elm2.eid !== eid;
     });
     if (epicenterElm) {
+      console.log(epicenterElm)
+
       if (epicenterElm.markerElm) epicenterElm.markerElm.remove();
       if (epicenterElm.ESPopup) epicenterElm.ESPopup.remove();
       if (epicenterElm.ESPopup2) epicenterElm.ESPopup2.remove();
+
       epicenterElm.markerElm = null;
       epicenterElm.ESPopup = null;
       epicenterElm.ESPopup2 = null;
@@ -712,10 +716,8 @@ document.getElementById("CloseTsunamiRevocation").addEventListener("click", func
 });
 
 function psWaveAnm() {
-  if (now_EEW.length > 0) {
-    for (var elm of now_EEW) {
-      if (!elm.is_cancel) psWaveCalc(elm.EventID);
-    }
+  for (var elm of now_EEW) {
+    if (!elm.is_cancel) psWaveCalc(elm.EventID);
   }
   if (background) setTimeout(psWaveAnm, 1000);
   else {
@@ -2055,6 +2057,7 @@ function psWaveEntry() {
 
       if (map.getLayer("PCircle_" + elm.id)) map.removeSource("PCircle_" + elm.id);
       if (map.getLayer("SCircle_" + elm.id)) map.removeSource("SCircle_" + elm.id);
+      if (elm.SIElm) elm.SIElm.remove();
     }
     return stillEEW;
   });
@@ -2143,8 +2146,8 @@ function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrive
         if (pRadius) {
           var pcircle = turf.circle(_center, pRadius / 1000, circle_options);
           PCircleElm.setData(pcircle);
-          map.setPaintProperty("PCircle_" + EventID, "line-width", 2);
-        } else map.setPaintProperty("PCircle_" + EventID, "line-width", 0);
+          if (map.getLayer("PCircle_" + EventID)) map.setPaintProperty("PCircle_" + EventID, "line-width", 2);
+        } else if (map.getLayer("PCircle_" + EventID)) map.setPaintProperty("PCircle_" + EventID, "line-width", 0);
       }
 
       var SCircleElm = map.getSource("SCircle_" + EventID);
@@ -2152,9 +2155,11 @@ function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrive
         if (sRadius) {
           var scircle = turf.circle(_center, sRadius / 1000, circle_options);
           SCircleElm.setData(scircle);
-          map.setPaintProperty("SCircle_" + EventID, "line-width", SnotArrived ? 0 : 2);
-          map.setPaintProperty("SCircle_" + EventID + "_FILL", "fill-opacity", SnotArrived ? 0 : 0.15);
-        } else {
+          if (map.getLayer("SCircle_" + EventID)) {
+            map.setPaintProperty("SCircle_" + EventID, "line-width", SnotArrived ? 0 : 2);
+            map.setPaintProperty("SCircle_" + EventID + "_FILL", "fill-opacity", SnotArrived ? 0 : 0.15);
+          }
+        } else if (map.getLayer("SCircle_" + EventID)) {
           map.setPaintProperty("SCircle_" + EventID, "line-width", 0);
           map.setPaintProperty("SCircle_" + EventID + "_FILL", "fill-opacity", 0);
         }
@@ -2246,7 +2251,8 @@ function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrive
         if (SCircleElm) {
           var scircle = turf.circle(_center, 0, circle_options);
           SCircleElm.setData(scircle);
-          map.setPaintProperty("SCircle_" + EventID, "line-width", SnotArrived ? 0 : 2);
+          if (map.getLayer("SCircle_" + EventID))
+            map.setPaintProperty("SCircle_" + EventID, "line-width", SnotArrived ? 0 : 2);
         }
       }
     }
