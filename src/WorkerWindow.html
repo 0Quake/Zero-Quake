@@ -96,7 +96,7 @@
         Pitch = config.notice.voice_parameter.pitch;
         Volume = config.notice.voice_parameter.volume;
 
-        speak(lost_text.text, lost_text.engine)
+        if (lost_text) speak(lost_text.text, lost_text.engine)
       } else if (request.action == "KmoniImgUpdate") {
         kmoni_date = request.date
         image.src = request.data;
@@ -128,6 +128,10 @@
               speak(text, "Default")
             });
         } else {
+          function fire_default() {
+            speak(text, "Default")
+          }
+
           fetch(`http://localhost:${config.notice.voice_parameter.Boyomi_Port}/GetVoiceList`).then(function (res) {
             return res.json()
           }).then(function (json) {
@@ -137,22 +141,14 @@
             })
             if (voiceElm) voice_parameter = "&voice=" + config.notice.voice_parameter.Boyomi_Voice;
 
-            fetch(`http://localhost:${config.notice.voice_parameter.Boyomi_Port}/skip`)
-              .then(function () {
-                fetch(`http://localhost:${config.notice.voice_parameter.Boyomi_Port}/clear`)
-                  .then(function () {
-                    fetch(`http://localhost:${config.notice.voice_parameter.Boyomi_Port}/Talk?text=${text}${voice_parameter}&speed=${Rate * 100}&volume=${Volume * 100}&tone=${Pitch * 100}`)
-                      .catch(function (err) {
-                        speak(text, "Default")
-                      });
-                  }).catch(function (err) {
-                    speak(text, "Default")
-                  });;
-              }).catch(function (err) {
-                speak(text, "Default")
-              });;
+            fetch(`http://localhost:${config.notice.voice_parameter.Boyomi_Port}/skip`).then(function () {
+              fetch(`http://localhost:${config.notice.voice_parameter.Boyomi_Port}/clear`).then(function () {
+                fetch(`http://localhost:${config.notice.voice_parameter.Boyomi_Port}/Talk?text=${text}${voice_parameter}&speed=${Rate * 100}&volume=${Volume * 100}&tone=${Pitch * 100}`)
+                  .catch(fire_default);
+              }).catch(fire_default);
+            }).catch(fire_default);
 
-          });
+          }).catch(fire_default);
         }
 
       } else if (engine == "Default") {
