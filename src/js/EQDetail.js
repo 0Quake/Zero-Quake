@@ -2538,8 +2538,11 @@ document.getElementById("AllCloseL").addEventListener("click", function () {
 });
 
 function InfoType_add(type) {
-  document.getElementById(type).style.display = "inline-block";
-  document.getElementById(type).classList.remove("disabled");
+  var card = document.getElementById(type);
+  if (card) {
+    card.style.display = "inline-block";
+    card.classList.remove("disabled");
+  }
   if (type == "type-1") document.getElementById("EEWCaption").style.display = "block";
   else document.getElementById("EEWCaption").style.display = "none";
 
@@ -2572,7 +2575,8 @@ function InfoType_add(type) {
 }
 
 function InfoType_remove(type) {
-  document.getElementById(type).classList.add("disabled");
+  var card = document.getElementById(type)
+  if (card) card.classList.add("disabled");
 }
 
 function hinanjoPopup(e) {
