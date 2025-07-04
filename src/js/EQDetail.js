@@ -1192,12 +1192,13 @@ function jma_Fetch(url) {
       var LatLngDepth, originTimeTmp, epiCenterTmp, magnitudeTmp, maxIntTmp, LatTmp, LngTmp, depthTmp;
 
       if (json.Body.Earthquake) {
-        LatLngDepth = json.Body.Earthquake.Hypocenter.Area.Coordinate;
-        if (json.Body.Earthquake.Hypocenter.Area.Coordinate_WGS)
-          LatLngDepth = json.Body.Earthquake.Hypocenter.Area.Coordinate_WGS;
-        LatLngDepth = LatLngDepth
-          .replaceAll("+", "｜+").replaceAll("-", "｜-").replaceAll("/", "")
-          .split("｜");
+        if (json.Body.Earthquake.Hypocenter.Area.Coordinate_WGS) {
+          LatLngDepth = parse_LatLngDepth(json.Body.Earthquake.Hypocenter.Area.Coordinate_WGS);
+          LatLngDepth[0] /= 100
+          LatLngDepth[1] /= 100
+        } else {
+          LatLngDepth = parse_LatLngDepth(json.Body.Earthquake.Hypocenter.Area.Coordinate);
+        }
       }
       if (json.Body.Earthquake) {
         if (json.Body.Earthquake.OriginTime) originTimeTmp = new Date(json.Body.Earthquake.OriginTime);
@@ -1292,12 +1293,13 @@ function jmaL_Fetch(url) {
     .then(function (json) {
       document.getElementById("LgInt_radioWrap").style.display = "block";
       if (json.Body.Earthquake) {
-        var LatLngDepth = json.Body.Earthquake.Hypocenter.Area.Coordinate;
-        if (json.Body.Earthquake.Hypocenter.Area.Coordinate_WGS)
-          LatLngDepth = json.Body.Earthquake.Hypocenter.Area.Coordinate_WGS;
-        LatLngDepth = LatLngDepth
-          .replaceAll("+", "｜+").replaceAll("-", "｜-").replaceAll("/", "")
-          .split("｜");
+        if (json.Body.Earthquake.Hypocenter.Area.Coordinate_WGS) {
+          LatLngDepth = parse_LatLngDepth(json.Body.Earthquake.Hypocenter.Area.Coordinate_WGS);
+          LatLngDepth[0] /= 100
+          LatLngDepth[1] /= 100
+        } else {
+          var LatLngDepth = parse_LatLngDepth(json.Body.Earthquake.Hypocenter.Area.Coordinate);
+        }
       }
       if (json.Body.Earthquake) {
         if (json.Body.Earthquake.OriginTime) var originTimeTmp = new Date(json.Body.Earthquake.OriginTime);
@@ -1424,8 +1426,7 @@ function jmaXMLFetch(url) {
         epiCenterTmp = EarthquakeElm.querySelector("Name").textContent;
         magnitudeTmp = Number(EarthquakeElm.getElementsByTagName("jmx_eb:Magnitude")[0].textContent);
         magnitudeTypeTmp = EarthquakeElm.getElementsByTagName("jmx_eb:Magnitude")[0].getAttribute("type");
-        LatLngDepth = xml.querySelector("Body Earthquake Hypocenter").getElementsByTagName("jmx_eb:Coordinate")[0].textContent
-          .replaceAll("+", "｜+").replaceAll("-", "｜-").replaceAll("/", "").split("｜");
+        LatLngDepth = parse_LatLngDepth(xml.querySelector("Body Earthquake Hypocenter").getElementsByTagName("jmx_eb:Coordinate")[0].textContent)
         LatTmp = Number(LatLngDepth[1]);
         LngTmp = Number(LatLngDepth[2]);
         DepthTmp = Number(LatLngDepth[3] / 1000);
@@ -1651,9 +1652,7 @@ function narikakun_Fetch(url) {
 
 function axisInfoCtrl(json) {
   var Earthquake = json.Body.Earthquake[0];
-  var LatLngDepth = Earthquake.Hypocenter.Area.Coordinate[0].valueOf_
-    .replaceAll("+", "｜+").replaceAll("-", "｜-").replaceAll("/", "")
-    .split("｜");
+  var LatLngDepth = parse_LatLngDepth(Earthquake.Hypocenter.Area.Coordinate[0].valueOf_)
 
   var originTimeTmp, epiCenterTmp, magnitudeTmp, maxIntTmp, LatTmp, LngTmp, depthTmp;
 
@@ -2605,4 +2604,14 @@ function radioSet(name, val) {
 function Boolean2(elm) {
   return Boolean(elm !== null && elm !== undefined && elm !== "" && !Number.isNaN(elm) && elm != "Invalid Date" &&
     (!Array.isArray(elm) || elm.length > 0) && elm);
+}
+
+function parse_LatLngDepth(str) {
+  try {
+    if (str) {
+      return String(str).replaceAll("+", "｜+").replaceAll("-", "｜-").replaceAll("/", "").split("｜");
+    }
+  } catch {
+    return []
+  }
 }
