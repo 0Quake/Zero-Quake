@@ -4375,13 +4375,12 @@ function NormalizeShindo(str, responseType) {
 }
 
 //２地点の緯度経度から距離（km）を算出
-function geosailing(latA, lngA, latB, lngB) {
+function geosailing(lat1, lon1, lat2, lon2) {
   try {
-    return (Math.acos(Math.sin(Math.atan(Math.tan(latA * (Math.PI / 180)))) * Math.sin(Math.atan(Math.tan(latB * (Math.PI / 180)))) + Math.cos(Math.atan(Math.tan(latA * (Math.PI / 180)))) * Math.cos(Math.atan(Math.tan(latB * (Math.PI / 180)))) * Math.cos(lngA * (Math.PI / 180) - lngB * (Math.PI / 180))) * 6371.008);
-  } catch {
-    return 0;
-  }
-}
+    var a = Math.pow(Math.sin((lon2 - lon1) * Math.PI / 360), 2) + Math.pow(Math.sin((lat2 - lat1) * Math.PI / 360), 2) * Math.cos(lon1 * Math.PI / 180) * Math.cos(lon2 * Math.PI / 180);
+    return 12746 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  } catch { return 0 }
+};
 
 //連想配列オブジェクトのマージ
 function mergeDeeply(target, source, opts) {

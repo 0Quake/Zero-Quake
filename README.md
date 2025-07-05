@@ -124,10 +124,9 @@
 - [MaterialIcons](https://raw.githubusercontent.com/google/material-design-icons/refs/heads/master/LICENSE)
 
 ### その他
-
-- 強震観測点の情報：[© 2019 ingen084](https://raw.githubusercontent.com/ingen084/KyoshinEewViewerIngen/develop/LICENSE)（編集して使用）
-- KyoshinShindoColorMap [© ingen084, こんぽ](https://github.com/ingen084/KyoshinShindoColorMap)
-- 表層地盤増幅率：[ 防災科学技術研究所 ／ 下記文献](https://www.j-shis.bosai.go.jp/api-sstruct-meshinfo)
+- turf-distance（変更して使用） [© 2014 Morgan Herlocker](http://mit-license.org/)
+- KyoshinShindoColorMap © ingen084, こんぽ
+- 表層地盤増幅率：防災科学技術研究所 ／ 下記文献
 
   1. 若松加寿江・松岡昌志(2013)：全国統一基準による地形・地盤分類 250m メッシュマップの構築とその利用，地震工学会誌 No.18, pp.35-38.
   2. Wakamatsu, K. and Matsuoka, M. (2013): " Nationwide 7.5-Arc-Second Japan Engineering Geomorphologic Classification Map and Vs30 Zoning", Journal of Disaster Research Vol.8 No.5, pp.904-911.

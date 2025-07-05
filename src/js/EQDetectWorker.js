@@ -298,17 +298,10 @@ function calcDifference(lat, lng, stations, data, originTime, dep) {
   return [Difference, radius];
 }
 
-//緯度・経度から2地点間の距離を産出
-var dist_cache = {};
-function geosailing(latA, lngA, latB, lngB) {
-  if (dist_cache[latA] && dist_cache[latA][lngA] && dist_cache[latA][lngA][latB] && dist_cache[latA][lngA][latB][lngB]) {
-    return dist_cache[latA][lngA][latB][lngB];
-  } else {
-    var dist = Math.acos(Math.sin(Math.atan(Math.tan(latA * (Math.PI / 180)))) * Math.sin(Math.atan(Math.tan(latB * (Math.PI / 180)))) + Math.cos(Math.atan(Math.tan(latA * (Math.PI / 180)))) * Math.cos(Math.atan(Math.tan(latB * (Math.PI / 180)))) * Math.cos(lngA * (Math.PI / 180) - lngB * (Math.PI / 180))) * 6371.008;
-    if (!dist_cache[latA]) dist_cache[latA] = {};
-    if (!dist_cache[latA][lngA]) dist_cache[latA][lngA] = {};
-    if (!dist_cache[latA][lngA][latB]) dist_cache[latA][lngA][latB] = {};
-    dist_cache[latA][lngA][latB][lngB] = dist;
-    return dist;
-  }
-}
+//緯度・経度から2地点間の距離を算出
+function geosailing(a, b, c, d) {
+  try {
+    var n = Math.pow(Math.sin((d - b) * Math.PI / 360), 2) + Math.pow(Math.sin((c - a) * Math.PI / 360), 2) * Math.cos(b * Math.PI / 180) * Math.cos(d * Math.PI / 180);
+    return 12746 * Math.atan2(Math.sqrt(n), Math.sqrt(1 - n));
+  } catch { return 0 }
+};
