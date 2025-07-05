@@ -6,12 +6,12 @@
 
 ## ご注意
 
-- [気象庁「緊急地震速報について」](https://www.data.jma.go.jp/svd/eew/data/nc/)を確認し、緊急地震速報について正しく理解したうえでご利用ください。
+- 地震に関する正確な知識に基づき、正しくお使いください。
+- インターネットを使用して情報を取得する都合で、情報の遅延・欠損等があり得ます。
+- 動画・配信等での使用は制限しませんが、当アプリで使用する情報源・合成音声システム等に付帯する第三者の権利に関しては、ご自身で確認うえ、自己責任でご使用ください。
 - 地図に表示されるリアルタイムの揺れ情報には、生活振動などを含みます。
-- TREM-RTS から取得する台湾の揺れ情報は、日本とは異なる尺度の震度ですが、おおむね日本の震度と対応するため、そのまま表示しています。
+- TREM-RTS から取得する台湾などの揺れ情報は、日本とは異なる尺度の震度ですが、おおむね日本の震度と対応するため、そのまま表示しています。
 - Early-Estによる情報は実験的なものであり、専門家による検証を経ていません。自己責任にて有効化してください。
-- インターネットを使用して情報を取得する都合で、情報の遅延・取得漏れ等があり得ます。
-- 当アプリとしては、動画・配信等での使用は制限しませんが、当アプリで使用している情報源、合成音声システム等に付帯する、第三者の権利には十分にご注意ください。
 
 ## 受信できる防災情報の一覧／出典
 
@@ -60,8 +60,8 @@
 
   K-NET, KiK-net（防災科学技術研究所 強震観測網）  
   S-net, 相模湾地震観測施設（防災科学技術研究所 海底観測網）  
-  TREM-RTS (SE-Net, MS-Net)※（台湾など コミュニティ観測網）
-  Wolfx SeisJS（中国など　コミュニティ観測網）
+  TREM-RTS (SE-Net, MS-Net)※（台湾など コミュニティ観測網）  
+  Wolfx SeisJS（中国本土など　コミュニティ観測網）
 
   ※<a href="https://github.com/whes1015">YuYu1015 様</a>のご厚意でデータを提供していただいています
 
@@ -101,27 +101,29 @@
 
 ### 地図データ
 
-- 国内陸地 出典： [気象庁 地震情報／細分区域](https://www.data.jma.go.jp/developer/gis.html)※
-- 国内湖沼 出典：[国土交通省 国土数値情報(湖沼データ)](https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-W09-v2_2.html)※
+- 国内陸地 出典： 気象庁「[地震情報／細分区域](https://www.data.jma.go.jp/developer/gis.html)」※
+- 国内湖沼 出典：国土交通省「[国土数値情報(湖沼データ)](https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-W09-v2_2.html)」※
 - 国外陸地 出典：Natural Earth※
-- プレート境界
+- プレート境界 出典
 
   1. [© Hugo Ahlenius, Nordpil, Peter Bird](http://opendatacommons.org/licenses/by/1.0/)
-  2. 気象庁「震度データベース検索」([気象庁HP](https://www.data.jma.go.jp/eqdb/data/shindo/), 地図部分を編集して使用)
+  2. 気象庁「[震度データベース検索](https://www.data.jma.go.jp/eqdb/data/shindo/)」(地図部分を編集して使用)
 - 海底地形 出典：GEBCO
 - [© OpenStreetMap contributors](https://www.openstreetmap.org/copyright/)
 - 最適化ベクトルタイル, 地理院タイル [© 国土地理院](https://maps.gsi.go.jp/development/ichiran.html)  
-  ※加工（単純化処理）して使用
+
+※加工（単純化処理）して使用
 
 ### フォント
 
-- [© 2016 The M+ Project Authors.](https://openfontlicense.org/open-font-license-official-text/) /
+- © 2022 The BIZ UDGothic Project Authors /
   [OFL](https://openfontlicense.org/open-font-license-official-text/)
-- [© 2022 The BIZ UDGothic Project Authors](https://github.com/googlefonts/morisawa-biz-ud-mincho) /
+- © 2016 The M+ Project Authors. /
   [OFL](https://openfontlicense.org/open-font-license-official-text/)
-- [© 2021 The Azeret Project Authors](https://github.com/displaay/azeret) /
+- © 2021 The Azeret Project Authors /
   [OFL](https://openfontlicense.org/open-font-license-official-text/)
-- [MaterialIcons](https://raw.githubusercontent.com/google/material-design-icons/refs/heads/master/LICENSE)
+- © Google /
+  [Apache License, Version 2.0](https://raw.githubusercontent.com/google/material-design-icons/refs/heads/master/LICENSE)
 
 ### その他
 - turf-distance（変更して使用） [© 2014 Morgan Herlocker](http://mit-license.org/)
