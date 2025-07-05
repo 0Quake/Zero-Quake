@@ -57,21 +57,17 @@ function EQDetect(data, date, detect) {
 
     if (elm.data) {
       if (!EEWNow && detect) {
-        //PGAの10回平均を求める
+        //PGAのn回平均を求める
         pgaAvr = ptData.SUM / ptData.SUMTmp.length;
 
         //平均PGAから閾値を決定
-        thresholds.threshold02 = 0.19 * pgaAvr + 0.02;
-        thresholds.threshold03 = 0.7 * pgaAvr + 0.2;
-        if (ptData.isCity) {
-          //都会では閾値を大きく
-          thresholds.threshold02 *= 2;
-          thresholds.threshold03 *= 2;
-        }
+        var city_coefficient = ptData.isCity ? 2 : 1; //都会係数 都会ではしきい値を大きく
+        var threshold02 = (1.19 * pgaAvr + 0.02) * city_coefficient;
+        var threshold03 = (1.7 * pgaAvr + 0.2) * city_coefficient;
 
-        detect0 = elm.pga - pgaAvr >= thresholds.threshold02 || elm.shindo >= thresholds.threshold04; //PGA増加量・震度絶対値で評価
+        detect0 = elm.pga >= threshold02 || elm.shindo >= thresholds.threshold04; //PGAの時間軸偏差・震度絶対値で評価
         elm.detect = detect0 && ptData.detectCount > 0; //elm.detectに加え、連続検出回数を加えて評価
-        elm.detect2 = elm.detect && ((elm.pga - pgaAvr >= thresholds.threshold03 && ptData.UpCount > 0) || elm.shindo > thresholds.threshold04);
+        elm.detect2 = elm.detect && ((elm.pga >= threshold03 && ptData.UpCount > 0) || elm.shindo > thresholds.threshold04);
 
         //連続上昇回数（変化なし含む）
         if (elm.pga >= ptData.SUMTmp[ptData.SUMTmp.length - 1]) ptData.UpCount++;
@@ -81,17 +77,17 @@ function EQDetect(data, date, detect) {
           elm.o_arrivalTime = new Date() - Replay;
         }
 
-        //連続検出回数（elm.detectは連続検出回数を指標に含むため、detect0で判定）
+        //連続検出回数（elm.detectは連続検出回数を指標に含み循環になるため、detect0で判定）
         if (detect0) ptData.detectCount++;
         else ptData.detectCount = 0;
       }
 
       //PGA平均を求めるためのデータ追加
-      ptData.SUMTmp = ptData.SUMTmp.slice(1);
       ptData.SUMTmp.push(elm.pga);
-      if (ptData.SUMTmp.length >= thresholds.historyCount) {
-        ptData.SUM += ptData.SUMTmp[ptData.SUMTmp.length - thresholds.historyCount];
-        ptData.SUM -= ptData.SUMTmp[0];
+      ptData.SUM += elm.pga//合計に最新の値を加算
+      if (ptData.SUMTmp.length > thresholds.historyCount) {
+        ptData.SUM -= ptData.SUMTmp[0];//合計から比較対象から外れる古い値を減算
+        ptData.SUMTmp = ptData.SUMTmp.slice(-thresholds.historyCount);//比較対象から外れる古い値を削除
       }
     }
 
