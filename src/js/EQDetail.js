@@ -1,6 +1,6 @@
 /* global NormalizeDate NormalizeShindo LgIntConvert maplibregl pmtiles removeChild*/
 
-var pointList;
+var pointList = {};
 
 var data_time = document.getElementById("data_time");
 var data_maxI = document.getElementById("data_maxI");
