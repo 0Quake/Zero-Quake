@@ -393,10 +393,10 @@ h2 {
 }
 
 .EQDItem.lv1 h2::after {
-  content: " 弱い検出";
+  content: " 弱い検知";
 }
 .EQDItem.lv2 h2::after {
-  content: " 強い検出";
+  content: " 強い検知";
 }
 .EQD_Regions {
   padding: 5px;

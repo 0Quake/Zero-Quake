@@ -103,7 +103,11 @@ var defaultConfigVal = {
       Local_threshold: -1,
       Bypass_threshold: true,
     },
-    RealTimeShake: { List: { ItemCount: 10 }, DetectEarthquake: false },
+    RealTimeShake: {
+      DetectEarthquake: false,
+      noticeLv: 2,
+      notice_BigEvent: true,
+    },
   },
   Source: {
     kmoni: { kmoni: { GetData: true, Interval: 1000 } },
@@ -1452,11 +1456,19 @@ function createWorker() {
         var EQD_ItemTmp = message.data;
         var LvTmp = EQD_ItemTmp.maxPGA > 1.3 ? 2 : 1;
 
-        if (EQD_ItemTmp.showed) {
-          if (LvTmp == 2 && EQD_ItemTmp.Lv == 1) PlayAudio("EQDetectLv2"); //既存イベントのレベルが上がったときの通知音
-        } else {
-          PlayAudio(LvTmp == 2 ? "EQDetectLv2" : "EQDetectLv1");
-          CreateMainWindow();
+        if (config.Info.RealTimeShake.noticeLv <= LvTmp) {
+          if (EQD_ItemTmp.showed) {//続報時
+            if (LvTmp == 2 && EQD_ItemTmp.Lv == 1) {
+              //既存イベントのレベルが上がったときの通知音
+              PlayAudio("EQDetectLv2");
+            }
+          } else if (LvTmp == 2) {//初報時・大
+            PlayAudio("EQDetectLv2");
+            CreateMainWindow();
+          } else if (LvTmp == 1) {//初報時・小
+            PlayAudio("EQDetectLv1");
+            CreateMainWindow();
+          }
         }
         EQD_ItemTmp.Lv = LvTmp;
         messageToMainWindow({ action: "EQDetect", data: message.data });
