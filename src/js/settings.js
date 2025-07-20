@@ -106,18 +106,9 @@ function configDataDraw() {
   document.getElementById("EEW_kodoriyou").checked = config.Info.EEW.kodoriyou;
 
   selectBoxSet(document.getElementById("EEW_Window"), config.notice.window.EEW);
-  selectBoxSet(
-    document.getElementById("EEW_Window_Update"),
-    config.notice.window.EEW_Update
-  );
-  selectBoxSet(
-    document.getElementById("EEW_IntFilter"),
-    config.Info.EEW.IntThreshold
-  );
-  selectBoxSet(
-    document.getElementById("EEW_userIntFilter"),
-    config.Info.EEW.userIntThreshold
-  );
+  selectBoxSet(document.getElementById("EEW_Window_Update"), config.notice.window.EEW_Update);
+  selectBoxSet(document.getElementById("EEW_IntFilter"), config.Info.EEW.IntThreshold);
+  selectBoxSet(document.getElementById("EEW_userIntFilter"), config.Info.EEW.userIntThreshold);
   selectBoxSet(document.getElementById("saibun"), config.home.Section);
   tsunamiSect = config.home.TsunamiSect;
   EQSect = config.home.Section;
@@ -132,103 +123,61 @@ function configDataDraw() {
   TTSpitchSet(config.notice.voice_parameter.pitch);
   TTSspeedSet(config.notice.voice_parameter.rate);
 
-  selectBoxSet(
-    document.getElementById("TTSvoiceSelect"),
-    config.notice.voice_parameter.voice
-  );
+  selectBoxSet(document.getElementById("TTSvoiceSelect"), config.notice.voice_parameter.voice);
 
   selectBoxSet(document.getElementById("intType"), config.Info.EEW.IntType);
-  document.getElementById("EarthquakeDetect").checked =
-    config.Info.RealTimeShake.DetectEarthquake;
-  document.getElementById("WindowAutoOpen").checked =
-    config.system.WindowAutoOpen;
+  document.getElementById("EarthquakeDetect").checked = config.Info.RealTimeShake.DetectEarthquake;
+  document.getElementById("WindowAutoOpen").checked = config.system.WindowAutoOpen;
   document.getElementById("alwaysOnTop").checked = config.system.alwaysOnTop;
   document.getElementById("HomePinShow").checked = config.home.ShowPin;
   document.getElementById("Tsunami_GetData").checked = config.Info.TsunamiInfo.GetData;
   document.getElementById("Axis_GetData").checked = config.Source.axis.GetData;
-  document.getElementById("Wolfx_GetData").checked =
-    config.Source.wolfx.GetData;
-  document.getElementById("Wolfx_SeisJS_GetData").checked =
-    config.Source.wolfx.GetDataFromSeisJS;
-  document.getElementById("ProjectBS_GetData").checked =
-    config.Source.ProjectBS.GetData;
-  document.getElementById("EarlyEst_GetData").checked =
-    config.Source.EarlyEst.GetData;
+  document.getElementById("Wolfx_GetData").checked = config.Source.wolfx.GetData;
+  document.getElementById("Wolfx_SeisJS_GetData").checked = config.Source.wolfx.GetDataFromSeisJS;
+  document.getElementById("ProjectBS_GetData").checked = config.Source.ProjectBS.GetData;
+  document.getElementById("EarlyEst_GetData").checked = config.Source.EarlyEst.GetData;
   document.getElementById("msil_GetData").checked = config.Source.msil.GetData;
-  document.getElementById("kmoni_GetData").checked =
-    config.Source.kmoni.kmoni.GetData;
-  document.getElementById("EarlyEstInterval").value =
-    config.Source.EarlyEst.Interval / 1000;
-  document.getElementById("kmoniInterval").value =
-    config.Source.kmoni.kmoni.Interval / 1000;
-  document.getElementById("msilInterval").value =
-    config.Source.msil.Interval / 1000;
+  document.getElementById("kmoni_GetData").checked = config.Source.kmoni.kmoni.GetData;
+  document.getElementById("EarlyEstInterval").value = config.Source.EarlyEst.Interval / 1000;
+  document.getElementById("kmoniInterval").value = config.Source.kmoni.kmoni.Interval / 1000;
+  document.getElementById("msilInterval").value = config.Source.msil.Interval / 1000;
   if (config.Source.axis.AccessToken)
-    document.getElementById("Axis_AccessToken").value =
-      config.Source.axis.AccessToken;
+    document.getElementById("Axis_AccessToken").value = config.Source.axis.AccessToken;
 
-  document.getElementById("Tsunami_Test").checked =
-    config.Info.TsunamiInfo.showTest;
-  document.getElementById("Tsunami_training").checked =
-    config.Info.TsunamiInfo.showtraining;
+  document.getElementById("Tsunami_Test").checked = config.Info.TsunamiInfo.showTest;
+  document.getElementById("Tsunami_training").checked = config.Info.TsunamiInfo.showtraining;
 
   document.getElementById("EQInfo_Test").checked = config.Info.EQInfo.showTest;
-  document.getElementById("EQInfo_training").checked =
-    config.Info.EQInfo.showtraining;
+  document.getElementById("EQInfo_training").checked = config.Info.EQInfo.showtraining;
 
-  document.getElementById("TREM-RTS_GetData").checked =
-    config.Source.TREMRTS.GetData;
-  document.getElementById("TREM-RTS_Interval").value =
-    config.Source.TREMRTS.Interval / 1000;
+  document.getElementById("TREM-RTS_GetData").checked = config.Source.TREMRTS.GetData;
+  document.getElementById("TREM-RTS_Interval").value = config.Source.TREMRTS.Interval / 1000;
 
-  document.getElementById(
-    "VoiceEngine_" + config.notice.voice_parameter.engine
-  ).checked = true;
-  document.getElementById("Boyomi_Port").value =
-    config.notice.voice_parameter.Boyomi_Port;
+  document.getElementById("VoiceEngine_" + config.notice.voice_parameter.engine).checked = true;
+  document.getElementById("Boyomi_Port").value = config.notice.voice_parameter.Boyomi_Port;
 
-  document.getElementById("NotificationSound").checked =
-    config.Info.EQInfo.NotificationSound;
-  selectBoxSet(
-    document.getElementById("maxI_threshold"),
-    config.Info.EQInfo.maxI_threshold
-  );
+  document.getElementById("NotificationSound").checked = config.Info.EQInfo.NotificationSound;
+  selectBoxSet(document.getElementById("maxI_threshold"), config.Info.EQInfo.maxI_threshold);
   document.getElementById("M_threshold").value = config.Info.EQInfo.M_threshold;
-  document.getElementById("Bypass_threshold").checked =
-    config.Info.EQInfo.Bypass_threshold;
+  document.getElementById("Bypass_threshold").checked = config.Info.EQInfo.Bypass_threshold;
 
-  document.getElementById("Tsunami_NotificationSound").checked =
-    config.Info.TsunamiInfo.NotificationSound;
-  selectBoxSet(
-    document.getElementById("Tsunami_threshold"),
-    config.Info.TsunamiInfo.Global_threshold
-  );
-  selectBoxSet(
-    document.getElementById("Tsunami_L_threshold"),
-    config.Info.TsunamiInfo.Local_threshold
-  );
-  document.getElementById("Tsunami_Bypass_threshold").checked =
-    config.Info.TsunamiInfo.Bypass_threshold;
+  document.getElementById("Tsunami_NotificationSound").checked = config.Info.TsunamiInfo.NotificationSound;
+  selectBoxSet(document.getElementById("Tsunami_threshold"), config.Info.TsunamiInfo.Global_threshold);
+  selectBoxSet(document.getElementById("Tsunami_L_threshold"), config.Info.TsunamiInfo.Local_threshold);
+  document.getElementById("Tsunami_Bypass_threshold").checked = config.Info.TsunamiInfo.Bypass_threshold;
   document.getElementById("zoom").value = 100 * config.system.zoom;
-  selectBoxSet(
-    document.getElementById("shindoColor"),
-    config.color.IntColorTheme
-  );
+  selectBoxSet(document.getElementById("shindoColor"), config.color.IntColorTheme);
 
-  document.getElementById("powerSaveBlocking").checked =
-    config.system.powerSaveBlocking;
+  document.getElementById("powerSaveBlocking").checked = config.system.powerSaveBlocking;
+  selectBoxSet(document.getElementById("EQDetect_threshold"), config.Info.RealTimeShake.noticeLv);
 
-  fetch("http://localhost:50080/GetVoiceList")
-    .then(function (res) {
-      return res.json();
-    })
+  fetch("http://localhost:50080/GetVoiceList").then(function (res) { return res.json(); })
     .then(function (json) {
       json.voiceList.forEach(function (elm) {
         var VoiceOption = document.createElement("option");
         VoiceOption.textContent = elm.name;
         VoiceOption.value = elm.id;
-        if (elm.id == config.notice.voice_parameter.Boyomi_Voice)
-          VoiceOption.selected = true;
+        if (elm.id == config.notice.voice_parameter.Boyomi_Voice) VoiceOption.selected = true;
         document.getElementById("BoyomiVoiceSelect").appendChild(VoiceOption);
       });
     });
@@ -249,17 +198,13 @@ function disabled_control() {
   document.getElementById("Tsunami_threshold").disabled = !a || b;
   document.getElementById("Tsunami_Bypass_threshold").disabled = !a;
 }
-document
-  .getElementById("NotificationSound")
+document.getElementById("NotificationSound")
   .addEventListener("change", disabled_control);
-document
-  .getElementById("Bypass_threshold")
+document.getElementById("Bypass_threshold")
   .addEventListener("change", disabled_control);
-document
-  .getElementById("Tsunami_NotificationSound")
+document.getElementById("Tsunami_NotificationSound")
   .addEventListener("change", disabled_control);
-document
-  .getElementById("Tsunami_Bypass_threshold")
+document.getElementById("Tsunami_Bypass_threshold")
   .addEventListener("change", disabled_control);
 
 function UpdateDataDraw(data) {
@@ -325,14 +270,11 @@ document.getElementById("resetConfig").addEventListener("click", function () {
 function apply() {
   config.Info.EEW.IntType = document.getElementById("intType").value;
 
-  config.Info.RealTimeShake.DetectEarthquake =
-    document.getElementById("EarthquakeDetect").checked;
-  config.system.WindowAutoOpen =
-    document.getElementById("WindowAutoOpen").checked;
+  config.Info.RealTimeShake.DetectEarthquake = document.getElementById("EarthquakeDetect").checked;
+  config.system.WindowAutoOpen = document.getElementById("WindowAutoOpen").checked;
   config.system.alwaysOnTop = document.getElementById("alwaysOnTop").checked;
   config.home.ShowPin = document.getElementById("HomePinShow").checked;
-  config.Info.TsunamiInfo.GetData =
-    document.getElementById("Tsunami_GetData").checked;
+  config.Info.TsunamiInfo.GetData = document.getElementById("Tsunami_GetData").checked;
   config.home.arv = Number(document.getElementById("arv").value);
   config.home.name = document.getElementById("HomeName").value;
   config.home.latitude = document.getElementById("latitude").value;
@@ -407,6 +349,7 @@ function apply() {
   config.color.LgInt = intColor[document.getElementById("shindoColor").value].LgInt;
 
   config.system.powerSaveBlocking = document.getElementById("powerSaveBlocking").checked;
+  config.Info.RealTimeShake.noticeLv = document.getElementById("EQDetect_threshold").value
 
   window.electronAPI.messageReturn({
     action: "ChangeConfig",
