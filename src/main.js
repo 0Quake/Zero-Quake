@@ -293,7 +293,6 @@ function checkUpdate(userAction) {
                       dialog.showMessageBox(MainWindow, options4).then(function (result) {
                         if (result.response == 1) {
                           Create_SettingWindow(true);
-                          console.log(result.response)
                         }
                       });
                     }
@@ -3331,8 +3330,9 @@ function Req_JMAXML(url, count,) {
                           );
                         }
 
+                        var areaName = title == "沖合の津波観測に関する情報" ? "（海上）" : elm.getElementsByTagName("Name")[0].textContent;
                         var tsunamiItem = tsunamiDataTmp.areas.find(function (elm2) {
-                          return (elm2.name == elm.getElementsByTagName("Name")[0].textContent);
+                          return elm2.name == areaName;
                         });
                         if (tsunamiItem) {
                           stations.forEach(function (elm2) {
@@ -3344,8 +3344,7 @@ function Req_JMAXML(url, count,) {
                           });
                         } else {
                           tsunamiDataTmp.areas.push({
-                            name: title == "沖合の津波観測に関する情報"
-                              ? "（海上）" : elm.getElementsByTagName("Name")[0].textContent,
+                            name: areaName,
                             stations: stations,
                           });
                         }
@@ -3999,7 +3998,7 @@ function ConvertTsunamiInfo(data) {
                 if (elm2.maxHeightRising) stItem.maxHeightRising = elm2.maxHeightRising;
                 if (elm2.maxHeightTime) stItem.maxHeightTime = elm2.maxHeightTime;
                 if (elm2.maxHeightCondition) stItem.maxHeightCondition = elm2.maxHeightCondition;
-              } else elm.stations.push(elm2);
+              } else areaItem.stations.push(elm2);
             });
           }
         } else {
