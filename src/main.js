@@ -822,6 +822,7 @@ function Create_WorkerWindow() {
   });
   WorkerWindow.on("close", () => {
     WorkerWindow = null;
+    Create_WorkerWindow()
   });
   WorkerWindow.webContents.on("did-finish-load", () => {
     WorkerWindow.webContents.send("message2", {
