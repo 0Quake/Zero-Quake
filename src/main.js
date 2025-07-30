@@ -3868,7 +3868,7 @@ function ConvertTsunamiInfo(data) {
 
     let tsunamiItem = Tsunami_Data.find(function (elm) {
       return (Number(new Date(elm.issue.time)) == Number(new Date(data.issue.time)) &&
-        (!elm.issue.EventID || !data.issue.EventID || elm.issue.EventID == data.issue.EventID));
+        (!elm.issue.EventID || !data.issue.EventID || IncludesDuplicates(elm.issue.EventID, data.issue.EventID)));
     });
 
     if (tsunamiItem) {
@@ -4432,4 +4432,8 @@ function depthFilter(depth) {
 }
 function Boolean2(elm) {
   return Boolean(elm !== null && elm !== undefined && elm !== "" && !Number.isNaN(elm) && elm != "Invalid Date" && (!Array.isArray(elm) || elm.length > 0) && elm);
+}
+
+function IncludesDuplicates(arr1, arr2) {
+  return [...arr1, ...arr2].filter(item => arr1.includes(item) && arr2.includes(item)).length > 0
 }
