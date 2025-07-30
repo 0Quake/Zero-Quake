@@ -1061,8 +1061,11 @@ dialog::backdrop {
 .maplibregl-ctrl-group button:focus:focus-visible,
 .menu label:has(:focus-visible) {
   outline: solid 2px #ff9292;
-  box-shadow: none !important;
   outline-offset: 3px;
+}
+.maplibregl-ctrl-group button:focus:focus-visible,
+.menu label:has(:focus-visible) {
+  box-shadow: none !important;
 }
 /* キーボード操作以外でのフォーカス */
 :focus:not(:focus-visible) {
