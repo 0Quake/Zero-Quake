@@ -2556,8 +2556,8 @@ function tsunamiDataUpdate(data) {
     else
       document.getElementById("tsunamiTitle").style.borderColor = tsunamiColorConv("Yoho");
   }
-  document.getElementById("noEEW").style.display =
-    (now_EEW.length == 0 && !now_tsunami && EQDetectItem.length) == 0 ? "block" : "none";
+
+  document.getElementById("noEEW").style.display = now_EEW.length == 0 && !now_tsunami && EQDetectItem.length == 0 ? "block" : "none";
 }
 
 var EQinfo_Index = 0;
