@@ -1040,7 +1040,7 @@ function init() {
           layout: { "line-join": "round", "line-cap": "round" },
           paint: {
             "line-color": config.color.Tsunami.TsunamiYohoColor,
-            "line-width": ["interpolate", ["linear"], ["zoom"], 2, 10, 5, 20, 10, 80, 18, 300,],
+            "line-width": ["interpolate", ["linear"], ["zoom"], 2, 10, 5, 30, 10, 100, 18, 300,],
           },
           filter: ["==", "name", ""],
         },
@@ -1052,7 +1052,7 @@ function init() {
           layout: { "line-join": "round", "line-cap": "round" },
           paint: {
             "line-color": config.color.Tsunami.TsunamiWatchColor,
-            "line-width": ["interpolate", ["linear"], ["zoom"], 2, 10, 5, 20, 10, 80, 18, 300,],
+            "line-width": ["interpolate", ["linear"], ["zoom"], 2, 10, 5, 30, 10, 100, 18, 300,],
           },
           filter: ["==", "name", ""],
         },
@@ -1063,7 +1063,7 @@ function init() {
           layout: { "line-join": "round", "line-cap": "round" },
           paint: {
             "line-color": config.color.Tsunami.TsunamiWarningColor,
-            "line-width": ["interpolate", ["linear"], ["zoom"], 2, 10, 5, 20, 10, 80, 18, 300,],
+            "line-width": ["interpolate", ["linear"], ["zoom"], 2, 10, 5, 30, 10, 100, 18, 300,],
           },
           filter: ["==", "name", ""],
         },
@@ -1075,7 +1075,7 @@ function init() {
           layout: { "line-join": "round", "line-cap": "round" },
           paint: {
             "line-color": config.color.Tsunami.TsunamiMajorWarningColor,
-            "line-width": ["interpolate", ["linear"], ["zoom"], 2, 10, 5, 20, 10, 80, 18, 300,],
+            "line-width": ["interpolate", ["linear"], ["zoom"], 2, 10, 5, 30, 10, 100, 18, 300,],
           },
           filter: ["==", "name", ""],
         },
