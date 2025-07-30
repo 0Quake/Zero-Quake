@@ -3935,10 +3935,16 @@ function ConvertTsunamiInfo(data) {
       var max_grade = Math.max(...grades);
 
       if (config.Info.TsunamiInfo.NotificationSound) {
+        let NOTnewest = Tsunami_Data.find(function (elm) {
+          return (Number(new Date(elm.issue.time)) > Number(new Date(data.issue.time)) &&
+            (!elm.issue.EventID || !data.issue.EventID || IncludesDuplicates(elm.issue.EventID, data.issue.EventID)));
+        });
         if (
-          max_grade >= config.Info.TsunamiInfo.Global_threshold ||
-          home_grade >= config.Info.TsunamiInfo.Local_threshold ||
-          config.Info.TsunamiInfo.Bypass_threshold
+          !NOTnewest && (
+            max_grade >= config.Info.TsunamiInfo.Global_threshold ||
+            home_grade >= config.Info.TsunamiInfo.Local_threshold ||
+            config.Info.TsunamiInfo.Bypass_threshold
+          )
         ) {
           PlayAudio("TsunamiInfo");
           speak(GenerateTsunamiText(data));
