@@ -2507,7 +2507,7 @@ function tsunamiDataUpdate(data) {
 
               var TsunamiPopup = new maplibregl.Popup().setHTML(popupContent);
               tsunamiSTMarkers.push(
-                new maplibregl.Marker({ element: tsunamiST })
+                new maplibregl.Marker({ element: tsunamiST, opacityWhenCovered: 0 })
                   .setLngLat([st.lng, st.lat])
                   .setPopup(TsunamiPopup)
                   .addTo(map)
