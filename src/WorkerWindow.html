@@ -122,17 +122,19 @@
 
       if (!engine) engine = config.notice.voice_parameter.engine
       if (engine == "Boyomichan") {
+        var host = `http://localhost:${config.notice.voice_parameter.Boyomi_Port}`
+        function fire_default() {
+          speak(text, "Default")
+        }
         if (config.notice.voice_parameter.Boyomi_Voice == "auto") {
-          fetch(`http://localhost:${config.notice.voice_parameter.Boyomi_Port}/Talk?text=${text}&speed=${Rate * 100}&volume=${Volume * 100}&tone=${Pitch * 100}`)
-            .catch(function (err) {
-              speak(text, "Default")
-            });
+          fetch(`${host}/skip`).then(function () {
+            fetch(`${host}/clear`).then(function () {
+              fetch(`${host}/Talk?text=${text}&speed=${Rate * 100}&volume=${Volume * 100}&tone=${Pitch * 100}`)
+                .catch(fire_default);
+            }).catch(fire_default);
+          }).catch(fire_default);
         } else {
-          function fire_default() {
-            speak(text, "Default")
-          }
-
-          fetch(`http://localhost:${config.notice.voice_parameter.Boyomi_Port}/GetVoiceList`).then(function (res) {
+          fetch(`${host}/GetVoiceList`).then(function (res) {
             return res.json()
           }).then(function (json) {
             var voice_parameter = "";
@@ -141,9 +143,9 @@
             })
             if (voiceElm) voice_parameter = "&voice=" + config.notice.voice_parameter.Boyomi_Voice;
 
-            fetch(`http://localhost:${config.notice.voice_parameter.Boyomi_Port}/skip`).then(function () {
-              fetch(`http://localhost:${config.notice.voice_parameter.Boyomi_Port}/clear`).then(function () {
-                fetch(`http://localhost:${config.notice.voice_parameter.Boyomi_Port}/Talk?text=${text}${voice_parameter}&speed=${Rate * 100}&volume=${Volume * 100}&tone=${Pitch * 100}`)
+            fetch(`${host}/skip`).then(function () {
+              fetch(`${host}/clear`).then(function () {
+                fetch(`${host}/Talk?text=${text}${voice_parameter}&speed=${Rate * 100}&volume=${Volume * 100}&tone=${Pitch * 100}`)
                   .catch(fire_default);
               }).catch(fire_default);
             }).catch(fire_default);
