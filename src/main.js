@@ -25,7 +25,7 @@ function replay(ReplayDate) {
       });
     }
   } catch (err) {
-    throw new Error("リプレイに失敗しました。エラーメッセージは以下の通りです。\n" + err);
+    throw new Error("リプレイに失敗しました。", { cause: err });
   }
 }
 // prettier-ignore
@@ -325,9 +325,7 @@ function checkUpdate(userAction) {
       request.end();
     }
   } catch (err) {
-    throw new Error(
-      "アップデートの確認に失敗しました。エラーメッセージは以下の通りです。\n" + err
-    );
+    throw new Error("アップデートの確認に失敗しました。", { cause: err });
   }
 }
 
@@ -432,12 +430,19 @@ process.on("uncaughtException", function (err) {
     if (!errorMsgBox && app.isReady()) {
       if (String(err.stack).startsWith("Error: net::ERR_")) return false;
       errorMsgBox = true;
-      options.detail = "動作を選択してください。\nエラーコードは以下の通りです。\n" + err.stack;
+      options.detail = "動作を選択してください。エラーメッセージは以下の通りです。\n************\n" + causeTree(err);
 
-      dialog.showMessageBox(MainWindow, options).then(function (result) {
-        errorMsgBox = false;
-        errorResolve(result.response);
-      });
+      if (MainWindow) {
+        dialog.showMessageBox(MainWindow, options).then(function (result) {
+          errorMsgBox = false;
+          errorResolve(result.response);
+        });
+      } else {
+        dialog.showMessageBox(options).then(function (result) {
+          errorMsgBox = false;
+          errorResolve(result.response);
+        });
+      }
 
       SystemNotification("予期しないエラーが発生しました。");
     }
@@ -445,6 +450,23 @@ process.on("uncaughtException", function (err) {
     return;
   }
 });
+
+//エラーメッセージの作成。エラー原因のツリー
+function causeTree(err) {
+  try {
+    var ErrString = err.stack;
+    var i = 0;
+    while (err.cause && i < 10) {
+      ErrString += "\n[cause]:" + err.cause.stack;
+      i++;
+      err = err.cause;
+    }
+    return ErrString;
+  } catch {
+    return "";
+  }
+}
+
 //エラー処理
 function errorResolve(response) {
   try {
@@ -808,7 +830,7 @@ function CreateMainWindow() {
       });
     }
   } catch (err) {
-    throw new Error("メインウィンドウの作成でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
+    throw new Error("メインウィンドウの作成でエラーが発生しました。", { cause: err });
   }
 }
 //ワーカーウィンドウ表示処理
@@ -910,7 +932,7 @@ function Create_SettingWindow(update) {
     SettingWindow.webContents.on("will-navigate", handleUrlOpen);
     SettingWindow.webContents.on("new-window", handleUrlOpen);
   } catch (err) {
-    throw new Error("設定ウィンドウの作成でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
+    throw new Error("設定ウィンドウの作成でエラーが発生しました。", { cause: err });
   }
 }
 //津波情報ウィンドウ表示処理
@@ -951,7 +973,7 @@ function Create_TsunamiWindow() {
       TsunamiWindow = null;
     });
   } catch (err) {
-    throw new Error("津波情報ウィンドウの作成でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
+    throw new Error("津波情報ウィンドウの作成でエラーが発生しました。", { cause: err });
   }
 }
 //南海トラフ関連情報ウィンドウの作成
@@ -1006,7 +1028,7 @@ function Create_NankaiWindow(type) {
 
     NankaiWindow.window.loadFile("src/NankaiTrough.html");
   } catch (err) {
-    throw new Error("南海トラフ関連情報ウィンドウの作成でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
+    throw new Error("南海トラフ関連情報ウィンドウの作成でエラーが発生しました。", { cause: err });
   }
 }
 
@@ -1053,7 +1075,7 @@ function Create_HokkaidoSanrikuWindow() {
 
     HokkaidoSanrikuWindow.loadFile("src/HokkaidoSanriku.html");
   } catch (err) {
-    throw new Error("北海道・三陸沖後発地震注意情報ウィンドウの作成でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
+    throw new Error("北海道・三陸沖後発地震注意情報ウィンドウの作成でエラーが発生しました。", { cause: err });
   }
 }
 
@@ -1100,7 +1122,7 @@ function Create_KatsudoJokyoWindow() {
 
     KatsudoJokyoWindow.loadFile("src/KatsudoJokyo.html");
   } catch (err) {
-    throw new Error("地震の活動状況等に関する情報ウィンドウの作成でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
+    throw new Error("地震の活動状況等に関する情報ウィンドウの作成でエラーが発生しました。", { cause: err });
   }
 }
 
@@ -1172,7 +1194,7 @@ function EQInfo_createWindow(response, IS_WebURL) {
     EQInfoWindow.webContents.on("will-navigate", handleUrlOpen);
     EQInfoWindow.webContents.on("new-window", handleUrlOpen);
   } catch (err) {
-    throw new Error("地震情報ウィンドウの作成でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
+    throw new Error("地震情報ウィンドウの作成でエラーが発生しました。", { cause: err });
   }
 }
 
@@ -1495,7 +1517,7 @@ function createWorker() {
     }
   });
   worker.on("error", (error) => {
-    throw new Error("地震検知処理でエラーが発生しました。エラーメッセージは以下の通りです。\n" + error);
+    throw new Error("地震検知処理でエラーが発生しました。", { cause: error });
   });
 }
 
@@ -2024,9 +2046,7 @@ function RegularExecution(roop) {
       }, 1000);
     }
   } catch (err) {
-    throw new Error(
-      "内部の情報処理でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err
-    );
+    throw new Error("内部の情報処理でエラーが発生しました。", { cause: err });
   }
 }
 
@@ -2539,7 +2559,7 @@ function MargeEEW(data) {
       EEW_Alert(data, true); //警報処理
     }
   } catch (err) {
-    throw new Error("緊急地震速報データの処理（マージ）に失敗しました。エラーメッセージは以下の通りです。\n" + err);
+    throw new Error("緊急地震速報データの処理（マージ）に失敗しました。", { cause: err });
   }
 }
 
@@ -2606,7 +2626,7 @@ function MargeEarlyEst(data) {
       });
     }
   } catch (err) {
-    throw new Error("Early-Est データの処理（マージ）に失敗しました。エラーメッセージは以下の通りです。\n" + err);
+    throw new Error("Early-Est データの処理（マージ）に失敗しました。", { cause: err });
   }
 }
 
@@ -2627,7 +2647,7 @@ function EEW_Clear(EventID) {
       worker.postMessage({ action: "EEWNow", data: EEWNow });
     }
   } catch (err) {
-    throw new Error("緊急地震速報の解除処理でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
+    throw new Error("緊急地震速報の解除処理でエラーが発生しました。", { cause: err });
   }
 }
 
@@ -2703,7 +2723,7 @@ function EEW_Alert(data, first, update) {
       psBlock = powerSaveBlocker.start("prevent-display-sleep");
     }
   } catch (err) {
-    throw new Error("緊急地震速報の通知処理でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
+    throw new Error("緊急地震速報の通知処理でエラーが発生しました。", { cause: err });
   }
 }
 
@@ -2753,7 +2773,7 @@ function EarlyEst_Alert(data, first, update) {
       psBlock = powerSaveBlocker.start("prevent-display-sleep");
     }
   } catch (err) {
-    throw new Error("Early-Est地震情報の通知処理でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
+    throw new Error("Early-Est地震情報の通知処理でエラーが発生しました。", { cause: err });
   }
 }
 
@@ -2770,7 +2790,7 @@ function UpdateEQInfo(roop) {
     Req_NarikakunList("https://ntool.online/api/earthquakeList?year=" + new Date().getFullYear() + "&month=" + (new Date().getMonth() + 1), 10, true, EQInfoFetchCount);
     Req_USGS();
   } catch (err) {
-    throw new Error("地震情報の処理でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
+    throw new Error("地震情報の処理でエラーが発生しました。", { cause: err });
   }
   EQInfoFetchCount++;
 }
@@ -3769,7 +3789,7 @@ function ConvertEQInfo(dataList, type, EEW, count) {
         break;
     }
   } catch (err) {
-    throw new Error("地震情報データの処理（マージ）に失敗しました。エラーメッセージは以下の通りです。\n" + err);
+    throw new Error("地震情報データの処理（マージ）に失敗しました。", { cause: err });
   }
 }
 
@@ -3852,7 +3872,7 @@ function AlertEQInfo(data, source, update, audioPlay) {
       });
     }
   } catch (err) {
-    throw new Error("地震情報の通知処理でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
+    throw new Error("地震情報の通知処理でエラーが発生しました。", { cause: err });
   }
 }
 
@@ -4024,7 +4044,7 @@ function ConvertTsunamiInfo(data) {
       });
     }
   } catch (err) {
-    throw new Error("津波情報の処理（マージ）でエラーが発生しました。エラーメッセージは以下の通りです。\n" + err);
+    throw new Error("津波情報の処理（マージ）でエラーが発生しました。", { cause: err });
   }
 }
 
@@ -4427,14 +4447,14 @@ function mergeDeeply(target, source, opts) {
     }
     return result;
   } catch (err) {
-    throw new Error("内部の情報処理でエラーが発生しました。(JSONのマージ)エラーメッセージは以下の通りです。\n" + err);
+    throw new Error("内部の情報処理でエラーが発生しました。(JSONのマージ)", { cause: err });
   }
 }
 function ConvertJST(time) {
   try {
     return new Date(time.setHours(time.getHours() + 9));
   } catch (err) {
-    throw new Error("内部の情報処理でエラーが発生しました。(タイムゾーンの変換)エラーメッセージは以下の通りです。\n" + err);
+    throw new Error("内部の情報処理でエラーが発生しました。(タイムゾーンの変換)", { cause: err });
   }
 }
 function depthFilter(depth) {
