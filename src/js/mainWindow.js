@@ -2561,6 +2561,8 @@ function tsunamiDataUpdate(data) {
 var EQinfo_Index = 0;
 EQInfoLink.addEventListener("click", function (e) {
   e.preventDefault();
+  document.getElementById("tab1_menu1").click()
+  document.getElementById("tab2_menu1").click()
   var EIDs = EQInfoLink.dataset.eventid.split(",");
   EIDs.forEach(function (elm, index) {
     var EQItemElm = document.querySelector(elm);
