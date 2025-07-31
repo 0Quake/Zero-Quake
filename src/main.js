@@ -3081,300 +3081,296 @@ function Req_JMAXML(url, count,) {
             title == "沖合の津波観測に関する情報"
           ) {
             //津波予報
-            try {
-              var tsunamiDataTmp;
-              var EventID = xml.getElementsByTagName("EventID")[0].textContent.split(" ").map(Number);
-              var EQData = [];
-              Array.prototype.forEach.call(
-                xml.getElementsByTagName("Earthquake"),
-                function (elm, index) {
-                  var magTmp = elm.getElementsByTagName("jmx_eb:Magnitude")[0];
-                  magTmp = magTmp !== "NaN" && magTmp ? magTmp.textContent : null;
-                  var ECTmp = elm.getElementsByTagName("Name")[0];
-                  ECTmp = ECTmp ? ECTmp.textContent : null;
+            var tsunamiDataTmp;
+            var EventID = xml.getElementsByTagName("EventID")[0].textContent.split(" ").map(Number);
+            var EQData = [];
+            Array.prototype.forEach.call(
+              xml.getElementsByTagName("Earthquake"),
+              function (elm, index) {
+                var magTmp = elm.getElementsByTagName("jmx_eb:Magnitude")[0];
+                magTmp = magTmp !== "NaN" && magTmp ? magTmp.textContent : null;
+                var ECTmp = elm.getElementsByTagName("Name")[0];
+                ECTmp = ECTmp ? ECTmp.textContent : null;
 
-                  EQData.push({
-                    status: xml.getElementsByTagName("Status")[0].textContent,
-                    eventId: EventID[index],
-                    category: "Tsunami",
-                    OriginTime: elm.getElementsByTagName("OriginTime")[0] ? new Date(elm.getElementsByTagName("OriginTime")[0].textContent) : new Date(),
-                    epiCenter: ECTmp,
-                    M: Number(magTmp),
-                    maxI: null,
-                    cancel: Boolean(cancel),
-                    reportDateTime: new Date(xml.getElementsByTagName("ReportDateTime")[0].textContent),
-                    DetailURL: [url],
-                    Headline: "",
-                    axisData: null,
-                  });
+                EQData.push({
+                  status: xml.getElementsByTagName("Status")[0].textContent,
+                  eventId: EventID[index],
+                  category: "Tsunami",
+                  OriginTime: elm.getElementsByTagName("OriginTime")[0] ? new Date(elm.getElementsByTagName("OriginTime")[0].textContent) : new Date(),
+                  epiCenter: ECTmp,
+                  M: Number(magTmp),
+                  maxI: null,
+                  cancel: Boolean(cancel),
+                  reportDateTime: new Date(xml.getElementsByTagName("ReportDateTime")[0].textContent),
+                  DetailURL: [url],
+                  Headline: "",
+                  axisData: null,
+                });
+              }
+            );
+            ConvertEQInfo(EQData, "jma", false, count);
+
+            if (cancel) {
+              tsunamiDataTmp = {
+                status: xml.getElementsByTagName("Status")[0].textContent,
+                issue: {
+                  time: new Date(xml.getElementsByTagName("ReportDateTime")[0].textContent),
+                  EventID: null,
+                  EarthQuake: null,
+                },
+                areas: [],
+                revocation: true,
+                source: "jmaXML",
+                ValidDateTime: null,
+              };
+            } else {
+              var ValidDateTimeElm = xml.getElementsByTagName("ValidDateTime")[0];
+              if (ValidDateTimeElm) var ValidDateTimeTmp = new Date(ValidDateTimeElm.textContent);
+              else {
+                var ValidDateTimeTmp = new Date(xml.getElementsByTagName("ReportDateTime")[0].textContent);
+                ValidDateTimeTmp.setHours(ValidDateTimeTmp.getHours() + 12);
+              }
+              if (ValidDateTimeTmp < new Date()) return;
+
+              var headline = "";
+              var headlineElm = xml.getElementsByTagName("Headline")[0];
+              if (headlineElm && headlineElm.getElementsByTagName("Text")[0])
+                headline = headlineElm.getElementsByTagName("Text")[0].textContent;
+
+              var Text1 = "";
+              var WarningComment = "";
+              var FreeFormComment = "";
+              //付加文取得の不具合による処理停止を回避
+              try {
+                if (xml.querySelector("Body  > Text")) {
+                  Text1 = xml.querySelector("Body  > Text").textContent + "\n\n";
                 }
+
+                var comments_elm = xml.getElementsByTagName("Comments")[0];
+                if (comments_elm) {
+                  var WarningComment_elm =
+                    comments_elm.getElementsByTagName("WarningComment")[0];
+                  if (WarningComment_elm)
+                    WarningComment = WarningComment_elm.getElementsByTagName("Text")[0].textContent + "\n\n";
+
+                  var FreeFormComment_elm =
+                    comments_elm.getElementsByTagName("FreeFormComment")[0];
+                  if (FreeFormComment_elm)
+                    FreeFormComment = FreeFormComment_elm.textContent;
+                }
+                // eslint-disable-next-line no-empty
+              } catch { }
+
+              //P2PのAPIとの整合性のため、津波情報においてのみ、Control > DateTimeを発表時刻として扱う
+              var dateTime = new Date(
+                xml.getElementsByTagName("Control")[0].getElementsByTagName("DateTime")[0].textContent
               );
-              ConvertEQInfo(EQData, "jma", false, count);
 
-              if (cancel) {
-                tsunamiDataTmp = {
-                  status: xml.getElementsByTagName("Status")[0].textContent,
-                  issue: {
-                    time: new Date(xml.getElementsByTagName("ReportDateTime")[0].textContent),
-                    EventID: null,
-                    EarthQuake: null,
-                  },
-                  areas: [],
-                  revocation: true,
-                  source: "jmaXML",
-                  ValidDateTime: null,
-                };
-              } else {
-                var ValidDateTimeElm = xml.getElementsByTagName("ValidDateTime")[0];
-                if (ValidDateTimeElm) var ValidDateTimeTmp = new Date(ValidDateTimeElm.textContent);
-                else {
-                  var ValidDateTimeTmp = new Date(xml.getElementsByTagName("ReportDateTime")[0].textContent);
-                  ValidDateTimeTmp.setHours(ValidDateTimeTmp.getHours() + 12);
-                }
-                if (ValidDateTimeTmp < new Date()) return;
+              tsunamiDataTmp = {
+                status: xml.getElementsByTagName("Status")[0].textContent,
+                issue: {
+                  time: dateTime,
+                  EventID: EventID,
+                  EarthQuake: EQData,
+                },
+                areas: [],
+                revocation: false,
+                headline: headline,
+                comment: Text1 + WarningComment + FreeFormComment,
+                source: "jmaXML",
+                ValidDateTime: ValidDateTimeTmp,
+              };
 
-                var headline = "";
-                var headlineElm = xml.getElementsByTagName("Headline")[0];
-                if (headlineElm && headlineElm.getElementsByTagName("Text")[0])
-                  headline = headlineElm.getElementsByTagName("Text")[0].textContent;
-
-                var Text1 = "";
-                var WarningComment = "";
-                var FreeFormComment = "";
-                //付加文取得の不具合による処理停止を回避
-                try {
-                  if (xml.querySelector("Body  > Text")) {
-                    Text1 = xml.querySelector("Body  > Text").textContent + "\n\n";
-                  }
-
-                  var comments_elm = xml.getElementsByTagName("Comments")[0];
-                  if (comments_elm) {
-                    var WarningComment_elm =
-                      comments_elm.getElementsByTagName("WarningComment")[0];
-                    if (WarningComment_elm)
-                      WarningComment = WarningComment_elm.getElementsByTagName("Text")[0].textContent + "\n\n";
-
-                    var FreeFormComment_elm =
-                      comments_elm.getElementsByTagName("FreeFormComment")[0];
-                    if (FreeFormComment_elm)
-                      FreeFormComment = FreeFormComment_elm.textContent;
-                  }
-                  // eslint-disable-next-line no-empty
-                } catch { }
-
-                //P2PのAPIとの整合性のため、津波情報においてのみ、Control > DateTimeを発表時刻として扱う
-                var dateTime = new Date(
-                  xml.getElementsByTagName("Control")[0].getElementsByTagName("DateTime")[0].textContent
-                );
-
-                tsunamiDataTmp = {
-                  status: xml.getElementsByTagName("Status")[0].textContent,
-                  issue: {
-                    time: dateTime,
-                    EventID: EventID,
-                    EarthQuake: EQData,
-                  },
-                  areas: [],
-                  revocation: false,
-                  headline: headline,
-                  comment: Text1 + WarningComment + FreeFormComment,
-                  source: "jmaXML",
-                  ValidDateTime: ValidDateTimeTmp,
-                };
-
-                var tsunamiElm = xml.getElementsByTagName("Body")[0].getElementsByTagName("Tsunami")[0];
-                if (tsunamiElm) {
-                  var forecastElm;
-                  if (tsunamiElm.getElementsByTagName("Forecast")[0])
-                    forecastElm = tsunamiElm.getElementsByTagName("Forecast")[0];
-                  if (tsunamiElm.getElementsByTagName("Estimation")[0])
-                    forecastElm = tsunamiElm.getElementsByTagName("Estimation")[0];
-                  if (forecastElm) {
-                    Array.prototype.forEach.call(
-                      forecastElm.getElementsByTagName("Item"),
-                      function (elm) {
-                        var gradeTmp;
-                        var cancelledTmp = false;
-                        if (elm.getElementsByTagName("Category")[0]) {
-                          switch (
-                          Number(
-                            elm.getElementsByTagName("Category")[0].getElementsByTagName("Kind")[0].getElementsByTagName("Code")[0].textContent
-                          )
-                          ) {
-                            case 52:
-                            case 53:
-                              gradeTmp = "MajorWarning";
-                              break;
-                            case 51:
-                              gradeTmp = "Warning";
-                              break;
-                            case 62:
-                              gradeTmp = "Watch";
-                              break;
-                            case 71:
-                            case 72:
-                            case 73:
-                              gradeTmp = "Yoho";
-                              break;
-                            case 50:
-                            case 60:
-                              cancelledTmp = true;
-                              break;
-                          }
+              var tsunamiElm = xml.getElementsByTagName("Body")[0].getElementsByTagName("Tsunami")[0];
+              if (tsunamiElm) {
+                var forecastElm;
+                if (tsunamiElm.getElementsByTagName("Forecast")[0])
+                  forecastElm = tsunamiElm.getElementsByTagName("Forecast")[0];
+                if (tsunamiElm.getElementsByTagName("Estimation")[0])
+                  forecastElm = tsunamiElm.getElementsByTagName("Estimation")[0];
+                if (forecastElm) {
+                  Array.prototype.forEach.call(
+                    forecastElm.getElementsByTagName("Item"),
+                    function (elm) {
+                      var gradeTmp;
+                      var cancelledTmp = false;
+                      if (elm.getElementsByTagName("Category")[0]) {
+                        switch (
+                        Number(
+                          elm.getElementsByTagName("Category")[0].getElementsByTagName("Kind")[0].getElementsByTagName("Code")[0].textContent
+                        )
+                        ) {
+                          case 52:
+                          case 53:
+                            gradeTmp = "MajorWarning";
+                            break;
+                          case 51:
+                            gradeTmp = "Warning";
+                            break;
+                          case 62:
+                            gradeTmp = "Watch";
+                            break;
+                          case 71:
+                          case 72:
+                          case 73:
+                            gradeTmp = "Yoho";
+                            break;
+                          case 50:
+                          case 60:
+                            cancelledTmp = true;
+                            break;
                         }
-                        var firstHeightTmp;
-                        var firstHeightConditionTmp;
-                        var maxHeightTmp;
-                        if (elm.getElementsByTagName("FirstHeight")[0]) {
-                          if (elm.getElementsByTagName("FirstHeight")[0].getElementsByTagName("ArrivalTime")[0]) {
-                            firstHeightTmp = new Date(elm.getElementsByTagName("FirstHeight")[0].getElementsByTagName("ArrivalTime")[0].textContent);
-                          }
-                          if (elm.getElementsByTagName("FirstHeight")[0].getElementsByTagName("Condition")[0]) {
-                            firstHeightConditionTmp = elm.getElementsByTagName("FirstHeight")[0].getElementsByTagName("Condition")[0].textContent;
-                          }
-                        }
-                        if (elm.getElementsByTagName("MaxHeight")[0]) {
-                          var maxHeightElm = elm.getElementsByTagName("MaxHeight")[0].getElementsByTagName("jmx_eb:TsunamiHeight");
-                          if (maxHeightElm[0]) {
-                            maxHeightTmp = maxHeightElm[0].getAttribute("description")
-                              .replace(/[Ａ-Ｚａ-ｚ０-９．]/g, function (s) {
-                                return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
-                              });
-                          } else if (elm.getElementsByTagName("MaxHeight")[0].getElementsByTagName("Condition")[0]) {
-                            maxHeightTmp = elm.getElementsByTagName("MaxHeight")[0].getElementsByTagName("Condition")[0].textContent;
-                          }
-                        }
-
-                        var stations = [];
-                        if (elm.getElementsByTagName("Station")[0]) {
-                          Array.prototype.forEach.call(
-                            elm.getElementsByTagName("Station"),
-                            function (elm2) {
-                              var ArrivalTimeTmp;
-                              var ConditionTmp;
-                              var nameTmp = elm2.getElementsByTagName("Name")[0].textContent;
-                              var codeTmp = elm2.getElementsByTagName("Code")[0].textContent;
-                              var highTideTimeTmp = new Date(elm2.getElementsByTagName("HighTideDateTime")[0].textContent);
-                              if (elm2.getElementsByTagName("FirstHeight")[0].getElementsByTagName("ArrivalTime")[0])
-                                ArrivalTimeTmp = new Date(elm2.getElementsByTagName("FirstHeight")[0].getElementsByTagName("ArrivalTime")[0].textContent);
-                              if (elm2.getElementsByTagName("Condition")[0])
-                                ConditionTmp = elm2.getElementsByTagName("Condition")[0].textContent;
-                              stations.push({
-                                name: nameTmp,
-                                code: codeTmp,
-                                HighTideDateTime: highTideTimeTmp,
-                                ArrivalTime: ArrivalTimeTmp,
-                                Condition: ConditionTmp,
-                              });
-                            }
-                          );
-                        }
-
-                        var codeTmp;
-                        if (elm.getElementsByTagName("Category")[0])
-                          codeTmp = Number(elm.getElementsByTagName("Category")[0].getElementsByTagName("Kind")[0].getElementsByTagName("Code")[0].textContent);
-
-                        tsunamiDataTmp.areas.push({
-                          code: codeTmp,
-                          grade: gradeTmp,
-                          name: elm.getElementsByTagName("Name")[0].textContent,
-                          cancelled: cancelledTmp,
-                          firstHeight: firstHeightTmp,
-                          firstHeightCondition: firstHeightConditionTmp,
-                          stations: stations,
-                          maxHeight: maxHeightTmp,
-                        });
                       }
-                    );
-                  }
-
-                  if (tsunamiElm.getElementsByTagName("Observation")[0]) {
-                    Array.prototype.forEach.call(
-                      tsunamiElm.getElementsByTagName("Observation")[0].getElementsByTagName("Item"),
-                      function (elm) {
-                        var stations = [];
-                        if (elm.getElementsByTagName("Station")[0]) {
-                          Array.prototype.forEach.call(
-                            elm.getElementsByTagName("Station"),
-                            function (elm2) {
-                              var ArrivalTimeTmp;
-                              var firstHeightConditionTmp;
-                              var firstHeightInitialTmp;
-                              var maxHeightTime;
-                              var maxHeightCondition;
-                              var oMaxHeightTmp;
-                              var maxHeightRising = false;
-                              var nameTmp = elm2.getElementsByTagName("Name")[0].textContent;
-
-                              if (elm2.getElementsByTagName("FirstHeight")[0]) {
-                                var firstHeightTag = elm2.getElementsByTagName("FirstHeight")[0];
-                                if (firstHeightTag.getElementsByTagName("ArrivalTime")[0])
-                                  ArrivalTimeTmp = new Date(firstHeightTag.getElementsByTagName("ArrivalTime")[0].textContent);
-                                if (firstHeightTag.getElementsByTagName("Condition")[0])
-                                  firstHeightConditionTmp = firstHeightTag.getElementsByTagName("Condition")[0].textContent;
-                                if (firstHeightTag.getElementsByTagName("Initial")[0])
-                                  firstHeightInitialTmp = firstHeightTag.getElementsByTagName("Initial")[0].textContent;
-                              }
-                              if (elm2.getElementsByTagName("MaxHeight")[0]) {
-                                var maxHeightElm = elm2.getElementsByTagName("MaxHeight")[0].getElementsByTagName("jmx_eb:TsunamiHeight")[0];
-                                if (maxHeightElm) {
-                                  oMaxHeightTmp = maxHeightElm.getAttribute("description");
-                                  oMaxHeightTmp = oMaxHeightTmp.replace(/[Ａ-Ｚａ-ｚ０-９．]/g, function (s) {
-                                    return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
-                                  });
-                                  if (maxHeightElm.getAttribute("condition"))
-                                    maxHeightRising = maxHeightElm.getAttribute("condition") == "上昇中";
-                                }
-
-                                var maxHeightTimeElm = elm2.getElementsByTagName("MaxHeight")[0].getElementsByTagName("DateTime")[0];
-                                if (maxHeightTimeElm) maxHeightTime = new Date(maxHeightTimeElm.textContent);
-
-                                var maxHeightConditionElm = elm2.getElementsByTagName("MaxHeight")[0].getElementsByTagName("Condition")[0];
-                                if (maxHeightConditionElm) maxHeightCondition = maxHeightConditionElm.textContent;
-                              }
-
-                              var codeTmp = elm2.getElementsByTagName("Code")[0].textContent;
-
-                              stations.push({
-                                name: nameTmp,
-                                code: codeTmp,
-                                ArrivedTime: ArrivalTimeTmp,
-                                firstHeightCondition: firstHeightConditionTmp,
-                                firstHeightInitial: firstHeightInitialTmp,
-                                omaxHeight: oMaxHeightTmp,
-                                maxHeightRising: maxHeightRising,
-                                maxHeightTime: maxHeightTime,
-                                maxHeightCondition: maxHeightCondition,
-                              });
-                            }
-                          );
+                      var firstHeightTmp;
+                      var firstHeightConditionTmp;
+                      var maxHeightTmp;
+                      if (elm.getElementsByTagName("FirstHeight")[0]) {
+                        if (elm.getElementsByTagName("FirstHeight")[0].getElementsByTagName("ArrivalTime")[0]) {
+                          firstHeightTmp = new Date(elm.getElementsByTagName("FirstHeight")[0].getElementsByTagName("ArrivalTime")[0].textContent);
                         }
-
-                        var areaName = title == "沖合の津波観測に関する情報" ? "（海上）" : elm.getElementsByTagName("Name")[0].textContent;
-                        var tsunamiItem = tsunamiDataTmp.areas.find(function (elm2) {
-                          return elm2.name == areaName;
-                        });
-                        if (tsunamiItem) {
-                          stations.forEach(function (elm2) {
-                            var stationElm = tsunamiItem.stations.findIndex(function (elm3) {
-                              return elm3.name == elm2.name;
+                        if (elm.getElementsByTagName("FirstHeight")[0].getElementsByTagName("Condition")[0]) {
+                          firstHeightConditionTmp = elm.getElementsByTagName("FirstHeight")[0].getElementsByTagName("Condition")[0].textContent;
+                        }
+                      }
+                      if (elm.getElementsByTagName("MaxHeight")[0]) {
+                        var maxHeightElm = elm.getElementsByTagName("MaxHeight")[0].getElementsByTagName("jmx_eb:TsunamiHeight");
+                        if (maxHeightElm[0]) {
+                          maxHeightTmp = maxHeightElm[0].getAttribute("description")
+                            .replace(/[Ａ-Ｚａ-ｚ０-９．]/g, function (s) {
+                              return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
                             });
-                            if (stationElm > -1) tsunamiItem.stations[stationElm] = Object.assign(elm2, tsunamiItem.stations[stationElm]);
-                            else tsunamiItem.stations.push(elm2);
-                          });
-                        } else {
-                          tsunamiDataTmp.areas.push({
-                            name: areaName,
-                            stations: stations,
-                          });
+                        } else if (elm.getElementsByTagName("MaxHeight")[0].getElementsByTagName("Condition")[0]) {
+                          maxHeightTmp = elm.getElementsByTagName("MaxHeight")[0].getElementsByTagName("Condition")[0].textContent;
                         }
                       }
-                    );
-                  }
+
+                      var stations = [];
+                      if (elm.getElementsByTagName("Station")[0]) {
+                        Array.prototype.forEach.call(
+                          elm.getElementsByTagName("Station"),
+                          function (elm2) {
+                            var ArrivalTimeTmp;
+                            var ConditionTmp;
+                            var nameTmp = elm2.getElementsByTagName("Name")[0].textContent;
+                            var codeTmp = elm2.getElementsByTagName("Code")[0].textContent;
+                            var highTideTimeTmp = new Date(elm2.getElementsByTagName("HighTideDateTime")[0].textContent);
+                            if (elm2.getElementsByTagName("FirstHeight")[0].getElementsByTagName("ArrivalTime")[0])
+                              ArrivalTimeTmp = new Date(elm2.getElementsByTagName("FirstHeight")[0].getElementsByTagName("ArrivalTime")[0].textContent);
+                            if (elm2.getElementsByTagName("Condition")[0])
+                              ConditionTmp = elm2.getElementsByTagName("Condition")[0].textContent;
+                            stations.push({
+                              name: nameTmp,
+                              code: codeTmp,
+                              HighTideDateTime: highTideTimeTmp,
+                              ArrivalTime: ArrivalTimeTmp,
+                              Condition: ConditionTmp,
+                            });
+                          }
+                        );
+                      }
+
+                      var codeTmp;
+                      if (elm.getElementsByTagName("Category")[0])
+                        codeTmp = Number(elm.getElementsByTagName("Category")[0].getElementsByTagName("Kind")[0].getElementsByTagName("Code")[0].textContent);
+
+                      tsunamiDataTmp.areas.push({
+                        code: codeTmp,
+                        grade: gradeTmp,
+                        name: elm.getElementsByTagName("Name")[0].textContent,
+                        cancelled: cancelledTmp,
+                        firstHeight: firstHeightTmp,
+                        firstHeightCondition: firstHeightConditionTmp,
+                        stations: stations,
+                        maxHeight: maxHeightTmp,
+                      });
+                    }
+                  );
+                }
+
+                if (tsunamiElm.getElementsByTagName("Observation")[0]) {
+                  Array.prototype.forEach.call(
+                    tsunamiElm.getElementsByTagName("Observation")[0].getElementsByTagName("Item"),
+                    function (elm) {
+                      var stations = [];
+                      if (elm.getElementsByTagName("Station")[0]) {
+                        Array.prototype.forEach.call(
+                          elm.getElementsByTagName("Station"),
+                          function (elm2) {
+                            var ArrivalTimeTmp;
+                            var firstHeightConditionTmp;
+                            var firstHeightInitialTmp;
+                            var maxHeightTime;
+                            var maxHeightCondition;
+                            var oMaxHeightTmp;
+                            var maxHeightRising = false;
+                            var nameTmp = elm2.getElementsByTagName("Name")[0].textContent;
+
+                            if (elm2.getElementsByTagName("FirstHeight")[0]) {
+                              var firstHeightTag = elm2.getElementsByTagName("FirstHeight")[0];
+                              if (firstHeightTag.getElementsByTagName("ArrivalTime")[0])
+                                ArrivalTimeTmp = new Date(firstHeightTag.getElementsByTagName("ArrivalTime")[0].textContent);
+                              if (firstHeightTag.getElementsByTagName("Condition")[0])
+                                firstHeightConditionTmp = firstHeightTag.getElementsByTagName("Condition")[0].textContent;
+                              if (firstHeightTag.getElementsByTagName("Initial")[0])
+                                firstHeightInitialTmp = firstHeightTag.getElementsByTagName("Initial")[0].textContent;
+                            }
+                            if (elm2.getElementsByTagName("MaxHeight")[0]) {
+                              var maxHeightElm = elm2.getElementsByTagName("MaxHeight")[0].getElementsByTagName("jmx_eb:TsunamiHeight")[0];
+                              if (maxHeightElm) {
+                                oMaxHeightTmp = maxHeightElm.getAttribute("description");
+                                oMaxHeightTmp = oMaxHeightTmp.replace(/[Ａ-Ｚａ-ｚ０-９．]/g, function (s) {
+                                  return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
+                                });
+                                if (maxHeightElm.getAttribute("condition"))
+                                  maxHeightRising = maxHeightElm.getAttribute("condition") == "上昇中";
+                              }
+
+                              var maxHeightTimeElm = elm2.getElementsByTagName("MaxHeight")[0].getElementsByTagName("DateTime")[0];
+                              if (maxHeightTimeElm) maxHeightTime = new Date(maxHeightTimeElm.textContent);
+
+                              var maxHeightConditionElm = elm2.getElementsByTagName("MaxHeight")[0].getElementsByTagName("Condition")[0];
+                              if (maxHeightConditionElm) maxHeightCondition = maxHeightConditionElm.textContent;
+                            }
+
+                            var codeTmp = elm2.getElementsByTagName("Code")[0].textContent;
+
+                            stations.push({
+                              name: nameTmp,
+                              code: codeTmp,
+                              ArrivedTime: ArrivalTimeTmp,
+                              firstHeightCondition: firstHeightConditionTmp,
+                              firstHeightInitial: firstHeightInitialTmp,
+                              omaxHeight: oMaxHeightTmp,
+                              maxHeightRising: maxHeightRising,
+                              maxHeightTime: maxHeightTime,
+                              maxHeightCondition: maxHeightCondition,
+                            });
+                          }
+                        );
+                      }
+
+                      var areaName = title == "沖合の津波観測に関する情報" ? "（海上）" : elm.getElementsByTagName("Name")[0].textContent;
+                      var tsunamiItem = tsunamiDataTmp.areas.find(function (elm2) {
+                        return elm2.name == areaName;
+                      });
+                      if (tsunamiItem) {
+                        stations.forEach(function (elm2) {
+                          var stationElm = tsunamiItem.stations.findIndex(function (elm3) {
+                            return elm3.name == elm2.name;
+                          });
+                          if (stationElm > -1) tsunamiItem.stations[stationElm] = Object.assign(elm2, tsunamiItem.stations[stationElm]);
+                          else tsunamiItem.stations.push(elm2);
+                        });
+                      } else {
+                        tsunamiDataTmp.areas.push({
+                          name: areaName,
+                          stations: stations,
+                        });
+                      }
+                    }
+                  );
                 }
               }
-            } catch (e) {
-              console.log(e);
             }
             ConvertTsunamiInfo(tsunamiDataTmp);
           } else if (title == "北海道・三陸沖後発地震注意情報") {

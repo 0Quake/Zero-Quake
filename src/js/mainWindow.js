@@ -42,7 +42,6 @@ window.electronAPI.messageSend((event, request) => {
   } else if (request.action == "unactivate") {
     background = true;
   } else if (request.action == "EEW_AlertUpdate") {
-    console.log("EEW Updated", request.data)
     EEW_AlertUpdate(request.data);
     psWaveEntry();
     JMAEstShindoControl(request.data);
@@ -347,7 +346,6 @@ function epiCenterClear(eid) {
       return elm2.eid !== eid;
     });
     if (epicenterElm) {
-      console.log(epicenterElm)
 
       if (epicenterElm.markerElm) epicenterElm.markerElm.remove();
       if (epicenterElm.ESPopup) epicenterElm.ESPopup.remove();
