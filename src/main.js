@@ -3898,9 +3898,12 @@ function ConvertTsunamiInfo(data) {
 
           if (elm.stations) {
             elm.stations.forEach(function (elm2) {
-              var stItem = areaItem.stations.find(function (elm3) {
-                return elm3.name == elm2.name;
-              });
+              var stItem
+              if (Array.isArray(areaItem.stations)) {
+                stItem = areaItem.stations.find(function (elm3) {
+                  return elm3.name == elm2.name;
+                });
+              }
               if (stItem) {
                 if (elm2.code) stItem.code = elm2.code;
                 if (elm2.ArrivedTime) stItem.ArrivedTime = elm2.ArrivedTime;
@@ -3972,9 +3975,12 @@ function ConvertTsunamiInfo(data) {
       if (elm0.issue.time) Tsunami_data_Marged.issue.time = elm0.issue.time;
 
       elm0.areas.forEach(function (elm) {
-        var areaItem = Tsunami_data_Marged.areas.find(function (elm2) {
-          return elm2.name == elm.name;
-        });
+        var areaItem;
+        if (Array.isArray(Tsunami_data_Marged.areas)) {
+          areaItem = Tsunami_data_Marged.areas.find(function (elm2) {
+            return elm2.name == elm.name;
+          });
+        }
         if (areaItem) {
           if (elm.code) areaItem.code = elm.code;
           if (elm.grade) areaItem.grade = elm.grade;
@@ -3985,9 +3991,12 @@ function ConvertTsunamiInfo(data) {
 
           if (elm.stations) {
             elm.stations.forEach(function (elm2) {
-              var stItem = areaItem.stations.find(function (elm3) {
-                return elm3.name == elm2.name;
-              });
+              var stItem;
+              if (Array.isArray(areaItem.stations)) {
+                stItem = areaItem.stations.find(function (elm3) {
+                  return elm3.name == elm2.name;
+                });
+              }
 
               if (stItem) {
                 if (elm2.code) stItem.code = elm2.code;
