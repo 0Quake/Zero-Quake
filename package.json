@@ -40,7 +40,9 @@
       "applicationId": "Benidate.ZeroQuake",
       "publisherDisplayName": "Benidate",
       "publisher": "CN=0FCA04CE-D29D-4DB6-BA68-14F151A28AD4",
-      "languages": [ "JA-JP" ],
+      "languages": [
+        "JA-JP"
+      ],
       "backgroundColor": "#202227"
     }
   },

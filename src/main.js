@@ -695,6 +695,11 @@ function CreateMainWindow() {
       if (!MainWindow.isVisible()) MainWindow.show();
     } else {
       MainWindow = new BrowserWindow({
+        x: store.get("x", null),
+        y: store.get("y", null),
+        width: store.get("width", 800),
+        height: store.get("height", 640),
+
         minWidth: 650,
         minHeight: 400,
         icon: path.join(__dirname, "img/icon.ico"),
@@ -706,6 +711,9 @@ function CreateMainWindow() {
         backgroundColor: "#222225",
         alwaysOnTop: config.system.alwaysOnTop,
       });
+      if (store.get("Maximized", null)) MainWindow.maximize()
+      else MainWindow.unmaximize()
+
       if (Replay !== 0) {
         messageToMainWindow({ action: "Replay", data: Replay });
       }
@@ -780,6 +788,16 @@ function CreateMainWindow() {
       });
 
       MainWindow.loadFile("src/index.html");
+
+      function savePosition() {
+        const { x, y, width, height } = MainWindow.getBounds();
+        store.set({ x, y, width, height });
+        store.set("Maximized", MainWindow.isMaximized());
+      }
+      MainWindow.on('maximize', savePosition)
+        .on('unmaximize', savePosition)
+        .on('resize', savePosition)
+        .on('move', savePosition);
 
       MainWindow.on("unresponsive", () => {
         MainWindow.responsive = true;
