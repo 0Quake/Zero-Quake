@@ -1049,24 +1049,28 @@
                             <div class="smalltext">通知音（ベル音）および読み上げ音声に適用されます。設定した条件の1つでも合致する場合は音声で通知します。（OR条件）</div>
 
                             <div id="T_thresholds_wrap">
-                                <label><input type="checkbox" id="Tsunami_Bypass_threshold">無条件に全津波を通知</label>
+                                <label>
+                                    <input type="checkbox" id="Tsunami_Bypass_threshold">無条件に全津波を通知
+                                    <div class="smalltext">津波予報などを含むすべての津波情報を通知します。</div>
+                                </label>
+
 
                                 <div id="T_thresholds">
                                     <label>全国で～が発表された際<select id="Tsunami_threshold">
-                                            <option value="0" selected>何らかの津波情報（常に通知）</option>
+                                            <option value="0" selected>何らかの津波情報（津波予報含む全津波を通知）</option><!--この項目 不要だが残してもいいかも...-->
                                             <option value="1">津波注意報・津波警報・大津波警報</option>
                                             <option value="2">津波警報・大津波警報</option>
                                             <option value="3">大津波警報</option>
-                                            <option value="4">条件なし（すべて条件外）</option>
+                                            <option value="4">条件無効</option>
                                         </select></label>
 
                                     <label>設定地点で～が発表された際<select id="Tsunami_L_threshold">
-                                            <option value="-1" selected>（常に通知）</option>
+                                            <option value="-1" selected>（全津波を通知）</option><!--この項目 消したいけど互換性が...-->
                                             <option value="0">何らかの津波情報</option>
                                             <option value="1">津波注意報・津波警報・大津波警報</option>
                                             <option value="2">津波警報・大津波警報</option>
                                             <option value="3">大津波警報</option>
-                                            <option value="4">条件なし（すべて条件外）</option>
+                                            <option value="4">条件無効</option>
                                         </select></label>
                                 </div>
                             </div>
@@ -1200,13 +1204,9 @@
             </div>
             <div id="tab1_content7" class="tabcontent" role="tabpanel" aria-labelledby="tab1_menu7">
                 <h3><span>情報種別ごとの設定</span>リアルタイム揺れ情報</h3>
-                <h4>全般</h4>
+                <h4>揺れ検知</h4>
                 <section>
                     <label><input type="checkbox" id="EarthquakeDetect">揺れ検知機能を使用（日本のみ）</label>
-                </section>
-
-                <h4>通知条件</h4>
-                <section>
                     <label>通知対象<select id="EQDetect_threshold">
                             <option value="1">すべての検知</option>
                             <option value="2">強い検知のみ</option>
