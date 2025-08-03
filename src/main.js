@@ -816,24 +816,20 @@ function CreateMainWindow() {
             });
           }
         }, 5000);
+      }).on("responsive", () => {
+        MainWindow.responsive = false;
       });
+
       MainWindow.on("focus", () => {
         messageToMainWindow({ action: "activate" });
-      });
-      MainWindow.on("show", () => {
+      }).on("show", () => {
         messageToMainWindow({ action: "activate" });
-      });
-      MainWindow.on("hide", () => {
-        messageToMainWindow({ action: "unactivate" });
-      });
-      MainWindow.on("restore", () => {
+      }).on("hide", () => {
+        messageToMainWindow({ action: "deactivate" });
+      }).on("restore", () => {
         messageToMainWindow({ action: "activate" });
-      });
-      MainWindow.on("minimize", () => {
-        messageToMainWindow({ action: "unactivate" });
-      });
-      MainWindow.on("responsive", () => {
-        MainWindow.responsive = false;
+      }).on("minimize", () => {
+        messageToMainWindow({ action: "deactivate" });
       });
 
       MainWindow.on("close", (event) => {
@@ -841,9 +837,7 @@ function CreateMainWindow() {
           event.preventDefault();
           MainWindow.hide();
         }
-      });
-
-      MainWindow.on("closed", () => {
+      }).on("closed", () => {
         MainWindow = null;
       });
     }

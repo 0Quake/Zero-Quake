@@ -39,7 +39,7 @@ window.electronAPI.messageSend((event, request) => {
     if (snetMapData) kmoniMapUpdate(snetMapData, "snet");
     if (TREMRTS_TMP) TREMRTSUpdate(TREMRTS_TMP);
     if (SeisJS_TMP) SeisJSUpdate(SeisJS_TMP);
-  } else if (request.action == "unactivate") {
+  } else if (request.action == "deactivate") {
     background = true;
   } else if (request.action == "EEW_AlertUpdate") {
     EEW_AlertUpdate(request.data);
