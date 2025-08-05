@@ -14,7 +14,8 @@
 #layerSwitch_toggle {
   border-radius: 5px;
   background: #3f3f42;
-  font-family: "Material Icons Round";
+  font-family: "Material Symbols";
+  font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
   font-size: 22px;
   width: 45px;
   height: 40px;
@@ -73,26 +74,6 @@
   background: rgb(149, 46, 46);
   color: #fff;
 }
-/*
-.menu .check label::before {
-  content: "check_box_outline_blank";
-  font-family: "Material Icons Round";
-  vertical-align: bottom;
-  padding-right: 5px;
-}
-.menu .check label:has(input:checked)::before {
-  content: "check_box";
-}
-.radio label::before {
-  content: "radio_button_unchecked";
-  font-family: "Material Icons Round";
-  vertical-align: bottom;
-  padding-right: 5px;
-}
-.radio label:has(input:checked)::before {
-  content: "radio_button_checked";
-}
-*/
 #mapcontainer {
   display: inline-block;
   width: 100%;
@@ -127,7 +108,8 @@
 }
 .maplibregl-ctrl button::before {
   color: #eee;
-  font-family: "Material Icons Round";
+  font-family: "Material Symbols";
+  font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
   font-size: 17px;
 }
 .maplibregl-ctrl button.maplibregl-ctrl-zoom-in::before {
