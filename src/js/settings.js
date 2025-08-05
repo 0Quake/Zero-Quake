@@ -208,10 +208,7 @@ document.getElementById("Tsunami_Bypass_threshold")
   .addEventListener("change", disabled_control);
 
 function UpdateDataDraw(data) {
-  document.getElementById("update-check-date").innerText = NormalizeDate(
-    3,
-    data.check_date
-  );
+  document.getElementById("update-check-date").innerText = NormalizeDate(4, data.check_date);
   updateWrap.classList.remove("U-error", "U-available", "U-not_available");
   updateBtnWrap.style.display = "none";
   update_detail.style.display = "none";
@@ -231,7 +228,7 @@ function UpdateDataDraw(data) {
       update_detail.style.display = "block";
     } else {
       updateWrap.classList.add("U-not_available");
-      updateStatus.innerText = "お使いのアプリケーションは最新の状態です。";
+      updateStatus.innerText = "アプリケーションは最新の状態です。";
       updateVersion.innerText = "ver." + data.current_version;
     }
   }

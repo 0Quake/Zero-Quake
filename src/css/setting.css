@@ -219,7 +219,10 @@ h5 {
 #update-icon,
 #update-content,
 #update-button-wrap {
-  padding: 3px 10px;
+  padding: 3px 8px;
+}
+#update-content{
+  width: 100%;
 }
 #update-version {
   font-size: 12px;
@@ -230,6 +233,8 @@ h5 {
   border-radius: 5px;
   display: inline-block;
   margin: 20px 0;
+  width: 550px;
+  max-width: 100%;
 }
 #update-wrap h3 {
   margin: 0 0 15px 0;
@@ -260,7 +265,7 @@ h5 {
   margin-top: 10px;
 }
 #check_update {
-  min-width: 60px;
+  min-width: 100px;
   padding: 10px 5px;
 }
 #check_update::before {
@@ -318,6 +323,8 @@ ol {
 }
 #tab1_bar .material-icons-round {
   letter-spacing: 0.13em;
+  font-size: 18px;
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 22;
 }
 #layerSwitch_toggle {
   margin: 0;
