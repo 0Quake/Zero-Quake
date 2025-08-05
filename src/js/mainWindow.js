@@ -80,6 +80,7 @@ window.electronAPI.messageSend((event, request) => {
   else if (request.action == "HokkaidoSanrikuInfo") HokkaidoSanrikuInfo(request.data);
   else if (request.action == "KatsudoJokyoInfo") KatsudoJokyoInfo(request.data);
   else if (request.action == "Return_gaikyo") draw_gaikyo(request.data);
+  else if (request.action == "Return_wepa") draw_wepa(request.data);
 
   document.getElementById("splash").style.display = "none";
   return true;
@@ -2770,7 +2771,7 @@ function draw_gaikyo(data) {
 
   if (gaikyo_history.length == data.length) return;
   gaikyo_history = data;
-  removeChild(document.getElementById("gaikyo-Wrao"));
+  removeChild(document.getElementById("gaikyo-Wrap"));
   data.forEach(function (elm, index) {
     if (index <= 25) {
       var clone = document.getElementById("gaikyo-item")
@@ -2801,10 +2802,50 @@ function draw_gaikyo(data) {
       clone.addEventListener("click", function () {
         window.open(elm.url);
       });
-      document.getElementById("gaikyo-Wrao").appendChild(clone);
+      document.getElementById("gaikyo-Wrap").appendChild(clone);
     }
   });
 }
+
+document.getElementById("tab1_menu3").addEventListener("click", function () {
+  if (new Date() - wepa_lastUpdate > 60000) {
+    window.electronAPI.messageReturn({ action: "Request_wepa" });
+  }
+});
+
+var wepa_lastUpdate = 0;
+function draw_wepa(data) {
+  wepa_lastUpdate = new Date();
+  if (!data || data.length == 0)
+    document.getElementById("wepa_update_time").innerText = "データがありません：" + NormalizeDate("hh:mm:ss", new Date());
+  else
+    document.getElementById("wepa_update_time").innerText = "更新：" + NormalizeDate("hh:mm:ss", new Date());
+
+  removeChild(document.getElementById("wepa-Wrap"));
+  data.forEach(function (elm, index) {
+    if (index <= 25) {
+      var clone = document.getElementById("wepa-item")
+        .content.cloneNode(true).querySelector(".EQItem");
+
+      if (index == 0) clone.setAttribute("tabindex", 2);
+
+      var dateToSpeak = NormalizeDate("YY年M月D日h時m分", elm.time) + " 発表";
+      var dateStr = NormalizeDate("YYYY/MM/DD hh:mm", elm.time) + " 発表";
+
+      clone.querySelector(".EQI_datetime").textContent = dateStr;
+
+      clone.setAttribute("aria-label", "国際津波情報" + dateToSpeak);
+      clone.addEventListener("click", function () {
+        window.electronAPI.messageReturn({
+          action: "wepa_window",
+          fname: elm.fname
+        });
+      });
+      document.getElementById("wepa-Wrap").appendChild(clone);
+    }
+  });
+}
+
 
 function hinanjoPopup(e) {
   if (e.originalEvent.cancelBubble) return;

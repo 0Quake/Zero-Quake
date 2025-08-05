@@ -224,6 +224,7 @@
                         <div id="tab1_bar" role="tablist" aria-label="情報種別選択" ZQ-focusgroup>
                             <div id="tab1_menu1" role="tab" class="tabmenu active_tabmenu" tabindex="0" aria-controls="tab1_content1" aria-label="地震情報" ZQ-focusgroup-item><span class="material-icons-round" aria-hidden="true">format_list_bulleted</span>地震情報</div>
                             <div id="tab1_menu2" role="tab" class="tabmenu" tabindex="-1" aria-controls="tab1_content2" aria-label="地震解説情報" ZQ-focusgroup-item><span class="material-icons-round" aria-hidden="true">description</span>解説情報</div>
+                            <div id="tab1_menu3" role="tab" class="tabmenu" tabindex="-1" aria-controls="tab1_content3" aria-label="国際津波情報" ZQ-focusgroup-item><span class="material-icons-round" aria-hidden="true">tsunami</span>国際津波</div>
                         </div>
                     </div>
                     <div id="tab1_content" class="tabContentWrap">
@@ -322,7 +323,21 @@
                                 </div>
                             </template>
                             <div id="gaikyo_update_time">読み込み中...</div>
-                            <div id="gaikyo-Wrao" class="EQInfo" role="list">
+                            <div id="gaikyo-Wrap" class="EQInfo" role="list">
+                                <div class="mini-loading-wrap" aria-label="読み込み中"></div>
+                            </div>
+                        </div>
+                        <div id="tab1_content3" role="tabpanel" aria-labelledby="tab1_menu3" class="tabcontent" tabindex="-1" ZQ-focusgroup>
+                            <template id="wepa-item">
+                                <div class="EQItem EQI_wepa" role="listitem" title="クリックして詳細を表示" tabindex="-1" ZQ-focusgroup-item>
+                                    <div class="EQI_detailWrap" aria-hidden="true">
+                                        <div class="EQI_datetime"></div>
+                                        国際津波関連情報
+                                    </div>
+                                </div>
+                            </template>
+                            <div id="wepa_update_time">読み込み中...</div>
+                            <div id="wepa-Wrap" class="EQInfo" role="list">
                                 <div class="mini-loading-wrap" aria-label="読み込み中"></div>
                             </div>
                         </div>

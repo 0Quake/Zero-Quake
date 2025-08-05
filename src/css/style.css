@@ -1181,14 +1181,18 @@ summary:focus {
   font-size: 13px;
   margin: 2px;
 }
-#gaikyo_update_time {
+#gaikyo_update_time,#wepa_update_time {
   font-size: 14px;
   text-align: center;
   color: #ccc;
   margin-top: 3px;
 }
-.EQI_gaikyo .EQI_datetime {
+.EQI_gaikyo .EQI_datetime,
+.EQI_wepa .EQI_datetime {
   color: #ccc;
+}
+.EQI_wepa .EQI_datetime {
+  font-family: "AzeretMono-Regular", "BIZ UDPGothic", ui-monospace;
 }
 .EQI_headline {
   font-size: 14px;

@@ -643,6 +643,12 @@ ipcMain.on("message", (_event, response) => {
     case "Request_gaikyo":
       Req_JMA_gaikyo();
       break;
+    case "Request_wepa":
+      Req_JMA_wepa();
+      break;
+    case "wepa_window":
+      Create_WepaWindow(response.fname);
+      break;
   }
 });
 
@@ -1038,6 +1044,53 @@ function Create_NankaiWindow(type) {
   }
 }
 
+//WEPA40 国際津波関連情報ウィンドウ
+var WepaWindow = {}
+function Create_WepaWindow(fname) {
+  try {
+    if (WepaWindow[fname]) {
+      if (WepaWindow[fname].isMinimized()) WepaWindow[fname].restore();
+      if (!WepaWindow[fname].isFocused()) WepaWindow[fname].focus();
+      return false;
+    }
+
+    WepaWindow[fname] = new BrowserWindow({
+      minWidth: 650,
+      minHeight: 400,
+      icon: path.join(__dirname, "img/icon.ico"),
+      webPreferences: {
+        preload: path.join(__dirname, "js/preload.js"),
+        title: "国際津波関連情報 - Zero Quake",
+      },
+      backgroundColor: "#222225",
+      alwaysOnTop: config.system.alwaysOnTop,
+    });
+
+    WepaWindow[fname].webContents.on("did-finish-load", () => {
+      WepaWindow[fname].webContents.setZoomFactor(config.system.zoom);
+
+      if (fname) {
+        WepaWindow[fname].webContents.send("message2", {
+          action: "metadata",
+          fname: fname,
+        });
+        WepaWindow[fname].webContents.send("message2", {
+          action: "setting",
+          data: config,
+        });
+      }
+    });
+
+    WepaWindow[fname].on("closed", () => {
+      WepaWindow[fname] = null;
+    });
+
+    WepaWindow[fname].loadFile("src/WEPA.html");
+  } catch (err) {
+    throw new Error("国際津波関連情報ウィンドウの作成でエラーが発生しました。", { cause: err });
+  }
+}
+
 //北海道・三陸沖後発地震注意情報ウィンドウ
 var HokkaidoSanrikuWindow;
 function Create_HokkaidoSanrikuWindow() {
@@ -1311,6 +1364,30 @@ function Req_JMA_gaikyo() {
     });
     request.on("error", () => {
       messageToMainWindow({ action: "Return_gaikyo", data: [] });
+    });
+    request.end();
+  }
+}
+
+function Req_JMA_wepa() {
+  if (net.online) {
+    var request = net.request("https://www.jma.go.jp/bosai/pacifictsunami/data/list.json?_=" + Number(new Date()));
+    request.on("response", (res) => {
+      var dataTmp = "";
+      res.on("data", (chunk) => {
+        dataTmp += chunk;
+      });
+      res.on("end", function () {
+        try {
+          var json = ParseJSON(dataTmp);
+          messageToMainWindow({ action: "Return_wepa", data: json });
+        } catch {
+          messageToMainWindow({ action: "Return_wepa", data: [] });
+        }
+      });
+    });
+    request.on("error", () => {
+      messageToMainWindow({ action: "Return_wepa", data: [] });
     });
     request.end();
   }

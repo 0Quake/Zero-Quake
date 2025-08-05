@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>国際津波関連情報 - Zero Quake</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel='stylesheet' href='../node_modules/maplibre-gl/dist/maplibre-gl.css'>
+    <link rel="stylesheet" href="./css/map.css">
+    <link rel="stylesheet" href="./css/setting.css">
+    <meta name="color-scheme" content="dark">
+    <style>
+        body {
+            background: #222225;
+        }
+
+        h1 {
+            font-size: 30px;
+        }
+
+        section {
+            padding: 20px 10px;
+        }
+
+        section h2 {
+            margin: 10px 3px;
+            background: #3f3f42;
+            padding: 2px 10px 2px 17px;
+            border-radius: 5px;
+        }
+
+        section>div {
+            padding: 0 20px;
+        }
+
+        h1 {
+            text-align: center;
+            border-radius: 5px;
+        }
+
+        #headline {
+            color: #CCC;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        body {
+            overflow: auto;
+            font-size: 16px;
+            letter-spacing: .8px;
+            line-height: 1.7;
+            padding: 15px;
+        }
+
+        #Text,
+        #Appendix,
+        #Text2 {
+            display: none;
+        }
+
+
+        h1 {
+            border: solid 2px #62626c;
+        }
+
+        h1.happyo {
+            border-color: var(--TsunamiWatchColor);
+        }
+    </style>
+
+    <style>
+        * {
+            font-family: ui-monospace;
+        }
+
+        h3 {
+            margin: 10px 0 0 0;
+        }
+
+        section {
+            margin: 0.3em 0;
+        }
+
+        .indent {
+            text-indent: 1em;
+        }
+
+        .indent3 {
+            text-indent: 3em;
+        }
+
+        th,
+        td {
+            padding: 0 0.5em;
+            text-align: left;
+        }
+
+        table {
+            margin: 0 0 15px 00;
+        }
+
+        .table1 tr td:nth-child(1),
+        .table1 tr th:nth-child(1),
+        .table2 tr td:nth-child(1),
+        .table2 tr th:nth-child(1) {
+            width: 14em;
+        }
+
+        .table1 tr td:nth-child(2),
+        .table1 tr th:nth-child(2),
+        .table2 tr td:nth-child(2),
+        .table2 tr th:nth-child(2) {
+            width: 8em;
+        }
+
+        .table1 tr td:nth-child(3),
+        .table1 tr th:nth-child(3),
+        .table2 tr td:nth-child(3),
+        .table2 tr th:nth-child(3) {
+            width: 10em;
+        }
+
+        .table1 tr td:nth-child(4),
+        .table1 tr th:nth-child(4) {
+            width: 6em;
+        }
+
+        .table1 tr td:nth-child(5),
+        .table1 tr th:nth-child(5) {
+            width: 4em;
+        }
+
+        main {
+            min-width: 740px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="splash">
+        <img src="./img/icon.svg" width="256" height="256" alt="Zero Quakeロゴ" aria-hidden="true">
+        <div id="loading-wrap" aria-label="読み込み中"></div>
+    </div>
+
+    <main>
+        <header>
+            <h1 id="title">国際津波関連情報</h1>
+        </header>
+
+        <section>
+            <div>
+                <div id="header"></div>
+                津波速報番号 <span id="bulletin_number">-</span>
+                <div class="indent3">
+                    <div>発表者：<span id="by">-</span></div>
+                    <div>発表時：<span id="at">-</span></div>
+                </div>
+                <div id="part"></div>
+            </div>
+        </section>
+
+        <section id="hypocentral_parameters">
+            <h2>震源要素<span id="revision">(訂正)</span></h2>
+            <div>
+                <div>震源時：<span id="origin_time">-</span></div>
+                <div>暫定震源：<span id="preliminary_epicenter">-</span></div>
+                <div class="indent">
+                    <div id="area_regional">-</div>
+                    <div id="area_wider">-</div>
+                </div>
+                <div><span id="depth"></span><span id="mag"></span></div>
+                <div id="hyp_remarks"></span></div>
+            </div>
+        </section>
+
+        <section>
+            <h2>評価</h2>
+            <div id="evaluation"></div>
+        </section>
+
+        <section id="for_wrap">
+            <h2>対象地域</h2>
+            <div id="for"></div>
+        </section>
+
+
+        <section id="estimation_wrap">
+            <h2>津波の到達時刻と振幅の予測</h2>
+            <div>
+                <div id="estimation"></div>
+                <div id="remarks0_est"></div>
+                <div id="remarks1_est"></div>
+            </div>
+        </section>
+
+        <section id="observation_wrap">
+            <h2>津波の測定と報告</h2>
+            <div>
+                <div id="observation"></div>
+                <div>最大波高さ = 津波の山から谷までの振幅の半分</div>
+            </div>
+        </section>
+
+        <section>
+            <h2>情報の活用時における注意点</h2>
+            <div id="remarks"></div>
+        </section>
+
+        <a id="textLink" href="javascript:void(0)" aria-label="新しいウィンドウで国際津波関連情報の原文を見る"><span class="material-icons-round" aria-hidden="true">open_in_new</span>原文を見る</a>
+
+    </main>
+    <template id="table_base">
+        <table class="table1">
+            <thead>
+                <tr>
+                    <th>場所</th>
+                    <th>座標</th>
+                    <th>到達時刻</th>
+                    <th>津波高さ</th>
+                    <th>備考</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </template>
+    <template id="table_base2">
+        <table class="table2">
+            <thead>
+                <tr>
+                    <th>場所</th>
+                    <th>座標</th>
+                    <th>最大波到達時刻</th>
+                    <th>最大波高さ</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </template>
+
+
+    <script src="./js/UIcommon.js"></script>
+    <script>
+        var url;
+        window.electronAPI.messageSend((event, request) => {
+            if (request.action == "metadata") {
+                url = "https://www.jma.go.jp/bosai/pacifictsunami/data/wepa40/" + request.fname
+                fetch(url).then(function (res) { return res.text() }).then(function (text) {
+                    var json = decode_WEPA40orWEPA60(text + "\n(ETX)")
+                    console.log(json);
+                    draw(json)
+                    document.getElementById("splash").style.display = "none";
+                })
+            }
+        });
+
+        document.getElementById("textLink").addEventListener("click", function () {
+            window.open(url)
+        })
+
+
+        var FE_conv_table = { "CENTRAL ALASKA": "米国、アラスカ州中央部", "SOUTHERN ALASKA": "米国、アラスカ州南部", "BERING SEA": "ベーリング海", "KOMANDORSKY ISLANDS REGION": "ロシア、コマンドル諸島", "NEAR ISLANDS, ALEUTIAN ISLANDS": "アリューシャン列島ニア諸島", "RAT ISLANDS, ALEUTIAN ISLANDS": "アリューシャン列島ラット諸島", "ANDREANOF ISLANDS, ALEUTIAN IS.": "アリューシャン列島アンドリアノフ諸島", "PRIBILOF ISLANDS, ALASKA REGION": "米国、プリビロフ諸島", "FOX ISLANDS, ALEUTIAN ISLANDS": "アリューシャン列島フォックス諸島", "UNIMAK ISLAND REGION, ALASKA": "米国、アラスカ州ユーニマク島", "BRISTOL BAY": "米国、ブリストル湾", "ALASKA PENINSULA": "米国、アラスカ半島", "KODIAK ISLAND REGION, ALASKA": "米国、アラスカ州コディアク島", "KENAI PENINSULA, ALASKA": "米国、アラスカ州キーナイ半島", "GULF OF ALASKA": "アラスカ湾", "SOUTH OF ALEUTIAN ISLANDS": "アリューシャン列島南方", "SOUTH OF ALASKA": "アラスカ州南方", "SOUTHERN YUKON TERRITORY, CANADA": "カナダ、ユーコン準州南部", "SOUTHEASTERN ALASKA": "米国、アラスカ州南東部", "OFF COAST OF SOUTHEASTERN ALASKA": "米国、アラスカ州南東部沖", "WEST OF VANCOUVER ISLAND": "バンクーバー島西方", "QUEEN CHARLOTTE ISLANDS REGION": "カナダ、クイーンシャーロット諸島", "BRITISH COLUMBIA, CANADA": "カナダ、ブリティッシュコロンビア州", "ALBERTA, CANADA": "カナダ、アルバータ州", "VANCOUVER ISLAND, CANADA REGION": "カナダ、バンクーバー島", "OFF COAST OF WASHINGTON": "米国、ワシントン州沖", "NEAR COAST OF WASHINGTON": "米国、ワシントン州沿岸", "WASHINGTON-OREGON BORDER REGION": "米国、ワシントン／オレゴン州境", "WASHINGTON": "米国、ワシントン州", "OFF COAST OF OREGON": "米国、オレゴン州沖", "NEAR COAST OF OREGON": "米国、オレゴン州沿岸", "OREGON": "米国、オレゴン州", "WESTERN IDAHO": "米国、アイダホ州", "OFF COAST OF NORTHERN CALIFORNIA": "米国、カリフォルニア州北部沖", "NEAR COAST OF NORTHERN CALIF.": "米国、カリフォルニア州北部沿岸", "NORTHERN CALIFORNIA": "米国、カリフォルニア州北部", "NEVADA": "米国、ネバダ州", "OFF COAST OF CALIFORNIA": "米国、カリフォルニア州沖", "CENTRAL CALIFORNIA": "米国、カリフォルニア州中部", "CALIFORNIA-NEVADA BORDER REGION": "米国、カリフォルニア／ネバダ州境", "SOUTHERN NEVADA": "米国、ネバダ州", "WESTERN ARIZONA": "米国、アリゾナ州", "SOUTHERN CALIFORNIA": "米国、カリフォルニア州南部", "CALIFORNIA-ARIZONA BORDER REGION": "米国、カリフォルニア／アリゾナ州境", "CALIF.-BAJA CALIF. BORDER REGION": "カリフォルニア州（米国）／メキシコ国境", "W. ARIZONA-SONORA BORDER REGION": "アリゾナ州（米国）／ソノラ州（メキシコ）境", "OFF W. COAST OF BAJA CALIFORNIA": "メキシコ、バハカリフォルニア州西方沖", "BAJA CALIFORNIA, MEXICO": "メキシコ、バハカリフォルニア州", "GULF OF CALIFORNIA": "メキシコ、カリフォルニア湾", "SONORA, MEXICO": "メキシコ、ソノラ州", "OFF COAST OF CENTRAL MEXICO": "メキシコ中部沖", "NEAR COAST OF CENTRAL MEXICO": "メキシコ中部沿岸", "REVILLA GIGEDO ISLANDS REGION": "メキシコ、レビージャヒヘード諸島", "OFF COAST OF JALISCO, MEXICO": "メキシコ、ハリスコ州沖", "NEAR COAST OF JALISCO, MEXICO": "メキシコ、ハリスコ州沿岸", "NEAR COAST OF MICHOACAN, MEXICO": "メキシコ、ミチョアカン州沿岸", "MICHOACAN, MEXICO": "メキシコ、ミチョアカン州", "NEAR COAST OF GUERRERO, MEXICO": "メキシコ、ゲレロ州沿岸", "GUERRERO, MEXICO": "メキシコ、ゲレロ州", "OAXACA, MEXICO": "メキシコ、オアハカ州", "CHIAPAS, MEXICO": "メキシコ、チアパス州", "MEXICO-GUATEMALA BORDER REGION": "メキシコ／グアテマラ国境", "OFF COAST OF MEXICO": "メキシコ沖", "OFF COAST OF MICHOACAN, MEXICO": "メキシコ、ミチョアカン州沖", "OFF COAST OF GUERRERO, MEXICO": "メキシコ、ゲレロ州沖", "NEAR COAST OF OAXACA, MEXICO": "メキシコ、オアハカ州沿岸", "OFF COAST OF OAXACA, MEXICO": "メキシコ、オアハカ州沖", "OFF COAST OF CHIAPAS, MEXICO": "メキシコ、チアパス州沖", "NEAR COAST OF CHIAPAS, MEXICO": "メキシコ、チアパス州沿岸", "GUATEMALA": "グアテマラ", "NEAR COAST OF GUATEMALA": "グアテマラ沿岸", "HONDURAS": "ホンジュラス", "EL SALVADOR": "エルサルバドル", "NEAR COAST OF NICARAGUA": "ニカラグア沿岸", "NICARAGUA": "ニカラグア", "OFF COAST OF CENTRAL AMERICA": "中央アメリカ沖", "OFF COAST OF COSTA RICA": "コスタリカ沖", "COSTA RICA": "コスタリカ", "NORTH OF PANAMA": "パナマ北方", "PANAMA-COSTA RICA BORDER REGION": "パナマ／コスタリカ国境", "PANAMA": "パナマ", "PANAMA-COLOMBIA BORDER REGION": "パナマ／コロンビア国境", "SOUTH OF PANAMA": "パナマ南方", "YUCATAN PENINSULA, MEXICO": "メキシコ、ユカタン半島", "CUBA REGION": "キューバ", "JAMAICA REGION": "ジャマイカ", "HAITI REGION": "ハイチ", "DOMINICAN REPUBLIC REGION": "ドミニカ共和国", "MONA PASSAGE": "モナ海峡", "PUERTO RICO REGION": "プエルトリコ", "VIRGIN ISLANDS": "バージン諸島", "LEEWARD ISLANDS": "リワード諸島", "BELIZE": "ベリーズ", "CARIBBEAN SEA": "カリブ海", "WINDWARD ISLANDS": "ウィンドワード諸島", "NEAR NORTH COAST OF COLOMBIA": "コロンビア北岸", "NEAR COAST OF VENEZUELA": "ベネズエラ沿岸", "TRINIDAD": "トリニダード・トバゴ", "NORTHERN COLOMBIA": "コロンビア北部", "LAKE MARACAIBO, VENEZUELA": "ベネズエラ、マラカイボ湖", "VENEZUELA": "コロンビア西岸", "COLOMBIA": "コロンビア", "OFF COAST OF ECUADOR": "エクアドル沖", "NEAR COAST OF ECUADOR": "エクアドル沿岸", "COLOMBIA-ECUADOR BORDER REGION": "コロンビア／エクアドル国境", "ECUADOR": "エクアドル", "OFF COAST OF NORTHERN PERU": "ペルー北部沖", "NEAR COAST OF NORTHERN PERU": "ペルー北部沿岸", "PERU-ECUADOR BORDER REGION": "ペルー／エクアドル国境", "NORTHERN PERU": "ペルー北部", "PERU-BRAZIL BORDER REGION": "ペルー／ブラジル国境", "WESTERN BRAZIL": "ブラジル、アマゾナス州", "OFF COAST OF PERU": "ペルー沖", "NEAR COAST OF PERU": "ペルー沿岸", "CENTRAL PERU": "ペルー中部", "SOUTHERN PERU": "ペルー南部", "PERU-BOLIVIA BORDER REGION": "ペルー／ボリビア国境", "NORTHERN BOLIVIA": "ボリビア北部", "CENTRAL BOLIVIA": "ボリビア中部", "OFF COAST OF NORTHERN CHILE": "チリ北部沖", "NEAR COAST OF NORTHERN CHILE": "チリ北部沿岸", "NORTHERN CHILE": "チリ北部", "CHILE-BOLIVIA BORDER REGION": "チリ／ボリビア国境", "SOUTHERN BOLIVIA": "ボリビア南部", "PARAGUAY": "パラグアイ", "CHILE-ARGENTINA BORDER REGION": "チリ／アルゼンチン国境", "JUJUY PROVINCE, ARGENTINA": "アルゼンチン、フフイ州", "SALTA PROVINCE, ARGENTINA": "アルゼンチン、サルタ州", "CATAMARCA PROVINCE, ARGENTINA": "アルゼンチン、カタマルカ州", "TUCUMAN PROVINCE, ARGENTINA": "アルゼンチン、トゥクマン州", "SANTIAGO DEL ESTERO PROV., ARG.": "アルゼンチン、サンティアゴデルエステロ州", "NORTHEASTERN ARGENTINA": "アルゼンチン北東部", "OFF COAST OF CENTRAL CHILE": "チリ中部沖", "NEAR COAST OF CENTRAL CHILE": "チリ中部沿岸", "CENTRAL CHILE": "チリ中部", "SAN JUAN PROVINCE, ARGENTINA": "アルゼンチン、サンフアン州", "LA RIOJA PROVINCE, ARGENTINA": "アルゼンチン、ラリオハ州", "MENDOZA PROVINCE, ARGENTINA": "アルゼンチン、メンドサ州", "SAN LUIS PROVINCE, ARGENTINA": "アルゼンチン、サンルイス州", "CORDOBA PROVINCE, ARGENTINA": "アルゼンチン、コルドバ州", "URUGUAY": "ウルグアイ", "OFF COAST OF SOUTHERN CHILE": "チリ南部沖", "SOUTHERN CHILE": "チリ南部", "S. CHILE-ARGENTINA BORDER REGION": "チリ南部／アルゼンチン国境", "SOUTHERN ARGENTINA": "アルゼンチン南部", "TIERRA DEL FUEGO": "ティエラデルフエゴ", "FALKLAND ISLANDS REGION": "フォークランド諸島", "DRAKE PASSAGE": "ドレーク海峡", "SCOTIA SEA": "スコシア海", "SOUTH GEORGIA ISLAND REGION": "サウスジョージア島", "SOUTH GEORGIA RISE": "サウスジョージア海膨", "SOUTH SANDWICH ISLANDS REGION": "サウスサンドウィッチ諸島", "SOUTH SHETLAND ISLANDS": "サウスシェトランド諸島", "ANTARCTIC PENINSULA": "南極半島", "SOUTHWESTERN ATLANTIC OCEAN": "大西洋南西部", "WEDDELL SEA": "ニュージーランド、北島", "OFF E. COAST OF N. ISLAND, N.Z.": "ニュージーランド、北島東方沖", "OFF W. COAST OF S. ISLAND, N.Z.": "ニュージーランド、南島西方沖", "SOUTH ISLAND, NEW ZEALAND": "ニュージーランド、南島", "COOK STRAIT, NEW ZEALAND": "ニュージーランド、クック海峡", "OFF E. COAST OF S. ISLAND, N.Z.": "ニュージーランド、南島東方沖", "NORTH OF MACQUARIE ISLAND": "マクオーリー島北方", "AUCKLAND ISLANDS, N.Z.,REGION": "オークランド諸島", "MACQUARIE ISLAND REGION": "マクオーリー島", "SOUTH OF NEW ZEALAND": "ニュージーランド南方", "SAMOA ISLANDS REGION": "サモア諸島", "SAMOA ISLANDS": "サモア諸島", "SOUTH OF FIJI ISLANDS": "フィジー諸島南方", "WEST OF TONGA ISLANDS (NOT IN USE)": "トンガ諸島西方", "TONGA ISLANDS": "トンガ諸島", "TONGA ISLANDS REGION": "トンガ諸島", "SOUTH OF TONGA ISLANDS": "トンガ諸島南方", "NORTH OF NEW ZEALAND": "ニュージーランド北方", "KERMADEC ISLANDS REGION": "ケルマデック諸島", "KERMADEC ISLANDS, NEW ZEALAND": "ケルマデック諸島", "SOUTH OF KERMADEC ISLANDS": "ケルマデック諸島南方", "NORTH OF FIJI ISLANDS": "フィジー諸島北方", "FIJI ISLANDS REGION": "フィジー諸島", "FIJI ISLANDS": "フィジー諸島", "SANTA CRUZ ISLANDS REGION": "サンタクルーズ諸島", "SANTA CRUZ ISLANDS": "サンタクルーズ諸島", "VANUATU ISLANDS REGION": "バヌアツ諸島", "VANUATU ISLANDS": "バヌアツ諸島", "NEW CALEDONIA": "ニューカレドニア", "LOYALTY ISLANDS": "ローヤリティー諸島", "SOUTHEAST OF LOYALTY ISLANDS": "ローヤリティー諸島南東方", "NEW IRELAND REGION, P.N.G.": "パプアニューギニア、ニューアイルランド", "NORTH OF SOLOMON ISLANDS": "ソロモン諸島北方", "NEW BRITAIN REGION, P.N.G.": "パプアニューギニア、ニューブリテン", "SOLOMON ISLANDS": "ソロモン諸島", "D'ENTRECASTEAUX ISLANDS REGION": "パプアニューギニア、ダントルカストー", "SOUTH OF SOLOMON ISLANDS": "ソロモン諸島南方", "IRIAN JAYA REGION, INDONESIA": "インドネシア、パプア", "NEAR NORTH COAST OF IRIAN JAYA": "インドネシア、パプア北岸", "NINIGO ISLANDS REGION, P.N.G.": "パプアニューギニア、ニーニゴー諸島", "ADMIRALTY ISLANDS REGION, P.N.G.": "パプアニューギニア、アドミラルティ", "NEAR N COAST OF NEW GUINEA, PNG.": "パプアニューギニア、ニューギニア北岸", "IRIAN JAYA, INDONESIA": "インドネシア、パプア", "NEW GUINEA, PAPUA NEW GUINEA": "パプアニューギニア、ニューギニア", "BISMARCK SEA": "ビスマルク海", "ARU ISLANDS REGION, INDONESIA": "インドネシア、アルー諸島", "NEAR SOUTH COAST OF IRIAN JAYA": "インドネシア、パプア南岸", "NEAR S COAST OF NEW GUINEA, PNG.": "パプアニューギニア、ニューギニア南岸", "EASTERN NEW GUINEA REG., P.N.G.": "パプアニューギニア、ニューギニア東部", "ARAFURA SEA": "アラフラ海", "W. CAROLINE ISLANDS, MICRONESIA": "パラオ", "SOUTH OF MARIANA ISLANDS": "マリアナ諸島南方", "SOUTHEAST OF HONSHU, JAPAN": "本州南東方", "BONIN ISLANDS, JAPAN REGION": "小笠原諸島", "VOLCANO ISLANDS, JAPAN REGION": "硫黄列島", "WEST OF MARIANA ISLANDS": "マリアナ諸島西方", "MARIANA ISLANDS REGION": "マリアナ諸島", "MARIANA ISLANDS": "マリアナ諸島", "KAMCHATKA PENINSULA, RUSSIA": "ロシア、カムチャツカ半島", "NEAR EAST COAST OF KAMCHATKA": "ロシア、カムチャツカ半島東岸", "OFF EAST COAST OF KAMCHATKA": "ロシア、カムチャツカ半島東方沖", "NORTHWEST OF KURIL ISLANDS": "千島列島北西方", "KURIL ISLANDS": "千島列島", "EAST OF KURIL ISLANDS": "千島列島東方", "EASTERN SEA OF JAPAN": "日本海東部", "HOKKAIDO, JAPAN,REGION": "北海道", "OFF COAST OF HOKKAIDO, JAPAN": "北海道南東沖", "NEAR WEST COAST OF HONSHU, JAPAN": "本州東部西岸", "EASTERN HONSHU, JAPAN": "本州東部", "NEAR EAST COAST OF HONSHU, JAPAN": "本州東部東岸", "OFF EAST COAST OF HONSHU, JAPAN": "本州東方沖", "NEAR S. COAST OF HONSHU, JAPAN": "本州東部南岸", "SOUTH KOREA": "韓国", "WESTERN HONSHU, JAPAN": "本州西部", "NEAR S. COAST OF WESTERN HONSHU": "本州西部南岸", "NORTHWEST OF RYUKYU ISLANDS": "南西諸島北西方", "KYUSHU, JAPAN": "九州", "SHIKOKU, JAPAN": "四国", "SOUTHEAST OF SHIKOKU, JAPAN": "四国南東方", "RYUKYU ISLANDS, JAPAN": "南西諸島", "SOUTHEAST OF RYUKYU ISLANDS": "南西諸島南東方", "WEST OF BONIN ISLANDS": "小笠原諸島西方", "PHILIPPINE SEA": "フィリピン海", "NEAR COAST OF SOUTHEASTERN CHINA": "中国南東部沿岸", "TAIWAN REGION": "台湾", "TAIWAN": "台湾", "NORTHEAST OF TAIWAN": "台湾北東方", "SOUTHWESTERN RYUKYU ISL., JAPAN": "南西諸島南西部", "SOUTHEAST OF TAIWAN": "台湾南東方", "PHILIPPINE ISLANDS REGION": "フィリピン諸島", "LUZON, PHILIPPINES": "フィリピン諸島、ルソン", "MINDORO, PHILIPPINES": "フィリピン諸島、ミンドロ", "SAMAR, PHILIPPINES": "フィリピン諸島、サマル", "PALAWAN, PHILIPPINES": "フィリピン諸島、パラワン", "SULU SEA": "スールー海", "PANAY, PHILIPPINES": "フィリピン諸島、パナイ", "CEBU, PHILIPPINES": "フィリピン諸島、セブ", "LEYTE, PHILIPPINES": "フィリピン諸島、レイテ", "NEGROS, PHILIPPINES": "フィリピン諸島、ネグロス", "SULU ARCHIPELAGO, PHILIPPINES": "フィリピン諸島、スールー諸島", "MINDANAO, PHILIPPINES": "フィリピン諸島、ミンダナオ", "EAST OF PHILIPPINE ISLANDS": "フィリピン諸島東方", "BORNEO": "カリマンタン", "CELEBES SEA": "セレベス海", "TALAUD ISLANDS, INDONESIA": "インドネシア、タラウド諸島", "NORTH OF HALMAHERA, INDONESIA": "インドネシア、ハルマヘラ北方", "MINAHASSA PENINSULA, SULAWESI": "インドネシア、スラウェシ、ミナハサ半島", "NORTHERN MOLUCCA SEA": "モルッカ海", "HALMAHERA, INDONESIA": "インドネシア、ハルマヘラ", "SULAWESI, INDONESIA": "インドネシア、スラウェシ", "SOUTHERN MOLUCCA SEA": "スラ諸島", "CERAM SEA": "セラム海", "BURU, INDONESIA": "インドネシア、ブル", "SERAM, INDONESIA": "インドネシア、セラム", "SOUTHWEST OF SUMATERA, INDONESIA": "インドネシア、スマトラ南西方", "SOUTHERN SUMATERA, INDONESIA": "インドネシア、スマトラ南部", "JAVA SEA": "ジャワ海", "SUNDA STRAIT, INDONESIA": "スンダ海峡", "JAVA, INDONESIA": "インドネシア、ジャワ", "BALI SEA": "バリ海", "FLORES SEA": "フローレス海", "BANDA SEA": "バンダ海", "TANIMBAR ISLANDS REG., INDONESIA": "インドネシア、タニンバル諸島", "SOUTH OF JAVA, INDONESIA": "インドネシア、ジャワ南方", "BALI REGION, INDONESIA": "インドネシア、バリ", "SOUTH OF BALI, INDONESIA": "インドネシア、バリ南方", "SUMBAWA REGION, INDONESIA": "インドネシア、スンバワ", "FLORES REGION, INDONESIA": "インドネシア、フローレス", "SUMBA REGION, INDONESIA": "インドネシア、スンバ", "SAVU SEA": "サブ海", "TIMOR REGION": "ティモール島", "TIMOR SEA": "ティモール海", "SOUTH OF SUMBAWA, INDONESIA": "インドネシア、スンバワ南方", "SOUTH OF SUMBA, INDONESIA": "インドネシア、スンバ南方", "SOUTH OF TIMOR, INDONESIA": "ティモール南方", "MYANMAR-INDIA BORDER REGION": "ミャンマー／インド国境", "MYANMAR-BANGLADESH BORDER REGION": "ミャンマー／バングラデシュ国境", "MYANMAR": "ミャンマー", "MYANMAR-CHINA BORDER REGION": "ミャンマー／中国国境", "NEAR SOUTH COAST OF MYANMAR": "ミャンマー南岸", "SOUTHEAST ASIA (NOT IN USE)": "アジア南東部", "HAINAN ISLAND, CHINA": "中国、海南島", "SOUTH CHINA SEA": "カシミール／チベット自治区（中国）境界", "#N/A": "チベット自治区西部（中国）／インド国境", "XIZANG": "チベット自治区（中国）", "SICHUAN, CHINA": "中国、スーチョワン（四川）省", "NORTHERN INDIA": "インド北部", "NEPAL-INDIA BORDER REGION": "ネパール／インド国境", "NEPAL": "ネパール", "SIKKIM, INDIA": "インド、シッキム州", "BHUTAN": "ブータン", "EASTERN XIZANG-INDIA BORDER REG.": "チベット自治区東部（中国）／インド国境", "SOUTHERN INDIA": "インド南部", "INDIA-BANGLADESH BORDER REGION": "インド／バングラデシュ国境", "BANGLADESH": "バングラデシュ", "NORTHEASTERN INDIA": "インド北東部", "YUNNAN, CHINA": "中国、ユンナン（雲南）省", "BAY OF BENGAL": "ベンガル湾", "KYRGYZSTAN-XINJIANG BORDER REG.": "キルギス／シンチアンウイグル自治区（中国）国境", "SOUTHERN XINJIANG, CHINA": "中国、シンチアンウイグル自治区南部", "GANSU, CHINA": "中国、カンスー（甘粛）省", "WESTERN NEI MONGOL, CHINA": "中国、ネイモンクー（内蒙古）自治区西部", "KASHMIR-XINJIANG BORDER REGION": "カシミール／シンチアンウイグル自治区（中国）境界", "QINGHAI, CHINA": "中国、チンハイ（青海）省", "SOUTHWESTERN SIBERIA, RUSSIA": "ロシア、シベリア南西部", "LAKE BAYKAL REGION, RUSSIA": "ロシア、バイカル湖", "EAST OF LAKE BAYKAL, RUSSIA": "ロシア、バイカル湖東方", "EASTERN KAZAKHSTAN": "カザフスタン東部", "LAKE ISSYK-KUL REGION": "キルギス、イシククル湖", "KAZAKHSTAN-XINJIANG BORDER REG.": "カザフスタン／シンチアンウイグル自治区（中国）国境", "NORTHERN XINJIANG, CHINA": "中国、シンチアンウイグル自治区北部", "RUSSIA-MONGOLIA BORDER REGION": "ロシア／モンゴル国境", "MONGOLIA": "モンゴル", "URAL MOUNTAINS REGION, RUSSIA": "ロシア、ウラル山脈", "WESTERN KAZAKHSTAN": "カザフスタン西部", "EASTERN CAUCASUS": "コーカサス", "CASPIAN SEA": "カスピ海", "NORTHWESTERN UZBEKISTAN": "ウズベキスタン", "TURKMENISTAN": "トルクメニスタン", "TURKMENISTAN-IRAN BORDER REGION": "トルクメニスタン／イラン国境", "TURKMENISTAN-AFGHANISTAN BRD REG": "トルクメニスタン／アフガニスタン国境", "TURKEY-IRAN BORDER REGION": "トルコ／イラン国境", "ARMENIA-AZERBAIJAN-IRAN BORD REG": "イラン／アルメニア／アゼルバイジャン国境", "NORTHWESTERN IRAN": "イラン", "IRAN-IRAQ BORDER REGION": "イラン／イラク国境", "WESTERN IRAN": "イラン", "NORTHERN AND CENTRAL IRAN": "イラン", "NORTHWESTERN AFGHANISTAN": "アフガニスタン", "SOUTHWESTERN AFGHANISTAN": "アフガニスタン", "EASTERN ARABIAN PENINSULA": "アラビア半島東部", "PERSIAN GULF": "ペルシャ湾", "SOUTHERN IRAN": "イラン", "SOUTHWESTERN PAKISTAN": "パキスタン南西部", "GULF OF OMAN": "オマーン湾", "OFF COAST OF PAKISTAN": "パキスタン沖", "UKRAINE-MOLDOVA-SW RUSSIA REGION": "ウクライナ／モルドバ／ロシア南西部", "ROMANIA": "ルーマニア", "BULGARIA": "ブルガリア", "BLACK SEA": "黒海", "CRIMEA REGION, UKRAINE": "ウクライナ、クリミア", "WESTERN CAUCASUS": "コーカサス", "GREECE-BULGARIA BORDER REGION": "ギリシャ／ブルガリア国境", "GREECE": "ギリシャ", "AEGEAN SEA": "エーゲ海", "TURKEY": "トルコ", "GEORGIA-ARMENIA-TURKEY BORD REG.": "トルコ／ジョージア／アルメニア国境", "SOUTHERN GREECE": "ギリシャ南部", "DODECANESE ISLANDS, GREECE": "ギリシャ、ドデカネス諸島", "CRETE, GREECE": "ギリシャ、クレタ", "EASTERN MEDITERRANEAN SEA": "地中海東部", "CYPRUS REGION": "キプロス", "DEAD SEA REGION": "死海", "JORDAN - SYRIA REGION": "ヨルダン／シリア", "IRAQ": "イラク", "PORTUGAL": "ポルトガル", "SPAIN": "スペイン", "PYRENEES": "ピレネー山脈", "NEAR SOUTH COAST OF FRANCE": "フランス南岸", "CORSICA, FRANCE": "フランス、コルシカ", "CENTRAL ITALY": "イタリア中央部", "ADRIATIC SEA": "アドリア海", "NORTHWESTERN BALKAN REGION": "バルカン半島北西部", "WEST OF GIBRALTAR": "ジブラルタル西方", "STRAIT OF GIBRALTAR": "ジブラルタル海峡", "BALEARIC ISLANDS, SPAIN": "スペイン、バレアレス諸島", "WESTERN MEDITERRANEAN SEA": "地中海西部", "SARDINIA, ITALY": "イタリア、サルデーニャ", "TYRRHENIAN SEA": "ティレニア海", "SOUTHERN ITALY": "イタリア南部", "ALBANIA": "アルバニア", "GREECE-ALBANIA BORDER REGION": "ギリシャ／アルバニア国境", "MADEIRA ISLANDS, PORTUGAL REGION": "ポルトガル、マデイラ諸島", "CANARY ISLANDS, SPAIN REGION": "スペイン、カナリア諸島", "MOROCCO": "モロッコ", "NORTHERN ALGERIA": "アルジェリア北部", "TUNISIA": "チュニジア", "SICILY, ITALY": "イタリア、シチリア", "IONIAN SEA": "イオニア海", "CENTRAL MEDITERRANEAN SEA": "地中海中央部", "NEAR COAST OF LIBYA": "リビア沿岸", "NORTH ATLANTIC OCEAN": "北大西洋", "NORTHERN MID-ATLANTIC RIDGE": "大西洋中央海嶺北部", "AZORES ISLANDS REGION": "アゾレス諸島", "AZORES ISLANDS, PORTUGAL": "アゾレス諸島", "CENTRAL MID-ATLANTIC RIDGE": "大西洋中央海嶺中部", "NORTH OF ASCENSION ISLAND": "アセンション島北方", "ASCENSION ISLAND REGION": "アセンション島", "SOUTH ATLANTIC OCEAN": "南大西洋", "SOUTHERN MID-ATLANTIC RIDGE": "大西洋中央海嶺南部", "TRISTAN DA CUNHA REGION": "トリスタンダクーニャ諸島", "BOUVET ISLAND REGION": "ブーヴェ島", "SOUTHWEST OF AFRICA": "アフリカ南西方", "SOUTHEASTERN ATLANTIC OCEAN": "大西洋南東部", "EASTERN GULF OF ADEN": "アデン湾", "SOCOTRA REGION": "ソコトラ島", "ARABIAN SEA": "アラビア海", "LAKSHADWEEP REGION, INDIA": "インド、ラクシャドウィープ", "NORTHEASTERN SOMALIA": "ソマリア北東部", "NORTH INDIAN OCEAN": "北インド洋", "CARLSBERG RIDGE": "カールスバーグ海嶺", "MALDIVE ISLANDS REGION": "モルディブ諸島", "LACCADIVE SEA": "ラカディブ海", "SRI LANKA": "スリランカ", "SOUTH INDIAN OCEAN": "南インド洋", "CHAGOS ARCHIPELAGO REGION": "チャゴス諸島", "MAURITIUS - REUNION REGION": "モーリシャス／レユニオン", "SOUTHWEST INDIAN RIDGE": "南西インド洋海嶺", "MID-INDIAN RIDGE": "中央インド洋海嶺", "SOUTH OF AFRICA": "アフリカ南方", "PRINCE EDWARD ISLANDS REGION": "南アフリカ、プリンスエドワード諸島", "CROZET ISLANDS REGION": "クロゼ諸島", "KERGUELEN ISLANDS REGION": "ケルゲレン諸島", "BROKEN RIDGE": "ブロークン海嶺", "SOUTHEAST INDIAN RIDGE": "南東インド洋海嶺", "SOUTHERN KERGUELEN PLATEAU": "ケルゲレン海台南部", "SOUTH OF AUSTRALIA": "ハドソン湾", "ONTARIO, CANADA": "カナダ、オンタリオ州", "HUDSON STRAIT REGION, CANADA": "カナダ、ハドソン海峡", "NORTHERN QUEBEC, CANADA": "カナダ、ケベック州北部", "DAVIS STRAIT": "デービス海峡", "LABRADOR, CANADA": "カナダ、ラブラドル", "LABRADOR SEA": "ラブラドル海", "SOUTHERN QUEBEC, CANADA": "カナダ、ケベック州南部", "GASPE PENINSULA, CANADA": "カナダ、ガスペ半島", "EASTERN QUEBEC, CANADA": "カナダ、ケベック州東部", "ANTICOSTI ISLAND, CANADA": "カナダ、アンチコスチ島", "NEW BRUNSWICK, CANADA": "カナダ、ニューブランズウィック州", "NOVA SCOTIA, CANADA": "カナダ、ノバスコシア州", "PRINCE EDWARD ISLAND, CANADA": "カナダ、プリンスエドワード島", "GULF OF ST. LAWRENCE": "セントローレンス湾", "NEWFOUNDLAND, CANADA": "カナダ、ニューファンドランド", "MONTANA": "米国、モンタナ州", "EASTERN IDAHO": "米国、アイダホ州", "HEBGEN LAKE REGION": "米国、モンタナ州ヘブゲン湖", "YELLOWSTONE REGION, WYOMING": "米国、ワイオミング州イエローストーン", "WYOMING": "米国、ワイオミング州", "NORTH DAKOTA": "米国、ノースダコタ州", "SOUTH DAKOTA": "米国、サウスダコタ州", "NEBRASKA": "米国、ネブラスカ州", "MINNESOTA": "米国、ミネソタ州", "IOWA": "米国、アイオワ州", "WISCONSIN": "米国、ウィスコンシン州", "ILLINOIS": "米国、イリノイ州", "MICHIGAN": "米国、ミシガン州", "INDIANA": "米国、インディアナ州", "SOUTHERN ONTARIO, CANADA": "カナダ、オンタリオ州南部", "OHIO": "米国、オハイオ州", "NEW YORK": "米国、ニューヨーク州", "PENNSYLVANIA": "米国、ペンシルバニア州", "VERMONT - NEW HAMPSHIRE REGION": "米国、バーモント／ニューハンプシャー州", "MAINE": "米国、メーン州", "SOUTHERN NEW ENGLAND": "米国、ニューイングランド南部", "GULF OF MAINE": "米国、メーン湾", "UTAH": "米国、ユタ州", "COLORADO": "米国、コロラド州", "KANSAS": "米国、カンザス州", "IOWA-MISSOURI BORDER REGION": "米国、アイオワ／ミズーリ州境", "MISSOURI-KANSAS BORDER REGION": "米国、ミズーリ／カンザス州境", "MISSOURI": "米国、ミズーリ州", "MISSOURI-ARKANSAS BORDER REGION": "米国、ミズーリ／アーカンソー州境", "EASTERN MISSOURI": "米国、ミズーリ／イリノイ州境", "NEW MADRID, MISSOURI,REGION": "米国、ミズーリ州", "CAPE GIRARDEAU, MISSOURI,REGION": "米国、ミズーリ州", "SOUTHERN ILLINOIS": "米国、イリノイ州南部", "SOUTHERN INDIANA": "米国、インディアナ州南部", "KENTUCKY": "米国、ケンタッキー州", "WEST VIRGINIA": "米国、ウェストバージニア州", "VIRGINIA": "米国、バーニジア州", "CHESAPEAKE BAY REGION": "米国、チェサピーク湾", "NEW JERSEY": "米国、ニュージャージー州", "EASTERN ARIZONA": "米国、アリゾナ州", "NEW MEXICO": "米国、ニューメキシコ州", "TEXAS PANHANDLE REGION": "米国、テキサス州北西部／オクラホマ州境", "WESTERN TEXAS": "米国、テキサス州西部", "OKLAHOMA": "米国、オクラホマ州", "CENTRAL TEXAS": "米国、テキサス州中部", "ARKANSAS-OKLAHOMA BORDER REGION": "米国、アーカンソー／オクラホマ州境", "ARKANSAS": "米国、アーカンソー州", "LOUISIANA-TEXAS BORDER REGION": "米国、ルイジアナ／テキサス州境", "LOUISIANA": "米国、ルイジアナ州", "MISSISSIPPI": "米国、ミシシッピ州", "TENNESSEE": "米国、テネシー州", "ALABAMA": "米国、アラバマ州", "WESTERN FLORIDA": "米国、フロリダ州西部", "GEORGIA, USA": "米国、ジョージア州", "FLORIDA-GEORGIA BORDER REGION": "米国、フロリダ／ジョージア州境", "SOUTH CAROLINA": "米国、サウスカロライナ州", "NORTH CAROLINA": "米国、ノースカロライナ州", "OFF EAST COAST OF UNITED STATES": "米国東方沖", "FLORIDA PENINSULA": "米国、フロリダ半島", "BAHAMA ISLANDS": "バハマ諸島", "E. ARIZONA-SONORA BORDER REGION": "アリゾナ州（米国）／ソノラ州（メキシコ）境", "NEW MEXICO-CHIHUAHUA BORDER REG.": "ニューメキシコ州（米国）／チワワ州（メキシコ）境", "TEXAS-MEXICO BORDER REGION": "テキサス州（米国）／メキシコ国境", "SOUTHERN TEXAS": "米国、テキサス州南部", "NEAR COAST OF TEXAS": "米国、テキサス州沿岸", "CHIHUAHUA, MEXICO": "メキシコ、チワワ州", "NORTHERN MEXICO": "メキシコ北部", "CENTRAL MEXICO": "メキシコ中部", "JALISCO, MEXICO": "メキシコ、ハリスコ州", "VERACRUZ, MEXICO": "メキシコ、ベラクルス州", "GULF OF MEXICO": "メキシコ湾", "BAY OF CAMPECHE": "カンペチェ湾", "BRAZIL": "ブラジル", "GUYANA": "ガイアナ", "SURINAME": "スリナム", "FRENCH GUIANA": "仏領ギアナ", "IRELAND": "アイルランド", "UNITED KINGDOM": "イギリス", "NORTH SEA": "北海", "SOUTHERN NORWAY": "ノルウェー南部", "SWEDEN": "スウェーデン", "BALTIC SEA": "バルト海", "FRANCE": "フランス", "BAY OF BISCAY": "ビスケー湾", "THE NETHERLANDS": "オランダ", "BELGIUM": "ベルギー", "DENMARK": "デンマーク", "GERMANY": "ドイツ", "SWITZERLAND": "スイス", "NORTHERN ITALY": "イタリア北部", "AUSTRIA": "オーストリア", "CZECH AND SLOVAK REPUBLICS": "チェコ及びスロバキア", "POLAND": "ポーランド", "HUNGARY": "ハンガリー", "NORTHWEST AFRICA (NOT IN USE)": "アフリカ北西部", "SOUTHERN ALGERIA": "アルジェリア南部", "LIBYA": "リビア", "EGYPT": "エジプト", "RED SEA": "紅海", "WESTERN ARABIAN PENINSULA": "アラビア半島西部", "CHAD REGION": "チャド", "SUDAN": "スーダン", "ETHIOPIA": "エチオピア", "WESTERN GULF OF ADEN": "アデン湾", "NORTHWESTERN SOMALIA": "ソマリア北西部", "OFF S. COAST OF NORTHWEST AFRICA": "北西アフリカ南方沖", "CAMEROON": "カメルーン", "EQUATORIAL GUINEA": "赤道ギニア", "CENTRAL AFRICAN REPUBLIC": "中央アフリカ共和国", "GABON": "ガボン", "REPUBLIC OF CONGO": "コンゴ共和国", "DEMOCRATIC REPUBLIC OF CONGO": "コンゴ民主共和国", "UGANDA": "ウガンダ", "LAKE VICTORIA REGION": "ビクトリア湖", "KENYA": "ケニア", "SOUTHERN SOMALIA": "ソマリア南部", "LAKE TANGANYIKA REGION": "タンガニーカ湖", "TANZANIA": "タンザニア", "NORTHWEST OF MADAGASCAR": "マダガスカル北西方", "ANGOLA": "アンゴラ", "ZAMBIA": "ザンビア", "MALAWI": "マラウイ", "NAMIBIA": "ナミビア", "BOTSWANA": "ボツワナ", "ZIMBABWE": "ジンバブエ", "MOZAMBIQUE": "モザンビーク", "MOZAMBIQUE CHANNEL": "モザンビーク海峡", "MADAGASCAR": "マダガスカル", "SOUTH AFRICA": "南アフリカ共和国", "LESOTHO": "レソト", "SWAZILAND": "スワジランド", "OFF COAST OF SOUTH AFRICA": "オーストラリア、ノーザンテリトリー", "SOUTH AUSTRALIA": "オーストラリア、サウスオーストラリア", "GULF OF CARPENTARIA": "オーストラリア、カーペンタリア湾", "QUEENSLAND, AUSTRALIA": "オーストラリア、クィーンズランド", "CORAL SEA": "コーラル海", "NORTHWEST OF NEW CALEDONIA": "ニューカレドニア北西方", "SOUTHWEST OF NEW CALEDONIA": "ニューカレドニア", "SOUTHWEST OF AUSTRALIA": "オーストラリア南西方", "OFF SOUTH COAST OF AUSTRALIA": "オーストラリア南方沖", "NEAR COAST OF SOUTH AUSTRALIA": "オーストラリア南岸", "NEW SOUTH WALES, AUSTRALIA": "オーストラリア、ニューサウスウェールズ", "VICTORIA, AUSTRALIA": "オーストラリア、ビクトリア", "NEAR S.E. COAST OF AUSTRALIA": "オーストラリア南東岸", "NEAR EAST COAST OF AUSTRALIA": "オーストラリア東岸", "EAST OF AUSTRALIA": "オーストラリア東方", "NORFOLK ISLAND REGION": "オーストラリア、ノーフォーク島", "NORTHWEST OF NEW ZEALAND": "ニュージーランド北西方", "BASS STRAIT": "オーストラリア、バス海峡", "TASMANIA REGION, AUSTRALIA REGION": "オーストラリア、タスマニア", "SOUTHEAST OF AUSTRALIA": "オーストラリア南東方", "NORTH PACIFIC OCEAN": "北太平洋", "HAWAIIAN ISLANDS REGION": "ハワイ諸島", "HAWAII": "ハワイ諸島", "E. CAROLINE ISLANDS, MICRONESIA": "ミクロネシア連邦", "MARSHALL ISLANDS REGION": "マーシャル諸島", "ENEWETAK ATOLL REG, MARSHALL IS.": "マーシャル諸島", "BIKINI ATOLL REG., MARSHALL IS.": "マーシャル諸島", "GILBERT ISLANDS, KIRIBATI REGION": "キリバス、ギルバート諸島", "JOHNSTON ISLAND REGION": "ジョンストン島", "LINE ISLANDS REGION, KIRIBATI": "キリバス、ライン諸島", "PALMYRA ISLAND REGION, KIRIBATI": "キリバス、パルミラ島", "KIRITIMATI REGION, KIRIBATI": "キリバス、キリティマティ", "TUVALU REGION": "ツバル", "PHOENIX ISLANDS, KIRIBATI REGION": "キリバス、フェニックス諸島", "TOKELAU ISLANDS REGION": "トケラウ諸島", "NORTHERN COOK ISLANDS": "クック諸島北部", "COOK ISLANDS REGION": "クック諸島", "SOCIETY ISLANDS REGION": "ソシエテ諸島", "TUBUAI ISLANDS REGION": "トゥブアイ諸島", "MARQUESAS ISLANDS REGION": "マルキーズ諸島", "TUAMOTU ARCHIPELAGO REGION": "トゥアモトウ諸島", "SOUTH PACIFIC OCEAN": "南太平洋", "LOMONOSOV RIDGE": "ロモノソフ海嶺", "ARCTIC OCEAN": "北極海", "NEAR NORTH COAST OF GREENLAND": "グリーンランド（カラーリットヌナート）北岸", "EASTERN GREENLAND": "グリーンランド（カラーリットヌナート）東部", "ICELAND REGION": "アイスランド", "ICELAND": "アイスランド", "JAN MAYEN ISLAND REGION": "ヤンマイエン島", "GREENLAND SEA": "グリーンランド海", "NORTH OF SVALBARD": "スバールバル北方", "NORWEGIAN SEA": "ノルウェー海", "SVALBARD REGION": "ノルウェー、スバールバル", "NORTH OF FRANZ JOSEF LAND": "フランツヨーゼフランド北方", "FRANZ JOSEF LAND, RUSSIA": "ロシア、フランツヨーゼフランド", "NORTHERN NORWAY": "ノルウェー北部", "BARENTS SEA": "バレンツ海", "NOVAYA ZEMLYA, RUSSIA": "ロシア、ノバヤゼムリャ", "KARA SEA": "カラ海", "NEAR COAST OF W. SIBERIA, RUSSIA": "ロシア、シベリア北西部沿岸", "NORTH OF SEVERNAYA ZEMLYA": "セーベルナヤゼムリャ北方", "SEVERNAYA ZEMLYA, RUSSIA": "ロシア、セーベルナヤゼムリャ", "NEAR COAST OF C. SIBERIA, RUSSIA": "ロシア、シベリア北部沿岸", "EAST OF SEVERNAYA ZEMLYA, RUSSIA": "セーベルナヤゼムリャ東方", "LAPTEV SEA": "ラプテフ海", "SOUTHEASTERN SIBERIA, RUSSIA": "ロシア、シベリア南東部", "E. RUSSIA-N.E. CHINA BORDER REG.": "ロシア東部／中国北東部国境", "NORTHEASTERN CHINA": "中国北東部", "NORTH KOREA": "北朝鮮", "SEA OF JAPAN": "日本海", "PRIMOR'YE, RUSSIA": "ロシア、沿海地方", "SAKHALIN, RUSSIA": "ロシア、サハリン島", "SEA OF OKHOTSK": "オホーツク海", "SOUTHEASTERN CHINA": "中国南東部", "YELLOW SEA": "黄海", "OFF EASY COAST OF EASTERN CHINA": "中国南東部東方沖", "NORTH OF NEW SIBERIAN ISLANDS": "ノボシビルスク（ニューシベリアン）諸島北方", "NEW SIBERIAN ISLANDS, RUSSIA": "ロシア、ノボシビルスク（ニューシベリアン）諸島", "EAST SIBERIAN SEA": "東シベリア海", "NEAR N. COAST OF EASTERN SIBERIA": "ロシア、シベリア東部北岸", "EASTERN SIBERIA, RUSSIA": "ロシア、シベリア東部", "CHUKCHI SEA": "チュクチ海", "BERING STRAIT": "ベーリング海峡", "ST. LAWRENCE ISLAND, ALASKA REG.": "米国、セントローレンス島", "BEAUFORT SEA": "ボーフォート海", "NORTHERN ALASKA": "米国、アラスカ北部", "NORTHERN YUKON TERRITORY, CANADA": "カナダ、ユーコン準州北部", "QUEEN ELIZABETH ISLANDS, CANADA": "カナダ、クイーンエリザベス諸島", "NW TERRITORIES - NUNAVUT, CANADA": "カナダ、ノースウェスト準州", "WESTERN GREENLAND": "グリーンランド（カラーリットヌナート）西部", "BAFFIN BAY": "バフィン湾", "BAFFIN ISLAND REGION, CANADA": "カナダ、バフィン島", "SOUTHEAST CENTRAL PACIFIC OCEAN": "中央太平洋南東部", "SOUTHERN EAST PACIFIC RISE": "東太平洋海膨南部", "EASTER ISLAND REGION": "イースター島", "WEST CHILE RISE": "西チリ海膨", "JUAN FERNANDEZ ISLANDS REGION": "チリ、ファンフェルナンデス群島", "EAST OF NORTH ISLAND, N.Z.": "ニュージーランド北島東方", "CHATHAM ISLANDS, N.Z. REGION": "ニュージーランド、チャタム諸島", "SOUTH OF CHATHAM ISLANDS": "チャタム諸島南方", "PACIFIC-ANTARCTIC RIDGE": "太平洋／南極海嶺", "SOUTHERN PACIFIC OCEAN": "ガラパゴス諸島", "WEST OF GALAPAGOS ISLANDS": "ガラパゴス諸島西方", "GALAPAGOS ISLANDS REGION": "ガラパゴス諸島", "SOUTHWEST OF GALAPAGOS ISLANDS": "ガラパゴス諸島南西方", "SOUTHEAST OF GALAPAGOS ISLANDS": "インドネシア、スマトラ北部西方沖", "SOUTH OF TASMANIA": "タスマニア南方", "WEST OF MACQUARIE ISLAND": "マクオーリー島西方", "BALLENY ISLANDS REGION": "バレニー諸島", "ANDAMAN ISLANDS, INDIA REGION": "インド、アンダマン諸島", "NICOBAR ISLANDS, INDIA REGION": "インド、ニコバル諸島", "NORTHERN SUMATERA, INDONESIA": "インドネシア、スマトラ北部", "MALAY PENINSULA": "マレー半島", "GULF OF THAILAND": "タイ湾", "SOUTHEASTERN AFGHANISTAN": "アフガニスタン", "PAKISTAN": "パキスタン", "SOUTHWESTERN KASHMIR": "カシミール南西部", "INDIA-PAKISTAN BORDER REGION": "インド／パキスタン国境", "CENTRAL KAZAKHSTAN": "カザフスタン中部", "SOUTHEASTERN UZBEKISTAN": "ウズベキスタン", "TAJIKISTAN": "タジキスタン", "KYRGYZSTAN": "キルギス", "AFGHANISTAN-TAJIKISTAN BORD REG.": "アフガニスタン／タジキスタン国境", "HINDU KUSH REGION, AFGHANISTAN": "アフガニスタン、ヒンドゥークシ", "TAJIKISTAN-XINJIANG BORDER REG.": "タジキスタン／シンチアンウイグル自治区（中国）境", "NORTHWESTERN KASHMIR": "カシミール北西部", "FINLAND": "フィンランド", "NORWAY-RUSSIA BORDER REGION": "ノルウェー／ムルマンスク（ロシア）境", "FINLAND-RUSSIA BORDER REGION": "フィンランド／カレリア共和国（ロシア）境", "BALTIC-BELARUS-NW RUSSIA REG.": "バルト諸国／ベラルーシ／ロシア北西部", "NORTHWESTERN SIBERIA, RUSSIA": "ロシア、シベリア北西部", "NORTHCENTRAL SIBERIA, RUSSIA": "ロシア、シベリア北・中部", "VICTORIA LAND, ANTARCTICA": "南極、ビクトリアランド", "ROSS SEA": "ロス海", "ANTARCTICA": "南極大陸" }
+        var conv_table = {
+            "0.3-1M": "0.3-1m",
+            "1-3M": "1-3m",
+            "3-5M": "3-5m",
+            "5-10M": "5-10m",
+            "OVER10M": "10m超",
+            "HUGE": "巨大",
+            "HIGH": "高い",
+            "----": "-"
+        }
+        var conv_table_narrator = {
+            "0.3-1M": "0.3から1メートル",
+            "1-3M": "1から3メートル",
+            "3-5M": "3から5メートル",
+            "5-10M": "5から10メートル",
+            "OVER10M": "10メートル超",
+            "HUGE": "巨大",
+            "HIGH": "高い",
+            "----": "発表なし"
+        }
+        var conv_table2 = {
+            "ADDITION": "(追加)",
+            "REVISION": "(改訂)",
+            "CANCELLATION": "(取消)"
+        }
+        var report_date_UTC = new Date()
+
+        function draw(json) {
+            if (json.header) document.getElementById("header").innerText = json.header
+
+            if (json.issue.bulletin_number) document.getElementById("bulletin_number").innerText = json.issue.bulletin_number
+            if (json.issue.by) document.getElementById("by").innerText = json.issue.by
+            if (json.issue.at) {
+                var at = new Date(json.issue.at.year, json.issue.at.month_num - 1, json.issue.at.date, json.issue.at.hour, json.issue.at.minute)
+                if (at.toString() !== "Invalid Date") {
+                    report_date_UTC = at
+                    document.getElementById("at").innerText = NormalizeDate(4, ConvertJST(at)) + " JST"
+                }
+            }
+            if (json.issue.part && json.issue.part.number && json.issue.part.total) {
+                document.getElementById("part").innerText = `${json.issue.part.number}通目 / ${json.issue.part.total}通中`
+            }
+
+
+
+            document.getElementById("revision").style.display = json.hypocentral_parameters.status == "REVISION" ? "inline" : "none"
+
+            document.getElementById("hypocentral_parameters").style.display = json.hypocentral_parameters ? "block" : "none"
+            if (json.hypocentral_parameters.origin_time) {
+                var ot = json.hypocentral_parameters.origin_time
+                var date = new Date(ot.year, ot.month_num - 1, ot.date, ot.hour, ot.minute)
+                if (date.toString() !== "Invalid Date") {
+                    document.getElementById("origin_time").innerText = NormalizeDate(4, ConvertJST(date)) + " JST"
+                }
+            }
+            var ec = json.hypocentral_parameters.preliminary_epicenter
+            if (ec) {
+                if (ec.lat && ec.lon) {
+                    document.getElementById("preliminary_epicenter").innerText = `${ec.lat >= 0 ? "北緯" : "南緯"}${Math.abs(ec.lat).toFixed(1)}度　${ec.lon >= 0 ? "東経" : "西経"}${Math.abs(ec.lon).toFixed(1)}度`
+                }
+                if (ec.geographical_area_regional) {
+                    var rname = ec.geographical_area_regional
+                    document.getElementById("area_regional").innerText = FE_conv_table[rname] ? FE_conv_table[rname] : rname
+                }
+                if (ec.geographical_area_wider) document.getElementById("area_wider").innerText = ec.geographical_area_wider
+
+            }
+
+            if (json.hypocentral_parameters.focal_depth && json.hypocentral_parameters.focal_depth.value) {
+                var str = "震源深さ:" + json.hypocentral_parameters.focal_depth.value + "km "
+                document.getElementById("depth").innerText = str
+            }
+            if (json.hypocentral_parameters.mag && json.hypocentral_parameters.mag.value) {
+                var val = json.hypocentral_parameters.mag.value
+                if (isNaN(val)) val = val.replace("OVER 8", "8以上")
+                else val = val.toFixed(1)
+                var str = "マグニチュード:" + val
+
+                if (json.hypocentral_parameters.mag.type) {
+                    str += ` (${json.hypocentral_parameters.mag.type})`
+                }
+                document.getElementById("mag").innerText = str
+            }
+            document.getElementById("hyp_remarks").innerText = json.hypocentral_parameters.remarks
+
+            document.getElementById("evaluation").innerText = json.evaluation
+
+            if (json.target_blocks && Array.isArray(json.target_blocks) && json.target_blocks.length) {
+                var str = []
+                json.target_blocks.forEach(function (e) {
+                    var status = e.status ? `(${e.status})` : ""
+                    str.push(e.block + status)
+                })
+                document.getElementById("for").innerText = str.join("\n")
+                document.getElementById("for_wrap").style.display = "block"
+            } else document.getElementById("for_wrap").style.display = "none"
+
+            document.getElementById("estimation_wrap").style.display = json.estimation ? "block" : "none"
+            if (json.estimation) {
+                json.estimation.blocks.forEach(function (el) {
+                    var h3 = document.createElement("h3")
+                    h3.innerText = el.block
+                    document.getElementById("estimation").appendChild(h3)
+
+                    var clone = document.getElementById('table_base').content.cloneNode(true);
+
+                    el.locations.forEach(function (elm) {
+                        if (elm.status == "CANCELLATION") {
+                            var arrival = "-"
+                            var ampl = "-"
+                            var ampl_speak = "-"
+                        } else {
+                            var arrival = new Date(gen_YYYY(elm.arrival.month_num), elm.arrival.month_num - 1, elm.arrival.date, elm.arrival.hour, elm.arrival.minute)
+                            arrival = NormalizeDate("MM/DD hh:mm", ConvertJST(arrival)) + " JST"
+                            var ampl = conv_table[elm.ampl.string]
+                            var ampl_speak = conv_table_narrator[elm.ampl.string]
+                        }
+                        var status = elm.status ? conv_table2[elm.status] : ""
+                        clone.querySelector("tbody").innerHTML += `<tr><td>${elm.location}</td><td aria-label="${coord_toString_narrator(elm.lat, elm.lng)}">${coord_toString(elm.lat, elm.lng)}</td><td>${arrival}</td><td aria-label="${ampl_speak}">${ampl}</td><td>${status}</td></tr>`
+                    })
+
+                    document.getElementById("estimation").appendChild(clone);
+                })
+
+                document.getElementById("remarks0_est").innerText = json.estimation.remarks0 ? json.estimation.remarks0.replace("AMPL - MAXIMUM AMPLITUDE IN METERS FROM THE UNDISTURBED SEA LEVEL TO THE CREST", "津波高さ = 平常潮位から津波によって海面が上昇したその高さの差") : ""
+                document.getElementById("remarks1_est").innerText = json.estimation.remarks1 ? json.estimation.remarks1 : ""
+            }
+
+            document.getElementById("observation_wrap").style.display = json.observation ? "block" : "none"
+            if (json.observation) {
+                var clone = document.getElementById('table_base2').content.cloneNode(true);
+                json.observation.locatios.forEach(function (elm) {
+                    var arrival = new Date(gen_YYYY(elm.max_wave_arrival.month_num), elm.max_wave_arrival.month_num - 1, elm.max_wave_arrival.date, elm.max_wave_arrival.hour, elm.max_wave_arrival.minute)
+                    arrival = NormalizeDate("MM/DD hh:mm", ConvertJST(arrival)) + " JST"
+                    var ampl = elm.ampl.value
+
+                    clone.querySelector("tbody").innerHTML += `<tr><td>${elm.location}</td><td aria-label="${coord_toString_narrator(elm.lat, elm.lng)}">${coord_toString(elm.lat, elm.lng)}</td><td>${arrival}</td><td aria-label="${ampl}メートル">${ampl}m</td></tr>`
+                })
+                document.getElementById("observation").appendChild(clone);
+            }
+
+            document.getElementById("remarks").innerText = json.remarks ? json.remarks : ""
+        }
+
+
+
+
+
+        function decode_WEPA40orWEPA60(str) {
+            str = str.replaceAll("\r\n", "\n")
+            if (!str.startsWith("WEPA40 RJTD") && !str.startsWith("WEPA60 RJTD")) {
+                str = "WEPA40 RJTD \n(STX)\n" + str//ヘッダの抜けたデータ（気象庁HPなどに掲載）にも対応
+            }
+
+            //気象庁側の表記ゆれに対応
+            str = str.replaceAll("MEASUREMENTS OR REPORTS ON TSUNAMI", "MEASUREMENTS OR REPORTS OF TSUNAMI")
+
+
+            var json = {}
+            var splitted = str.split("\n")
+            var splitted2 = str.split("\n\n")
+
+            dateElm = splitted[0].split(" ")[2].match(/.{2}/g);
+
+            json.header = splitted[0]
+
+            var month_table = ["", "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+            var month_num = month_table.indexOf(splitted[4].split(" ")[7].trim())
+            if (month_num < 1) month_num = "";
+            json.issue = {
+                bulletin_number: Number(splitted[2].split(" ")[3].trim()),
+                by: "NWPTAC(JMA)",
+                at: {
+                    year: Number(splitted[4].split(" ")[8].trim()),
+                    month: splitted[4].split(" ")[7].trim(),
+                    month_num: Number(month_num),
+                    date: Number(splitted[4].split(" ")[6].trim()),
+                    hour: Number(splitted[4].split(" ")[5].trim().substring(0, 2)),
+                    minute: Number(splitted[4].split(" ")[5].trim().substring(2, 4)),
+                    timezone: "UTC"
+                },
+            }
+
+            if (splitted[5].startsWith("PART")) {
+                json.issue.part = {
+                    number: Number(splitted[5].split(" ")[1]),
+                    total: Number(splitted[5].split(" ")[3])
+                }
+            }
+            var status = "";
+            if (str.includes("HYPOCENTRAL PARAMETERS (REVISION)\n")) {
+                status = "REVISION";
+                var HYPOCENTRAL_data = str.split("HYPOCENTRAL PARAMETERS (REVISION)\n")[1].split("\n\n")[0].split("\n")
+            } else if (str.includes("HYPOCENTRAL PARAMETERS\n")) {
+                var HYPOCENTRAL_data = str.split("HYPOCENTRAL PARAMETERS\n")[1].split("\n\n")[0].split("\n")
+            }
+
+            if (HYPOCENTRAL_data) {
+                var focal_depth = ""
+                if (HYPOCENTRAL_data[4].includes("FOCAL DEPTH:")) focal_depth = Number(HYPOCENTRAL_data[4].split("FOCAL DEPTH:")[1].substring(0, 3))
+                var month_num = month_table.indexOf(HYPOCENTRAL_data[0].split(" ")[3].trim())
+                if (month_num < 1) month_num = "";
+                var MAG = HYPOCENTRAL_data[4].split("MAG:")[1].split(" (")[0]
+                MAG = isNaN(MAG) ? MAG : Number(MAG)
+                var MAGType = HYPOCENTRAL_data[4].split("MAG:")[1].split(" (")[1]
+                if (MAGType) MAGType = MAGType.replace(")", "").trim()
+                else MAGType = ""
+                json.hypocentral_parameters = {
+                    status: status,
+                    origin_time: {
+                        year: Number(HYPOCENTRAL_data[0].split(" ")[4].trim()),
+                        month: HYPOCENTRAL_data[0].split(" ")[3].trim(),
+                        month_num: Number(month_num),
+                        date: Number(HYPOCENTRAL_data[0].split(" ")[2].trim()),
+                        hour: Number(HYPOCENTRAL_data[0].split(" ")[1].trim().substring(5, 7)),
+                        minute: Number(HYPOCENTRAL_data[0].split(" ")[1].trim().substring(7, 9)),
+                        timezone: "UTC"
+                    }, preliminary_epicenter: {
+                        lat: Number(HYPOCENTRAL_data[1].split("LAT")[1].substring(0, 4).replace(/[^0-9.]/g, '')) * (HYPOCENTRAL_data[1].split("LAT")[1].substring(4, 9) == "NORTH" ? 1 : -1),
+                        lon: Number(HYPOCENTRAL_data[1].split("LON")[1].substring(0, 5).replace(/[^0-9.]/g, '')),
+                        geographical_area_regional: HYPOCENTRAL_data[2].trim(),
+                        geographical_area_wider: HYPOCENTRAL_data[3].trim(),
+                    },
+                    focal_depth: { value: focal_depth, unit: "km" },
+                    mag: {
+                        value: MAG,
+                        type: MAGType,
+                    },
+                    remarks: str.includes("THIS INFORMATION IS BASED ON THE PREDEFINED MAGNITUDE") ? "THIS INFORMATION IS BASED ON THE PREDEFINED MAGNITUDE" : ""
+                }
+            }
+
+            if (str.includes("EVALUATION\n")) {
+                json.evaluation = str.split("EVALUATION\n")[1].split("\n\n")[0].trim()
+            }
+
+            if (str.includes("THIS BULLETIN IS FOR\n")) {
+                json.target_blocks = []
+                var target_blocks = str.split("THIS BULLETIN IS FOR\n")[1].split("\n\n")[0].split("\n")
+                target_blocks.forEach(function (elm) {
+                    var words = elm.trim().split(" ")
+                    var status = words[words.length - 1].replace("(", "").replace(")", "").trim()
+                    if (status != "ADDITION" && status != "CANCELLATION") status = ""
+                    json.target_blocks.push({
+                        block: elm.replace(/\(.*?\)/g, "").trim(),
+                        status: status
+                    })
+                })
+            }
+
+            if (str.includes("ESTIMATED TSUNAMI ARRIVAL TIMES AND WAVE AMPLITUDES\n")) {
+                var estimated_str = str.split("ESTIMATED TSUNAMI ARRIVAL TIMES AND WAVE AMPLITUDES\n")[1].split("\n\n")[0].split("\n")
+                var estimated = { blocks: [] }
+                estimated_str.forEach(function (elm) {
+                    if (!elm.startsWith(" ")) {
+                        estimated.blocks.push({ block: elm, locations: [] })
+                    } else if (elm != " LOCATION              COORDINATES  ARRIVAL TIME  AMPL") {
+                        var lat = Number(elm.substring(23, 27).trim()) * (elm.substring(27, 28) == "N" ? 1 : -1)
+                        var lng = Number(elm.substring(29, 34).trim()) * (elm.substring(34, 35) == "E" ? 1 : -1)
+                        var month_num = month_table.indexOf(elm.substring(45, 48))
+                        if (month_num < 1) month_num = "";
+
+                        var conv_table = {
+                            "0.3-1M": { from: 0.3, to: 1 },
+                            "1-3M": { from: 1, to: 3 },
+                            "3-5M": { from: 3, to: 5 },
+                            "5-10M": { from: 5, to: 10 },
+                            "OVER10M": { from: 10, to: "" },
+                            "HUGE": { from: "", to: "" },
+                            "HIGH": { from: "", to: "" },
+                            "----": { from: "", to: "" }
+                        }
+
+                        var item = {
+                            location: elm.substring(1, 23).trim(),
+                            lat: lat,
+                            lng: lng,
+                        }
+
+                        if (elm.substring(36) == "(CANCELLATION)") {
+                            item.status = "CANCELLATION"
+                        } else {
+                            var status = elm.substring(50).split(" (")[1]
+                            if (status) status = status.replace(")", "").trim()
+                            else status = ""
+
+                            item.status = status
+                            item.arrival = {
+                                month: elm.substring(45, 48),
+                                month_num: Number(month_num),
+                                date: Number(elm.substring(42, 44)),
+                                hour: Number(elm.substring(36, 38)),
+                                minute: Number(elm.substring(38, 40))
+                            }
+                            item.ampl = {
+                                string: elm.substring(50, 57).trim().split(" ")[0],
+                                value: conv_table[elm.substring(50, 57).trim().split(" ")[0]],
+                                unit: "M",
+                            }
+                        }
+                        estimated.blocks[estimated.blocks.length - 1].locations.push(item)
+                    }
+                })
+
+                estimated.remarks0 = "AMPL - MAXIMUM AMPLITUDE IN METERS FROM THE UNDISTURBED SEA LEVEL TO THE CREST"
+
+                var flag0 = false
+                var remarks1 = ""
+                splitted2.forEach(function (el, index) {
+                    if (index == splitted2.length - 2) flag0 = false
+                    if (el.startsWith("MEASUREMENTS OR REPORTS OF TSUNAMI")) flag0 = false
+                    if (flag0) remarks1 += el + "\n\n"
+                    if (el == "AMPL - MAXIMUM AMPLITUDE IN METERS FROM THE\nUNDISTURBED SEA LEVEL TO THE CREST") flag0 = true
+                })
+
+                estimated.remarks1 = remarks1.trim()
+
+                json.estimation = estimated
+            } else if (str.includes("ESTIMATION AT FORECAST POINTS - NO TSUNAMI WAVES WITH AN AMPLITUDE\nOF 0.3 METERS OR MORE ARE EXPECTED AT ANY FORECAST POINT.")) {
+                json.estimation = {
+                    blocks: [],
+                    remarks0: "ESTIMATION AT FORECAST POINTS - NO TSUNAMI WAVES WITH AN AMPLITUDE\nOF 0.3 METERS OR MORE ARE EXPECTED AT ANY FORECAST POINT.",
+                    remarks1: "HOWEVER, IN SOME COASTAL AREAS (PARTICULARLY NEAR THE EPICENTER),\nHIGHER TSUNAMI WAVES THAN ESTIMATED MAY ARRIVE.\nAUTHORITIES SHOULD BE AWARE OF THIS POSSIBILITY."
+                }
+            }
+
+            var status = "";
+            if (str.includes("MEASUREMENTS OR REPORTS OF TSUNAMI (REVISION)\n")) {
+                status = "REVISION";
+                var MEASUREMENTS_data = str.split("MEASUREMENTS OR REPORTS OF TSUNAMI (REVISION)\n")[1].split("\n\n")[0].split("\n")
+            } else if (str.includes("MEASUREMENTS OR REPORTS OF TSUNAMI\n")) {
+                var MEASUREMENTS_data = str.split("MEASUREMENTS OR REPORTS OF TSUNAMI\n")[1].split("\n\n")[0].split("\n")
+            }
+
+            if (MEASUREMENTS_data) {
+                var observation_str = MEASUREMENTS_data.slice(1)
+                var observation = []
+                observation_str.forEach(function (elm) {
+                    if (!elm.startsWith("  ")) {
+                        var lat = Number(elm.substring(32, 36).trim()) * (elm.substring(36, 37) == "N" ? 1 : -1)
+                        var lng = Number(elm.substring(38, 43).trim()) * (elm.substring(43, 44) == "E" ? 1 : -1)
+
+                        observation.push({
+                            location: elm.substring(1, 32).trim(),
+                            lat: lat,
+                            lng: lng,
+                        })
+                    } else {
+                        var month_num = month_table.indexOf(elm.substring(53, 56))
+                        observation[observation.length - 1].max_wave_arrival = {
+                            month: elm.substring(53, 56),
+                            month_num: Number(month_num),
+                            date: Number(elm.substring(50, 52)),
+                            hour: Number(elm.substring(44, 46)),
+                            minute: Number(elm.substring(46, 48))
+                        }
+                        observation[observation.length - 1].ampl = {
+                            value: Number(elm.substring(58).replace("M", "")),
+                            unit: "M"
+                        }
+                        observation[observation.length - 1].remarks = "MAXIMUM TSUNAMI WAVE"
+                    }
+                })
+
+                json.observation = {
+                    status: status,
+                    locatios: observation,
+                    remarks: "MAXIMUM TSUNAMI WAVE - HALF THE AMPLITUDE FROM THE TROUGH TO THE CREST"
+                }
+            }
+
+            var splitted2 = str.split("\n\n")
+            console.log(splitted2[splitted2.length - 2])
+            json.remarks = splitted2[splitted2.length - 2].trim()
+
+            return json;
+        }
+
+        function coord_toString(lat, lng) {
+            try {
+                if (!lat || !lng) throw new Error()
+                return Math.abs(lat).toFixed(1).padStart(4, "0") + (0 <= lat ? "N" : "S") + " " +
+                    Math.abs(lng).toFixed(1).padStart(5, "0") + (0 <= lng ? "E" : "W")
+            } catch {
+                return "------------"
+            }
+        }
+        function coord_toString_narrator(lat, lng) {
+            try {
+                if (!lat || !lng) throw new Error()
+                return (0 <= lat ? "北緯" : "南緯") + Math.abs(lat).toFixed(1).padStart(4, "0") + "度 " +
+                    (0 <= lng ? "東経" : "西経") + Math.abs(lng).toFixed(1).padStart(5, "0") + "度"
+            } catch {
+                return "------------"
+            }
+        }
+
+        function ConvertJST(time) {
+            return new Date(time.setHours(time.getHours() + 9));
+        }
+
+        //年をまたぐ情報の場合を考慮し、発表年から年を類推
+        function gen_YYYY(month) {
+            var rm = report_date_UTC.getMonth() + 1
+            if (rm > month) {
+                return report_date_UTC.getFullYear() + 1
+            } else {
+                return report_date_UTC.getFullYear()
+            }
+        }
+
+    </script>
+
+
+</body>
+
+</html>
