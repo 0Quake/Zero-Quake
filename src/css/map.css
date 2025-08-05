@@ -31,6 +31,7 @@
   max-height: calc(100% - 40px);
   overflow-y: auto;
   padding: 0;
+  max-width: 100%;
 }
 #menu_wrap {
   position: absolute;
