@@ -534,13 +534,7 @@ electron.app.on("ready", () => {
   });
 });
 
-app.on("second-instance", () => {
-  if (MainWindow) {
-    if (MainWindow.isMinimized()) MainWindow.restore();
-    if (!MainWindow.isFocused()) MainWindow.focus();
-    if (!MainWindow.isVisible()) MainWindow.show();
-  }
-});
+app.on("second-instance", CreateMainWindow);
 
 //レンダラープロセスからのメッセージ
 ipcMain.on("message", (_event, response) => {
