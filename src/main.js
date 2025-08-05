@@ -855,7 +855,7 @@ function Create_WorkerWindow() {
   });
   WorkerWindow.on("close", () => {
     WorkerWindow = null;
-    Create_WorkerWindow()
+    setTimeout(Create_WorkerWindow, 2000)
   });
   WorkerWindow.webContents.on("did-finish-load", () => {
     WorkerWindow.webContents.send("message2", {
