@@ -70,7 +70,7 @@
     "@turf/turf": "^7.2.0",
     "electron-store": "^10.1.0",
     "jsdom": "^26.1.0",
-    "maplibre-gl": "^5.7.0",
+    "maplibre-gl": "^5.9.0",
     "path": "^0.12.7",
     "pmtiles": "^4.3.0",
     "websocket": "^1.0.35"
