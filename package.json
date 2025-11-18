@@ -69,7 +69,7 @@
   "dependencies": {
     "@turf/turf": "^7.2.0",
     "electron-store": "^11.0.2",
-    "jsdom": "^27.0.1",
+    "jsdom": "^27.1.0",
     "maplibre-gl": "^5.9.0",
     "path": "^0.12.7",
     "pmtiles": "^4.3.0",
