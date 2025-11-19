@@ -2766,9 +2766,10 @@ function draw_gaikyo(data) {
   gaikyo_lastUpdate = new Date();
   if (!data || data.length == 0)
     document.getElementById("gaikyo_update_time").innerText = "更新失敗：" + NormalizeDate("hh:mm:ss", new Date());
-  else
-    document.getElementById("gaikyo_update_time").innerText = "更新：" + NormalizeDate("hh:mm:ss", new Date());
-
+  else {
+    document.getElementById("gaikyo_update_time").innerText = "最終更新：" + NormalizeDate("hh:mm:ss", new Date());
+    document.getElementById("gaikyo_update_time").setAttribute("aria-label", "最終更新時刻、" + NormalizeDate("h時m分s秒", new Date()));
+  }
   if (gaikyo_history.length == data.length) return;
   gaikyo_history = data;
   removeChild(document.getElementById("gaikyo-Wrap"));
@@ -2818,8 +2819,10 @@ function draw_wepa(data) {
   wepa_lastUpdate = new Date();
   if (!data || data.length == 0)
     document.getElementById("wepa_update_time").innerText = "データがありません：" + NormalizeDate("hh:mm:ss", new Date());
-  else
-    document.getElementById("wepa_update_time").innerText = "更新：" + NormalizeDate("hh:mm:ss", new Date());
+  else {
+    document.getElementById("wepa_update_time").innerText = "最終更新：" + NormalizeDate("hh:mm:ss", new Date());
+    document.getElementById("wepa_update_time").setAttribute("aria-label", "最終更新時刻、" + NormalizeDate("h時m分s秒", new Date()));
+  }
 
   removeChild(document.getElementById("wepa-Wrap"));
   data.forEach(function (elm, index) {
@@ -2834,7 +2837,7 @@ function draw_wepa(data) {
 
       clone.querySelector(".EQI_datetime").textContent = dateStr;
 
-      clone.setAttribute("aria-label", "国際津波情報" + dateToSpeak);
+      clone.setAttribute("aria-label", "国際津波情報、" + dateToSpeak);
       clone.addEventListener("click", function () {
         window.electronAPI.messageReturn({
           action: "wepa_window",
