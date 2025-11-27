@@ -67,7 +67,7 @@
     "prettier": "^3.6.2"
   },
   "dependencies": {
-    "@turf/turf": "^7.3.0",
+    "@turf/turf": "^7.3.1",
     "electron-store": "^11.0.2",
     "jsdom": "^27.2.0",
     "maplibre-gl": "^5.13.0",
