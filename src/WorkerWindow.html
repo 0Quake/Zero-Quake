@@ -109,6 +109,7 @@
         var AudioElm = AudioElms[request.data];
         if (AudioElm) {
           AudioElm.currentTime = 0;
+          AudioElm.volume = config.notice.bell_volume;
           if (AudioElm.paused) AudioElm.play();
         }
       }

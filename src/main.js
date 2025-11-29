@@ -119,6 +119,7 @@ var defaultConfigVal = {
     EarlyEst: { GetData: false, Interval: 60000 },
   },
   notice: {
+    bell_volume: 1,
     voice_parameter: {
       rate: 1,
       pitch: 1,
@@ -599,6 +600,8 @@ ipcMain.on("message", (_event, response) => {
           }
         });
       }
+      PlayAudio("EQDetectLv2");
+
       break;
     case "EEWSimulation":
       MargeEEW(response.data);

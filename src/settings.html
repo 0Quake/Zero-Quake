@@ -390,11 +390,17 @@
             </div>
             <div id="tab1_content3" class="tabcontent" role="tabpanel" aria-labelledby="tab1_menu3">
                 <h3><span>通知と音声</span>通知音 / 音声合成</h3>
+                <h4>通知音の調整</h4>
+                <section>
+                    <label> 音量：<input id="NotificationVolumeN" type="number" min="0" max="1" value="1" step="0.05" oninput="volumeSet(this.value)" placeholder="音量（0~1）"><input id="NotificationVolumeR" type="range" min="0" max="1" value="1" step="0.05" oninput="volumeSet(this.value)"></label>
+                    <div class="smalltext">ベル音などの調整を行います。合成音声の音量は「合成音声の調整」から独立して調整できます。</div>
+                </section>
+
                 <h4>合成音声の調整</h4>
                 <section>
+                    <label> 音量：<input id="TTSVolumeN" type="number" min="0" max="1" value="1" step="0.05" oninput="TTSvolumeSet(this.value)" placeholder="音量（0~1）"><input id="TTSVolumeR" type="range" min="0" max="1" value="1" step="0.05" oninput="TTSvolumeSet(this.value)"></label>
                     <label> 話速：<input id="TTSSpeedN" type="number" min="0.1" max="10" value="1" step="0.1" oninput="TTSspeedSet(this.value)" placeholder="話速（0.1~10）"><input id="TTSSpeedR" type="range" min="0.1" max="10" value="1" step="0.1" oninput="TTSspeedSet(this.value)"></label>
                     <label> 音高：<input id="TTSPitchN" type="number" min="0" max="2" value="1" step="0.05" oninput="TTSpitchSet(this.value)" placeholder="音高（0~2）"><input id="TTSPitchR" type="range" min="0" max="2" value="1" step="0.05" oninput="TTSpitchSet(this.value)"></label>
-                    <label> 音量：<input id="TTSVolumeN" type="number" min="0" max="1" value="1" step="0.05" oninput="TTSvolumeSet(this.value)" placeholder="音量（0~1）"><input id="TTSVolumeR" type="range" min="0" max="1" value="1" step="0.05" oninput="TTSvolumeSet(this.value)"></label>
                     <button id="speak_test">テスト</button>
                 </section>
 

@@ -122,6 +122,7 @@ function configDataDraw() {
   TTSvolumeSet(config.notice.voice_parameter.volume);
   TTSpitchSet(config.notice.voice_parameter.pitch);
   TTSspeedSet(config.notice.voice_parameter.rate);
+  volumeSet(config.notice.bell_volume, true)
 
   selectBoxSet(document.getElementById("TTSvoiceSelect"), config.notice.voice_parameter.voice);
 
@@ -313,6 +314,8 @@ function apply() {
   config.notice.voice_parameter.pitch = TTSpitch;
   config.notice.voice_parameter.volume = TTSvolume;
   config.notice.voice_parameter.voice = TTSVoiceSelect.value;
+
+  config.notice.bell_volume = master_volume;
 
   config.Info.TsunamiInfo.showTest = document.getElementById("Tsunami_Test").checked;
   config.Info.TsunamiInfo.showtraining = document.getElementById("Tsunami_training").checked;
@@ -1004,6 +1007,32 @@ function TTSvolumeSet(val) {
   document.getElementById("TTSVolumeR").value = val;
   TTSvolume = val;
 }
+var master_volume = 1;
+var audio_delay;
+function volumeSet(val, bypass_preview) {
+  val = Number(val);
+  document.getElementById("NotificationVolumeN").value = val;
+  document.getElementById("NotificationVolumeR").value = val;
+  master_volume = val;
+
+  if (!bypass_preview) {
+    if (audio_delay) {
+      clearTimeout(audio_delay);
+      audio_delay = null;
+    }
+    audio_delay = setTimeout(function () {
+      audio_preview(val)
+    }, 300);
+  }
+}
+
+var AudioElm = new Audio("audio/EQInfo.mp3")
+function audio_preview(volume) {
+  AudioElm.currentTime = 0;
+  AudioElm.volume = volume;
+  if (AudioElm.paused) AudioElm.play();
+}
+
 function selectBoxSet(selectElm, TargetValue) {
   selectElm.querySelectorAll("option").forEach(function (elm) {
     if (elm.value == TargetValue) elm.setAttribute("selected", "");
