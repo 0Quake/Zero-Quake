@@ -6,6 +6,10 @@ button {
   margin: 6px 9px 6px 0;
 }
 
+.h_grid{
+  display: flex;
+}
+
 .smalltext {
   font-size: 13px;
   color: #ccc;
@@ -283,7 +287,8 @@ h5 {
 }
 label {
   display: block;
-  padding: 7px 0;
+  width: 100%;
+  padding: 7px 5px;
 }
 label input[type="text"],
 label input[type="number"],
