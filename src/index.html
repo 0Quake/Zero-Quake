@@ -219,13 +219,31 @@
                     </div>
 
                 </div>
+
+                <svg style="display:none;"><!--icooon-mono.comより-->
+                    <defs>
+                        <symbol id="japan-icon" viewBox="0 0 512 512">
+                            <g>
+                                <path class="st0" d="M259.119,460.031c0,13.406-10.875,24.266-24.266,24.266h-51.031c-13.406,0-24.266-10.859-24.266-24.266v-11.203c0-13.406,10.859-24.266,24.266-24.266h51.031c13.391,0,24.266,10.859,24.266,24.266V460.031z"></path>
+                                <path class="st0" d="M36.9,365.688h-4.266c-13.391,0-24.266,10.875-24.266,24.266v33.516c0,13.406,6.25,24.281,16.953,24.281h2.672c11.578,0,8.906,10.859,8.906,24.266v15.719C36.9,501.125,47.775,512,61.166,512H98.26c13.406,0,24.266-10.875,24.266-24.266V447.75v-57.797c0-13.391-10.859-24.266-24.266-24.266H36.9z"></path>
+                                <path class="st0" d="M338.322,161.438c-11.422,0-21.297,7.969-23.703,19.125l-13.563,62.531c-2.406,11.156-12.297,19.125-23.719,19.125H125.385c-13.391,0-24.266,10.875-24.266,24.266v18.375c0,13.391,10.875,24.266,24.266,24.266h4.984c13.391,0,24.266,10.875,24.266,24.281v12.078c0,13.391,10.875,24.266,24.266,24.266h188.125c11.391,0,21.25-7.938,23.703-19.094l39.313-179.781c1.578-7.156-0.188-14.656-4.797-20.375c-4.609-5.75-11.563-9.063-18.922-9.063H338.322z"></path>
+                                <path class="st0" d="M487.947,108.75c-2.188,11.422-12.172,19.688-23.844,19.688H358.588c-7.234,0-14.109-3.203-18.688-8.781c-4.625-5.594-6.516-12.938-5.156-20.031l15.25-79.906C352.182,8.281,362.182,0,373.838,0h105.531c7.234,0,14.078,3.219,18.688,8.813c4.625,5.578,6.5,12.922,5.141,20.031L487.947,108.75z"></path>
+                            </g>
+                        </symbol>
+                    </defs>
+                </svg>
+
                 <div id="tab1_wrap" data-tabID="1">
                     <div id="bar1">
                         <div id="tab1_bar" role="tablist" aria-label="情報種別選択" ZQ-focusgroup>
-                            <div id="tab1_menu1" role="tab" class="tabmenu active_tabmenu" tabindex="0" aria-controls="tab1_content1" aria-label="気象庁の地震情報" ZQ-focusgroup-item><span class="material-icons-round" aria-hidden="true">format_list_bulleted</span>地震情報</div>
-                            <div id="tab1_menu4" role="tab" class="tabmenu" tabindex="-1" aria-controls="tab1_content4" aria-label="USGSの国際地震情報" ZQ-focusgroup-item><span class="material-icons-round" aria-hidden="true">globe_asia</span>USGS</div>
+                            <div id="tab1_menu1" role="tab" class="tabmenu active_tabmenu" tabindex="0" aria-controls="tab1_content1" aria-label="気象庁の地震情報" title="気象庁の地震情報（国内）" ZQ-focusgroup-item>
+                                <svg viewbox="0 0 18 18" width="18" height="18">
+                                    <use href="#japan-icon">
+                                </svg>地震情報
+                            </div>
+                            <div id="tab1_menu4" role="tab" class="tabmenu" tabindex="-1" aria-controls="tab1_content4" aria-label="USGSの国際地震情報" title="USGSの地震情報（国際）" ZQ-focusgroup-item><span class="material-icons-round" aria-hidden="true">globe_asia</span>USGS</div>
                             <div id="tab1_menu2" role="tab" class="tabmenu" tabindex="-1" aria-controls="tab1_content2" aria-label="地震解説情報" ZQ-focusgroup-item><span class="material-icons-round" aria-hidden="true">description</span>解説情報</div>
-                            <div id="tab1_menu3" role="tab" class="tabmenu" tabindex="-1" aria-controls="tab1_content3" aria-label="国際津波情報" ZQ-focusgroup-item><span class="material-icons-round" aria-hidden="true">globe_asia</span>国際津波</div>
+                            <div id="tab1_menu3" role="tab" class="tabmenu" tabindex="-1" aria-controls="tab1_content3" aria-label="国際津波情報" ZQ-focusgroup-item><span class="material-icons-round" aria-hidden="true">tsunami</span>国際津波</div>
                         </div>
                     </div>
                     <div id="tab1_content" class="tabContentWrap">
