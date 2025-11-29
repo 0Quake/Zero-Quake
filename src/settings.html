@@ -638,6 +638,7 @@
 
                 <h4>全般</h4>
                 <section>
+                    <label><input type="checkbox" id="EEW_kodoriyou">高度利用者向けの緊急地震速報（予報）を表示</label>
                     <label><input type="checkbox" id="EEW_training">訓練報を受信</label>
                     <label>表示する予想震度
                         <select id="intType">
@@ -648,7 +649,49 @@
                     <div class="smalltext">点震源想定での予測値を下限、断層長（１／２）考慮による予測値を上限として表現する。 [緊急地震速報の概要や処理手法に関する技術的参考資料より]</div>
                 </section>
 
-                <h4>画面表示</h4>
+                <h4>通知条件</h4>
+                <div class="smalltext">音声通知・画面通知の条件を設定します。2つの条件のどちらかが一致すれば通知します（OR条件）。メイン画面には、条件にかかわらず情報が表示されます。</div>
+                <section>
+                    <h5>予想最大震度</h5>
+                    <label>しきい値
+                        <select id="EEW_IntFilter">
+                            <option value="0">すべて</option>
+                            <option value="1">震度1以上</option>
+                            <option value="2">震度2以上</option>
+                            <option value="3">震度3以上</option>
+                            <option value="4">震度4以上</option>
+                            <option value="5-">震度5弱以上</option>
+                            <option value="5+">震度5強以上</option>
+                            <option value="6-">震度6弱以上</option>
+                            <option value="6+">震度6強以上</option>
+                            <option value="7">震度7以上</option>
+                            <option value="99">条件なし</option>
+                        </select>
+                    </label>
+
+                    <label><input type="checkbox" id="EEW_IntQ">予想最大震度 不明時も通知</label>
+
+                    <h5>現在地の予想震度</h5>
+                    <label>しきい値
+                        <select id="EEW_userIntFilter">
+                            <option value="0">すべて</option>
+                            <option value="1">震度1以上</option>
+                            <option value="2">震度2以上</option>
+                            <option value="3">震度3以上</option>
+                            <option value="4">震度4以上</option>
+                            <option value="5-">震度5弱以上</option>
+                            <option value="5+">震度5強以上</option>
+                            <option value="6-">震度6弱以上</option>
+                            <option value="6+">震度6強以上</option>
+                            <option value="7">震度7以上</option>
+                            <option value="99">条件なし</option>
+                        </select>
+                    </label>
+
+                    <label><input type="checkbox" id="EEW_userIntQ">予想震度 不明時も通知</label>
+                </section>
+
+                <h4>画面通知</h4>
                 <section>
                     <label>
                         緊急地震速報（初報）：
@@ -666,48 +709,6 @@
                             <option value="openWindow">メイン画面表示</option>
                         </select>
                     </label>
-                </section>
-
-                <h4>受信条件</h4>
-                <div class="smalltext">続報により 条件を満たさなくなった場合でも、その地震については情報の表示・更新を続けます。</div>
-                <section>
-                    <label><input type="checkbox" id="EEW_kodoriyou">高度利用者向けの緊急地震速報（予報）を表示</label>
-
-                    <h5>予想最大震度</h5>
-                    <label>しきい値
-                        <select id="EEW_userIntFilter">
-                            <option value="0">すべて</option>
-                            <option value="1">震度1以上</option>
-                            <option value="2">震度2以上</option>
-                            <option value="3">震度3以上</option>
-                            <option value="4">震度4以上</option>
-                            <option value="5-">震度5弱以上</option>
-                            <option value="5+">震度5強以上</option>
-                            <option value="6-">震度6弱以上</option>
-                            <option value="6+">震度6強以上</option>
-                            <option value="7">震度7以上</option>
-                        </select>
-                    </label>
-
-                    <label><input type="checkbox" id="EEW_IntQ">予想最大震度 不明時も通知</label>
-
-                    <h5>現在地の予想震度</h5>
-                    <label>しきい値
-                        <select id="EEW_IntFilter">
-                            <option value="0">すべて</option>
-                            <option value="1">震度1以上</option>
-                            <option value="2">震度2以上</option>
-                            <option value="3">震度3以上</option>
-                            <option value="4">震度4以上</option>
-                            <option value="5-">震度5弱以上</option>
-                            <option value="5+">震度5強以上</option>
-                            <option value="6-">震度6弱以上</option>
-                            <option value="6+">震度6強以上</option>
-                            <option value="7">震度7以上</option>
-                        </select>
-                    </label>
-
-                    <label><input type="checkbox" id="EEW_userIntQ">予想震度 不明時も通知</label>
                 </section>
 
                 <h4>音声合成文</h4>

@@ -2604,7 +2604,7 @@ function MargeEEW(data) {
             });
           }
           //データに変化があれば、警報処理へ
-          if (changed) EEW_Alert(oneBeforeData, false, true);
+          if (changed) EEW_Alert(oneBeforeData, true);
         }
       } else {
         //同じ報数の情報がない場合（データ登録）
@@ -2617,20 +2617,11 @@ function MargeEEW(data) {
           });
           EQJSON.data.push(data); //データ追加
           if (data.is_cancel) EQJSON.cancelled = true;
-          EEW_Alert(data, false); //警報処理
+          EEW_Alert(data); //警報処理
         }
       }
     } else {
       //第１報
-      if (!data.maxInt) {
-        if (!config.Info.EEW.IntQuestion) return; //予想最大震度不明を無視するか（設定に準拠）
-      } else if (NormalizeShindo(config.Info.EEW.IntThreshold, 5) > NormalizeShindo(data.maxInt, 5) && NormalizeShindo(data.maxInt) !== "?")
-        return; //予想最大震度通知条件（設定に準拠）
-
-      if (!data.userIntensity) {
-        if (!config.Info.EEW.userIntQuestion) return; //予想震度不明を無視するか（設定に準拠）
-      } else if (NormalizeShindo(config.Info.EEW.userIntThreshold, 5) > NormalizeShindo(data.userIntensity, 5) && NormalizeShindo(data.userIntensity) !== "?")
-        return; //予想震度（細分区域）通知条件（設定に準拠）
 
       //データ追加
       EEW_Data.push({
@@ -2640,7 +2631,7 @@ function MargeEEW(data) {
         data: [data],
       });
 
-      EEW_Alert(data, true); //警報処理
+      EEW_Alert(data); //警報処理
     }
   } catch (err) {
     throw new Error("緊急地震速報データの処理（マージ）に失敗しました。", { cause: err });
@@ -2736,36 +2727,36 @@ function EEW_Clear(EventID) {
 }
 
 //EEW通知（音声・画面表示等）
-function EEW_Alert(data, first, update) {
+function EEW_Alert(data, update) {
   try {
     EEWNow = true;
     worker.postMessage({ action: "EEWNow", data: EEWNow });
 
-    //【現在のEEW】から同一地震、古い報を削除
-    EEW_nowList = EEW_nowList.filter(function (elm) {
-      return elm.EventID !== data.EventID;
+    //通知条件の判定
+    var show_alert = false;
+    if (NormalizeShindo(data.maxInt) == "?") {
+      if (config.Info.EEW.IntQuestion) show_alert = true; //予想震度不明を無視するか（設定に準拠）
+    } else if (NormalizeShindo(config.Info.EEW.IntThreshold, 5) <= NormalizeShindo(data.maxInt, 5))
+      show_alert = true//予想最大震度通知条件（設定に準拠）
+
+    if (NormalizeShindo(data.userIntensity) == "?") {
+      if (config.Info.EEW.userIntQuestion) show_alert = true; //予想震度不明を無視するか（設定に準拠）
+    } else if (NormalizeShindo(config.Info.EEW.userIntThreshold, 5) <= NormalizeShindo(data.userIntensity, 5))
+      show_alert = true; //予想震度（細分区域）通知条件（設定に準拠）
+
+    var old = EEW_nowList.find(function (elm) {
+      return elm.EventID == data.EventID;
     });
-    //【現在のEEW】配列に追加
-    EEW_nowList.push(data);
+    var first = !old || !old.shown
 
-    if (update) {
-      //第２報以降
-      messageToMainWindow({
-        action: "EEW_AlertUpdate",
-        data: EEW_nowList,
-        update: true,
-      });
-    } else {
-      //第１報
+    var notified = false;
 
+    console.log(update, show_alert, NormalizeShindo(config.Info.EEW.IntThreshold, 5), NormalizeShindo(data.maxInt, 5))
+    if (!update && show_alert) {
+      //同一報の更新時でなく、条件に合致
+      notified = true
       PlayAudio(data.alertflg == "警報" ? "EEW1" : "EEW2");
       speak(GenerateEEWText(data, !first));
-
-      messageToMainWindow({
-        action: "EEW_AlertUpdate",
-        data: EEW_nowList,
-        update: false,
-      });
 
       var notice_setting = first ? config.notice.window.EEW : config.notice.window.EEW_Update;
       if (notice_setting == "push" && (!MainWindow || MainWindow.isMinimized() || !MainWindow.isFocused() || !MainWindow.isVisible())) {
@@ -2783,6 +2774,24 @@ function EEW_Alert(data, first, update) {
         EEWNotification.on("click", CreateMainWindow);
       } else if (notice_setting == "openWindow") CreateMainWindow();
     }
+
+    //【現在のEEW】から同一地震、古い報を取得・削除
+    EEW_nowList = EEW_nowList.filter(function (elm) {
+      return elm.EventID !== data.EventID;
+    });
+
+    //初回通知か否か
+    if ((old && old.shown) || notified) data.shown = true;
+
+    //【現在のEEW】配列に追加
+    EEW_nowList.push(data);
+
+    messageToMainWindow({
+      action: "EEW_AlertUpdate",
+      data: EEW_nowList,
+      update: update,
+    });
+
 
     ConvertEQInfo(
       [
@@ -2803,8 +2812,10 @@ function EEW_Alert(data, first, update) {
     );
 
     //スリープ回避開始
-    if (config.system.powerSaveBlocking && (!psBlock || !powerSaveBlocker.isStarted(psBlock))) {
-      psBlock = powerSaveBlocker.start("prevent-display-sleep");
+    if (show_alert) {
+      if (config.system.powerSaveBlocking && (!psBlock || !powerSaveBlocker.isStarted(psBlock))) {
+        psBlock = powerSaveBlocker.start("prevent-display-sleep");
+      }
     }
   } catch (err) {
     throw new Error("緊急地震速報の通知処理でエラーが発生しました。", { cause: err });
