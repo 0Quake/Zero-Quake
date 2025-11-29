@@ -673,9 +673,10 @@ td {
 #bar1 .tabmenu {
   margin: 0;
   width: 32px;
-  border-radius: 7px;
+  border-radius: 0 7px 7px 0;
   background: transparent;
-  border-color: transparent;
+  border: solid 1px transparent;
+  border-left: none;
   color: #ccc;
 }
 #bar1 .tabmenu:hover{
@@ -684,9 +685,7 @@ td {
 #bar1 .active_tabmenu{
   background: #3f3f42;
   color: #eee;
-  border: solid 1px #62626C;
-  border-left: none;
-  border-radius: 0 7px 7px 0;
+  border-color: #62626C;
 }
 .active_tabmenu,
 .active_tabmenu:hover {
