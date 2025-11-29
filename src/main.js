@@ -600,8 +600,6 @@ ipcMain.on("message", (_event, response) => {
           }
         });
       }
-      PlayAudio("EQDetectLv2");
-
       break;
     case "EEWSimulation":
       MargeEEW(response.data);
