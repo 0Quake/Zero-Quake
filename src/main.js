@@ -925,7 +925,16 @@ function Create_SettingWindow(update) {
         });
       }
     });
+    SettingWindow.on("closed", () => {
+      SettingWindow = null;
+    });
+
+    SettingWindow.loadFile("src/settings.html");
+    SettingWindow.webContents.on("will-navigate", handleUrlOpen);
+    SettingWindow.webContents.on("new-window", handleUrlOpen);
     SettingWindow.webContents.on("will-prevent-unload", (event) => {
+      if (handling_url) return handling_url = false;
+
       const choice = dialog.showMessageBoxSync(SettingWindow, {
         type: "question",
         title: "確認",
@@ -937,13 +946,6 @@ function Create_SettingWindow(update) {
       });
       if (choice == 0) event.preventDefault();
     });
-    SettingWindow.on("closed", () => {
-      SettingWindow = null;
-    });
-
-    SettingWindow.loadFile("src/settings.html");
-    SettingWindow.webContents.on("will-navigate", handleUrlOpen);
-    SettingWindow.webContents.on("new-window", handleUrlOpen);
   } catch (err) {
     throw new Error("設定ウィンドウの作成でエラーが発生しました。", { cause: err });
   }
@@ -1192,8 +1194,13 @@ function messageToMainWindow(message) {
 
 //地震情報ウィンドウ表示処理
 var EQI_Window = {};
+var handling_url = false;
 function handleUrlOpen(e, url) {
   if (url.match(/^http/)) {
+    handling_url = true;
+    setTimeout(function () {
+      handling_url = false;
+    }, 5)
     e.preventDefault();
     shell.openExternal(url);
   }
@@ -2751,7 +2758,6 @@ function EEW_Alert(data, update) {
 
     var notified = false;
 
-    console.log(update, show_alert, NormalizeShindo(config.Info.EEW.IntThreshold, 5), NormalizeShindo(data.maxInt, 5))
     if (!update && show_alert) {
       //同一報の更新時でなく、条件に合致
       notified = true
