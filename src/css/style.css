@@ -269,8 +269,6 @@ main {
 }
 
 #sokuho-Panel {
-  padding: 5px;
-  min-height: 60px;
   height: auto;
   max-height: 45%;
   overflow: auto;

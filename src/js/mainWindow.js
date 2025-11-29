@@ -244,8 +244,6 @@ function EEW_AlertUpdate(data) {
   });
   if (EEWData.length == 0) document.body.classList.remove("EEWMode");
   else document.body.classList.add("EEWMode");
-
-  document.getElementById("noEEW").style.display = now_EEW.length == 0 && !now_tsunami && EQDetectItem.length == 0 ? "block" : "none";
 }
 
 var EEWID = 0;
@@ -598,7 +596,6 @@ function EQDetect(data) {
       padding: 100,
     });
   }
-  document.getElementById("noEEW").style.display = now_EEW.length == 0 && !now_tsunami && EQDetectItem.length == 0 ? "block" : "none";
 
   if (EQDetectItem.length != 0) document.body.classList.add("EQDetecting");
 }
@@ -619,7 +616,6 @@ function EQDetectFinish(id) {
 
   var eqdItem = document.getElementById("EQDItem_" + id);
   if (eqdItem) eqdItem.remove();
-  document.getElementById("noEEW").style.display = now_EEW.length == 0 && !now_tsunami && EQDetectItem.length == 0 ? "block" : "none";
 
   if (EQDetectItem.length == 0) document.body.classList.remove("EQDetecting");
 }
@@ -2293,7 +2289,6 @@ function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrive
 //津波情報更新
 var EQInfoLink = document.getElementById("EQInfoLink");
 var tsunamiData;
-var now_tsunami = false;
 var tsunamiSTMarkers = [];
 function tsunamiDataUpdate(data) {
   tsunamiData = data;
@@ -2309,8 +2304,6 @@ function tsunamiDataUpdate(data) {
   document.querySelector("#tsunamiWrap .TestNotes").style.display = data.status == "試験" ? "block" : "none";
   document.querySelector("#tsunamiWrap .trainingNotes").style.display = data.status == "訓練" ? "block" : "none";
 
-  now_tsunami = true;
-
   tsunamiSTMarkers.forEach(function (elm) {
     elm.remove();
   });
@@ -2318,7 +2311,6 @@ function tsunamiDataUpdate(data) {
   if (data.cancelled) {
     document.getElementById("tsunamiWrap").style.display = "none";
     document.body.classList.remove("TsunamiMode");
-    now_tsunami = false;
   } else {
     EQInfoLink.style.display = "none";
     if (Array.isArray(data.issue.EventID) && data.issue.EventID.length) {
@@ -2527,11 +2519,9 @@ function tsunamiDataUpdate(data) {
       document.getElementById("tsunamiWrap").style.display = "none";
       document.body.classList.remove("TsunamiMode");
       Tsunami_MajorWarning = Tsunami_Warning = Tsunami_Watch = false;
-      now_tsunami = false;
     } else if (!alertNowTmp && tsunamiAlertNow) {
       document.getElementById("tsunamiWrap").style.display = "none";
       document.body.classList.remove("TsunamiMode");
-      now_tsunami = false;
       Tsunami_MajorWarning = Tsunami_Warning = Tsunami_Watch = false;
     }
     tsunamiAlertNow = alertNowTmp;
@@ -2555,8 +2545,6 @@ function tsunamiDataUpdate(data) {
     else
       document.getElementById("tsunamiTitle").style.borderColor = tsunamiColorConv("Yoho");
   }
-
-  document.getElementById("noEEW").style.display = now_EEW.length == 0 && !now_tsunami && EQDetectItem.length == 0 ? "block" : "none";
 }
 
 var EQinfo_Index = 0;
