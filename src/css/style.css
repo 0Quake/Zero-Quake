@@ -1270,10 +1270,16 @@ summary:focus {
     filter: invert(1);
   }
   .tabmenu::before {
-    content: "☐ ";
+    content: "☐";
+    font-size: 18px;
+    text-align: center;
+    margin: 0 0 2px 0;
   }
   .active_tabmenu::before {
-    content: "☑ ";
+    content: "☑";
+    font-size: 18px;
+    text-align: center;
+    margin: 0 0 2px 0;
   }
   dialog::backdrop,
   #menu_wrap {

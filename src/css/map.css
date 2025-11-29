@@ -752,4 +752,7 @@ body {
     forced-color-adjust: none;
     border-color: #fff;
   }
+  #mapcontainer canvas {
+    filter: none;
+  }
 }
