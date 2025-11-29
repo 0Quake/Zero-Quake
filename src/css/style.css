@@ -719,8 +719,9 @@ td {
   text-align: center;
   padding: 0 4px;
 }
-#tab1_content1 {
-  padding: 0;
+#tab1_content .tabcontent {
+  padding: 0 0 6px 0;
+  scrollbar-gutter: stable;
 }
 .EQInfo.activeEQInfo {
   display: block;
@@ -750,7 +751,7 @@ td {
   flex-wrap: wrap;
   align-content: center;
   align-items: center;
-  margin: 7px 5px;
+  margin: 6px 3px 6px 6px;
   background: #222225;
   border: solid 1px #181818;
   border-radius: 8px;

@@ -222,7 +222,8 @@
                 <div id="tab1_wrap" data-tabID="1">
                     <div id="bar1">
                         <div id="tab1_bar" role="tablist" aria-label="情報種別選択" ZQ-focusgroup>
-                            <div id="tab1_menu1" role="tab" class="tabmenu active_tabmenu" tabindex="0" aria-controls="tab1_content1" aria-label="地震情報" ZQ-focusgroup-item><span class="material-icons-round" aria-hidden="true">format_list_bulleted</span>地震情報</div>
+                            <div id="tab1_menu1" role="tab" class="tabmenu active_tabmenu" tabindex="0" aria-controls="tab1_content1" aria-label="気象庁の地震情報" ZQ-focusgroup-item><span class="material-icons-round" aria-hidden="true">format_list_bulleted</span>地震情報</div>
+                            <div id="tab1_menu4" role="tab" class="tabmenu" tabindex="-1" aria-controls="tab1_content4" aria-label="USGSの国際地震情報" ZQ-focusgroup-item><span class="material-icons-round" aria-hidden="true">globe_asia</span>USGS</div>
                             <div id="tab1_menu2" role="tab" class="tabmenu" tabindex="-1" aria-controls="tab1_content2" aria-label="地震解説情報" ZQ-focusgroup-item><span class="material-icons-round" aria-hidden="true">description</span>解説情報</div>
                             <div id="tab1_menu3" role="tab" class="tabmenu" tabindex="-1" aria-controls="tab1_content3" aria-label="国際津波情報" ZQ-focusgroup-item><span class="material-icons-round" aria-hidden="true">globe_asia</span>国際津波</div>
                         </div>
@@ -253,63 +254,32 @@
                                     <div class="cancelled">取り消されました</div>
                                 </div>
                             </template>
-                            <template id="EQListTemplate2">
-                                <div class="EQItem usgs_Item" role="listitem" title="クリックして詳細を表示" ZQ-focusgroup-item>
-                                    <div class="EQI_IntWrap">
-                                        <div class="EQI_maxI"></div>
-                                    </div>
-                                    <div class="EQI_detailWrap">
-                                        <div class="EQI_datetime"></div>
-                                        <div class="EQI_line">
-                                            <div class="EQI_epiCenter"></div>
-                                            <div class="EQI_magnitude_Wrap">
-                                                M<span class="EQI_magnitude"></span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </template>
                             <template id="EQListTemplate3">
                                 <div class="EQItem EQCount" role="listitem" ZQ-focusgroup-item>
                                     <div class="trainingNotes">訓練報</div>
                                     <div class="TestNotes">試験報</div>
                                     <div class="EQI_datetime"></div>
-                                    <div class="EQI_detail">aaa</div>
+                                    <div class="EQI_detail"></div>
                                     <div class="cancelled">取り消されました</div>
                                 </div>
                             </template>
 
-                            <div id="tab2_wrap" data-tabID="2">
-                                <div id="tab2_bar" role="tablist" aria-label="地震情報 発表機関選択" ZQ-focusgroup>
-                                    <div id="tab2_menu1" role="tab" class="tabmenu active_tabmenu" tabindex="1" aria-controls="tab2_content1" title="気象庁の地震情報（日本周辺）" aria-label="気象庁の情報" ZQ-focusgroup-item>気象庁</div>
-                                    <div id="tab2_menu2" role="tab" class="tabmenu" tabindex="-1" aria-controls="tab2_content2" title="USGSの地震情報（全世界）" aria-label="USGSの情報" ZQ-focusgroup-item>USGS</div>
+                            <div role="list">
+                                <div id="NankaiTroughInfo_Rinji" role="listitem" ZQ-focusgroup-item tabindex="2">
+                                    <span id="Nankai_Title_Rinji"></span>
                                 </div>
-                                <div id="tab2_content" class="tabContentWrap">
-                                    <div id="tab2_content1" role="tabpanel list" aria-labelledby="tab2_menu1" class="tabcontent active_tabcontent" ZQ-focusgroup>
-                                        <div role="list">
-                                            <div id="NankaiTroughInfo_Rinji" role="listitem" ZQ-focusgroup-item tabindex="2">
-                                                <span id="Nankai_Title_Rinji"></span>
-                                            </div>
-                                            <div id="NankaiTroughInfo_Teirei" role="listitem" ZQ-focusgroup-item tabindex="2">
-                                                <span id="Nankai_Title_Teirei"></span>
-                                            </div>
-                                            <div id="HokkaidoSanrikuInfo" role="listitem" ZQ-focusgroup-item tabindex="2">
-                                                <span id="HokkaidoSanriku_Title"></span>
-                                            </div>
-                                            <div id="KatsudoJokyoInfo" role="listitem" ZQ-focusgroup-item tabindex="2">
-                                                <span id="KatsudoJokyoInfo_Title"></span>
-                                            </div>
+                                <div id="NankaiTroughInfo_Teirei" role="listitem" ZQ-focusgroup-item tabindex="2">
+                                    <span id="Nankai_Title_Teirei"></span>
+                                </div>
+                                <div id="HokkaidoSanrikuInfo" role="listitem" ZQ-focusgroup-item tabindex="2">
+                                    <span id="HokkaidoSanriku_Title"></span>
+                                </div>
+                                <div id="KatsudoJokyoInfo" role="listitem" ZQ-focusgroup-item tabindex="2">
+                                    <span id="KatsudoJokyoInfo_Title"></span>
+                                </div>
 
-                                            <div id="JMA_EqInfo" class="EQInfo">
-                                                <div class="mini-loading-wrap" aria-label="読み込み中"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div id="tab2_content2" role="tabpanel" aria-labelledby="tab2_menu2" class="tabcontent" ZQ-focusgroup>
-                                        <div id="USGS_EqInfo" class="EQInfo" role="list">
-                                            <div class="mini-loading-wrap" aria-label="読み込み中"></div>
-                                        </div>
-                                    </div>
+                                <div id="JMA_EqInfo" class="EQInfo">
+                                    <div class="mini-loading-wrap" aria-label="読み込み中"></div>
                                 </div>
                             </div>
                         </div>
@@ -338,6 +308,27 @@
                             </template>
                             <div id="wepa_update_time">読み込み中...</div>
                             <div id="wepa-Wrap" class="EQInfo" role="list">
+                                <div class="mini-loading-wrap" aria-label="読み込み中"></div>
+                            </div>
+                        </div>
+                        <div id="tab1_content4" role="tabpanel" aria-labelledby="tab1_menu4" class="tabcontent" tabindex="-1" ZQ-focusgroup>
+                            <template id="EQListTemplate2">
+                                <div class="EQItem usgs_Item" role="listitem" title="クリックして詳細を表示" ZQ-focusgroup-item>
+                                    <div class="EQI_IntWrap">
+                                        <div class="EQI_maxI"></div>
+                                    </div>
+                                    <div class="EQI_detailWrap">
+                                        <div class="EQI_datetime"></div>
+                                        <div class="EQI_line">
+                                            <div class="EQI_epiCenter"></div>
+                                            <div class="EQI_magnitude_Wrap">
+                                                M<span class="EQI_magnitude"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                            <div id="USGS_EqInfo" class="EQInfo" role="list">
                                 <div class="mini-loading-wrap" aria-label="読み込み中"></div>
                             </div>
                         </div>
