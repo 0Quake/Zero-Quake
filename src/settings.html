@@ -33,6 +33,7 @@
                     <div id="tab1_menu11" class="tabmenu active_tabmenu" tabindex="0" ZQ-focusgroup-item role="tab" aria-controls="tab1_content11"><span class="material-icons-round" aria-hidden="true"> construction</span>システム設定</div>
                     <div id="tab1_menu1" class="tabmenu" tabindex="-1" ZQ-focusgroup-item role="tab" aria-controls="tab1_content1"><span class="material-icons-round" aria-hidden="true">home </span>現在地</div>
                     <div id="tab1_menu13" class="tabmenu" tabindex="-1" ZQ-focusgroup-item role="tab" aria-controls="tab1_content13"><span class="material-icons-round" aria-hidden="true"> history</span>シミュレーション</div>
+                    <div id="tab1_menu3" class="tabmenu" tabindex="-1" ZQ-focusgroup-item role="tab" aria-controls="tab1_content3"><span class="material-icons-round" aria-hidden="true">volume_up</span>音声</div>
                 </div>
 
                 <h2><span class="material-icons-round" aria-hidden="true">info</span>情報種別ごとの設定</h2>
@@ -78,12 +79,6 @@
                     <div id="tab1_menu15" class="tabmenu" tabindex="-1" ZQ-focusgroup-item role="tab" aria-controls="tab1_content15">
                         Early-est
                     </div>
-                </div>
-
-                <h2><span class="material-icons-round" aria-hidden="true">notifications</span>通知と音声</h2>
-                <div class="_tabgroup">
-                    <div id="tab1_menu3" class="tabmenu" tabindex="-1" ZQ-focusgroup-item role="tab" aria-controls="tab1_content3"><span class="material-icons-round" aria-hidden="true">volume_up</span>音声</div>
-                    <div id="tab1_menu10" class="tabmenu" tabindex="-1" ZQ-focusgroup-item role="tab" aria-controls="tab1_content10"><span class="material-icons-round" aria-hidden="true">chat</span>画面表示</div>
                 </div>
 
                 <div id="tab1_menu2" class="tabmenu" tabindex="-1" ZQ-focusgroup-item role="tab" aria-controls="tab1_content2">
@@ -391,7 +386,7 @@
                 </section>
             </div>
             <div id="tab1_content3" class="tabcontent" role="tabpanel" aria-labelledby="tab1_menu3">
-                <h3><span>通知と音声</span>通知音 / 音声合成</h3>
+                <h3><span>全般</span>通知音 / 音声合成</h3>
                 <h4>通知音の調整</h4>
                 <section>
                     <label> 音量：<input id="NotificationVolumeN" type="number" min="0" max="1" value="1" step="0.05" oninput="volumeSet(this.value)" placeholder="音量（0~1）"><input id="NotificationVolumeR" type="range" min="0" max="1" value="1" step="0.05" oninput="volumeSet(this.value)"></label>
@@ -433,7 +428,7 @@
 
                 <h4>その他</h4>
                 <section>
-                    <div class="smalltext">読み上げ内容の設定は、「設定>情報種別ごとの設定」から行ってください。</div>
+                    <div class="smalltext">読み上げ内容や各種通知条件の設定は、「設定>情報種別ごとの設定」から行ってください。</div>
                 </section>
             </div>
             <div id="tab1_content2" class="tabcontent" role="tabpanel" aria-labelledby="tab1_menu2">
@@ -1310,10 +1305,6 @@
                     <label><input type="checkbox" id="ProjectBS_GetData">データを取得</label>
                     <span class="smalltext">WebSocketで随時情報を受け取ります。</span>
                 </section>
-            </div>
-            <div id="tab1_content10" class="tabcontent" role="tabpanel" aria-labelledby="tab1_menu10">
-                <h3><span>通知と音声</span>画面表示</h3>
-                <p class="smalltext">画面表示による通知の設定は、「情報種別ごとの設定」から調整してください。</p>
             </div>
             <div id="tab1_content11" class="tabcontent  active_tabcontent" role="tabpanel" aria-labelledby="tab1_menu11">
                 <h3><span>全般</span>システム設定</h3>
