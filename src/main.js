@@ -544,7 +544,7 @@ ipcMain.on("message", (_event, response) => {
       ConvertKmoni(response.data, response.date);
       break;
     case "SnetReturn":
-      ConvertSnet(response.data, response.date);
+      ConvertSnet(response.data, response.date, response.y, response.uid);
       break;
     case "SettingWindowOpen":
       Create_SettingWindow();
@@ -1628,14 +1628,21 @@ function ConvertKmoni(data, date) {
 }
 
 //海しるリアルタイム揺れ情報処理
-function ConvertSnet(data, date) {
-  SnetPointsDataTmp = {
-    action: "SnetUpdate",
-    Updatetime: new Date(date),
-    LocalTime: new Date(),
-    data: { data: data },
-  };
-  messageToMainWindow(SnetPointsDataTmp);
+var msil_latest = { 11: null, 12: null }
+function ConvertSnet(data, date, y, uid) {
+  msil_latest[y] = [uid, data]
+  var another = ((y == 11) ? 12 : 11)
+  if (msil_latest[another] && msil_latest[another][0] == uid) {
+    SnetPointsDataTmp = {
+      action: "SnetUpdate",
+      Updatetime: new Date(date),
+      LocalTime: new Date(),
+      data: {
+        data: Object.values(mergeDeeply(data, msil_latest[another][0]))
+      },
+    };
+    messageToMainWindow(SnetPointsDataTmp);
+  }
 }
 
 var kmoniI_url = 0;
@@ -1695,7 +1702,7 @@ function Req_kmoni() {
 function Req_SNet() {
   if (config.Source.msil.GetData) {
     if (net.online) {
-      var request = net.request("https://www.msil.go.jp/arcgis/rest/services/Msil/DisasterPrevImg1/ImageServer/query?f=json&returnGeometry=false&outFields=msilstarttime%2Cmsilendtime&_=" + new Date());
+      var request = net.request("https://www.msil.go.jp/tiles/smoni/targetTimes.json?" + Number(new Date()));
       request.on("response", (res) => {
         var dataTmp = "";
         res.on("data", (chunk) => {
@@ -1703,44 +1710,48 @@ function Req_SNet() {
         });
         res.on("end", function () {
           try {
-            var json = ParseJSON(dataTmp);
-            if (!json || !json.features || !Array.isArray(json.features)) return false;
-            var dateTime = 0;
-            var NowDateTime = Number(new Date() - Replay);
-            json.features.forEach(function (elm) {
-              if (
-                NowDateTime - dateTime > NowDateTime - elm.attributes.msilstarttime &&
-                NowDateTime >= elm.attributes.msilstarttime
-              )
-                dateTime = Number(elm.attributes.msilstarttime);
+            var json = JSON.parse(dataTmp.replace(/\s+/g, ''));
+            if (!json || !Array.isArray(json)) throw new Error();
+            var basetime = 0;
+            var Now = Number(NormalizeDate(1, ConvertUTC(new Date(new Date() - Replay))));
+            json.forEach(function (elm) {
+              if (basetime < elm.basetime && Now >= elm.basetime)
+                basetime = Number(elm.basetime);
             });
-            if (msil_lastTime < dateTime) {
-              var request = net.request("https://www.msil.go.jp/arcgis/rest/services/Msil/DisasterPrevImg1/ImageServer//exportImage?f=image&time=" + dateTime + "%2C" + dateTime + "&bbox=13409547.546603577%2C2713376.239114911%2C16907305.960932314%2C5966536.162931148&size=400%2C400");
-              request.on("response", (res) => {
-                var dataTmp = [];
-                res.on("data", (chunk) => {
-                  dataTmp.push(chunk);
-                });
-                res.on("end", () => {
-                  try {
-                    if (WorkerWindow) {
-                      // eslint-disable-next-line no-undef
-                      var bufTmp = Buffer.concat(dataTmp);
-                      var ReqTime = new Date(dateTime);
-                      WorkerWindow.webContents.send("message2", {
-                        action: "SnetImgUpdate",
-                        data: "data:image/png;base64," + bufTmp.toString("base64"),
-                        date: ReqTime,
-                      });
+            if (msil_lastTime < basetime) {
+
+              function Req_SNet_core(y, unique_id) {
+                var request = net.request(`https://www.msil.go.jp/tiles/smoni/${basetime}/${basetime}/5/28/${y}.png`);
+                request.on("response", (res) => {
+                  var dataTmp = [];
+                  res.on("data", (chunk) => {
+                    dataTmp.push(chunk);
+                  });
+                  res.on("end", () => {
+                    try {
+                      if (WorkerWindow) {
+                        // eslint-disable-next-line no-undef
+                        var bufTmp = Buffer.concat(dataTmp);
+                        WorkerWindow.webContents.send("message2", {
+                          action: "SnetImgUpdate",
+                          y: y,
+                          unique_id: unique_id,
+                          data: "data:image/png;base64," + bufTmp.toString("base64"),
+                          date: new Date(),
+                        });
+                      }
+                      UpdateStatus(new Date() - Replay, "msilImg", "success");
+                    } catch {
+                      UpdateStatus(new Date() - Replay, "msilImg", "Error");
                     }
-                    UpdateStatus(new Date() - Replay, "msilImg", "success");
-                  } catch {
-                    UpdateStatus(new Date() - Replay, "msilImg", "Error");
-                  }
+                  });
                 });
-              });
-              request.end();
-              msil_lastTime = dateTime;
+                request.end();
+              }
+              var unique_id = Number(new Date());
+              Req_SNet_core(11, unique_id);
+              Req_SNet_core(12, unique_id);
+              msil_lastTime = basetime;
             }
           } catch {
             UpdateStatus(new Date() - Replay, "msilImg", "Error");
@@ -4549,7 +4560,14 @@ function ConvertJST(time) {
   try {
     return new Date(time.setHours(time.getHours() + 9));
   } catch (err) {
-    throw new Error("内部の情報処理でエラーが発生しました。(タイムゾーンの変換)", { cause: err });
+    throw new Error("内部の情報処理でエラーが発生しました。(タイムゾーンの変換 - UTC to JST)", { cause: err });
+  }
+}
+function ConvertUTC(time) {
+  try {
+    return new Date(time.setHours(time.getHours() - 9));
+  } catch (err) {
+    throw new Error("内部の情報処理でエラーが発生しました。(タイムゾーンの変換 - JST to UTC)", { cause: err });
   }
 }
 function depthFilter(depth) {

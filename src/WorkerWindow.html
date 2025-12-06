@@ -51,7 +51,7 @@
       });
 
     var canvas = new OffscreenCanvas(352, 400);
-    var Scanvas = new OffscreenCanvas(400, 400)
+    var Scanvas = new OffscreenCanvas(256, 256)
     var context = canvas.getContext("2d", { willReadFrequently: true });
     var Scontext = Scanvas.getContext("2d", { willReadFrequently: true });
 
@@ -79,7 +79,7 @@
       Scontext.clearRect(0, 0, Scanvas.width, Scanvas.height);
       Scontext.drawImage(image2, 0, 0);
       image2_loaded = true
-      SnetRedraw();
+      SnetRedraw(image2.getAttribute("current_uid"), image2.getAttribute("current_y"));
     };
 
     window.electronAPI.messageSend((event, request) => {
@@ -103,6 +103,8 @@
       } else if (request.action == "SnetImgUpdate") {
         kmoni_date2 = request.date
         image2.src = request.data;
+        image2.setAttribute("current_y", request.y)
+        image2.setAttribute("current_uid", request.unique_id)
       } else if (request.action == "speak") {
         speak(request.data)
       } else if (request.action == "PlayAudio") {
@@ -211,12 +213,15 @@
       });
     }
 
-    function SnetRedraw() {
+    function SnetRedraw(uid, y) {
       if (!Spoints) return;
-      var imagedata = Scontext.getImageData(0, 0, 400, 400).data;
+      var imagedata = Scontext.getImageData(0, 0, 256, 256).data;
 
-      Spoints.forEach(function (elm, index) {
-        var index = elm.Point.Y * 400 + elm.Point.X;
+      Spoints_f = Spoints.filter(function (el) {
+        return el.TileID == (y == 12 ? 1 : 2)
+      })
+      Spoints_f.forEach(function (elm, index) {
+        var index = elm.Point.Y * 256 + elm.Point.X;
         var rgb = [
           imagedata[4 * index],
           imagedata[4 * index + 1],
@@ -241,6 +246,8 @@
         action: "SnetReturn",
         data: Spoints,
         date: kmoni_date2,
+        uid: uid,
+        y: y,
       });
     }
 

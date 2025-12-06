@@ -1,158 +1,2186 @@
 [
-  { "Type": "S-net", "Code": "N.S1N01", "IsSuspended": false, "depth": 169, "Location": { "Latitude": 35.8968, "Longitude": 141.0535 }, "Point": { "X": 261, "Y": 205 } },
-  { "Type": "S-net", "Code": "N.S1N02", "IsSuspended": false, "depth": 1466, "Location": { "Latitude": 35.8424, "Longitude": 141.3772 }, "Point": { "X": 266, "Y": 205 } },
-  { "Type": "S-net", "Code": "N.S1N03", "IsSuspended": false, "depth": 2591, "Location": { "Latitude": 35.7203, "Longitude": 141.6451 }, "Point": { "X": 269, "Y": 207 } },
-  { "Type": "S-net", "Code": "N.S1N04", "IsSuspended": false, "depth": 2612, "Location": { "Latitude": 35.6036, "Longitude": 141.9041 }, "Point": { "X": 272, "Y": 209 } },
-  { "Type": "S-net", "Code": "N.S1N05", "IsSuspended": false, "depth": 5836, "Location": { "Latitude": 35.4047, "Longitude": 142.0531 }, "Point": { "X": 274, "Y": 212 } },
-  { "Type": "S-net", "Code": "N.S1N06", "IsSuspended": false, "depth": 5567, "Location": { "Latitude": 35.2277, "Longitude": 141.8692 }, "Point": { "X": 272, "Y": 215 } },
-  { "Type": "S-net", "Code": "N.S1N07", "IsSuspended": false, "depth": 3285, "Location": { "Latitude": 35.2773, "Longitude": 141.5902 }, "Point": { "X": 268, "Y": 214 } },
-  { "Type": "S-net", "Code": "N.S1N08", "IsSuspended": false, "depth": 1387, "Location": { "Latitude": 35.4536, "Longitude": 141.3898 }, "Point": { "X": 266, "Y": 212 } },
-  { "Type": "S-net", "Code": "N.S1N09", "IsSuspended": false, "depth": 1583, "Location": { "Latitude": 35.227, "Longitude": 141.3068 }, "Point": { "X": 264, "Y": 215 } },
-  { "Type": "S-net", "Code": "N.S1N10", "IsSuspended": false, "depth": 2554, "Location": { "Latitude": 35.0925, "Longitude": 141.2021 }, "Point": { "X": 263, "Y": 217 } },
-  { "Type": "S-net", "Code": "N.S1N11", "IsSuspended": false, "depth": 1670, "Location": { "Latitude": 35.1203, "Longitude": 140.9682 }, "Point": { "X": 260, "Y": 217 } },
-  { "Type": "S-net", "Code": "N.S1N12", "IsSuspended": false, "depth": 1239, "Location": { "Latitude": 35.0228, "Longitude": 140.8091 }, "Point": { "X": 258, "Y": 218 } },
-  { "Type": "S-net", "Code": "N.S1N13", "IsSuspended": false, "depth": 2210, "Location": { "Latitude": 34.8788, "Longitude": 140.9627 }, "Point": { "X": 260, "Y": 220 } },
-  { "Type": "S-net", "Code": "N.S1N14", "IsSuspended": false, "depth": 4861, "Location": { "Latitude": 34.6407, "Longitude": 141.0907 }, "Point": { "X": 262, "Y": 224 } },
-  { "Type": "S-net", "Code": "N.S1N15", "IsSuspended": false, "depth": 6569, "Location": { "Latitude": 34.5256, "Longitude": 141.3512 }, "Point": { "X": 265, "Y": 225 } },
-  { "Type": "S-net", "Code": "N.S1N16", "IsSuspended": false, "depth": 6978, "Location": { "Latitude": 34.3686, "Longitude": 141.5402 }, "Point": { "X": 267, "Y": 229 } },
-  { "Type": "S-net", "Code": "N.S1N17", "IsSuspended": false, "depth": 6805, "Location": { "Latitude": 34.1956, "Longitude": 141.3341 }, "Point": { "X": 265, "Y": 231 } },
-  { "Type": "S-net", "Code": "N.S1N18", "IsSuspended": false, "depth": 5111, "Location": { "Latitude": 34.262, "Longitude": 141.0316 }, "Point": { "X": 261, "Y": 230 } },
-  { "Type": "S-net", "Code": "N.S1N19", "IsSuspended": false, "depth": 3274, "Location": { "Latitude": 34.2269, "Longitude": 140.7311 }, "Point": { "X": 257, "Y": 231 } },
-  { "Type": "S-net", "Code": "N.S1N20", "IsSuspended": false, "depth": 2513, "Location": { "Latitude": 34.2592, "Longitude": 140.4159 }, "Point": { "X": 254, "Y": 230 } },
-  { "Type": "S-net", "Code": "N.S1N21", "IsSuspended": false, "depth": 2869, "Location": { "Latitude": 34.4231, "Longitude": 140.203 }, "Point": { "X": 250, "Y": 227 } },
-  { "Type": "S-net", "Code": "N.S1N22", "IsSuspended": false, "depth": 2512, "Location": { "Latitude": 34.6443, "Longitude": 140.0906 }, "Point": { "X": 249, "Y": 224 } },
-  { "Type": "S-net", "Code": "N.S2N01", "IsSuspended": false, "depth": 102, "Location": { "Latitude": 37.8428, "Longitude": 141.3845 }, "Point": { "X": 266, "Y": 174 } },
-  { "Type": "S-net", "Code": "N.S2N02", "IsSuspended": false, "depth": 239, "Location": { "Latitude": 37.6922, "Longitude": 141.6387 }, "Point": { "X": 269, "Y": 176 } },
-  { "Type": "S-net", "Code": "N.S2N03", "IsSuspended": false, "depth": 462, "Location": { "Latitude": 37.7073, "Longitude": 141.965 }, "Point": { "X": 273, "Y": 176 } },
-  { "Type": "S-net", "Code": "N.S2N04", "IsSuspended": false, "depth": 786, "Location": { "Latitude": 37.6739, "Longitude": 142.2975 }, "Point": { "X": 277, "Y": 176 } },
-  { "Type": "S-net", "Code": "N.S2N05", "IsSuspended": false, "depth": 1781, "Location": { "Latitude": 37.6016, "Longitude": 142.6236 }, "Point": { "X": 281, "Y": 178 } },
-  { "Type": "S-net", "Code": "N.S2N06", "IsSuspended": false, "depth": 2945, "Location": { "Latitude": 37.5259, "Longitude": 142.935 }, "Point": { "X": 285, "Y": 179 } },
-  { "Type": "S-net", "Code": "N.S2N07", "IsSuspended": false, "depth": 4767, "Location": { "Latitude": 37.429, "Longitude": 143.2266 }, "Point": { "X": 289, "Y": 180 } },
-  { "Type": "S-net", "Code": "N.S2N08", "IsSuspended": false, "depth": 4353, "Location": { "Latitude": 37.222, "Longitude": 143.07 }, "Point": { "X": 287, "Y": 183 } },
-  { "Type": "S-net", "Code": "N.S2N09", "IsSuspended": false, "depth": 4226, "Location": { "Latitude": 37.0741, "Longitude": 142.8188 }, "Point": { "X": 284, "Y": 186 } },
-  { "Type": "S-net", "Code": "N.S2N10", "IsSuspended": false, "depth": 2417, "Location": { "Latitude": 37.0948, "Longitude": 142.4979 }, "Point": { "X": 279, "Y": 185 } },
-  { "Type": "S-net", "Code": "N.S2N11", "IsSuspended": false, "depth": 1447, "Location": { "Latitude": 37.1931, "Longitude": 142.1998 }, "Point": { "X": 276, "Y": 184 } },
-  { "Type": "S-net", "Code": "N.S2N12", "IsSuspended": false, "depth": 591, "Location": { "Latitude": 37.2772, "Longitude": 141.879 }, "Point": { "X": 272, "Y": 183 } },
-  { "Type": "S-net", "Code": "N.S2N13A", "IsSuspended": false, "depth": 212, "Location": { "Latitude": 37.3003, "Longitude": 141.5709 }, "Point": { "X": 268, "Y": 182 } },
-  { "Type": "S-net", "Code": "N.S2N14", "IsSuspended": false, "depth": 162, "Location": { "Latitude": 37.0952, "Longitude": 141.3703 }, "Point": { "X": 266, "Y": 185 } },
-  { "Type": "S-net", "Code": "N.S2N15", "IsSuspended": false, "depth": 264, "Location": { "Latitude": 36.8344, "Longitude": 141.3307 }, "Point": { "X": 265, "Y": 190 } },
-  { "Type": "S-net", "Code": "N.S2N16", "IsSuspended": false, "depth": 874, "Location": { "Latitude": 36.662, "Longitude": 141.5207 }, "Point": { "X": 267, "Y": 192 } },
-  { "Type": "S-net", "Code": "N.S2N17", "IsSuspended": false, "depth": 2247, "Location": { "Latitude": 36.6337, "Longitude": 141.8389 }, "Point": { "X": 271, "Y": 193 } },
-  { "Type": "S-net", "Code": "N.S2N18", "IsSuspended": false, "depth": 2460, "Location": { "Latitude": 36.6824, "Longitude": 142.1445 }, "Point": { "X": 275, "Y": 192 } },
-  { "Type": "S-net", "Code": "N.S2N19", "IsSuspended": false, "depth": 3425, "Location": { "Latitude": 36.5986, "Longitude": 142.4389 }, "Point": { "X": 279, "Y": 193 } },
-  { "Type": "S-net", "Code": "N.S2N20", "IsSuspended": false, "depth": 5770, "Location": { "Latitude": 36.3885, "Longitude": 142.6164 }, "Point": { "X": 281, "Y": 197 } },
-  { "Type": "S-net", "Code": "N.S2N21", "IsSuspended": false, "depth": 6230, "Location": { "Latitude": 36.1577, "Longitude": 142.5553 }, "Point": { "X": 281, "Y": 200 } },
-  { "Type": "S-net", "Code": "N.S2N22", "IsSuspended": false, "depth": 4492, "Location": { "Latitude": 35.9463, "Longitude": 142.4014 }, "Point": { "X": 279, "Y": 204 } },
-  { "Type": "S-net", "Code": "N.S2N23", "IsSuspended": false, "depth": 3881, "Location": { "Latitude": 35.9677, "Longitude": 142.1138 }, "Point": { "X": 275, "Y": 203 } },
-  { "Type": "S-net", "Code": "N.S2N24", "IsSuspended": false, "depth": 2310, "Location": { "Latitude": 35.9976, "Longitude": 141.7944 }, "Point": { "X": 271, "Y": 203 } },
-  { "Type": "S-net", "Code": "N.S2N25", "IsSuspended": false, "depth": 1887, "Location": { "Latitude": 36.0729, "Longitude": 141.5095 }, "Point": { "X": 267, "Y": 201 } },
-  { "Type": "S-net", "Code": "N.S2N26", "IsSuspended": false, "depth": 730, "Location": { "Latitude": 36.1442, "Longitude": 141.2021 }, "Point": { "X": 263, "Y": 201 } },
-  { "Type": "S-net", "Code": "N.S3N01", "IsSuspended": false, "depth": 940, "Location": { "Latitude": 39.4497, "Longitude": 142.4578 }, "Point": { "X": 279, "Y": 147 } },
-  { "Type": "S-net", "Code": "N.S3N02", "IsSuspended": false, "depth": 1622, "Location": { "Latitude": 39.3746, "Longitude": 142.7918 }, "Point": { "X": 283, "Y": 149 } },
-  { "Type": "S-net", "Code": "N.S3N03", "IsSuspended": false, "depth": 1890, "Location": { "Latitude": 39.3231, "Longitude": 143.1206 }, "Point": { "X": 287, "Y": 149 } },
-  { "Type": "S-net", "Code": "N.S3N04", "IsSuspended": false, "depth": 2490, "Location": { "Latitude": 39.2958, "Longitude": 143.4544 }, "Point": { "X": 292, "Y": 150 } },
-  { "Type": "S-net", "Code": "N.S3N05", "IsSuspended": false, "depth": 4308, "Location": { "Latitude": 39.1906, "Longitude": 143.7499 }, "Point": { "X": 296, "Y": 151 } },
-  { "Type": "S-net", "Code": "N.S3N06", "IsSuspended": false, "depth": 5440, "Location": { "Latitude": 39.0459, "Longitude": 143.9305 }, "Point": { "X": 298, "Y": 154 } },
-  { "Type": "S-net", "Code": "N.S3N07", "IsSuspended": false, "depth": 5231, "Location": { "Latitude": 38.8308, "Longitude": 143.7846 }, "Point": { "X": 296, "Y": 157 } },
-  { "Type": "S-net", "Code": "N.S3N08", "IsSuspended": false, "depth": 2465, "Location": { "Latitude": 38.7826, "Longitude": 143.4769 }, "Point": { "X": 292, "Y": 158 } },
-  { "Type": "S-net", "Code": "N.S3N09", "IsSuspended": false, "depth": 1779, "Location": { "Latitude": 38.7739, "Longitude": 143.1437 }, "Point": { "X": 288, "Y": 159 } },
-  { "Type": "S-net", "Code": "N.S3N10", "IsSuspended": false, "depth": 1310, "Location": { "Latitude": 38.8668, "Longitude": 142.8212 }, "Point": { "X": 284, "Y": 157 } },
-  { "Type": "S-net", "Code": "N.S3N11", "IsSuspended": false, "depth": 1168, "Location": { "Latitude": 38.9349, "Longitude": 142.4873 }, "Point": { "X": 279, "Y": 156 } },
-  { "Type": "S-net", "Code": "N.S3N12", "IsSuspended": false, "depth": 558, "Location": { "Latitude": 38.8412, "Longitude": 142.1816 }, "Point": { "X": 276, "Y": 157 } },
-  { "Type": "S-net", "Code": "N.S3N13", "IsSuspended": false, "depth": 573, "Location": { "Latitude": 38.5901, "Longitude": 142.1816 }, "Point": { "X": 276, "Y": 151 } },
-  { "Type": "S-net", "Code": "N.S3N14", "IsSuspended": false, "depth": 1092, "Location": { "Latitude": 38.4993, "Longitude": 142.5002 }, "Point": { "X": 280, "Y": 163 } },
-  { "Type": "S-net", "Code": "N.S3N15", "IsSuspended": false, "depth": 1472, "Location": { "Latitude": 38.4487, "Longitude": 142.8376 }, "Point": { "X": 284, "Y": 164 } },
-  { "Type": "S-net", "Code": "N.S3N16", "IsSuspended": false, "depth": 2420, "Location": { "Latitude": 38.4262, "Longitude": 143.1703 }, "Point": { "X": 288, "Y": 164 } },
-  { "Type": "S-net", "Code": "N.S3N17", "IsSuspended": false, "depth": 3020, "Location": { "Latitude": 38.3978, "Longitude": 143.5139 }, "Point": { "X": 292, "Y": 165 } },
-  { "Type": "S-net", "Code": "N.S3N18", "IsSuspended": false, "depth": 5528, "Location": { "Latitude": 38.3063, "Longitude": 143.781 }, "Point": { "X": 296, "Y": 166 } },
-  { "Type": "S-net", "Code": "N.S3N19", "IsSuspended": false, "depth": 5591, "Location": { "Latitude": 38.0594, "Longitude": 143.7441 }, "Point": { "X": 296, "Y": 170 } },
-  { "Type": "S-net", "Code": "N.S3N20", "IsSuspended": false, "depth": 5225, "Location": { "Latitude": 37.9311, "Longitude": 143.5675 }, "Point": { "X": 293, "Y": 172 } },
-  { "Type": "S-net", "Code": "N.S3N21", "IsSuspended": false, "depth": 2779, "Location": { "Latitude": 37.9713, "Longitude": 143.2454 }, "Point": { "X": 289, "Y": 172 } },
-  { "Type": "S-net", "Code": "N.S3N22", "IsSuspended": false, "depth": 1645, "Location": { "Latitude": 37.9838, "Longitude": 142.9072 }, "Point": { "X": 285, "Y": 171 } },
-  { "Type": "S-net", "Code": "N.S3N23", "IsSuspended": false, "depth": 1220, "Location": { "Latitude": 38.027, "Longitude": 142.5735 }, "Point": { "X": 281, "Y": 170 } },
-  { "Type": "S-net", "Code": "N.S3N24", "IsSuspended": false, "depth": 849, "Location": { "Latitude": 38.0569, "Longitude": 142.234 }, "Point": { "X": 276, "Y": 170 } },
-  { "Type": "S-net", "Code": "N.S3N25", "IsSuspended": false, "depth": 230, "Location": { "Latitude": 38.0972, "Longitude": 141.8957 }, "Point": { "X": 272, "Y": 169 } },
-  { "Type": "S-net", "Code": "N.S3N26", "IsSuspended": false, "depth": 128, "Location": { "Latitude": 38.106, "Longitude": 141.5572 }, "Point": { "X": 267, "Y": 169 } },
-  { "Type": "S-net", "Code": "N.S4N01", "IsSuspended": false, "depth": 139, "Location": { "Latitude": 40.7881, "Longitude": 141.7895 }, "Point": { "X": 271, "Y": 125 } },
-  { "Type": "S-net", "Code": "N.S4N02", "IsSuspended": false, "depth": 858, "Location": { "Latitude": 40.9069, "Longitude": 142.1057 }, "Point": { "X": 275, "Y": 123 } },
-  { "Type": "S-net", "Code": "N.S4N03", "IsSuspended": false, "depth": 1425, "Location": { "Latitude": 41.0156, "Longitude": 142.4314 }, "Point": { "X": 279, "Y": 121 } },
-  { "Type": "S-net", "Code": "N.S4N04", "IsSuspended": false, "depth": 1798, "Location": { "Latitude": 41.0762, "Longitude": 142.7706 }, "Point": { "X": 283, "Y": 120 } },
-  { "Type": "S-net", "Code": "N.S4N05", "IsSuspended": false, "depth": 1940, "Location": { "Latitude": 41.0443, "Longitude": 143.1138 }, "Point": { "X": 288, "Y": 121 } },
-  { "Type": "S-net", "Code": "N.S4N06", "IsSuspended": false, "depth": 1970, "Location": { "Latitude": 40.9718, "Longitude": 143.4481 }, "Point": { "X": 292, "Y": 122 } },
-  { "Type": "S-net", "Code": "N.S4N07", "IsSuspended": false, "depth": 2613, "Location": { "Latitude": 40.882, "Longitude": 143.7746 }, "Point": { "X": 296, "Y": 124 } },
-  { "Type": "S-net", "Code": "N.S4N08", "IsSuspended": false, "depth": 5060, "Location": { "Latitude": 40.7805, "Longitude": 144.0905 }, "Point": { "X": 300, "Y": 122 } },
-  { "Type": "S-net", "Code": "N.S4N09", "IsSuspended": false, "depth": 5095, "Location": { "Latitude": 40.5521, "Longitude": 144.1332 }, "Point": { "X": 301, "Y": 129 } },
-  { "Type": "S-net", "Code": "N.S4N10", "IsSuspended": false, "depth": 3897, "Location": { "Latitude": 40.4327, "Longitude": 143.8887 }, "Point": { "X": 298, "Y": 131 } },
-  { "Type": "S-net", "Code": "N.S4N11", "IsSuspended": false, "depth": 2273, "Location": { "Latitude": 40.4353, "Longitude": 143.543 }, "Point": { "X": 294, "Y": 131 } },
-  { "Type": "S-net", "Code": "N.S4N12", "IsSuspended": false, "depth": 1711, "Location": { "Latitude": 40.4515, "Longitude": 143.2015 }, "Point": { "X": 289, "Y": 130 } },
-  { "Type": "S-net", "Code": "N.S4N13", "IsSuspended": false, "depth": 1537, "Location": { "Latitude": 40.5196, "Longitude": 142.9617 }, "Point": { "X": 286, "Y": 130 } },
-  { "Type": "S-net", "Code": "N.S4N14", "IsSuspended": false, "depth": 1393, "Location": { "Latitude": 40.5927, "Longitude": 142.634 }, "Point": { "X": 281, "Y": 128 } },
-  { "Type": "S-net", "Code": "N.S4N15", "IsSuspended": false, "depth": 816, "Location": { "Latitude": 40.5933, "Longitude": 142.2844 }, "Point": { "X": 277, "Y": 128 } },
-  { "Type": "S-net", "Code": "N.S4N16", "IsSuspended": false, "depth": 559, "Location": { "Latitude": 40.3295, "Longitude": 142.2673 }, "Point": { "X": 277, "Y": 132 } },
-  { "Type": "S-net", "Code": "N.S4N17", "IsSuspended": false, "depth": 681, "Location": { "Latitude": 40.1165, "Longitude": 142.3926 }, "Point": { "X": 278, "Y": 137 } },
-  { "Type": "S-net", "Code": "N.S4N18", "IsSuspended": false, "depth": 969, "Location": { "Latitude": 40.1088, "Longitude": 142.6222 }, "Point": { "X": 281, "Y": 137 } },
-  { "Type": "S-net", "Code": "N.S4N19", "IsSuspended": false, "depth": 1256, "Location": { "Latitude": 40.0904, "Longitude": 142.9695 }, "Point": { "X": 286, "Y": 137 } },
-  { "Type": "S-net", "Code": "N.S4N20", "IsSuspended": false, "depth": 1329, "Location": { "Latitude": 40.0743, "Longitude": 143.321 }, "Point": { "X": 290, "Y": 137 } },
-  { "Type": "S-net", "Code": "N.S4N21", "IsSuspended": false, "depth": 2456, "Location": { "Latitude": 40.0863, "Longitude": 143.6572 }, "Point": { "X": 294, "Y": 137 } },
-  { "Type": "S-net", "Code": "N.S4N22", "IsSuspended": false, "depth": 4107, "Location": { "Latitude": 40.026, "Longitude": 143.9547 }, "Point": { "X": 298, "Y": 138 } },
-  { "Type": "S-net", "Code": "N.S4N23", "IsSuspended": false, "depth": 4358, "Location": { "Latitude": 39.7718, "Longitude": 143.9259 }, "Point": { "X": 298, "Y": 142 } },
-  { "Type": "S-net", "Code": "N.S4N24", "IsSuspended": false, "depth": 2936, "Location": { "Latitude": 39.6388, "Longitude": 143.7154 }, "Point": { "X": 295, "Y": 144 } },
-  { "Type": "S-net", "Code": "N.S4N25", "IsSuspended": false, "depth": 2228, "Location": { "Latitude": 39.6976, "Longitude": 143.3749 }, "Point": { "X": 291, "Y": 143 } },
-  { "Type": "S-net", "Code": "N.S4N26", "IsSuspended": false, "depth": 1569, "Location": { "Latitude": 39.7245, "Longitude": 143.0384 }, "Point": { "X": 286, "Y": 143 } },
-  { "Type": "S-net", "Code": "N.S4N27", "IsSuspended": false, "depth": 914, "Location": { "Latitude": 39.7445, "Longitude": 142.6903 }, "Point": { "X": 282, "Y": 143 } },
-  { "Type": "S-net", "Code": "N.S4N28", "IsSuspended": false, "depth": 569, "Location": { "Latitude": 39.7385, "Longitude": 142.3408 }, "Point": { "X": 277, "Y": 143 } },
-  { "Type": "S-net", "Code": "N.S5N01", "IsSuspended": false, "depth": 2052, "Location": { "Latitude": 42.7688, "Longitude": 145.7115 }, "Point": { "X": 321, "Y": 91 } },
-  { "Type": "S-net", "Code": "N.S5N02", "IsSuspended": false, "depth": 2042, "Location": { "Latitude": 42.6403, "Longitude": 145.4063 }, "Point": { "X": 317, "Y": 93 } },
-  { "Type": "S-net", "Code": "N.S5N03", "IsSuspended": false, "depth": 1985, "Location": { "Latitude": 42.4802, "Longitude": 145.1433 }, "Point": { "X": 313, "Y": 96 } },
-  { "Type": "S-net", "Code": "N.S5N04", "IsSuspended": false, "depth": 3149, "Location": { "Latitude": 42.2286, "Longitude": 145.204 }, "Point": { "X": 314, "Y": 100 } },
-  { "Type": "S-net", "Code": "N.S5N05", "IsSuspended": false, "depth": 3813, "Location": { "Latitude": 42.0615, "Longitude": 145.437 }, "Point": { "X": 317, "Y": 103 } },
-  { "Type": "S-net", "Code": "N.S5N06", "IsSuspended": false, "depth": 5619, "Location": { "Latitude": 41.884, "Longitude": 145.6544 }, "Point": { "X": 320, "Y": 106 } },
-  { "Type": "S-net", "Code": "N.S5N07", "IsSuspended": false, "depth": 5953, "Location": { "Latitude": 41.6637, "Longitude": 145.5291 }, "Point": { "X": 318, "Y": 110 } },
-  { "Type": "S-net", "Code": "N.S5N08", "IsSuspended": false, "depth": 5980, "Location": { "Latitude": 41.5301, "Longitude": 145.2483 }, "Point": { "X": 314, "Y": 113 } },
-  { "Type": "S-net", "Code": "N.S5N09", "IsSuspended": false, "depth": 5100, "Location": { "Latitude": 41.521, "Longitude": 144.905 }, "Point": { "X": 310, "Y": 113 } },
-  { "Type": "S-net", "Code": "N.S5N10", "IsSuspended": false, "depth": 4103, "Location": { "Latitude": 41.6541, "Longitude": 144.6716 }, "Point": { "X": 308, "Y": 111 } },
-  { "Type": "S-net", "Code": "N.S5N11", "IsSuspended": false, "depth": 2093, "Location": { "Latitude": 41.9072, "Longitude": 144.6955 }, "Point": { "X": 308, "Y": 106 } },
-  { "Type": "S-net", "Code": "N.S5N12", "IsSuspended": false, "depth": 1772, "Location": { "Latitude": 42.0784, "Longitude": 144.6375 }, "Point": { "X": 307, "Y": 103 } },
-  { "Type": "S-net", "Code": "N.S5N13", "IsSuspended": false, "depth": 1607, "Location": { "Latitude": 41.9792, "Longitude": 144.3445 }, "Point": { "X": 303, "Y": 105 } },
-  { "Type": "S-net", "Code": "N.S5N14", "IsSuspended": false, "depth": 1592, "Location": { "Latitude": 41.7475, "Longitude": 144.1779 }, "Point": { "X": 301, "Y": 109 } },
-  { "Type": "S-net", "Code": "N.S5N15", "IsSuspended": false, "depth": 1950, "Location": { "Latitude": 41.4961, "Longitude": 144.0879 }, "Point": { "X": 300, "Y": 113 } },
-  { "Type": "S-net", "Code": "N.S5N16", "IsSuspended": false, "depth": 2380, "Location": { "Latitude": 41.3742, "Longitude": 143.8006 }, "Point": { "X": 296, "Y": 115 } },
-  { "Type": "S-net", "Code": "N.S5N17", "IsSuspended": false, "depth": 2023, "Location": { "Latitude": 41.3643, "Longitude": 143.453 }, "Point": { "X": 292, "Y": 115 } },
-  { "Type": "S-net", "Code": "N.S5N18", "IsSuspended": false, "depth": 1509, "Location": { "Latitude": 41.4351, "Longitude": 143.1264 }, "Point": { "X": 287, "Y": 114 } },
-  { "Type": "S-net", "Code": "N.S5N19", "IsSuspended": false, "depth": 986, "Location": { "Latitude": 41.5607, "Longitude": 142.8177 }, "Point": { "X": 284, "Y": 112 } },
-  { "Type": "S-net", "Code": "N.S5N20", "IsSuspended": false, "depth": 1165, "Location": { "Latitude": 41.6095, "Longitude": 142.4787 }, "Point": { "X": 279, "Y": 111 } },
-  { "Type": "S-net", "Code": "N.S5N21", "IsSuspended": false, "depth": 1189, "Location": { "Latitude": 41.4248, "Longitude": 142.2193 }, "Point": { "X": 276, "Y": 114 } },
-  { "Type": "S-net", "Code": "N.S5N22", "IsSuspended": false, "depth": 1029, "Location": { "Latitude": 41.1989, "Longitude": 142.0271 }, "Point": { "X": 274, "Y": 118 } },
-  { "Type": "S-net", "Code": "N.S5N23", "IsSuspended": false, "depth": 529, "Location": { "Latitude": 40.954, "Longitude": 141.8762 }, "Point": { "X": 272, "Y": 122 } },
-  { "Type": "S-net", "Code": "N.S6N01", "IsSuspended": false, "depth": 2427, "Location": { "Latitude": 42.8064, "Longitude": 146.0211 }, "Point": { "X": 324, "Y": 90 } },
-  { "Type": "S-net", "Code": "N.S6N02", "IsSuspended": false, "depth": 2830, "Location": { "Latitude": 42.5807, "Longitude": 146.078 }, "Point": { "X": 325, "Y": 95 } },
-  { "Type": "S-net", "Code": "N.S6N03", "IsSuspended": false, "depth": 5710, "Location": { "Latitude": 42.0943, "Longitude": 146.2316 }, "Point": { "X": 327, "Y": 103 } },
-  { "Type": "S-net", "Code": "N.S6N04", "IsSuspended": false, "depth": 6950, "Location": { "Latitude": 41.6653, "Longitude": 146.1747 }, "Point": { "X": 326, "Y": 110 } },
-  { "Type": "S-net", "Code": "N.S6N05", "IsSuspended": false, "depth": 6680, "Location": { "Latitude": 41.3717, "Longitude": 145.6053 }, "Point": { "X": 319, "Y": 115 } },
-  { "Type": "S-net", "Code": "N.S6N06", "IsSuspended": false, "depth": 6012, "Location": { "Latitude": 40.8999, "Longitude": 145.3929 }, "Point": { "X": 316, "Y": 123 } },
-  { "Type": "S-net", "Code": "N.S6N07", "IsSuspended": false, "depth": 6160, "Location": { "Latitude": 40.536, "Longitude": 144.9381 }, "Point": { "X": 311, "Y": 129 } },
-  { "Type": "S-net", "Code": "N.S6N08", "IsSuspended": false, "depth": 5900, "Location": { "Latitude": 40.0319, "Longitude": 144.8089 }, "Point": { "X": 309, "Y": 138 } },
-  { "Type": "S-net", "Code": "N.S6N09", "IsSuspended": false, "depth": 6054, "Location": { "Latitude": 39.5172, "Longitude": 144.7191 }, "Point": { "X": 308, "Y": 146 } },
-  { "Type": "S-net", "Code": "N.S6N10", "IsSuspended": false, "depth": 6160, "Location": { "Latitude": 39.0072, "Longitude": 144.5915 }, "Point": { "X": 306, "Y": 155 } },
-  { "Type": "S-net", "Code": "N.S6N11", "IsSuspended": false, "depth": 6118, "Location": { "Latitude": 38.499, "Longitude": 144.4536 }, "Point": { "X": 304, "Y": 163 } },
-  { "Type": "S-net", "Code": "N.S6N12", "IsSuspended": false, "depth": 6111, "Location": { "Latitude": 37.9879, "Longitude": 144.3357 }, "Point": { "X": 303, "Y": 171 } },
-  { "Type": "S-net", "Code": "N.S6N13", "IsSuspended": false, "depth": 6174, "Location": { "Latitude": 37.4862, "Longitude": 144.1757 }, "Point": { "X": 301, "Y": 179 } },
-  { "Type": "S-net", "Code": "N.S6N14", "IsSuspended": false, "depth": 6228, "Location": { "Latitude": 37.012, "Longitude": 143.9557 }, "Point": { "X": 298, "Y": 187 } },
-  { "Type": "S-net", "Code": "N.S6N15", "IsSuspended": false, "depth": 6433, "Location": { "Latitude": 36.5748, "Longitude": 143.6059 }, "Point": { "X": 294, "Y": 194 } },
-  { "Type": "S-net", "Code": "N.S6N16", "IsSuspended": false, "depth": 6513, "Location": { "Latitude": 36.1262, "Longitude": 143.2823 }, "Point": { "X": 289, "Y": 201 } },
-  { "Type": "S-net", "Code": "N.S6N17", "IsSuspended": false, "depth": 6625, "Location": { "Latitude": 35.6745, "Longitude": 142.9688 }, "Point": { "X": 286, "Y": 208 } },
-  { "Type": "S-net", "Code": "N.S6N18", "IsSuspended": false, "depth": 6319, "Location": { "Latitude": 35.2114, "Longitude": 142.6799 }, "Point": { "X": 282, "Y": 215 } },
-  { "Type": "S-net", "Code": "N.S6N19", "IsSuspended": false, "depth": 6284, "Location": { "Latitude": 34.7118, "Longitude": 142.5208 }, "Point": { "X": 280, "Y": 223 } },
-  { "Type": "S-net", "Code": "N.S6N20", "IsSuspended": false, "depth": 7830, "Location": { "Latitude": 34.2604, "Longitude": 142.2389 }, "Point": { "X": 276, "Y": 230 } },
-  { "Type": "S-net", "Code": "N.S6N21", "IsSuspended": false, "depth": 7797, "Location": { "Latitude": 33.9619, "Longitude": 141.7291 }, "Point": { "X": 270, "Y": 235 } },
-  { "Type": "S-net", "Code": "N.S6N22", "IsSuspended": false, "depth": 3941, "Location": { "Latitude": 33.8601, "Longitude": 141.1281 }, "Point": { "X": 262, "Y": 236 } },
-  { "Type": "S-net", "Code": "N.S6N23", "IsSuspended": false, "depth": 1723, "Location": { "Latitude": 33.9448, "Longitude": 140.5189 }, "Point": { "X": 254, "Y": 235 } },
-  { "Type": "S-net", "Code": "N.S6N24", "IsSuspended": false, "depth": 1276, "Location": { "Latitude": 34.1773, "Longitude": 139.9814 }, "Point": { "X": 247, "Y": 231 } },
-  { "Type": "S-net", "Code": "N.S6N25", "IsSuspended": false, "depth": 2411, "Location": { "Latitude": 34.6696, "Longitude": 139.8167 }, "Point": { "X": 245, "Y": 225 } },
-  { "Type": "Sagami", "Code": "N.ST1H", "IsSuspended": false, "Location": { "Latitude": 34.59219, "Longitude": 139.9215 }, "Point": { "X": 248, "Y": 226 } },
-  { "Type": "Sagami", "Code": "N.ST2H", "IsSuspended": false, "Location": { "Latitude": 34.73631, "Longitude": 139.8425 }, "Point": { "X": 247, "Y": 223 } },
-  { "Type": "Sagami", "Code": "N.ST3H", "IsSuspended": false, "Location": { "Latitude": 34.795, "Longitude": 139.64669 }, "Point": { "X": 244, "Y": 223 } },
-  { "Type": "Sagami", "Code": "N.ST4H", "IsSuspended": false, "Location": { "Latitude": 34.88981, "Longitude": 139.57431 }, "Point": { "X": 243, "Y": 222 } },
-  { "Type": "Sagami", "Code": "N.ST5H", "IsSuspended": false, "Location": { "Latitude": 34.938, "Longitude": 139.4245 }, "Point": { "X": 241, "Y": 221 } },
-  { "Type": "Sagami", "Code": "N.ST6H", "IsSuspended": false, "Location": { "Latitude": 35.09331, "Longitude": 139.381 }, "Point": { "X": 241, "Y": 219 } }
+  {
+    "Type": "S-net",
+    "Code": "N.S1N01",
+    "Location": {
+      "Latitude": 35.8968,
+      "Longitude": 141.0535
+    },
+    "depth": 169,
+    "TileID": 1,
+    "Point": {
+      "X": 137,
+      "Y": 147
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S1N02",
+    "Location": {
+      "Latitude": 35.8424,
+      "Longitude": 141.3772
+    },
+    "depth": 1466,
+    "TileID": 1,
+    "Point": {
+      "X": 146,
+      "Y": 148
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S1N03",
+    "Location": {
+      "Latitude": 35.7203,
+      "Longitude": 141.6451
+    },
+    "depth": 2591,
+    "TileID": 1,
+    "Point": {
+      "X": 151,
+      "Y": 152
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S1N04",
+    "Location": {
+      "Latitude": 35.6036,
+      "Longitude": 141.9041
+    },
+    "depth": 2612,
+    "TileID": 1,
+    "Point": {
+      "X": 156,
+      "Y": 155
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S1N05",
+    "Location": {
+      "Latitude": 35.4047,
+      "Longitude": 142.0531
+    },
+    "depth": 5836,
+    "TileID": 1,
+    "Point": {
+      "X": 160,
+      "Y": 160
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S1N06",
+    "Location": {
+      "Latitude": 35.2277,
+      "Longitude": 141.8692
+    },
+    "depth": 5567,
+    "TileID": 1,
+    "Point": {
+      "X": 156,
+      "Y": 165
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S1N07",
+    "Location": {
+      "Latitude": 35.2773,
+      "Longitude": 141.5902
+    },
+    "depth": 3285,
+    "TileID": 1,
+    "Point": {
+      "X": 150,
+      "Y": 164
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S1N08",
+    "Location": {
+      "Latitude": 35.4536,
+      "Longitude": 141.3898
+    },
+    "depth": 1387,
+    "TileID": 1,
+    "Point": {
+      "X": 145,
+      "Y": 160
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S1N09",
+    "Location": {
+      "Latitude": 35.227,
+      "Longitude": 141.3068
+    },
+    "depth": 1583,
+    "TileID": 1,
+    "Point": {
+      "X": 143,
+      "Y": 165
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S1N10",
+    "Location": {
+      "Latitude": 35.0925,
+      "Longitude": 141.2021
+    },
+    "depth": 2554,
+    "TileID": 1,
+    "Point": {
+      "X": 140,
+      "Y": 169
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S1N11",
+    "Location": {
+      "Latitude": 35.1203,
+      "Longitude": 140.9682
+    },
+    "depth": 1670,
+    "TileID": 1,
+    "Point": {
+      "X": 134,
+      "Y": 169
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S1N12",
+    "Location": {
+      "Latitude": 35.0228,
+      "Longitude": 140.8091
+    },
+    "depth": 1239,
+    "TileID": 1,
+    "Point": {
+      "X": 131,
+      "Y": 171
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S1N13",
+    "Location": {
+      "Latitude": 34.8788,
+      "Longitude": 140.9627
+    },
+    "depth": 2210,
+    "TileID": 1,
+    "Point": {
+      "X": 134,
+      "Y": 174
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S1N14",
+    "Location": {
+      "Latitude": 34.6407,
+      "Longitude": 141.0907
+    },
+    "depth": 4861,
+    "TileID": 1,
+    "Point": {
+      "X": 137,
+      "Y": 181
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S1N15",
+    "Location": {
+      "Latitude": 34.5256,
+      "Longitude": 141.3512
+    },
+    "depth": 6569,
+    "TileID": 1,
+    "Point": {
+      "X": 145,
+      "Y": 185
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S1N16",
+    "Location": {
+      "Latitude": 34.3686,
+      "Longitude": 141.5402
+    },
+    "depth": 6978,
+    "TileID": 1,
+    "Point": {
+      "X": 149,
+      "Y": 189
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S1N17",
+    "Location": {
+      "Latitude": 34.1956,
+      "Longitude": 141.3341
+    },
+    "depth": 6805,
+    "TileID": 1,
+    "Point": {
+      "X": 145,
+      "Y": 194
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S1N18",
+    "Location": {
+      "Latitude": 34.262,
+      "Longitude": 141.0316
+    },
+    "depth": 5111,
+    "TileID": 1,
+    "Point": {
+      "X": 137,
+      "Y": 192
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S1N19",
+    "Location": {
+      "Latitude": 34.2269,
+      "Longitude": 140.7311
+    },
+    "depth": 3274,
+    "TileID": 1,
+    "Point": {
+      "X": 130,
+      "Y": 193
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S1N20",
+    "Location": {
+      "Latitude": 34.2592,
+      "Longitude": 140.4159
+    },
+    "depth": 2513,
+    "TileID": 1,
+    "Point": {
+      "X": 122,
+      "Y": 192
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S1N21",
+    "Location": {
+      "Latitude": 34.4231,
+      "Longitude": 140.203
+    },
+    "depth": 2869,
+    "TileID": 1,
+    "Point": {
+      "X": 117,
+      "Y": 188
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S1N22",
+    "Location": {
+      "Latitude": 34.6443,
+      "Longitude": 140.0906
+    },
+    "depth": 2512,
+    "TileID": 1,
+    "Point": {
+      "X": 116,
+      "Y": 181
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S2N01",
+    "Location": {
+      "Latitude": 37.8428,
+      "Longitude": 141.3845
+    },
+    "depth": 102,
+    "TileID": 1,
+    "Point": {
+      "X": 146,
+      "Y": 91
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S2N02",
+    "Location": {
+      "Latitude": 37.6922,
+      "Longitude": 141.6387
+    },
+    "depth": 239,
+    "TileID": 1,
+    "Point": {
+      "X": 151,
+      "Y": 95
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S2N03",
+    "Location": {
+      "Latitude": 37.7073,
+      "Longitude": 141.965
+    },
+    "depth": 462,
+    "TileID": 1,
+    "Point": {
+      "X": 159,
+      "Y": 95
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S2N04",
+    "Location": {
+      "Latitude": 37.6739,
+      "Longitude": 142.2975
+    },
+    "depth": 786,
+    "TileID": 1,
+    "Point": {
+      "X": 165,
+      "Y": 97
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S2N05",
+    "Location": {
+      "Latitude": 37.6016,
+      "Longitude": 142.6236
+    },
+    "depth": 1781,
+    "TileID": 1,
+    "Point": {
+      "X": 173,
+      "Y": 99
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S2N06",
+    "Location": {
+      "Latitude": 37.5259,
+      "Longitude": 142.935
+    },
+    "depth": 2945,
+    "TileID": 1,
+    "Point": {
+      "X": 180,
+      "Y": 101
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S2N07",
+    "Location": {
+      "Latitude": 37.429,
+      "Longitude": 143.2266
+    },
+    "depth": 4767,
+    "TileID": 1,
+    "Point": {
+      "X": 187,
+      "Y": 103
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S2N08",
+    "Location": {
+      "Latitude": 37.222,
+      "Longitude": 143.07
+    },
+    "depth": 4353,
+    "TileID": 1,
+    "Point": {
+      "X": 183,
+      "Y": 109
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S2N09",
+    "Location": {
+      "Latitude": 37.0741,
+      "Longitude": 142.8188
+    },
+    "depth": 4226,
+    "TileID": 1,
+    "Point": {
+      "X": 178,
+      "Y": 114
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S2N10",
+    "Location": {
+      "Latitude": 37.0948,
+      "Longitude": 142.4979
+    },
+    "depth": 2417,
+    "TileID": 1,
+    "Point": {
+      "X": 170,
+      "Y": 113
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S2N11",
+    "Location": {
+      "Latitude": 37.1931,
+      "Longitude": 142.1998
+    },
+    "depth": 1447,
+    "TileID": 1,
+    "Point": {
+      "X": 163,
+      "Y": 110
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S2N12",
+    "Location": {
+      "Latitude": 37.2772,
+      "Longitude": 141.879
+    },
+    "depth": 591,
+    "TileID": 1,
+    "Point": {
+      "X": 156,
+      "Y": 108
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S2N13A",
+    "Location": {
+      "Latitude": 37.3003,
+      "Longitude": 141.5709
+    },
+    "depth": 212,
+    "TileID": 1,
+    "Point": {
+      "X": 150,
+      "Y": 107
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S2N14",
+    "Location": {
+      "Latitude": 37.0952,
+      "Longitude": 141.3703
+    },
+    "depth": 162,
+    "TileID": 1,
+    "Point": {
+      "X": 145,
+      "Y": 113
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S2N15",
+    "Location": {
+      "Latitude": 36.8344,
+      "Longitude": 141.3307
+    },
+    "depth": 264,
+    "TileID": 1,
+    "Point": {
+      "X": 144,
+      "Y": 121
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S2N16",
+    "Location": {
+      "Latitude": 36.662,
+      "Longitude": 141.5207
+    },
+    "depth": 874,
+    "TileID": 1,
+    "Point": {
+      "X": 149,
+      "Y": 125
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S2N17",
+    "Location": {
+      "Latitude": 36.6337,
+      "Longitude": 141.8389
+    },
+    "depth": 2247,
+    "TileID": 1,
+    "Point": {
+      "X": 156,
+      "Y": 126
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S2N18",
+    "Location": {
+      "Latitude": 36.6824,
+      "Longitude": 142.1445
+    },
+    "depth": 2460,
+    "TileID": 1,
+    "Point": {
+      "X": 162,
+      "Y": 124
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S2N19",
+    "Location": {
+      "Latitude": 36.5986,
+      "Longitude": 142.4389
+    },
+    "depth": 3425,
+    "TileID": 1,
+    "Point": {
+      "X": 169,
+      "Y": 126
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S2N20",
+    "Location": {
+      "Latitude": 36.3885,
+      "Longitude": 142.6164
+    },
+    "depth": 5770,
+    "TileID": 1,
+    "Point": {
+      "X": 173,
+      "Y": 132
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S2N21",
+    "Location": {
+      "Latitude": 36.1577,
+      "Longitude": 142.5553
+    },
+    "depth": 6230,
+    "TileID": 1,
+    "Point": {
+      "X": 172,
+      "Y": 139
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S2N22",
+    "Location": {
+      "Latitude": 35.9463,
+      "Longitude": 142.4014
+    },
+    "depth": 4492,
+    "TileID": 1,
+    "Point": {
+      "X": 169,
+      "Y": 146
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S2N23",
+    "Location": {
+      "Latitude": 35.9677,
+      "Longitude": 142.1138
+    },
+    "depth": 3881,
+    "TileID": 1,
+    "Point": {
+      "X": 162,
+      "Y": 145
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S2N24",
+    "Location": {
+      "Latitude": 35.9976,
+      "Longitude": 141.7944
+    },
+    "depth": 2310,
+    "TileID": 1,
+    "Point": {
+      "X": 155,
+      "Y": 144
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S2N25",
+    "Location": {
+      "Latitude": 36.0729,
+      "Longitude": 141.5095
+    },
+    "depth": 1887,
+    "TileID": 1,
+    "Point": {
+      "X": 148,
+      "Y": 141
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S2N26",
+    "Location": {
+      "Latitude": 36.1442,
+      "Longitude": 141.2021
+    },
+    "depth": 730,
+    "TileID": 1,
+    "Point": {
+      "X": 140,
+      "Y": 140
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S3N01",
+    "Location": {
+      "Latitude": 39.4497,
+      "Longitude": 142.4578
+    },
+    "depth": 940,
+    "TileID": 1,
+    "Point": {
+      "X": 170,
+      "Y": 44
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S3N02",
+    "Location": {
+      "Latitude": 39.3746,
+      "Longitude": 142.7918
+    },
+    "depth": 1622,
+    "TileID": 1,
+    "Point": {
+      "X": 176,
+      "Y": 46
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S3N03",
+    "Location": {
+      "Latitude": 39.3231,
+      "Longitude": 143.1206
+    },
+    "depth": 1890,
+    "TileID": 1,
+    "Point": {
+      "X": 184,
+      "Y": 47
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S3N04",
+    "Location": {
+      "Latitude": 39.2958,
+      "Longitude": 143.4544
+    },
+    "depth": 2490,
+    "TileID": 1,
+    "Point": {
+      "X": 192,
+      "Y": 48
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S3N05",
+    "Location": {
+      "Latitude": 39.1906,
+      "Longitude": 143.7499
+    },
+    "depth": 4308,
+    "TileID": 1,
+    "Point": {
+      "X": 199,
+      "Y": 51
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S3N06",
+    "Location": {
+      "Latitude": 39.0459,
+      "Longitude": 143.9305
+    },
+    "depth": 5440,
+    "TileID": 1,
+    "Point": {
+      "X": 203,
+      "Y": 56
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S3N07",
+    "Location": {
+      "Latitude": 38.8308,
+      "Longitude": 143.7846
+    },
+    "depth": 5231,
+    "TileID": 1,
+    "Point": {
+      "X": 200,
+      "Y": 62
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S3N08",
+    "Location": {
+      "Latitude": 38.7826,
+      "Longitude": 143.4769
+    },
+    "depth": 2465,
+    "TileID": 1,
+    "Point": {
+      "X": 192,
+      "Y": 63
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S3N09",
+    "Location": {
+      "Latitude": 38.7739,
+      "Longitude": 143.1437
+    },
+    "depth": 1779,
+    "TileID": 1,
+    "Point": {
+      "X": 186,
+      "Y": 64
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S3N10",
+    "Location": {
+      "Latitude": 38.8668,
+      "Longitude": 142.8212
+    },
+    "depth": 1310,
+    "TileID": 1,
+    "Point": {
+      "X": 178,
+      "Y": 61
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S3N11",
+    "Location": {
+      "Latitude": 38.9349,
+      "Longitude": 142.4873
+    },
+    "depth": 1168,
+    "TileID": 1,
+    "Point": {
+      "X": 170,
+      "Y": 60
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S3N12",
+    "Location": {
+      "Latitude": 38.8412,
+      "Longitude": 142.1816
+    },
+    "depth": 558,
+    "TileID": 1,
+    "Point": {
+      "X": 163,
+      "Y": 62
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S3N13",
+    "Location": {
+      "Latitude": 38.5901,
+      "Longitude": 142.1816
+    },
+    "depth": 573,
+    "TileID": 1,
+    "Point": {
+      "X": 163,
+      "Y": 69
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S3N14",
+    "Location": {
+      "Latitude": 38.4993,
+      "Longitude": 142.5002
+    },
+    "depth": 1092,
+    "TileID": 1,
+    "Point": {
+      "X": 171,
+      "Y": 71
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S3N15",
+    "Location": {
+      "Latitude": 38.4487,
+      "Longitude": 142.8376
+    },
+    "depth": 1472,
+    "TileID": 1,
+    "Point": {
+      "X": 178,
+      "Y": 74
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S3N16",
+    "Location": {
+      "Latitude": 38.4262,
+      "Longitude": 143.1703
+    },
+    "depth": 2420,
+    "TileID": 1,
+    "Point": {
+      "X": 185,
+      "Y": 74
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S3N17",
+    "Location": {
+      "Latitude": 38.3978,
+      "Longitude": 143.5139
+    },
+    "depth": 3020,
+    "TileID": 1,
+    "Point": {
+      "X": 193,
+      "Y": 75
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S3N18",
+    "Location": {
+      "Latitude": 38.3063,
+      "Longitude": 143.781
+    },
+    "depth": 5528,
+    "TileID": 1,
+    "Point": {
+      "X": 200,
+      "Y": 77
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S3N19",
+    "Location": {
+      "Latitude": 38.0594,
+      "Longitude": 143.7441
+    },
+    "depth": 5591,
+    "TileID": 1,
+    "Point": {
+      "X": 199,
+      "Y": 84
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S3N20",
+    "Location": {
+      "Latitude": 37.9311,
+      "Longitude": 143.5675
+    },
+    "depth": 5225,
+    "TileID": 1,
+    "Point": {
+      "X": 194,
+      "Y": 89
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S3N21",
+    "Location": {
+      "Latitude": 37.9713,
+      "Longitude": 143.2454
+    },
+    "depth": 2779,
+    "TileID": 1,
+    "Point": {
+      "X": 188,
+      "Y": 87
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S3N22",
+    "Location": {
+      "Latitude": 37.9838,
+      "Longitude": 142.9072
+    },
+    "depth": 1645,
+    "TileID": 1,
+    "Point": {
+      "X": 180,
+      "Y": 86
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S3N23",
+    "Location": {
+      "Latitude": 38.027,
+      "Longitude": 142.5735
+    },
+    "depth": 1220,
+    "TileID": 1,
+    "Point": {
+      "X": 172,
+      "Y": 85
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S3N24",
+    "Location": {
+      "Latitude": 38.0569,
+      "Longitude": 142.234
+    },
+    "depth": 849,
+    "TileID": 1,
+    "Point": {
+      "X": 165,
+      "Y": 84
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S3N25",
+    "Location": {
+      "Latitude": 38.0972,
+      "Longitude": 141.8957
+    },
+    "depth": 230,
+    "TileID": 1,
+    "Point": {
+      "X": 157,
+      "Y": 83
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S3N26",
+    "Location": {
+      "Latitude": 38.106,
+      "Longitude": 141.5572
+    },
+    "depth": 128,
+    "TileID": 1,
+    "Point": {
+      "X": 149,
+      "Y": 83
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S4N01",
+    "Location": {
+      "Latitude": 40.7881,
+      "Longitude": 141.7895
+    },
+    "depth": 139,
+    "TileID": 1,
+    "Point": {
+      "X": 154,
+      "Y": 4
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S4N02",
+    "Location": {
+      "Latitude": 40.9069,
+      "Longitude": 142.1057
+    },
+    "depth": 858,
+    "TileID": 1,
+    "Point": {
+      "X": 162,
+      "Y": 1
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S4N03",
+    "Location": {
+      "Latitude": 41.0156,
+      "Longitude": 142.4314
+    },
+    "depth": 1425,
+    "TileID": 2,
+    "Point": {
+      "X": 169,
+      "Y": 253
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S4N04",
+    "Location": {
+      "Latitude": 41.0762,
+      "Longitude": 142.7706
+    },
+    "depth": 1798,
+    "TileID": 2,
+    "Point": {
+      "X": 176,
+      "Y": 252
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S4N05",
+    "Location": {
+      "Latitude": 41.0443,
+      "Longitude": 143.1138
+    },
+    "depth": 1940,
+    "TileID": 2,
+    "Point": {
+      "X": 185,
+      "Y": 253
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S4N06",
+    "Location": {
+      "Latitude": 40.9718,
+      "Longitude": 143.4481
+    },
+    "depth": 1970,
+    "TileID": 2,
+    "Point": {
+      "X": 192,
+      "Y": 254
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S4N07",
+    "Location": {
+      "Latitude": 40.882,
+      "Longitude": 143.7746
+    },
+    "depth": 2613,
+    "TileID": 1,
+    "Point": {
+      "X": 199,
+      "Y": 1
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S4N08",
+    "Location": {
+      "Latitude": 40.7805,
+      "Longitude": 144.0905
+    },
+    "depth": 5060,
+    "TileID": 1,
+    "Point": {
+      "X": 207,
+      "Y": 4
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S4N09",
+    "Location": {
+      "Latitude": 40.5521,
+      "Longitude": 144.1332
+    },
+    "depth": 5095,
+    "TileID": 1,
+    "Point": {
+      "X": 208,
+      "Y": 11
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S4N10",
+    "Location": {
+      "Latitude": 40.4327,
+      "Longitude": 143.8887
+    },
+    "depth": 3897,
+    "TileID": 1,
+    "Point": {
+      "X": 202,
+      "Y": 15
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S4N11",
+    "Location": {
+      "Latitude": 40.4353,
+      "Longitude": 143.543
+    },
+    "depth": 2273,
+    "TileID": 1,
+    "Point": {
+      "X": 194,
+      "Y": 15
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S4N12",
+    "Location": {
+      "Latitude": 40.4515,
+      "Longitude": 143.2015
+    },
+    "depth": 1711,
+    "TileID": 1,
+    "Point": {
+      "X": 187,
+      "Y": 14
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S4N13",
+    "Location": {
+      "Latitude": 40.5196,
+      "Longitude": 142.9617
+    },
+    "depth": 1537,
+    "TileID": 1,
+    "Point": {
+      "X": 181,
+      "Y": 13
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S4N14",
+    "Location": {
+      "Latitude": 40.5927,
+      "Longitude": 142.634
+    },
+    "depth": 1393,
+    "TileID": 1,
+    "Point": {
+      "X": 173,
+      "Y": 11
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S4N15",
+    "Location": {
+      "Latitude": 40.5933,
+      "Longitude": 142.2844
+    },
+    "depth": 816,
+    "TileID": 1,
+    "Point": {
+      "X": 165,
+      "Y": 11
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S4N16",
+    "Location": {
+      "Latitude": 40.3295,
+      "Longitude": 142.2673
+    },
+    "depth": 559,
+    "TileID": 1,
+    "Point": {
+      "X": 165,
+      "Y": 18
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S4N17",
+    "Location": {
+      "Latitude": 40.1165,
+      "Longitude": 142.3926
+    },
+    "depth": 681,
+    "TileID": 1,
+    "Point": {
+      "X": 168,
+      "Y": 25
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S4N18",
+    "Location": {
+      "Latitude": 40.1088,
+      "Longitude": 142.6222
+    },
+    "depth": 969,
+    "TileID": 1,
+    "Point": {
+      "X": 173,
+      "Y": 25
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S4N19",
+    "Location": {
+      "Latitude": 40.0904,
+      "Longitude": 142.9695
+    },
+    "depth": 1256,
+    "TileID": 1,
+    "Point": {
+      "X": 181,
+      "Y": 25
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S4N20",
+    "Location": {
+      "Latitude": 40.0743,
+      "Longitude": 143.321
+    },
+    "depth": 1329,
+    "TileID": 1,
+    "Point": {
+      "X": 189,
+      "Y": 26
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S4N21",
+    "Location": {
+      "Latitude": 40.0863,
+      "Longitude": 143.6572
+    },
+    "depth": 2456,
+    "TileID": 1,
+    "Point": {
+      "X": 197,
+      "Y": 25
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S4N22",
+    "Location": {
+      "Latitude": 40.026,
+      "Longitude": 143.9547
+    },
+    "depth": 4107,
+    "TileID": 1,
+    "Point": {
+      "X": 204,
+      "Y": 28
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S4N23",
+    "Location": {
+      "Latitude": 39.7718,
+      "Longitude": 143.9259
+    },
+    "depth": 4358,
+    "TileID": 1,
+    "Point": {
+      "X": 202,
+      "Y": 35
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S4N24",
+    "Location": {
+      "Latitude": 39.6388,
+      "Longitude": 143.7154
+    },
+    "depth": 2936,
+    "TileID": 1,
+    "Point": {
+      "X": 198,
+      "Y": 38
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S4N25",
+    "Location": {
+      "Latitude": 39.6976,
+      "Longitude": 143.3749
+    },
+    "depth": 2228,
+    "TileID": 1,
+    "Point": {
+      "X": 190,
+      "Y": 37
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S4N26",
+    "Location": {
+      "Latitude": 39.7245,
+      "Longitude": 143.0384
+    },
+    "depth": 1569,
+    "TileID": 1,
+    "Point": {
+      "X": 182,
+      "Y": 36
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S4N27",
+    "Location": {
+      "Latitude": 39.7445,
+      "Longitude": 142.6903
+    },
+    "depth": 914,
+    "TileID": 1,
+    "Point": {
+      "X": 174,
+      "Y": 36
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S4N28",
+    "Location": {
+      "Latitude": 39.7385,
+      "Longitude": 142.3408
+    },
+    "depth": 569,
+    "TileID": 1,
+    "Point": {
+      "X": 166,
+      "Y": 36
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S5N01",
+    "Location": {
+      "Latitude": 42.7688,
+      "Longitude": 145.7115
+    },
+    "depth": 2052,
+    "TileID": 2,
+    "Point": {
+      "X": 243,
+      "Y": 200
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S5N02",
+    "Location": {
+      "Latitude": 42.6403,
+      "Longitude": 145.4063
+    },
+    "depth": 2042,
+    "TileID": 2,
+    "Point": {
+      "X": 237,
+      "Y": 203
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S5N03",
+    "Location": {
+      "Latitude": 42.4802,
+      "Longitude": 145.1433
+    },
+    "depth": 1985,
+    "TileID": 2,
+    "Point": {
+      "X": 230,
+      "Y": 208
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S5N04",
+    "Location": {
+      "Latitude": 42.2286,
+      "Longitude": 145.204
+    },
+    "depth": 3149,
+    "TileID": 2,
+    "Point": {
+      "X": 231,
+      "Y": 216
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S5N05",
+    "Location": {
+      "Latitude": 42.0615,
+      "Longitude": 145.437
+    },
+    "depth": 3813,
+    "TileID": 2,
+    "Point": {
+      "X": 237,
+      "Y": 220
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S5N06",
+    "Location": {
+      "Latitude": 41.884,
+      "Longitude": 145.6544
+    },
+    "depth": 5619,
+    "TileID": 2,
+    "Point": {
+      "X": 243,
+      "Y": 227
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S5N07",
+    "Location": {
+      "Latitude": 41.6637,
+      "Longitude": 145.5291
+    },
+    "depth": 5953,
+    "TileID": 2,
+    "Point": {
+      "X": 239,
+      "Y": 233
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S5N08",
+    "Location": {
+      "Latitude": 41.5301,
+      "Longitude": 145.2483
+    },
+    "depth": 5980,
+    "TileID": 2,
+    "Point": {
+      "X": 232,
+      "Y": 238
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S5N09",
+    "Location": {
+      "Latitude": 41.521,
+      "Longitude": 144.905
+    },
+    "depth": 5100,
+    "TileID": 2,
+    "Point": {
+      "X": 225,
+      "Y": 238
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S5N10",
+    "Location": {
+      "Latitude": 41.6541,
+      "Longitude": 144.6716
+    },
+    "depth": 4103,
+    "TileID": 2,
+    "Point": {
+      "X": 220,
+      "Y": 235
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S5N11",
+    "Location": {
+      "Latitude": 41.9072,
+      "Longitude": 144.6955
+    },
+    "depth": 2093,
+    "TileID": 2,
+    "Point": {
+      "X": 220,
+      "Y": 226
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S5N12",
+    "Location": {
+      "Latitude": 42.0784,
+      "Longitude": 144.6375
+    },
+    "depth": 1772,
+    "TileID": 2,
+    "Point": {
+      "X": 219,
+      "Y": 221
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S5N13",
+    "Location": {
+      "Latitude": 41.9792,
+      "Longitude": 144.3445
+    },
+    "depth": 1607,
+    "TileID": 2,
+    "Point": {
+      "X": 212,
+      "Y": 224
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S5N14",
+    "Location": {
+      "Latitude": 41.7475,
+      "Longitude": 144.1779
+    },
+    "depth": 1592,
+    "TileID": 2,
+    "Point": {
+      "X": 209,
+      "Y": 231
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S5N15",
+    "Location": {
+      "Latitude": 41.4961,
+      "Longitude": 144.0879
+    },
+    "depth": 1950,
+    "TileID": 2,
+    "Point": {
+      "X": 207,
+      "Y": 238
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S5N16",
+    "Location": {
+      "Latitude": 41.3742,
+      "Longitude": 143.8006
+    },
+    "depth": 2380,
+    "TileID": 2,
+    "Point": {
+      "X": 200,
+      "Y": 242
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S5N17",
+    "Location": {
+      "Latitude": 41.3643,
+      "Longitude": 143.453
+    },
+    "depth": 2023,
+    "TileID": 2,
+    "Point": {
+      "X": 192,
+      "Y": 243
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S5N18",
+    "Location": {
+      "Latitude": 41.4351,
+      "Longitude": 143.1264
+    },
+    "depth": 1509,
+    "TileID": 2,
+    "Point": {
+      "X": 184,
+      "Y": 240
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S5N19",
+    "Location": {
+      "Latitude": 41.5607,
+      "Longitude": 142.8177
+    },
+    "depth": 986,
+    "TileID": 2,
+    "Point": {
+      "X": 178,
+      "Y": 236
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S5N20",
+    "Location": {
+      "Latitude": 41.6095,
+      "Longitude": 142.4787
+    },
+    "depth": 1165,
+    "TileID": 2,
+    "Point": {
+      "X": 170,
+      "Y": 235
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S5N21",
+    "Location": {
+      "Latitude": 41.4248,
+      "Longitude": 142.2193
+    },
+    "depth": 1189,
+    "TileID": 2,
+    "Point": {
+      "X": 165,
+      "Y": 240
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S5N22",
+    "Location": {
+      "Latitude": 41.1989,
+      "Longitude": 142.0271
+    },
+    "depth": 1029,
+    "TileID": 2,
+    "Point": {
+      "X": 160,
+      "Y": 248
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S5N23",
+    "Location": {
+      "Latitude": 40.954,
+      "Longitude": 141.8762
+    },
+    "depth": 529,
+    "TileID": 1,
+    "Point": {
+      "X": 157,
+      "Y": 0
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S6N01",
+    "Location": {
+      "Latitude": 42.8064,
+      "Longitude": 146.0211
+    },
+    "depth": 2427,
+    "TileID": 2,
+    "Point": {
+      "X": 250,
+      "Y": 198
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S6N02",
+    "Location": {
+      "Latitude": 42.5807,
+      "Longitude": 146.078
+    },
+    "depth": 2830,
+    "TileID": 2,
+    "Point": {
+      "X": 251,
+      "Y": 206
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S6N03",
+    "Location": {
+      "Latitude": 42.0943,
+      "Longitude": 146.2316
+    },
+    "depth": 5710,
+    "TileID": 2,
+    "Point": {
+      "X": 254,
+      "Y": 220
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S6N04",
+    "Location": {
+      "Latitude": 41.6653,
+      "Longitude": 146.1747
+    },
+    "depth": 6950,
+    "TileID": 2,
+    "Point": {
+      "X": 253,
+      "Y": 233
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S6N05",
+    "Location": {
+      "Latitude": 41.3717,
+      "Longitude": 145.6053
+    },
+    "depth": 6680,
+    "TileID": 2,
+    "Point": {
+      "X": 241,
+      "Y": 243
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S6N06",
+    "Location": {
+      "Latitude": 40.8999,
+      "Longitude": 145.3929
+    },
+    "depth": 6012,
+    "TileID": 1,
+    "Point": {
+      "X": 236,
+      "Y": 1
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S6N07",
+    "Location": {
+      "Latitude": 40.536,
+      "Longitude": 144.9381
+    },
+    "depth": 6160,
+    "TileID": 1,
+    "Point": {
+      "X": 226,
+      "Y": 11
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S6N08",
+    "Location": {
+      "Latitude": 40.0319,
+      "Longitude": 144.8089
+    },
+    "depth": 5900,
+    "TileID": 1,
+    "Point": {
+      "X": 222,
+      "Y": 27
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S6N09",
+    "Location": {
+      "Latitude": 39.5172,
+      "Longitude": 144.7191
+    },
+    "depth": 6054,
+    "TileID": 1,
+    "Point": {
+      "X": 211,
+      "Y": 42
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S6N10",
+    "Location": {
+      "Latitude": 39.0072,
+      "Longitude": 144.5915
+    },
+    "depth": 6160,
+    "TileID": 1,
+    "Point": {
+      "X": 218,
+      "Y": 57
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S6N11",
+    "Location": {
+      "Latitude": 38.499,
+      "Longitude": 144.4536
+    },
+    "depth": 6118,
+    "TileID": 1,
+    "Point": {
+      "X": 214,
+      "Y": 71
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S6N12",
+    "Location": {
+      "Latitude": 37.9879,
+      "Longitude": 144.3357
+    },
+    "depth": 6111,
+    "TileID": 1,
+    "Point": {
+      "X": 212,
+      "Y": 86
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S6N13",
+    "Location": {
+      "Latitude": 37.4862,
+      "Longitude": 144.1757
+    },
+    "depth": 6174,
+    "TileID": 1,
+    "Point": {
+      "X": 209,
+      "Y": 101
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S6N14",
+    "Location": {
+      "Latitude": 37.012,
+      "Longitude": 143.9557
+    },
+    "depth": 6228,
+    "TileID": 1,
+    "Point": {
+      "X": 204,
+      "Y": 115
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S6N15",
+    "Location": {
+      "Latitude": 36.5748,
+      "Longitude": 143.6059
+    },
+    "depth": 6433,
+    "TileID": 1,
+    "Point": {
+      "X": 196,
+      "Y": 127
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S6N16",
+    "Location": {
+      "Latitude": 36.1262,
+      "Longitude": 143.2823
+    },
+    "depth": 6513,
+    "TileID": 1,
+    "Point": {
+      "X": 188,
+      "Y": 140
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S6N17",
+    "Location": {
+      "Latitude": 35.6745,
+      "Longitude": 142.9688
+    },
+    "depth": 6625,
+    "TileID": 1,
+    "Point": {
+      "X": 181,
+      "Y": 152
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S6N18",
+    "Location": {
+      "Latitude": 35.2114,
+      "Longitude": 142.6799
+    },
+    "depth": 6319,
+    "TileID": 1,
+    "Point": {
+      "X": 175,
+      "Y": 166
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S6N19",
+    "Location": {
+      "Latitude": 34.7118,
+      "Longitude": 142.5208
+    },
+    "depth": 6284,
+    "TileID": 1,
+    "Point": {
+      "X": 171,
+      "Y": 179
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S6N20",
+    "Location": {
+      "Latitude": 34.2604,
+      "Longitude": 142.2389
+    },
+    "depth": 7830,
+    "TileID": 1,
+    "Point": {
+      "X": 164,
+      "Y": 192
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S6N21",
+    "Location": {
+      "Latitude": 33.9619,
+      "Longitude": 141.7291
+    },
+    "depth": 7797,
+    "TileID": 1,
+    "Point": {
+      "X": 153,
+      "Y": 201
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S6N22",
+    "Location": {
+      "Latitude": 33.8601,
+      "Longitude": 141.1281
+    },
+    "depth": 3941,
+    "TileID": 1,
+    "Point": {
+      "X": 139,
+      "Y": 203
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S6N23",
+    "Location": {
+      "Latitude": 33.9448,
+      "Longitude": 140.5189
+    },
+    "depth": 1723,
+    "TileID": 1,
+    "Point": {
+      "X": 124,
+      "Y": 201
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S6N24",
+    "Location": {
+      "Latitude": 34.1773,
+      "Longitude": 139.9814
+    },
+    "depth": 1276,
+    "TileID": 1,
+    "Point": {
+      "X": 112,
+      "Y": 194
+    }
+  },
+  {
+    "Type": "S-net",
+    "Code": "N.S6N25",
+    "Location": {
+      "Latitude": 34.6696,
+      "Longitude": 139.8167
+    },
+    "depth": 2411,
+    "TileID": 1,
+    "Point": {
+      "X": 108,
+      "Y": 181
+    }
+  },
+  {
+    "Type": "Sagami",
+    "Code": "N.ST1H",
+    "Location": {
+      "Latitude": 34.5956,
+      "Longitude": 139.9183
+    },
+    "depth": 2197,
+    "TileID": 1,
+    "Point": {
+      "X": 111,
+      "Y": 184
+    }
+  },
+  {
+    "Type": "Sagami",
+    "Code": "N.ST2H",
+    "Location": {
+      "Latitude": 34.7396,
+      "Longitude": 139.8393
+    },
+    "depth": 2339,
+    "TileID": 1,
+    "Point": {
+      "X": 111,
+      "Y": 178
+    }
+  },
+  {
+    "Type": "Sagami",
+    "Code": "N.ST3H",
+    "Location": {
+      "Latitude": 34.7983,
+      "Longitude": 139.6435
+    },
+    "depth": 902,
+    "TileID": 1,
+    "Point": {
+      "X": 105,
+      "Y": 178
+    }
+  },
+  {
+    "Type": "Sagami",
+    "Code": "N.ST4H",
+    "Location": {
+      "Latitude": 34.8931,
+      "Longitude": 139.5711
+    },
+    "depth": 933,
+    "TileID": 1,
+    "Point": {
+      "X": 103,
+      "Y": 175
+    }
+  },
+  {
+    "Type": "Sagami",
+    "Code": "N.ST5H",
+    "Location": {
+      "Latitude": 34.9413,
+      "Longitude": 139.4213
+    },
+    "depth": 1486,
+    "TileID": 1,
+    "Point": {
+      "X": 100,
+      "Y": 173
+    }
+  },
+  {
+    "Type": "Sagami",
+    "Code": "N.ST6H",
+    "Location": {
+      "Latitude": 35.0966,
+      "Longitude": 139.3778
+    },
+    "depth": 1130,
+    "TileID": 1,
+    "Point": {
+      "X": 99,
+      "Y": 171
+    }
+  }
 ]
