@@ -374,6 +374,14 @@ function eqInfoDraw(data, source) {
   } else if (source == "usgs") {
     EQTemplate = template2_2;
     EQListWrap = document.getElementById("USGS_EqInfo");
+
+    if (!data || data.length == 0)
+      document.getElementById("usgs_update_time").innerText = "データがありません：" + NormalizeDate("hh:mm:ss", new Date());
+    else {
+      usgs_lastUpdate = new Date()
+      document.getElementById("usgs_update_time").innerText = "最終更新：" + NormalizeDate("hh:mm:ss", new Date());
+      document.getElementById("usgs_update_time").setAttribute("aria-label", "最終更新時刻、" + NormalizeDate("h時m分s秒", new Date()));
+    }
   }
   removeChild(EQListWrap);
 
@@ -1647,6 +1655,20 @@ function init() {
     ) {
       window.electronAPI.messageReturn({ action: "Request_gaikyo" });
     }
+
+    if (
+      new Date() - wepa_lastUpdate > 1800000 &&
+      document.getElementById("tab1_menu3").classList.contains("active_tabmenu")
+    ) {
+      window.electronAPI.messageReturn({ action: "Request_wepa" });
+    }
+
+    if (
+      new Date() - usgs_lastUpdate > 1800000 &&
+      document.getElementById("tab1_menu4").classList.contains("active_tabmenu")
+    ) {
+      window.electronAPI.messageReturn({ action: "Request_usgs" });
+    }
   }, 10000);
 
   var zoomLevelContinue = function () {
@@ -2747,6 +2769,16 @@ document.getElementById("tab1_menu2").addEventListener("click", function () {
     window.electronAPI.messageReturn({ action: "Request_gaikyo" });
   }
 });
+document.getElementById("tab1_menu3").addEventListener("click", function () {
+  if (new Date() - wepa_lastUpdate > 60000) {
+    window.electronAPI.messageReturn({ action: "Request_wepa" });
+  }
+});
+document.getElementById("tab1_menu4").addEventListener("click", function () {
+  if (new Date() - usgs_lastUpdate > 60000) {
+    window.electronAPI.messageReturn({ action: "Request_usgs" });
+  }
+});
 
 var gaikyo_lastUpdate = 0;
 var gaikyo_history = [];
@@ -2796,12 +2828,6 @@ function draw_gaikyo(data) {
   });
 }
 
-document.getElementById("tab1_menu3").addEventListener("click", function () {
-  if (new Date() - wepa_lastUpdate > 60000) {
-    window.electronAPI.messageReturn({ action: "Request_wepa" });
-  }
-});
-
 var wepa_lastUpdate = 0;
 function draw_wepa(data) {
   wepa_lastUpdate = new Date();
@@ -2836,6 +2862,8 @@ function draw_wepa(data) {
     }
   });
 }
+
+var usgs_lastUpdate = 0;
 
 
 function hinanjoPopup(e) {

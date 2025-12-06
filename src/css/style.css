@@ -1215,7 +1215,7 @@ summary:focus {
   font-size: 13px;
   margin: 2px;
 }
-#gaikyo_update_time,#wepa_update_time {
+#gaikyo_update_time,#wepa_update_time,#usgs_update_time {
   font-size: 14px;
   text-align: center;
   color: #ccc;

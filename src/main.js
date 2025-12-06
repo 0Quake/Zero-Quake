@@ -647,6 +647,9 @@ ipcMain.on("message", (_event, response) => {
     case "Request_wepa":
       Req_JMA_wepa();
       break;
+    case "Request_usgs":
+      Req_USGS();
+      break;
     case "wepa_window":
       Create_WepaWindow(response.fname);
       break;
@@ -1886,7 +1889,6 @@ function AXIS() {
                     axisData: data,
                   },
                 ],
-                "jma"
               );
               break;
           }
@@ -2814,7 +2816,7 @@ function EEW_Alert(data, update) {
           DetailURL: [],
           axisData: null,
         },
-      ], "jma", true, 999
+      ], 999
     );
 
     //スリープ回避開始
@@ -2889,7 +2891,6 @@ function UpdateEQInfo(roop) {
   try {
     Req_JMAXMLList(EQInfoFetchCount == 0, EQInfoFetchCount);
     Req_NarikakunList("https://ntool.online/api/earthquakeList?year=" + new Date().getFullYear() + "&month=" + (new Date().getMonth() + 1), 10, true, EQInfoFetchCount);
-    Req_USGS();
   } catch (err) {
     throw new Error("地震情報の処理でエラーが発生しました。", { cause: err });
   }
@@ -3044,7 +3045,7 @@ function Req_JMAXML(url, count,) {
                   headline: headline,
                   axisData: null,
                 },
-              ], "jma", false, count
+              ], count
             );
           } else if (title == "地震回数に関する情報") {
             if (xml.getElementsByTagName("EarthquakeCount")[0]) {
@@ -3209,7 +3210,7 @@ function Req_JMAXML(url, count,) {
                 });
               }
             );
-            ConvertEQInfo(EQData, "jma", false, count);
+            ConvertEQInfo(EQData, count);
 
             if (cancel) {
               tsunamiDataTmp = {
@@ -3619,7 +3620,10 @@ function Req_USGS() {
                 DetailURL: [elm.properties.url],
               });
             });
-            ConvertEQInfo(dataTmp2, "usgs");
+            dataTmp2 = dataTmp2.sort(function (a, b) {
+              return a.OriginTime > b.OriginTime ? -1 : 1;
+            });
+            AlertEQInfo(dataTmp2, "usgs");
           }
           UpdateStatus(new Date() - Replay, "USGS", "success");
         } catch {
@@ -3727,7 +3731,7 @@ function Req_Narikakun(url, count) {
               axisData: null,
             },
           ];
-          ConvertEQInfo(dataTmp2, "jma", false, count);
+          ConvertEQInfo(dataTmp2, count);
           UpdateStatus(new Date() - Replay, "ntool", "success");
           nakn_Fetched.push(url);
         } catch {
@@ -3744,24 +3748,58 @@ function Req_Narikakun(url, count) {
 
 var EQInfoData = {};
 //地震情報マージ→AlertEQInfo
-function ConvertEQInfo(dataList, type, EEW, count) {
+function ConvertEQInfo(dataList, count) {
   try {
-    switch (type) {
-      case "jma":
-        var eqInfoTmp = [];
-        var UpdateEQInfoTmp = [];
+    var eqInfoTmp = [];
+    var UpdateEQInfoTmp = [];
 
-        var playAudio = false;
-        var changed = false;
+    var playAudio = false;
+    var changed = false;
 
-        dataList.forEach(function (data) {
-          if (!data.eventId) return;
-          var EQElm = EQInfoData[data.eventId];
-          if (EQElm) {
-            var EQInfo_Item = {
+    dataList.forEach(function (data) {
+      if (!data.eventId) return;
+      var EQElm = EQInfoData[data.eventId];
+      if (EQElm) {
+        var EQInfo_Item = {
+          eventId: EQElm.eventId,
+          category: null,
+          EEW: null,
+          reportDateTime: null,
+          OriginTime: null,
+          epiCenter: null,
+          M: null,
+          maxI: null,
+          maxLgInt: null,
+          DetailURL: [],
+          headline: null,
+          axisData: [],
+        };
+        EQElm.raw_data.push(data);
+        var rawData = EQElm.raw_data.sort(function (a, b) {
+          return a.reportDateTime < b.reportDateTime ? -1 : 1;
+        });
+        rawData.forEach(function (elm, index) {
+          if (elm.cancel) {
+            rawData.slice(0, index).forEach(function (elm2, index2) {
+              if (elm2.category == elm.category) rawData[index2].cancel = true;
+            });
+          }
+        });
+        rawData.forEach(function (elm) {
+          if (!config.Info.EQInfo.showtraining && elm.status == "訓練") return;
+          if (!config.Info.EQInfo.showTest && elm.status == "試験") return;
+          if (new Date(elm.reportDateTime) > new Date() - Replay) return;
+
+          //EEW以外の情報が既に入っているとき、EEWによる情報を破棄
+          if (elm.category == "EEW" && EQElm.EEW === false) return;
+          else if (elm.category == "EEW") EQElm.EEW = true;
+          else if (elm.category != "EEW" && EQElm.EEW == true) {
+            //EEW以外の情報が入ってきたとき、EEWによる情報を破棄
+            EQElm.EEW = false;
+            EQInfo_Item = {
               eventId: EQElm.eventId,
               category: null,
-              EEW: null,
+              EEW: false,
               reportDateTime: null,
               OriginTime: null,
               epiCenter: null,
@@ -3772,119 +3810,75 @@ function ConvertEQInfo(dataList, type, EEW, count) {
               headline: null,
               axisData: [],
             };
-            EQElm.raw_data.push(data);
-            var rawData = EQElm.raw_data.sort(function (a, b) {
-              return a.reportDateTime < b.reportDateTime ? -1 : 1;
-            });
-            rawData.forEach(function (elm, index) {
-              if (elm.cancel) {
-                rawData.slice(0, index).forEach(function (elm2, index2) {
-                  if (elm2.category == elm.category) rawData[index2].cancel = true;
-                });
-              }
-            });
-            rawData.forEach(function (elm) {
-              if (!config.Info.EQInfo.showtraining && elm.status == "訓練") return;
-              if (!config.Info.EQInfo.showTest && elm.status == "試験") return;
-              if (new Date(elm.reportDateTime) > new Date() - Replay) return;
-
-              //EEW以外の情報が既に入っているとき、EEWによる情報を破棄
-              if (elm.category == "EEW" && EQElm.EEW === false) return;
-              else if (elm.category == "EEW") EQElm.EEW = true;
-              else if (elm.category != "EEW" && EQElm.EEW == true) {
-                //EEW以外の情報が入ってきたとき、EEWによる情報を破棄
-                EQElm.EEW = false;
-                EQInfo_Item = {
-                  eventId: EQElm.eventId,
-                  category: null,
-                  EEW: false,
-                  reportDateTime: null,
-                  OriginTime: null,
-                  epiCenter: null,
-                  M: null,
-                  maxI: null,
-                  maxLgInt: null,
-                  DetailURL: [],
-                  headline: null,
-                  axisData: [],
-                };
-              }
-
-              EQInfo_Item.category = elm.category;
-              if (Boolean2(elm.OriginTime)) EQInfo_Item.OriginTime = elm.OriginTime;
-              if (Boolean2(elm.epiCenter)) EQInfo_Item.epiCenter = elm.epiCenter;
-              if (Boolean2(elm.M) && elm.M != "Ｍ不明" && elm.M != "NaN") EQInfo_Item.M = elm.M;
-              if (Boolean2(elm.maxI) && elm.maxI !== "?") EQInfo_Item.maxI = elm.maxI;
-              if (Boolean2(elm.maxLgInt) && elm.maxLgInt !== "?") EQInfo_Item.maxLgInt = elm.maxLgInt;
-              if (Boolean2(elm.headline)) EQInfo_Item.headline = elm.headline;
-              EQInfo_Item.cancel = elm.cancel;
-
-              if (Array.isArray(elm.DetailURL)) {
-                elm.DetailURL.forEach(function (elm2) {
-                  if (elm2 && !EQInfo_Item.DetailURL.includes(elm2) && !EQElm.DetailURL.includes(elm2)) {
-                    EQInfo_Item.DetailURL.push(elm2);
-                  }
-                });
-              }
-              if (elm.axisData) EQInfo_Item.axisData.push(elm.axisData);
-            });
-
-            if (EQElm.cancel !== EQInfo_Item.cancel) changed = true;
-            if (EQElm.category !== EQInfo_Item.category) changed = true;
-            if (EQElm.EEW !== EQInfo_Item.EEW) changed = true;
-            if (EQElm.OriginTime !== EQInfo_Item.OriginTime) changed = true;
-            if (EQElm.epiCenter !== EQInfo_Item.epiCenter) changed = true;
-            if (EQElm.M !== EQInfo_Item.M) changed = true;
-            if (EQElm.maxI !== EQInfo_Item.maxI) changed = true;
-            if (EQElm.maxLgInt !== EQInfo_Item.maxLgInt) changed = true;
-            if (EQElm.headline !== EQInfo_Item.headline) changed = true;
-            if (EQElm.DetailURL.length !== EQInfo_Item.DetailURL.length) changed = true;
-            if (EQInfo_Item.axisData) changed = true;
-
-            if (EQElm.category == "EEW" && EQInfo_Item.category != "EEW") playAudio = true;
-
-            EQElm.cancel = EQInfo_Item.cancel;
-            EQElm.category = EQInfo_Item.category;
-            EQElm.EEW = EQInfo_Item.EEW;
-            EQElm.reportDateTime = EQInfo_Item.reportDateTime;
-            EQElm.OriginTime = EQInfo_Item.OriginTime;
-            EQElm.epiCenter = EQInfo_Item.epiCenter;
-            EQElm.M = EQInfo_Item.M;
-            EQElm.maxI = EQInfo_Item.maxI;
-            EQElm.maxLgInt = EQInfo_Item.maxLgInt;
-            EQElm.headline = EQInfo_Item.headline;
-            EQElm.DetailURL = EQElm.DetailURL.concat(EQInfo_Item.DetailURL);
-            if (EQInfo_Item.axisData) EQElm.axisData = EQInfo_Item.axisData;
-
-            if (changed) {
-              UpdateEQInfoTmp.push(EQElm);
-              var i = eqInfo.jma.findIndex(function (elm2) {
-                return elm2.eventId == EQElm.eventId;
-              });
-              eqInfo.jma[i] = EQElm;
-            }
-          } else {
-            data.EEW = data.category == "EEW"
-
-            EQInfoData[data.eventId] = Object.assign({}, data);
-            EQInfoData[data.eventId].raw_data = [Object.assign({}, data)];
-
-            eqInfoTmp.push(data);
-            eqInfo.jma.push(data);
-            if (count !== 0 && data.category !== "EEW") playAudio = true;
           }
+
+          EQInfo_Item.category = elm.category;
+          if (Boolean2(elm.OriginTime)) EQInfo_Item.OriginTime = elm.OriginTime;
+          if (Boolean2(elm.epiCenter)) EQInfo_Item.epiCenter = elm.epiCenter;
+          if (Boolean2(elm.M) && elm.M != "Ｍ不明" && elm.M != "NaN") EQInfo_Item.M = elm.M;
+          if (Boolean2(elm.maxI) && elm.maxI !== "?") EQInfo_Item.maxI = elm.maxI;
+          if (Boolean2(elm.maxLgInt) && elm.maxLgInt !== "?") EQInfo_Item.maxLgInt = elm.maxLgInt;
+          if (Boolean2(elm.headline)) EQInfo_Item.headline = elm.headline;
+          EQInfo_Item.cancel = elm.cancel;
+
+          if (Array.isArray(elm.DetailURL)) {
+            elm.DetailURL.forEach(function (elm2) {
+              if (elm2 && !EQInfo_Item.DetailURL.includes(elm2) && !EQElm.DetailURL.includes(elm2)) {
+                EQInfo_Item.DetailURL.push(elm2);
+              }
+            });
+          }
+          if (elm.axisData) EQInfo_Item.axisData.push(elm.axisData);
         });
 
-        if (eqInfoTmp.length > 0) AlertEQInfo(eqInfoTmp, "jma", false, playAudio);
-        if (UpdateEQInfoTmp.length > 0) AlertEQInfo(UpdateEQInfoTmp, "jma", true, playAudio);
-        break;
-      case "usgs":
-        dataList = dataList.sort(function (a, b) {
-          return a.OriginTime > b.OriginTime ? -1 : 1;
-        });
-        AlertEQInfo(dataList, "usgs");
-        break;
-    }
+        if (EQElm.cancel !== EQInfo_Item.cancel) changed = true;
+        if (EQElm.category !== EQInfo_Item.category) changed = true;
+        if (EQElm.EEW !== EQInfo_Item.EEW) changed = true;
+        if (EQElm.OriginTime !== EQInfo_Item.OriginTime) changed = true;
+        if (EQElm.epiCenter !== EQInfo_Item.epiCenter) changed = true;
+        if (EQElm.M !== EQInfo_Item.M) changed = true;
+        if (EQElm.maxI !== EQInfo_Item.maxI) changed = true;
+        if (EQElm.maxLgInt !== EQInfo_Item.maxLgInt) changed = true;
+        if (EQElm.headline !== EQInfo_Item.headline) changed = true;
+        if (EQElm.DetailURL.length !== EQInfo_Item.DetailURL.length) changed = true;
+        if (EQInfo_Item.axisData) changed = true;
+
+        if (EQElm.category == "EEW" && EQInfo_Item.category != "EEW") playAudio = true;
+
+        EQElm.cancel = EQInfo_Item.cancel;
+        EQElm.category = EQInfo_Item.category;
+        EQElm.EEW = EQInfo_Item.EEW;
+        EQElm.reportDateTime = EQInfo_Item.reportDateTime;
+        EQElm.OriginTime = EQInfo_Item.OriginTime;
+        EQElm.epiCenter = EQInfo_Item.epiCenter;
+        EQElm.M = EQInfo_Item.M;
+        EQElm.maxI = EQInfo_Item.maxI;
+        EQElm.maxLgInt = EQInfo_Item.maxLgInt;
+        EQElm.headline = EQInfo_Item.headline;
+        EQElm.DetailURL = EQElm.DetailURL.concat(EQInfo_Item.DetailURL);
+        if (EQInfo_Item.axisData) EQElm.axisData = EQInfo_Item.axisData;
+
+        if (changed) {
+          UpdateEQInfoTmp.push(EQElm);
+          var i = eqInfo.jma.findIndex(function (elm2) {
+            return elm2.eventId == EQElm.eventId;
+          });
+          eqInfo.jma[i] = EQElm;
+        }
+      } else {
+        data.EEW = data.category == "EEW"
+
+        EQInfoData[data.eventId] = Object.assign({}, data);
+        EQInfoData[data.eventId].raw_data = [Object.assign({}, data)];
+
+        eqInfoTmp.push(data);
+        eqInfo.jma.push(data);
+        if (count !== 0 && data.category !== "EEW") playAudio = true;
+      }
+    });
+
+    if (eqInfoTmp.length > 0) AlertEQInfo(eqInfoTmp, "jma", false, playAudio);
+    if (UpdateEQInfoTmp.length > 0) AlertEQInfo(UpdateEQInfoTmp, "jma", true, playAudio);
   } catch (err) {
     throw new Error("地震情報データの処理（マージ）に失敗しました。", { cause: err });
   }
