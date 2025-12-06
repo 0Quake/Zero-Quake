@@ -1808,9 +1808,6 @@ function kmoniMapUpdate(dataTmp, type) {
           type: "Feature",
           properties: {
             Code: elm.Code,
-            IsSuspended: elm.IsSuspended,
-            Name: elm.Name,
-            Region: elm.Region,
             Type: elm.Type,
             data: elm.data,
             pga: elm.pga,
@@ -1827,6 +1824,7 @@ function kmoniMapUpdate(dataTmp, type) {
         kmoni_popup[elm.Code].setHTML(generatePopupContent_K(elm));
       }
     });
+    console.log(geojson)
     if (map) map.getSource("snet_points").setData(geojson);
   }
 }
