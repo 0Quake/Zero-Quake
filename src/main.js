@@ -1462,6 +1462,8 @@ function Req_TremRts() {
                   PGA: st.pga,
                   Code: StID,
                   Name: "",
+                  IsSuspended: false,
+                  Region: "",
                   Location: {
                     Longitude: stationData.info[0].lon,
                     Latitude: stationData.info[0].lat,
@@ -2078,6 +2080,8 @@ function MargeSeisJS(json) {
     PGA: json.PGA,
     Code: json.type,
     Name: json.region,
+    IsSuspended: false,
+    Region: "",
     Location: { Longitude: json.longitude, Latitude: json.latitude },
     rgb: [rgb.r, rgb.g, rgb.b],
     update_at: json.update_at,
