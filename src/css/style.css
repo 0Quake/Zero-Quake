@@ -658,15 +658,6 @@ td {
   background: rgba(128, 128, 128, 0.3);
   border: solid 1px rgba(128, 128, 128, 0.8);
 }
-#tab2_bar {
-  padding: 4px 3px;
-  background: #222225;
-  border-bottom: solid 1px #4e4e51;
-}
-#tab2_bar .tabmenu {
-  margin: 0 4px;
-  height: 22px;
-}
 #tab1_bar{
   padding: 5px 0;
 }
@@ -718,32 +709,8 @@ td {
 #tab1_content2 {
   padding: 5px;
 }
-#tab2_wrap {
-  height: 100%;
-}
-#tab2_content {
-  height: calc(100% - 30px);
-  padding: 0;
-  background: #3f3f42;
-}
-#tab2_content1,
-#tab2_content2,
 #tab1_content2 {
   padding: 3px 0 3px 3px;
-}
-#tab2_content .tabcontent {
-  height: 100%;
-  width: 320px;
-  overflow: auto;
-}
-#tab2_bar {
-  display: flex;
-  height: 30px;
-}
-#tab2_bar .tabmenu {
-  width: 100%;
-  text-align: center;
-  padding: 0 4px;
 }
 #tab1_content .tabcontent {
   padding: 0 0 6px 0;
@@ -1245,10 +1212,7 @@ summary:focus {
     border-style: solid;
     border-width: 1px;
   }
-  #tab2_bar {
-    border-bottom-style: solid;
-    border-bottom-width: 1px;
-  }
+
   #setting {
     border-style: solid;
     border-width: 1px;
