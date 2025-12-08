@@ -64,12 +64,45 @@ window.electronAPI.messageSend((event, request) => {
       });
     }
 
+    console.log(request)
     if (request.urls && Array.isArray(request.urls)) {
+
+      var kindCode_history = {}
+      request.urls.filter(function (e) {
+        return e && e.includes("www.data.jma.go.jp")
+      }).sort((a, b) => {
+        var timeStampA = a.match(".+/(.+?).[a-z]+([?#;].*)?$")[1].split("_")[0]
+        var timeStampB = b.match(".+/(.+?).[a-z]+([?#;].*)?$")[1].split("_")[0]
+        return timeStampB - timeStampA;
+      }).forEach(function (elm) {
+        var kindCode = elm.match(".+/(.+?).[a-z]+([?#;].*)?$")[1].split("_")[2]
+        if (!kindCode_history[kindCode]) {
+          //より新しい同一種別の情報がなければ受信
+          kindCode_history[kindCode] = true;
+          jmaXMLFetch(elm);
+        }
+      });
+
+      var json_kindCode_history = {}
+      request.urls.filter(function (e) {
+        return e && e.includes("www.jma.go.jp")
+      }).sort((a, b) => {
+        var timeStampA = a.match(".+/(.+?).[a-z]+([?#;].*)?$")[1].split("_")[0]
+        var timeStampB = b.match(".+/(.+?).[a-z]+([?#;].*)?$")[1].split("_")[0]
+        return timeStampB - timeStampA;
+      }).forEach(function (elm) {
+        var kindCode = elm.match(".+/(.+?).[a-z]+([?#;].*)?$")[1].split("_")[2]
+        if (!json_kindCode_history[kindCode]) {
+          //より新しい同一種別の情報がなければ受信
+          json_kindCode_history[kindCode] = true;
+          jma_Fetch(elm);
+        }
+      });
+
+
       request.urls.forEach(function (elm) {
         if (elm) {
-          if (elm.includes("www.jma.go.jp")) jma_Fetch(elm);
-          else if (elm.includes("www.data.jma.go.jp")) jmaXMLFetch(elm);
-          else if (elm.includes("dev.narikakun.net")) narikakun_Fetch(elm);
+          if (elm.includes("dev.narikakun.net")) narikakun_Fetch(elm);
         }
       });
     }
@@ -1141,10 +1174,25 @@ function jma_ListReq() {
   fetch("https://www.jma.go.jp/bosai/quake/data/list.json")
     .then(function (res) { return res.json(); })
     .then(function (data) {
-      data.forEach(function (elm) {
-        var urlTmp = "https://www.jma.go.jp/bosai/quake/data/" + elm.json;
-        if (elm.eid == eid) jma_Fetch(urlTmp);
+      var json_kindCode_history2 = {}
+      data.filter(function (elm) {
+        return elm.eid == eid
+      }).map(function (elm) {
+        return "https://www.jma.go.jp/bosai/quake/data/" + elm.json;
+      }).sort((a, b) => {
+        var timeStampA = a.match(".+/(.+?).[a-z]+([?#;].*)?$")[1].split("_")[0]
+        var timeStampB = b.match(".+/(.+?).[a-z]+([?#;].*)?$")[1].split("_")[0]
+        return timeStampB - timeStampA;
+      }).forEach(function (elm) {
+        var kindCode = elm.match(".+/(.+?).[a-z]+([?#;].*)?$")[1].split("_")[2]
+        if (!json_kindCode_history2[kindCode]) {
+          //より新しい同一種別の情報がなければ受信
+          json_kindCode_history2[kindCode] = true;
+          jma_Fetch(elm);
+        }
       });
+
+
     })
     .catch(function () { });
   fetch("https://www.jma.go.jp/bosai/ltpgm/data/list.json")
