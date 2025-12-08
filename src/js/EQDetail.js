@@ -1467,18 +1467,28 @@ function jmaXMLFetch(url) {
                 if (elm2.querySelectorAll("City")[0]) {
                   elm2.querySelectorAll("City").forEach(function (elm3) {
                     var stData = [];
+                    var stDataL = [];
                     if (elm3.querySelectorAll("IntensityStation")[0]) {
                       elm3.querySelectorAll("IntensityStation")
                         .forEach(function (elm4) {
                           var pointT =
                             pointList[elm4.querySelector("Code").textContent];
-                          if (pointT)
+                          if (pointT) {
                             stData.push({
                               lat: pointT.location[0],
                               lng: pointT.location[1],
                               name: elm4.querySelector("Name").textContent,
                               int: elm4.querySelector("Int").textContent,
                             });
+                            if (elm4.querySelector("LgInt")) {
+                              stDataL.push({
+                                lat: pointT.location[0],
+                                lng: pointT.location[1],
+                                name: elm4.querySelector("Name").textContent,
+                                lgint: elm4.querySelector("LgInt").textContent,
+                              });
+                            }
+                          }
                         });
                     }
                     cityData.push({
@@ -1501,13 +1511,14 @@ function jmaXMLFetch(url) {
                           name: elm4.querySelector("Name").textContent,
                           int: elm4.querySelector("Int").textContent,
                         });
-                        if (elm4.querySelector("LgInt"))
+                        if (elm4.querySelector("LgInt")) {
                           stDataL.push({
                             lat: pointT.location[0],
                             lng: pointT.location[1],
                             name: elm4.querySelector("Name").textContent,
                             lgint: elm4.querySelector("LgInt").textContent,
                           });
+                        }
                       }
                     });
                 }
