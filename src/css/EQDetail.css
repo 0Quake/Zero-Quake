@@ -241,12 +241,17 @@ td {
   forced-color-adjust: none;
 }
 
-.LgIntIcon div::before {
+.LgIntIcon div::before,
+.ShindoItemL div::before {
   content: "長";
   font-size: 65%;
   margin-right: 3px;
   font-family: "BIZ UDPGothic", sans-serif;
   font-weight: bold;
+}
+.ShindoItemL div::before {
+  font-size: 55%;
+  margin-right: 2px;
 }
 
 .zoomLevel_4 .ShindoIcon,
