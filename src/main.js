@@ -2905,6 +2905,7 @@ function UpdateEQInfo(roop) {
     }, config.Info.EQInfo.Interval);
   try {
     Req_JMAXMLList(EQInfoFetchCount == 0, EQInfoFetchCount);
+    Req_JMAJSONList()
     Req_NarikakunList("https://ntool.online/api/earthquakeList?year=" + new Date().getFullYear() + "&month=" + (new Date().getMonth() + 1), 10, true, EQInfoFetchCount);
   } catch (err) {
     throw new Error("地震情報の処理でエラーが発生しました。", { cause: err });
@@ -2983,6 +2984,86 @@ function Req_JMAXMLList(LongPeriodFeed, count) {
   } else UpdateStatus(new Date() - Replay, "JMAXML", "Error");
 }
 
+function Req_JMAJSONList() {
+  var request = net.request("https://www.jma.go.jp/bosai/quake/data/list.json");
+  request.on("response", (res) => {
+    var dataTmp = "";
+    res.on("data", (chunk) => {
+      dataTmp += chunk;
+    });
+    res.on("end", function () {
+      try {
+        var json = ParseJSON(dataTmp);
+        if (json) {
+          var HokkaidoSanrikuURL = json.find(function (el) {
+            return el.ttl == "北海道・三陸沖後発地震注意情報"
+          })
+          if (HokkaidoSanrikuURL) Req_Hokkaidosanriku_JSON("https://www.jma.go.jp/bosai/quake/data/" + HokkaidoSanrikuURL.json)
+        }
+
+      } catch { return }
+    })
+  })
+  request.end();
+}
+
+function Req_Hokkaidosanriku_JSON(url) {
+  var request = net.request(url);
+  request.on("response", (res) => {
+    var dataTmp = "";
+    res.on("data", (chunk) => {
+      dataTmp += chunk;
+    });
+    res.on("end", function () {
+      try {
+        var json = ParseJSON(dataTmp);
+        if (json) {
+          var data = {
+            title: "北海道・三陸沖後発地震注意情報",
+            kind: json.Head.InfoType,//発表/取消
+            reportDate: new Date(json.Head.ReportDateTime), //時刻
+            HeadLine: json.Head.Headline.Text, //要約
+            Text: "",
+            Appendix: "",
+            Text2: "",
+          };
+
+          var EarthQuakeInfo = json.Body.EarthquakeInfo;
+          if (EarthQuakeInfo) {
+            data.Text = EarthQuakeInfo.Text;
+            if (EarthQuakeInfo.Appendix) data.Appendix = EarthQuakeInfo.Appendix;
+          }
+
+          if (json.Body.Text) data.Text2 = json.Body.Text;
+
+          Process_Hokkaidosanriku(data)
+        }
+      } catch { return }
+    })
+  })
+  request.end();
+}
+
+function Process_Hokkaidosanriku(data) {
+  HokkaidoSanrikuInfoAll.push(data);
+  HokkaidoSanrikuInfoAll = HokkaidoSanrikuInfoAll.sort(function (a, b) {
+    return a.reportDate > b.reportDate ? -1 : 1;
+  });
+
+  messageToMainWindow({
+    action: "HokkaidoSanrikuInfo",
+    data: HokkaidoSanrikuInfoAll[0],
+  });
+  if (HokkaidoSanrikuWindow && HokkaidoSanrikuInfoAll[0]) {
+    if (data) {
+      HokkaidoSanrikuWindow.webContents.send("message2", {
+        action: "HokkaidoSanrikuInfo",
+        data: HokkaidoSanrikuInfoAll[0],
+      });
+    }
+  }
+
+}
 //気象庁XML 取得・フォーマット変更→ConvertEQInfo
 function Req_JMAXML(url, count,) {
   if (!url || jmaXML_Fetched.includes(url)) return;
@@ -3513,23 +3594,7 @@ function Req_JMAXML(url, count,) {
               .find(function (elm) { return elm.tagName == "Text"; });
             if (Text2Elm) data.Text2 = Text2Elm.textContent;
 
-            HokkaidoSanrikuInfoAll.push(data);
-            HokkaidoSanrikuInfoAll = HokkaidoSanrikuInfoAll.sort(function (a, b) {
-              return a.reportDate > b.reportDate ? -1 : 1;
-            });
-
-            messageToMainWindow({
-              action: "HokkaidoSanrikuInfo",
-              data: HokkaidoSanrikuInfoAll[0],
-            });
-            if (HokkaidoSanrikuWindow && HokkaidoSanrikuInfoAll[0]) {
-              if (data) {
-                HokkaidoSanrikuWindow.webContents.send("message2", {
-                  action: "HokkaidoSanrikuInfo",
-                  data: HokkaidoSanrikuInfoAll[0],
-                });
-              }
-            }
+            Process_Hokkaidosanriku(data)
           } else if (title == "地震の活動状況等に関する情報") {
             var headline = xml.getElementsByTagName("Headline")[0].getElementsByTagName("Text")[0].textContent
             if (headline.includes("南海トラフ地震に関連する情報")) return;//南海トラフ地震関連解説情報（移行措置電文）の重複をはじく
