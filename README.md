@@ -128,7 +128,6 @@
   [Apache License, Version 2.0](https://raw.githubusercontent.com/google/material-design-icons/refs/heads/master/LICENSE)
 
 ### その他
-- turf-distance（変更して使用） [© 2014 Morgan Herlocker](http://mit-license.org/)
 - KyoshinShindoColorMap © ingen084, こんぽ
 - 表層地盤増幅率：防災科学技術研究所 ／ 下記文献
 
