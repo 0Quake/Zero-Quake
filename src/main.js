@@ -748,16 +748,20 @@ function CreateMainWindow() {
           messageToMainWindow({ action: "EEW_AlertUpdate", data: EEW_nowList });
         }
 
-        messageToMainWindow({
-          action: "EQInfo",
-          source: "jma",
-          data: eqInfo.jma.slice(0, config.Info.EQInfo.ItemCount),
-        });
-        messageToMainWindow({
-          action: "EQInfo",
-          source: "usgs",
-          data: eqInfo.usgs.slice(0, config.Info.EQInfo.ItemCount),
-        });
+        if (eqInfo.jma.length > 0) {
+          messageToMainWindow({
+            action: "EQInfo",
+            source: "jma",
+            data: eqInfo.jma.slice(0, config.Info.EQInfo.ItemCount),
+          });
+        }
+        if (eqInfo.usgs.length > 0) {
+          messageToMainWindow({
+            action: "EQInfo",
+            source: "usgs",
+            data: eqInfo.usgs.slice(0, config.Info.EQInfo.ItemCount),
+          });
+        }
         EQCount_process(null)
 
         EQDetect_List.forEach(function (elm) {
