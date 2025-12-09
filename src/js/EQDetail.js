@@ -64,7 +64,6 @@ window.electronAPI.messageSend((event, request) => {
       });
     }
 
-    console.log(request)
     if (request.urls && Array.isArray(request.urls)) {
 
       var kindCode_history = {}
@@ -138,16 +137,15 @@ window.electronAPI.messageSend((event, request) => {
 //情報取得
 function InfoFetch() {
   jma_ListReq();
-  estimated_intensity_mapReq();
-
   narikakun_ListReq(new Date().getFullYear(), new Date().getMonth() + 1);
   if (EEWData) ConvertEQInfo(EEWData);
-
   if (axisDatas) {
     axisDatas.forEach(function (elm) {
       axisInfoCtrl(elm.message);
     });
   }
+
+  estimated_intensity_mapReq();//処理重いので最後にかく
 }
 
 //地図初期化
@@ -1210,6 +1208,7 @@ function narikakun_ListReq(year, month, retry) {
   fetch("https://ntool.online/api/earthquakeList?year=" + year + "&month=" + month)
     .then(function (res) { return res.json(); })
     .then(function (data) {
+      console.log(11111111111)
       var nakn_detected = false;
       data.lists.forEach(function (elm) {
         if (elm.includes(eid)) {
@@ -1331,6 +1330,7 @@ function jma_Fetch(url) {
     });
 }
 
+var jmaL_json_fetched = false
 function jmaL_Fetch(url) {
   if (fetchedURL.includes(url)) return;
   fetchedURL.push(url);
@@ -1442,6 +1442,7 @@ function jmaL_Fetch(url) {
         LngIntData: LngIntData,
         IntData: IntData,
       });
+      jmaL_json_fetched = true
     });
 }
 //気象庁防災XML 取得・フォーマット変更→ ConvertEQInfo
@@ -1521,21 +1522,21 @@ function jmaXMLFetch(url) {
                         .forEach(function (elm4) {
                           var pointT =
                             pointList[elm4.querySelector("Code").textContent];
-                          if (pointT) {
+                          if (elm4.querySelector("Int")) {
                             stData.push({
-                              lat: pointT.location[0],
-                              lng: pointT.location[1],
+                              lat: pointT ? pointT.location[0] : null,
+                              lng: pointT ? pointT.location[1] : null,
                               name: elm4.querySelector("Name").textContent,
                               int: elm4.querySelector("Int").textContent,
                             });
-                            if (elm4.querySelector("LgInt")) {
-                              stDataL.push({
-                                lat: pointT.location[0],
-                                lng: pointT.location[1],
-                                name: elm4.querySelector("Name").textContent,
-                                lgint: elm4.querySelector("LgInt").textContent,
-                              });
-                            }
+                          }
+                          if (elm4.querySelector("LgInt")) {
+                            stDataL.push({
+                              lat: pointT ? pointT.location[0] : null,
+                              lng: pointT ? pointT.location[1] : null,
+                              name: elm4.querySelector("Name").textContent,
+                              lgint: elm4.querySelector("LgInt").textContent,
+                            });
                           }
                         });
                     }
@@ -1550,23 +1551,22 @@ function jmaXMLFetch(url) {
                   var stDataL = [];
                   elm2.querySelectorAll("IntensityStation")
                     .forEach(function (elm4) {
-                      var pointT =
-                        pointList[elm4.querySelector("Code").textContent];
-                      if (pointT) {
+                      var pointT = pointList[elm4.querySelector("Code").textContent];
+                      if (elm4.querySelector("Int")) {
                         stData.push({
-                          lat: pointT.location[0],
-                          lng: pointT.location[1],
+                          lat: pointT ? pointT.location[0] : null,
+                          lng: pointT ? pointT.location[1] : null,
                           name: elm4.querySelector("Name").textContent,
                           int: elm4.querySelector("Int").textContent,
                         });
-                        if (elm4.querySelector("LgInt")) {
-                          stDataL.push({
-                            lat: pointT.location[0],
-                            lng: pointT.location[1],
-                            name: elm4.querySelector("Name").textContent,
-                            lgint: elm4.querySelector("LgInt").textContent,
-                          });
-                        }
+                      }
+                      if (elm4.querySelector("LgInt")) {
+                        stDataL.push({
+                          lat: pointT ? pointT.location[0] : null,
+                          lng: pointT ? pointT.location[1] : null,
+                          name: elm4.querySelector("Name").textContent,
+                          lgint: elm4.querySelector("LgInt").textContent,
+                        });
                       }
                     });
                 }
@@ -1576,25 +1576,29 @@ function jmaXMLFetch(url) {
                   city: cityData,
                   station: stData,
                 });
-                if (elm2.querySelector("MaxLgInt"))
+                if (elm2.querySelector("MaxLgInt")) {
                   areaDataL.push({
                     name: elm2.querySelector("Name").textContent,
                     lgint: elm2.querySelector("MaxLgInt").textContent,
                     station: stDataL,
                   });
+                }
               });
             }
-            IntData.push({
-              name: elm.querySelector("Name").textContent,
-              int: elm.querySelector("MaxInt").textContent,
-              area: areaData,
-            });
-            if (elm.querySelector("MaxLgInt"))
+            if (elm.querySelector("MaxInt")) {
+              IntData.push({
+                name: elm.querySelector("Name").textContent,
+                int: elm.querySelector("MaxInt").textContent,
+                area: areaData,
+              });
+            }
+            if (elm.querySelector("MaxLgInt")) {
               LngIntData.push({
                 name: elm.querySelector("Name").textContent,
                 lgint: elm.querySelector("MaxLgInt").textContent,
                 area: areaDataL,
               });
+            }
           });
       }
 
@@ -1612,7 +1616,7 @@ function jmaXMLFetch(url) {
         epiCenter: epiCenterTmp,
         comment: commentText,
         cancel: cancelTmp,
-        LngIntData: LngIntData,
+        LngIntData: jmaL_json_fetched ? null : LngIntData,//気象庁json apiとの衝突を回避（）
         IntData: IntData,
       });
     });
@@ -1620,6 +1624,8 @@ function jmaXMLFetch(url) {
 //narikakun地震情報API 取得・フォーマット変更→ ConvertEQInfo
 function narikakun_Fetch(url) {
   if (fetchedURL.includes(url)) return;
+  console.log(22222222)
+
   fetchedURL.push(url);
 
   fetch(url)
@@ -1663,13 +1669,12 @@ function narikakun_Fetch(url) {
                     if (elm3.IntensityStation) {
                       elm3.IntensityStation.forEach(function (elm4) {
                         var pointT = pointList[elm4.Code];
-                        if (pointT)
-                          stData.push({
-                            lat: pointT.location[0],
-                            lng: pointT.location[1],
-                            name: elm4.Name,
-                            int: elm4.Int,
-                          });
+                        stData.push({
+                          lat: pointT ? pointT.location[0] : null,
+                          lng: pointT ? pointT.location[1] : null,
+                          name: elm4.Name,
+                          int: elm4.Int,
+                        });
                       });
                     }
                     cityData.push({
@@ -1755,13 +1760,12 @@ function axisInfoCtrl(json) {
               if (elm3.IntensityStation) {
                 elm3.IntensityStation.forEach(function (elm4) {
                   var pointT = pointList[elm4.Code];
-                  if (pointT)
-                    stData.push({
-                      lat: pointT.location[0],
-                      lng: pointT.location[1],
-                      name: elm4.Name,
-                      int: elm4.Int,
-                    });
+                  stData.push({
+                    lat: pointT ? pointT.location[0] : null,
+                    lng: pointT ? pointT.location[1] : null,
+                    name: elm4.Name,
+                    int: elm4.Int,
+                  });
                 });
               }
               cityData.push({
@@ -2087,16 +2091,18 @@ function add_IntensityStation_info(lat, lng, name, int) {
     "<div class='popupContent'><div class='shindoItem' style='background:" + color4[0] + ";color:" + color4[1] + "'>震度 "
     + intStrLong + "</div><div class='pointName'>" + name + "</div>" + mi_description + "<div class='pointHead'>震度観測点</div></div><div></div>"
   );
-  var markerElm = new maplibregl.Marker({ element: icon, opacityWhenCovered: 0 })
-    .setLngLat([lng, lat])
-    .setPopup(PtPopup)
-    .addTo(map);
-  markerElm.getElement().removeAttribute("tabindex");
-  markerElm.getElement().setAttribute("aria-hidden", true);
-  intensityIcons.push(markerElm);
+  if (lat !== null && lng !== null) {
+    var markerElm = new maplibregl.Marker({ element: icon, opacityWhenCovered: 0 })
+      .setLngLat([lng, lat])
+      .setPopup(PtPopup)
+      .addTo(map);
+    markerElm.getElement().removeAttribute("tabindex");
+    markerElm.getElement().setAttribute("aria-hidden", true);
+    intensityIcons.push(markerElm);
+    ZoomBounds.extend([lng, lat]);
+  }
 
   wrap3[wrap3.length - 1].append(newDiv);
-  ZoomBounds.extend([lng, lat]);
 }
 
 var lastDrawDate;
@@ -2326,24 +2332,26 @@ function add_IntensityStation_infoL(lat, lng, name, int) {
   newDiv.setAttribute("role", "treeitem");
   wrap3[wrap3.length - 1].append(newDiv);
 
-  const icon = document.createElement("div");
-  icon.classList.add("LgIntIcon");
-  icon.innerHTML = '<div style="background:' + color4[0] + ";color:" + color4[1] + '">'
-    + int + "</div>";
+  if (lat !== null && lng !== null) {
+    const icon = document.createElement("div");
+    icon.classList.add("LgIntIcon");
+    icon.innerHTML = '<div style="background:' + color4[0] + ";color:" + color4[1] + '">'
+      + int + "</div>";
 
-  var PtPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML(
-    "<div class='popupContent'><div class='shindoItem' style='background:" + color4[0] + ";color:" + color4[1] + "'>長周期地震動階級 "
-    + intStr + "</div><div class='pointName'>" + name + "</div><div class='pointHead'>震度観測点</div></div><div></div>"
-  );
-  var markerElm = new maplibregl.Marker({ element: icon, opacityWhenCovered: 0 })
-    .setLngLat([lng, lat])
-    .setPopup(PtPopup)
-    .addTo(map);
-  markerElm.getElement().removeAttribute("tabindex");
-  markerElm.getElement().setAttribute("aria-hidden", true);
-  LgIntIcons.push(markerElm);
+    var PtPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML(
+      "<div class='popupContent'><div class='shindoItem' style='background:" + color4[0] + ";color:" + color4[1] + "'>長周期地震動階級 "
+      + intStr + "</div><div class='pointName'>" + name + "</div><div class='pointHead'>震度観測点</div></div><div></div>"
+    );
+    var markerElm = new maplibregl.Marker({ element: icon, opacityWhenCovered: 0 })
+      .setLngLat([lng, lat])
+      .setPopup(PtPopup)
+      .addTo(map);
+    markerElm.getElement().removeAttribute("tabindex");
+    markerElm.getElement().setAttribute("aria-hidden", true);
+    LgIntIcons.push(markerElm);
 
-  ZoomBounds.extend([lng, lat]);
+    ZoomBounds.extend([lng, lat]);
+  }
 }
 
 var EQInfoMarged = {};
