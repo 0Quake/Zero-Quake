@@ -1058,6 +1058,7 @@ document.getElementById("over4").addEventListener("change", function () {
 var estimated_intensity_map_layers = [];
 var ESMap_Worker;
 function estimated_intensity_mapReq() {
+  console.log(9999)
   ESMap_Worker = new Worker("js/ESMap_Worker.js");
   ESMap_Worker.addEventListener("message", (e) => {
     if (map.getSource("estimated_intensity_map_" + e.data.index)) {
@@ -1145,6 +1146,8 @@ function estimated_intensity_mapReq() {
           ZoomBounds.extend([lng, lat2]);
           ZoomBounds.extend([lng2, lat]);
 
+          console.log(8888)
+
           ESMap_Worker.postMessage({
             action: "URL",
             url: "https://www.jma.go.jp/bosai/estimated_intensity_map/data/" + idTmp + "/" + elm + ".png",
@@ -1208,7 +1211,6 @@ function narikakun_ListReq(year, month, retry) {
   fetch("https://ntool.online/api/earthquakeList?year=" + year + "&month=" + month)
     .then(function (res) { return res.json(); })
     .then(function (data) {
-      console.log(11111111111)
       var nakn_detected = false;
       data.lists.forEach(function (elm) {
         if (elm.includes(eid)) {
@@ -1521,7 +1523,7 @@ function jmaXMLFetch(url) {
                       elm3.querySelectorAll("IntensityStation")
                         .forEach(function (elm4) {
                           var pointT =
-                            pointList[elm4.querySelector("Code").textContent];
+                            pointList[Number(elm4.querySelector("Code").textContent)];
                           if (elm4.querySelector("Int")) {
                             stData.push({
                               lat: pointT ? pointT.location[0] : null,
@@ -1551,7 +1553,7 @@ function jmaXMLFetch(url) {
                   var stDataL = [];
                   elm2.querySelectorAll("IntensityStation")
                     .forEach(function (elm4) {
-                      var pointT = pointList[elm4.querySelector("Code").textContent];
+                      var pointT = pointList[Number(elm4.querySelector("Code").textContent)];
                       if (elm4.querySelector("Int")) {
                         stData.push({
                           lat: pointT ? pointT.location[0] : null,
@@ -1624,7 +1626,6 @@ function jmaXMLFetch(url) {
 //narikakun地震情報API 取得・フォーマット変更→ ConvertEQInfo
 function narikakun_Fetch(url) {
   if (fetchedURL.includes(url)) return;
-  console.log(22222222)
 
   fetchedURL.push(url);
 
@@ -1668,7 +1669,7 @@ function narikakun_Fetch(url) {
                     var stData = [];
                     if (elm3.IntensityStation) {
                       elm3.IntensityStation.forEach(function (elm4) {
-                        var pointT = pointList[elm4.Code];
+                        var pointT = pointList[Number(elm4.Code)];
                         stData.push({
                           lat: pointT ? pointT.location[0] : null,
                           lng: pointT ? pointT.location[1] : null,
@@ -1759,7 +1760,7 @@ function axisInfoCtrl(json) {
               var stData = [];
               if (elm3.IntensityStation) {
                 elm3.IntensityStation.forEach(function (elm4) {
-                  var pointT = pointList[elm4.Code];
+                  var pointT = pointList[Number(elm4.Code)];
                   stData.push({
                     lat: pointT ? pointT.location[0] : null,
                     lng: pointT ? pointT.location[1] : null,
@@ -2105,23 +2106,10 @@ function add_IntensityStation_info(lat, lng, name, int) {
   wrap3[wrap3.length - 1].append(newDiv);
 }
 
-var lastDrawDate;
-var drawTimeout;
-var DataToDraw;
-function DrawIntensity(data) {
-  DataToDraw = data;
-  if (lastDrawDate && new Date() - lastDrawDate < 500) {
-    if (drawTimeout) clearTimeout(drawTimeout);
-    drawTimeout = setTimeout(function () {
-      DrawIntensity(DataToDraw);
-    }, 500);
-  } else {
-    DrawIntensityCORE(DataToDraw);
-    lastDrawDate = new Date();
-  }
-}
-
-function DrawIntensityCORE(data) {
+var WaitingToDraw = null
+function DrawIntensity() {
+  if (WaitingToDraw) var data = WaitingToDraw
+  else return
   var has_StaShindo = false;
   intensityIcons.forEach(function (elm) {
     elm.remove();
@@ -2442,7 +2430,11 @@ function ConvertEQInfo(data) {
 
   EQInfoMarged = EQInfoTmp;
 
-  if (EQInfoMarged.IntData) DrawIntensity(EQInfoMarged.IntData);
+  if (EQInfoMarged.IntData) {
+    WaitingToDraw = EQInfoMarged.IntData
+    throttle(DrawIntensity, 500)()
+  }
+
   if (EQInfoMarged.LngIntData) {
     InfoType_add("type-7");
     DrawLgIntensity(EQInfoMarged.LngIntData);
@@ -2684,5 +2676,24 @@ function parse_LatLngDepth(str) {
     }
   } catch {
     return []
+  }
+}
+function throttle(anonymousFunction, limit) {
+  let lastFunctionTimerId;
+  let lastExecute;
+
+  return function () {
+    const context = this;
+    const args = arguments;
+    if (!lastExecute) {
+      anonymousFunction.apply(context, args);
+      lastExecute = Date.now();
+      return;
+    }
+    clearTimeout(lastFunctionTimerId);
+    lastFunctionTimerId = setTimeout(function () {
+      anonymousFunction.apply(context, args);
+      lastExecute = Date.now();
+    }, limit - (Date.now() - lastExecute));
   }
 }
