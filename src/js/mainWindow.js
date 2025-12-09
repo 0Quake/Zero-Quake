@@ -477,10 +477,13 @@ function eqInfoDraw(data, source) {
           clone.querySelector(".EQItem").classList.add("EQI_cancelled");
           clone.querySelector(".EQItem").setAttribute("aria-label", "取り消された地震情報アイテム");
         } else {
+          var lgIntStr = ""
+          if (elm.maxLgInt) lgIntStr = "最大長周期地震動階級" + elm.maxLgInt + "、"
+
           clone.querySelector(".EQItem")
             .setAttribute("aria-label",
               `過去の地震情報アイテム：${elm.status == "訓練" ? "訓練報、" : ""}${elm.status == "試験" ? "試験報、" : ""}
-            ${maxITmp != "?" ? "最大震度" + NormalizeShindo(maxITmp, 1) + "、" : ""}${elm.M || elm.M === 0 ? "マグニチュード" + elm.M.toFixed(1) + "、" : ""}
+            ${maxITmp != "?" ? "最大震度" + NormalizeShindo(maxITmp, 1) + "、" : ""}${lgIntStr}${elm.M || elm.M === 0 ? "マグニチュード" + elm.M.toFixed(1) + "、" : ""}
             ${elm.epiCenter ? "震源は" + elm.epiCenter + "、" : ""}発生時刻は${NormalizeDate("M月D日h時m分", elm.OriginTime)}。エンターキーで詳細情報を確認。`
             );
           clone.querySelector(".EQItem").addEventListener("click", function () {
