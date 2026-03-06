@@ -2777,9 +2777,14 @@ function EEW_Alert(data, update) {
     });
     var first = !old || !old.shown
 
+
+    var old_i = old ? NormalizeShindo(old.maxInt, 5) : -9;
+    var new_i = NormalizeShindo(data.maxInt, 5);
+    var int_increased = new_i > old_i || !new_i || !old_i
+
     var notified = false;
 
-    if (!update && show_alert) {
+    if (!update && show_alert && !(!int_increased && config.Info.EEW.IntTerm1)) {
       //同一報の更新時でなく、条件に合致
       notified = true
       PlayAudio(data.alertflg == "警報" ? "EEW1" : "EEW2");
