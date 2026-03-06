@@ -61,8 +61,8 @@
   "devDependencies": {
     "@eslint/js": "^9.39.2",
     "electron": "^39.2.7",
-    "electron-builder": "^26.0.12",
-    "globals": "^16.5.0",
+    "electron-builder": "^26.4.0",
+    "globals": "^17.0.0",
     "eslint": "^9.39.2",
     "prettier": "^3.7.4"
   },
@@ -70,9 +70,9 @@
     "@turf/turf": "^7.3.1",
     "electron-store": "^11.0.2",
     "jsdom": "^27.4.0",
-    "maplibre-gl": "^5.15.0",
+    "maplibre-gl": "^5.16.0",
     "path": "^0.12.7",
-    "pmtiles": "^4.3.1",
+    "pmtiles": "^4.3.2",
     "websocket": "^1.0.35"
   }
 }

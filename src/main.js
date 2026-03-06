@@ -2504,7 +2504,7 @@ function MargeEEW(data) {
     if (data.source == "simulation" && !data.isPlum) {
       var estIntTmp = {};
       if (!data.is_cancel) {
-        if (!data.userIntensity)
+        if (!data.userIntensity && data.depth <= 150)
           data.userIntensity = calcInt(
             data.magnitude,
             data.depth,
