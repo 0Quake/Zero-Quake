@@ -102,6 +102,7 @@ function configDataDraw() {
   document.getElementById("EEW_training").checked = config.Info.EEW.showtraining;
   document.getElementById("EEW_IntQ").checked = config.Info.EEW.IntQuestion;
   document.getElementById("EEW_IntI").checked = config.Info.EEW.IntTerm1;
+  selectBoxSet(document.getElementById("tide_processing"), config.Info.TideHeight.processing)
   document.getElementById("EEW_userIntQ").checked = config.Info.EEW.userIntQuestion;
   document.getElementById("EQInfoInterval").value = config.Info.EQInfo.Interval / 1000;
   document.getElementById("EEW_kodoriyou").checked = config.Info.EEW.kodoriyou;
@@ -292,6 +293,7 @@ function apply() {
   config.Info.EEW.showtraining = document.getElementById("EEW_training").checked;
   config.Info.EEW.IntQuestion = document.getElementById("EEW_IntQ").checked;
   config.Info.EEW.IntTerm1 = document.getElementById("EEW_IntI").checked;
+  config.Info.TideHeight.processing = document.getElementById("tide_processing").value
 
   config.Info.EEW.userIntQuestion = document.getElementById("EEW_userIntQ").checked;
   config.Info.EEW.IntThreshold = document.getElementById("EEW_IntFilter").value;

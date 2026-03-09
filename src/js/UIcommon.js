@@ -49,6 +49,7 @@ function SetShindoColor() {
   root.style.setProperty("--TsunamiWarningColor", config.color.Tsunami.TsunamiWarningColor);
   root.style.setProperty("--TsunamiWatchColor", config.color.Tsunami.TsunamiWatchColor);
   root.style.setProperty("--TsunamiYohoColor", config.color.Tsunami.TsunamiYohoColor);
+  root.style.setProperty("--AstroHeightColor", config.color.Tsunami.AstroHeightColor);
 }
 
 window.addEventListener("load", function () {

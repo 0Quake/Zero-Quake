@@ -80,6 +80,7 @@ window.electronAPI.messageSend((event, request) => {
   else if (request.action == "HokkaidoSanrikuInfo") HokkaidoSanrikuInfo(request.data);
   else if (request.action == "KatsudoJokyoInfo") KatsudoJokyoInfo(request.data);
   else if (request.action == "Return_gaikyo") draw_gaikyo(request.data);
+  else if (request.action == "Return_tide") draw_tide(request.data);
   else if (request.action == "Return_wepa") draw_wepa(request.data);
 
   document.getElementById("splash").style.display = "none";
@@ -1658,6 +1659,12 @@ function init() {
     ) {
       window.electronAPI.messageReturn({ action: "Request_gaikyo" });
     }
+    if (
+      new Date() - tide_lastUpdate > 1800000 &&
+      document.getElementById("tab1_menu5").classList.contains("active_tabmenu")
+    ) {
+      window.electronAPI.messageReturn({ action: "Request_tide" });
+    }
 
     if (
       new Date() - wepa_lastUpdate > 1800000 &&
@@ -1827,7 +1834,6 @@ function kmoniMapUpdate(dataTmp, type) {
         kmoni_popup[elm.Code].setHTML(generatePopupContent_K(elm));
       }
     });
-    console.log(geojson)
     if (map) map.getSource("snet_points").setData(geojson);
   }
 }
@@ -2769,6 +2775,11 @@ document.getElementById("tab1_menu2").addEventListener("click", function () {
     window.electronAPI.messageReturn({ action: "Request_gaikyo" });
   }
 });
+document.getElementById("tab1_menu5").addEventListener("click", function () {
+  if (new Date() - tide_lastUpdate > 60000) {
+    window.electronAPI.messageReturn({ action: "Request_tide" });
+  }
+});
 document.getElementById("tab1_menu3").addEventListener("click", function () {
   if (new Date() - wepa_lastUpdate > 60000) {
     window.electronAPI.messageReturn({ action: "Request_wepa" });
@@ -2779,6 +2790,67 @@ document.getElementById("tab1_menu4").addEventListener("click", function () {
     window.electronAPI.messageReturn({ action: "Request_usgs" });
   }
 });
+
+var tide_lastUpdate = 0;
+function draw_tide(data) {
+  tide_lastUpdate = new Date();
+  if (!data || data.length == 0)
+    document.getElementById("tide_update_time").innerText = "更新失敗：" + NormalizeDate("hh:mm:ss", new Date());
+  else {
+    document.getElementById("tide_update_time").innerText = "最終更新：" + NormalizeDate("hh:mm:ss", new Date());
+    document.getElementById("tide_update_time").setAttribute("aria-label", "最終更新時刻、" + NormalizeDate("h時m分s秒", new Date()));
+  }
+  removeChild(document.getElementById("tide-Wrap"));
+
+  //データバーの表示範囲をそろえるため事前にループ
+  var range_min = 0
+  var range_max = 0
+  var adv_exists = Boolean(Object.keys(data).find(function (key) {
+  }));
+  Object.keys(data).forEach(function (key) {
+    elm = data[key];
+    var adv_exists = elm.height >= elm.threshold_advisory;
+    var warn_threshold = adv_exists ? elm.threshold_warn : 0;//注意報基準超過の場合のみ警報基準を範囲に含める
+    var range_min_tmp = Math.min(elm.height, elm.astro, elm.threshold_advisory, warn_threshold, 0)
+    range_min = Math.min(range_min_tmp, range_min)
+    var range_max_tmp = Math.max(elm.height, elm.astro, elm.threshold_advisory, warn_threshold, 0)
+    range_max = Math.max(range_max_tmp, range_max)
+  })
+  var margin = (range_max - range_min) * 0.07
+  range_max += margin
+  range_min -= margin
+
+  Object.keys(data).forEach(function (key, index) {
+    elm = data[key];
+    var clone = document.getElementById("tide-item")
+      .content.cloneNode(true).querySelector(".EQItem");
+
+    if (index == 0) clone.setAttribute("tabindex", 2);
+
+    var dateToSpeak = NormalizeDate("M月D日h時m分", elm.time);
+    var dateStr = NormalizeDate("MM/DD hh:mm", elm.time);
+    clone.querySelector(".EQI_datetime").textContent = dateStr;
+
+    clone.querySelector(".EQI_name").textContent = elm.name;
+    clone.querySelector(".EQI_by").textContent = `(${elm.by})`;
+
+    clone.querySelector(".EQI_height").textContent = elm.height.toFixed(0);
+
+    function to_percent(v) {
+      return (v - range_min) / (range_max - range_min) * 100
+    }
+    clone.querySelector(".EQI_databar_v").style.width = `${to_percent(elm.height)}%`;
+    clone.querySelector(".EQI_point_astro").style.left = `calc(${to_percent(elm.astro)}% - 2px)`;
+    clone.querySelector(".EQI_point_adv").style.left = `calc(${to_percent(elm.threshold_advisory)}% - 2px)`;
+    clone.querySelector(".EQI_point_warn").style.left = `calc(${to_percent(elm.threshold_warn)}% - 2px)`;
+
+    clone.setAttribute("aria-label", `潮位観測情報、観測点名は${elm.name}(${elm.by})。潮位${elm.height.toFixed(0)}センチ、${dateToSpeak}時点。なお、天文潮位は${elm.astro}センチ、高潮注意報基準は${elm.threshold_advisory}センチ、高潮警報基準は${elm.threshold_warn}センチ。クリックして詳細を表示。`);
+    clone.addEventListener("click", function () {
+      window.open(`https://www.jma.go.jp/bosai/tidelevel/#point_code=${data[key].code}`);
+    });
+    document.getElementById("tide-Wrap").appendChild(clone);
+  });
+}
 
 var gaikyo_lastUpdate = 0;
 var gaikyo_history = [];

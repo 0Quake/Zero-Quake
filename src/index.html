@@ -237,6 +237,7 @@
                             </div>
                             <div id="tab1_menu4" role="tab" class="tabmenu" tabindex="-1" aria-controls="tab1_content4" aria-label="USGSの国際地震情報" title="USGSの地震情報（国際）" ZQ-focusgroup-item><span class="material-icons-round" aria-hidden="true">globe_asia</span>USGS</div>
                             <div id="tab1_menu2" role="tab" class="tabmenu" tabindex="-1" aria-controls="tab1_content2" aria-label="地震解説情報" ZQ-focusgroup-item><span class="material-icons-round" aria-hidden="true">description</span>解説情報</div>
+                            <div id="tab1_menu5" role="tab" class="tabmenu" tabindex="-1" aria-controls="tab1_content5" aria-label="潮位観測情報" ZQ-focusgroup-item><span class="material-icons-round" aria-hidden="true">bar_chart</span>潮位観測</div>
                             <div id="tab1_menu3" role="tab" class="tabmenu" tabindex="-1" aria-controls="tab1_content3" aria-label="国際津波情報" ZQ-focusgroup-item><span class="material-icons-round" aria-hidden="true">tsunami</span>国際津波</div>
                         </div>
                     </div>
@@ -306,6 +307,48 @@
                             </template>
                             <div id="gaikyo_update_time">読み込み中...</div>
                             <div id="gaikyo-Wrap" class="EQInfo" role="list">
+                                <div class="mini-loading-wrap" aria-label="読み込み中"></div>
+                            </div>
+                        </div>
+                        <div id="tab1_content5" role="tabpanel" aria-labelledby="tab1_menu5" class="tabcontent" tabindex="-1" ZQ-focusgroup>
+                            <template id="tide-item">
+                                <div class="EQItem EQI_tide" role="link listitem" title="クリックして詳細を表示" tabindex="-1" ZQ-focusgroup-item>
+                                    <div class="EQI_detailWrap" aria-hidden="true">
+                                        <div class="EQI_head_wrap">
+                                            <div class="EQI_name_wrap">
+                                                <div>
+                                                    <span class="EQI_name"></span>
+                                                    <span class="EQI_by"></span>
+                                                </div>
+                                                <div class="EQI_datetime"></div>
+                                            </div>
+                                            <div class="EQI_height_wrap">
+                                                <span class="EQI_height"></span>cm
+                                            </div>
+                                        </div>
+                                        <div class="EQI_databar" aria-hidden="true">
+                                            <div class="EQI_databar_v"></div>
+                                            <div class="EQI_point EQI_point_astro"></div>
+                                            <div class="EQI_point EQI_point_adv"></div>
+                                            <div class="EQI_point EQI_point_warn"></div>
+                                        </div>
+                                    </div>
+                            </template>
+                            <div id="tide_update_time">読み込み中...</div>
+                            <div class="EQItemDummy EQI_tide_sample" aria-label="凡例">
+                                <div class="EQI_detailWrap" aria-hidden="true">
+                                    <div class="tide_sample_wrap">
+                                        <div id="tide_sample_astro"></div>天文潮位
+                                    </div>
+                                    <div class="tide_sample_wrap">
+                                        <div id="tide_sample_adv"></div>高潮注意報基準
+                                    </div>
+                                    <div class="tide_sample_wrap">
+                                        <div id="tide_sample_warn"></div>高潮警報基準
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="tide-Wrap" class="EQInfo" role="list">
                                 <div class="mini-loading-wrap" aria-label="読み込み中"></div>
                             </div>
                         </div>

@@ -735,6 +735,7 @@ td {
   font-family: "AzeretMono-Regular", ui-monospace;
 }
 .EQItem,
+.EQItemDummy,
 #NankaiTroughInfo_Rinji,
 #NankaiTroughInfo_Teirei,
 #HokkaidoSanrikuInfo,
@@ -751,8 +752,12 @@ td {
   overflow: hidden;
   cursor: pointer;
 }
-.EQItem {
+.EQItem,
+.EQItemDummy {
   padding: 6px;
+}
+.EQItemDummy{
+  cursor: default;
 }
 .EQCount{
   display: block;
@@ -1182,7 +1187,7 @@ summary:focus {
   font-size: 13px;
   margin: 2px;
 }
-#gaikyo_update_time,#wepa_update_time,#usgs_update_time {
+#gaikyo_update_time,#wepa_update_time,#usgs_update_time,#tide_update_time {
   font-size: 14px;
   text-align: center;
   color: #ccc;
@@ -1198,6 +1203,81 @@ summary:focus {
 .EQI_headline {
   font-size: 14px;
 }
+.EQI_tide_sample .EQI_detailWrap {
+    display: flex;
+    gap: 0px 10px;
+    flex-wrap: wrap;
+}
+.EQI_tide .EQI_datetime{
+  margin: 0;
+  font-size: 12px;
+  color: #CCC;
+  line-height: 1;
+  margin-top: 2px;
+}
+.EQI_tide .EQI_head_wrap{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.EQI_tide .EQI_height_wrap{
+  font-family: "AzeretMono-Regular", ui-monospace;
+  font-size: 16px;
+}
+.EQI_tide .EQI_height{
+  font-size: 20px;
+  margin-right: 3px;
+}
+.EQI_tide .EQI_databar{
+  position: relative;
+  background: #363639;
+  width: 100%;
+  height: 5px;
+  border-radius: 2.5px;
+  overflow: hidden;
+}
+.EQI_tide .EQI_databar_v{
+  background: #CCCCCC;
+  width: 60%;
+  height: 5px;
+  border-radius: 2.5px;
+}
+.EQI_tide .EQI_point{
+  position: absolute;
+  top: 0;
+  left: calc(5% - 2px);
+  width: 4px;
+  height: 5px;
+  outline: solid 1px #363639;
+}
+
+.EQI_point_astro,
+#tide_sample_astro {
+  background: var(--AstroHeightColor);
+}
+.EQI_point_adv,
+#tide_sample_adv {
+  background: var(--TsunamiWatchColor);
+}
+.EQI_point_warn,
+#tide_sample_warn {
+  background: var(--TsunamiWarningColor);
+}
+.tide_sample_wrap {
+  display: inline-block;
+  line-height: 1.2em;
+  white-space: nowrap;
+  font-size: 13px;
+}
+.tide_sample_wrap div{
+  display: inline-block;
+  width: 4px;
+  height: 0.6em;
+  vertical-align: bottom;
+  margin: 0.3em 4px 0.3em 0;
+}
+
 @media (forced-colors: active) {
   #tab1_content {
     border-right-style: solid;
