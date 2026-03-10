@@ -157,11 +157,11 @@ function EEW_AlertUpdate(data) {
       var clone = document.getElementById("EEW-" + elm.EventID);
       is_update = true;
     } else {
+      if (elm.is_cancel) return;
       var clone = template.content.cloneNode(true).querySelector(".EEWWrap");
       EEWID++;
       EEW_LocalIDs[elm.EventID] = EEWID;
     }
-    if (!is_update && elm.is_cancel) return;
 
     if (elm.alertflg == "警報" || elm.alertflg == "予報")
       var textForReader = GenerateEEWText(elm, "緊急地震速報アイテム。{training}{grade}、第{serial}報。[{location}の予想震度は{local_Int}。]予想マグニチュード、{magnitude}。予想最大震度、{maxInt}。{region_name}の、深さ{depth}キロメートルで、{origin_time}に発生。{final}");
@@ -226,6 +226,7 @@ function EEW_AlertUpdate(data) {
     });
     var EEWItem = document.getElementById("EEW-" + elm.EventID);
 
+    console.log("aaaa", stillEQ)
     //終わった地震
     if (!stillEQ) {
       epiCenterClear(elm.EventID);
@@ -2093,14 +2094,13 @@ function psWaveCalc(eid) {
   });
   if (pswaveFind) {
     var TimeTableTmp = pswaveFind.TimeTable;
-    var SWmin;
+    var SWmin = TimeTableTmp[0].S;
     var distance = (new Date() - Replay - new Date(pswaveFind.data.originTime)) / 1000;
 
     var PRadius = null;
     var SRadius = null;
 
     var i = 0;
-    SWmin = TimeTableTmp[0].S;
     for (const elm of TimeTableTmp) {
       if (!PRadius) {
         if (elm.P == distance) {

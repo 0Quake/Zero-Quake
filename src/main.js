@@ -2651,9 +2651,13 @@ function MargeEEW(data) {
       return elm.EQ_id == data.EventID;
     });
 
-    //５分以上前の地震／未来の地震（リプレイ時）を除外
+    var showing = Boolean(EEW_nowList.find(function (elm) {
+      return elm.EventID == data.EventID;
+    }));
+
+    //５分以上前の地震／未来の地震（リプレイ時）を除外 ただし既に表示中の地震の更新報は通す
     var pastTime = new Date() - Replay - data.origin_time;
-    if (!EQJSON && (pastTime > 300000 || pastTime < 0)) return;
+    if (!showing && (pastTime > 300000 || pastTime < 0)) return;
 
     data.TimeTable = TimeTable_JMA2001[depthFilter(data.depth)];
     if (data.source == "simulation") {
