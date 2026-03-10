@@ -661,6 +661,9 @@ td {
 #tab1_bar{
   padding: 5px 0;
 }
+#bar1{
+  font-size: 0;
+}
 #bar1 .tabmenu {
   margin: 0;
   width: 32px;
@@ -669,6 +672,8 @@ td {
   border: solid 1px transparent;
   border-left: none;
   color: #ccc;
+  font-size: 13px;
+  padding: 0.5em 0;
 }
 #bar1 .tabmenu:hover{
     color: #eee;

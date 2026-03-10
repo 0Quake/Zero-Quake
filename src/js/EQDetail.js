@@ -1058,7 +1058,6 @@ document.getElementById("over4").addEventListener("change", function () {
 var estimated_intensity_map_layers = [];
 var ESMap_Worker;
 function estimated_intensity_mapReq() {
-  console.log(9999)
   ESMap_Worker = new Worker("js/ESMap_Worker.js");
   ESMap_Worker.addEventListener("message", (e) => {
     if (map.getSource("estimated_intensity_map_" + e.data.index)) {
@@ -1145,8 +1144,6 @@ function estimated_intensity_mapReq() {
 
           ZoomBounds.extend([lng, lat2]);
           ZoomBounds.extend([lng2, lat]);
-
-          console.log(8888)
 
           ESMap_Worker.postMessage({
             action: "URL",
