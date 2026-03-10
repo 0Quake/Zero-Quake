@@ -282,9 +282,6 @@ function epiCenterUpdate(elm) {
       img.src = "./img/epicenter.svg";
       img.classList.add("epicenterIcon");
 
-      map.panTo([longitude, latitude], { animate: false });
-      map.zoomTo(8, { animate: false });
-
       var ESPopup = new maplibregl.Popup({
         closeButton: false,
         closeOnClick: false,
@@ -2189,9 +2186,10 @@ function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrive
         }
       }
     } else {
+      var p_geometry = turf.circle(_center, pRadius ? pRadius / 1000 : 0, circle_options)
       map.addSource("PCircle_" + EventID, {
         type: "geojson",
-        data: turf.circle(_center, pRadius / 1000, circle_options),
+        data: p_geometry,
         tolerance: 0.6,
       });
 
@@ -2206,9 +2204,10 @@ function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrive
       });
 
       var sRadTmp = sRadius ? sRadius / 1000 : 0;
+      var s_geometry = turf.circle(_center, sRadTmp, circle_options)
       map.addSource("SCircle_" + EventID, {
         type: "geojson",
-        data: turf.circle(_center, sRadTmp, circle_options),
+        data: s_geometry,
         tolerance: 0.6,
       });
 
@@ -2233,6 +2232,17 @@ function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrive
         },
         "tsunami_Yoho"
       );
+
+      var ZoomBounds = new maplibregl.LngLatBounds();
+      ZoomBounds.extend(_center);
+      ZoomBounds.extend(turf.bbox(p_geometry));
+      ZoomBounds.extend(turf.bbox(s_geometry));
+
+      map.setMaxZoom(8);
+      map.fitBounds(ZoomBounds, {
+        padding: 10, maxZoom: 8, animate: false
+      });
+      map.setMaxZoom(null);
 
       EQElm = psWaveList[psWaveList.length - 1];
 
