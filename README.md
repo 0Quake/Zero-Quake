@@ -87,6 +87,16 @@
   </ul>
   </details>
 
+- ### 潮汐
+
+  潮位観測情報
+  <details>
+  <summary>出典・情報源</summary>
+    <ul><li>出典：<a href="https://www.jma.go.jp/bosai/map.html?contents=tidelevel">気象庁ホームページ「潮位観測情報」</a></li>
+  </ul>
+  </details>
+
+
 - ### 海外の地震情報
 
   1. USGS Earthquake Catalog
