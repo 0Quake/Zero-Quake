@@ -1,7 +1,7 @@
 {
   "name": "zeroquake",
   "productName": "Zero Quake",
-  "version": "0.9.5",
+  "version": "0.9.6",
   "description": "Zero Quake",
   "scripts": {
     "start": "electron . --develop --debug-mode"
