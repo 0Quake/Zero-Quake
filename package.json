@@ -72,7 +72,7 @@
     "jsdom": "^29.0.1",
     "maplibre-gl": "^5.21.1",
     "path": "^0.12.7",
-    "pmtiles": "^4.4.0",
+    "pmtiles": "^4.4.1",
     "websocket": "^1.0.35"
   }
 }
