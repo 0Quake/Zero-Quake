@@ -185,7 +185,7 @@ function EEW_AlertUpdate(data) {
     clone.querySelector(".userLocation").textContent = config.home.name ? config.home.name : "現在地";
     clone.querySelector(".is_final").style.display = elm.is_final ? "inline" : "none";
     clone.querySelector(".cancelled").style.display = elm.is_cancel ? "flex" : "none";
-    clone.querySelector(".region_name").textContent = elm.region_name ? elm.region_name : "震源地域不明";
+    clone.querySelector(".region_name").textContent = elm.region_name ? elm.region_name : "震央不明";
     clone.querySelector(".origin_time").textContent = NormalizeDate(3, elm.origin_time);
     clone.querySelector(".magnitude").textContent = elm.magnitude || elm.magnitude == 0 ? Math.round(elm.magnitude * 10) / 10 : "不明";
     if (elm.magnitude || elm.magnitude == 0)
