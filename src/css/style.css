@@ -1116,6 +1116,7 @@ summary {
   cursor: pointer;
   margin: 6px;
   overflow: hidden;
+  box-shadow: 1px 1px 3px -1px #0009;
 }
 button:hover,
 summary:hover {

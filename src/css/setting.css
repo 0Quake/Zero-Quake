@@ -8,6 +8,8 @@ button {
 
 .h_grid{
   display: flex;
+  justify-content: space-between;
+  gap: 10px;
 }
 
 .smalltext {
@@ -140,8 +142,10 @@ div .tabcontent {
   border-top: solid 1px #62626c;
   text-align: center;
   font-size: 0;
-  margin: 0 8px 8px 3px;
   background: #222225;
+  box-shadow: 0 0 11px #000C;
+  padding: 3px;
+  position: relative;
 }
 
 #BtnWrap button {
@@ -289,7 +293,7 @@ h5 {
 label {
   display: block;
   width: 100%;
-  padding: 7px 5px;
+  padding: 7px 0;
 }
 label input[type="text"],
 label input[type="number"],
@@ -366,6 +370,10 @@ ol {
 summary {
   margin-left: 0;
   margin-right: 0;
+  font-size: 13px;
+  padding: 2px 12px;
+  border-radius: 6px;
+  width: fit-content;
 }
 .tableWrap {
   border: solid 1px #88888b;
