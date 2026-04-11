@@ -21,9 +21,9 @@
   <details>
   <summary>出典・情報源</summary>
   <ul>
+    <li>Axis (By:Prioris)（無料登録必須）</li>
     <li>Wolfx (By: Wolfx Project)</li>
     <li>ProjectBS (By: CrossRoad)</li>
-    <li>Axis (By:Prioris)（無料登録必須）</li>
     <li>P2P 地震情報 API (By: P2P地震情報)（警報のみ）</li>
   </ul>
   </details>
@@ -46,15 +46,15 @@
 
 - ### 津波情報 (気象庁)
 
-  大津波警報／津波警報／津波注意報／津波予報※  
-  津波情報／沖合の津波観測に関する情報※
-  国際津波関連情報(WEPA40)☆
+  大津波警報☆／津波警報☆／津波注意報☆／津波予報  
+  津波情報☆／沖合の津波観測に関する情報
+  国際津波関連情報(WEPA40)※
   <details>
   <summary>出典・情報源</summary>
   <ul>
     <li>出典：<a href="https://xml.kishou.go.jp/xmlpull.html">気象庁防災情報 XML</a></li>
-    <li>出典：<a href="https://www.jma.go.jp/bosai/map.html#contents=pacifictsunami">気象庁ホームページ</a>（☆の項目のみ）</li>
-    <li>P2P 地震情報 API（※の項目を除く）</li>
+    <li>出典：<a href="https://www.jma.go.jp/bosai/map.html#contents=pacifictsunami">気象庁ホームページ</a>（※の項目のみ）</li>
+    <li>P2P 地震情報 API（☆の項目のみ）</li>
   </ul>
   </details>
 
@@ -117,7 +117,6 @@
 - 国内湖沼 出典：国土交通省「[国土数値情報(湖沼データ)](https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-W09-v2_2.html)」※
 - 国外陸地 出典：Natural Earth※
 - プレート境界 出典
-
   1. [© Hugo Ahlenius, Nordpil, Peter Bird](http://opendatacommons.org/licenses/by/1.0/)
   2. 気象庁「[震度データベース検索](https://www.data.jma.go.jp/eqdb/data/shindo/)」(地図部分を編集して使用)
 - 海底地形 出典：GEBCO
@@ -139,9 +138,15 @@
 
 ### その他
 - KyoshinShindoColorMap © ingen084, こんぽ
-- 表層地盤増幅率：防災科学技術研究所 ／ 下記文献
-
-  1. 若松加寿江・松岡昌志(2013)：全国統一基準による地形・地盤分類 250m メッシュマップの構築とその利用，地震工学会誌 No.18, pp.35-38.
-  2. Wakamatsu, K. and Matsuoka, M. (2013): " Nationwide 7.5-Arc-Second Japan Engineering Geomorphologic Classification Map and Vs30 Zoning", Journal of Disaster Research Vol.8 No.5, pp.904-911.
-  3. 松岡昌志・若松加寿江(2008) ： 地形・地盤分類 250m メッシュマップ全国版に基づく地盤のゆれやすさデータ，産業技術総合研究所，知的財産管理番号 H20PRO-936．
-  4. 藤本一雄・翠川三郎(2006) : 近接観測点ペアの強震観測記録に基づく地盤増幅度と地盤の平均 S 波速度の関係,日本地震工学会論文集,Vol.6,No.1,pp.11-22.
+- JMA2001走時表
+- Kennett, B. L. N. Seismological Tables: ak135.
+- 表層地盤増幅率：防災科学技術研究所
+  <details>
+  <summary>原典</summary>
+  <ol>
+  <li>若松加寿江・松岡昌志(2013)：全国統一基準による地形・地盤分類 250m メッシュマップの構築とその利用，地震工学会誌 No.18, pp.35-38.</li>
+  <li>Wakamatsu, K. and Matsuoka, M. (2013): " Nationwide 7.5-Arc-Second Japan Engineering Geomorphologic Classification Map and Vs30 Zoning", Journal of Disaster Research Vol.8 No.5, pp.904-911.</li>
+  <li>松岡昌志・若松加寿江(2008) ： 地形・地盤分類 250m メッシュマップ全国版に基づく地盤のゆれやすさデータ，産業技術総合研究所，知的財産管理番号 H20PRO-936．</li>
+  <li>藤本一雄・翠川三郎(2006) : 近接観測点ペアの強震観測記録に基づく地盤増幅度と地盤の平均 S 波速度の関係,日本地震工学会論文集,Vol.6,No.1,pp.11-22.</li>
+  </ol>
+  </details>
