@@ -432,7 +432,7 @@ let options = {
   title: "エラー",
   message: "予期しないエラーが発生しました",
   detail: "動作を選択してください。",
-  buttons: ["今すぐ再起動", "終了", "無視"],
+  buttons: ["アプリを再起動", "終了", "無視"],
   noLink: true,
 };
 var errorMsgBox = false;
@@ -443,7 +443,7 @@ process.on("uncaughtException", function (err) {
     if (!errorMsgBox && app.isReady()) {
       if (String(err.stack).startsWith("Error: net::ERR_")) return false;
       errorMsgBox = true;
-      options.detail = "動作を選択してください。エラーメッセージは以下の通りです。\n************\n" + causeTree(err);
+      options.detail = `よろしければ、以下のエラーメッセージのスクリーンショット等を開発者へご報告ください。\n=================\nZeroQuake v${soft_version ? soft_version : "?.?.?"}\n\n${causeTree(err)}\n=================\n\n動作を選択してください。`;
 
       if (MainWindow) {
         dialog.showMessageBox(MainWindow, options).then(function (result) {
@@ -469,14 +469,26 @@ function causeTree(err) {
   try {
     var ErrString = err.stack;
     var i = 0;
-    while (err.cause && i < 10) {
-      ErrString += "\n[cause]:" + err.cause.stack;
-      i++;
-      err = err.cause;
-    }
+
+    try {
+      while (err.cause && i < 10) {
+        ErrString += "\n[cause]:" + err.cause.stack;
+        i++;
+        err = err.cause;
+      }
+    } catch { }
+
+    try {
+      //ユーザーのフォルダ構成を秘匿
+      var homeDir = app.getAppPath();
+      homeDir = homeDir.replaceAll("\\", "/");//バックスラッシュ対策
+      ErrString = ErrString.replace(homeDir, '<0quake_root>');
+    } catch { }
+
     return ErrString;
-  } catch {
-    return "";
+  } catch (e) {
+    console.log(e)
+    return "エラーログツリーの作成に失敗";
   }
 }
 
