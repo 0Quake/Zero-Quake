@@ -177,7 +177,7 @@ function EEW_AlertUpdate(data) {
     else if (elm.alertflg == "EarlyEst") clone.classList.add("EarlyEst");
 
     clone.setAttribute("aria-label", textForReader);
-    clone.querySelector(".EEWLocalID").textContent = EEW_LocalIDs[elm.EventID];
+    clone.querySelector(".epiCenterTooltip").textContent = EEW_LocalIDs[elm.EventID];
     clone.querySelector(".serial").textContent = elm.serial;
     clone.querySelector(".maxInt").textContent = elm.maxInt ? elm.maxInt : "?";
     clone.querySelector(".maxInt").style.background = NormalizeShindo(elm.maxInt, 2)[0];
@@ -313,7 +313,7 @@ function epiCenterUpdate(elm) {
         ESPopup2: ESPopup2,
       });
       var displayTmp = epiCenter.length > 1 ? "inline-block" : "none";
-      document.querySelectorAll(".epiCenterTooltip,.EEWLocalID").forEach(function (elm3) {
+      document.querySelectorAll(".epiCenterTooltip,.epiCenterTooltip").forEach(function (elm3) {
         elm3.style.display = displayTmp;
       });
     }

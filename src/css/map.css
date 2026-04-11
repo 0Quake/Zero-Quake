@@ -407,19 +407,8 @@
   width: auto;
 }
 
-.EEWLocalID {
-  width: 20px;
-  height: 20px;
-  line-height: 18px;
-  text-align: center;
-  background: #3f3f42;
-  border: solid 1px #363639;
-  color: #fff;
-  display: inline-block;
+.EEWWrap .epiCenterTooltip {
   margin: 0 3px 0 0;
-  border-radius: 3px;
-  font-family: "BIZ UDPGothic";
-  font-weight: normal;
 }
 #legendWrap {
   max-height: 100vh;

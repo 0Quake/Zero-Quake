@@ -334,6 +334,7 @@ h2 {
 .EEW_content_wrap {
   display: flex;
   align-items: center;
+  justify-content: space-between;
 }
 
 .list-item h2 {
@@ -346,8 +347,8 @@ h2 {
   margin-bottom: 5px;
 }
 .EEWWrap .maxInt_description {
-  color: #999;
-  font-size: 11px;
+  color: #AAA;
+  font-size: 10.5px;
   margin: 0;
   writing-mode: vertical-rl;
   align-items: center;
@@ -358,7 +359,8 @@ h2 {
 .EQDItem h2,
 .EEWWrap.EarlyEst h2 {
   float: none;
-  background: rgb(39, 110, 50);
+  background: #3f3f42;
+  border-bottom: solid 2px rgb(39, 110, 50);
   color: #fff;
 }
 #tsunamiTitle {
@@ -368,12 +370,12 @@ h2 {
 
 .EEWWrap.yohou h2,
 .EQDItem.lv1 h2 {
-  background: rgb(212, 214, 91);
+  border-color: rgb(212, 214, 91);
   color: #000;
 }
 .EEWWrap.keihou h2,
 .EQDItem.lv2 h2 {
-  background: rgb(175, 54, 54);
+  border-color: rgb(175, 54, 54);
   color: #fff;
 }
 .Title_EarlyEst,
@@ -401,9 +403,9 @@ h2 {
   padding: 5px;
 }
 .detail_text {
-  flex: 1;
-  margin: 0 0 0 10px;
-  max-width: 200px;
+  margin-left: 10px;
+  padding-top: 5px;
+  width: 194px;
 }
 .GraphicalDataWrap {
   text-align: center;
@@ -418,9 +420,7 @@ h2 {
 }
 
 .dataGroup1 {
-  margin-bottom: 10px;
   font-size: 15px;
-  text-align: center;
   line-height: 40px;
 }
 .EpicenterElement {
@@ -436,12 +436,21 @@ h2 {
   color: #ccc;
   white-space: nowrap;
 }
+.magnitude_wrap{
+  font-family: "AzeretMono-Regular", ui-monospace;
+  font-size: 19px;
+  color: #ccc;
+}
+.depth_wrap{
+  font-weight: bold;
+  font-size: 15px;
+}
 .magnitude {
   font-size: 32px;
-  margin: 0 14px 0 6px;
-  font-family: "AzeretMono-Regular", ui-monospace;
+  margin: 0 10px 0 6px;
   font-weight: bold;
   color: #fff;
+  font-family: inherit;
 }
 .magnitude.UnknownMag {
   color: #ccc;
@@ -462,19 +471,21 @@ h2 {
   color: #fff;
 }
 .region_name {
-  text-align: center;
-  margin-bottom: 15px;
-  white-space: nowrap;
+  margin-bottom: 10px;
+  font-size: 17px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .origin_time {
   font-size: 14px;
   color: #ccc;
-  text-align: center;
   white-space: nowrap;
   font-family: "AzeretMono-Regular", ui-monospace;
+  margin-bottom: 1px;
 }
 .graphWrap {
   border-radius: 22px;
@@ -486,7 +497,7 @@ h2 {
   outline: solid 2px rgb(0, 0, 0, 0.2);
 }
 .userLocationWrap {
-  color: #ccc;
+  color: #aaa;
   font-size: 14px;
 }
 .userLocation {
@@ -731,12 +742,13 @@ td {
   background: #222225;
 }
 .EQI_detailWrap {
-  padding: 5px;
+  padding: 5px 5px 6px 5px;
   flex: 1;
 }
 .EQI_datetime {
-  margin-bottom: 7px;
+  margin-bottom: 1px;
   font-size: 14px;
+  color:#ccc;
   font-family: "AzeretMono-Regular", ui-monospace;
 }
 .EQItem,
