@@ -13,7 +13,7 @@ var knetMapData;
 var snetMapData;
 var userPosition = [138.46, 32.99125];
 var userZoom = 4;
-var userMotion;
+var userMotionFlg;
 
 var high_contrast = window.matchMedia("(forced-colors: active)").matches;
 
@@ -1462,6 +1462,8 @@ function init() {
 
   map.touchZoomRotate.disableRotation();
 
+  map_gethome();
+
   map.on("click", "prefmap_fill", function (e) {
     e.originalEvent.cancelBubble = true;
   });
@@ -1598,14 +1600,7 @@ function init() {
   homeButton.setAttribute("title", "初期位置に戻る");
   homeButton.setAttribute("aria-label", "地図を初期位置に戻す");
   homeButton.className = "material-icons-round";
-  homeButton.addEventListener("click", function () {
-    userMotion = true;
-    map.panTo([138.46, 32.99125], { animate: false });
-    map.zoomTo(4, { animate: false });
-    userMotion = false;
-    userPosition = map.getCenter().toArray();
-    userZoom = map.getZoom();
-  });
+  homeButton.addEventListener("click", map_gethome);
 
   var returnButton = document.createElement("button");
   returnButton.innerText = "undo";
@@ -1613,9 +1608,9 @@ function init() {
   returnButton.setAttribute("aria-label", "地図を直前の操作位置に戻す");
   returnButton.className = "material-icons-round";
   returnButton.addEventListener("click", function () {
-    userMotion = true;
+    userMotionFlg = true;
     returnToUserPosition();
-    userMotion = false;
+    userMotionFlg = false;
   });
   returnButton.setAttribute("id", "returnToUserPosition");
   returnButton.style.display = "none";
@@ -1740,7 +1735,9 @@ function init() {
   });
   map.on("move", function (e) {
     var nowAtUserPosition;
-    if (e.originalEvent || userMotion) {
+    var isUserMotion = e.originalEvent || userMotionFlg;//ユーザー操作による移動
+    var windowResize = userPosition[0] == map.getCenter().lng && userPosition[1] == map.getCenter().lat//ウィンドウリサイズによるmoveイベント（中心移動なし）
+    if (isUserMotion || windowResize) {
       userPosition = map.getCenter().toArray();
       nowAtUserPosition = true;
     }
@@ -1764,6 +1761,26 @@ function returnToUserPosition() {
   if (userPosition) map.panTo(userPosition, { animate: false });
   if (userZoom) map.zoomTo(userZoom, { animate: false });
   document.getElementById("returnToUserPosition").style.display = "none"
+}
+
+function map_gethome() {
+  userMotionFlg = true;
+
+  var ZoomBounds = turf.bbox(turf.points([[154, 46], [122, 20], [98, 35]]));
+
+  console.log(turf.bboxPolygon(ZoomBounds))
+  if (turf.booleanPointInPolygon([config.home.longitude, config.home.latitude], turf.bboxPolygon(ZoomBounds))) {
+    map.fitBounds(ZoomBounds, {
+      padding: 10, animate: false
+    });
+  } else {
+    map.panTo([config.home.longitude, config.home.latitude], { animate: false });
+    map.zoomTo(4, { animate: false });
+  }
+
+  userMotionFlg = false;
+  userPosition = map.getCenter().toArray();
+  userZoom = map.getZoom();
 }
 
 //観測点情報更新
