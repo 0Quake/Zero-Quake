@@ -203,12 +203,12 @@ main {
   padding: 0.5em 1em;
   color: #fff;
   background: #3f3f42;
-  border: solid 3px rgb(177, 46, 46);
+  border: solid 3px rgb(149, 46, 46);
   text-align: center;
 }
 #offline h2 {
   padding: 0.2em;
-  background: rgb(177, 46, 46);
+  background: rgb(149, 46, 46);
   color: #fff;
   font-family: "M PLUS 1p", sans-serif;
 }
@@ -630,8 +630,8 @@ td {
 #setting {
   background: transparent;
   border: none;
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border-radius: 3px;
   vertical-align: middle;
   font-family: "Material Symbols";
@@ -979,7 +979,7 @@ td {
   padding: 0.2em 0.5em;
 }
 #UpdateTimeWrap {
-  height: 30px;
+  height: 32px;
   overflow-y: auto;
   max-height: 80vh;
   padding: 0;
@@ -1117,6 +1117,14 @@ summary {
   margin: 6px;
   overflow: hidden;
   box-shadow: 1px 1px 3px -1px #0009;
+}
+.maplibregl-control-container button,button#setting{
+  box-shadow: none;
+}
+.maplibregl-ctrl.maplibregl-ctrl-group ,
+.maplibregl-ctrl-attrib,
+.legend{
+    filter: drop-shadow(1px 1px 2px #0007);
 }
 button:hover,
 summary:hover {
