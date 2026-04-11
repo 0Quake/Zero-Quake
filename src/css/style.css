@@ -374,12 +374,10 @@ h2 {
 .EEWWrap.yohou h2,
 .EQDItem.lv1 h2 {
   border-color: var(--TsunamiWatchColor);
-  color: #000;
 }
 .EEWWrap.keihou h2,
 .EQDItem.lv2 h2 {
   border-color: var(--TsunamiWarningColor);
-  color: #fff;
 }
 .Title_EarlyEst,
 .Title_EEW {
