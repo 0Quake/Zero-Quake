@@ -146,28 +146,27 @@ var defaultConfigVal = {
     window: { EEW: "openWindow", EEW_Update: "push" },
   },
   color: {
-    IntColorTheme: "0quake_old",
+    "IntColorTheme": "0quake",
     psWave: { PwaveColor: "rgb(48, 148, 255)", SwaveColor: "rgb(255, 62, 48)" },
-    Shindo: {
-      "0": { background: "rgb(80, 86, 102)", color: "rgb(204, 204, 204)" },
-      "1": { background: "rgb(134, 168, 198)", color: "rgb(51, 51, 51)" },
-      "2": { background: "rgb(56, 120, 193)", color: "rgb(255, 255, 255)" },
-      "3": { background: "rgb(80, 186, 84)", color: "rgb(34, 34, 34)" },
-      "4": { background: "rgb(204, 209, 74)", color: "rgb(34, 34, 34)" },
-      "5m": { background: "rgb(231, 150, 21)", color: "rgb(0, 0, 0)" },
-      "5p": { background: "rgb(255, 91, 22)", color: "rgb(0, 0, 0)" },
-      "6m": { background: "rgb(237, 0, 0)", color: "rgb(255, 255, 255)" },
-      "6p": { background: "rgb(128, 9, 9)", color: "rgb(255, 255, 255)" },
-      "7": { background: "rgb(196, 0, 222)", color: "rgb(255, 255, 255)" },
-      "?": { background: "rgb(191, 191, 191)", color: "rgb(68, 68, 68)" },
-      "5p?": { background: "rgb(231, 150, 21)", color: "rgb(0, 0, 0)" },
-    },
-    LgInt: {
-      "1": { background: "rgb(80, 186, 84)", color: "rgb(34, 34, 34)" },
-      "2": { background: "rgb(231, 150, 21)", color: "rgb(0, 0, 0)" },
-      "3": { background: "rgb(237, 0, 0)", color: "rgb(255, 255, 255)" },
-      "4": { background: "rgb(196, 0, 222)", color: "rgb(255, 255, 255)" },
-      "?": { background: "rgb(191, 191, 191)", color: "rgb(68, 68, 68)" },
+    "Shindo": {
+      "0": { "background": "rgb(80, 81, 83)", "color": "rgb(194, 195, 197)" },
+      "1": { "background": "rgb(157, 175, 194)", "color": "rgb(61, 64, 89)" },
+      "2": { "background": "rgb(89, 123, 171)", "color": "rgb(0, 1, 6)" },
+      "3": { "background": "rgb(69, 72, 130)", "color": "rgb(216, 217, 235)" },
+      "4": { "background": "rgb(217, 215, 98)", "color": "rgb(67, 67, 71)" },
+      "7": { "background": "rgb(165, 0, 194)", "color": "rgb(255, 255, 255)" },
+      "5m": { "background": "rgb(224, 157, 0)", "color": "rgb(38, 38, 38)" },
+      "5p": { "background": "rgb(232, 93, 19)", "color": "rgb(0, 0, 0)" },
+      "6m": { "background": "rgb(194, 26, 0)", "color": "rgb(255, 255, 255)" },
+      "6p": { "background": "rgb(128, 0, 21)", "color": "rgb(255, 255, 255)" },
+      "?": { "background": "rgb(191, 191, 191)", "color": "rgb(68, 68, 68)" },
+      "5p?": { "background": "rgb(232, 93, 19)", "color": "rgb(0, 0, 0)" }
+    }, "LgInt": {
+      "1": { "background": "rgb(69, 72, 130)", "color": "rgb(216, 217, 235)" },
+      "2": { "background": "rgb(224, 157, 0)", "color": "rgb(38, 38, 38)" },
+      "3": { "background": "rgb(194, 26, 0)", "color": "rgb(255, 255, 255)" },
+      "4": { "background": "rgb(165, 0, 194)", "color": "rgb(255, 255, 255)" },
+      "?": { "background": "rgb(191, 191, 191)", "color": "rgb(68, 68, 68)" }
     },
     Tsunami: {
       TsunamiMajorWarningColor: "rgb(200, 0, 255)",
