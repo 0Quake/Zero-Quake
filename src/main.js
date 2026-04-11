@@ -2693,7 +2693,7 @@ function MargeEEW(data) {
                 var SSec =
                   elm2.S +
                   ((elm.S - elm2.S) * (data.distance - elm2.R)) / (elm2.S - elm2.R);
-              } else SSec = 0;
+              } else SSec = null;
               break;
             }
           }
