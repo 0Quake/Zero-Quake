@@ -254,7 +254,7 @@ function GuessHypocenter(EQElm, data) {
 
 var TimeTable_JMA2001 = JSON.parse(await readFile(path.join(__dirname, "../Resource/TimeTable_JMA2001.json")));
 function calcDifference(lat, lng, stations, data, originTime, dep) {
-  var TimeTable = TimeTable_JMA2001[dep];
+  var TimeTable = TimeTable_JMA2001.s[dep];
   var f_arrivalTime_min = Infinity;
   var radius = 0;
 
@@ -265,13 +265,13 @@ function calcDifference(lat, lng, stations, data, originTime, dep) {
 
     if (radius < station.distance) radius = station.distance;
     var index = TimeTable.findIndex(function (elm) {
-      return elm.R >= station.distance;
+      return elm.r >= station.distance;
     });
     if (index >= 0) {
       var elm0 = TimeTable[Math.max(index - 1, 0)];
       var elm2 = TimeTable[index];
-      if (elm0.R == station.distance) station.f_arrivalTime = elm0.S;
-      else station.f_arrivalTime = elm0.S + ((elm2.S - elm0.S) * (station.distance - elm0.R)) / (elm2.R - elm0.R);
+      if (elm0.R == station.distance) station.f_arrivalTime = elm0.s;
+      else station.f_arrivalTime = elm0.t + ((elm2.t - elm0.t) * (station.distance - elm0.r)) / (elm2.r - elm0.r);
       station.o_arrivalTime = pointsData[station.Code].o_arrivalTime;
 
       if (f_arrivalTime_min > station.f_arrivalTime) f_arrivalTime_min = station.f_arrivalTime;
