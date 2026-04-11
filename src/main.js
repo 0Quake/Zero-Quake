@@ -50,7 +50,7 @@ var FERegion = JSON.parse(
   await readFile(path.join(__dirname, "./Resource/feRegion.json"))
 );
 var packageJson = JSON.parse(await readFile(path.join(__dirname, "../package.json")));
-var soft_version;
+var soft_version = packageJson.version;
 var EQInfoFetchCount = 0;
 
 // prettier-ignore
@@ -412,6 +412,15 @@ app.whenReady().then(() => {
       }
     });
   }
+
+  //各種のためカスタムリファラーを送信
+  const filter = { urls: ['https://*/*'] };
+  electron.session.defaultSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
+    //console.log(details.url)
+    details.requestHeaders['Referer'] = 'https://0quake.github.io/ZeroQuake_Website/';
+    details.requestHeaders['User-Agent'] = `ZeroQuake/${soft_version} contact:(https://0quake.github.io/ZeroQuake_Website/contact.html)`;
+    callback({ requestHeaders: details.requestHeaders });
+  });
 
   //初期化処理
   start();
@@ -1288,8 +1297,6 @@ var TimeTable_AK135 = JSON.parse(
 
 //開始処理
 function start() {
-  soft_version = packageJson.version;
-
   //地震検知ワーカー作成
   createWorker();
 
@@ -2715,41 +2722,12 @@ function MargeEEW(data) {
         if (!data.arrivalTime) {//JMA2001走時表での到達時刻予想
           var res = calc_arTime(data.distance, data.TimeTable)
           if (res) data.arrivalTime = new Date(Number(data.origin_time) + res * 1000)
-          console.log("jma", res)
         }
 
         if (!data.arrivalTime) {//AK135走時表での到達時刻予想
           var res = calc_arTime(data.distance, data.TimeTable2)
           if (res) data.arrivalTime = new Date(Number(data.origin_time) + res * 1000)
-          console.log("ak", res)
         }
-          /*
-        if (!data.arrivalTime) {//JMA2001走時表での到達時刻予想
-          for (let index = 0; index < data.TimeTable.length; index++) {
-            var elm = data.TimeTable[index];
-            if (elm.R > data.distance) {
-              if (index > 0) {
-                var elm2 = data.TimeTable[index - 1];
-                var SSec = elm2.S + ((elm.S - elm2.S) * (data.distance - elm2.R)) / (elm2.S - elm2.R);
-              } else SSec = null;
-              break;
-            }
-          }
-          if (SSec || SSec == 0) data.arrivalTime = new Date(Number(data.origin_time) + SSec * 1000);
-        }
-        if (!data.arrivalTime) {//AK135走時表での到達時刻予想
-          for (let index = 0; index < data.TimeTable2.s.length; index++) {
-            var elm = data.TimeTable2.s[index];
-            if ((elm.r * 111) > data.distance) {
-              if (index > 0) {
-                var elm2 = data.TimeTable2.s[index - 1];
-                var SSec = elm2.s + ((elm.t - elm2.t) * (data.distance - (elm2.r * 111))) / (elm2.t - (elm2.r * 111));
-              } else SSec = null;
-              break;
-            }
-          }
-          if (SSec || SSec == 0) data.arrivalTime = new Date(Number(data.origin_time) + SSec * 1000);
-        }*/
         if (data.depth <= 150) {
           var maxShindo = 0;
           Object.keys(sesmicPoints).forEach(function (key) {
