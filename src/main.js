@@ -2697,7 +2697,7 @@ function MargeEEW(data) {
               break;
             }
           }
-          data.arrivalTime = new Date(Number(data.origin_time) + SSec * 1000);
+          if (SSec || SSec == 0) data.arrivalTime = new Date(Number(data.origin_time) + SSec * 1000);
         }
         if (data.depth <= 150) {
           var maxShindo = 0;
