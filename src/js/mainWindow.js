@@ -1768,7 +1768,6 @@ function map_gethome() {
 
   var ZoomBounds = turf.bbox(turf.points([[154, 46], [122, 20], [98, 35]]));
 
-  console.log(turf.bboxPolygon(ZoomBounds))
   if (turf.booleanPointInPolygon([config.home.longitude, config.home.latitude], turf.bboxPolygon(ZoomBounds))) {
     map.fitBounds(ZoomBounds, {
       padding: 10, animate: false
@@ -2145,10 +2144,8 @@ function psWaveCalc(eid) {
 
     var [PRadius, SRadius, SfirstArrival] = est_radius(pswaveFind.TimeTable);
     if ((!PRadius || !SRadius) && SfirstArrival < passedTime) {
-      console.log("AK")
       var [PRadius, SRadius, SfirstArrival] = est_radius(pswaveFind.TimeTable2);
     }
-    console.log(PRadius, SRadius, SfirstArrival)
     if (SfirstArrival > passedTime) {
       window.requestAnimationFrame(function () {
         psWaveReDraw(
@@ -2257,7 +2254,6 @@ function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrive
     var limit_s = turf.lineString([[-180, -83], [180, -83]]);//Webメルカトルの南端（85.051+マージン）
     var limitOfRadius = 1000 * Math.min(turf.pointToLineDistance(_center, limit_n, { units: "kilometers" }), turf.pointToLineDistance(_center, limit_s, { units: "kilometers" }));
 
-    console.log("limitOfRadius", limitOfRadius, "pRadius", pRadius, "sRadius", sRadius)
     if (map && map.getSource("PCircle_" + EventID)) {
       var PCircleElm = map.getSource("PCircle_" + EventID);
       if (PCircleElm) {

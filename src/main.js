@@ -415,7 +415,6 @@ app.whenReady().then(() => {
   //各種のためカスタムリファラーを送信
   const filter = { urls: ['https://*/*'] };
   electron.session.defaultSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
-    //console.log(details.url)
     details.requestHeaders['Referer'] = 'https://0quake.github.io/ZeroQuake_Website/';
     details.requestHeaders['User-Agent'] = `ZeroQuake/${soft_version} contact:(https://0quake.github.io/ZeroQuake_Website/contact.html)`;
     callback({ requestHeaders: details.requestHeaders });
@@ -487,7 +486,6 @@ function causeTree(err) {
 
     return ErrString;
   } catch (e) {
-    console.log(e)
     return "エラーログツリーの作成に失敗";
   }
 }

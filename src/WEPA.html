@@ -248,7 +248,6 @@
                 url = "https://www.jma.go.jp/bosai/pacifictsunami/data/wepa40/" + request.fname
                 fetch(url).then(function (res) { return res.text() }).then(function (text) {
                     var json = decode_WEPA40orWEPA60(text + "\n(ETX)")
-                    console.log(json);
                     draw(json)
                     document.getElementById("splash").style.display = "none";
                 })
@@ -633,7 +632,6 @@
             }
 
             var splitted2 = str.split("\n\n")
-            console.log(splitted2[splitted2.length - 2])
             json.remarks = splitted2[splitted2.length - 2].trim()
 
             return json;
