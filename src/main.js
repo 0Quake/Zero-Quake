@@ -2315,7 +2315,7 @@ function RegularExecution(roop) {
   try {
     //EEW解除
     EEW_nowList.forEach(function (elm) {
-      if (new Date() - Replay - new Date(elm.origin_time) > 1200000)
+      if (new Date() - Replay - new Date(elm.origin_time) > 300000)
         EEW_Clear(elm.EventID);
     });
 
@@ -2667,7 +2667,7 @@ function MargeEEW(data) {
 
     //５分以上前の地震／未来の地震（リプレイ時）を除外 ただし既に表示中の地震の更新報は通す
     var pastTime = new Date() - Replay - data.origin_time;
-    if (!showing && (pastTime > 1200000 || pastTime < 0)) return;
+    if (!showing && (pastTime > 300000 || pastTime < 0)) return;
 
     data.TimeTable = {
       p: TimeTable_JMA2001.p[getClosestNum(data.depth, Object.keys(TimeTable_JMA2001.p))],
@@ -2885,7 +2885,7 @@ function MargeEarlyEst(data) {
     if (!data.origin_time) return;
 
     var pastTime = new Date() - Replay - data.origin_time;
-    if (pastTime > 1200000 || pastTime < 0) return;
+    if (pastTime > 300000 || pastTime < 0) return;
 
     if (data.latitude && data.longitude)
       data.distance = geosailing(data.latitude, data.longitude, config.home.latitude, config.home.longitude);
