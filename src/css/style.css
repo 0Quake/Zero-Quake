@@ -363,6 +363,9 @@ h2 {
   border-bottom: solid 2px rgb(39, 110, 50);
   color: #fff;
 }
+.alertflg{
+  margin-left: 0.5em;
+}
 #tsunamiTitle {
   background: #3f3f42;
   border-bottom: solid 2px #fff;
@@ -370,12 +373,12 @@ h2 {
 
 .EEWWrap.yohou h2,
 .EQDItem.lv1 h2 {
-  border-color: rgb(212, 214, 91);
+  border-color: var(--TsunamiWatchColor);
   color: #000;
 }
 .EEWWrap.keihou h2,
 .EQDItem.lv2 h2 {
-  border-color: rgb(175, 54, 54);
+  border-color: var(--TsunamiWarningColor);
   color: #fff;
 }
 .Title_EarlyEst,
@@ -565,6 +568,9 @@ h2.training {
 .EEW_MenuRight {
   float: right;
   text-align: right;
+  color: #ccc;
+  font-size: 13px;
+  font-weight: normal;
 }
 
 table,
@@ -864,8 +870,8 @@ td {
   width: 100%;
   font-size: 14px;
   text-align: center;
-  background: #111;
-  border: solid 1px #f00;
+  background: #181818;
+  border: solid 1px #bc2727;
   border-radius: 3px;
 }
 .trainingNotes,
