@@ -1240,8 +1240,8 @@ function jma_Fetch(url) {
       if (json.Body.Earthquake) {
         if (json.Body.Earthquake.Hypocenter.Area.Coordinate_WGS) {
           LatLngDepth = parse_LatLngDepth(json.Body.Earthquake.Hypocenter.Area.Coordinate_WGS);
-          LatLngDepth[0] /= 100
           LatLngDepth[1] /= 100
+          LatLngDepth[2] /= 100
         } else {
           LatLngDepth = parse_LatLngDepth(json.Body.Earthquake.Hypocenter.Area.Coordinate);
         }
@@ -1342,8 +1342,8 @@ function jmaL_Fetch(url) {
       if (json.Body.Earthquake) {
         if (json.Body.Earthquake.Hypocenter.Area.Coordinate_WGS) {
           LatLngDepth = parse_LatLngDepth(json.Body.Earthquake.Hypocenter.Area.Coordinate_WGS);
-          LatLngDepth[0] /= 100
           LatLngDepth[1] /= 100
+          LatLngDepth[2] /= 100
         } else {
           var LatLngDepth = parse_LatLngDepth(json.Body.Earthquake.Hypocenter.Area.Coordinate);
         }
@@ -2442,6 +2442,8 @@ function ConvertEQInfo(data) {
   if (EQInfoMarged.originTime) EQInfo.originTime = EQInfoMarged.originTime;
   if (EQInfoMarged.maxI) EQInfo.maxI = EQInfoMarged.maxI;
   if (EQInfoMarged.mag) EQInfo.mag = EQInfoMarged.mag;
+  if (EQInfoMarged.lat || EQInfoMarged.lat == 0) EQInfo.lat = EQInfoMarged.lat;
+  if (EQInfoMarged.lng || EQInfoMarged.lng == 0) EQInfo.lng = EQInfoMarged.lng;
 
   if (EQInfoMarged.depth || EQInfoMarged.depth === 0) EQInfo.depth = Math.abs(EQInfoMarged.depth);
   if (EQInfoMarged.epiCenter) EQInfo.epiCenter = EQInfoMarged.epiCenter;
