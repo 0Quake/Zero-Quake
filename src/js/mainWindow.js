@@ -2440,7 +2440,7 @@ function tsunamiDataUpdate(data) {
     elm.remove();
   });
 
-  if (data.cancelled) {
+  if (data.cancelled || data.revocation || data.Torikeshi) {
     document.getElementById("tsunamiWrap").style.display = "none";
     document.body.classList.remove("TsunamiMode");
   } else {
