@@ -376,7 +376,14 @@ function ScheduledExecution() {
     }
   }
 }
-
+electron.protocol.registerSchemesAsPrivileged([
+  {
+    scheme: 'local-range-request',
+    privileges: {
+      supportFetchAPI: true,
+    }
+  }
+]);
 //準備完了イベント
 app.whenReady().then(() => {
   //ウィンドウ作成
@@ -418,6 +425,43 @@ app.whenReady().then(() => {
     details.requestHeaders['Referer'] = 'https://0quake.github.io/ZeroQuake_Website/';
     details.requestHeaders['User-Agent'] = `ZeroQuake/${soft_version} contact:(https://0quake.github.io/ZeroQuake_Website/contact.html)`;
     callback({ requestHeaders: details.requestHeaders });
+  });
+
+  electron.protocol.handle('local-range-request', (request) => {
+    try {
+      var filePath = decodeURI(request.url.slice('local-range-request://'.length))
+
+      var rangeHeader = request.headers.get("Range");
+      var stat = fs.statSync(filePath);
+      var totalSize = stat.size;
+
+      if (rangeHeader) {
+        var header_value = rangeHeader.match(/bytes=(\d+)-(\d*)/);
+        var start = Number(header_value[1]);
+        var end = Number(header_value[2]) || totalSize - 1;
+        var ContentLength = end - start + 1;
+
+        var buffer = Buffer.alloc(ContentLength);
+        var fd = fs.openSync(filePath, "r");
+        fs.readSync(fd, buffer, 0, ContentLength, start);
+        fs.closeSync(fd);
+
+        return new Response(buffer, {
+          status: 206,
+          headers: {
+            "Content-Range": `bytes ${start}-${end}/${totalSize}`,
+            "Content-Length": String(ContentLength),
+            "Content-Type": "binary/octet-stream",
+          },
+        });
+      } else {
+        throw new Error("local-range-requestプロトコルにてRangeヘッダーなしのリクエスト。URL:" + request.url);
+      }
+    } catch (err) {
+      return new Response("500 error:" + err, {
+        status: 500,
+      });
+    }
   });
 
   //初期化処理

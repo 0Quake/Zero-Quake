@@ -884,14 +884,14 @@ function init() {
           tolerance: 0.3,
           attribution: "気象庁",
         },
-        plate: { type: "geojson", data: "./Resource/plate.json", tolerance: 2 },
         submarine: {
           type: "raster",
-          tiles: ["./Resource/Submarine/{z}/{x}/{y}.jpg"],
+          //tiles: ["./Resource/Submarine/{z}/{x}/{y}.jpg"],
+          url: "pmtiles://local-range-request://src/Resource/background.pmtiles",
           tileSize: 256,
           attribution: "GEBCO, Peter Bird",
           minzoom: 0,
-          maxzoom: 5,
+          maxzoom: 6,
         },
         tile0: {
           type: "raster",
