@@ -254,114 +254,11 @@ td {
   margin-right: 2px;
 }
 
-.zoomLevel_4 .ShindoIcon,
-.zoomLevel_4 .LgIntIcon {
-  padding: 0;
-}
-.zoomLevel_4 .ShindoIcon div,
-.zoomLevel_4 .LgIntIcon div {
-  width: 23px;
-  height: 23px;
-  line-height: 23px;
-  font-size: 18px;
-}
-
-.ShindoIcon div,
-.LgIntIcon div {
-  display: block;
-  width: 16px;
-  height: 16px;
-  border: solid 1px #000;
-  outline: solid 2px #fff;
-  line-height: 16px;
-  text-align: center;
-  border-radius: 50%;
-  font-size: 12px;
-  font-family: "M PLUS 1p";
-}
-
-.zoomLevel_4 .LgIntIcon div {
-  width: 35px;
-}
-
-.MaxShindoIcon,
-.MaxLgIntIcon {
-  forced-color-adjust: none;
-}
-.MaxShindoIcon div,
-.MaxLgIntIcon div {
-  display: block;
-  width: 22px;
-  height: 22px;
-  border: solid 1px #000;
-  outline: solid 2px #fff;
-  font-size: 16px;
-  line-height: 22px;
-  border-radius: 2px;
-  text-align: center;
-  font-family: "M PLUS 1p";
-}
-
-.MaxLgIntIcon div {
-  width: 35px;
-}
-.MaxLgIntIcon div::before {
-  content: "長";
-  font-size: 65%;
-  margin-right: 3px;
-  font-family: "BIZ UDPGothic", sans-serif;
-  font-weight: bold;
-}
-
-.zoomLevel_1 .MaxShindoIcon,
-.zoomLevel_2 .MaxShindoIcon,
-.zoomLevel_1 .MaxLgIntIcon,
-.zoomLevel_2 .MaxLgIntIcon {
-  visibility: visible;
-  pointer-events: auto !important;
-}
-.zoomLevel_1 .MaxShindoIcon div,
-.zoomLevel_1 .MaxLgIntIcon div {
-  width: 15px;
-  height: 15px;
-  line-height: 15px;
-  font-size: 10px;
-  margin: 3.5px;
-}
-
-.zoomLevel_1 .MaxLgIntIcon div {
-  width: 22px;
-}
-
-.zoomLevel_1 .ShindoIcon,
-.zoomLevel_2 .ShindoIcon,
-.zoomLevel_3 .ShindoIcon,
-.zoomLevel_1 .LgIntIcon,
-.zoomLevel_2 .LgIntIcon,
-.zoomLevel_3 .LgIntIcon {
-  visibility: hidden;
-  pointer-events: none !important;
-}
-
-.has_StaShindo.zoomLevel_4 .MaxShindoIcon,
-.zoomLevel_4 .MaxLgIntIcon {
-  visibility: hidden;
-  pointer-events: none !important;
-}
-
-.zoomLevel_4 .ShindoIcon,
-.zoomLevel_4 .LgIntIcon {
-  visibility: visible;
-  pointer-events: auto !important;
-}
-
 #ShindoSample,
 #LngIntSample {
   font-size: 0;
   text-align: center;
 }
-.LgIntIcon,
-.MaxLgIntIcon,
 #LngIntSample {
   display: none;
 }
@@ -395,18 +292,6 @@ td {
   justify-content: center;
   align-items: center;
   font-size: 30px;
-}
-
-.GJMap {
-  transition: fill-opacity 500ms;
-}
-
-.zoomLevel_4 .GJMap {
-  fill-opacity: 0.3;
-}
-
-.zoomLevel_3 .GJMap {
-  fill-opacity: 0.5;
 }
 
 #ShindoSample0 {

@@ -114,10 +114,6 @@
                         すべての津波情報が解除されました。
                         <button id="CloseTsunamiRevocation" aria-label="この情報を閉じる">close</button>
                     </div>
-                    <div id="tsunamiCancel" class="list-item" tabindex="0" aria-label="解除された津波アイテム">
-                        すべての津波情報が解除されました。
-                        <button id="CloseTsunamiCancel" aria-label="この情報を閉じる">close</button>
-                    </div>
                     <div id="tsunamiCancel" class="list-item" tabindex="0" aria-label="取り消された津波アイテム">
                         津波情報が取り消されました。
                         <button id="CloseTsunamiCancel" aria-label="この情報を閉じる">close</button>
@@ -130,12 +126,15 @@
 
                         <div id="tsunamiHeadline"></div>
 
-                        <ul id="tsunamiSample" aria-hidden="true">
-                            <li id="tsunami_MajorWarning"><span></span>大津波警報</li>
-                            <li id="tsunami_Warning"><span></span>津波警報</li>
-                            <li id="tsunami_Watch"><span></span>津波注意報</li>
-                            <li id="tsunami_Yoho"><span></span>津波予報</li>
-                        </ul>
+                        <div id="tsunamiSample" aria-hidden="true">
+                            <div>地図凡例：</div>
+                            <ul id="tsunamiSample_inner">
+                                <li id="tsunami_MajorWarning"><span></span>大津波警報</li>
+                                <li id="tsunami_Warning"><span></span>津波警報</li>
+                                <li id="tsunami_Watch"><span></span>津波注意報</li>
+                                <li id="tsunami_Yoho"><span></span>津波予報</li>
+                            </ul>
+                        </div>
                         <div id="TsunamiMySectData">
                             <h3 id="tsunamiSectTitle"></h3>
                             <div id="tsunamiForecastWrap"><span id="firstHeightData">第1波:<span>12:00</span></span><span id="maxHeightData">最大波:<span>10m</span></span></div>
