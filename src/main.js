@@ -24,6 +24,7 @@ function replay(ReplayDate) {
         data: Replay,
       });
     }
+    Req_JMAXMLList(true, 0);
   } catch (err) {
     throw new Error("リプレイに失敗しました。", { cause: err });
   }
@@ -44,6 +45,7 @@ import * as turf from "@turf/turf";
 import workerThreads from "worker_threads";
 import { readFile } from "fs/promises";
 import fs from "fs";
+import url from "url";
 import { exec } from "child_process";
 var __dirname = path.dirname(fileURLToPath(import.meta.url));
 var FERegion = JSON.parse(
@@ -1350,6 +1352,7 @@ var TimeTable_AK135 = JSON.parse(
 
 //開始処理
 function start() {
+  //replay("2026/4/20 16:55:40")
   //地震検知ワーカー作成
   createWorker();
 
@@ -2374,7 +2377,7 @@ function RegularExecution(roop) {
 
     //津波情報解除
     Tsunami_Data.forEach(function (elm) {
-      if (elm.ValidDateTime <= new Date() && !elm.revocation) {
+      if (elm.ValidDateTime <= new Date() - Replay && !elm.revocation) {
         elm.revocation = true;
         ConvertTsunamiInfo(elm); //ダミーデータを送信、再度マージ処理
       }
@@ -3595,7 +3598,7 @@ function Req_JMAXML(url, count,) {
                 var ValidDateTimeTmp = new Date(xml.getElementsByTagName("ReportDateTime")[0].textContent);
                 ValidDateTimeTmp.setHours(ValidDateTimeTmp.getHours() + 12);
               }
-              if (ValidDateTimeTmp < new Date()) return;
+              if (ValidDateTimeTmp < new Date() - Replay) return;
 
               var headline = "";
               var headlineElm = xml.getElementsByTagName("Headline")[0];
@@ -3913,7 +3916,10 @@ function Req_JMAXML(url, count,) {
 
           }
           UpdateStatus(new Date() - Replay, "JMAXML", "success");
-          jmaXML_Fetched.push(url);
+          if (new Date(xml.getElementsByTagName("ReportDateTime")[0].textContent) < new Date() - Replay) {
+          //未来のデータ（リプレイ時）のため無視した場合、取得済みリストに入れない
+            jmaXML_Fetched.push(url);
+          }
         } catch {
           UpdateStatus(new Date() - Replay, "JMAXML", "Error");
         }
@@ -4322,6 +4328,8 @@ function ConvertTsunamiInfo(data) {
     if (!config.Info.TsunamiInfo.GetData) return;
     if (!config.Info.TsunamiInfo.showtraining && data.status == "訓練") return;
     if (!config.Info.TsunamiInfo.showTest && data.status == "試験") return;
+    console.log(new Date(data.issue.time).toLocaleString(), new Date(new Date() - Replay).toLocaleString())
+    if (new Date(data.issue.time) > (new Date() - Replay)) return;
 
     let tsunamiItem = Tsunami_Data.find(function (elm) {
       return (Number(new Date(elm.issue.time)) == Number(new Date(data.issue.time)) &&

@@ -6,8 +6,6 @@ var Replay;
 var openAtLogin = false;
 var tsunamiSect;
 var EQSect;
-var tsunamiFeatures;
-var EQSectFeatures;
 var defaultConfigVal;
 window.addEventListener("load", function () {
   this.document.getElementById("replay").value = NormalizeDate(3, new Date()).replaceAll("/", "-");
@@ -437,27 +435,24 @@ function mapInit() {
           maxzoom: 16,
         },
         worldmap: {
-          type: "geojson",
-          data: "./Resource/World.json",
-          tolerance: 2,
+          type: "vector",
+          url: "pmtiles://local-range-request://src/Resource/world.pmtiles",
           attribution: "Natural Earth",
         },
         tsunami: {
-          type: "geojson",
-          data: "./Resource/tsunami.json",
+          type: "vector",
+          url: "pmtiles://local-range-request://src/Resource/jp_tsunami.pmtiles",
           tolerance: 1.6,
           attribution: "気象庁",
         },
         basemap: {
-          type: "geojson",
-          data: "./Resource/basemap.json",
-          tolerance: 0.7,
+          type: "vector",
+          url: "pmtiles://local-range-request://src/Resource/jp_sect.pmtiles",
           attribution: "気象庁",
         },
         prefmap: {
-          type: "geojson",
-          data: "./Resource/prefectures.json",
-          tolerance: 0.7,
+          type: "vector",
+          url: "pmtiles://local-range-request://src/Resource/jp_pref.pmtiles",
           attribution: "気象庁",
         },
       },
@@ -466,6 +461,7 @@ function mapInit() {
           id: "tsunami_LINE",
           type: "line",
           source: "tsunami",
+          "source-layer": "jp_tsunami",
           minzoom: 0,
           maxzoom: 22,
         },
@@ -473,6 +469,7 @@ function mapInit() {
           id: "tsunami_LINE_selected",
           type: "line",
           source: "tsunami",
+          "source-layer": "jp_tsunami",
           layout: {
             "line-join": "round",
             "line-cap": "butt",
@@ -489,6 +486,7 @@ function mapInit() {
           id: "prefmap_fill",
           type: "fill",
           source: "prefmap",
+          "source-layer": "jp_pref",
           paint: {
             "fill-color": high_contrast ? "#000" : "#333",
             "fill-opacity": 1,
@@ -500,6 +498,7 @@ function mapInit() {
           id: "selected_sect",
           type: "fill",
           source: "basemap",
+          "source-layer": "jp_sect",
           paint: {
             "fill-color": "rgba(255, 146, 146, 0.5)",
             "fill-opacity": 1,
@@ -513,6 +512,7 @@ function mapInit() {
           id: "basemap_LINE",
           type: "line",
           source: "basemap",
+          "source-layer": "jp_sect",
           paint: {
             "line-color": high_contrast ? "#FFF" : "#666",
             "line-width": 1,
@@ -524,6 +524,7 @@ function mapInit() {
           id: "prefmap_LINE",
           type: "line",
           source: "prefmap",
+          "source-layer": "jp_pref",
           paint: {
             "line-color": high_contrast ? "#FFF" : "#999",
             "line-width": 1,
@@ -535,6 +536,7 @@ function mapInit() {
           id: "tsunami_LINE_selected_2",
           type: "line",
           source: "tsunami",
+          "source-layer": "jp_tsunami",
           layout: {
             "line-join": "round",
             "line-cap": "butt",
@@ -551,6 +553,7 @@ function mapInit() {
           id: "worldmap_fill",
           type: "fill",
           source: "worldmap",
+          "source-layer": "world",
           paint: {
             "fill-color": high_contrast ? "#000" : "#333",
             "fill-opacity": 1,
@@ -562,6 +565,7 @@ function mapInit() {
           id: "worldmap_LINE",
           type: "line",
           source: "worldmap",
+          "source-layer": "world",
           paint: {
             "line-color": high_contrast ? "#FFF" : "#999",
             "line-width": 1,
@@ -793,8 +797,7 @@ function MapReDraw() {
   if (!lat) lat = 0;
   if (!lng) lng = 0;
 
-  tsunamiFeatures = map.querySourceFeatures("tsunami");
-  EQSectFeatures = map.querySourceFeatures("basemap");
+  var EQSectFeatures = map.querySourceFeatures("basemap", { sourceLayer: 'jp_sect' });
 
   var selected_sect = EQSectFeatures.find(function (elm) {
     return turf.booleanPointInPolygon([lng, lat], elm);
@@ -855,6 +858,8 @@ function MapReDraw() {
   }
 
   var minDistance = Infinity;
+  var tsunamiFeatures = map.querySourceFeatures("tsunami", { sourceLayer: 'jp_tsunami' });;
+
   tsunamiFeatures.forEach(function (elm) {
     // 距離を求める
     if (elm.geometry.type == "MultiLineString") {

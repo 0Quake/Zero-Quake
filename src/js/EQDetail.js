@@ -171,11 +171,12 @@ function Mapinit() {
       sources: {
         submarine: {
           type: "raster",
-          tiles: ["./Resource/Submarine/{z}/{x}/{y}.jpg"],
+          //tiles: ["./Resource/Submarine/{z}/{x}/{y}.jpg"],
+          url: "pmtiles://local-range-request://src/Resource/background.pmtiles",
           tileSize: 256,
           attribution: "GEBCO, Peter Bird",
           minzoom: 0,
-          maxzoom: 5,
+          maxzoom: 6,
         },
         v: {
           type: "vector",
@@ -185,21 +186,18 @@ function Mapinit() {
           maxzoom: 16,
         },
         worldmap: {
-          type: "geojson",
-          data: "./Resource/World.json",
-          tolerance: 2,
+          type: "vector",
+          url: "pmtiles://local-range-request://src/Resource/world.pmtiles",
           attribution: "Natural Earth",
         },
         basemap: {
-          type: "geojson",
-          data: "./Resource/basemap.json",
-          tolerance: 0.9,
+          type: "vector",
+          url: "pmtiles://local-range-request://src/Resource/jp_sect.pmtiles",
           attribution: "気象庁",
         },
         prefmap: {
-          type: "geojson",
-          data: "./Resource/prefectures.json",
-          tolerance: 0.9,
+          type: "vector",
+          url: "pmtiles://local-range-request://src/Resource/jp_pref.pmtiles",
           attribution: "気象庁",
         },
         lake: {
@@ -355,6 +353,7 @@ function Mapinit() {
           id: "prefmap_fill",
           type: "fill",
           source: "prefmap",
+          "source-layer": "jp_pref",
           paint: {
             "fill-color": high_contrast ? "#000" : "#333",
             "fill-opacity": 1,
@@ -364,6 +363,7 @@ function Mapinit() {
           id: "basemap_LINE",
           type: "line",
           source: "basemap",
+          "source-layer": "jp_sect",
           minzoom: 6,
           paint: {
             "line-color": high_contrast ? "#FFF" : "#666",
@@ -410,6 +410,7 @@ function Mapinit() {
           id: "Int0",
           type: "fill",
           source: "basemap",
+          "source-layer": "jp_sect",
           paint: { "fill-color": config.color.Shindo["0"].background },
           filter: ["==", "name", ""],
         },
@@ -417,6 +418,7 @@ function Mapinit() {
           id: "Int1",
           type: "fill",
           source: "basemap",
+          "source-layer": "jp_sect",
           paint: { "fill-color": config.color.Shindo["1"].background },
           filter: ["==", "name", ""],
         },
@@ -424,6 +426,7 @@ function Mapinit() {
           id: "Int2",
           type: "fill",
           source: "basemap",
+          "source-layer": "jp_sect",
           paint: { "fill-color": config.color.Shindo["2"].background },
           filter: ["==", "name", ""],
         },
@@ -431,6 +434,7 @@ function Mapinit() {
           id: "Int3",
           type: "fill",
           source: "basemap",
+          "source-layer": "jp_sect",
           paint: { "fill-color": config.color.Shindo["3"].background },
           filter: ["==", "name", ""],
         },
@@ -438,6 +442,7 @@ function Mapinit() {
           id: "Int4",
           type: "fill",
           source: "basemap",
+          "source-layer": "jp_sect",
           paint: { "fill-color": config.color.Shindo["4"].background },
           filter: ["==", "name", ""],
         },
@@ -445,6 +450,7 @@ function Mapinit() {
           id: "Int5-",
           type: "fill",
           source: "basemap",
+          "source-layer": "jp_sect",
           paint: { "fill-color": config.color.Shindo["5m"].background },
           filter: ["==", "name", ""],
         },
@@ -452,6 +458,7 @@ function Mapinit() {
           id: "Int5+",
           type: "fill",
           source: "basemap",
+          "source-layer": "jp_sect",
           paint: { "fill-color": config.color.Shindo["5p"].background },
           filter: ["==", "name", ""],
         },
@@ -459,6 +466,7 @@ function Mapinit() {
           id: "Int6-",
           type: "fill",
           source: "basemap",
+          "source-layer": "jp_sect",
           paint: { "fill-color": config.color.Shindo["6m"].background },
           filter: ["==", "name", ""],
         },
@@ -466,6 +474,7 @@ function Mapinit() {
           id: "Int6+",
           type: "fill",
           source: "basemap",
+          "source-layer": "jp_sect",
           paint: { "fill-color": config.color.Shindo["6p"].background },
           filter: ["==", "name", ""],
         },
@@ -473,6 +482,7 @@ function Mapinit() {
           id: "Int7",
           type: "fill",
           source: "basemap",
+          "source-layer": "jp_sect",
           paint: { "fill-color": config.color.Shindo["7"].background },
           filter: ["==", "name", ""],
         },
@@ -480,6 +490,7 @@ function Mapinit() {
           id: "LgInt1",
           type: "fill",
           source: "basemap",
+          "source-layer": "jp_sect",
           paint: { "fill-color": config.color.LgInt["1"].background },
           filter: ["==", "name", ""],
         },
@@ -487,6 +498,7 @@ function Mapinit() {
           id: "LgInt2",
           type: "fill",
           source: "basemap",
+          "source-layer": "jp_sect",
           paint: { "fill-color": config.color.LgInt["2"].background },
           filter: ["==", "name", ""],
         },
@@ -494,6 +506,7 @@ function Mapinit() {
           id: "LgInt3",
           type: "fill",
           source: "basemap",
+          "source-layer": "jp_sect",
           paint: { "fill-color": config.color.LgInt["3"].background },
           filter: ["==", "name", ""],
         },
@@ -501,6 +514,7 @@ function Mapinit() {
           id: "LgInt4",
           type: "fill",
           source: "basemap",
+          "source-layer": "jp_sect",
           paint: { "fill-color": config.color.LgInt["4"].background },
           filter: ["==", "name", ""],
         },
@@ -509,6 +523,7 @@ function Mapinit() {
           id: "prefmap_LINE",
           type: "line",
           source: "prefmap",
+          "source-layer": "jp_pref",
           paint: {
             "line-color": high_contrast ? "#FFF" : "#999",
             "line-width": 1,
@@ -518,6 +533,7 @@ function Mapinit() {
           id: "worldmap_fill",
           type: "fill",
           source: "worldmap",
+          "source-layer": "world",
           paint: {
             "fill-color": high_contrast ? "#000" : "#333",
             "fill-opacity": 1,
@@ -527,6 +543,7 @@ function Mapinit() {
           id: "worldmap_LINE",
           type: "line",
           source: "worldmap",
+          "source-layer": "world",
           paint: {
             "line-color": high_contrast ? "#FFF" : "#999",
             "line-width": 1,
@@ -2161,6 +2178,7 @@ function DrawLgIntensity(data) {
   LgIntIcons.forEach(function (elm) {
     elm.remove();
   });
+  LgIntIcons = [];
   removeChild(document.getElementById("LngInt"));
   document.getElementById("ShindoWrap").style.display = "inline-block";
   document.getElementById("lngintListWrap").style.display = "block";
