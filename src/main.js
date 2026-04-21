@@ -212,12 +212,12 @@ var thresholds;
 if (app.isPackaged) {
   //メニューバー非表示
   Menu.setApplicationMenu(false);
-}
-
-//多重起動防止
-const gotTheLock = app.requestSingleInstanceLock();
-if (!gotTheLock) {
-  app.exit(0);
+} else {
+  //多重起動防止
+  const gotTheLock = app.requestSingleInstanceLock();
+  if (!gotTheLock) {
+    app.exit(0);
+  }
 }
 
 var update_data;
