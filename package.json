@@ -1,7 +1,7 @@
 {
   "name": "zeroquake",
   "productName": "Zero Quake",
-  "version": "0.9.6",
+  "version": "0.9.7",
   "description": "Zero Quake",
   "scripts": {
     "start": "electron . --develop --debug-mode"
@@ -60,16 +60,16 @@
   "homepage": "https://0quake.github.io/ZeroQuake_Website/",
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "electron": "^41.2.1",
+    "electron": "^41.3.0",
     "electron-builder": "^26.8.1",
-    "eslint": "^10.2.0",
+    "eslint": "^10.2.1",
     "globals": "^17.5.0",
     "prettier": "^3.8.3"
   },
   "dependencies": {
     "@turf/turf": "^7.3.5",
     "electron-store": "^11.0.2",
-    "maplibre-gl": "^5.23.0",
+    "maplibre-gl": "^5.24.0",
     "jsdom": "^29.0.2",
     "path": "^0.12.7",
     "pmtiles": "^4.4.1",
