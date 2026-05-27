@@ -209,6 +209,19 @@ var kmoniPointsDataTmp, SnetPointsDataTmp, TremRtsData_Marged;
 let tray;
 var thresholds;
 
+electron.protocol.registerSchemesAsPrivileged([
+  {
+    scheme: 'local-range-request',
+    privileges: {
+      supportFetchAPI: true,
+      standard: true,
+      secure: true,
+      corsEnabled: true,
+      bypassCSP: true
+    }
+  }
+]);
+
 if (app.isPackaged) {
   //メニューバー非表示
   Menu.setApplicationMenu(false);
@@ -377,14 +390,6 @@ function ScheduledExecution() {
     }
   }
 }
-electron.protocol.registerSchemesAsPrivileged([
-  {
-    scheme: 'local-range-request',
-    privileges: {
-      supportFetchAPI: true,
-    }
-  }
-]);
 //準備完了イベント
 app.whenReady().then(() => {
   //ウィンドウ作成
