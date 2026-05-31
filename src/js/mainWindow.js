@@ -2928,11 +2928,14 @@ function draw_tide(data) {
   }));
   Object.keys(data).forEach(function (key) {
     elm = data[key];
+    function NaNu(n) {//NaNtoNull
+      return isNaN(n) ? null : n
+    }
     var adv_exists = elm.height >= elm.threshold_advisory;
-    var warn_threshold = adv_exists ? elm.threshold_warn : 0;//注意報基準超過の場合のみ警報基準を範囲に含める
-    var range_min_tmp = Math.min(elm.height, elm.astro, elm.threshold_advisory, warn_threshold, 0)
+    var threshold_warn = adv_exists ? elm.threshold_warn : 0;//注意報基準超過の場合のみ警報基準を範囲に含める
+    var range_min_tmp = Math.min(NaNu(elm.height), NaNu(elm.astro), NaNu(elm.threshold_advisory), NaNu(threshold_warn), 0)
     range_min = Math.min(range_min_tmp, range_min)
-    var range_max_tmp = Math.max(elm.height, elm.astro, elm.threshold_advisory, warn_threshold, 0)
+    var range_max_tmp = Math.max(NaNu(elm.height), NaNu(elm.astro), NaNu(elm.threshold_advisory), NaNu(threshold_warn), 0)
     range_max = Math.max(range_max_tmp, range_max)
   })
   var margin = (range_max - range_min) * 0.07
@@ -2956,12 +2959,17 @@ function draw_tide(data) {
     clone.querySelector(".EQI_height").textContent = elm.height.toFixed(0);
 
     function to_percent(v) {
-      return (v - range_min) / (range_max - range_min) * 100
+      return (v || v == 0) ? (v - range_min) / (range_max - range_min) * 100 : null
     }
     clone.querySelector(".EQI_databar_v").style.width = `${to_percent(elm.height)}%`;
     clone.querySelector(".EQI_point_astro").style.left = `calc(${to_percent(elm.astro)}% - 2px)`;
     clone.querySelector(".EQI_point_adv").style.left = `calc(${to_percent(elm.threshold_advisory)}% - 2px)`;
     clone.querySelector(".EQI_point_warn").style.left = `calc(${to_percent(elm.threshold_warn)}% - 2px)`;
+
+    clone.querySelector(".EQI_databar_v").style.display = (elm.height || elm.height == 0) ? "block" : "none";
+    clone.querySelector(".EQI_point_astro").style.display = (elm.astro || elm.astro == 0) ? "block" : "none";
+    clone.querySelector(".EQI_point_adv").style.display = (elm.threshold_advisory || elm.threshold_advisory == 0) ? "block" : "none";
+    clone.querySelector(".EQI_point_warn").style.display = (elm.threshold_warn || elm.threshold_warn == 0) ? "block" : "none";
 
     clone.setAttribute("aria-label", `潮位観測情報、観測点名は${elm.name}(${elm.by})。潮位${elm.height.toFixed(0)}センチ、${dateToSpeak}時点。なお、天文潮位は${elm.astro}センチ、高潮注意報基準は${elm.threshold_advisory}センチ、高潮警報基準は${elm.threshold_warn}センチ。クリックして詳細を表示。`);
     clone.addEventListener("click", function () {

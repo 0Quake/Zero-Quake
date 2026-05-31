@@ -1236,6 +1236,7 @@ summary:focus {
 .EQI_tide_sample .EQI_detailWrap {
     display: flex;
     gap: 0px 10px;
+    padding: 2px 5px;
     flex-wrap: wrap;
 }
 .EQI_tide .EQI_datetime{
@@ -1299,6 +1300,7 @@ summary:focus {
   line-height: 1.2em;
   white-space: nowrap;
   font-size: 13px;
+  margin:0.15em 0;
 }
 .tide_sample_wrap div{
   display: inline-block;
