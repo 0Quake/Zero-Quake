@@ -435,13 +435,15 @@ app.whenReady().then(() => {
 
   electron.protocol.handle('local-range-request', (request) => {
     try {
-      var filePath = decodeURI(request.url.slice('local-range-request://'.length))
+      let rawPath = decodeURI(request.url.slice('local-range-request://'.length));
+      // ビルド後も正しくファイルパスを生成するためapp.getAppPath()を使用
+      let filePath = path.isAbsolute(rawPath) ? rawPath : path.join(app.getAppPath(), rawPath);
 
       var rangeHeader = request.headers.get("Range");
       var stat = fs.statSync(filePath);
       var totalSize = stat.size;
 
-      if (rangeHeader) {
+      if (rangeHeader && rangeHeader.startsWith("bytes=")) {
         var header_value = rangeHeader.match(/bytes=(\d+)-(\d*)/);
         var start = Number(header_value[1]);
         var end = Number(header_value[2]) || totalSize - 1;
@@ -449,8 +451,11 @@ app.whenReady().then(() => {
 
         var buffer = Buffer.alloc(ContentLength);
         var fd = fs.openSync(filePath, "r");
-        fs.readSync(fd, buffer, 0, ContentLength, start);
-        fs.closeSync(fd);
+        try {
+          fs.readSync(fd, buffer, 0, ContentLength, start);
+        } finally {
+          fs.closeSync(fd);
+        }
 
         return new Response(buffer, {
           status: 206,

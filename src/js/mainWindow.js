@@ -59,6 +59,8 @@ window.electronAPI.messageSend((event, request) => {
   } else if (request.action == "SeisJSUpdate") {
     SeisJS_TMP = request.data;
     SeisJSUpdate(request.data);
+  } else if (request.action == "aaa") {
+    console.log(request.data);
   } else if (request.action == "Replay") {
     Replay = request.data;
     document.getElementById("replayFrame").style.display = Replay == 0 ? "none" : "block";
@@ -856,17 +858,17 @@ function init() {
         },
         worldmap: {
           type: "vector",
-          url: "pmtiles://local-range-request://src/Resource/world.pmtiles",
+          url: "pmtiles://local-range-request://./src/Resource/world.pmtiles",
           attribution: "Natural Earth",
         },
         basemap: {
           type: "vector",
-          url: "pmtiles://local-range-request://src/Resource/jp_sect.pmtiles",
+          url: "pmtiles://local-range-request://./src/Resource/jp_sect.pmtiles",
           attribution: "気象庁",
         },
         prefmap: {
           type: "vector",
-          url: "pmtiles://local-range-request://src/Resource/jp_pref.pmtiles",
+          url: "pmtiles://local-range-request://./src/Resource/jp_pref.pmtiles",
           tolerance: 0.9,
           attribution: "気象庁",
         },
@@ -878,13 +880,13 @@ function init() {
         },
         tsunami: {
           type: "vector",
-          url: "pmtiles://local-range-request://src/Resource/jp_tsunami.pmtiles",
+          url: "pmtiles://local-range-request://./src/Resource/jp_tsunami.pmtiles",
           attribution: "気象庁",
         },
         submarine: {
           type: "raster",
           //tiles: ["./Resource/Submarine/{z}/{x}/{y}.jpg"],
-          url: "pmtiles://local-range-request://src/Resource/background.pmtiles",
+          url: "pmtiles://local-range-request://./src/Resource/background.pmtiles",
           tileSize: 256,
           attribution: "GEBCO, Peter Bird",
           minzoom: 0,
