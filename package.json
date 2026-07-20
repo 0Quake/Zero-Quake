@@ -63,7 +63,7 @@
     "electron": "^43.1.1",
     "electron-builder": "^26.15.3",
     "globals": "^17.7.0",
-    "eslint": "^10.6.0",
+    "eslint": "^10.7.0",
     "prettier": "^3.9.5"
   },
   "dependencies": {
