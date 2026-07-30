@@ -63,8 +63,8 @@
     "electron": "^43.2.0",
     "electron-builder": "^26.15.3",
     "globals": "^17.7.0",
+    "prettier": "^3.9.6"
     "eslint": "^10.8.0",
-    "prettier": "^3.9.5"
   },
   "dependencies": {
     "@turf/turf": "^7.3.5",
