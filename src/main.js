@@ -83,7 +83,7 @@ var defaultConfigVal = {
       IntThreshold: 0,
       IntQuestion: true,
       userIntThreshold: 0,
-      userIntQuestion: true,
+      userIntQuestion: false,
       IntType: "max",
     },
     EQInfo: {
