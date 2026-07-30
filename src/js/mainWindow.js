@@ -365,13 +365,16 @@ var template2_2 = document.getElementById("EQListTemplate2");
 var template2_3 = document.getElementById("EQListTemplate3");
 var EQListWrap;
 var eqInfoDataJMA;
+var eqInfoDataUSGS;
 function eqInfoDraw(data, source) {
   var EQTemplate;
   if (source == "jma") {
     eqInfoDataJMA = data;
     EQTemplate = template2;
-    EQListWrap = document.getElementById("JMA_EqInfo");
+    EQListWrap = document.getElementById("JMA_EqInfo_Data");
+    var sort_key = document.getElementById("JMA_EqInfo_Sort").value
   } else if (source == "usgs") {
+    eqInfoDataUSGS = data;
     EQTemplate = template2_2;
     EQListWrap = document.getElementById("USGS_EqInfo");
 
@@ -379,14 +382,24 @@ function eqInfoDraw(data, source) {
       document.getElementById("usgs_update_time").innerText = "データがありません：" + NormalizeDate("hh:mm:ss", new Date());
     else {
       usgs_lastUpdate = new Date()
-      document.getElementById("usgs_update_time").innerText = "最終更新：" + NormalizeDate("hh:mm:ss", new Date());
-      document.getElementById("usgs_update_time").setAttribute("aria-label", "最終更新時刻、" + NormalizeDate("h時m分s秒", new Date()));
+      document.getElementById("usgs_update_time").innerText = "更新：" + NormalizeDate("hh:mm:ss", new Date());
+      document.getElementById("usgs_update_time").setAttribute("aria-label", "更新時刻、" + NormalizeDate("h時m分s秒", new Date()));
     }
+    var sort_key = document.getElementById("USGS_EqInfo_Sort").value
   }
   removeChild(EQListWrap);
 
 
-  data.concat(eqCount).forEach(function (elm, index) {
+  var data_to_draw = data.concat(eqCount);
+  data_to_draw.sort(function (a, b) {
+    if (sort_key == "t") return (a.OriginTime < b.OriginTime ? 1 : -1) | 0;
+    else if (sort_key == "m") return (a.M < b.M ? 1 : -1) | 0;
+    else if (sort_key == "i") return (NormalizeShindo(a.maxI, 5) < NormalizeShindo(b.maxI, 5) ? 1 : -1) | 0;
+    else return 0;
+  });
+
+
+  data_to_draw.forEach(function (elm, index) {
     if (elm.category == "地震回数に関する情報" && source == "jma") {
       var clone = template2_3.content.cloneNode(true);
 
@@ -442,7 +455,7 @@ function eqInfoDraw(data, source) {
           });
         }
 
-        document.getElementById("JMA_EqInfo").appendChild(clone);
+        document.getElementById("JMA_EqInfo_Data").appendChild(clone);
       }
 
       //EQI_detail
@@ -520,6 +533,14 @@ function eqInfoDraw(data, source) {
     }
   });
 }
+
+document.getElementById("JMA_EqInfo_Sort").addEventListener("change", function () {
+  eqInfoDraw(eqInfoDataJMA, "jma")
+})
+
+document.getElementById("USGS_EqInfo_Sort").addEventListener("change", function () {
+  eqInfoDraw(eqInfoDataUSGS, "usgs")
+})
 
 var eqCount = []
 function eqCountDraw(data) {
@@ -680,6 +701,8 @@ function kmoniTimeRedraw(updateTime, LocalTime, type, condition) {
           this.classList.remove("SuccessAnm");
         });
       }
+      if (type == "ntool" || type == "JMAXML")
+
       break;
     case "Error":
       iconElm.classList.remove("Success");
@@ -2918,8 +2941,8 @@ function draw_tide(data) {
   if (!data || data.length == 0)
     document.getElementById("tide_update_time").innerText = "更新失敗：" + NormalizeDate("hh:mm:ss", new Date());
   else {
-    document.getElementById("tide_update_time").innerText = "最終更新：" + NormalizeDate("hh:mm:ss", new Date());
-    document.getElementById("tide_update_time").setAttribute("aria-label", "最終更新時刻、" + NormalizeDate("h時m分s秒", new Date()));
+    document.getElementById("tide_update_time").innerText = "更新：" + NormalizeDate("hh:mm:ss", new Date());
+    document.getElementById("tide_update_time").setAttribute("aria-label", "更新時刻、" + NormalizeDate("h時m分s秒", new Date()));
   }
   removeChild(document.getElementById("tide-Wrap"));
 
@@ -2988,8 +3011,8 @@ function draw_gaikyo(data) {
   if (!data || data.length == 0)
     document.getElementById("gaikyo_update_time").innerText = "更新失敗：" + NormalizeDate("hh:mm:ss", new Date());
   else {
-    document.getElementById("gaikyo_update_time").innerText = "最終更新：" + NormalizeDate("hh:mm:ss", new Date());
-    document.getElementById("gaikyo_update_time").setAttribute("aria-label", "最終更新時刻、" + NormalizeDate("h時m分s秒", new Date()));
+    document.getElementById("gaikyo_update_time").innerText = "更新：" + NormalizeDate("hh:mm:ss", new Date());
+    document.getElementById("gaikyo_update_time").setAttribute("aria-label", "更新時刻、" + NormalizeDate("h時m分s秒", new Date()));
   }
   if (gaikyo_history.length == data.length) return;
   gaikyo_history = data;
@@ -3035,8 +3058,8 @@ function draw_wepa(data) {
   if (!data || data.length == 0)
     document.getElementById("wepa_update_time").innerText = "データがありません：" + NormalizeDate("hh:mm:ss", new Date());
   else {
-    document.getElementById("wepa_update_time").innerText = "最終更新：" + NormalizeDate("hh:mm:ss", new Date());
-    document.getElementById("wepa_update_time").setAttribute("aria-label", "最終更新時刻、" + NormalizeDate("h時m分s秒", new Date()));
+    document.getElementById("wepa_update_time").innerText = "更新：" + NormalizeDate("hh:mm:ss", new Date());
+    document.getElementById("wepa_update_time").setAttribute("aria-label", "更新時刻、" + NormalizeDate("h時m分s秒", new Date()));
   }
 
   removeChild(document.getElementById("wepa-Wrap"));

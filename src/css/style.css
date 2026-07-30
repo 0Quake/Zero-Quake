@@ -1217,11 +1217,11 @@ summary:focus {
   font-size: 13px;
   margin: 2px;
 }
-#gaikyo_update_time,#wepa_update_time,#usgs_update_time,#tide_update_time {
-  font-size: 14px;
-  text-align: center;
+#jma_update_time,#gaikyo_update_time,#wepa_update_time,#usgs_update_time,#tide_update_time {
+  font-size: 13px;
+  text-align: left;
   color: #ccc;
-  margin-top: 3px;
+  display: inline-block;
 }
 .EQI_gaikyo .EQI_datetime,
 .EQI_wepa .EQI_datetime {
@@ -1308,6 +1308,42 @@ summary:focus {
   height: 0.6em;
   vertical-align: bottom;
   margin: 0.3em 4px 0.3em 0;
+}
+
+.EqInfo_Sort_Wrap,
+.EqInfo_Sort_Wrap_t2{
+  height:23px;
+  margin-top: 3px;
+  padding:0 3px 0 6px;
+  font-size: 0;
+}
+.EqInfo_Sort_Wrap_t2{
+  text-align: center;
+}
+.EqInfo_Sort_Wrap label{
+  float:right;
+}
+
+.EqInfo_Sort_Wrap span{
+  font-size: 18px;
+  color:#CCC;
+  vertical-align: top;
+  margin: 1px 3px 0 0;
+}
+
+.EqInfo_Sort_Wrap select{
+    padding: 3px 4px;
+    border-radius: 4px;
+    background: #00000000;
+    border: solid 1px #777777;
+    font-size: 11px;
+    color:#CCC;
+    width: fit-content;
+}
+.EqInfo_Sort_Wrap select:focus,
+.EqInfo_Sort_Wrap select:hover{
+  color:#FFF;
+  background: #363639;
 }
 
 @media (forced-colors: active) {
