@@ -369,6 +369,12 @@ var eqInfoDataUSGS;
 function eqInfoDraw(data, source) {
   var EQTemplate;
   if (source == "jma") {
+    //新規地震イベントを記録、あとでフォーカス移動などにつかう
+    var new_entry = data.find(function (elm) {
+      return eqInfoDataJMA && !eqInfoDataJMA.find(function (elm2) {
+        return elm.eventId == elm2.eventId
+      })
+    })
     eqInfoDataJMA = data;
     EQTemplate = template2;
     EQListWrap = document.getElementById("JMA_EqInfo_Data");
@@ -532,6 +538,10 @@ function eqInfoDraw(data, source) {
       EQListWrap.appendChild(clone);
     }
   });
+
+  //新規地震イベントの強調
+  var new_entry_item = new_entry ? document.getElementById("EQItem_" + new_entry.eventId) : null;
+  if (new_entry_item) Focus_EQItem(new_entry_item);
 }
 
 document.getElementById("JMA_EqInfo_Sort").addEventListener("change", function () {
@@ -2713,6 +2723,7 @@ function tsunamiDataUpdate(data) {
     else
       document.getElementById("tsunamiTitle").style.borderColor = tsunamiColorConv("Yoho");
   }
+  EQinfo_Index = 0;
 }
 
 var EQinfo_Index = 0;
@@ -2722,17 +2733,20 @@ EQInfoLink.addEventListener("click", function (e) {
   var EIDs = EQInfoLink.dataset.eventid.split(",");
   EIDs.forEach(function (elm, index) {
     var EQItemElm = document.querySelector(elm);
-    if (EQItemElm) {
-      if (index == EQinfo_Index) {
-        EQItemElm.scrollIntoView({ block: "center" });
-      }
-      EQItemElm.animate({ boxShadow: ["0 0 0 0 rgba(203, 27, 27, 1)", "0 0 0 15px rgba(203, 27, 27, 0)"], }, 500);
-      EQItemElm.focus();
+    if (EQItemElm && index == EQinfo_Index) {
+      Focus_EQItem(EQItemElm);
     }
   });
   EQinfo_Index++;
   if (EQinfo_Index >= EIDs.length) EQinfo_Index = 0;
 });
+
+//地震情報アイテムの強調
+function Focus_EQItem(elm) {
+  elm.scrollIntoView({ block: "center" });
+  elm.animate({ boxShadow: ["0 0 0 0 rgba(203, 27, 27, 1)", "0 0 0 15px rgba(203, 27, 27, 0)"], }, 500);
+  elm.focus();
+}
 
 //津波情報色変換
 function tsunamiColorConv(str) {
