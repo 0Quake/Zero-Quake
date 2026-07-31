@@ -3124,6 +3124,17 @@ function hinanjoPopup(e) {
     .addTo(map);
 }
 
+//JMA地震情報タブを最後までスクロールしたとき追加をリクエスト
+var tab1c1 = document.getElementById("tab1_content1");
+tab1c1.addEventListener('scroll', () => {
+  if (tab1c1.scrollTop + tab1c1.clientHeight >= tab1c1.scrollHeight - 1) {
+    window.electronAPI.messageReturn({
+      action: "Req_additionalEQInfo_JMA",
+    });
+  }
+});
+
+
 function radioSet(name, val) {
   document.getElementsByName(name).forEach(function (elm) {
     if (elm.value == val) elm.checked = true;
