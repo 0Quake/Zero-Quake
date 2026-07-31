@@ -2729,7 +2729,6 @@ function tsunamiDataUpdate(data) {
 var EQinfo_Index = 0;
 EQInfoLink.addEventListener("click", function (e) {
   e.preventDefault();
-  document.getElementById("tab1_menu1").click()
   var EIDs = EQInfoLink.dataset.eventid.split(",");
   EIDs.forEach(function (elm, index) {
     var EQItemElm = document.querySelector(elm);
@@ -2743,6 +2742,7 @@ EQInfoLink.addEventListener("click", function (e) {
 
 //地震情報アイテムの強調
 function Focus_EQItem(elm) {
+  document.getElementById("tab1_menu1").click();
   elm.scrollIntoView({ block: "center" });
   elm.animate({ boxShadow: ["0 0 0 0 rgba(203, 27, 27, 1)", "0 0 0 15px rgba(203, 27, 27, 0)"], }, 500);
   elm.focus();
