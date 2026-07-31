@@ -1807,16 +1807,11 @@ function returnToUserPosition() {
 function map_gethome() {
   userMotionFlg = true;
 
-  var ZoomBounds = turf.bbox(turf.points([[154, 46], [122, 20], [98, 35]]));
+  var ZoomBounds = config.home.initialBounds;
 
-  if (turf.booleanPointInPolygon([config.home.longitude, config.home.latitude], turf.bboxPolygon(ZoomBounds))) {
-    map.fitBounds(ZoomBounds, {
-      padding: 10, animate: false
-    });
-  } else {
-    map.panTo([config.home.longitude, config.home.latitude], { animate: false });
-    map.zoomTo(4, { animate: false });
-  }
+  map.fitBounds(ZoomBounds, {
+    padding: 10, animate: false
+  });
 
   userMotionFlg = false;
   userPosition = map.getCenter().toArray();

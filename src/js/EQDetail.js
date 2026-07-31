@@ -883,8 +883,8 @@ function Mapinit() {
 
   var homeButton = document.createElement("button");
   homeButton.innerText = "home";
-  homeButton.setAttribute("title", "ズーム範囲をリセット");
-  homeButton.setAttribute("aria-label", "地図のズーム範囲をリセット");
+  homeButton.setAttribute("title", "初期位置に戻る");
+  homeButton.setAttribute("aria-label", "地図を初期位置に戻す");
 
   homeButton.className = "material-icons-round";
   homeButton.addEventListener("click", function () {
@@ -2141,8 +2141,11 @@ function mapFillDraw() {
 
 function mapZoomReset(forced) {
   try {
-    if (!movedByUser || forced)
-    map.fitBounds(ZoomBounds, { padding: 60, maxZoom: 7, animate: false });
+    if (!movedByUser || forced) {
+      map.fitBounds(ZoomBounds,
+        { padding: 60, maxZoom: 7, animate: false }
+      );
+    }
   } catch {
     return;
   }

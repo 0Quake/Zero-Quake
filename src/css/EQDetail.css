@@ -500,7 +500,7 @@ td {
 #EEWLink span {
   margin-right: 3px;
   font-size: 16px;
-  vertical-align: bottom;
+  vertical-align: text-bottom;
 }
 #LinkWrap {
   margin-top: 20px;

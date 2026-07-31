@@ -87,6 +87,13 @@ function configDataDraw() {
   document.getElementById("HomeName").value = config.home.name;
   document.getElementById("latitude").value = config.home.latitude;
   document.getElementById("longitude").value = config.home.longitude;
+
+  var iBounds = config.home.initialBounds;
+  document.getElementById("b_NELat").value = iBounds[1][1];
+  document.getElementById("b_NELng").value = iBounds[1][0];
+  document.getElementById("b_SWLat").value = iBounds[0][1];
+  document.getElementById("b_SWLng").value = iBounds[0][0];
+
   document.getElementById("EEW_Voice").value = config.notice.voice.EEW;
   document.getElementById("EEW2_Voice").value = config.notice.voice.EEWUpdate;
   document.getElementById("EEW3_Voice").value = config.notice.voice.EEWCancel;
@@ -277,6 +284,25 @@ function apply() {
   config.home.name = document.getElementById("HomeName").value;
   config.home.latitude = document.getElementById("latitude").value;
   config.home.longitude = document.getElementById("longitude").value;
+
+  var iBounds = config.home.initialBounds = [
+    [document.getElementById("b_SWLng").value,
+    document.getElementById("b_SWLat").value],
+    [document.getElementById("b_NELng").value,
+    document.getElementById("b_NELat").value]
+  ];
+
+  //面積ゼロ回避
+  if (iBounds[0][0] == iBounds[1][0]) {
+    iBounds[0][0] = Number(iBounds[0][0]) - 0.5
+    iBounds[1][0] = Number(iBounds[1][0]) + 0.5
+  }
+  if (iBounds[0][1] == iBounds[1][1]) {
+    iBounds[0][1] = Number(iBounds[0][1]) - 0.5
+    iBounds[1][1] = Number(iBounds[1][1]) + 0.5
+  }
+
+
   config.home.Section = document.getElementById("saibun").value;
   config.home.TsunamiSect = document.getElementById("tsunamiSect").value;
   config.notice.voice.EEW = document.getElementById("EEW_Voice").value;

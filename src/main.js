@@ -75,6 +75,7 @@ var defaultConfigVal = {
     TsunamiSect: "東京湾内湾",
     ShowPin: true,
     arv: 1.27,
+    initialBounds: [[98, 20], [154, 46]]
   },
   Info: {
     EEW: {
