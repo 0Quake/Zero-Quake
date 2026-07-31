@@ -138,18 +138,22 @@ td {
 #Shindo .ShindoItem1:hover,
 #Shindo .ShindoItem2:hover,
 #Shindo .ShindoItem3:hover,
+#Shindo .ShindoItem4:hover,
 #lngintListWrap .ShindoItem1L:hover,
 #lngintListWrap .ShindoItem2L:hover,
-#lngintListWrap .ShindoItem3L:hover {
+#lngintListWrap .ShindoItem3L:hover,
+#lngintListWrap .ShindoItem4L:hover {
   background: #464649;
 }
 
 #Shindo .ShindoItem1,
 #Shindo .ShindoItem2,
 #Shindo .ShindoItem3,
+#Shindo .ShindoItem4,
 #lngintListWrap .ShindoItem1L,
 #lngintListWrap .ShindoItem2L,
-#lngintListWrap .ShindoItem3L {
+#lngintListWrap .ShindoItem3L,
+#lngintListWrap .ShindoItem4L {
   cursor: pointer;
 }
 
@@ -397,6 +401,7 @@ td {
   white-space: nowrap;
   max-width: 100vw;
   overflow-x: auto;
+  padding:0 8px;
   background: #181818;
 }
 #infoKind div {
@@ -406,10 +411,6 @@ td {
 
 #infoKind .tip {
   display: none;
-}
-#infoKind span.disabled {
-  box-shadow: none;
-  color: #777;
 }
 #estimated_intensity_map_canvas {
   display: none;
@@ -582,9 +583,11 @@ td {
   #Shindo .ShindoItem1:hover,
   #Shindo .ShindoItem2:hover,
   #Shindo .ShindoItem3:hover,
+  #Shindo .ShindoItem4:hover,
   #lngintListWrap .ShindoItem1L:hover,
   #lngintListWrap .ShindoItem2L:hover,
-  #lngintListWrap .ShindoItem3L:hover {
+  #lngintListWrap .ShindoItem3L:hover,
+  #lngintListWrap .ShindoItem4L:hover {
     filter: invert(1);
   }
 
@@ -592,9 +595,11 @@ td {
   #Shindo .ShindoItem1:hover div,
   #Shindo .ShindoItem2:hover div,
   #Shindo .ShindoItem3:hover div,
+  #Shindo .ShindoItem4:hover div,
   #lngintListWrap .ShindoItem1L:hover div,
   #lngintListWrap .ShindoItem2L:hover div,
-  #lngintListWrap .ShindoItem3L:hover div {
+  #lngintListWrap .ShindoItem3L:hover div,
+  #lngintListWrap .ShindoItem4L:hover div {
     filter: invert(1);
   }
 }

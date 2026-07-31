@@ -676,7 +676,7 @@ body {
 }
 .pointName {
   display: inline-block;
-  margin: 0 30px 0 5px;
+  margin: 0 30px 0 7px;
 }
 
 @media (max-width: 600px) {

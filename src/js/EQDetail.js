@@ -1035,54 +1035,11 @@ function Mapinit() {
       },
       'minzoom': 8,
     })
-    map.on("click", "int_icon", function (e) {
-      var elm = e.features[0].properties;
 
-      color = NormalizeShindo(elm.int, 2);
-      var AreaPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML(
-        "<div class='popupContent'><div class='shindoItem_S' style='background:" + color[0] + ";color:" + color[1] + "'>震度 "
-        + elm.intStr + "</div><div class='pointName'>" + elm.name + "</div><div class='pointHead'>細分区域</div></div><div></div>"
-      ).setLngLat(e.features[0].geometry.coordinates).addTo(map);
-
-      e.originalEvent.cancelBubble = true;
-    });
-    map.on("click", "int_sta_icon", function (e) {
-      var elm = e.features[0].properties;
-
-      color = NormalizeShindo(elm.int, 2);
-
-      var mi_description = NormalizeShindo(elm.int) == "未" ? "<div class = 'description'>震度5弱以上と考えられるが<br>現在震度を入手していない。</div>" : "";
-      var AreaPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML(
-        "<div class='popupContent'><div class='shindoItem' style='background:" + color[0] + ";color:" + color[1] + "'>震度 "
-        + elm.intStr + "</div><div class='pointName'>" + elm.name + "</div>" + mi_description + "<div class='pointHead'>震度観測点</div></div><div></div>"
-      ).setLngLat(e.features[0].geometry.coordinates).addTo(map);
-
-      e.originalEvent.cancelBubble = true;
-    });
-
-    map.on("click", "lgint_icon", function (e) {
-      var elm = e.features[0].properties;
-
-      color = LgIntConvert(elm.lgint);
-      var AreaPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML(
-        "<div class='popupContent'><div class='shindoItem_S' style='background:" + color[0] + ";color:" + color[1] + "'>長周期地震動階級 "
-        + elm.lgintStr + "</div><div class='pointName'>" + elm.name + "</div><div class='pointHead'>細分区域</div></div><div></div>"
-      ).setLngLat(e.features[0].geometry.coordinates).addTo(map);
-
-      e.originalEvent.cancelBubble = true;
-    });
-
-    map.on("click", "lgint_sta_icon", function (e) {
-      var elm = e.features[0].properties;
-
-      color = LgIntConvert(elm.lgint);
-      var AreaPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML(
-        "<div class='popupContent'><div class='shindoItem' style='background:" + color[0] + ";color:" + color[1] + "'>長周期地震動階級 "
-        + elm.lgintStr + "</div><div class='pointName'>" + elm.name + "</div><div class='pointHead'>震度観測点</div></div><div></div>"
-      ).setLngLat(e.features[0].geometry.coordinates).addTo(map);
-
-      e.originalEvent.cancelBubble = true;
-    });
+    map.on("click", "int_icon", Int_Area_Popup);
+    map.on("click", "int_sta_icon", Int_Sta_Popup);
+    map.on("click", "lgint_icon", LgInt_Area_Popup);
+    map.on("click", "lgint_sta_icon", LgInt_Sta_Popup);
   });
 
   map.on("zoom", function (e) {
@@ -1104,6 +1061,55 @@ function Mapinit() {
     mkr.getElement().removeAttribute("tabindex");
     mkr.getElement().setAttribute("aria-hidden", true);
   }
+}
+
+function Int_Area_Popup(e) {
+      var elm = e.features[0].properties;
+
+      color = NormalizeShindo(elm.int, 2);
+  new maplibregl.Popup({ offset: [0, -17] }).setHTML(
+        "<div class='popupContent'><div class='shindoItem_S' style='background:" + color[0] + ";color:" + color[1] + "'>震度 "
+        + elm.intStr + "</div><div class='pointName'>" + elm.name + "</div><div class='pointHead'>細分区域</div></div><div></div>"
+      ).setLngLat(e.features[0].geometry.coordinates).addTo(map);
+
+      e.originalEvent.cancelBubble = true;
+}
+
+function Int_Sta_Popup(e) {
+      var elm = e.features[0].properties;
+
+      color = NormalizeShindo(elm.int, 2);
+
+      var mi_description = NormalizeShindo(elm.int) == "未" ? "<div class = 'description'>震度5弱以上と考えられるが<br>現在震度を入手していない。</div>" : "";
+  new maplibregl.Popup({ offset: [0, -17] }).setHTML(
+        "<div class='popupContent'><div class='shindoItem' style='background:" + color[0] + ";color:" + color[1] + "'>震度 "
+    + elm.intStr + "</div><div class='pointName'>" + elm.name + "</div>" + mi_description + "<div class='pointHead'>観測点</div></div><div></div>"
+      ).setLngLat(e.features[0].geometry.coordinates).addTo(map);
+
+  if (e.originalEvent) e.originalEvent.cancelBubble = true;
+}
+function LgInt_Area_Popup(e) {
+      var elm = e.features[0].properties;
+
+      color = LgIntConvert(elm.lgint);
+  new maplibregl.Popup({ offset: [0, -17] }).setHTML(
+        "<div class='popupContent'><div class='shindoItem_S' style='background:" + color[0] + ";color:" + color[1] + "'>長周期地震動階級 "
+        + elm.lgintStr + "</div><div class='pointName'>" + elm.name + "</div><div class='pointHead'>細分区域</div></div><div></div>"
+      ).setLngLat(e.features[0].geometry.coordinates).addTo(map);
+
+      e.originalEvent.cancelBubble = true;
+}
+
+function LgInt_Sta_Popup(e) {
+      var elm = e.features[0].properties;
+
+      color = LgIntConvert(elm.lgint);
+  new maplibregl.Popup({ offset: [0, -17] }).setHTML(
+        "<div class='popupContent'><div class='shindoItem' style='background:" + color[0] + ";color:" + color[1] + "'>長周期地震動階級 "
+    + elm.lgintStr + "</div><div class='pointName'>" + elm.name + "</div><div class='pointHead'>観測点</div></div><div></div>"
+      ).setLngLat(e.features[0].geometry.coordinates).addTo(map);
+
+  if (e.originalEvent) e.originalEvent.cancelBubble = true;
 }
 
 function roundedRect(ctx, x, y, width, height, radius) {
@@ -2329,7 +2335,7 @@ function add_IntensityStation_info(lat, lng, name, int) {
   newDiv.classList.add("ShindoItem", "ShindoItem4");
   newDiv.setAttribute("tabindex", 0);
   newDiv.setAttribute("aria-label", `観測点 ${name}、震度${NormalizeShindo(int, 1)}`);
-  newDiv.setAttribute("title", `観測点：${name}`);
+  newDiv.setAttribute("title", `観測点：${name}\nクリックで地図を観測点に移動`);
   newDiv.setAttribute("role", "treeitem");
 
   if (lat !== null && lng !== null) {
@@ -2344,6 +2350,12 @@ function add_IntensityStation_info(lat, lng, name, int) {
     intensityIcons_st.push(icon);
     ZoomBounds.extend([lng, lat]);
   }
+
+  newDiv.addEventListener("click", function () {
+    map.flyTo({ center: [lng, lat], zoom: 11, duration: 800 });
+
+    if (icon) Int_Sta_Popup({ features: [icon] });
+  });
 
   wrap3[wrap3.length - 1].append(newDiv);
 }
@@ -2568,7 +2580,7 @@ function add_IntensityStation_infoL(lat, lng, name, int) {
   newDiv.classList.add("ShindoItemL", "ShindoItem4L");
   newDiv.setAttribute("tabindex", 0);
   newDiv.setAttribute("aria-label", `観測点 ${name}、長周期地震動階級${int}`);
-  newDiv.setAttribute("title", `観測点：${name}`);
+  newDiv.setAttribute("title", `観測点：${name}\nクリックで地図を観測点に移動`);
   newDiv.setAttribute("aria-expanded", "false");
   newDiv.setAttribute("role", "treeitem");
   wrap3[wrap3.length - 1].append(newDiv);
@@ -2587,6 +2599,13 @@ function add_IntensityStation_infoL(lat, lng, name, int) {
 
     ZoomBounds.extend([lng, lat]);
   }
+
+
+  newDiv.addEventListener("click", function () {
+    map.flyTo({ center: [lng, lat], zoom: 11, duration: 800 });
+
+    if (icon) LgInt_Sta_Popup({ features: [icon] });
+  });
 }
 
 var EQInfoMarged = {};
