@@ -4158,6 +4158,8 @@ function MargeEQInfo(dataList, count) {
               changed = true;//変更ありフラグ
               EQElm[key] = [...EQElm[key], ...EQInfo_Item[key]];
             }
+          } else if (key == "audioNotification") {
+            return;//前の部分で判定済みなので上書きしないよう飛ばす
           } else {
             if (EQElm[key] !== EQInfo_Item[key] && Boolean2(EQInfo_Item[key])) {
               changed = true;//変更ありフラグ
