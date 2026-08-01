@@ -381,7 +381,7 @@ function ScheduledExecution() {
               SystemNotification("Axisのアクセストークンが不正です。設定を修正してください。");
             }
           } catch {
-            UpdateStatus(new Date() - Replay, "axis", "Error");
+            UpdateStatus("axis", "Error");
           }
         });
       });
@@ -1511,7 +1511,7 @@ function Req_TremRts_sta() {
           var json = ParseJSON(dataTmp);
           if (json) TremRts_sta = json;
         } catch {
-          UpdateStatus(new Date() - Replay, "TREM-RTS", "Error");
+          UpdateStatus("TREM-RTS", "Error");
           Trem_server = !Trem_server;
         }
       });
@@ -1570,19 +1570,19 @@ function Req_TremRts() {
               data: TremRtsData,
             };
             messageToMainWindow(TremRtsData_Marged);
-            UpdateStatus(new Date(json.time), "TREM-RTS", "success");
+            UpdateStatus("TREM-RTS", "success", new Date(json.time),);
           } catch {
-            UpdateStatus(new Date() - Replay, "TREM-RTS", "Error");
+            UpdateStatus("TREM-RTS", "Error");
             TremRTS_server = !TremRTS_server;
           }
         });
       });
       request.on("error", () => {
-        UpdateStatus(new Date() - Replay, "TREM-RTS", "Error");
+        UpdateStatus("TREM-RTS", "Error");
         TremRTS_server = !TremRTS_server;
       });
       request.end();
-    } else UpdateStatus(new Date() - Replay, "TREM-RTS", "Error");
+    } else UpdateStatus("TREM-RTS", "Error");
   }
 
   setTimeout(Req_TremRts, config.Source.TREMRTS.Interval);
@@ -1751,7 +1751,7 @@ function Req_EarlyEst() {
       var request = net.request("http://early-est.rm.ingv.it/monitor.xml");
       request.on("response", (res) => {
         if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
-          UpdateStatus(new Date() - Replay, "Early-est", "Error");
+          UpdateStatus("Early-est", "Error");
         } else {
           var dataTmp = "";
           res.on("data", (chunk) => {
@@ -1759,7 +1759,7 @@ function Req_EarlyEst() {
           });
           res.on("end", function () {
             try {
-              UpdateStatus(new Date() - Replay, "Early-est", "success");
+              UpdateStatus("Early-est", "success");
               let parser = new new JSDOM().window.DOMParser();
               let doc = parser.parseFromString(dataTmp, "text/xml");
               Array.prototype.forEach.call(
@@ -1800,17 +1800,17 @@ function Req_EarlyEst() {
                 }
               );
             } catch {
-              UpdateStatus(new Date() - Replay, "Early-est", "Error");
+              UpdateStatus("Early-est", "Error");
             }
           });
         }
       });
       request.on("error", () => {
-        UpdateStatus(new Date() - Replay, "Early-est", "Error");
+        UpdateStatus("Early-est", "Error");
       });
 
       request.end();
-    } else UpdateStatus(new Date() - Replay, "Early-est", "Error");
+    } else UpdateStatus("Early-est", "Error");
   }
   setTimeout(Req_EarlyEst, config.Source.EarlyEst.Interval);
 }
@@ -1921,7 +1921,7 @@ function Req_kmoni() {
                 if (kmoniI_url >= urlTmp.length - 1) kmoniI_url = 0;
                 SetKmoniOffset(Req_kmoni);
               }
-              UpdateStatus(new Date() - Replay, "kmoniImg", "Error");
+              UpdateStatus("kmoniImg", "Error");
             } else {
               errorCountkI = 0;
               // eslint-disable-next-line no-undef
@@ -1935,12 +1935,12 @@ function Req_kmoni() {
               }
             }
           } catch {
-            UpdateStatus(new Date() - Replay, "kmoniImg", "Error");
+            UpdateStatus("kmoniImg", "Error");
           }
         });
       });
       request.end();
-    } else UpdateStatus(new Date() - Replay, "kmoniImg", "Error");
+    } else UpdateStatus("kmoniImg", "Error");
   }
 
   if (kmoniTimeout) clearTimeout(kmoniTimeout);
@@ -1989,9 +1989,9 @@ function Req_SNet() {
                           date: new Date(),
                         });
                       }
-                      UpdateStatus(new Date() - Replay, "msilImg", "success");
+                      UpdateStatus("msilImg", "success");
                     } catch {
-                      UpdateStatus(new Date() - Replay, "msilImg", "Error");
+                      UpdateStatus("msilImg", "Error");
                     }
                   });
                 });
@@ -2003,16 +2003,16 @@ function Req_SNet() {
               msil_lastTime = basetime;
             }
           } catch {
-            UpdateStatus(new Date() - Replay, "msilImg", "Error");
+            UpdateStatus("msilImg", "Error");
           }
         });
       });
       request.on("error", () => {
-        UpdateStatus(new Date() - Replay, "msilImg", "Error");
+        UpdateStatus("msilImg", "Error");
       });
 
       request.end();
-    } else UpdateStatus(new Date() - Replay, "msilImg", "Error");
+    } else UpdateStatus("msilImg", "Error");
   }
   setTimeout(Req_SNet, config.Source.msil.Interval);
 }
@@ -2022,23 +2022,23 @@ var P2P_Client;
 function P2P() {
   P2P_Client = new WebSocketClient();
   P2P_Client.on("connectFailed", function () {
-    UpdateStatus(new Date() - Replay, "P2P_EEW", "Error");
+    UpdateStatus("P2P_EEW", "Error");
     setTimeout(TryConnect_P2P, 5000);
   });
   P2P_Client.on("connect", function (connection) {
     connection.on("error", function () {
-      UpdateStatus(new Date() - Replay, "P2P_EEW", "Error");
+      UpdateStatus("P2P_EEW", "Error");
     });
     connection.on("close", function () {
-      UpdateStatus(new Date() - Replay, "P2P_EEW", "Disconnect");
+      UpdateStatus("P2P_EEW", "Disconnect");
       setTimeout(TryConnect_P2P, 5000);
     });
     connection.on("message", function (message) {
       try {
         if (Replay == 0 && message.type === "utf8") {
           var data = JSON.parse(message.utf8Data);
-          if (data.time) UpdateStatus(new Date(data.time), "P2P_EEW", "success");
-          else UpdateStatus(new Date(), "P2P_EEW", "success");
+          if (data.time) UpdateStatus("P2P_EEW", "success", new Date(data.time));
+          else UpdateStatus("P2P_EEW", "success");
 
           switch (data.code) {
             case 551:
@@ -2071,10 +2071,10 @@ function P2P() {
           }
         }
       } catch {
-        UpdateStatus(new Date() - Replay, "P2P_EEW", "Error");
+        UpdateStatus("P2P_EEW", "Error");
       }
     });
-    UpdateStatus(new Date() - Replay, "P2P_EEW", "success");
+    UpdateStatus("P2P_EEW", "success");
   });
   Connect_P2P();
 }
@@ -2094,21 +2094,21 @@ function AXIS() {
   AXIS_Client = new WebSocketClient();
 
   AXIS_Client.on("connectFailed", function () {
-    UpdateStatus(new Date() - Replay, "axis", "Error");
+    UpdateStatus("axis", "Error");
     TryConnect_AXIS();
   });
 
   AXIS_Client.on("connect", function (connection) {
     connection.on("error", function () {
-      UpdateStatus(new Date() - Replay, "axis", "Error");
+      UpdateStatus("axis", "Error");
     });
     connection.on("close", function () {
-      UpdateStatus(new Date() - Replay, "axis", "Disconnect");
+      UpdateStatus("axis", "Disconnect");
       TryConnect_AXIS();
     });
     connection.on("message", function (message) {
       if (Replay !== 0) return;
-      UpdateStatus(new Date() - Replay, "axis", "success");
+      UpdateStatus("axis", "success");
       try {
         var dataStr = message.utf8Data;
         if (dataStr == "hello") return;
@@ -2156,10 +2156,10 @@ function AXIS() {
           }
         }
       } catch {
-        UpdateStatus(new Date() - Replay, "axis", "Error");
+        UpdateStatus("axis", "Error");
       }
     });
-    UpdateStatus(new Date() - Replay, "axis", "success");
+    UpdateStatus("axis", "success");
   });
 
   Connect_AXIS();
@@ -2185,32 +2185,32 @@ function ProjectBS() {
   ProjectBS_Client = new WebSocketClient();
 
   ProjectBS_Client.on("connectFailed", function () {
-    UpdateStatus(new Date() - Replay, "ProjectBS", "Error");
+    UpdateStatus("ProjectBS", "Error");
     TryConnect_ProjectBS();
   });
 
   ProjectBS_Client.on("connect", function (connection) {
     ProjectBS_Connection = connection;
     connection.on("error", function () {
-      UpdateStatus(new Date() - Replay, "ProjectBS", "Error");
+      UpdateStatus("ProjectBS", "Error");
     });
     connection.on("close", function () {
-      UpdateStatus(new Date() - Replay, "ProjectBS", "Disconnect");
+      UpdateStatus("ProjectBS", "Disconnect");
       TryConnect_ProjectBS();
     });
     connection.on("message", function (message) {
       if (Replay !== 0) return;
-      UpdateStatus(new Date() - Replay, "ProjectBS", "success");
+      UpdateStatus("ProjectBS", "success");
       try {
         var dataStr = message.utf8Data;
         if (dataStr !== "pong") DetectEEW(1, ParseJSON(dataStr));
       } catch {
-        UpdateStatus(new Date() - Replay, "ProjectBS", "Error");
+        UpdateStatus("ProjectBS", "Error");
       }
     });
     connection.sendUTF("queryjson");
 
-    UpdateStatus(new Date() - Replay, "ProjectBS", "success");
+    UpdateStatus("ProjectBS", "success");
     setInterval(function () {
       connection.sendUTF("ping");
     }, 1200000);
@@ -2236,21 +2236,21 @@ function WolfxWS() {
   WolfxWS_Client = new WebSocketClient();
 
   WolfxWS_Client.on("connectFailed", function () {
-    UpdateStatus(new Date() - Replay, "wolfx", "Error");
+    UpdateStatus("wolfx", "Error");
     TryConnect_WolfxWS();
   });
 
   WolfxWS_Client.on("connect", function (WolfxConnection) {
     WolfxConnection.on("error", function () {
-      UpdateStatus(new Date() - Replay, "wolfx", "Error");
+      UpdateStatus("wolfx", "Error");
     });
     WolfxConnection.on("close", function () {
-      UpdateStatus(new Date() - Replay, "wolfx", "Disconnect");
+      UpdateStatus("wolfx", "Disconnect");
       TryConnect_WolfxWS();
     });
     WolfxConnection.on("message", function (message) {
       if (Replay !== 0) return;
-      UpdateStatus(new Date() - Replay, "wolfx", "success");
+      UpdateStatus("wolfx", "success");
       try {
         var json = ParseJSON(message.utf8Data);
         if (json.type == "heartbeat") {
@@ -2261,14 +2261,14 @@ function WolfxWS() {
           UpdateEQInfo();
         }
       } catch {
-        UpdateStatus(new Date() - Replay, "wolfx", "Error");
+        UpdateStatus("wolfx", "Error");
       }
       setInterval(function () {
         WolfxConnection.sendUTF("ping");
       }, 60000);
     });
     WolfxConnection.sendUTF("query_jmaeew");
-    UpdateStatus(new Date() - Replay, "wolfx", "success");
+    UpdateStatus("wolfx", "success");
   });
 
   Connect_WolfxWS();
@@ -2290,33 +2290,33 @@ function SeisjsWS() {
   SeisjsWS_Client = new WebSocketClient();
 
   SeisjsWS_Client.on("connectFailed", function () {
-    UpdateStatus(new Date() - Replay, "wolfx", "Error");
+    UpdateStatus("wolfx", "Error");
     TryConnect_SeisjsWS();
   });
 
   SeisjsWS_Client.on("connect", function (SeisjsConnection) {
     SeisjsConnection.on("error", function () {
-      UpdateStatus(new Date() - Replay, "wolfx", "Error");
+      UpdateStatus("wolfx", "Error");
     });
     SeisjsConnection.on("close", function () {
-      UpdateStatus(new Date() - Replay, "wolfx", "Disconnect");
+      UpdateStatus("wolfx", "Disconnect");
       TryConnect_SeisjsWS();
     });
     SeisjsConnection.on("message", function (message) {
       if (Replay !== 0) return;
-      UpdateStatus(new Date() - Replay, "wolfx", "success");
+      UpdateStatus("wolfx", "success");
       try {
         var json = ParseJSON(message.utf8Data);
         if (!json || json.type == "pong" || json.type == "heartbeat") return;
         MargeSeisJS(json);
       } catch {
-        UpdateStatus(new Date() - Replay, "wolfx", "Error");
+        UpdateStatus("wolfx", "Error");
       }
       setInterval(function () {
         SeisjsConnection.sendUTF("ping");
       }, 60000);
     });
-    UpdateStatus(new Date() - Replay, "wolfx", "success");
+    UpdateStatus("wolfx", "success");
   });
 
   Connect_SeisjsWS();
@@ -2432,7 +2432,7 @@ async function SetKmoniOffset(func) {
                   resTimeTmp = resTime;
                 }
               } catch {
-                UpdateStatus(new Date() - Replay, "kmoniImg", "Error");
+                UpdateStatus("kmoniImg", "Error");
               }
             });
           });
@@ -2452,19 +2452,19 @@ async function SetKmoniOffset(func) {
 }
 
 //情報最終更新時刻を更新
-function UpdateStatus(Updatetime, type, condition, vendor) {
+function UpdateStatus(type, condition, timeStamp) {
+  if (!timeStamp || !Boolean2(new Date(timeStamp))) timeStamp = new Date() - Replay;
   messageToMainWindow({
     action: "UpdateStatus",
-    Updatetime: Updatetime,
+    Updatetime: timeStamp,
     LocalTime: new Date(),
-    vendor: vendor,
     type: type,
     condition: condition,
   });
 
   kmoniTimeTmp[type] = {
     type: type,
-    Updatetime: Updatetime,
+    Updatetime: timeStamp,
     LocalTime: new Date(),
     condition: condition,
   };
@@ -2533,7 +2533,7 @@ function DetectEEW(type, json) {
       };
       MargeEEW(EEWdata);
     } catch {
-      UpdateStatus(new Date() - Replay, "ProjectBS", "Error");
+      UpdateStatus("ProjectBS", "Error");
     }
   } else if (type == 2) {
     //wolfx
@@ -2600,7 +2600,7 @@ function DetectEEW(type, json) {
 
       MargeEEW(EEWdata, json);
     } catch {
-      UpdateStatus(new Date() - Replay, "wolfx", "Error");
+      UpdateStatus("wolfx", "Error");
     }
   } else if (type == 3) {
     //axis
@@ -2642,7 +2642,7 @@ function DetectEEW(type, json) {
       };
       MargeEEW(EEWdata);
     } catch {
-      UpdateStatus(new Date() - Replay, "axis", "Error");
+      UpdateStatus("axis", "Error");
     }
   } else if (type == 4) {
     //P2P
@@ -2707,7 +2707,7 @@ function DetectEEW(type, json) {
 
       MargeEEW(EEWdata);
     } catch {
-      UpdateStatus(new Date() - Replay, "P2P_EEW", "Error");
+      UpdateStatus("P2P_EEW", "Error");
     }
   }
 }
@@ -3183,7 +3183,6 @@ function EarlyEst_Alert(data, first, update) {
 
 //地震情報更新処理
 var UpdateEQInfo = throttle(function (loop) {
-  console.log(111111)
   try {
     Req_JMAXMLList(EQInfoFetchCount, EQInfoFetchCount == 0);
     Req_JMAJSONList()
@@ -3202,7 +3201,7 @@ var UpdateEQInfo = throttle(function (loop) {
 
 //気象庁XMLリスト取得→Req_JMAXML
 function Req_JMAXMLList(count, longFeed) {
-  if (!net.online) return UpdateStatus(new Date() - Replay, "JMAXML", "Error");
+  if (!net.online) return UpdateStatus("JMAXML", "Error");
 
   var request = net.request("https://www.data.jma.go.jp/developer/xml/feed/" + (longFeed ? "eqvol_l.xml" : "eqvol.xml"));
   request.on("response", (res) => {
@@ -3265,14 +3264,14 @@ function Req_JMAXMLList(count, longFeed) {
           }
         );
 
-        UpdateStatus(new Date() - Replay, "JMAXML", "success");
+        UpdateStatus("JMAXML", "success");
       } catch {
-        UpdateStatus(new Date() - Replay, "JMAXML", "Error");
+        UpdateStatus("JMAXML", "Error");
       }
     });
   });
   request.on("error", () => {
-    UpdateStatus(new Date() - Replay, "JMAXML", "Error");
+    UpdateStatus("JMAXML", "Error");
   });
   request.end();
 }
@@ -3359,11 +3358,9 @@ function Process_Hokkaidosanriku(data) {
 }
 //気象庁XML 取得・フォーマット変更→MargeEQInfo
 function Req_JMAXML(url, count) {
-  //console.log(3)
   if (!url || jmaXML_Fetched.includes(url)) return;
-  //console.log(4, url, jmaXML_Fetched.includes(url))
 
-  if (!net.online) UpdateStatus(new Date() - Replay, "JMAXML", "Error");
+  if (!net.online) UpdateStatus("JMAXML", "Error");
   var request = net.request(url);
   request.on("response", (res) => {
     var dataTmp = "";
@@ -3940,19 +3937,18 @@ function Req_JMAXML(url, count) {
           }
 
         }
-        UpdateStatus(new Date() - Replay, "JMAXML", "success");
+        UpdateStatus("JMAXML", "success");
         if (new Date(xml.getElementsByTagName("ReportDateTime")[0].textContent) < new Date() - Replay) {
           //未来のデータ（リプレイ時）のため無視した場合、取得済みリストに入れない
           jmaXML_Fetched.push(url);
         }
       } catch (err) {
-        console.log(err)
-        UpdateStatus(new Date() - Replay, "JMAXML", "Error");
+        UpdateStatus("JMAXML", "Error");
       }
     });
   });
   request.on("error", () => {
-    UpdateStatus(new Date() - Replay, "JMAXML", "Error");
+    UpdateStatus("JMAXML", "Error");
   });
   request.end();
 }
@@ -4003,23 +3999,23 @@ function Req_USGS() {
             });
             AlertEQInfo(dataTmp2, "usgs");
           }
-          UpdateStatus(new Date() - Replay, "USGS", "success");
+          UpdateStatus("USGS", "success");
         } catch {
-          UpdateStatus(new Date() - Replay, "USGS", "Error");
+          UpdateStatus("USGS", "Error");
         }
       });
     });
     request.on("error", () => {
-      UpdateStatus(new Date() - Replay, "USGS", "Error");
+      UpdateStatus("USGS", "Error");
     });
 
     request.end();
-  } else UpdateStatus(new Date() - Replay, "USGS", "Error");
+  } else UpdateStatus("USGS", "Error");
 }
 
 //narikakun地震情報API リスト取得→Req_Narikakun
 function Req_NarikakunList(url, count) {
-  if (!net.online) return UpdateStatus(new Date() - Replay, "ntool", "Error");
+  if (!net.online) return UpdateStatus("ntool", "Error");
   var request = net.request(`https://earthquake-api-v2.nakn.jp/api/v2/list?limit=${JMA_CurrentInfoNumber}`);
   request.on("response", (res) => {
     var dataTmp = "";
@@ -4036,14 +4032,14 @@ function Req_NarikakunList(url, count) {
           }
         }
 
-        UpdateStatus(new Date() - Replay, "ntool", "success");
+        UpdateStatus("ntool", "success");
       } catch {
-        UpdateStatus(new Date() - Replay, "ntool", "Error");
+        UpdateStatus("ntool", "Error");
       }
     });
   });
   request.on("error", () => {
-    UpdateStatus(new Date() - Replay, "ntool", "Error");
+    UpdateStatus("ntool", "Error");
   });
   request.end();
 }
@@ -4088,18 +4084,18 @@ function Req_Narikakun(url, count) {
             },
           ];
           MargeEQInfo(dataTmp2, count);
-          UpdateStatus(new Date() - Replay, "ntool", "success");
+          UpdateStatus("ntool", "success");
           nakn_Fetched.push(url);
         } catch {
-          UpdateStatus(new Date() - Replay, "ntool", "Error");
+          UpdateStatus("ntool", "Error");
         }
       });
     });
     request.on("error", () => {
-      UpdateStatus(new Date() - Replay, "ntool", "Error");
+      UpdateStatus("ntool", "Error");
     });
     request.end();
-  } else UpdateStatus(new Date() - Replay, "ntool", "Error");
+  } else UpdateStatus("ntool", "Error");
 }
 
 var EQInfoData = {};
@@ -4134,6 +4130,8 @@ function MargeEQInfo(dataList, count) {
         var rawData = EQElm.raw_data.sort(function (a, b) {
           return a.reportDateTime < b.reportDateTime ? -1 : 1;
         });
+
+        //キャンセル報を受信時、同一カテゴリの過去情報のキャンセルフラグを立てる（気象庁仕様に準拠）
         rawData.forEach(function (elm, index) {
           if (elm.cancel) {
             rawData.slice(0, index).forEach(function (elm2, index2) {
@@ -4146,8 +4144,8 @@ function MargeEQInfo(dataList, count) {
           if (!config.Info.EQInfo.showTest && elm.status == "試験") return;
           if (new Date(elm.reportDateTime) > new Date() - Replay) return;
 
-          //EEW以外の情報が既に入っているとき、EEWによる情報を破棄
-          if (elm.category == "EEW" && EQElm.EEW === false) return;
+
+          if (elm.category == "EEW" && EQElm.EEW === false) return;//EEW以外の情報が既に入っているとき、EEWによる情報を破棄
           else if (elm.category == "EEW") EQElm.EEW = true;
           else if (elm.category != "EEW" && EQElm.EEW == true) {
             //EEW以外の情報が入ってきたとき、EEWによる情報を破棄
@@ -4187,32 +4185,24 @@ function MargeEQInfo(dataList, count) {
           if (elm.axisData) EQInfo_Item.axisData.push(elm.axisData);
         });
 
-        if (EQElm.cancel !== EQInfo_Item.cancel) changed = true;
-        if (EQElm.category !== EQInfo_Item.category) changed = true;
-        if (EQElm.EEW !== EQInfo_Item.EEW) changed = true;
-        if (EQElm.OriginTime !== EQInfo_Item.OriginTime) changed = true;
-        if (EQElm.epiCenter !== EQInfo_Item.epiCenter) changed = true;
-        if (EQElm.M !== EQInfo_Item.M) changed = true;
-        if (EQElm.maxI !== EQInfo_Item.maxI) changed = true;
-        if (EQElm.maxLgInt !== EQInfo_Item.maxLgInt) changed = true;
-        if (EQElm.headline !== EQInfo_Item.headline) changed = true;
-        if (EQElm.DetailURL.length !== EQInfo_Item.DetailURL.length) changed = true;
-        if (EQInfo_Item.axisData) changed = true;
+        if (EQElm.category == "EEW" && EQInfo_Item.category != "EEW") EQElm.audioNotification = true;//同イベント2報以降だがEEW以外の情報は初の場合音声通知する
 
-        if (EQElm.category == "EEW" && EQInfo_Item.category != "EEW") audioNotification = true;
-
-        EQElm.cancel = EQInfo_Item.cancel;
-        EQElm.category = EQInfo_Item.category;
-        EQElm.EEW = EQInfo_Item.EEW;
-        EQElm.reportDateTime = EQInfo_Item.reportDateTime;
-        EQElm.OriginTime = EQInfo_Item.OriginTime;
-        EQElm.epiCenter = EQInfo_Item.epiCenter;
-        EQElm.M = EQInfo_Item.M;
-        EQElm.maxI = EQInfo_Item.maxI;
-        EQElm.maxLgInt = EQInfo_Item.maxLgInt;
-        EQElm.headline = EQInfo_Item.headline;
-        EQElm.DetailURL = EQElm.DetailURL.concat(EQInfo_Item.DetailURL);
-        if (EQInfo_Item.axisData) EQElm.axisData = EQInfo_Item.axisData;
+        //キーごとにマージ
+        Object.keys(EQInfo_Item).forEach(function (key) {
+          if (key == "reportDateTime") {//reportDateTimeは常に更新、フラグ立てない
+            EQElm[key] = EQInfo_Item[key];
+          } else if (key == "DetailURL") {//DetailURLは配列を結合
+            if (Array.isArray(EQInfo_Item[key]) && Array.isArray(EQElm[key])) {//データ検証
+              changed = true;//変更ありフラグ
+              EQElm[key] = [...EQElm[key], ...EQInfo_Item[key]];
+            }
+          } else {
+            if (EQElm[key] !== EQInfo_Item[key] && Boolean2(EQInfo_Item[key])) {
+              changed = true;//変更ありフラグ
+              EQElm[key] = EQInfo_Item[key];
+            }
+          }
+        });
 
         if (changed) {
           UpdateEQInfoTmp.push(EQElm);
@@ -4224,17 +4214,22 @@ function MargeEQInfo(dataList, count) {
       } else {
         data.EEW = data.category == "EEW"
 
-        EQInfoData[data.eventId] = Object.assign({}, data);
-        EQInfoData[data.eventId].raw_data = [Object.assign({}, data)];
+        EQInfoData[data.eventId] = Object.assign({}, data);//値渡しにする
+        EQInfoData[data.eventId].raw_data = [Object.assign({}, data)];//値渡しにする
 
         eqInfoTmp.push(data);
         eqInfo.jma.push(data);
-        if (count !== 0 && data.category !== "EEW") audioNotification = true;
+        var latest_reportDate = Math.max(...Object.keys(EQInfoData).map(function (key) { return Number(EQInfoData[key].reportDateTime) }));
+        console.log(new Date(latest_reportDate).toLocaleString())
+        if (count !== 0 && data.category !== "EEW" && Number(data.reportDateTime) == latest_reportDate) {
+          data.audioNotification = true;//当該イベントの初受信＆それが最新（reportDateが過去最大）なら音声通知する
+          console.log(count, data.category !== "EEW", Number(data.reportDateTime) == latest_reportDate, new Date(data.reportDateTime).toLocaleString(), new Date(data.OriginTime).toLocaleString())
+        }
       }
     });
 
-    if (eqInfoTmp.length > 0) AlertEQInfo(eqInfoTmp, "jma", false, audioNotification);
-    if (UpdateEQInfoTmp.length > 0) AlertEQInfo(UpdateEQInfoTmp, "jma", true, audioNotification);
+    if (eqInfoTmp.length > 0) AlertEQInfo(eqInfoTmp, "jma", false);
+    if (UpdateEQInfoTmp.length > 0) AlertEQInfo(UpdateEQInfoTmp, "jma", true);
   } catch (err) {
     throw new Error("地震情報データの処理（マージ）に失敗しました。", { cause: err });
   }
@@ -4268,19 +4263,23 @@ function timeDifference(miliseconds) {
 }
 
 //地震情報通知（音声・画面表示等）
-function AlertEQInfo(data, source, update, AudioNotification) {
+function AlertEQInfo(dataUpdated, source, update) {
   try {
     if (source == "jma") {
-      if (AudioNotification) {
-        data = data.sort(function (a, b) {
-          return a.OriginTime > b.OriginTime ? -1 : 1;
-        });
 
+      //音声通知条件を満たす最新のデータ
+      var dataToNotify = dataUpdated.sort(function (a, b) {
+        return a.OriginTime > b.OriginTime ? -1 : 1;
+      }).find(function (elm) {
+        return elm.audioNotification
+      })
+
+      //音声通知
+      if (dataToNotify) {
         if (config.Info.EQInfo.NotificationSound &&
-          (config.Info.EQInfo.Bypass_threshold || NormalizeShindo(config.Info.EQInfo.maxI_threshold, 5) <= NormalizeShindo(data[0].maxI, 5) ||
-            config.Info.EQInfo.M_threshold <= data[0].M)) {
+          (config.Info.EQInfo.Bypass_threshold || NormalizeShindo(config.Info.EQInfo.maxI_threshold, 5) <= NormalizeShindo(dataToNotify.maxI, 5) || config.Info.EQInfo.M_threshold <= dataToNotify.M)) {
           PlayAudio("EQInfo");
-          speak(GenerateEQInfoText(data[0]));
+          speak(GenerateEQInfoText(dataToNotify));
         }
       }
 
@@ -4296,7 +4295,9 @@ function AlertEQInfo(data, source, update, AudioNotification) {
         source: "jma",
         data: eqInfo.jma.slice(0, JMA_CurrentInfoNumber),
       });
-      data.forEach(function (elm) {
+
+      //現在開いている地震情報ウィンドウにデータ送信
+      dataUpdated.forEach(function (elm) {
         if (EQI_Window[elm.eventId]) {
           var metadata = EQI_Window[elm.eventId].metadata;
           var EEWDataItem = EEW_Data.find(function (elm2) {
@@ -4932,7 +4933,7 @@ function getClosestNum(needle, haystack) {
   });
 }
 function Boolean2(elm) {
-  return Boolean(elm !== null && elm !== undefined && elm !== "" && !Number.isNaN(elm) && elm != "Invalid Date" && (!Array.isArray(elm) || elm.length > 0) && elm);
+  return Boolean(elm !== null && elm !== undefined && elm !== "" && !Number.isNaN(elm) && elm != "Invalid Date" && (!Array.isArray(elm) || elm.length > 0) && elm || elm === 0);
 }
 
 function IncludesDuplicates(arr1, arr2) {

@@ -46,7 +46,7 @@ window.electronAPI.messageSend((event, request) => {
     psWaveEntry();
     JMAEstShindoControl(request.data);
   } else if (request.action == "UpdateStatus") {
-    UpdateStatus(request.Updatetime, request.LocalTime, request.type, request.condition, request.vendor);
+    UpdateStatus(request.Updatetime, request.LocalTime, request.type, request.condition);
   } else if (request.action == "kmoniUpdate") {
     UpdateStatus(request.Updatetime, request.LocalTime, "kmoniImg", "success");
     if (!background || !knet_already_draw) kmoniMapUpdate(request.data, "knet");
@@ -687,17 +687,16 @@ document.getElementById("setting").addEventListener("click", function () {
 
 //情報更新時刻更新
 var UpdateTime = [];
-function UpdateStatus(updateTime, LocalTime, type, condition, vendor) {
+function UpdateStatus(updateTime, LocalTime, type, condition) {
   if (updateTime > new Date() - Replay) return;
   UpdateTime[type] = {
     type: type,
     updateTime: updateTime,
     LocalTime: LocalTime,
     condition: condition,
-    vendor: vendor,
   };
   if (UTDialogShow && !background)
-    kmoniTimeRedraw(updateTime, LocalTime, type, condition, vendor);
+    kmoniTimeRedraw(updateTime, LocalTime, type, condition);
 }
 function kmoniTimeRedraw(updateTime, LocalTime, type, condition) {
   document.getElementById(type + "_UT").textContent = NormalizeDate(3, updateTime);
@@ -715,7 +714,7 @@ function kmoniTimeRedraw(updateTime, LocalTime, type, condition) {
       }
       if (type == "ntool" || type == "JMAXML")
 
-      break;
+        break;
     case "Error":
       iconElm.classList.remove("Success");
       iconElm.classList.add("Error");
@@ -739,7 +738,6 @@ document.getElementById("all_UpdateTime").addEventListener("click", function () 
       utData.LocalTime,
       utData.type,
       utData.condition,
-      utData.vendor
     );
   });
 });
