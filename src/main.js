@@ -4238,9 +4238,14 @@ function AlertEQInfo(data, source, update) {
   try {
     if (source == "jma") {
 
+      //OriginTimeがないデータ用にソート専用時刻をつくる
+      data.forEach(function (elm) {
+        elm.DateForSort = elm.OriginTime ? elm.OriginTime : elm.reportDateTime;
+      })
+
       //音声通知条件を満たす最新のデータ
       var dataToNotify = data.sort(function (a, b) {
-        return a.OriginTime > b.OriginTime ? -1 : 1;
+        return a.DateForSort > b.DateForSort ? -1 : 1;
       }).find(function (elm) {
         return elm.audioNotification
       })
@@ -4254,12 +4259,9 @@ function AlertEQInfo(data, source, update) {
         }
       }
 
-      eqInfo.jma = eqInfo.jma
-        .filter(function (elm) {
-          return elm.OriginTime;
-        }).sort(function (a, b) {
-          return a.OriginTime > b.OriginTime ? -1 : 1;
-        });
+      eqInfo.jma = eqInfo.jma.sort(function (a, b) {
+        return a.DateForSort > b.DateForSort ? -1 : 1;
+      });
 
       messageToMainWindow({
         action: "EQInfo",

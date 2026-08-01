@@ -398,9 +398,14 @@ function eqInfoDraw(data, source) {
   removeChild(EQListWrap);
 
 
-  var data_to_draw = data.concat(eqCount);
+  var data_to_draw = [...data, ...eqCount];
+
+  //ソート用にOriginTimeがないデータはReportTimeを参照する専用Dateを用意
+  data_to_draw.forEach(function (elm) {
+    elm.DateForSort = elm.OriginTime ? elm.OriginTime : elm.reportDateTime;
+  })
   data_to_draw.sort(function (a, b) {
-    if (sort_key == "t") return (a.OriginTime < b.OriginTime ? 1 : -1) | 0;
+    if (sort_key == "t") return (a.DateForSort < b.DateForSort ? 1 : -1) | 0;
     else if (sort_key == "m") return (a.M < b.M ? 1 : -1) | 0;
     else if (sort_key == "i") return (NormalizeShindo(a.maxI, 5) < NormalizeShindo(b.maxI, 5) ? 1 : -1) | 0;
     else return 0;
@@ -504,8 +509,8 @@ function eqInfoDraw(data, source) {
           clone.querySelector(".EQItem")
             .setAttribute("aria-label",
               `過去の気象庁による地震情報アイテム：${elm.status == "訓練" ? "訓練報、" : ""}${elm.status == "試験" ? "試験報、" : ""}
-            ${maxITmp != "?" ? "最大震度" + NormalizeShindo(maxITmp, 1) + "、" : ""}${lgIntStr}${elm.M || elm.M === 0 ? "マグニチュード" + elm.M.toFixed(1) + "、" : ""}
-            ${elm.epiCenter ? "震源は" + elm.epiCenter + "、" : ""}発生時刻は${NormalizeDate("M月D日h時m分", elm.OriginTime)}。エンターキーで詳細情報を確認。`
+            ${(maxITmp != "?") ? ("最大震度" + NormalizeShindo(maxITmp, 1) + "、") : ""}${lgIntStr}${elm.M || elm.M === 0 ? ("マグニチュード" + elm.M.toFixed(1) + "、") : ""}
+            ${elm.epiCenter ? ("震源は" + elm.epiCenter + "、") : ""}発生時刻は${elm.OriginTime ? NormalizeDate("M月D日h時m分", elm.OriginTime) : "不明"}。エンターキーで詳細情報を確認。`
             );
           clone.querySelector(".EQItem").addEventListener("click", function () {
             window.electronAPI.messageReturn({

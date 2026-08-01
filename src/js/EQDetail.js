@@ -130,7 +130,14 @@ window.electronAPI.messageSend((event, request) => {
     }
 
     if (!map) Mapinit();
-    else drawData();//2回目以降なら地図初期化とばしてdraw
+    else {
+      document.getElementById("shindomap_radio").setAttribute("checked", true);
+      estShindoMapDraw = false;
+      ShindoMapDraw = true;
+      LgIntMapDraw = false;
+
+      drawData();//2回目以降なら地図初期化とばしてdraw
+    }
   } else if (request.action == "setting") {
     config = request.data;
     document.getElementById("areaName").textContent = config.home.name || "現在地";
@@ -851,7 +858,7 @@ function Mapinit() {
   var radioWrap = document.createElement("div");
   radioWrap.classList.add("radio");
   radioWrap.innerHTML = '<label id="estshindomap_radioWrap"><input type="radio" name="mapFillSelect" value="fill1" id="estshindomap_radio">推計震度分布図</label>';
-  radioWrap.innerHTML += '<label><input type="radio" name="mapFillSelect" value="fill2" checked>各地の震度</label>';
+  radioWrap.innerHTML += '<label><input type="radio" name="mapFillSelect" value="fill2" checked  id="shindomap_radio">各地の震度</label>';
   radioWrap.innerHTML += '<label id="LgInt_radioWrap"><input type="radio" name="mapFillSelect" value="fill4">各地の長周期地震動階級</label>';
 
   var checkWrap = document.createElement("div");
@@ -1423,8 +1430,7 @@ function estimated_intensity_mapReq() {
           });
         });
 
-        document.getElementById("estshindomap_radio")
-          .setAttribute("checked", true);
+        document.getElementById("estshindomap_radio").setAttribute("checked", true);
         estShindoMapDraw = true;
         ShindoMapDraw = false;
         LgIntMapDraw = false;
