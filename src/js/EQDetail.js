@@ -128,7 +128,9 @@ window.electronAPI.messageSend((event, request) => {
         eew: true,
       };
     }
-    Mapinit();
+
+    if (map) Mapinit();
+    else drawData();//2回目以降なら地図初期化とばしてdraw
   } else if (request.action == "setting") {
     config = request.data;
     document.getElementById("areaName").textContent = config.home.name || "現在地";
@@ -897,19 +899,7 @@ function Mapinit() {
   cbWrapper.appendChild(homeButton);
   map.addControl({ onAdd: function () { return cbWrapper; }, });
 
-  map.on("load", function () {
-    mapFillSwitch();
-    layerSelect(config.data.layer);
-    radioSet("mapSelect", config.data.layer);
-    document.getElementById("globeView").checked = config.data.globeView;
-
-    InfoFetch();
-
-    config.data.overlay.forEach(function (elm) {
-      if (document.getElementById(elm)) document.getElementById(elm).checked = true;
-      overlaySelect(elm, true);
-    });
-  });
+  map.on("load", drawData)
 
   map.on('style.load', () => {
     ["0", "1", "2", "3", "4", "5-", "5+", "6-", "6+", "7", "未", "?"].forEach(function (int) {
@@ -1061,6 +1051,20 @@ function Mapinit() {
     mkr.getElement().removeAttribute("tabindex");
     mkr.getElement().setAttribute("aria-hidden", true);
   }
+}
+
+function drawData() {
+  mapFillSwitch();
+  layerSelect(config.data.layer);
+  radioSet("mapSelect", config.data.layer);
+  document.getElementById("globeView").checked = config.data.globeView;
+
+  InfoFetch();
+
+  config.data.overlay.forEach(function (elm) {
+    if (document.getElementById(elm)) document.getElementById(elm).checked = true;
+    overlaySelect(elm, true);
+  });
 }
 
 function Int_Area_Popup(e) {
@@ -2683,7 +2687,6 @@ function ConvertEQInfo(data) {
 
   EQInfoData.filter(function (elm) { return elm.category == "長周期地震動に関する観測情報"; }).forEach(function (elm) {
     if (Boolean2(elm.IntData)) EQInfoTmp.IntData = elm.IntData;
-
   });
 
   EQInfoData.filter(function (elm) { return elm.category !== "長周期地震動に関する観測情報"; }).forEach(function (elm) {
