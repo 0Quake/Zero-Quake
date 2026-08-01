@@ -235,127 +235,31 @@ var update_data;
 var downloadURL;
 
 //アップデートの確認
-function checkUpdate(userAction) {
+var checkUpdate = throttle(function (userAction) {
   try {
-    if (net.online) {
-      var UpdateError = function () {
-        var current_verTmp = soft_version;
+    var UpdateError = function (err) {
+      var current_verTmp = soft_version;
 
-        update_data = {
-          check_error: true,
-          check_date: new Date(),
-          latest_version: null,
-          current_version: current_verTmp,
-          update_available: null,
-          dl_page: null,
-        };
-        if (SettingWindow) {
-          SettingWindow.webContents.send("message2", {
-            action: "Update_Data",
-            data: update_data,
-          });
-        }
+      update_data = {
+        check_error: true,
+        check_date: new Date(),
+        latest_version: null,
+        current_version: current_verTmp,
+        update_available: null,
+        dl_page: null,
       };
-      let request = net.request(
-        "https://api.github.com/repos/0quake/Zero-Quake/releases?_=" + Number(new Date())
-      );
-      request.on("response", (res) => {
-        if (!300 <= res._responseHead.statusCode && !res._responseHead.statusCode < 200) {
-          var dataTmp = "";
-          res.on("data", (chunk) => {
-            dataTmp += chunk;
-          });
-          res.on("end", function () {
-            try {
-              var json = ParseJSON(dataTmp);
-              var latest_verTmp = String(json[0].tag_name.replace("v", ""));
+      if (SettingWindow) {
+        SettingWindow.webContents.send("message2", {
+          action: "Update_Data",
+          data: update_data,
+        });
+      }
+    };
 
-              var current_verTmp = packageJson.version;
-              var latest_v = String(latest_verTmp).split(".").map(Number);
-              var current_v = String(current_verTmp).split(".").map(Number);
-              var dl_page = json[0].html_url;
-              var update_detail = json[0].body;
-              downloadURL = json[0].assets[0];
-              if (downloadURL && downloadURL.browser_download_url)
-                downloadURL = downloadURL.browser_download_url;
-              else {
-                update_data = { check_error: true, check_date: new Date() };
-                if (SettingWindow) {
-                  SettingWindow.webContents.send("message2", {
-                    action: "Update_Data",
-                    data: update_data,
-                  });
-                }
-              }
-              var update_available = false;
-              if (latest_v[0] > current_v[0]) {
-                update_available = true;
-              } else if (latest_v[0] == current_v[0]) {
-                if (latest_v[1] > current_v[1]) {
-                  update_available = true;
-                } else if (latest_v[1] == current_v[1]) {
-                  if (latest_v[2] > current_v[2]) {
-                    update_available = true;
-
-                    if (!userAction) {
-                      var options4 = {
-                        type: "question",
-                        title: "アプリケーションの更新",
-                        message: "Zero Quake で更新が利用可能です。",
-                        detail: "v." + current_verTmp + " > v." + latest_verTmp + "\n操作を選択してください。",
-                        buttons: ["後で確認", "詳細を確認"],
-                        noLink: true,
-                      };
-
-                      dialog.showMessageBox(MainWindow, options4).then(function (result) {
-                        if (result.response == 1) {
-                          Create_SettingWindow(true);
-                        }
-                      });
-                    }
-                  }
-                }
-              }
-
-              update_data = {
-                check_error: false,
-                check_date: new Date(),
-                latest_version: latest_verTmp,
-                current_version: current_verTmp,
-                update_available: update_available,
-                dl_page: dl_page,
-                update_detail: update_detail,
-              };
-              if (SettingWindow) {
-                SettingWindow.webContents.send("message2", {
-                  action: "Update_Data",
-                  data: update_data,
-                });
-              }
-            } catch {
-              UpdateError();
-            }
-          });
-        }
-      });
-      request.on("error", UpdateError);
-      request.end();
-    }
-  } catch (err) {
-    throw new Error("アップデートの確認に失敗しました。", { cause: err });
-  }
-}
-
-//定期実行
-function ScheduledExecution() {
-  //axisのアクセストークン確認
-  if (config.Source.axis.GetData) {
-    if (net.online) {
-      var request = net.request(
-        "https://axis.prioris.jp/api/token/refresh/?token=" +
-        config.Source.axis.AccessToken
-      );
-      request.on("response", (res) => {
+    if (!net.online) return UpdateError("ネットワークに接続されていません。");
+    let request = net.request("https://api.github.com/repos/0quake/Zero-Quake/releases?_=" + Number(new Date()));
+    request.on("response", (res) => {
+      if (!300 <= res._responseHead.statusCode && !res._responseHead.statusCode < 200) {
         var dataTmp = "";
         res.on("data", (chunk) => {
           dataTmp += chunk;
@@ -363,31 +267,123 @@ function ScheduledExecution() {
         res.on("end", function () {
           try {
             var json = ParseJSON(dataTmp);
-            if (json.status == "generate a new token") {
-              //トークン更新
-              if (json.token) {
-                config.Source.axis.AccessToken = String(json.token);
-                store.set("config", config);
-                SystemNotification("Axisのアクセストークンを自動で更新しました。");
+            var latest_verTmp = String(json[0].tag_name.replace("v", ""));
+
+            var current_verTmp = packageJson.version;
+            var latest_v = String(latest_verTmp).split(".").map(Number);
+            var current_v = String(current_verTmp).split(".").map(Number);
+            var dl_page = json[0].html_url;
+            var update_detail = json[0].body;
+            downloadURL = json[0].assets[0];
+            if (downloadURL && downloadURL.browser_download_url)
+              downloadURL = downloadURL.browser_download_url;
+            else {
+              update_data = { check_error: true, check_date: new Date() };
+              if (SettingWindow) {
+                SettingWindow.webContents.send("message2", {
+                  action: "Update_Data",
+                  data: update_data,
+                });
               }
-            } else if (json.status == "contract has expired") {
-              //トークン期限切れ
-              config.Source.axis.GetData = false;
-              store.set("config", config);
-              SystemNotification("Axisのアクセストークンの期限が切れました。手動でトークンを更新しください。");
-            } else if (json.status == "invalid header authorization") {
-              config.Source.axis.GetData = false;
-              store.set("config", config);
-              SystemNotification("Axisのアクセストークンが不正です。設定を修正してください。");
             }
-          } catch {
-            UpdateStatus("axis", "Error");
+            var update_available = false;
+            if (latest_v[0] > current_v[0]) {
+              update_available = true;
+            } else if (latest_v[0] == current_v[0]) {
+              if (latest_v[1] > current_v[1]) {
+                update_available = true;
+              } else if (latest_v[1] == current_v[1]) {
+                if (latest_v[2] > current_v[2]) {
+                  update_available = true;
+
+                  if (!userAction) {
+                    var options4 = {
+                      type: "question",
+                      title: "アプリケーションの更新",
+                      message: "Zero Quake で更新が利用可能です。",
+                      detail: "v." + current_verTmp + " > v." + latest_verTmp + "\n操作を選択してください。",
+                      buttons: ["後で確認", "詳細を確認"],
+                      noLink: true,
+                    };
+
+                    dialog.showMessageBox(MainWindow, options4).then(function (result) {
+                      if (result.response == 1) {
+                        Create_SettingWindow(true);
+                      }
+                    });
+                  }
+                }
+              }
+            }
+
+            update_data = {
+              check_error: false,
+              check_date: new Date(),
+              latest_version: latest_verTmp,
+              current_version: current_verTmp,
+              update_available: update_available,
+              dl_page: dl_page,
+              update_detail: update_detail,
+            };
+            if (SettingWindow) {
+              SettingWindow.webContents.send("message2", {
+                action: "Update_Data",
+                data: update_data,
+              });
+            }
+          } catch (err) {
+            UpdateError(err);
           }
         });
-      });
-      request.end();
-    }
+      }
+    });
+    request.on("error", UpdateError);
+    request.end();
+  } catch (err) {
+    throw new Error("アップデートの確認で深刻なエラーが発生しました。");
   }
+}, 2000);
+
+//定期実行
+function ScheduledExecution() {
+  //axisのアクセストークン確認
+  if (!config.Source.axis.GetData) return;
+  if (!net.online) return;
+  var request = net.request(
+    "https://axis.prioris.jp/api/token/refresh/?token=" +
+    config.Source.axis.AccessToken
+  );
+  request.on("response", (res) => {
+    var dataTmp = "";
+    res.on("data", (chunk) => {
+      dataTmp += chunk;
+    });
+    res.on("end", function () {
+      try {
+        var json = ParseJSON(dataTmp);
+        if (json.status == "generate a new token") {
+          //トークン更新
+          if (json.token) {
+            config.Source.axis.AccessToken = String(json.token);
+            store.set("config", config);
+            SystemNotification("Axisのアクセストークンを自動で更新しました。");
+          }
+        } else if (json.status == "contract has expired") {
+          //トークン期限切れ
+          config.Source.axis.GetData = false;
+          store.set("config", config);
+          SystemNotification("Axisのアクセストークンの期限が切れました。手動でトークンを更新しください。");
+        } else if (json.status == "invalid header authorization") {
+          config.Source.axis.GetData = false;
+          store.set("config", config);
+          SystemNotification("Axisのアクセストークンが不正です。設定を修正してください。");
+        }
+      } catch {
+        UpdateStatus("axis", "Error");
+      }
+    });
+  });
+  request.end();
 }
 //準備完了イベント
 app.whenReady().then(() => {
@@ -1398,198 +1394,193 @@ function start() {
 }
 
 function Req_JMA_gaikyo() {
-  if (net.online) {
-    var request = net.request("https://www.data.jma.go.jp/svd/eqev/data/gaikyo/?_=" + Number(new Date()));
-    request.on("response", (res) => {
-      var text = "";
-      res.on("data", (chunk) => {
-        text += chunk;
-      });
-      res.on("end", function () {
-        try {
-          const parser = new new JSDOM().window.DOMParser();
-          const doc = parser.parseFromString(text, "text/html");
-          var data = [];
-          doc.querySelectorAll("ul.subMenu li a").forEach(function (elm) {
-            var href = elm.getAttribute("href");
-            if (href.includes("monthly/")) {
-              var date = new Date(elm.textContent.substring(0, 4), elm.textContent.substring(5, 7) - 1 + 1, 0); //月の最終日を取得
-              data.push({
-                date: date,
-                dateStr: `${elm.textContent.substring(0, 4)}/${elm.textContent.substring(5, 7)}`,
-                title: "地震・火山月報（防災編）",
-                headline: "地震・火山月報（防災編）",
-                url: "https://www.data.jma.go.jp/svd/eqev/data/gaikyo/" + href,
-              });
-            } else if (href.includes("press/") || href.includes("oshirase/")) {
-              data.push({
-                date: new Date(
-                  elm.textContent.substring(0, 4), elm.textContent.substring(5, 7) - 1, elm.textContent.substring(8, 10),
-                  elm.textContent.substring(11, 13), elm.textContent.substring(14, 16)),
-                dateStr: `${elm.textContent.substring(0, 4)}/${elm.textContent.substring(5, 7)}/${elm.textContent.substring(8, 10)} ${elm.textContent.substring(11, 13)}:${elm.textContent.substring(14, 16)}`,
-                title: "地震解説資料",
-                headline: "地震解説資料\n" + elm.textContent.substring(17).trim(),
-                url: "https:" + href,
-              });
-            } else if (href.includes("weekly/zenkoku/")) {
-              var year = Number(elm.textContent.substring(0, 4));
-              var year2 = Number(year);
-              var number = Number(elm.textContent.substring(8, 10));
-              if (number == 1 && Number(elm.textContent.substring(19, 21)) == 12) year -= 1;
-              data.push({
-                date0: new Date(year, elm.textContent.substring(19, 21) - 1, elm.textContent.substring(22, 24)),
-                date: new Date(year2, elm.textContent.substring(31, 33) - 1, elm.textContent.substring(34, 36)),
-                dateStr: `${year}/${elm.textContent.substring(19, 21)}/${elm.textContent.substring(22, 24)}～${elm.textContent.substring(31, 33)}/${elm.textContent.substring(34, 36)}`,
-                title: "週間地震概況（全国）",
-                headline: "週間地震概況（全国）No." + number,
-                url: "https://www.data.jma.go.jp/svd/eqev/data/gaikyo/" + href,
-              });
-            } else if (href.includes("weekly/nt/")) {
-              var year = Number(elm.textContent.substring(0, 4));
-              var year2 = Number(year);
-              var number = Number(elm.textContent.substring(8, 10));
-              if (number == 1 && Number(elm.textContent.substring(19, 21)) == 12)
-                year -= 1;
-              data.push({
-                date0: new Date(year, elm.textContent.substring(19, 21) - 1, elm.textContent.substring(22, 24)),
-                date: new Date(year2, elm.textContent.substring(31, 33) - 1, elm.textContent.substring(34, 36)),
-                dateStr: `${year}/${elm.textContent.substring(19, 21)}/${elm.textContent.substring(22, 24)}～${elm.textContent.substring(31, 33)}/${elm.textContent.substring(34, 36)}`,
-                title: "週間地震活動概況（南海トラフ周辺）",
-                headline: "週間地震活動概況（南海トラフ周辺）No." + number,
-                url: "https://www.data.jma.go.jp/svd/eqev/data/gaikyo/" + href,
-              });
-            }
-          });
-          data.sort(function (a, b) {
-            return a.date < b.date ? 1 : -1;
-          });
-          messageToMainWindow({ action: "Return_gaikyo", data: data });
-        } catch {
-          messageToMainWindow({ action: "Return_gaikyo", data: [] });
-        }
-      });
+  if (!net.online) return;
+  var request = net.request("https://www.data.jma.go.jp/svd/eqev/data/gaikyo/?_=" + Number(new Date()));
+  request.on("response", (res) => {
+    var text = "";
+    res.on("data", (chunk) => {
+      text += chunk;
     });
-    request.on("error", () => {
-      messageToMainWindow({ action: "Return_gaikyo", data: [] });
+    res.on("end", function () {
+      try {
+        const parser = new new JSDOM().window.DOMParser();
+        const doc = parser.parseFromString(text, "text/html");
+        var data = [];
+        doc.querySelectorAll("ul.subMenu li a").forEach(function (elm) {
+          var href = elm.getAttribute("href");
+          if (href.includes("monthly/")) {
+            var date = new Date(elm.textContent.substring(0, 4), elm.textContent.substring(5, 7) - 1 + 1, 0); //月の最終日を取得
+            data.push({
+              date: date,
+              dateStr: `${elm.textContent.substring(0, 4)}/${elm.textContent.substring(5, 7)}`,
+              title: "地震・火山月報（防災編）",
+              headline: "地震・火山月報（防災編）",
+              url: "https://www.data.jma.go.jp/svd/eqev/data/gaikyo/" + href,
+            });
+          } else if (href.includes("press/") || href.includes("oshirase/")) {
+            data.push({
+              date: new Date(
+                elm.textContent.substring(0, 4), elm.textContent.substring(5, 7) - 1, elm.textContent.substring(8, 10),
+                elm.textContent.substring(11, 13), elm.textContent.substring(14, 16)),
+              dateStr: `${elm.textContent.substring(0, 4)}/${elm.textContent.substring(5, 7)}/${elm.textContent.substring(8, 10)} ${elm.textContent.substring(11, 13)}:${elm.textContent.substring(14, 16)}`,
+              title: "地震解説資料",
+              headline: "地震解説資料\n" + elm.textContent.substring(17).trim(),
+              url: "https:" + href,
+            });
+          } else if (href.includes("weekly/zenkoku/")) {
+            var year = Number(elm.textContent.substring(0, 4));
+            var year2 = Number(year);
+            var number = Number(elm.textContent.substring(8, 10));
+            if (number == 1 && Number(elm.textContent.substring(19, 21)) == 12) year -= 1;
+            data.push({
+              date0: new Date(year, elm.textContent.substring(19, 21) - 1, elm.textContent.substring(22, 24)),
+              date: new Date(year2, elm.textContent.substring(31, 33) - 1, elm.textContent.substring(34, 36)),
+              dateStr: `${year}/${elm.textContent.substring(19, 21)}/${elm.textContent.substring(22, 24)}～${elm.textContent.substring(31, 33)}/${elm.textContent.substring(34, 36)}`,
+              title: "週間地震概況（全国）",
+              headline: "週間地震概況（全国）No." + number,
+              url: "https://www.data.jma.go.jp/svd/eqev/data/gaikyo/" + href,
+            });
+          } else if (href.includes("weekly/nt/")) {
+            var year = Number(elm.textContent.substring(0, 4));
+            var year2 = Number(year);
+            var number = Number(elm.textContent.substring(8, 10));
+            if (number == 1 && Number(elm.textContent.substring(19, 21)) == 12)
+              year -= 1;
+            data.push({
+              date0: new Date(year, elm.textContent.substring(19, 21) - 1, elm.textContent.substring(22, 24)),
+              date: new Date(year2, elm.textContent.substring(31, 33) - 1, elm.textContent.substring(34, 36)),
+              dateStr: `${year}/${elm.textContent.substring(19, 21)}/${elm.textContent.substring(22, 24)}～${elm.textContent.substring(31, 33)}/${elm.textContent.substring(34, 36)}`,
+              title: "週間地震活動概況（南海トラフ周辺）",
+              headline: "週間地震活動概況（南海トラフ周辺）No." + number,
+              url: "https://www.data.jma.go.jp/svd/eqev/data/gaikyo/" + href,
+            });
+          }
+        });
+        data.sort(function (a, b) {
+          return a.date < b.date ? 1 : -1;
+        });
+        messageToMainWindow({ action: "Return_gaikyo", data: data });
+      } catch {
+        messageToMainWindow({ action: "Return_gaikyo", data: [] });
+      }
     });
-    request.end();
-  }
+  });
+  request.on("error", () => {
+    messageToMainWindow({ action: "Return_gaikyo", data: [] });
+  });
+  request.end();
 }
 
 function Req_JMA_wepa() {
-  if (net.online) {
-    var request = net.request("https://www.jma.go.jp/bosai/pacifictsunami/data/list.json?_=" + Number(new Date()));
-    request.on("response", (res) => {
-      var dataTmp = "";
-      res.on("data", (chunk) => {
-        dataTmp += chunk;
-      });
-      res.on("end", function () {
-        try {
-          var json = ParseJSON(dataTmp);
-          messageToMainWindow({ action: "Return_wepa", data: json });
-        } catch {
-          messageToMainWindow({ action: "Return_wepa", data: [] });
-        }
-      });
+  if (!net.online) return;
+  var request = net.request("https://www.jma.go.jp/bosai/pacifictsunami/data/list.json?_=" + Number(new Date()));
+  request.on("response", (res) => {
+    var dataTmp = "";
+    res.on("data", (chunk) => {
+      dataTmp += chunk;
     });
-    request.on("error", () => {
-      messageToMainWindow({ action: "Return_wepa", data: [] });
+    res.on("end", function () {
+      try {
+        var json = ParseJSON(dataTmp);
+        messageToMainWindow({ action: "Return_wepa", data: json });
+      } catch {
+        messageToMainWindow({ action: "Return_wepa", data: [] });
+      }
     });
-    request.end();
-  }
+  });
+  request.on("error", () => {
+    messageToMainWindow({ action: "Return_wepa", data: [] });
+  });
+  request.end();
 }
 
 var TremRts_sta;
 var Trem_server = true;
 function Req_TremRts_sta() {
-  if (net.online) {
-    var request = net.request("https://api-" + (Trem_server ? 1 : 2) + ".exptech.dev/api/v1/trem/station?_=" + Number(new Date()));
-    request.on("response", (res) => {
-      var dataTmp = "";
-      res.on("data", (chunk) => {
-        dataTmp += chunk;
-      });
-      res.on("end", function () {
-        try {
-          var json = ParseJSON(dataTmp);
-          if (json) TremRts_sta = json;
-        } catch {
-          UpdateStatus("TREM-RTS", "Error");
-          Trem_server = !Trem_server;
-        }
-      });
+  if (!net.online) return;
+  var request = net.request(`https://api-${Trem_server ? 1 : 2}.exptech.dev/api/v1/trem/station?_=${Number(new Date())}`);
+  request.on("response", (res) => {
+    var dataTmp = "";
+    res.on("data", (chunk) => {
+      dataTmp += chunk;
     });
-    request.on("error", () => {
-      Trem_server = !Trem_server;
+    res.on("end", function () {
+      try {
+        var json = ParseJSON(dataTmp);
+        if (json) TremRts_sta = json;
+      } catch {
+        UpdateStatus("TREM-RTS", "Error");
+        Trem_server = !Trem_server;
+      }
     });
-    request.end();
-  }
+  });
+  request.on("error", () => {
+    Trem_server = !Trem_server;
+  });
+  request.end();
 }
 
 var TremRTS_server = true;
 function Req_TremRts() {
-  if (config.Source.TREMRTS.GetData) {
-    if (net.online) {
-      if (!TremRts_sta) Req_TremRts_sta();
+  setTimeout(Req_TremRts, config.Source.TREMRTS.Interval);
 
-      if (Replay !== 0) var url = "https://api-" + (TremRTS_server ? 1 : 2) + ".exptech.dev/api/v1/trem/rts/" + Number(new Date() - Replay);
-      else var url = "https://lb-" + (TremRTS_server ? 1 : 2) + ".exptech.dev/api/v1/trem/rts?_=" + Number(new Date());
+  if (!config.Source.TREMRTS.GetData) return;
+  if (!net.online) return UpdateStatus("TREM-RTS", "Error");
+  if (!TremRts_sta) Req_TremRts_sta();
 
-      var request = net.request(url);
-      request.on("response", (res) => {
-        var dataTmp = "";
-        res.on("data", (chunk) => {
-          dataTmp += chunk;
-        });
-        res.on("end", function () {
-          try {
-            var json = ParseJSON(dataTmp);
-            var TremRtsData = {};
-            Object.keys(json.station).forEach(function (StID) {
-              var st = json.station[StID];
-              var stationData = TremRts_sta ? TremRts_sta[StID] : null;
-              if (stationData) {
-                var JPShindo = st.i; //おおむね対応するため、現時点では変換不要と判断
-                var rgb = shindoColorTable[Math.max(-3, Math.floor(JPShindo * 10) / 10)];
-                TremRtsData[StID] = {
-                  Type: "TREMRTS",
-                  shindo: JPShindo,
-                  PGA: st.pga,
-                  Code: StID,
-                  Name: "",
-                  IsSuspended: false,
-                  Region: "",
-                  Location: {
-                    Longitude: stationData.info[0].lon,
-                    Latitude: stationData.info[0].lat,
-                  },
-                  rgb: [rgb.r, rgb.g, rgb.b],
-                };
-              }
-            });
-            TremRtsData_Marged = {
-              action: "TREM-RTSUpdate",
-              LocalTime: new Date(),
-              data: TremRtsData,
+  if (Replay !== 0) var url = `https://api-${TremRTS_server ? 1 : 2}.exptech.dev/api/v1/trem/rts/${Number(new Date() - Replay)}`;
+  else var url = `https://lb-${TremRTS_server ? 1 : 2}.exptech.dev/api/v1/trem/rts?_=${Number(new Date())}`;
+
+  var request = net.request(url);
+  request.on("response", (res) => {
+    var dataTmp = "";
+    res.on("data", (chunk) => {
+      dataTmp += chunk;
+    });
+    res.on("end", function () {
+      try {
+        var json = ParseJSON(dataTmp);
+        var TremRtsData = {};
+        Object.keys(json.station).forEach(function (StID) {
+          var st = json.station[StID];
+          var stationData = TremRts_sta ? TremRts_sta[StID] : null;
+          if (stationData) {
+            var JPShindo = st.i; //おおむね対応するため、現時点では変換不要と判断
+            var rgb = shindoColorTable[Math.max(-3, Math.floor(JPShindo * 10) / 10)];
+            TremRtsData[StID] = {
+              Type: "TREMRTS",
+              shindo: JPShindo,
+              PGA: st.pga,
+              Code: StID,
+              Name: "",
+              IsSuspended: false,
+              Region: "",
+              Location: {
+                Longitude: stationData.info[0].lon,
+                Latitude: stationData.info[0].lat,
+              },
+              rgb: [rgb.r, rgb.g, rgb.b],
             };
-            messageToMainWindow(TremRtsData_Marged);
-            UpdateStatus("TREM-RTS", "success", new Date(json.time),);
-          } catch {
-            UpdateStatus("TREM-RTS", "Error");
-            TremRTS_server = !TremRTS_server;
           }
         });
-      });
-      request.on("error", () => {
+        TremRtsData_Marged = {
+          action: "TREM-RTSUpdate",
+          LocalTime: new Date(),
+          data: TremRtsData,
+        };
+        messageToMainWindow(TremRtsData_Marged);
+        UpdateStatus("TREM-RTS", "success", new Date(json.time),);
+      } catch {
         UpdateStatus("TREM-RTS", "Error");
         TremRTS_server = !TremRTS_server;
-      });
-      request.end();
-    } else UpdateStatus("TREM-RTS", "Error");
-  }
-
-  setTimeout(Req_TremRts, config.Source.TREMRTS.Interval);
+      }
+    });
+  });
+  request.on("error", () => {
+    UpdateStatus("TREM-RTS", "Error");
+    TremRTS_server = !TremRTS_server;
+  });
+  request.end();
 }
 
 function sort_by_dist_TIDE(data) {
@@ -1602,91 +1593,57 @@ function sort_by_dist_TIDE(data) {
 
 var JMATide_sta = [];
 function Req_JMATide_sta() {
-  if (net.online) {
-    var request = net.request("https://www.jma.go.jp/bosai/tidelevel/const/tide_area.json?_=" + Number(new Date()));
-    request.on("response", (res) => {
-      var dataTmp = "";
-      res.on("data", (chunk) => {
-        dataTmp += chunk;
-      });
-      res.on("end", function () {
-        try {
-          var json = ParseJSON(dataTmp);
-          var stations = []
-          Object.keys(json).forEach(function (key) {
-            var el = json[key]
-            el.class30s.forEach(function (cl) {
-              if (cl.stations) {
-                cl.stations.forEach(function (st) {
-                  if (st.code && st.lat && st.lon && st.name) {//データ有効性チェック
-                    st.threshold_warn = cl.standard.level4
-                    st.threshold_advisory = cl.standard.level5
-                    stations.push(st);
-                  }
-                });
-              }
-            });
+  if (!net.online) return messageToMainWindow({ action: "Return_tide", data: [] });
+  var request = net.request("https://www.jma.go.jp/bosai/tidelevel/const/tide_area.json?_=" + Number(new Date()));
+  request.on("response", (res) => {
+    var dataTmp = "";
+    res.on("data", (chunk) => {
+      dataTmp += chunk;
+    });
+    res.on("end", function () {
+      try {
+        var json = ParseJSON(dataTmp);
+        var stations = []
+        Object.keys(json).forEach(function (key) {
+          var el = json[key]
+          el.class30s.forEach(function (cl) {
+            if (cl.stations) {
+              cl.stations.forEach(function (st) {
+                if (st.code && st.lat && st.lon && st.name) {//データ有効性チェック
+                  st.threshold_warn = cl.standard.level4
+                  st.threshold_advisory = cl.standard.level5
+                  stations.push(st);
+                }
+              });
+            }
           });
+        });
 
-          //↓近い順10件
-          stations = sort_by_dist_TIDE(stations);
-          JMATide_sta = stations.slice(0, 10)
-          //↑近い順10件
-        } catch (e) {
-          messageToMainWindow({ action: "Return_tide", data: [] });
-        }
-      });
+        //↓近い順10件
+        stations = sort_by_dist_TIDE(stations);
+        JMATide_sta = stations.slice(0, 10)
+        //↑近い順10件
+      } catch (e) {
+        messageToMainWindow({ action: "Return_tide", data: [] });
+      }
     });
-    request.on("error", () => {
-      messageToMainWindow({ action: "Return_tide", data: [] });
-    });
-    request.end();
-  } else {
+  });
+  request.on("error", () => {
     messageToMainWindow({ action: "Return_tide", data: [] });
-  }
+  });
+  request.end();
 }
 
 var JMATide_astro = {};
 var JMATide_obs = {};
 function Req_JMATide() {
   if (!JMATide_sta) Req_TremRts_sta();
+  if (!net.online) return messageToMainWindow({ action: "Return_tide", data: [] });;
 
-  if (net.online) {
-    JMATide_sta.forEach(function (st) {
+  JMATide_sta.forEach(function (st) {
 
-      if (!JMATide_astro[st.code]) {
-        var request = net.request(`https://www.jma.go.jp/bosai/tidelevel/const/tide_astro/tide_astro_${NormalizeDate("YYYY", new Date() - Replay)}_${st.code}.json`);
-        request.on("response", (res) => {
-          var dataTmp = "";
-          res.on("data", (chunk) => {
-            dataTmp += chunk;
-          });
-          res.on("end", function () {
-            try {
-              var json = ParseJSON(dataTmp);
-              if (json.tide) {
-                var tide = json.tide;
-                JMATide_astro[st.code] = tide
-
-                if (JMATide_obs[st.code]) {//★1と同じ
-                  JMATide_obs[st.code].astro = tide[NormalizeDate("MMDD", new Date() - Replay)][NormalizeDate("h", new Date() - Replay)]
-                  messageToMainWindow({ action: "Return_tide", data: sort_by_dist_TIDE(Object.values(JMATide_obs)) });
-                }
-              }
-
-            } catch (e) {
-              messageToMainWindow({ action: "Return_tide", data: [] });
-            }
-          });
-        });
-        request.on("error", () => {
-          messageToMainWindow({ action: "Return_tide", data: [] });
-        });
-        request.end();
-      }
-
-
-      var request = net.request(`https://www.jma.go.jp/bosai/tidelevel/data/tide/tide_obs_${NormalizeDate(2, new Date() - Replay)}_${st.code}.json`);
+    if (!JMATide_astro[st.code]) {
+      var request = net.request(`https://www.jma.go.jp/bosai/tidelevel/const/tide_astro/tide_astro_${NormalizeDate("YYYY", new Date() - Replay)}_${st.code}.json`);
       request.on("response", (res) => {
         var dataTmp = "";
         res.on("data", (chunk) => {
@@ -1695,44 +1652,16 @@ function Req_JMATide() {
         res.on("end", function () {
           try {
             var json = ParseJSON(dataTmp);
-            if (json.tide && json.tide.length >= 4) {
-              var obsdata = {
-                code: st.code,
-                name: st.name,
-                by: st.typeName ? st.typeName.replaceAll("（地図では自治体等）", "") : "-",
-                date: new Date(json.time) + (json.interval * json.tide.length) * 1000,
-                threshold_warn: st.threshold_warn,
-                threshold_advisory: st.threshold_advisory
-              };
+            if (json.tide) {
+              var tide = json.tide;
+              JMATide_astro[st.code] = tide
 
-              var part = json.tide.slice(-4);
-              var height;
-              switch (config.Info.TideHeight.processing) {
-                case "median":
-                  var sorted = part.sort((a, b) => a - b);
-                  height = (sorted[1] + sorted[2]) / 2
-                  break;
-                default:
-                case "latest":
-                  height = json.tide[json.tide.length - 1]
-                  break;
+              if (JMATide_obs[st.code]) {//★1と同じ
+                JMATide_obs[st.code].astro = tide[NormalizeDate("MMDD", new Date() - Replay)][NormalizeDate("h", new Date() - Replay)]
+                messageToMainWindow({ action: "Return_tide", data: sort_by_dist_TIDE(Object.values(JMATide_obs)) });
               }
-              obsdata.height = height;
-
-              if (JMATide_astro[st.code]) {//★1と同じ処理
-                /*線形補完する？
-function lerp(x0, y0, x1, y1, x) {//線形補完
-  return y0 + (y1 - y0) * (x - x0) / (x1 - x0);
-}
-var h = Number(NormalizeDate("h", new Date() - Replay))
-var m = Number(NormalizeDate("m", new Date() - Replay))
-lerp(h, tide[h], h + 1, tide[h + 1], h + m / 60)*/
-                obsdata.astro = JMATide_astro[st.code][NormalizeDate("MMDD", new Date() - Replay)][NormalizeDate("h", new Date() - Replay)]
-              }
-
-              JMATide_obs[st.code] = obsdata
-              messageToMainWindow({ action: "Return_tide", data: sort_by_dist_TIDE(Object.values(JMATide_obs)) });
             }
+
           } catch (e) {
             messageToMainWindow({ action: "Return_tide", data: [] });
           }
@@ -1742,81 +1671,129 @@ lerp(h, tide[h], h + 1, tide[h + 1], h + m / 60)*/
         messageToMainWindow({ action: "Return_tide", data: [] });
       });
       request.end();
-    })
-  } else {
-    messageToMainWindow({ action: "Return_tide", data: [] });
-  }
+    }
+
+
+    var request = net.request(`https://www.jma.go.jp/bosai/tidelevel/data/tide/tide_obs_${NormalizeDate(2, new Date() - Replay)}_${st.code}.json`);
+    request.on("response", (res) => {
+      var dataTmp = "";
+      res.on("data", (chunk) => {
+        dataTmp += chunk;
+      });
+      res.on("end", function () {
+        try {
+          var json = ParseJSON(dataTmp);
+          if (json.tide && json.tide.length >= 4) {
+            var obsdata = {
+              code: st.code,
+              name: st.name,
+              by: st.typeName ? st.typeName.replaceAll("（地図では自治体等）", "") : "-",
+              date: new Date(json.time) + (json.interval * json.tide.length) * 1000,
+              threshold_warn: st.threshold_warn,
+              threshold_advisory: st.threshold_advisory
+            };
+
+            var part = json.tide.slice(-4);
+            var height;
+            switch (config.Info.TideHeight.processing) {
+              case "median":
+                var sorted = part.sort((a, b) => a - b);
+                height = (sorted[1] + sorted[2]) / 2
+                break;
+              default:
+              case "latest":
+                height = json.tide[json.tide.length - 1]
+                break;
+            }
+            obsdata.height = height;
+
+            if (JMATide_astro[st.code]) {//★1と同じ処理
+              obsdata.astro = JMATide_astro[st.code][NormalizeDate("MMDD", new Date() - Replay)][NormalizeDate("h", new Date() - Replay)]
+            }
+
+            JMATide_obs[st.code] = obsdata
+            messageToMainWindow({ action: "Return_tide", data: sort_by_dist_TIDE(Object.values(JMATide_obs)) });
+          }
+        } catch (e) {
+          messageToMainWindow({ action: "Return_tide", data: [] });
+        }
+      });
+    });
+    request.on("error", () => {
+      messageToMainWindow({ action: "Return_tide", data: [] });
+    });
+    request.end();
+  })
 }
 
 
 function Req_EarlyEst() {
-  if (config.Source.EarlyEst.GetData) {
-    if (net.online) {
-      var request = net.request("http://early-est.rm.ingv.it/monitor.xml");
-      request.on("response", (res) => {
-        if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
-          UpdateStatus("Early-est", "Error");
-        } else {
-          var dataTmp = "";
-          res.on("data", (chunk) => {
-            dataTmp += chunk;
-          });
-          res.on("end", function () {
-            try {
-              UpdateStatus("Early-est", "success");
-              let parser = new new JSDOM().window.DOMParser();
-              let doc = parser.parseFromString(dataTmp, "text/xml");
-              Array.prototype.forEach.call(
-                doc.getElementsByTagName("eventParameters"),
-                function (parent) {
-                  var elm = parent.getElementsByTagName("event")[0];
-                  if (elm) {
-                    var latitude = elm.querySelector("origin latitude value") ? Number(elm.querySelector("origin latitude value").textContent) : null;
-                    var longitude = elm.querySelector("origin longitude value") ? Number(elm.querySelector("origin longitude value").textContent) : null;
-                    if (!latitude || !longitude) return;
+  setTimeout(Req_EarlyEst, config.Source.EarlyEst.Interval);
 
-                    var FECode = FERegion.features.find(function (elm2) {
-                      return turf.booleanPointInPolygon([longitude, latitude], elm2);
-                    });
+  if (!config.Source.EarlyEst.GetData) return;
+  if (!net.online) return UpdateStatus("Early-est", "Error")
+  var request = net.request("http://early-est.rm.ingv.it/monitor.xml");
+  request.on("response", (res) => {
+    if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
+      UpdateStatus("Early-est", "Error");
+    } else {
+      var dataTmp = "";
+      res.on("data", (chunk) => {
+        dataTmp += chunk;
+      });
+      res.on("end", function () {
+        try {
+          UpdateStatus("Early-est", "success");
+          let parser = new new JSDOM().window.DOMParser();
+          let doc = parser.parseFromString(dataTmp, "text/xml");
+          Array.prototype.forEach.call(
+            doc.getElementsByTagName("eventParameters"),
+            function (parent) {
+              var elm = parent.getElementsByTagName("event")[0];
+              if (elm) {
+                var latitude = elm.querySelector("origin latitude value") ? Number(elm.querySelector("origin latitude value").textContent) : null;
+                var longitude = elm.querySelector("origin longitude value") ? Number(elm.querySelector("origin longitude value").textContent) : null;
+                if (!latitude || !longitude) return;
 
-                    if (FECode) {
-                      var data = {
-                        alertflg: "EarlyEst",
-                        EventID: 901471985000000000000 + Number(String(elm.getAttribute("publicID")).slice(-12)), //気象庁EIDと確実に区別するため、EarlyEstのIPアドレスと連結,
-                        serial:
-                          Number(elm.querySelector("origin quality").getElementsByTagName("ee:report_count")[0].textContent) + 1,
-                        report_time: elm.querySelector("creationInfo creationTime")
-                          ? ConvertJST(new Date(elm.querySelector("creationInfo creationTime").textContent)) : null,
-                        magnitude: elm.querySelector("magnitude mag value")
-                          ? Number(elm.querySelector("magnitude mag value").textContent) : null,
-                        depth: elm.querySelector("origin depth value")
-                          ? Number(elm.querySelector("origin depth value").textContent) / 1000 : null,
-                        latitude: latitude,
-                        longitude: longitude,
-                        region_name: FECode.properties.nameJA,
-                        origin_time: elm.querySelector("origin time value")
-                          ? ConvertJST(new Date(elm.querySelector("origin time value").textContent)) : null,
-                        source: "EarlyEst",
-                      };
-                      MargeEarlyEst(data);
-                    }
-                  }
+                var FECode = FERegion.features.find(function (elm2) {
+                  return turf.booleanPointInPolygon([longitude, latitude], elm2);
+                });
+
+                if (FECode) {
+                  var data = {
+                    alertflg: "EarlyEst",
+                    EventID: 901471985000000000000 + Number(String(elm.getAttribute("publicID")).slice(-12)), //気象庁EIDと確実に区別するため、EarlyEstのIPアドレスと連結,
+                    serial:
+                      Number(elm.querySelector("origin quality").getElementsByTagName("ee:report_count")[0].textContent) + 1,
+                    report_time: elm.querySelector("creationInfo creationTime")
+                      ? ConvertJST(new Date(elm.querySelector("creationInfo creationTime").textContent)) : null,
+                    magnitude: elm.querySelector("magnitude mag value")
+                      ? Number(elm.querySelector("magnitude mag value").textContent) : null,
+                    depth: elm.querySelector("origin depth value")
+                      ? Number(elm.querySelector("origin depth value").textContent) / 1000 : null,
+                    latitude: latitude,
+                    longitude: longitude,
+                    region_name: FECode.properties.nameJA,
+                    origin_time: elm.querySelector("origin time value")
+                      ? ConvertJST(new Date(elm.querySelector("origin time value").textContent)) : null,
+                    source: "EarlyEst",
+                  };
+                  MargeEarlyEst(data);
                 }
-              );
-            } catch {
-              UpdateStatus("Early-est", "Error");
+              }
             }
-          });
+          );
+        } catch {
+          UpdateStatus("Early-est", "Error");
         }
       });
-      request.on("error", () => {
-        UpdateStatus("Early-est", "Error");
-      });
+    }
+  });
+  request.on("error", () => {
+    UpdateStatus("Early-est", "Error");
+  });
 
-      request.end();
-    } else UpdateStatus("Early-est", "Error");
-  }
-  setTimeout(Req_EarlyEst, config.Source.EarlyEst.Interval);
+  request.end();
 }
 
 function createWorker() {
@@ -1901,124 +1878,122 @@ function ConvertSnet(data, date, y, uid) {
 var kmoniI_url = 0;
 //強震モニタへのHTTPリクエスト
 function Req_kmoni() {
-  if (config.Source.kmoni.kmoni.GetData) {
-    if (net.online) {
-      var ReqTime = new Date() - KmoniOffset - Replay;
-      var urlTmp = [
-        "https://smi.lmoniexp.bosai.go.jp/data/map_img/RealTimeImg/jma_s/" + NormalizeDate(2, ReqTime) + "/" + NormalizeDate(1, ReqTime) + ".jma_s.gif",
-        "http://www.kmoni.bosai.go.jp/data/map_img/RealTimeImg/jma_s/" + NormalizeDate(2, ReqTime) + "/" + NormalizeDate(1, ReqTime) + ".jma_s.gif",
-      ][kmoniI_url];
-
-      var request = net.request(urlTmp);
-      request.on("response", (res) => {
-        var dataTmp = [];
-        res.on("data", (chunk) => {
-          dataTmp.push(chunk);
-        });
-        res.on("end", () => {
-          try {
-            if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
-              errorCountkI++;
-              if (errorCountkI > 3) {
-                errorCountkI = 0;
-                kmoniI_url++;
-                if (kmoniI_url >= urlTmp.length - 1) kmoniI_url = 0;
-                SetKmoniOffset(Req_kmoni);
-              }
-              UpdateStatus("kmoniImg", "Error");
-            } else {
-              errorCountkI = 0;
-              // eslint-disable-next-line no-undef
-              var bufTmp = Buffer.concat(dataTmp);
-              if (WorkerWindow) {
-                WorkerWindow.webContents.send("message2", {
-                  action: "KmoniImgUpdate",
-                  data: "data:image/gif;base64," + bufTmp.toString("base64"),
-                  date: ReqTime,
-                });
-              }
-            }
-          } catch {
-            UpdateStatus("kmoniImg", "Error");
-          }
-        });
-      });
-      request.end();
-    } else UpdateStatus("kmoniImg", "Error");
-  }
-
+  //タイマー処理
   if (kmoniTimeout) clearTimeout(kmoniTimeout);
   kmoniTimeout = setTimeout(Req_kmoni, config.Source.kmoni.kmoni.Interval);
+
+  if (!config.Source.kmoni.kmoni.GetData) return;
+  if (!net.online) return UpdateStatus("kmoniImg", "Error")
+  var ReqTime = new Date() - KmoniOffset - Replay;
+  var urlTmp = [
+    "https://smi.lmoniexp.bosai.go.jp/data/map_img/RealTimeImg/jma_s/" + NormalizeDate(2, ReqTime) + "/" + NormalizeDate(1, ReqTime) + ".jma_s.gif",
+    "http://www.kmoni.bosai.go.jp/data/map_img/RealTimeImg/jma_s/" + NormalizeDate(2, ReqTime) + "/" + NormalizeDate(1, ReqTime) + ".jma_s.gif",
+  ][kmoniI_url];
+
+  var request = net.request(urlTmp);
+  request.on("response", (res) => {
+    var dataTmp = [];
+    res.on("data", (chunk) => {
+      dataTmp.push(chunk);
+    });
+    res.on("end", () => {
+      try {
+        if (300 <= res._responseHead.statusCode || res._responseHead.statusCode < 200) {
+          errorCountkI++;
+          if (errorCountkI > 3) {
+            errorCountkI = 0;
+            kmoniI_url++;
+            if (kmoniI_url >= urlTmp.length - 1) kmoniI_url = 0;
+            SetKmoniOffset(Req_kmoni);
+          }
+          UpdateStatus("kmoniImg", "Error");
+        } else {
+          errorCountkI = 0;
+          // eslint-disable-next-line no-undef
+          var bufTmp = Buffer.concat(dataTmp);
+          if (WorkerWindow) {
+            WorkerWindow.webContents.send("message2", {
+              action: "KmoniImgUpdate",
+              data: "data:image/gif;base64," + bufTmp.toString("base64"),
+              date: ReqTime,
+            });
+          }
+        }
+      } catch {
+        UpdateStatus("kmoniImg", "Error");
+      }
+    });
+  });
+  request.end();
 }
 
 //海しるへのHTTPリクエスト処理
 function Req_SNet() {
-  if (config.Source.msil.GetData) {
-    if (net.online) {
-      var request = net.request("https://www.msil.go.jp/data/tiles/smoni/targetTimes.json?" + Number(new Date()));
-      request.on("response", (res) => {
-        var dataTmp = "";
-        res.on("data", (chunk) => {
-          dataTmp += chunk;
-        });
-        res.on("end", function () {
-          try {
-            var json = JSON.parse(dataTmp.replace(/\s+/g, ''));
-            if (!json || !Array.isArray(json)) throw new Error("msil.go.jpが無効なJSONを返しました。");
-            var basetime = 0;
-            var Now = Number(NormalizeDate(1, ConvertUTC(new Date(new Date() - Replay))));
-            json.forEach(function (elm) {
-              if (basetime < elm.basetime && Now >= elm.basetime)
-                basetime = Number(elm.basetime);
-            });
-            if (msil_lastTime < basetime) {
-
-              function Req_SNet_core(y, unique_id) {
-                var request = net.request(`https://www.msil.go.jp/data/tiles/smoni/tileimage/${basetime}/${basetime}/5/28/${y}.png`);
-                request.on("response", (res) => {
-                  var dataTmp = [];
-                  res.on("data", (chunk) => {
-                    dataTmp.push(chunk);
-                  });
-                  res.on("end", () => {
-                    try {
-                      if (WorkerWindow) {
-                        // eslint-disable-next-line no-undef
-                        var bufTmp = Buffer.concat(dataTmp);
-                        WorkerWindow.webContents.send("message2", {
-                          action: "SnetImgUpdate",
-                          y: y,
-                          unique_id: unique_id,
-                          data: "data:image/png;base64," + bufTmp.toString("base64"),
-                          date: new Date(),
-                        });
-                      }
-                      UpdateStatus("msilImg", "success");
-                    } catch {
-                      UpdateStatus("msilImg", "Error");
-                    }
-                  });
-                });
-                request.end();
-              }
-              var unique_id = Number(new Date());
-              Req_SNet_core(11, unique_id);
-              Req_SNet_core(12, unique_id);
-              msil_lastTime = basetime;
-            }
-          } catch {
-            UpdateStatus("msilImg", "Error");
-          }
-        });
-      });
-      request.on("error", () => {
-        UpdateStatus("msilImg", "Error");
-      });
-
-      request.end();
-    } else UpdateStatus("msilImg", "Error");
-  }
   setTimeout(Req_SNet, config.Source.msil.Interval);
+
+  if (!config.Source.msil.GetData) return;
+  if (!net.online) return UpdateStatus("msilImg", "Error");
+  var request = net.request("https://www.msil.go.jp/data/tiles/smoni/targetTimes.json?" + Number(new Date()));
+  request.on("response", (res) => {
+    var dataTmp = "";
+    res.on("data", (chunk) => {
+      dataTmp += chunk;
+    });
+    res.on("end", function () {
+      try {
+        var json = JSON.parse(dataTmp.replace(/\s+/g, ''));
+        if (!json || !Array.isArray(json)) throw new Error("msil.go.jpが無効なJSONを返しました。");
+        var basetime = 0;
+        var Now = Number(NormalizeDate(1, ConvertUTC(new Date(new Date() - Replay))));
+        json.forEach(function (elm) {
+          if (basetime < elm.basetime && Now >= elm.basetime)
+            basetime = Number(elm.basetime);
+        });
+        if (msil_lastTime < basetime) {
+
+          function Req_SNet_core(y, unique_id) {
+            var request = net.request(`https://www.msil.go.jp/data/tiles/smoni/tileimage/${basetime}/${basetime}/5/28/${y}.png`);
+            request.on("response", (res) => {
+              var dataTmp = [];
+              res.on("data", (chunk) => {
+                dataTmp.push(chunk);
+              });
+              res.on("end", () => {
+                try {
+                  if (WorkerWindow) {
+                    // eslint-disable-next-line no-undef
+                    var bufTmp = Buffer.concat(dataTmp);
+                    WorkerWindow.webContents.send("message2", {
+                      action: "SnetImgUpdate",
+                      y: y,
+                      unique_id: unique_id,
+                      data: "data:image/png;base64," + bufTmp.toString("base64"),
+                      date: new Date(),
+                    });
+                  }
+                  UpdateStatus("msilImg", "success");
+                } catch {
+                  UpdateStatus("msilImg", "Error");
+                }
+              });
+            });
+            request.end();
+          }
+          var unique_id = Number(new Date());
+          Req_SNet_core(11, unique_id);
+          Req_SNet_core(12, unique_id);
+          msil_lastTime = basetime;
+        }
+      } catch {
+        UpdateStatus("msilImg", "Error");
+      }
+    });
+  });
+  request.on("error", () => {
+    UpdateStatus("msilImg", "Error");
+  });
+
+  request.end();
 }
 
 //P2P地震情報API WebSocket接続・受信処理
@@ -3364,7 +3339,7 @@ function Process_Hokkaidosanriku(data) {
 function Req_JMAXML(url, count) {
   if (!url || jmaXML_Fetched.includes(url)) return;
 
-  if (!net.online) UpdateStatus("JMAXML", "Error");
+  if (!net.online) return UpdateStatus("JMAXML", "Error");
   var request = net.request(url);
   request.on("response", (res) => {
     var dataTmp = "";
@@ -3965,57 +3940,56 @@ var KatsudoJokyoInfoAll = [];
 //USGS 取得・フォーマット変更→MargeEQInfo
 var usgsLastGenerated = 0;
 function Req_USGS() {
-  if (net.online) {
-    var request = net.request("https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&limit=" + config.Info.EQInfo.ItemCount);
-    request.on("response", (res) => {
-      var dataTmp = "";
-      res.on("data", (chunk) => {
-        dataTmp += chunk;
-      });
-      res.on("end", function () {
-        try {
-          var json = ParseJSON(dataTmp);
-          if (!json) return false;
-          if (json.features[0].properties && json.features[0].properties.updated && usgsLastGenerated < json.features[0].properties.updated) {
-            usgsLastGenerated = json.features[0].properties.updated;
+  if (!net.online) return UpdateStatus("USGS", "Error")
+  var request = net.request("https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&limit=" + config.Info.EQInfo.ItemCount);
+  request.on("response", (res) => {
+    var dataTmp = "";
+    res.on("data", (chunk) => {
+      dataTmp += chunk;
+    });
+    res.on("end", function () {
+      try {
+        var json = ParseJSON(dataTmp);
+        if (!json) return false;
+        if (json.features[0].properties && json.features[0].properties.updated && usgsLastGenerated < json.features[0].properties.updated) {
+          usgsLastGenerated = json.features[0].properties.updated;
 
-            var dataTmp2 = [];
-            json.features.forEach(function (elm) {
-              var FECode = FERegion.features.find(function (elm2) {
-                return turf.booleanPointInPolygon(elm.geometry.coordinates, elm2);
-              });
-
-              var maxi;
-              if (elm.properties.mmi !== null) maxi = elm.properties.mmi;
-
-              dataTmp2.push({
-                eventId: elm.id,
-                category: null,
-                OriginTime: new Date(elm.properties.time),
-                epiCenter: FECode.properties.nameJA,
-                M: Math.round(elm.properties.mag * 10) / 10,
-                maxI: maxi,
-                DetailURL: [elm.properties.url],
-              });
+          var dataTmp2 = [];
+          json.features.forEach(function (elm) {
+            var FECode = FERegion.features.find(function (elm2) {
+              return turf.booleanPointInPolygon(elm.geometry.coordinates, elm2);
             });
-            dataTmp2 = dataTmp2.sort(function (a, b) {
-              return a.OriginTime > b.OriginTime ? -1 : 1;
+
+            var maxi;
+            if (elm.properties.mmi !== null) maxi = elm.properties.mmi;
+
+            dataTmp2.push({
+              eventId: elm.id,
+              category: null,
+              OriginTime: new Date(elm.properties.time),
+              epiCenter: FECode.properties.nameJA,
+              M: Math.round(elm.properties.mag * 10) / 10,
+              maxI: maxi,
+              DetailURL: [elm.properties.url],
             });
-            AlertEQInfo(dataTmp2, "usgs");
-          }
-          UpdateStatus("USGS", "success");
-        } catch (err) {
-          console.log(err)
-          UpdateStatus("USGS", "Error");
+          });
+          dataTmp2 = dataTmp2.sort(function (a, b) {
+            return a.OriginTime > b.OriginTime ? -1 : 1;
+          });
+          AlertEQInfo(dataTmp2, "usgs");
         }
-      });
+        UpdateStatus("USGS", "success");
+      } catch (err) {
+        console.log(err)
+        UpdateStatus("USGS", "Error");
+      }
     });
-    request.on("error", () => {
-      UpdateStatus("USGS", "Error");
-    });
+  });
+  request.on("error", () => {
+    UpdateStatus("USGS", "Error");
+  });
 
-    request.end();
-  } else UpdateStatus("USGS", "Error");
+  request.end();
 }
 
 //narikakun地震情報API リスト取得→Req_Narikakun
@@ -4053,54 +4027,53 @@ function Req_NarikakunList(url, count) {
 function Req_Narikakun(url, count) {
   if (!url || nakn_Fetched.includes(url)) return;
 
-  if (net.online) {
-    var request = net.request(url);
-    request.on("response", (res) => {
-      var dataTmp = "";
-      res.on("data", (chunk) => {
-        dataTmp += chunk;
-      });
-      res.on("end", function () {
-        try {
-          var json = ParseJSON(dataTmp);
-          if (!json) return;
-
-          var originTimeTmp = json.Body.Earthquake ? new Date(json.Body.Earthquake.OriginTime) : null;
-          if (!originTimeTmp) originTimeTmp = new Date(json.Head.TargetDateTime);
-
-          var epiCenterTmp = json.Body.Earthquake ? json.Body.Earthquake.Hypocenter.Name : null;
-          var MagnitudeTmp = json.Body.Earthquake && json.Body.Earthquake.Magnitude ? Number(json.Body.Earthquake.Magnitude) : null;
-          var MaxITmp = json.Body.Intensity ? json.Body.Intensity.Observation.MaxInt : null;
-          var cancel = json.Head.InfoType == "取消";
-          var dataTmp2 = [
-            {
-              status: json.Control.Status,
-              eventId: json.Head.EventID,
-              category: json.Head.Title,
-              OriginTime: new Date(originTimeTmp),
-              epiCenter: epiCenterTmp,
-              M: MagnitudeTmp,
-              maxI: NormalizeShindo(MaxITmp),
-              cancel: Boolean(cancel),
-              reportDateTime: new Date(json.Head.ReportDateTime),
-              DetailURL: [url],
-              headline: json.Head.Headline,
-              axisData: null,
-            },
-          ];
-          MargeEQInfo(dataTmp2, count);
-          UpdateStatus("ntool", "success");
-          nakn_Fetched.push(url);
-        } catch {
-          UpdateStatus("ntool", "Error");
-        }
-      });
+  if (!net.online) return UpdateStatus("ntool", "Error");
+  var request = net.request(url);
+  request.on("response", (res) => {
+    var dataTmp = "";
+    res.on("data", (chunk) => {
+      dataTmp += chunk;
     });
-    request.on("error", () => {
-      UpdateStatus("ntool", "Error");
+    res.on("end", function () {
+      try {
+        var json = ParseJSON(dataTmp);
+        if (!json) return;
+
+        var originTimeTmp = json.Body.Earthquake ? new Date(json.Body.Earthquake.OriginTime) : null;
+        if (!originTimeTmp) originTimeTmp = new Date(json.Head.TargetDateTime);
+
+        var epiCenterTmp = json.Body.Earthquake ? json.Body.Earthquake.Hypocenter.Name : null;
+        var MagnitudeTmp = json.Body.Earthquake && json.Body.Earthquake.Magnitude ? Number(json.Body.Earthquake.Magnitude) : null;
+        var MaxITmp = json.Body.Intensity ? json.Body.Intensity.Observation.MaxInt : null;
+        var cancel = json.Head.InfoType == "取消";
+        var dataTmp2 = [
+          {
+            status: json.Control.Status,
+            eventId: json.Head.EventID,
+            category: json.Head.Title,
+            OriginTime: new Date(originTimeTmp),
+            epiCenter: epiCenterTmp,
+            M: MagnitudeTmp,
+            maxI: NormalizeShindo(MaxITmp),
+            cancel: Boolean(cancel),
+            reportDateTime: new Date(json.Head.ReportDateTime),
+            DetailURL: [url],
+            headline: json.Head.Headline,
+            axisData: null,
+          },
+        ];
+        MargeEQInfo(dataTmp2, count);
+        UpdateStatus("ntool", "success");
+        nakn_Fetched.push(url);
+      } catch {
+        UpdateStatus("ntool", "Error");
+      }
     });
-    request.end();
-  } else UpdateStatus("ntool", "Error");
+  });
+  request.on("error", () => {
+    UpdateStatus("ntool", "Error");
+  });
+  request.end();
 }
 
 var EQInfoData = {};
