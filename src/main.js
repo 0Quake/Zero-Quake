@@ -820,7 +820,7 @@ function CreateMainWindow() {
           var elm = kmoniTimeTmp[key];
           messageToMainWindow({
             action: "UpdateStatus",
-            Updatetime: elm.Updatetime,
+            timestamp: elm.timestamp,
             LocalTime: elm.LocalTime,
             type: elm.type,
             condition: elm.condition,
@@ -1569,7 +1569,8 @@ function Req_TremRts() {
           data: TremRtsData,
         };
         messageToMainWindow(TremRtsData_Marged);
-        UpdateStatus("TREM-RTS", "success", new Date(json.time),);
+        UpdateStatus("TREM-RTS", "success", new Date(json.time));
+        console.log("aaaaaaaaaaaaa")
       } catch {
         UpdateStatus("TREM-RTS", "Error");
         TremRTS_server = !TremRTS_server;
@@ -1834,7 +1835,7 @@ function createWorker() {
         EQDetect_List = message.EQDetect_List;
         kmoniPointsDataTmp = {
           action: "kmoniUpdate",
-          Updatetime: new Date(message.date),
+          timestamp: new Date(message.date),
           LocalTime: new Date(),
           data: message,
         };
@@ -1865,7 +1866,7 @@ function ConvertSnet(data, date, y, uid) {
   if (msil_latest[another] && msil_latest[another][0] == uid) {
     SnetPointsDataTmp = {
       action: "SnetUpdate",
-      Updatetime: new Date(date),
+      timestamp: new Date(date),
       LocalTime: new Date(),
       data: {
         data: Object.values(mergeDeeply(data, msil_latest[another][0]))
@@ -2432,10 +2433,11 @@ async function SetKmoniOffset(func) {
 
 //情報最終更新時刻を更新
 function UpdateStatus(type, condition, timeStamp) {
-  if (!timeStamp || !Boolean2(new Date(timeStamp))) timeStamp = new Date() - Replay;
+  if (!timeStamp || !Boolean2(new Date(timeStamp))) timeStamp = new Date(new Date() - Replay)
+  else timeStamp = new Date(timeStamp)
   messageToMainWindow({
     action: "UpdateStatus",
-    Updatetime: timeStamp,
+    timestamp: timeStamp,
     LocalTime: new Date(),
     type: type,
     condition: condition,
@@ -2443,7 +2445,7 @@ function UpdateStatus(type, condition, timeStamp) {
 
   kmoniTimeTmp[type] = {
     type: type,
-    Updatetime: timeStamp,
+    timestamp: timeStamp,
     LocalTime: new Date(),
     condition: condition,
   };
@@ -3940,7 +3942,7 @@ var KatsudoJokyoInfoAll = [];
 //USGS 取得・フォーマット変更→MargeEQInfo
 var usgsLastGenerated = 0;
 function Req_USGS() {
-  if (!net.online) return UpdateStatus("USGS", "Error")
+  if (!net.online) return;
   var request = net.request("https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&limit=" + config.Info.EQInfo.ItemCount);
   request.on("response", (res) => {
     var dataTmp = "";
@@ -3978,16 +3980,12 @@ function Req_USGS() {
           });
           AlertEQInfo(dataTmp2, "usgs");
         }
-        UpdateStatus("USGS", "success");
       } catch (err) {
         console.log(err)
-        UpdateStatus("USGS", "Error");
       }
     });
   });
-  request.on("error", () => {
-    UpdateStatus("USGS", "Error");
-  });
+  request.on("error", () => { });
 
   request.end();
 }

@@ -46,12 +46,12 @@ window.electronAPI.messageSend((event, request) => {
     psWaveEntry();
     JMAEstShindoControl(request.data);
   } else if (request.action == "UpdateStatus") {
-    UpdateStatus(request.Updatetime, request.LocalTime, request.type, request.condition);
+    UpdateStatus(request.timestamp, request.LocalTime, request.type, request.condition);
   } else if (request.action == "kmoniUpdate") {
-    UpdateStatus(request.Updatetime, request.LocalTime, "kmoniImg", "success");
+    UpdateStatus(request.timestamp, request.LocalTime, "kmoniImg", "success");
     if (!background || !knet_already_draw) kmoniMapUpdate(request.data, "knet");
   } else if (request.action == "SnetUpdate") {
-    UpdateStatus(request.Updatetime, request.LocalTime, "msilImg", "success");
+    UpdateStatus(request.timestamp, request.LocalTime, "msilImg", "success");
     kmoniMapUpdate(request.data, "snet");
   } else if (request.action == "TREM-RTSUpdate") {
     TREMRTS_TMP = request.data;
@@ -686,19 +686,20 @@ document.getElementById("setting").addEventListener("click", function () {
 
 //情報更新時刻更新
 var UpdateTime = [];
-function UpdateStatus(updateTime, LocalTime, type, condition) {
-  if (updateTime > new Date() - Replay) return;
+function UpdateStatus(timestamp, LocalTime, type, condition) {
+  if (timestamp > (new Date() - Replay + 60000)) return;//ホストとの時刻ズレを考慮し現在時刻+1分まで受け入れる
   UpdateTime[type] = {
     type: type,
-    updateTime: updateTime,
+    timestamp: timestamp,
     LocalTime: LocalTime,
     condition: condition,
   };
-  if (UTDialogShow && !background)
-    kmoniTimeRedraw(updateTime, LocalTime, type, condition);
+  if (UTDialogShow && !background) {
+    kmoniTimeRedraw(timestamp, LocalTime, type, condition);
+  }
 }
-function kmoniTimeRedraw(updateTime, LocalTime, type, condition) {
-  document.getElementById(type + "_UT").textContent = NormalizeDate(3, updateTime);
+function kmoniTimeRedraw(timestamp, LocalTime, type, condition) {
+  document.getElementById(type + "_UT").textContent = NormalizeDate(3, timestamp);
   var iconElm = document.getElementById(type + "_ICN");
 
   switch (condition) {
@@ -711,9 +712,7 @@ function kmoniTimeRedraw(updateTime, LocalTime, type, condition) {
           this.classList.remove("SuccessAnm");
         });
       }
-      if (type == "ntool" || type == "JMAXML")
-
-        break;
+      break;
     case "Error":
       iconElm.classList.remove("Success");
       iconElm.classList.add("Error");
