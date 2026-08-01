@@ -434,18 +434,22 @@
 }
 .legend {
   display: inline-block;
-  background: #3f3f42;
+  background: #222225;
   color: #fff;
   border: solid 1px #62626c;
   border-radius: 5px;
   overflow: hidden;
-  padding: 8px;
+  padding: 0px;
   width: fit-content;
 }
 
 .legend img {
   max-height: 40vh;
   max-width: 20vw;
+  height: 300px;
+}
+#legend0 img{
+  height: 450px;
 }
 #legend1,
 #legend2 {
