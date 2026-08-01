@@ -170,6 +170,7 @@ table tr:nth-child(2) {
   top: 0;
   left: 0;
   outline: solid 2px var(--TsunamiMajorWarningColor);
+  forced-color-adjust: none;
 }
 
 #WarningInfo::after {
@@ -180,6 +181,7 @@ table tr:nth-child(2) {
   top: 0;
   left: 0;
   outline: solid 2px var(--TsunamiWarningColor);
+  forced-color-adjust: none;
 }
 
 #WatchInfo::after {
@@ -190,6 +192,7 @@ table tr:nth-child(2) {
   top: 0;
   left: 0;
   outline: solid 2px var(--TsunamiWatchColor);
+  forced-color-adjust: none;
 }
 
 #YohoInfo::after {
@@ -200,6 +203,7 @@ table tr:nth-child(2) {
   top: 0;
   left: 0;
   outline: solid 2px var(--TsunamiYohoColor);
+  forced-color-adjust: none;
 }
 
 #revocation {
@@ -212,18 +216,22 @@ table tr:nth-child(2) {
 
 .ListIcon_MajorWarning {
   background: var(--TsunamiMajorWarningColor);
+  forced-color-adjust: none;
 }
 
 .ListIcon_Warning {
   background: var(--TsunamiWarningColor);
+  forced-color-adjust: none;
 }
 
 .ListIcon_Watch {
   background: var(--TsunamiWatchColor);
+  forced-color-adjust: none;
 }
 
 .ListIcon_Yoho {
   background: var(--TsunamiYohoColor);
+  forced-color-adjust: none;
 }
 
 header {

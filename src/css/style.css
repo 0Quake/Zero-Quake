@@ -393,6 +393,7 @@ h2 {
 #tsunamiTitle {
   background: #3f3f42;
   border-bottom: solid 2px #fff;
+  forced-color-adjust: none;
 }
 
 .EEWWrap.yohou h2,
@@ -878,6 +879,7 @@ td {
   margin: 5px 0 0 0;
   line-height: 18px;
   border: solid 1px rgba(255, 255, 255, 0.15);
+  forced-color-adjust: none;
 }
 .EQI_LgIntBody {
   display: inline-block;
@@ -1027,6 +1029,7 @@ td {
   vertical-align: middle;
   background: #999;
   margin: 10px;
+  forced-color-adjust: none;
 }
 .statusIcon.Success {
   background: rgba(16, 243, 0);
@@ -1310,14 +1313,17 @@ summary:focus {
 .EQI_point_astro,
 #tide_sample_astro {
   background: var(--AstroHeightColor);
+  forced-color-adjust: none;
 }
 .EQI_point_adv,
 #tide_sample_adv {
   background: var(--TsunamiWatchColor);
+  forced-color-adjust: none;
 }
 .EQI_point_warn,
 #tide_sample_warn {
   background: var(--TsunamiWarningColor);
+  forced-color-adjust: none;
 }
 .tide_sample_wrap {
   display: inline-block;
@@ -1475,5 +1481,15 @@ summary:focus {
   }
   ::-webkit-scrollbar-thumb:hover {
     border-width: 5px;
+  }
+  .EQI_tide .EQI_databar_v{
+    background: #FFF;
+  }
+  .EQI_databar {
+    outline: solid 1px #FFF;
+  }
+  #tsunamiTitle {
+    background: #000;
+    color: #FFF;
   }
 }
