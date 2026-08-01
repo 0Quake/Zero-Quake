@@ -295,7 +295,7 @@
                                 <div id="JMA_EqInfo" class="EQInfo">
                                     <div class="EqInfo_Sort_Wrap">
                                         <div id="jma_update_time">更新：リアルタイム</div>
-                                    
+
                                         <label>
                                             <span class="material-icons-round" aria-hidden="true">sort</span>
                                             <select id="JMA_EqInfo_Sort" aria-label="地震情報の並び順">
@@ -307,9 +307,13 @@
                                     </div>
                                     <div id="JMA_EqInfo_Data">
                                         <div class="mini-loading-wrap" aria-label="読み込み中"></div>
-                                        </div>
-                                        </div>
-                                        </div>
+                                    </div>
+                                    <div id="JMA_loading_status">
+                                        <div id="JMA_loading_status_txt"></div>
+                                        <div class="mini-loading-wrap" id="jma_loading_more" aria-label="さらに過去の情報を読み込み中"></div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div id="tab1_content2" role="tabpanel" aria-labelledby="tab1_menu2" class="tabcontent" tabindex="-1" ZQ-focusgroup>
                             <template id="gaikyo-item">
@@ -415,7 +419,7 @@
                                         <option value="i">最大震度（降順）</option>
                                     </select>
                                 </label>
-                                </div>
+                            </div>
                             <div id="USGS_EqInfo" class="EQInfo" role="list">
                                 <div class="mini-loading-wrap" aria-label="読み込み中"></div>
                             </div>

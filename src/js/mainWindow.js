@@ -59,8 +59,6 @@ window.electronAPI.messageSend((event, request) => {
   } else if (request.action == "SeisJSUpdate") {
     SeisJS_TMP = request.data;
     SeisJSUpdate(request.data);
-  } else if (request.action == "aaa") {
-    console.log(request.data);
   } else if (request.action == "Replay") {
     Replay = request.data;
     document.getElementById("replayFrame").style.display = Replay == 0 ? "none" : "block";
@@ -84,6 +82,7 @@ window.electronAPI.messageSend((event, request) => {
   else if (request.action == "Return_gaikyo") draw_gaikyo(request.data);
   else if (request.action == "Return_tide") draw_tide(request.data);
   else if (request.action == "Return_wepa") draw_wepa(request.data);
+  else if (request.action == "Deny_additionalEQInfo_JMA") deny_additionalEQInfo_JMA();
 
   document.getElementById("splash").style.display = "none";
   return true;
@@ -3126,11 +3125,28 @@ function hinanjoPopup(e) {
 var tab1c1 = document.getElementById("tab1_content1");
 tab1c1.addEventListener('scroll', () => {
   if (tab1c1.scrollTop + tab1c1.clientHeight >= tab1c1.scrollHeight - 1) {
-    window.electronAPI.messageReturn({
-      action: "Req_additionalEQInfo_JMA",
-    });
+    var sortKey = document.getElementById("JMA_EqInfo_Sort").value;
+
+    if (sortKey == "t") {//新しい順の時のみさらに読み込む
+      document.getElementById("JMA_loading_status_txt").style.display = "none";
+      document.getElementById("jma_loading_more").style.display = "block";
+      window.electronAPI.messageReturn({
+        action: "Req_additionalEQInfo_JMA",
+      });
+    } else {
+      document.getElementById("jma_loading_more").style.display = "none";
+      document.getElementById("JMA_loading_status_txt").style.display = "block";
+      document.getElementById("JMA_loading_status_txt").innerText = "さらに読み込むには「新しい順」を選択";
+    }
   }
 });
+
+//最大件数まで読み込んだので追加読み込みを拒否する場合
+function deny_additionalEQInfo_JMA() {
+  document.getElementById("jma_loading_more").style.display = "none";
+  document.getElementById("JMA_loading_status_txt").style.display = "block";
+  document.getElementById("JMA_loading_status_txt").innerText = "最大件数まで読み込みました";
+}
 
 
 function radioSet(name, val) {

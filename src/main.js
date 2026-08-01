@@ -733,8 +733,12 @@ ipcMain.on("message", (_event, response) => {
       Create_WepaWindow(response.fname);
       break;
     case "Req_additionalEQInfo_JMA":
-      JMA_CurrentInfoNumber += 5;
-      UpdateEQInfo();
+      if (JMA_CurrentInfoNumber < 1000) {
+        JMA_CurrentInfoNumber += 5;
+        UpdateEQInfo();
+      } else {
+        messageToMainWindow({ action: "Deny_additionalEQInfo_JMA" });
+      }
       break;
   }
 });
@@ -3197,7 +3201,7 @@ var UpdateEQInfo = throttle(function (loop) {
       UpdateEQInfo(true);
     }, config.Info.EQInfo.Interval);
   }
-}, 1000);
+}, 2000);
 
 //気象庁XMLリスト取得→Req_JMAXML
 function Req_JMAXMLList(count, longFeed) {
