@@ -82,7 +82,10 @@ body {
   width: 30px;
   height: 30px;
 }
-
+#JMA_ScrollWrap,
+#USGS_ScrollWrap{
+  min-height: 101vh;
+}
 #JMA_loading_status,
 #USGS_loading_status{
   height:64px;
@@ -1333,9 +1336,13 @@ summary:focus {
 
 .EqInfo_Sort_Wrap,
 .EqInfo_Sort_Wrap_t2{
-  height:23px;
-  margin-top: 3px;
-  padding:0 3px 0 6px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: #181818;
+  height: 29px;
+  padding: 3px 3px 3px 6px;
+  border-bottom: solid 1px #4e4e51;
   font-size: 0;
 }
 .EqInfo_Sort_Wrap_t2{
@@ -1350,21 +1357,26 @@ summary:focus {
   color:#CCC;
   vertical-align: top;
   margin: 1px 3px 0 0;
+  line-height: 23px;
 }
 
 .EqInfo_Sort_Wrap select{
     padding: 3px 4px;
     border-radius: 4px;
     background: #00000000;
-    border: solid 1px #777777;
+    border: solid 1px #62626C;
     font-size: 11px;
     color:#CCC;
     width: fit-content;
+    margin:1px 0;
+    height:21px;
 }
+
 .EqInfo_Sort_Wrap select:focus,
 .EqInfo_Sort_Wrap select:hover{
   color:#FFF;
   background: #363639;
+  border-color: #88888B;
 }
 
 @media (forced-colors: active) {

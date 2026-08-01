@@ -88,7 +88,7 @@ var defaultConfigVal = {
       IntType: "max",
     },
     EQInfo: {
-      ItemCount: 15,
+      InitialCount: 18,
       Interval: 60000,
       showtraining: false,
       showTest: false,
@@ -200,7 +200,6 @@ var errorCountkI = 0;
 var EQDetect_List = [];
 
 var jmaXML_Fetched = [];
-var nakn_Fetched = [];
 var eqInfo = { jma: [], usgs: [] };
 var kmoniTimeout;
 var msil_lastTime = 0;
@@ -220,6 +219,18 @@ electron.protocol.registerSchemesAsPrivileged([
     }
   }
 ]);
+
+app.whenReady().then(() => {
+  // アプリ全体のネットワークリクエストの発生を事前に検知するフック
+  electron.session.defaultSession.webRequest.onBeforeRequest((details, callback) => {
+    if (details.url.includes("https://")) {
+      console.log(`[Request detected] ${details.url}`);
+    }
+
+    // キャンセルしない場合は空オブジェクトを渡してリクエストを続行
+    callback({});
+  });
+});
 
 if (app.isPackaged) {
   //メニューバー非表示
@@ -3988,7 +3999,6 @@ var Req_USGS = throttle(function () {
           return a.OriginTime > b.OriginTime ? -1 : 1;
         });
         AlertEQInfo(dataTmp2, "usgs");
-        console.log(222222222, dataTmp2.length)
 
       } catch (err) {
         console.log(err)
@@ -4014,65 +4024,40 @@ function Req_NarikakunList(count) {
         var json = ParseJSON(dataTmp);
         if (!json || json.status != "ok" || !json.items) throw new Error("ntools APIが不正なデータかstatus≠okを返した。");
         for (let item of json.items) {
+          //if (!originTimeTmp) originTimeTmp = new Date(json.Head.TargetDateTime);
+
           for (let elm of item.lists) {
-            Req_Narikakun(elm.url, count);
+            //Req_Narikakun(elm.url, count);
+            var originTime = (elm.data && elm.data.originTimeNew) ? new Date(elm.data.originTimeNew) : null;
+            var reportDateTime = elm.datetime ? new Date(elm.datetime) : null;
+            var epiCenter = (elm.data && elm.data.hypoName) ? elm.data.hypoName : null;
+            var Magnitude = (elm.data && elm.data.magnitude) ? Number(elm.data.magnitude) : null;
+            var MaxI = (elm.data && elm.data.int) ? NormalizeShindo(elm.data.int) : null;
+            var cancel = (elm.type == "取消");
+            var url_list = elm.url ? [elm.url] : [];
+
+            var dataTmp2 = [
+              {
+                status: elm.status,
+                eventId: item.eventId,
+                category: elm.title,
+                OriginTime: originTime,
+                epiCenter: epiCenter,
+                M: Magnitude,
+                maxI: MaxI,
+                cancel: cancel,
+                reportDateTime: reportDateTime,
+                DetailURL: url_list,
+                headline: "",//保留
+                axisData: null,
+              },
+            ];
+            MargeEQInfo(dataTmp2, count);
+            UpdateStatus("ntool", "success");
           }
         }
 
         UpdateStatus("ntool", "success");
-      } catch {
-        UpdateStatus("ntool", "Error");
-      }
-    });
-  });
-  request.on("error", () => {
-    UpdateStatus("ntool", "Error");
-  });
-  request.end();
-}
-
-//narikakun地震情報API 取得・フォーマット変更→MargeEQInfo
-function Req_Narikakun(url, count) {
-  if (!url || nakn_Fetched.includes(url)) return;
-
-  if (!net.online) return UpdateStatus("ntool", "Error");
-  var request = net.request(url);
-  request.on("response", (res) => {
-    var dataTmp = "";
-    res.on("data", (chunk) => {
-      dataTmp += chunk;
-    });
-    res.on("end", function () {
-      try {
-        var json = ParseJSON(dataTmp);
-        if (!json) return;
-
-        var originTimeTmp = json.Body.Earthquake ? new Date(json.Body.Earthquake.OriginTime) : null;
-        if (!originTimeTmp) originTimeTmp = new Date(json.Head.TargetDateTime);
-
-        var epiCenterTmp = json.Body.Earthquake ? json.Body.Earthquake.Hypocenter.Name : null;
-        var MagnitudeTmp = json.Body.Earthquake && json.Body.Earthquake.Magnitude ? Number(json.Body.Earthquake.Magnitude) : null;
-        var MaxITmp = json.Body.Intensity ? json.Body.Intensity.Observation.MaxInt : null;
-        var cancel = json.Head.InfoType == "取消";
-        var dataTmp2 = [
-          {
-            status: json.Control.Status,
-            eventId: json.Head.EventID,
-            category: json.Head.Title,
-            OriginTime: new Date(originTimeTmp),
-            epiCenter: epiCenterTmp,
-            M: MagnitudeTmp,
-            maxI: NormalizeShindo(MaxITmp),
-            cancel: Boolean(cancel),
-            reportDateTime: new Date(json.Head.ReportDateTime),
-            DetailURL: [url],
-            headline: json.Head.Headline,
-            axisData: null,
-          },
-        ];
-        MargeEQInfo(dataTmp2, count);
-        UpdateStatus("ntool", "success");
-        nakn_Fetched.push(url);
       } catch {
         UpdateStatus("ntool", "Error");
       }
