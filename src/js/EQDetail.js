@@ -1495,7 +1495,7 @@ function narikakun_ListReq() {
       var target = data.items.find(function (el) {
         return el.eventId == eid
       })
-      if (!target.lists) return;
+      if (!target || !target.lists) return;
       target.lists.forEach(function (el2) {
         if (el2.url) narikakun_Fetch(el2.url);
       });
