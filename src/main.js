@@ -4050,7 +4050,6 @@ function Req_NarikakunList(url, count) {
 
 //narikakun地震情報API 取得・フォーマット変更→ConvertEQInfo
 function Req_Narikakun(url, count) {
-  return //aaaaaaaaaaaaaaa
   if (!url || nakn_Fetched.includes(url)) return;
 
   if (net.online) {
