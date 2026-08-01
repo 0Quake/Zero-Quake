@@ -4189,6 +4189,8 @@ function MargeEQInfo(dataList, count) {
 
         //キーごとにマージ
         Object.keys(EQInfo_Item).forEach(function (key) {
+          if (!EQInfo_Item[key]) return;//新しい側の値がなかったら無視
+
           if (key == "reportDateTime") {//reportDateTimeは常に更新、フラグ立てない
             EQElm[key] = EQInfo_Item[key];
           } else if (key == "DetailURL") {//DetailURLは配列を結合
@@ -4220,10 +4222,8 @@ function MargeEQInfo(dataList, count) {
         eqInfoTmp.push(data);
         eqInfo.jma.push(data);
         var latest_reportDate = Math.max(...Object.keys(EQInfoData).map(function (key) { return Number(EQInfoData[key].reportDateTime) }));
-        console.log(new Date(latest_reportDate).toLocaleString())
         if (count !== 0 && data.category !== "EEW" && Number(data.reportDateTime) == latest_reportDate) {
           data.audioNotification = true;//当該イベントの初受信＆それが最新（reportDateが過去最大）なら音声通知する
-          console.log(count, data.category !== "EEW", Number(data.reportDateTime) == latest_reportDate, new Date(data.reportDateTime).toLocaleString(), new Date(data.OriginTime).toLocaleString())
         }
       }
     });
