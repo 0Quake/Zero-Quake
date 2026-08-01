@@ -4028,7 +4028,7 @@ function Req_NarikakunList(url, count) {
         if (!json || json.status != "ok" || !json.items) throw new Error("ntools APIが不正なデータかstatus≠okを返した。");
         for (let item of json.items) {
           for (let elm of item.lists) {
-            Req_Narikakun(elm, count);
+            Req_Narikakun(elm.url, count);
           }
         }
 
