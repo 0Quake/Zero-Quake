@@ -542,8 +542,8 @@ function eqInfoDraw(data, source) {
   });
 
   //新規地震イベントの強調 起動後２秒以内なら起動時における既存イベントの一括追加と判断し強調しない
-  var new_entry_item = new_entry ? document.getElementById("EQItem_" + new_entry.eventId) : null;
-  if (new_entry_item && new Date() - startTime < 2000) Focus_EQItem(new_entry_item);
+  var new_entry_elm = new_entry ? document.getElementById("EQItem_" + new_entry.eventId) : null;
+  if (new_entry_elm && new_entry.audioNotification) Focus_EQItem(new_entry_elm);
 }
 
 document.getElementById("JMA_EqInfo_Sort").addEventListener("change", function () {
