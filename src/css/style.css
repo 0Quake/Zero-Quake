@@ -49,7 +49,7 @@ body {
   font-style: normal;
   font-weight: 100 700;
   font-display: block;
-  src: url(../font/MaterialSymbols.woff2) format("woff2");
+  src: url(../font/material-symbols-rounded.woff2) format("woff2");
 }
 @font-face {
   font-family: "AzeretMono-Regular";
