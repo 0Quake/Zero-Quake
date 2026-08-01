@@ -103,7 +103,6 @@ function configDataDraw() {
 
   document.getElementById("EQInfo_Voice1").value = config.notice.voice.EQInfo;
   document.getElementById("EQInfo_Voice2").value = config.notice.voice.EQInfoCancel;
-  document.getElementById("EQInfo_ItemCount").value = config.Info.EQInfo.ItemCount;
   document.getElementById("EEW_training").checked = config.Info.EEW.showtraining;
   document.getElementById("EEW_IntQ").checked = config.Info.EEW.IntQuestion;
   document.getElementById("EEW_IntI").checked = config.Info.EEW.IntTerm1;
@@ -313,7 +312,6 @@ function apply() {
   config.notice.voice.TsunamiTorikeshi = document.getElementById("Tsunami_Voice3").value;
   config.notice.voice.EQInfo = document.getElementById("EQInfo_Voice1").value;
   config.notice.voice.EQInfoCancel = document.getElementById("EQInfo_Voice2").value;
-  config.Info.EQInfo.ItemCount = Number(document.getElementById("EQInfo_ItemCount").value);
   config.Info.EEW.showtraining = document.getElementById("EEW_training").checked;
   config.Info.EEW.IntQuestion = document.getElementById("EEW_IntQ").checked;
   config.Info.EEW.IntTerm1 = document.getElementById("EEW_IntI").checked;

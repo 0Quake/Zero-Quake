@@ -88,7 +88,7 @@ var defaultConfigVal = {
       IntType: "max",
     },
     EQInfo: {
-      InitialCount: 18,
+      //ItemCount: 15,//廃止済み
       Interval: 60000,
       showtraining: false,
       showTest: false,
