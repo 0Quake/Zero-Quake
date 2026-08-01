@@ -2223,70 +2223,7 @@ function psWaveCalc(eid) {
       });
       return;
     }
-
   }
-
-  /*
-  if (pswaveFind) {
-    //JMA2001走時表による予報
-    var TTable = pswaveFind.TimeTable;
-    var SfirstArrival = TTable[0].S;
-    var distance = (new Date() - Replay - new Date(pswaveFind.data.originTime)) / 1000;
-
-    var PRadius = null;
-    var SRadius = null;
-
-    var i = 0;
-    for (const elm of TTable) {
-      if (!PRadius) {
-        if (elm.P == distance) {
-          PRadius = elm.R;
-          if (SRadius || SfirstArrival > distance) break;
-        } else if (elm.P > distance) {
-          var elm2 = TTable[Math.max(i - 1, 0)];
-          PRadius = elm.R + ((elm2.R - elm.R) * (distance - elm.P)) / (elm2.P - elm.P);
-          if (SRadius || SfirstArrival > distance) break;
-        }
-      }
-      if (!SRadius && SfirstArrival < distance) {
-        if (elm.S == distance) {
-          SRadius = elm.R;
-          if (PRadius) break;
-        } else if (elm.S > distance) {
-          elm2 = TTable[Math.max(i - 1, 0)];
-          SRadius = elm.R + ((elm2.R - elm.R) * (distance - elm.S)) / (elm2.S - elm.S);
-          if (PRadius) break;
-        }
-      }
-      i++;
-    }
-    if (SfirstArrival > distance) {
-      window.requestAnimationFrame(function () {
-        psWaveReDraw(
-          pswaveFind.id,
-          pswaveFind.data.latitude,
-          pswaveFind.data.longitude,
-          PRadius * 1000,
-          0,
-          true, //S波未到達
-          SfirstArrival, //発生からの到達時間
-          distance //現在の経過時間
-        );
-      });
-      return;
-    } else {
-      window.requestAnimationFrame(function () {
-        psWaveReDraw(
-          pswaveFind.id,
-          pswaveFind.data.latitude,
-          pswaveFind.data.longitude,
-          PRadius * 1000,
-          SRadius * 1000
-        );
-      });
-      return;
-    }
-  }*/
 }
 
 let circle_options = { steps: 80, units: "kilometers" };
