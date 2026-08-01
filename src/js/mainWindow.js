@@ -83,6 +83,7 @@ window.electronAPI.messageSend((event, request) => {
   else if (request.action == "Return_tide") draw_tide(request.data);
   else if (request.action == "Return_wepa") draw_wepa(request.data);
   else if (request.action == "Deny_additionalEQInfo_JMA") deny_additionalEQInfo_JMA();
+  else if (request.action == "Deny_additionalEQInfo_USGS") deny_additionalEQInfo_USGS();
 
   document.getElementById("splash").style.display = "none";
   return true;
@@ -449,7 +450,7 @@ function eqInfoDraw(data, source) {
         } else {
           clone.querySelector(".EQItem")
             .setAttribute("aria-label",
-              `過去の地震情報アイテム：${elm.status == "訓練" ? "訓練報、" : ""}${elm.status == "試験" ? "試験報、" : ""}${elm.headline}${content}
+              `過去の気象庁による地震情報アイテム：${elm.status == "訓練" ? "訓練報、" : ""}${elm.status == "試験" ? "試験報、" : ""}${elm.headline}${content}
             `//エンターキーで詳細情報を確認。
             );
           clone.querySelector(".EQItem").addEventListener("click", function () {
@@ -502,7 +503,7 @@ function eqInfoDraw(data, source) {
 
           clone.querySelector(".EQItem")
             .setAttribute("aria-label",
-              `過去の地震情報アイテム：${elm.status == "訓練" ? "訓練報、" : ""}${elm.status == "試験" ? "試験報、" : ""}
+              `過去の気象庁による地震情報アイテム：${elm.status == "訓練" ? "訓練報、" : ""}${elm.status == "試験" ? "試験報、" : ""}
             ${maxITmp != "?" ? "最大震度" + NormalizeShindo(maxITmp, 1) + "、" : ""}${lgIntStr}${elm.M || elm.M === 0 ? "マグニチュード" + elm.M.toFixed(1) + "、" : ""}
             ${elm.epiCenter ? "震源は" + elm.epiCenter + "、" : ""}発生時刻は${NormalizeDate("M月D日h時m分", elm.OriginTime)}。エンターキーで詳細情報を確認。`
             );
@@ -525,7 +526,7 @@ function eqInfoDraw(data, source) {
         var MMIStr = elm.maxI ? `最大改正メルカリ震度${NormalizeMMI(elm.maxI, 3)}` : "";
         clone.querySelector(".EQItem")
           .setAttribute("aria-label",
-            `過去の地震情報アイテム：${MMIStr}、${elm.M || elm.M === 0 ? "マグニチュード" + elm.M.toFixed(1) + "、" : ""}
+            `過去のUSGSによる地震情報アイテム：${MMIStr}、${elm.M || elm.M === 0 ? "マグニチュード" + elm.M.toFixed(1) + "、" : ""}
           ${elm.epiCenter ? "震源は" + elm.epiCenter + "、" : ""}発生時刻は${NormalizeDate("M月D日h時m分", elm.OriginTime)}。エンターキーで詳細情報を確認。`
           );
 
@@ -3128,12 +3129,12 @@ tab1c1.addEventListener('scroll', () => {
 
     if (sortKey == "t") {//新しい順の時のみさらに読み込む
       document.getElementById("JMA_loading_status_txt").style.display = "none";
-      document.getElementById("jma_loading_more").style.display = "block";
+      document.getElementById("JMA_loading_more").style.display = "block";
       window.electronAPI.messageReturn({
         action: "Req_additionalEQInfo_JMA",
       });
     } else {
-      document.getElementById("jma_loading_more").style.display = "none";
+      document.getElementById("JMA_loading_more").style.display = "none";
       document.getElementById("JMA_loading_status_txt").style.display = "block";
       document.getElementById("JMA_loading_status_txt").innerText = "さらに読み込むには「新しい順」を選択";
     }
@@ -3142,11 +3143,37 @@ tab1c1.addEventListener('scroll', () => {
 
 //最大件数まで読み込んだので追加読み込みを拒否する場合
 function deny_additionalEQInfo_JMA() {
-  document.getElementById("jma_loading_more").style.display = "none";
+  document.getElementById("JMA_loading_more").style.display = "none";
   document.getElementById("JMA_loading_status_txt").style.display = "block";
   document.getElementById("JMA_loading_status_txt").innerText = "最大件数まで読み込みました";
 }
 
+var tab1c4 = document.getElementById("tab1_content4");
+tab1c4.addEventListener('scroll', () => {
+  if (tab1c4.scrollTop + tab1c4.clientHeight >= tab1c4.scrollHeight - 50) {
+    var sortKey = document.getElementById("USGS_EqInfo_Sort").value;
+
+    if (sortKey == "t") {//新しい順の時のみさらに読み込む
+      document.getElementById("USGS_loading_status_txt").style.display = "none";
+      document.getElementById("USGS_loading_more").style.display = "block";
+      window.electronAPI.messageReturn({
+        action: "Req_additionalEQInfo_USGS",
+      });
+      console.log("Req_additionalEQInfo_USGS")
+    } else {
+      document.getElementById("USGS_loading_more").style.display = "none";
+      document.getElementById("USGS_loading_status_txt").style.display = "block";
+      document.getElementById("USGS_loading_status_txt").innerText = "さらに読み込むには「新しい順」を選択";
+    }
+  }
+});
+
+//最大件数まで読み込んだので追加読み込みを拒否する場合
+function deny_additionalEQInfo_USGS() {
+  document.getElementById("USGS_loading_more").style.display = "none";
+  document.getElementById("USGS_loading_status_txt").style.display = "block";
+  document.getElementById("USGS_loading_status_txt").innerText = "最大件数まで読み込みました";
+}
 
 function radioSet(name, val) {
   document.getElementsByName(name).forEach(function (elm) {

@@ -83,7 +83,8 @@ body {
   height: 30px;
 }
 
-#JMA_loading_status{
+#JMA_loading_status,
+#USGS_loading_status{
   height:64px;
   margin-top:6px;
   display:flex;
@@ -91,11 +92,13 @@ body {
   align-items:center;
 }
 
-#jma_loading_more {
+#JMA_loading_more,
+#USGS_loading_more {
   display: none;
   margin:0;
 }
-#JMA_loading_status_txt{
+#JMA_loading_status_txt,
+#USGS_loading_status_txt{
   display:none;
   font-size:14px;
   color:#CCC;

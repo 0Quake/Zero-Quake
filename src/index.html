@@ -298,7 +298,7 @@
 
                                         <label>
                                             <span class="material-icons-round" aria-hidden="true">sort</span>
-                                            <select id="JMA_EqInfo_Sort" aria-label="地震情報の並び順">
+                                            <select id="JMA_EqInfo_Sort" aria-label="気象庁の地震情報の並び順">
                                                 <option value="t">新しい順</option>
                                                 <option value="m">マグニチュード（降順）</option>
                                                 <option value="i">最大震度（降順）</option>
@@ -310,7 +310,7 @@
                                     </div>
                                     <div id="JMA_loading_status">
                                         <div id="JMA_loading_status_txt"></div>
-                                        <div class="mini-loading-wrap" id="jma_loading_more" aria-label="さらに過去の情報を読み込み中"></div>
+                                        <div class="mini-loading-wrap" id="JMA_loading_more" aria-label="さらに過去の情報を読み込み中"></div>
                                     </div>
                                 </div>
                             </div>
@@ -413,7 +413,7 @@
                                 <div id="usgs_update_time">読み込み中...</div>
                                 <label>
                                     <span class="material-icons-round" aria-hidden="true">sort</span>
-                                    <select id="USGS_EqInfo_Sort" aria-label="地震情報の並び順">
+                                    <select id="USGS_EqInfo_Sort" aria-label="USGSの地震情報の並び順">
                                         <option value="t">新しい順</option>
                                         <option value="m">マグニチュード（降順）</option>
                                         <option value="i">最大震度（降順）</option>
@@ -422,6 +422,10 @@
                             </div>
                             <div id="USGS_EqInfo" class="EQInfo" role="list">
                                 <div class="mini-loading-wrap" aria-label="読み込み中"></div>
+                            </div>
+                            <div id="USGS_loading_status">
+                                <div id="USGS_loading_status_txt"></div>
+                                <div class="mini-loading-wrap" id="USGS_loading_more" aria-label="さらに過去の情報を読み込み中"></div>
                             </div>
                         </div>
                     </div>

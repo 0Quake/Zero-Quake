@@ -729,11 +729,19 @@ ipcMain.on("message", (_event, response) => {
       Create_WepaWindow(response.fname);
       break;
     case "Req_additionalEQInfo_JMA":
-      if (JMA_CurrentInfoNumber < 1000) {
+      if (JMA_CurrentInfoNumber < 1000) {//naknのMAX3000件以下にすべし
         JMA_CurrentInfoNumber += 5;
         UpdateEQInfo();
       } else {
         messageToMainWindow({ action: "Deny_additionalEQInfo_JMA" });
+      }
+      break;
+    case "Req_additionalEQInfo_USGS":
+      if (USGS_CurrentInfoNumber < 1000) {
+        USGS_CurrentInfoNumber += 25;
+        Req_USGS();
+      } else {
+        messageToMainWindow({ action: "Deny_additionalEQInfo_USGS" });
       }
       break;
   }
@@ -775,6 +783,7 @@ const unresponsiveMsg = {
 };
 
 var JMA_CurrentInfoNumber = 25;
+var USGS_CurrentInfoNumber = 25;
 //メインウィンドウ表示処理
 function CreateMainWindow() {
   try {
@@ -844,7 +853,7 @@ function CreateMainWindow() {
           messageToMainWindow({
             action: "EQInfo",
             source: "usgs",
-            data: eqInfo.usgs.slice(0, config.Info.EQInfo.ItemCount),
+            data: eqInfo.usgs.slice(0, USGS_CurrentInfoNumber),
           });
         }
         EQCount_process(null)
@@ -3166,7 +3175,7 @@ var UpdateEQInfo = throttle(function (loop) {
   try {
     Req_JMAXMLList(EQInfoFetchCount, EQInfoFetchCount == 0);
     Req_JMAJSONList()
-    Req_NarikakunList(`https://ntool.online/api/earthquakeList?year=${new Date().getFullYear()}&month=${new Date().getMonth() + 1}`, EQInfoFetchCount);
+    Req_NarikakunList(EQInfoFetchCount);
   } catch (err) {
     throw new Error("地震情報の処理でエラーが発生しました。", { cause: err });
   }
@@ -3940,9 +3949,9 @@ var KatsudoJokyoInfoAll = [];
 
 //USGS 取得・フォーマット変更→MargeEQInfo
 var usgsLastGenerated = 0;
-function Req_USGS() {
+var Req_USGS = throttle(function () {
   if (!net.online) return;
-  var request = net.request("https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&limit=" + config.Info.EQInfo.ItemCount);
+  var request = net.request(`https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&limit=${USGS_CurrentInfoNumber}`);
   request.on("response", (res) => {
     var dataTmp = "";
     res.on("data", (chunk) => {
@@ -3951,34 +3960,36 @@ function Req_USGS() {
     res.on("end", function () {
       try {
         var json = ParseJSON(dataTmp);
-        if (!json) return false;
-        if (json.features[0].properties && json.features[0].properties.updated && usgsLastGenerated < json.features[0].properties.updated) {
-          usgsLastGenerated = json.features[0].properties.updated;
+        if (!json || !json.features[0].properties || !json.features[0].properties.updated) throw new Error("usgs.govが不正なデータを返しました。");
+        if (usgsLastGenerated > json.features[0].properties.updated) throw new Error("usgs.govが古いデータを返しました。");
 
-          var dataTmp2 = [];
-          json.features.forEach(function (elm) {
-            var FECode = FERegion.features.find(function (elm2) {
-              return turf.booleanPointInPolygon(elm.geometry.coordinates, elm2);
-            });
+        usgsLastGenerated = json.features[0].properties.updated;
 
-            var maxi;
-            if (elm.properties.mmi !== null) maxi = elm.properties.mmi;
-
-            dataTmp2.push({
-              eventId: elm.id,
-              category: null,
-              OriginTime: new Date(elm.properties.time),
-              epiCenter: FECode.properties.nameJA,
-              M: Math.round(elm.properties.mag * 10) / 10,
-              maxI: maxi,
-              DetailURL: [elm.properties.url],
-            });
+        var dataTmp2 = [];
+        json.features.forEach(function (elm) {
+          var FECode = FERegion.features.find(function (elm2) {
+            return turf.booleanPointInPolygon(elm.geometry.coordinates, elm2);
           });
-          dataTmp2 = dataTmp2.sort(function (a, b) {
-            return a.OriginTime > b.OriginTime ? -1 : 1;
+
+          var maxi;
+          if (elm.properties.mmi !== null) maxi = elm.properties.mmi;
+
+          dataTmp2.push({
+            eventId: elm.id,
+            category: null,
+            OriginTime: new Date(elm.properties.time),
+            epiCenter: FECode.properties.nameJA,
+            M: Math.round(elm.properties.mag * 10) / 10,
+            maxI: maxi,
+            DetailURL: [elm.properties.url],
           });
-          AlertEQInfo(dataTmp2, "usgs");
-        }
+        });
+        dataTmp2 = dataTmp2.sort(function (a, b) {
+          return a.OriginTime > b.OriginTime ? -1 : 1;
+        });
+        AlertEQInfo(dataTmp2, "usgs");
+        console.log(222222222, dataTmp2.length)
+
       } catch (err) {
         console.log(err)
       }
@@ -3987,10 +3998,10 @@ function Req_USGS() {
   request.on("error", () => { });
 
   request.end();
-}
+}, 2000);
 
 //narikakun地震情報API リスト取得→Req_Narikakun
-function Req_NarikakunList(url, count) {
+function Req_NarikakunList(count) {
   if (!net.online) return UpdateStatus("ntool", "Error");
   var request = net.request(`https://earthquake-api-v2.nakn.jp/api/v2/list?limit=${JMA_CurrentInfoNumber}`);
   request.on("response", (res) => {
@@ -4291,7 +4302,7 @@ function AlertEQInfo(data, source, update) {
       messageToMainWindow({
         action: "EQInfo",
         source: "usgs",
-        data: eqInfo.usgs.slice(0, config.Info.EQInfo.ItemCount),
+        data: eqInfo.usgs.slice(0, USGS_CurrentInfoNumber),
       });
     }
   } catch (err) {
