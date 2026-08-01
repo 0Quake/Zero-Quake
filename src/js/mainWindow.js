@@ -2159,7 +2159,7 @@ function psWaveCalc(eid) {
     return elm2.id == eid;
   });
   if (pswaveFind) {
-    //JMA2001走時表による予報
+    //走時表による予報
     var passedTime = (new Date() - Replay - new Date(pswaveFind.data.originTime)) / 1000;
 
     function est_radius(TTable) {

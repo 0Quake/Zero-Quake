@@ -793,8 +793,8 @@ const unresponsiveMsg = {
   noLink: true,
 };
 
-var JMA_CurrentInfoNumber = 25;
-var USGS_CurrentInfoNumber = 25;
+var JMA_CurrentInfoNumber = 20;
+var USGS_CurrentInfoNumber = 20;
 //メインウィンドウ表示処理
 function CreateMainWindow() {
   try {
