@@ -224,7 +224,7 @@ app.whenReady().then(() => {
   // アプリ全体のネットワークリクエストの発生を事前に検知するフック
   electron.session.defaultSession.webRequest.onBeforeRequest((details, callback) => {
     if (details.url.includes("https://")) {
-      console.log(`[Request detected] ${details.url}`);
+      //console.log(`[Request detected] ${details.url}`);
     }
 
     // キャンセルしない場合は空オブジェクトを渡してリクエストを続行
@@ -1411,6 +1411,94 @@ function start() {
   //一回限り
   Req_TremRts_sta();
   Req_JMATide_sta();
+
+  setTimeout(() => {
+    console.log(11)
+    MargeEQInfo(
+      [
+        {
+          status: "発表",
+          eventId: 123,
+          category: "震度速報",
+          reportDateTime: new Date(),
+          OriginTime: new Date(),
+          epiCenter: null,
+          M: null,
+          maxI: 4,
+          cancel: false,
+          DetailURL: [],
+          headline: "",
+          axisData: null,
+        },
+      ],
+    );
+  }, 2000)
+
+  var dt1 = new Date();
+  setTimeout(() => {
+    console.log(22)
+    MargeEQInfo(
+      [
+        {
+          status: "発表",
+          eventId: 123,
+          category: "震源に関する情報",
+          reportDateTime: dt1,
+          OriginTime: dt1,
+          epiCenter: null,
+          M: 4,
+          maxI: null,
+          cancel: false,
+          DetailURL: [],
+          headline: "",
+          axisData: null,
+        },
+      ],
+    );
+  }, 5000)
+
+  setTimeout(() => {
+    console.log(33)
+    MargeEQInfo(
+      [
+        {
+          status: "発表",
+          eventId: 123,
+          category: "震源に関する情報",
+          reportDateTime: dt1,
+          OriginTime: dt1,
+          epiCenter: "どこか2",
+          M: 4,
+          maxI: null,
+          cancel: false,
+          DetailURL: [],
+          headline: "",
+          axisData: null,
+        },
+      ],
+    );
+  }, 7000)
+  setTimeout(() => {
+    console.log(44)
+    MargeEQInfo(
+      [
+        {
+          status: "発表",
+          eventId: 123,
+          category: "震源に関する情報",
+          reportDateTime: dt1,
+          OriginTime: dt1,
+          epiCenter: "どこか2",
+          M: 4,
+          maxI: null,
+          cancel: false,
+          DetailURL: [],
+          headline: "",
+          axisData: null,
+        },
+      ],
+    );
+  }, 9000)
 }
 
 function Req_JMA_gaikyo() {
@@ -4156,7 +4244,8 @@ function MargeEQInfo(dataList, count) {
           if (elm.axisData) EQInfo_Item.axisData.push(elm.axisData);
         });
 
-        if (EQElm.category == "EEW" && EQInfo_Item.category != "EEW") EQElm.audioNotification = true;//同イベント2報以降だがEEW以外の情報は初の場合音声通知する
+        //同イベント2報以降だがEEW以外の情報は初の場合音声通知する。そうでなければ残ってるフラグをfalseにもどす。
+        EQElm.audioNotification = (EQElm.category == "EEW" && EQInfo_Item.category != "EEW")
 
         //キーごとにマージ
         Object.keys(EQInfo_Item).forEach(function (key) {
@@ -4193,9 +4282,9 @@ function MargeEQInfo(dataList, count) {
         eqInfoTmp.push(data);
         eqInfo.jma.push(data);
         var latest_reportDate = Math.max(...Object.keys(EQInfoData).map(function (key) { return Number(EQInfoData[key].reportDateTime) }));
-        if (count !== 0 && data.category !== "EEW" && Number(data.reportDateTime) == latest_reportDate) {
-          data.audioNotification = true;//当該イベントの初受信＆それが最新（reportDateが過去最大）なら音声通知する
-        }
+
+        //当該イベントの初受信＆それが最新（reportDateが過去最大）なら音声通知する
+        data.audioNotification = (count !== 0 && data.category !== "EEW" && Number(data.reportDateTime) == latest_reportDate)
       }
     });
 
