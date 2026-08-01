@@ -3178,7 +3178,7 @@ var UpdateEQInfo = throttle(function (loop) {
   try {
     Req_JMAXMLList(EQInfoFetchCount, EQInfoFetchCount == 0);
     Req_JMAJSONList()
-    //Req_NarikakunList(EQInfoFetchCount);
+    Req_NarikakunList(EQInfoFetchCount);
   } catch (err) {
     throw new Error("地震情報の処理でエラーが発生しました。", { cause: err });
   }
