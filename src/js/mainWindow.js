@@ -3124,7 +3124,7 @@ function hinanjoPopup(e) {
 //JMA地震情報タブを最後までスクロールしたとき追加をリクエスト
 var tab1c1 = document.getElementById("tab1_content1");
 tab1c1.addEventListener('scroll', () => {
-  if (tab1c1.scrollTop + tab1c1.clientHeight >= tab1c1.scrollHeight - 1) {
+  if (tab1c1.scrollTop + tab1c1.clientHeight >= tab1c1.scrollHeight - 50) {
     var sortKey = document.getElementById("JMA_EqInfo_Sort").value;
 
     if (sortKey == "t") {//新しい順の時のみさらに読み込む

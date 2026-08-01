@@ -778,7 +778,7 @@ const unresponsiveMsg = {
   noLink: true,
 };
 
-var JMA_CurrentInfoNumber = 15;
+var JMA_CurrentInfoNumber = 25;
 //メインウィンドウ表示処理
 function CreateMainWindow() {
   try {
@@ -4004,7 +4004,8 @@ function Req_USGS() {
             AlertEQInfo(dataTmp2, "usgs");
           }
           UpdateStatus("USGS", "success");
-        } catch {
+        } catch (err) {
+          console.log(err)
           UpdateStatus("USGS", "Error");
         }
       });
