@@ -52,15 +52,18 @@
     <script>
         window.electronAPI.messageSend((event, request) => {
             if (request.action == "NankaiTroughInfo") {
-                document.title = (request.data.reportKind == "取消" ? "取消／" : "") + request.data.title + " (" + request.data.kind + ") - Zero Quake"
+                var title = String(request.data.title || "")
+                var kind = String(request.data.kind || "")
+                var prefix = request.data.reportKind == "取消" ? "取消／" : ""
+                document.title = prefix + title + " (" + kind + ") - Zero Quake"
 
-                document.getElementById("title").innerText = (request.data.reportKind == "取消" ? "取消／" : "") + request.data.title + " (" + request.data.kind + ")"
+                document.getElementById("title").innerText = prefix + title + " (" + kind + ")"
 
                 if (request.data.reportKind == "取消") document.getElementById("title").classList.remove("happyo")
                 else document.getElementById("title").classList.add("happyo")
 
-                var SerialStr = request.data.Serial ? ", 情報番号#" + request.data.Serial : ""
-                document.getElementById("headline").innerText = request.data.HeadLine + " (" + NormalizeDate(4, request.data.reportDate) + SerialStr + ")"
+                var SerialStr = request.data.Serial ? ", 情報番号#" + String(request.data.Serial) : ""
+                document.getElementById("headline").innerText = String(request.data.HeadLine || "") + " (" + NormalizeDate(4, request.data.reportDate) + SerialStr + ")"
                 document.getElementById("Text_body").innerText = removeFirstBR(request.data.Text)
                 document.getElementById("Appendix_body").innerText = removeFirstBR(request.data.Appendix)
                 document.getElementById("NextAdvisory_body").innerText = removeFirstBR(request.data.NextAdvisory)
