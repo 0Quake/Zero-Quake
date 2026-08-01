@@ -4267,12 +4267,12 @@ function timeDifference(miliseconds) {
 }
 
 //地震情報通知（音声・画面表示等）
-function AlertEQInfo(dataUpdated, source, update) {
+function AlertEQInfo(data, source, update) {
   try {
     if (source == "jma") {
 
       //音声通知条件を満たす最新のデータ
-      var dataToNotify = dataUpdated.sort(function (a, b) {
+      var dataToNotify = data.sort(function (a, b) {
         return a.OriginTime > b.OriginTime ? -1 : 1;
       }).find(function (elm) {
         return elm.audioNotification
@@ -4301,7 +4301,7 @@ function AlertEQInfo(dataUpdated, source, update) {
       });
 
       //現在開いている地震情報ウィンドウにデータ送信
-      dataUpdated.forEach(function (elm) {
+      data.forEach(function (elm) {
         if (EQI_Window[elm.eventId]) {
           var metadata = EQI_Window[elm.eventId].metadata;
           var EEWDataItem = EEW_Data.find(function (elm2) {
