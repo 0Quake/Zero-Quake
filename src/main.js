@@ -1960,7 +1960,7 @@ function Req_SNet() {
         res.on("end", function () {
           try {
             var json = JSON.parse(dataTmp.replace(/\s+/g, ''));
-            if (!json || !Array.isArray(json)) throw new Error();
+            if (!json || !Array.isArray(json)) throw new Error("msil.go.jpが無効なJSONを返しました。");
             var basetime = 0;
             var Now = Number(NormalizeDate(1, ConvertUTC(new Date(new Date() - Replay))));
             json.forEach(function (elm) {
@@ -2134,7 +2134,7 @@ function AXIS() {
                 OriginTimeTmp = new Date(data.message.Head.TargetDateTime);
               if (data.message.Body.Intensity) IntensityElm = data.message.Body.Intensity;
 
-              ConvertEQInfo(
+              MargeEQInfo(
                 [
                   {
                     status: data.message.Control.Status,
@@ -3100,7 +3100,7 @@ function EEW_Alert(data, update) {
     });
 
 
-    ConvertEQInfo(
+    MargeEQInfo(
       [
         {
           status: data.is_training ? "訓練" : "通常",
@@ -3357,7 +3357,7 @@ function Process_Hokkaidosanriku(data) {
   }
 
 }
-//気象庁XML 取得・フォーマット変更→ConvertEQInfo
+//気象庁XML 取得・フォーマット変更→MargeEQInfo
 function Req_JMAXML(url, count) {
   //console.log(3)
   if (!url || jmaXML_Fetched.includes(url)) return;
@@ -3417,7 +3417,7 @@ function Req_JMAXML(url, count) {
           if (maxIntTmp == "[objectHTMLUnknownElement]") maxIntTmp = null;
           var headline = xml.getElementsByTagName("Head")[0].getElementsByTagName("Headline")[0].getElementsByTagName("Text")[0].textContent;
 
-          ConvertEQInfo(
+          MargeEQInfo(
             [
               {
                 status: xml.getElementsByTagName("Status")[0].textContent,
@@ -3601,7 +3601,7 @@ function Req_JMAXML(url, count) {
               });
             }
           );
-          ConvertEQInfo(EQData, count);
+          MargeEQInfo(EQData, count);
 
           if (cancel) {
             tsunamiDataTmp = {
@@ -3962,7 +3962,7 @@ var NankaiTroughInfoAll = [];
 var HokkaidoSanrikuInfoAll = [];
 var KatsudoJokyoInfoAll = [];
 
-//USGS 取得・フォーマット変更→ConvertEQInfo
+//USGS 取得・フォーマット変更→MargeEQInfo
 var usgsLastGenerated = 0;
 function Req_USGS() {
   if (net.online) {
@@ -4048,7 +4048,7 @@ function Req_NarikakunList(url, count) {
   request.end();
 }
 
-//narikakun地震情報API 取得・フォーマット変更→ConvertEQInfo
+//narikakun地震情報API 取得・フォーマット変更→MargeEQInfo
 function Req_Narikakun(url, count) {
   if (!url || nakn_Fetched.includes(url)) return;
 
@@ -4087,7 +4087,7 @@ function Req_Narikakun(url, count) {
               axisData: null,
             },
           ];
-          ConvertEQInfo(dataTmp2, count);
+          MargeEQInfo(dataTmp2, count);
           UpdateStatus(new Date() - Replay, "ntool", "success");
           nakn_Fetched.push(url);
         } catch {
@@ -4104,7 +4104,7 @@ function Req_Narikakun(url, count) {
 
 var EQInfoData = {};
 //地震情報マージ→AlertEQInfo
-function ConvertEQInfo(dataList, count) {
+function MargeEQInfo(dataList, count) {
   try {
     var eqInfoTmp = [];
     var UpdateEQInfoTmp = [];
