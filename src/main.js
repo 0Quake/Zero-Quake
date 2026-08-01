@@ -1570,7 +1570,6 @@ function Req_TremRts() {
         };
         messageToMainWindow(TremRtsData_Marged);
         UpdateStatus("TREM-RTS", "success", new Date(json.time));
-        console.log("aaaaaaaaaaaaa")
       } catch {
         UpdateStatus("TREM-RTS", "Error");
         TremRTS_server = !TremRTS_server;

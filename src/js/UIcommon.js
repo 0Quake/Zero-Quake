@@ -9,6 +9,7 @@ window.electronAPI.messageSend((event, request) => {
 });
 
 function SetShindoColor() {
+  if (!config) return;
   root.style.setProperty("--IntTheme_Q_BgColor", config.color.Shindo["?"].background);
   root.style.setProperty("--IntTheme_0_BgColor", config.color.Shindo["0"].background);
   root.style.setProperty("--IntTheme_1_BgColor", config.color.Shindo["1"].background);
@@ -153,6 +154,7 @@ function NormalizeShindo(str, responseType) {
       var ConvTable = ["0", "1", "2", "3", "4", "5弱", "5強", "6弱", "6強", "7", "５弱以上未入電", "不明"];
       break;
     case 2:
+      if (!config) return "#000000";
       var ConvTable = [
         [config.color.Shindo["0"].background, config.color.Shindo["0"].color],
         [config.color.Shindo["1"].background, config.color.Shindo["1"].color],
@@ -210,6 +212,7 @@ function NormalizeMMI(str, responseType) {
       var ConvTable = ["?", "Ⅰ", "Ⅱ", "Ⅲ", "Ⅳ", "Ⅴ", "Ⅵ", "Ⅶ", "Ⅷ", "Ⅸ", "Ⅹ", "Ⅺ", "Ⅻ"];
       break;
     case 2:
+      if (!config) return ["#00000000", "#00000000"];
       var ConvTable = [
         [config.color.Shindo["?"].background, config.color.Shindo["?"].color],
         [config.color.Shindo["0"].background, config.color.Shindo["0"].color],
@@ -235,6 +238,7 @@ function NormalizeMMI(str, responseType) {
 
 //eslint-disable-next-line
 function LgIntConvert(str) {
+  if (!config) return "#000000";
   switch (String(str)) {
     case "1":
       return [config.color.LgInt["1"].background, config.color.LgInt["1"].color];
