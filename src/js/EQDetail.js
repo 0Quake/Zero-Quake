@@ -2947,8 +2947,7 @@ function radioSet(name, val) {
 }
 
 function Boolean2(elm) {
-  return Boolean(elm !== null && elm !== undefined && elm !== "" && !Number.isNaN(elm) && elm != "Invalid Date" &&
-    (!Array.isArray(elm) || elm.length > 0) && elm);
+  return Boolean(elm !== null && elm !== undefined && elm !== "" && !Number.isNaN(elm) && elm != "Invalid Date" && (!Array.isArray(elm) || elm.length > 0) && elm || elm === 0);
 }
 
 function parse_LatLngDepth(str) {
