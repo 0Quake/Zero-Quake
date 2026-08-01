@@ -306,6 +306,22 @@ function NormalizeDate(type, date) {
       return new Date().toLocaleString("ja-jp");
   }
 }
+
+function parseEID(EID) {
+  try {
+    EID = String(EID)
+    const year = parseInt(EID.substring(0, 4))
+    const month = parseInt(EID.substring(4, 6)) - 1
+    const date = parseInt(EID.substring(6, 8))
+    const hour = parseInt(EID.substring(8, 10))
+    const min = parseInt(EID.substring(10, 12))
+    const sec = parseInt(EID.substring(12, 14))
+    return new Date(year, month, date, hour, min, sec)
+  } catch {
+    return null
+  }
+}
+
 //子要素一括削除
 //eslint-disable-next-line
 function removeChild(element) {

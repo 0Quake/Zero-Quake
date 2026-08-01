@@ -129,7 +129,7 @@ window.electronAPI.messageSend((event, request) => {
       };
     }
 
-    if (map) Mapinit();
+    if (!map) Mapinit();
     else drawData();//2回目以降なら地図初期化とばしてdraw
   } else if (request.action == "setting") {
     config = request.data;
@@ -140,7 +140,7 @@ window.electronAPI.messageSend((event, request) => {
 //情報取得
 function InfoFetch() {
   jma_ListReq();
-  narikakun_ListReq(new Date().getFullYear(), new Date().getMonth() + 1);
+  narikakun_ListReq();
   if (EEWData) ConvertEQInfo(EEWData);
   if (axisDatas) {
     axisDatas.forEach(function (elm) {
@@ -818,6 +818,7 @@ function Mapinit() {
   });
 
   hinanjoCheck.addEventListener("change", function () {
+    if (!map) return;
     map.setLayoutProperty(
       "hinanjo",
       "visibility", hinanjoCheck.checked ? "visible" : "none"
@@ -1194,6 +1195,7 @@ document.getElementById("layerSwitch_close")
 var mapSelect = document.getElementsByName("mapSelect");
 var tilemapActive = false;
 function layerSelect(layerName) {
+  if (!map) return;
   map.setLayoutProperty("tile0", "visibility", "none");
   map.setLayoutProperty("tile1", "visibility", "none");
   map.setLayoutProperty("tile2", "visibility", "none");
@@ -1235,6 +1237,7 @@ document.getElementById("globeView").addEventListener("change", function () {
 
 function overlaySelect(layerName, checked) {
   if (layerName == "kmoni_points") return;
+  if (!map) return;
   var visibility = checked ? "visible" : "none";
   if (layerName !== "hinanjo" && layerName !== "kmoni_points") {
     if (layerName == "gsi_vector") {
@@ -1284,6 +1287,7 @@ function mapFillSwitch(val) {
     LgIntMapDraw = val == "fill4";
   }
 
+  if (!map) return;
   if (LgIntMapDraw) {
     if (map.getLayer('int_icon')) map.setLayoutProperty('int_icon', 'visibility', 'none');
     if (map.getLayer('int_sta_icon')) map.setLayoutProperty('int_sta_icon', 'visibility', 'none');
@@ -1404,9 +1408,10 @@ function estimated_intensity_mapReq() {
           var lat2 = lat + 2 / 3;
           var lng2 = lng + 1;
 
-          ZoomBounds.extend([lng, lat2]);
-          ZoomBounds.extend([lng2, lat]);
-
+          if (ZoomBounds) {
+            ZoomBounds.extend([lng, lat2]);
+            ZoomBounds.extend([lng2, lat]);
+          }
           ESMap_Worker.postMessage({
             action: "URL",
             url: "https://www.jma.go.jp/bosai/estimated_intensity_map/data/" + idTmp + "/" + elm + ".png",
@@ -1466,27 +1471,28 @@ function jma_ListReq() {
     .catch(function () { });
 }
 //narikakun地震情報APIリスト取得→narikakun_Fetch
-function narikakun_ListReq(year, month, retry) {
-  fetch("https://ntool.online/api/earthquakeList?year=" + year + "&month=" + month)
+function narikakun_ListReq() {
+  var EID_Date = parseEID(eid);
+
+  //eventIdは厳密にはDateではないので1h前後をとって日付範囲を選ぶ
+  var bDate = new Date(EID_Date);
+  var aDate = new Date(EID_Date);
+  bDate.setHours(bDate.getHours() - 1);
+  aDate.setHours(aDate.getHours() + 1);
+  var bDate_s = NormalizeDate("YYYY-MM-DD", bDate);
+  var aDate_s = NormalizeDate("YYYY-MM-DD", aDate);
+
+  fetch(`https://earthquake-api-v2.nakn.jp/api/v2/list?beforeDate=${bDate_s}&afterDate=${aDate_s}&limit=2000`)
     .then(function (res) { return res.json(); })
     .then(function (data) {
-      var nakn_detected = false;
-      data.lists.forEach(function (elm) {
-        if (elm.includes(eid)) {
-          narikakun_Fetch(elm);
-          nakn_detected = true;
-        }
+      if (!data || !data.items || !data.items.length) return;
+      var target = data.items.find(function (el) {
+        return el.eventId == eid
+      })
+      if (!target.lists) return;
+      target.lists.forEach(function (el2) {
+        if (el2.url) narikakun_Fetch(el2.url);
       });
-
-      if (!nakn_detected && !retry) {
-        var yearTmp = new Date().getFullYear();
-        var monthTmp = new Date().getMonth();
-        if (monthTmp == 0) {
-          yearTmp = new Date().getFullYear() - 1;
-          monthTmp = 1;
-        }
-        narikakun_ListReq(yearTmp, monthTmp, true);
-      }
     });
 }
 
@@ -2086,7 +2092,7 @@ function mapFillReset() {
   Int6mT = ["any"];
   Int6pT = ["any"];
   Int7T = ["any"];
-  if (!map.loaded()) return;
+  if (!map || !map.loaded()) return;
   map.setFilter("Int0", ["==", "name", ""]);
   map.setFilter("Int1", ["==", "name", ""]);
   map.setFilter("Int2", ["==", "name", ""]);
@@ -2111,6 +2117,7 @@ function mapFillResetL() {
 }
 
 function mapFillDraw() {
+  if (!map) return;
   map.setFilter("Int0", Int0T);
   map.setFilter("Int1", Int1T);
   map.setFilter("Int2", Int2T);
@@ -2254,7 +2261,7 @@ function add_Area_info(name, maxInt) {
     }
     intensityIcons.push(icon);
 
-    ZoomBounds.extend(pointLocation);
+    if (ZoomBounds) ZoomBounds.extend(pointLocation);
   }
 
   switch (maxInt) {
@@ -2352,7 +2359,7 @@ function add_IntensityStation_info(lat, lng, name, int) {
       }
     }
     intensityIcons_st.push(icon);
-    ZoomBounds.extend([lng, lat]);
+    if (ZoomBounds) ZoomBounds.extend([lng, lat]);
   }
 
   newDiv.addEventListener("click", function () {
@@ -2403,13 +2410,13 @@ function DrawIntensity() {
     }
   });
 
-  if (map.getSource("int_icon")) {
+  if (map && map.getSource("int_icon")) {
     map.getSource("int_icon").setData({
       "type": "FeatureCollection",
       "features": intensityIcons
     });
   }
-  if (map.getSource("int_sta_icon")) map.getSource("int_sta_icon").setData({
+  if (map && map.getSource("int_sta_icon")) map.getSource("int_sta_icon").setData({
     "type": "FeatureCollection",
     "features": intensityIcons_st
   });
@@ -2550,7 +2557,7 @@ function add_Area_infoL(name, maxInt) {
     }
 
     LgIntIcons.push(icon);
-    ZoomBounds.extend(pointLocation);
+    if (ZoomBounds) ZoomBounds.extend(pointLocation);
   }
 
   switch (maxInt) {
@@ -2601,7 +2608,7 @@ function add_IntensityStation_infoL(lat, lng, name, int) {
     }
     LgIntIcons_st.push(icon);
 
-    ZoomBounds.extend([lng, lat]);
+    if (ZoomBounds) ZoomBounds.extend([lng, lat]);
   }
 
 
@@ -2801,7 +2808,7 @@ function ConvertEQInfo(data) {
   }
 
   if (EQInfoMarged.lat && EQInfoMarged.lng) {
-    ZoomBounds.extend([EQInfoMarged.lng, EQInfoMarged.lat]);
+    if (ZoomBounds) ZoomBounds.extend([EQInfoMarged.lng, EQInfoMarged.lat]);
 
     if (!ESmarkerElm) {
       const img = document.createElement("img");
