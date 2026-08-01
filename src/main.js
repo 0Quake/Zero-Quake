@@ -2130,28 +2130,23 @@ function AXIS() {
                 EarthquakeElm = data.message.Body.Earthquake[0];
                 OriginTimeTmp = new Date(EarthquakeElm.OriginTime);
               }
-              if (!OriginTimeTmp)
-                OriginTimeTmp = new Date(data.message.Head.TargetDateTime);
+              if (!OriginTimeTmp) OriginTimeTmp = new Date(data.message.Head.TargetDateTime);
               if (data.message.Body.Intensity) IntensityElm = data.message.Body.Intensity;
 
-              MargeEQInfo(
-                [
-                  {
-                    status: data.message.Control.Status,
-                    eventId: data.message.Head.EventID,
-                    category: data.message.Head.Title,
-                    reportDateTime: new Date(data.message.Head.ReportDateTime),
-                    OriginTime: OriginTimeTmp,
-                    epiCenter: EarthquakeElm.Hypocenter.Area.Name,
-                    M: Number(EarthquakeElm.Magnitude[0].valueOf_),
-                    maxI: NormalizeShindo(IntensityElm.Observation.MaxInt),
-                    cancel: data.message.Head.InfoType == "取消",
-                    DetailURL: [],
-                    headline: data.message.Head.Headline.Text,
-                    axisData: data,
-                  },
-                ],
-              );
+              MargeEQInfo([{
+                status: data.message.Control.Status,
+                eventId: data.message.Head.EventID,
+                category: data.message.Head.Title,
+                reportDateTime: new Date(data.message.Head.ReportDateTime),
+                OriginTime: OriginTimeTmp,
+                epiCenter: EarthquakeElm.Hypocenter.Area.Name,
+                M: Number(EarthquakeElm.Magnitude[0].valueOf_),
+                maxI: NormalizeShindo(IntensityElm.Observation.MaxInt),
+                cancel: data.message.Head.InfoType == "取消",
+                DetailURL: [],
+                headline: data.message.Head.Headline.Text,
+                axisData: data,
+              }]);
               break;
           }
         }
@@ -3101,23 +3096,19 @@ function EEW_Alert(data, update) {
     });
 
 
-    MargeEQInfo(
-      [
-        {
-          status: data.is_training ? "訓練" : "通常",
-          eventId: data.EventID,
-          category: "EEW",
-          reportDateTime: new Date(data.report_time),
-          OriginTime: new Date(data.origin_time),
-          epiCenter: data.region_name,
-          M: data.isPlum ? null : Number(data.magnitude),
-          maxI: NormalizeShindo(data.maxInt),
-          cancel: Boolean(data.is_cancel),
-          DetailURL: [],
-          axisData: null,
-        },
-      ], 999
-    );
+    MargeEQInfo([{
+      status: data.is_training ? "訓練" : "通常",
+      eventId: data.EventID,
+      category: "EEW",
+      reportDateTime: new Date(data.report_time),
+      OriginTime: new Date(data.origin_time),
+      epiCenter: data.region_name,
+      M: data.isPlum ? null : Number(data.magnitude),
+      maxI: NormalizeShindo(data.maxInt),
+      cancel: Boolean(data.is_cancel),
+      DetailURL: [],
+      axisData: null,
+    }], 999);
 
     //スリープ回避開始
     if (show_alert) {
@@ -3187,7 +3178,7 @@ var UpdateEQInfo = throttle(function (loop) {
   try {
     Req_JMAXMLList(EQInfoFetchCount, EQInfoFetchCount == 0);
     Req_JMAJSONList()
-    Req_NarikakunList(EQInfoFetchCount);
+    //Req_NarikakunList(EQInfoFetchCount);
   } catch (err) {
     throw new Error("地震情報の処理でエラーが発生しました。", { cause: err });
   }
@@ -3415,27 +3406,23 @@ function Req_JMAXML(url, count) {
           if (maxIntTmp == "[objectHTMLUnknownElement]") maxIntTmp = null;
           var headline = xml.getElementsByTagName("Head")[0].getElementsByTagName("Headline")[0].getElementsByTagName("Text")[0].textContent;
 
-          MargeEQInfo(
-            [
-              {
-                status: xml.getElementsByTagName("Status")[0].textContent,
-                eventId: xml.getElementsByTagName("EventID")[0].textContent,
-                category: xml.getElementsByTagName("Title")[0].textContent,
-                OriginTime: originTimeTmp,
-                epiCenter: epiCenterTmp,
-                M: magnitudeTmp,
-                maxI: NormalizeShindo(maxIntTmp),
-                maxLgInt: maxLgInt,
-                cancel: Boolean(cancel),
-                reportDateTime: new Date(
-                  xml.getElementsByTagName("ReportDateTime")[0].textContent
-                ),
-                DetailURL: [url],
-                headline: headline,
-                axisData: null,
-              },
-            ], count
-          );
+          MargeEQInfo([{
+            status: xml.getElementsByTagName("Status")[0].textContent,
+            eventId: xml.getElementsByTagName("EventID")[0].textContent,
+            category: xml.getElementsByTagName("Title")[0].textContent,
+            OriginTime: originTimeTmp,
+            epiCenter: epiCenterTmp,
+            M: magnitudeTmp,
+            maxI: NormalizeShindo(maxIntTmp),
+            maxLgInt: maxLgInt,
+            cancel: Boolean(cancel),
+            reportDateTime: new Date(
+              xml.getElementsByTagName("ReportDateTime")[0].textContent
+            ),
+            DetailURL: [url],
+            headline: headline,
+            axisData: null,
+          }], count);
         } else if (title == "地震回数に関する情報") {
           if (xml.getElementsByTagName("EarthquakeCount")[0]) {
             var hourly = []
@@ -4024,11 +4011,12 @@ function Req_NarikakunList(count) {
       try {
         var json = ParseJSON(dataTmp);
         if (!json || json.status != "ok" || !json.items) throw new Error("ntools APIが不正なデータかstatus≠okを返した。");
+
+        var data_array = [];
         for (let item of json.items) {
-          //if (!originTimeTmp) originTimeTmp = new Date(json.Head.TargetDateTime);
+          //if (!originTimeTmp) originTimeTmp = new Date(json.Head.TargetDateTime);　保留
 
           for (let elm of item.lists) {
-            //Req_Narikakun(elm.url, count);
             var originTime = (elm.data && elm.data.originTimeNew) ? new Date(elm.data.originTimeNew) : null;
             var reportDateTime = elm.datetime ? new Date(elm.datetime) : null;
             var epiCenter = (elm.data && elm.data.hypoName) ? elm.data.hypoName : null;
@@ -4037,26 +4025,25 @@ function Req_NarikakunList(count) {
             var cancel = (elm.type == "取消");
             var url_list = elm.url ? [elm.url] : [];
 
-            var dataTmp2 = [
-              {
-                status: elm.status,
-                eventId: item.eventId,
-                category: elm.title,
-                OriginTime: originTime,
-                epiCenter: epiCenter,
-                M: Magnitude,
-                maxI: MaxI,
-                cancel: cancel,
-                reportDateTime: reportDateTime,
-                DetailURL: url_list,
-                headline: "",//保留
-                axisData: null,
-              },
-            ];
-            MargeEQInfo(dataTmp2, count);
+            data_array.push({
+              status: elm.status,
+              eventId: item.eventId,
+              category: elm.title,
+              OriginTime: originTime,
+              epiCenter: epiCenter,
+              M: Magnitude,
+              maxI: MaxI,
+              cancel: cancel,
+              reportDateTime: reportDateTime,
+              DetailURL: url_list,
+              headline: "",//保留
+              axisData: null,
+            });
             UpdateStatus("ntool", "success");
           }
         }
+
+        MargeEQInfo(data_array, count);
 
         UpdateStatus("ntool", "success");
       } catch {
