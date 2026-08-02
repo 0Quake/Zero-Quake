@@ -55,7 +55,7 @@ window.electronAPI.messageSend((event, request) => {
     eid = request.eid;
 
     if (document.getElementById("EEWLink").style.display != "inline") {
-      var EEWURL = "https://www.data.jma.go.jp/svd/eew/data/nc/fc_hist/" + String(eid).slice(0, 4) + "/" + String(eid).slice(4, 6) + "/" + eid + "/index.html";
+      var EEWURL = `https://www.data.jma.go.jp/svd/eew/data/nc/fc_hist/${String(eid).slice(0, 4)}/${String(eid).slice(4, 6)}/${eid}/index.html`;
       fetch(EEWURL).then(function (res) {
         if (res.status == 200) {
           document.getElementById("EEWLink").style.display = "inline";
@@ -772,20 +772,23 @@ function Mapinit() {
     var hinanjoShow = config.data.overlay.includes("hinanjo");
     if (e.sourceId == "hinanjo" && hinanjoShow && e.tile != undefined) {
       var ca = e.tile.tileID.canonical;
-      if (map.getLayer("hinanjo_eq_" + ca.x + ca.y + ca.z)) map.removeLayer("hinanjo_eq_" + ca.x + ca.y + ca.z);
-      if (map.getSource("hinanjo_eq_" + ca.x + ca.y + ca.z)) map.removeSource("hinanjo_eq_" + ca.x + ca.y + ca.z);
-      if (map.getLayer("hinanjo_ts_" + ca.x + ca.y + ca.z)) map.removeLayer("hinanjo_ts_" + ca.x + ca.y + ca.z);
-      if (map.getSource("hinanjo_ts_" + ca.x + ca.y + ca.z)) map.removeSource("hinanjo_ts_" + ca.x + ca.y + ca.z);
 
-      map.addSource("hinanjo_eq_" + ca.x + ca.y + ca.z, {
+      var eq_name = `hinanjo_eq_${ca.x}${ca.y}${ca.z}`;
+      var ts_name = `hinanjo_ts_${ca.x}${ca.y}${ca.z}`;
+      if (map.getLayer(eq_name)) map.removeLayer(eq_name);
+      if (map.getSource(eq_name)) map.removeSource(eq_name);
+      if (map.getLayer(ts_name)) map.removeLayer(ts_name);
+      if (map.getSource(ts_name)) map.removeSource(ts_name);
+
+      map.addSource(eq_name, {
         type: "geojson",
-        data: "https://cyberjapandata.gsi.go.jp/xyz/skhb04/" + ca.z + "/" + ca.x + "/" + ca.y + ".geojson",
+        data: `https://cyberjapandata.gsi.go.jp/xyz/skhb04/${ca.z}/${ca.x}/${ca.y}.geojson`,
       });
 
       map.addLayer({
-        id: "hinanjo_eq_" + ca.x + ca.y + ca.z,
+        id: eq_name,
         type: "circle",
-        source: "hinanjo_eq_" + ca.x + ca.y + ca.z,
+        source: eq_name,
         layout: { visibility: hinanjoShow ? "visible" : "none" },
         paint: {
           "circle-color": "#bf8715",
@@ -797,15 +800,15 @@ function Mapinit() {
         maxzoom: 22,
       });
 
-      map.addSource("hinanjo_ts_" + ca.x + ca.y + ca.z, {
+      map.addSource(ts_name, {
         type: "geojson",
-        data: "https://cyberjapandata.gsi.go.jp/xyz/skhb05/" + ca.z + "/" + ca.x + "/" + ca.y + ".geojson",
+        data: `https://cyberjapandata.gsi.go.jp/xyz/skhb05/${ca.z}/${ca.x}/${ca.y}.geojson`,
       });
 
       map.addLayer({
-        id: "hinanjo_ts_" + ca.x + ca.y + ca.z,
+        id: ts_name,
         type: "circle",
-        source: "hinanjo_ts_" + ca.x + ca.y + ca.z,
+        source: ts_name,
         layout: { visibility: hinanjoShow ? "visible" : "none" },
         paint: {
           "circle-color": "#2488c7",
@@ -817,12 +820,9 @@ function Mapinit() {
         maxzoom: 22,
       });
 
-      map.on("click", "hinanjo_eq_" + ca.x + ca.y + ca.z, hinanjoPopup);
-      map.on("click", "hinanjo_ts_" + ca.x + ca.y + ca.z, hinanjoPopup);
-      hinanjoLayers.push(
-        "hinanjo_eq_" + ca.x + ca.y + ca.z,
-        "hinanjo_ts_" + ca.x + ca.y + ca.z
-      );
+      map.on("click", eq_name, hinanjoPopup);
+      map.on("click", ts_name, hinanjoPopup);
+      hinanjoLayers.push(eq_name, ts_name);
     }
   });
 
@@ -1081,10 +1081,12 @@ function Int_Area_Popup(e) {
   var elm = e.features[0].properties;
 
   color = NormalizeShindo(elm.int, 2);
-  new maplibregl.Popup({ offset: [0, -17] }).setHTML(
-    "<div class='popupContent'><div class='shindoItem_S' style='background:" + color[0] + ";color:" + color[1] + "'>震度 "
-    + elm.intStr + "</div><div class='pointName'>" + elm.name + "</div><div class='pointHead'>細分区域</div></div><div></div>"
-  ).setLngLat(e.features[0].geometry.coordinates).addTo(map);
+  var content = `<div class='popupContent'><div class='shindoItem_S' style='background:${color[0]};color:${color[1]}'>震度 ${elm.intStr}</div><div class='pointName'>${elm.name}</div><div class='pointHead'>細分区域</div></div><div></div>`;
+
+  new maplibregl.Popup({ offset: [0, -17] })
+    .setHTML(content)
+    .setLngLat(e.features[0].geometry.coordinates)
+    .addTo(map);
 
   e.originalEvent.cancelBubble = true;
 }
@@ -1095,10 +1097,12 @@ function Int_Sta_Popup(e) {
   color = NormalizeShindo(elm.int, 2);
 
   var mi_description = NormalizeShindo(elm.int) == "未" ? "<div class = 'description'>震度5弱以上と考えられるが<br>現在震度を入手していない。</div>" : "";
-  new maplibregl.Popup({ offset: [0, -17] }).setHTML(
-    "<div class='popupContent'><div class='shindoItem' style='background:" + color[0] + ";color:" + color[1] + "'>震度 "
-    + elm.intStr + "</div><div class='pointName'>" + elm.name + "</div>" + mi_description + "<div class='pointHead'>観測点</div></div><div></div>"
-  ).setLngLat(e.features[0].geometry.coordinates).addTo(map);
+
+  var content = `<div class='popupContent'><div class='shindoItem' style='background:${color[0]};color:${color[1]}'>震度 ${+ elm.intStr}</div><div class='pointName'>${elm.name}</div>${mi_description}<div class='pointHead'>観測点</div></div><div></div>`;
+  new maplibregl.Popup({ offset: [0, -17] })
+    .setHTML(content)
+    .setLngLat(e.features[0].geometry.coordinates)
+    .addTo(map);
 
   if (e.originalEvent) e.originalEvent.cancelBubble = true;
 }
@@ -1106,10 +1110,13 @@ function LgInt_Area_Popup(e) {
   var elm = e.features[0].properties;
 
   color = LgIntConvert(elm.lgint);
-  new maplibregl.Popup({ offset: [0, -17] }).setHTML(
-    "<div class='popupContent'><div class='shindoItem_S' style='background:" + color[0] + ";color:" + color[1] + "'>長周期地震動階級 "
-    + elm.lgintStr + "</div><div class='pointName'>" + elm.name + "</div><div class='pointHead'>細分区域</div></div><div></div>"
-  ).setLngLat(e.features[0].geometry.coordinates).addTo(map);
+
+  var content = `<div class='popupContent'><div class='shindoItem_S' style='background:${color[0]};color:${color[1]}'>長周期地震動階級 ${elm.lgintStr}</div><div class='pointName'>${elm.name}</div><div class='pointHead'>細分区域</div></div><div></div>`;
+
+  new maplibregl.Popup({ offset: [0, -17] })
+    .setHTML(content)
+    .setLngLat(e.features[0].geometry.coordinates)
+    .addTo(map);
 
   e.originalEvent.cancelBubble = true;
 }
@@ -1118,10 +1125,13 @@ function LgInt_Sta_Popup(e) {
   var elm = e.features[0].properties;
 
   color = LgIntConvert(elm.lgint);
-  new maplibregl.Popup({ offset: [0, -17] }).setHTML(
-    "<div class='popupContent'><div class='shindoItem' style='background:" + color[0] + ";color:" + color[1] + "'>長周期地震動階級 "
-    + elm.lgintStr + "</div><div class='pointName'>" + elm.name + "</div><div class='pointHead'>観測点</div></div><div></div>"
-  ).setLngLat(e.features[0].geometry.coordinates).addTo(map);
+
+  var content = `<div class='popupContent'><div class='shindoItem' style='background:${color[0]};color:${color[1]}'>長周期地震動階級 ${elm.lgintStr}</div><div class='pointName'>${elm.name}</div><div class='pointHead'>観測点</div></div><div></div>`;
+
+  new maplibregl.Popup({ offset: [0, -17] })
+    .setHTML(content)
+    .setLngLat(e.features[0].geometry.coordinates)
+    .addTo(map);
 
   if (e.originalEvent) e.originalEvent.cancelBubble = true;
 }
@@ -1335,11 +1345,11 @@ var ESMap_Worker;
 function estimated_intensity_mapReq() {
   ESMap_Worker = new Worker("js/ESMap_Worker.js");
   ESMap_Worker.addEventListener("message", (e) => {
-    if (map.getSource("estimated_intensity_map_" + e.data.index)) {
-      map.removeLayer("estimated_intensity_map_layer_" + e.data.index);
-      map.removeSource("estimated_intensity_map_" + e.data.index);
+    if (map.getSource(`estimated_intensity_map_${e.data.index}`)) {
+      map.removeLayer(`estimated_intensity_map_layer_${e.data.index}`);
+      map.removeSource(`estimated_intensity_map_${e.data.index}`);
     }
-    map.addSource("estimated_intensity_map_" + e.data.index, {
+    map.addSource(`estimated_intensity_map_${e.data.index}`, {
       type: "image",
       url: e.data.data,
       coordinates: [
@@ -1351,9 +1361,9 @@ function estimated_intensity_mapReq() {
     });
     map.addLayer(
       {
-        id: "estimated_intensity_map_layer_" + e.data.index,
+        id: `estimated_intensity_map_layer_${e.data.index}`,
         type: "raster",
-        source: "estimated_intensity_map_" + e.data.index,
+        source: `estimated_intensity_map_${e.data.index}`,
         paint: {
           "raster-fade-duration": 0,
           "raster-resampling": "nearest",
@@ -1361,9 +1371,7 @@ function estimated_intensity_mapReq() {
       },
       "basemap_LINE"
     );
-    estimated_intensity_map_layers.push(
-      "estimated_intensity_map_layer_" + e.data.index
-    );
+    estimated_intensity_map_layers.push(`estimated_intensity_map_layer_${e.data.index}`);
   });
 
   ESMap_Worker.postMessage({
@@ -1423,7 +1431,7 @@ function estimated_intensity_mapReq() {
           }
           ESMap_Worker.postMessage({
             action: "URL",
-            url: "https://www.jma.go.jp/bosai/estimated_intensity_map/data/" + idTmp + "/" + elm + ".png",
+            url: `https://www.jma.go.jp/bosai/estimated_intensity_map/data/${idTmp}/${elm}.png`,
             index: index,
             lat: lat,
             lng: lng,
@@ -1451,7 +1459,7 @@ function jma_ListReq() {
       data.filter(function (elm) {
         return elm.eid == eid
       }).map(function (elm) {
-        return "https://www.jma.go.jp/bosai/quake/data/" + elm.json;
+        return `https://www.jma.go.jp/bosai/quake/data/${elm.json}`;
       }).sort((a, b) => {
         var timeStampA = a.match(".+/(.+?).[a-z]+([?#;].*)?$")[1].split("_")[0]
         var timeStampB = b.match(".+/(.+?).[a-z]+([?#;].*)?$")[1].split("_")[0]
@@ -1472,7 +1480,7 @@ function jma_ListReq() {
     .then(function (res) { return res.json(); })
     .then(function (data) {
       data.forEach(function (elm) {
-        var urlTmp = "https://www.jma.go.jp/bosai/ltpgm/data/" + elm.json;
+        var urlTmp = `https://www.jma.go.jp/bosai/ltpgm/data/${elm.json}`;
         if (elm.eid == eid) jmaL_Fetch(urlTmp);
       });
     })
@@ -2182,9 +2190,7 @@ var ShindoFragment;
 function add_Pref_info(name, maxInt) {
   var newDiv = document.createElement("div");
   var color1 = NormalizeShindo(maxInt, 2);
-  newDiv.innerHTML =
-    "<span aria-hidden='true'></span><div style='background:" + color1[0] + ";color:" + color1[1] + ";' aria-hidden='true'>" + maxInt +
-    "</div>" + name;
+  newDiv.innerHTML = `<span aria-hidden='true'></span><div style='background:${color1[0]};color:${color1[1]};' aria-hidden='true'>${maxInt}</div>${name}`;
   newDiv.classList.add("ShindoItem", "ShindoItem1");
   newDiv.setAttribute("tabindex", 0);
   newDiv.setAttribute("aria-label", `${name}、震度${NormalizeShindo(maxInt, 1)}`);
@@ -2199,9 +2205,9 @@ function add_Pref_info(name, maxInt) {
   var newDiv2 = document.createElement("div");
   newDiv2.innerHTML = "<div></div>";
   newDiv2.classList.add("WrapLevel1", "close");
-  newDiv2.setAttribute("id", "WrapLevel1_" + name);
+  newDiv2.setAttribute("id", `WrapLevel1_${name}`);
   newDiv2.setAttribute("role", "group");
-  newDiv.setAttribute("aria-controls", "WrapLevel1_" + name);
+  newDiv.setAttribute("aria-controls", `WrapLevel1_${name}`);
   ShindoFragment.append(newDiv, newDiv2);
 
   document.getElementById("splash").style.display = "none";
@@ -2212,9 +2218,7 @@ function add_Area_info(name, maxInt) {
 
   var newDiv = document.createElement("div");
   var color = NormalizeShindo(maxInt, 2);
-  newDiv.innerHTML =
-    "<span aria-hidden='true'></span><div style='background:" + color[0] + ";color:" + color[1] + ";' aria-hidden='true'>" +
-    maxInt + "</div>" + name;
+  newDiv.innerHTML = `<span aria-hidden='true'></span><div style='background:${color[0]};color:${color[1]};' aria-hidden='true'>${maxInt}</div>${name}`;
   newDiv.classList.add("ShindoItem", "ShindoItem2");
   newDiv.setAttribute("tabindex", 0);
   newDiv.setAttribute("aria-label", `細分区域 ${name}、震度${NormalizeShindo(maxInt, 1)}`);
@@ -2230,18 +2234,15 @@ function add_Area_info(name, maxInt) {
   var newDiv2 = document.createElement("div");
   newDiv2.innerHTML = "<div></div>";
   newDiv2.classList.add("WrapLevel2", "close");
-  newDiv2.setAttribute("id", "WrapLevel2_" + name);
+  newDiv2.setAttribute("id", `WrapLevel2_${name}`);
   newDiv2.setAttribute("role", "group");
-  newDiv.setAttribute("aria-controls", "WrapLevel2_" + name);
+  newDiv.setAttribute("aria-controls", `WrapLevel2_${name}`);
 
   wrap[wrap.length - 1].append(newDiv, newDiv2);
 
   if (name == config.home.Section) {
     var newDiv3 = document.createElement("div");
-    newDiv3.innerHTML =
-      "<span aria-hidden='true'></span><div style='background:" + color[0] + ";color:" + color[1] + ";' aria-hidden='true'>" +
-      maxInt + "</div>" +
-      name;
+    newDiv3.innerHTML = `<span aria-hidden='true'></span><div style='background:${color[0]};color:${color[1]};' aria-hidden='true'>${maxInt}</div>${name}`;
     newDiv3.classList.add("ShindoItem", "ShindoItem2");
     newDiv3.setAttribute("tabindex", 0);
 
@@ -2313,8 +2314,7 @@ function add_City_info(name, maxInt) {
   var newDiv = document.createElement("div");
   if (name) {
     var color3 = NormalizeShindo(maxInt, 2);
-    newDiv.innerHTML = "<span aria-hidden='true'></span><div style='background:" + color3[0] + ";color:" + color3[1] + ";' aria-hidden='true'>" +
-      maxInt + "</div>" + name;
+    newDiv.innerHTML = `<span aria-hidden='true'></span><div style='background:${color3[0]};color:${color3[1]};' aria-hidden='true'>${maxInt}</div>${name}`;
     newDiv.classList.add("ShindoItem", "ShindoItem3");
     newDiv.setAttribute("tabindex", 0);
     newDiv.setAttribute("aria-label", `市区町村 ${name}、震度${NormalizeShindo(maxInt, 1)}`);
@@ -2333,9 +2333,9 @@ function add_City_info(name, maxInt) {
   newDiv2.classList.add("WrapLevel3");
   if (name) {
     newDiv2.classList.add("close");
-    newDiv2.setAttribute("id", "WrapLevel2_" + name);
+    newDiv2.setAttribute("id", `WrapLevel2_${name}`);
     newDiv2.setAttribute("role", "group");
-    newDiv.setAttribute("aria-controls", "WrapLevel2_" + name);
+    newDiv.setAttribute("aria-controls", `WrapLevel2_${name}`);
   }
   wrap2[wrap2.length - 1].append(newDiv, newDiv2);
 }
@@ -2348,12 +2348,11 @@ function add_IntensityStation_info(lat, lng, name, int) {
 
   var newDiv = document.createElement("div");
   var color4 = NormalizeShindo(int, 2);
-  newDiv.innerHTML = "<span aria-hidden='true'></span><div style='background:" + color4[0] + ";color:" + color4[1] + ";' aria-hidden='true'>" +
-    intStr + "</div>" + name;
+  newDiv.innerHTML = `<span aria-hidden='true'></span><div style='background:${color4[0]};color:${color4[1]};' aria-hidden='true'>${intStr}</div>${name}`;
   newDiv.classList.add("ShindoItem", "ShindoItem4");
   newDiv.setAttribute("tabindex", 0);
-  newDiv.setAttribute("aria-label", `観測点 ${name}、震度${NormalizeShindo(int, 1)}`);
-  newDiv.setAttribute("title", `観測点：${name}\nクリックで地図を観測点に移動`);
+  newDiv.setAttribute("aria-label", `観測点 ${name}、震度${NormalizeShindo(int, 1)} `);
+  newDiv.setAttribute("title", `観測点：${name} \nクリックで地図を観測点に移動`);
   newDiv.setAttribute("role", "treeitem");
 
   if (lat !== null && lng !== null) {
@@ -2483,12 +2482,10 @@ function add_Pref_infoL(name, lngInt) {
   var newDiv = document.createElement("div");
   var color1 = LgIntConvert(lngInt);
 
-  newDiv.innerHTML =
-    "<span aria-hidden='true'></span><div style='background:" + color1[0] + ";color:" + color1[1] + ";' aria-hidden='true'>" +
-    lngInt + "</div>" + name;
+  newDiv.innerHTML = `<span aria-hidden='true'></span><div style='background:${color1[0]};color:${color1[1]};' aria-hidden='true'>${lngInt}</div>${name}`;
   newDiv.classList.add("ShindoItemL", "ShindoItem1L");
   newDiv.setAttribute("tabindex", 0);
-  newDiv.setAttribute("aria-label", `${name}、長周期地震動階級${lngInt}`);
+  newDiv.setAttribute("aria-label", `${name}、長周期地震動階級${lngInt} `);
   newDiv.setAttribute("aria-expanded", "false");
   newDiv.setAttribute("role", "treeitem");
   newDiv.addEventListener("click", function () {
@@ -2500,9 +2497,9 @@ function add_Pref_infoL(name, lngInt) {
   var newDiv2 = document.createElement("div");
   newDiv2.innerHTML = "<div></div>";
   newDiv2.classList.add("WrapLevel1L", "close");
-  newDiv2.setAttribute("id", "WrapLevel1L_" + name);
+  newDiv2.setAttribute("id", `WrapLevel1L_${name}`);
   newDiv2.setAttribute("role", "group");
-  newDiv.setAttribute("aria-controls", "WrapLevel1L_" + name);
+  newDiv.setAttribute("aria-controls", `WrapLevel1L_${name}`);
   LgIntFragment.append(newDiv, newDiv2);
 
   document.getElementById("splash").style.display = "none";
@@ -2513,12 +2510,11 @@ function add_Area_infoL(name, maxInt) {
   var color = LgIntConvert(maxInt);
 
   var newDiv = document.createElement("div");
-  newDiv.innerHTML = "<span aria-hidden='true'></span><div style='background:" + color[0] + ";color:" + color[1] + ";' aria-hidden='true'>" +
-    maxInt + "</div>" + name;
+  newDiv.innerHTML = `<span aria-hidden='true'></span><div style='background:${color[0]};color:${color[1]};' aria-hidden='true'>${maxInt}</div>${name}`;
   newDiv.classList.add("ShindoItemL", "ShindoItem2L");
   newDiv.setAttribute("tabindex", 0);
-  newDiv.setAttribute("aria-label", `細分区域 ${name}、長周期地震動階級${maxInt}`);
-  newDiv.setAttribute("title", `細分区域：${name}`);
+  newDiv.setAttribute("aria-label", `細分区域 ${name}、長周期地震動階級${maxInt} `);
+  newDiv.setAttribute("title", `細分区域：${name} `);
   newDiv.setAttribute("aria-expanded", "false");
   newDiv.setAttribute("role", "treeitem");
   newDiv.addEventListener("click", function () {
@@ -2530,21 +2526,20 @@ function add_Area_infoL(name, maxInt) {
   var newDiv2 = document.createElement("div");
   newDiv2.innerHTML = "<div></div>";
   newDiv2.classList.add("WrapLevel2L", "close");
-  newDiv2.setAttribute("id", "WrapLevel2L_" + name);
+  newDiv2.setAttribute("id", `WrapLevel2L_${name}`);
   newDiv2.setAttribute("role", "group");
-  newDiv.setAttribute("aria-controls", "WrapLevel2L_" + name);
+  newDiv.setAttribute("aria-controls", `WrapLevel2L_${name}`);
 
   wrap[wrap.length - 1].append(newDiv, newDiv2);
 
   if (name == config.home.Section) {
     var newDiv3 = document.createElement("div");
-    newDiv3.innerHTML = "<span aria-hidden='true'></span><div style='background:" + color[0] + ";color:" + color[1] + ";' aria-hidden='true'>" +
-      maxInt + "</div>" + name;
+    newDiv3.innerHTML = `<span aria-hidden='true'></span><div style='background:${color[0]};color:${color[1]};' aria-hidden='true'>${maxInt}</div>${name}`;
     newDiv3.classList.add("ShindoItemL", "ShindoItem2L");
     newDiv3.setAttribute("tabindex", 0);
     var homeName = config.home.name ? config.home.name : "現在地";
-    newDiv3.setAttribute("aria-label", `${homeName}エリアの ${name}、長周期地震動階級${maxInt}`);
-    newDiv3.setAttribute("title", `細分区域（${homeName}周辺）：${name}`);
+    newDiv3.setAttribute("aria-label", `${homeName}エリアの ${name}、長周期地震動階級${maxInt} `);
+    newDiv3.setAttribute("title", `細分区域（${homeName} 周辺）：${name} `);
 
     removeChild(document.getElementById("homeShindoL"));
     document.getElementById("homeShindoWrap").style.display = "block";
@@ -2592,13 +2587,11 @@ function add_IntensityStation_infoL(lat, lng, name, int) {
   var intStr = int;
 
   var newDiv = document.createElement("div");
-  newDiv.innerHTML =
-    "<span aria-hidden='true'></span><div style='background:" + color4[0] + ";color:" + color4[1] + ";' aria-hidden='true'>"
-    + int + "</div>" + name;
+  newDiv.innerHTML = `<span aria-hidden='true'></span><div style='background:${color4[0]};color:${color4[1]};' aria-hidden='true'>${int}</div>${name}`;
   newDiv.classList.add("ShindoItemL", "ShindoItem4L");
   newDiv.setAttribute("tabindex", 0);
-  newDiv.setAttribute("aria-label", `観測点 ${name}、長周期地震動階級${int}`);
-  newDiv.setAttribute("title", `観測点：${name}\nクリックで地図を観測点に移動`);
+  newDiv.setAttribute("aria-label", `観測点 ${name}、長周期地震動階級${int} `);
+  newDiv.setAttribute("title", `観測点：${name} \nクリックで地図を観測点に移動`);
   newDiv.setAttribute("aria-expanded", "false");
   newDiv.setAttribute("role", "treeitem");
   wrap3[wrap3.length - 1].append(newDiv);
@@ -2736,23 +2729,25 @@ function ConvertEQInfo(data) {
 
   if (EQInfo.originTime) data_time.innerText = NormalizeDate(4, EQInfo.originTime);
   if (EQInfo.maxI) data_maxI.innerText = NormalizeShindo(EQInfo.maxI, 1);
-  if (EQInfo.maxI) data_maxI.style.borderBottom = "solid 2px " + NormalizeShindo(EQInfo.maxI, 2)[0];
+  if (EQInfo.maxI) data_maxI.style.borderBottom = `solid 2px ${NormalizeShindo(EQInfo.maxI, 2)[0]}`;
   if (EQInfoMarged.magType) EQInfo.magType = EQInfoMarged.magType;
   else if (!EQInfo.magType) EQInfo.magType = "M";
-  if (EQInfo.mag) data_M.innerText = EQInfo.magType + " " + EQInfo.mag;
+  if (EQInfo.mag) data_M.innerText = `${EQInfo.magType} ${EQInfo.mag}`;
 
   if (EQInfo.depth == 0) data_depth.innerText = "ごく浅い";
   else if (EQInfo.depth == 700) data_depth.innerText = "700km以上";
-  else if (EQInfo.depth) data_depth.innerText = Math.round(EQInfo.depth) + "km";
+  else if (EQInfo.depth) data_depth.innerText = `${Math.round(EQInfo.depth)}km`;
 
   if (EQInfo.epiCenter) data_center.innerText = EQInfo.epiCenter;
 
   if (EQInfoMarged.comment) {
     EQInfo.comment = EQInfoMarged.comment;
 
-    data_comment.innerHTML = (EQInfoMarged.comment.ForecastComment + "\n" + EQInfoMarged.comment.VarComment + "\n" + EQInfoMarged.comment.FreeFormComment)
+    var content = `${EQInfoMarged.comment.ForecastComment}\n${EQInfoMarged.comment.VarComment}\n${EQInfoMarged.comment.FreeFormComment}`;
+    data_comment.innerHTML = content
       .replaceAll("\n", "<br>")
-      .replace(/(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#/%?=~_|!:,.;]*[-A-Z0-9+&@#/%=~_|])/gi, "<a href='$1'>$1</a>");
+      .replace(/(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#/%?=~_|!:,.;]*[-A-Z0-9+&@#/%=~_|])/gi, "<a href='$1'>$1</a>")
+      .trim();
 
     var comments = EQInfoMarged.comment.ForecastComment.split("\n").concat(
       EQInfoMarged.comment.VarComment.split("\n"),
@@ -2822,10 +2817,8 @@ function ConvertEQInfo(data) {
       img.src = "./img/epicenter.svg";
       img.classList.add("epicenterIcon");
 
-      var ESPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML(
-        "<div class='popupContent'><div class='epicenterTitle'>震央</div><div class='pointName'>" +
-        EQInfo.epiCenter + "</div></div>"
-      );
+      var content = `<div class='popupContent'><div class='epicenterTitle'>震央</div><div class='pointName'>${EQInfo.epiCenter}</div></div>`;
+      var ESPopup = new maplibregl.Popup({ offset: [0, -17] }).setHTML(content);
       ESmarkerElm = new maplibregl.Marker({ element: img })
         .setLngLat([EQInfoMarged.lng, EQInfoMarged.lat])
         .setPopup(ESPopup)
@@ -2933,12 +2926,12 @@ function hinanjoPopup(e) {
   if (e.features[0].properties.disaster7 == 1) supportType.push("内水氾濫");
   if (e.features[0].properties.disaster8 == 1) supportType.push("火山現象");
   supportType = supportType.join(", ");
+
+  var content = `<div class='popupContent' ><div class='hinanjoTitle'>指定緊急避難場所</div><div class="pointName">${DataTmp.name}</div><div class='popupContent'>対応：${supportType}${DataTmp.remarks ? `<div>${DataTmp.remarks}</div>` : ""}</div></div> `
   new maplibregl.Popup({ offset: 20 })
     .setLngLat(e.lngLat)
-    .setHTML(
-      `<div class='popupContent'><div class='hinanjoTitle'>指定緊急避難場所</div><div class="pointName">${DataTmp.name}
-      </div><div class='popupContent'>対応：${supportType + (DataTmp.remarks ? "<div>" + DataTmp.remarks + "</div>" : "")}</div></div>`
-    ).addTo(map);
+    .setHTML(content)
+    .addTo(map);
 }
 
 function radioSet(name, val) {

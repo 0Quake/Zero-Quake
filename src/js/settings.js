@@ -160,7 +160,7 @@ function configDataDraw() {
   document.getElementById("TREM-RTS_GetData").checked = config.Source.TREMRTS.GetData;
   document.getElementById("TREM-RTS_Interval").value = config.Source.TREMRTS.Interval / 1000;
 
-  document.getElementById("VoiceEngine_" + config.notice.voice_parameter.engine).checked = true;
+  document.getElementById(`VoiceEngine_${config.notice.voice_parameter.engine}`).checked = true;
   document.getElementById("Boyomi_Port").value = config.notice.voice_parameter.Boyomi_Port;
 
   document.getElementById("NotificationSound").checked = config.Info.EQInfo.NotificationSound;
@@ -229,14 +229,14 @@ function UpdateDataDraw(data) {
       updateWrap.classList.add("U-available");
       updateStatus.innerText = "更新が利用可能です。";
       updateVersion.innerText =
-        "ver." + data.current_version + " > ver." + data.latest_version;
+        `ver.${data.current_version} > ver.${data.latest_version}`;
       update_detail.innerText = data.update_detail;
       updateBtnWrap.style.display = "block";
       update_detail.style.display = "block";
     } else {
       updateWrap.classList.add("U-not_available");
       updateStatus.innerText = "アプリケーションは最新の状態です。";
-      updateVersion.innerText = "ver." + data.current_version;
+      updateVersion.innerText = `ver.${data.current_version}`;
     }
   }
 }
@@ -426,7 +426,7 @@ function offsetCalc() {
     var hours = Math.floor((Replay / 1000 / 60 / 60) % 24);
     var minutes = Math.floor((Replay / 1000 / 60) % 60);
     var seconds = Math.floor((((Replay / 1000) % 24) % 60) % 60);
-    document.getElementById("replayOffset").innerText = "- " + day + "日 " + hours + "時間" + minutes + "分" + seconds + "秒";
+    document.getElementById("replayOffset").innerText = `- ${day}日 ${hours}時間${minutes}分${seconds}秒`;
   }
 }
 
@@ -925,7 +925,7 @@ function MapReDraw() {
   });
 
   markerElm.setLngLat([lng, lat]);
-  fetch("https://www.j-shis.bosai.go.jp/map/api/sstrct/V4/meshinfo.geojson?position=" + lng + "," + lat + "&epsg=4612&attr=ARV")
+  fetch(`https://www.j-shis.bosai.go.jp/map/api/sstrct/V4/meshinfo.geojson?position=${lng},${lat}&epsg=4612&attr=ARV`)
     .then(function (res) { return res.json(); })
     .then(function (json) {
       if (json.features && json.features[0].properties)
@@ -960,7 +960,7 @@ speechSynthesis.onvoiceschanged = () => {
     if (config && elm.name == config.notice.voice_parameter.voice)
       selectedT = " selected";
 
-    opts += "<option" + selectedT + " value='" + elm.name + "'>" + elm.name + "</option>";
+    opts += `<option${selectedT} value='${elm.name}'>${elm.name}</option>`;
   });
   TTSVoiceSelect.innerHTML = opts;
 };
@@ -992,7 +992,7 @@ function speak(text, engine) {
           var voiceElm = json.voiceList.find(function (elm) {
             return elm.id == document.getElementById("BoyomiVoiceSelect").value;
           });
-          if (voiceElm) voice_parameter = "&voice=" + document.getElementById("BoyomiVoiceSelect").value;
+          if (voiceElm) voice_parameter = `&voice=${document.getElementById("BoyomiVoiceSelect").value}`;
 
           fetch(`http://localhost:${document.getElementById("Boyomi_Port").value}/Talk?text=${text}${voice_parameter}&speed=${TTSspeed * 100}&volume=${TTSvolume * 100}&tone=${TTSpitch * 100}`)
             .catch(function () {

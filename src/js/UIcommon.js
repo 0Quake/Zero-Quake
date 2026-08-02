@@ -63,12 +63,12 @@ document.querySelectorAll(".tabmenu").forEach(function (elm) {
   elm.addEventListener("click", function () {
     var id = this.getAttribute("id").split("_")[0];
 
-    document.querySelectorAll("#" + id + "_bar .active_tabmenu").forEach(function (elm2) {
+    document.querySelectorAll(`#${id}_bar .active_tabmenu`).forEach(function (elm2) {
       elm2.classList.remove("active_tabmenu");
       elm2.setAttribute("aria-selected", false);
     });
 
-    document.querySelectorAll("#" + id + "_content > .active_tabcontent").forEach(function (elm2) {
+    document.querySelectorAll(`#${id}_content > .active_tabcontent`).forEach(function (elm2) {
       elm2.classList.remove("active_tabcontent");
     });
     elm.classList.add("active_tabmenu");
@@ -257,56 +257,59 @@ function LgIntConvert(str) {
 //日時フォーマット
 //eslint-disable-next-line
 function NormalizeDate(type, date) {
-  if (!date) date = new Date();
-  else date = new Date(date);
-  if (Number.isNaN(date.getTime())) return "";
+  try {
+    if (!date) date = new Date();
+    else date = new Date(date);
+    if (Number.isNaN(date.getTime())) throw new Error();
 
-  var YYYY = String(date.getFullYear());
-  var YY = String(date.getFullYear()).slice(-2);
-  var MM = String(date.getMonth() + 1).padStart(2, "0");
-  var DD = String(date.getDate()).padStart(2, "0");
-  var hh = String(date.getHours()).padStart(2, "0");
-  var mm = String(date.getMinutes()).padStart(2, "0");
-  var ss = String(date.getSeconds()).padStart(2, "0");
-  var M = String(date.getMonth() + 1);
-  var D = String(date.getDate());
-  var h = String(date.getHours());
-  var m = String(date.getMinutes());
-  var s = String(date.getSeconds());
-  var isToday = date.toDateString() == new Date().toDateString();
-  if (typeof type === "string" || type instanceof String) {
-    return type.replaceAll("YYYY", YYYY).replaceAll("YY", YY).replaceAll("MM", MM).replaceAll("DD", DD).replaceAll("hh", hh).replaceAll("mm", mm).replaceAll("ss", ss).replaceAll("M", M).replaceAll("D", D).replaceAll("h", h).replaceAll("m", m).replaceAll("s", s);
-  }
-  switch (type) {
-    case 1:
-      return YYYY + MM + DD + hh + mm + ss;
-    case 2:
-      return YYYY + MM + DD;
-    case 3:
-      return YYYY + "/" + MM + "/" + DD + " " + hh + ":" + mm + ":" + ss;
-    case 4:
-      return YYYY + "/" + MM + "/" + DD + " " + hh + ":" + mm;
-    case 5:
-      return D + "日 " + hh + ":" + mm;
-    case 6:
-      return hh + ":" + mm;
-    case 7:
-      return hh + "時" + mm + "分" + ss + "秒";
-    case 8:
-      return h + "時" + m + "分" + s + "秒";
-    case 9:
-      var date_str = "";
-      if (!isToday) date_str = D + "日 ";
-      return date_str + h + "時" + m + "分";
-    case 10:
-      var date_str = "";
-      if (!isToday) date_str = D + "日 ";
-      return date_str + hh + ":" + mm;
-    default:
-      return new Date().toLocaleString("ja-jp");
+    var YYYY = String(date.getFullYear());
+    var YY = String(date.getFullYear()).slice(-2);
+    var MM = String(date.getMonth() + 1).padStart(2, "0");
+    var DD = String(date.getDate()).padStart(2, "0");
+    var hh = String(date.getHours()).padStart(2, "0");
+    var mm = String(date.getMinutes()).padStart(2, "0");
+    var ss = String(date.getSeconds()).padStart(2, "0");
+    var M = String(date.getMonth() + 1);
+    var D = String(date.getDate());
+    var h = String(date.getHours());
+    var m = String(date.getMinutes());
+    var s = String(date.getSeconds());
+    var isToday = date.toDateString() == new Date().toDateString();
+    if (typeof type === "string" || type instanceof String) {
+      return type.replaceAll("YYYY", YYYY).replaceAll("YY", YY).replaceAll("MM", MM).replaceAll("DD", DD).replaceAll("hh", hh).replaceAll("mm", mm).replaceAll("ss", ss).replaceAll("M", M).replaceAll("D", D).replaceAll("h", h).replaceAll("m", m).replaceAll("s", s);
+    }
+    switch (type) {
+      case 1:
+        return `${YYYY}${MM}${DD}${hh}${mm}${ss}`;
+      case 2:
+        return `${YYYY}${MM}${DD}`;
+      case 3:
+        return `${YYYY}/${MM}/${DD} ${hh}:${mm}:${ss}`;
+      case 4:
+        return `${YYYY}/${MM}/${DD} ${hh}:${mm}`;
+      case 5:
+        return `${D}日 ${hh}:${mm}`;
+      case 6:
+        return `${hh}:${mm}`;
+      case 7:
+        return `${hh}時${mm}分${ss}秒`;
+      case 8:
+        return `${h}時${m}分${s}秒`;
+      case 9:
+        var date_str = "";
+        if (!isToday) date_str = `${D}日 `;
+        return `${date_str}${h}時${m}分`;
+      case 10:
+        var date_str = "";
+        if (!isToday) date_str = `${D}日 `;
+        return `${date_str}${hh}:${mm}`;
+      default:
+        return new Date().toLocaleString("ja-jp");
+    }
+  } catch {
+    return new Date().toLocaleString("ja-jp");
   }
 }
-
 function parseEID(EID) {
   try {
     EID = String(EID)

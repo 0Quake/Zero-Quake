@@ -52,7 +52,7 @@
     <script>
         window.electronAPI.messageSend((event, request) => {
             if (request.action == "metaData") {
-                document.title = (request.data.status != "通常" ? request.data.status + "／" : "") + request.data.title + " - Zero Quake"
+                document.title = `${request.data.status != "通常" ? `${request.data.status}／` : ""}${request.data.title} - Zero Quake`;
 
                 if (request.data.kind == "取消") document.getElementById("title").classList.remove("happyo")
                 else document.getElementById("title").classList.add("happyo")
@@ -66,7 +66,7 @@
                     var sameDate = NormalizeDate("YYYYMMDD", new Date(data.StartTime)) == NormalizeDate("YYYYMMDD", new Date(data.EndTime))
                     if (sameDate) var EndTime = NormalizeDate("h時", new Date(data.EndTime))
                     else var EndTime = NormalizeDate("M/D h時", new Date(data.EndTime))
-                    var dateRangeStr = StartTime + " ～ " + EndTime
+                    var dateRangeStr = `${StartTime} ～ ${EndTime}`;
 
                     if (data.FeltNumber || data.FeltNumber === 0) {
                         var content = `${data.Number}回 （うち有感${data.FeltNumber}回）`
@@ -76,8 +76,8 @@
                     return `<div class="CountItem"><h4>${dateRangeStr}</h4><div>${content}</div></div>`;
                 }
 
-                if (request.data.std) Content += "<h3>地震回数</h3>" + generate_Text(request.data.std)
-                if (request.data.sum) Content += "<h3>累積地震回数</h3>" + generate_Text(request.data.sum)
+                if (request.data.std) Content += `<h3>地震回数</h3>${generate_Text(request.data.std)}`;
+                if (request.data.sum) Content += `<h3>累積地震回数</h3>${generate_Text(request.data.sum)}`;
                 if (request.data.hourly) {
                     Content += "<h3>１時間地震回数</h3>"
                     request.data.hourly.forEach(function (el) {
@@ -88,7 +88,7 @@
                 document.getElementById("Content_body").innerHTML = Content
 
                 document.getElementById("title").innerText = (request.data.cancel ? "取消／" : "") + request.data.category;
-                document.getElementById("headline").innerText = request.data.headline + " (" + NormalizeDate(4, request.data.reportDateTime) + ")"
+                document.getElementById("headline").innerText = `${request.data.headline} (${NormalizeDate(4, request.data.reportDateTime)})`;
                 document.getElementById("Text_body").innerText = removeFirstBR(request.data.Text)
                 document.getElementById("NextAdvisory_body").innerText = removeFirstBR(request.data.NextAdvisory)
                 document.getElementById("FreeFormComment_body").innerText = removeFirstBR(request.data.FreeFormComment)

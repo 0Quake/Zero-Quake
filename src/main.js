@@ -304,7 +304,7 @@ var checkUpdate = throttle(function (userAction) {
                   type: "question",
                   title: "アプリケーションの更新",
                   message: "Zero Quake で更新が利用可能です。",
-                  detail: "v." + current_verTmp + " > v." + latest_verTmp + "\n操作を選択してください。",
+                  detail: `v.${current_verTmp} > v.${latest_verTmp}\n操作を選択してください。`,
                   buttons: ["後で確認", "詳細を確認"],
                   noLink: true,
                 };
@@ -453,10 +453,10 @@ app.whenReady().then(() => {
           },
         });
       } else {
-        throw new Error("local-range-requestプロトコルにてRangeヘッダーなしのリクエスト。URL:" + request.url);
+        throw new Error(`local-range-requestプロトコルにてRangeヘッダーなしのリクエスト。URL:${request.url}`);
       }
     } catch (err) {
-      return new Response("500 error:" + err, {
+      return new Response(`500 error:${err}`, {
         status: 500,
       });
     }
@@ -517,7 +517,7 @@ function causeTree(err) {
 
     try {
       while (err.cause && i < 10) {
-        ErrString += "\n[cause]:" + err.cause.stack;
+        ErrString += `\n[cause]:${err.cause.stack}`;
         i++;
         err = err.cause;
       }
@@ -1417,7 +1417,7 @@ function Req_JMA_gaikyo() {
             dateStr: `${elm.textContent.substring(0, 4)}/${elm.textContent.substring(5, 7)}`,
             title: "地震・火山月報（防災編）",
             headline: "地震・火山月報（防災編）",
-            url: "https://www.data.jma.go.jp/svd/eqev/data/gaikyo/" + href,
+            url: `https://www.data.jma.go.jp/svd/eqev/data/gaikyo/${href}`,
           });
         } else if (href.includes("press/") || href.includes("oshirase/")) {
           data.push({
@@ -1426,8 +1426,8 @@ function Req_JMA_gaikyo() {
               elm.textContent.substring(11, 13), elm.textContent.substring(14, 16)),
             dateStr: `${elm.textContent.substring(0, 4)}/${elm.textContent.substring(5, 7)}/${elm.textContent.substring(8, 10)} ${elm.textContent.substring(11, 13)}:${elm.textContent.substring(14, 16)}`,
             title: "地震解説資料",
-            headline: "地震解説資料\n" + elm.textContent.substring(17).trim(),
-            url: "https:" + href,
+            headline: `地震解説資料\n${elm.textContent.substring(17).trim()}`,
+            url: `https:${href}`,
           });
         } else if (href.includes("weekly/zenkoku/")) {
           var year = Number(elm.textContent.substring(0, 4));
@@ -1437,10 +1437,10 @@ function Req_JMA_gaikyo() {
           data.push({
             date0: new Date(year, elm.textContent.substring(19, 21) - 1, elm.textContent.substring(22, 24)),
             date: new Date(year2, elm.textContent.substring(31, 33) - 1, elm.textContent.substring(34, 36)),
-            dateStr: `${year}/${elm.textContent.substring(19, 21)}/${elm.textContent.substring(22, 24)}～${elm.textContent.substring(31, 33)}/${elm.textContent.substring(34, 36)}`,
+            dateStr: `${year} / ${elm.textContent.substring(19, 21)} / ${elm.textContent.substring(22, 24)}～${elm.textContent.substring(31, 33)} / ${elm.textContent.substring(34, 36)}`,
             title: "週間地震概況（全国）",
-            headline: "週間地震概況（全国）No." + number,
-            url: "https://www.data.jma.go.jp/svd/eqev/data/gaikyo/" + href,
+            headline: `週間地震概況（全国）No.${number}`,
+            url: `https://www.data.jma.go.jp/svd/eqev/data/gaikyo/${href}`,
           });
         } else if (href.includes("weekly/nt/")) {
           var year = Number(elm.textContent.substring(0, 4));
@@ -1451,10 +1451,10 @@ function Req_JMA_gaikyo() {
           data.push({
             date0: new Date(year, elm.textContent.substring(19, 21) - 1, elm.textContent.substring(22, 24)),
             date: new Date(year2, elm.textContent.substring(31, 33) - 1, elm.textContent.substring(34, 36)),
-            dateStr: `${year}/${elm.textContent.substring(19, 21)}/${elm.textContent.substring(22, 24)}～${elm.textContent.substring(31, 33)}/${elm.textContent.substring(34, 36)}`,
+            dateStr: `${year} / ${elm.textContent.substring(19, 21)} / ${elm.textContent.substring(22, 24)}～${elm.textContent.substring(31, 33)} / ${elm.textContent.substring(34, 36)}`,
             title: "週間地震活動概況（南海トラフ周辺）",
-            headline: "週間地震活動概況（南海トラフ周辺）No." + number,
-            url: "https://www.data.jma.go.jp/svd/eqev/data/gaikyo/" + href,
+            headline: `週間地震活動概況（南海トラフ周辺）No.${number}`,
+            url: `https://www.data.jma.go.jp/svd/eqev/data/gaikyo/${href}`,
           });
         }
       });
@@ -2380,8 +2380,8 @@ function DetectEEW(type, json) {
             minInt = minInt == "//" ? null : NormalizeShindo(minInt);
             maxInt = maxInt == "//" ? null : NormalizeShindo(maxInt);
             var arrivalTime = EBIStr[i + 2];
-            arrivalTime = arrivalTime.substring(0, 2) + ":" + arrivalTime.substring(2, 4) + ":" + arrivalTime.substring(4, 6);
-            arrivalTime = new Date(NormalizeDate(4) + " " + arrivalTime);
+            arrivalTime = `${arrivalTime.substring(0, 2)}:${arrivalTime.substring(2, 4)}:${arrivalTime.substring(4, 6)}`;
+            arrivalTime = new Date(`${NormalizeDate(4)} ${arrivalTime}`);
 
             var alertFlg = EBIStr[i + 3].substring(0, 1) == "1";
             var arrived = EBIStr[i + 3].substring(1, 2) == "1";
@@ -2442,13 +2442,8 @@ function DetectEEW(type, json) {
             maxInt = maxInt == "//" ? null : maxInt;
             if (maxInt == 99) maxInt = minInt;
             var arrivalTime = EBIStr[i + 2];
-            arrivalTime =
-              arrivalTime.substring(0, 2) +
-              ":" +
-              arrivalTime.substring(2, 4) +
-              ":" +
-              arrivalTime.substring(4, 6);
-            arrivalTime = new Date(NormalizeDate(4) + " " + arrivalTime);
+            arrivalTime = `${arrivalTime.substring(0, 2)}:${arrivalTime.substring(2, 4)}:${arrivalTime.substring(4, 6)}`;
+            arrivalTime = new Date(`${NormalizeDate(4)} ${arrivalTime}`);
 
             var alertFlg = EBIStr[i + 3].substring(0, 1) == "1";
             var arrived = EBIStr[i + 3].substring(1, 2) == "1";
@@ -2959,13 +2954,8 @@ function EEW_Alert(data, update) {
       var notice_setting = first ? config.notice.window.EEW : config.notice.window.EEW_Update;
       if (notice_setting == "push" && (!MainWindow || MainWindow.isMinimized() || !MainWindow.isFocused() || !MainWindow.isVisible())) {
         var EEWNotification = new Notification({
-          title: (data.is_training ? "【訓練報】 " : "") + "緊急地震速報 " + data.alertflg + " #" + data.serial,
-          body:
-            data.region_name +
-            "\n予想最大震度：" + NormalizeShindo(data.maxInt, 1) +
-            " ／ M" + (data.magnitude ? data.magnitude : "不明") +
-            " ／ 深さ：" + (data.depth ? data.depth + "km" : "不明") +
-            (data.userIntensity ? "\n現在地の予想震度：" + NormalizeShindo(data.userIntensity, 1) : ""),
+          title: `${data.is_training ? "【訓練報】 " : ""}緊急地震速報 ${data.alertflg} #${data.serial}`,
+          body: `${data.region_name}\n予想最大震度：${NormalizeShindo(data.maxInt, 1)} ／ M${data.magnitude ? data.magnitude : "不明"} ／ 深さ：${data.depth ? `${data.depth}km` : "不明"}${data.userIntensity ? `\n現在地の予想震度：${NormalizeShindo(data.userIntensity, 1)}` : ""}`,
           icon: path.join(__dirname, "img/icon.ico"),
         });
         EEWNotification.show();
@@ -3040,8 +3030,8 @@ function EarlyEst_Alert(data, first, update) {
       });
       if (!MainWindow) {
         var EEWNotification = new Notification({
-          title: "Early-Est 地震情報" + " #" + data.serial,
-          body: data.region_name + "\n M" + data.magnitude + "  深さ：" + data.depth,
+          title: `Early-Est 地震情報 #${data.serial}`,
+          body: `${data.region_name}\n M${data.magnitude}  深さ：${data.depth}km`,
           icon: path.join(__dirname, "img/icon.ico"),
         });
         EEWNotification.show();
@@ -3488,7 +3478,7 @@ function Req_JMAXML(url, count) {
           //付加文取得の不具合による処理停止を回避
           try {
             if (xml.querySelector("Body  > Text")) {
-              Text1 = xml.querySelector("Body  > Text").textContent + "\n\n";
+              Text1 = `${xml.querySelector("Body  > Text").textContent}\n\n`;
             }
 
             var comments_elm = xml.getElementsByTagName("Comments")[0];
@@ -3496,7 +3486,7 @@ function Req_JMAXML(url, count) {
               var WarningComment_elm =
                 comments_elm.getElementsByTagName("WarningComment")[0];
               if (WarningComment_elm)
-                WarningComment = WarningComment_elm.getElementsByTagName("Text")[0].textContent + "\n\n";
+                WarningComment = `${WarningComment_elm.getElementsByTagName("Text")[0].textContent}\n\n`;
 
               var FreeFormComment_elm =
                 comments_elm.getElementsByTagName("FreeFormComment")[0];
@@ -4330,7 +4320,7 @@ function GenerateEEWText(EEWData, update) {
     text = text.replaceAll("{region_name}", EEWData.region_name ? EEWData.region_name : "");
     text = text.replaceAll("{report_time}", EEWData.report_time ? NormalizeDate(8, EEWData.report_time) : "");
     text = text.replaceAll("{origin_time}", EEWData.origin_time ? NormalizeDate(8, EEWData.origin_time) : "");
-    if (EEWData.source == "simulation") text = "シミュレーションです。" + text;
+    if (EEWData.source == "simulation") text = `シミュレーションです。${text}`;
 
     var userInt;
     if (EEWData.userIntensity) {
@@ -4371,7 +4361,7 @@ function GenerateEQInfoText(EQData) {
     text = text.replaceAll("{training2}", EQData.status == "訓練" ? "これは訓練報です。" : "");
     text = text.replaceAll("{report_time}", EQData.reportDateTime ? NormalizeDate(9, EQData.reportDateTime) : "");
     text = text.replaceAll("{origin_time}", EQData.OriginTime ? NormalizeDate(9, EQData.OriginTime) : "");
-    text = text.replaceAll("{origin_time2}", EQData.OriginTime ? dif.num + dif.unit + "前" : "先ほど");
+    text = text.replaceAll("{origin_time2}", EQData.OriginTime ? `${dif.num}${dif.unit}前` : "先ほど");
     text = text.replaceAll("{region_name}", EQData.epiCenter ? EQData.epiCenter : "");
     text = text.replaceAll("{magnitude}", EQData.M ? EQData.M : "");
     text = text.replaceAll("{maxInt}", EQData.maxI ? NormalizeShindo(EQData.maxI, 1) : "");
@@ -4424,23 +4414,27 @@ function GenerateTsunamiText(data) {
       text = text.replaceAll("{home_grade}", homeArea.grade ? grades_JA[homeArea.grade] : "津波情報");
 
       var firstHeightTmp = "";
-      if (homeArea.firstHeight)
-        firstHeightTmp = "第１波が" + NormalizeDate(9, homeArea.firstHeight) + "に予想され、";
-      else if (homeArea.firstHeightCondition == "津波到達中と推測")
+      if (homeArea.firstHeight) {
+        firstHeightTmp = `第１波が${NormalizeDate(9, homeArea.firstHeight)}に予想され、`;
+      } else if (homeArea.firstHeightCondition == "津波到達中と推測") {
         firstHeightTmp = "津波が到達中とみられ、";
-      else if (homeArea.firstHeightCondition == "第１波の到達を確認")
+      } else if (homeArea.firstHeightCondition == "第１波の到達を確認") {
         firstHeightTmp = "既に第１波が到達し、";
-      else firstHeightTmp = "";
+      } else {
+        firstHeightTmp = "";
+      }
       text = text.replaceAll("{first_height1}", firstHeightTmp);
 
       var firstHeightTmp2 = "";
-      if (homeArea.firstHeight)
-        firstHeightTmp2 = "到達予想時刻は" + NormalizeDate(9, homeArea.firstHeight);
-      else if (homeArea.firstHeightCondition == "津波到達中と推測")
+      if (homeArea.firstHeight) {
+        firstHeightTmp2 = `到達予想時刻は${NormalizeDate(9, homeArea.firstHeight)}`;
+      } else if (homeArea.firstHeightCondition == "津波到達中と推測") {
         firstHeightTmp2 = "津波到達中と推測";
-      else if (homeArea.firstHeightCondition == "第１波の到達を確認")
+      } else if (homeArea.firstHeightCondition == "第１波の到達を確認") {
         firstHeightTmp2 = "第１波の到達を確認";
-      else firstHeightTmp2 = "到達時刻は不明";
+      } else {
+        firstHeightTmp2 = "到達時刻は不明";
+      }
       text = text.replaceAll("{first_height2}", firstHeightTmp2);
 
       var immediately = "";
@@ -4449,13 +4443,17 @@ function GenerateTsunamiText(data) {
       text = text.replaceAll("{immediately}", immediately);
 
       var MaxHeightTmp = "";
-      if (homeArea.maxHeight == "巨大") MaxHeightTmp = "巨大な津波";
-      else if (homeArea.maxHeight == "高い") MaxHeightTmp = "高い津波";
-      else if (homeArea.maxHeight)
-        MaxHeightTmp = "今後最大" + homeArea.maxHeight.replace("m", "メートル") + "の津波";
-      else if (!homeArea.maxHeight && homeArea.grade == "Yoho")
+      if (homeArea.maxHeight == "巨大") {
+        MaxHeightTmp = "巨大な津波";
+      } else if (homeArea.maxHeight == "高い") {
+        MaxHeightTmp = "高い津波";
+      } else if (homeArea.maxHeight) {
+        MaxHeightTmp = `今後最大${homeArea.maxHeight.replace("m", "メートル")}の津波`;
+      } else if (!homeArea.maxHeight && homeArea.grade == "Yoho") {
         MaxHeightTmp = "若干の海面変動";
-      else MaxHeightTmp = "高さ不明の津波";
+      } else {
+        MaxHeightTmp = "高さ不明の津波";
+      }
       text = text.replaceAll("{max_height1}", MaxHeightTmp);
 
       var MaxHeightTmp2 = "";
@@ -4514,7 +4512,7 @@ function NormalizeDate(type, date) {
   try {
     if (!date) date = new Date();
     else date = new Date(date);
-    if (Number.isNaN(date.getTime())) return "";
+    if (Number.isNaN(date.getTime())) throw new Error();
 
     var YYYY = String(date.getFullYear());
     var YY = String(date.getFullYear()).slice(-2);
@@ -4534,34 +4532,34 @@ function NormalizeDate(type, date) {
     }
     switch (type) {
       case 1:
-        return YYYY + MM + DD + hh + mm + ss;
+        return `${YYYY}${MM}${DD}${hh}${mm}${ss}`;
       case 2:
-        return YYYY + MM + DD;
+        return `${YYYY}${MM}${DD}`;
       case 3:
-        return YYYY + "/" + MM + "/" + DD + " " + hh + ":" + mm + ":" + ss;
+        return `${YYYY}/${MM}/${DD} ${hh}:${mm}:${ss}`;
       case 4:
-        return YYYY + "/" + MM + "/" + DD + " " + hh + ":" + mm;
+        return `${YYYY}/${MM}/${DD} ${hh}:${mm}`;
       case 5:
-        return D + "日 " + hh + ":" + mm;
+        return `${D}日 ${hh}:${mm}`;
       case 6:
-        return hh + ":" + mm;
+        return `${hh}:${mm}`;
       case 7:
-        return hh + "時" + mm + "分" + ss + "秒";
+        return `${hh}時${mm}分${ss}秒`;
       case 8:
-        return h + "時" + m + "分" + s + "秒";
+        return `${h}時${m}分${s}秒`;
       case 9:
         var date_str = "";
-        if (!isToday) date_str = D + "日 ";
-        return date_str + h + "時" + m + "分";
+        if (!isToday) date_str = `${D}日 `;
+        return `${date_str}${h}時${m}分`;
       case 10:
         var date_str = "";
-        if (!isToday) date_str = D + "日 ";
-        return date_str + hh + ":" + mm;
+        if (!isToday) date_str = `${D}日 `;
+        return `${date_str}${hh}:${mm}`;
       default:
         return new Date().toLocaleString("ja-jp");
     }
   } catch {
-    return "";
+    return new Date().toLocaleString("ja-jp");
   }
 }
 //震度の形式変換

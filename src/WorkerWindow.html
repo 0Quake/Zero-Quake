@@ -144,7 +144,7 @@
             var voiceElm = json.voiceList.find(function (elm) {
               return elm.id == config.notice.voice_parameter.Boyomi_Voice;
             })
-            if (voiceElm) voice_parameter = "&voice=" + config.notice.voice_parameter.Boyomi_Voice;
+            if (voiceElm) voice_parameter = `&voice=${config.notice.voice_parameter.Boyomi_Voice}`;
 
             fetch(`${host}/skip`).then(function () {
               fetch(`${host}/clear`).then(function () {

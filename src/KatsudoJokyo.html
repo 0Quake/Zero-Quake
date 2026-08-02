@@ -69,10 +69,10 @@
     <script>
         window.electronAPI.messageSend((event, request) => {
             if (request.action == "KatsudoJokyoInfo") {
-                document.title = (request.data.kind == "取消" ? "取消／" : "") + request.data.title + " - Zero Quake"
+                document.title = `${request.data.kind == "取消" ? "取消／" : ""}${request.data.title} - Zero Quake`;
 
                 document.getElementById("title").innerText = (request.data.kind == "取消" ? "取消／" : "") + request.data.title;
-                document.getElementById("headline").innerText = request.data.HeadLine + " (" + NormalizeDate(4, request.data.reportDate) + ")"
+                document.getElementById("headline").innerText = `${request.data.HeadLine} (${NormalizeDate(4, request.data.reportDate)})`;
                 document.getElementById("Text_body").innerText = removeFirstBR(request.data.Text)
                 document.getElementById("Text2_body").innerText = removeFirstBR(request.data.Comments)
 
