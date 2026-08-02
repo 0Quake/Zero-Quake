@@ -1183,7 +1183,7 @@ function Create_WepaWindow(fname) {
     });
 
     WepaWindow[fname].on("closed", () => {
-      delete WepaWindow[fname] = null;
+      delete WepaWindow[fname];
     });
 
     WepaWindow[fname].loadFile("src/WEPA.html");
