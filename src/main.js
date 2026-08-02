@@ -244,7 +244,7 @@ var update_data;
 var downloadURL;
 
 //アップデートの確認
-var checkUpdate = throttle(function (userAction) {
+var checkUpdate = throttle(async function (userAction) {
   try {
     var UpdateError = function (err) {
       var current_verTmp = package_ver;
@@ -887,11 +887,11 @@ function CreateMainWindow() {
 
       MainWindow.loadFile("src/index.html");
 
-      function savePosition() {
+      var savePosition = throttle(function () {
         const { x, y, width, height } = MainWindow.getBounds();
         store.set({ x, y, width, height });
         store.set("Maximized", MainWindow.isMaximized());
-      }
+      }, 300);
       MainWindow.on('maximize', savePosition)
         .on('unmaximize', savePosition)
         .on('resize', savePosition)
@@ -1092,12 +1092,13 @@ function Create_TsunamiWindow() {
 var NankaiWindow = { type: null, window: null };
 function Create_NankaiWindow(type) {
   try {
-    if (NankaiWindow.window && NankaiWindow.window.isMinimized())
-      NankaiWindow.window.restore();
-    if (NankaiWindow.window && !NankaiWindow.window.isFocused())
-      NankaiWindow.window.focus();
+    var win = NankaiWindow.window;
+    if (win) {
+      if (win.isMinimized()) win.restore();
+      if (!win.isFocused()) win.focus();
+    }
 
-    if (NankaiWindow.window) {
+    if (win) {
       if (NankaiWindow.type == type) {
         //同じ情報について表示していたならおわる
         return false;
@@ -1134,7 +1135,7 @@ function Create_NankaiWindow(type) {
       });
 
       NankaiWindow.window.on("closed", () => {
-        NankaiWindow = {};
+        NankaiWindow.window = null;
       });
     }
 
@@ -1182,7 +1183,7 @@ function Create_WepaWindow(fname) {
     });
 
     WepaWindow[fname].on("closed", () => {
-      WepaWindow[fname] = null;
+      delete WepaWindow[fname] = null;
     });
 
     WepaWindow[fname].loadFile("src/WEPA.html");
@@ -1458,9 +1459,7 @@ function Req_JMA_gaikyo() {
           });
         }
       });
-      data.sort(function (a, b) {
-        return a.date < b.date ? 1 : -1;
-      });
+      data.sort((a, b) => a.date < b.date ? 1 : -1);
       messageToMainWindow({ action: "Return_gaikyo", data: data });
     }).catch((err) => {
       GeneralError_handler(err);
@@ -1531,7 +1530,7 @@ function Req_TremRts() {
         var stationData = TremRts_sta ? TremRts_sta[StID] : null;
         if (stationData) {
           var JPShindo = st.i; //おおむね対応するため、現時点では変換不要と判断
-          var rgb = KmoniColorTable[Math.max(-3, Math.floor(JPShindo * 10) / 10)];
+          var rgb = KmoniColorTable[Math.min(7, Math.max(-3, Math.floor(JPShindo * 10) / 10))];
           TremRtsData[StID] = {
             Type: "TREMRTS",
             shindo: JPShindo,
@@ -1565,7 +1564,7 @@ function Req_TremRts() {
 }
 
 function sort_by_dist_TIDE(data) {
-  return data.sort(function (a, b) {
+  return data.sort((a, b) => {
     var a_dist = geosailing(a.lat, a.lon, config.home.latitude, config.home.longitude)
     var b_dist = geosailing(b.lat, b.lon, config.home.latitude, config.home.longitude)
     return a_dist - b_dist
@@ -1642,7 +1641,7 @@ function Req_JMATide() {
             code: st.code,
             name: st.name,
             by: st.typeName ? st.typeName.replaceAll("（地図では自治体等）", "") : "-",
-            date: new Date(json.time) + (json.interval * json.tide.length) * 1000,
+            date: new Date(Number(new Date(json.time)) + (json.interval * json.tide.length * 1000)),
             threshold_warn: st.threshold_warn,
             threshold_advisory: st.threshold_advisory
           };
@@ -1797,7 +1796,7 @@ function ConvertSnet(data, date, y, uid) {
       timestamp: new Date(date),
       LocalTime: new Date(),
       data: {
-        data: Object.values(mergeDeeply(data, msil_latest[another][0]))
+        data: Object.values(mergeDeeply(data, msil_latest[another][1]))
       },
     };
     messageToMainWindow(SnetPointsDataTmp);
@@ -1898,7 +1897,7 @@ function Req_SNet() {
               UpdateStatus("msilImg", "success");
 
             }).catch((err) => {
-              NetError_handler(err)
+              GeneralError_handler(err)
               UpdateStatus("msilImg", "Error");
             });
         }
@@ -2123,6 +2122,7 @@ function Connect_ProjectBS() {
 //Wolfx WebSocket接続・受信処理
 var WolfxWS_Client;
 var WolfxConnection;
+var Wolfx_Timer;
 function WolfxWS() {
   if (!config.Source.wolfx.GetData) return;
   WolfxWS_Client = new WebSocketClient();
@@ -2155,7 +2155,11 @@ function WolfxWS() {
       } catch {
         UpdateStatus("wolfx", "Error");
       }
-      setInterval(function () {
+      if (Wolfx_Timer) {
+        clearInterval(Wolfx_Timer)
+        Wolfx_Timer = null;
+      }
+      Wolfx_Timer = setInterval(function () {
         WolfxConnection.sendUTF("ping");
       }, 60000);
     });
@@ -2177,6 +2181,7 @@ function Connect_WolfxWS() {
 
 //Seisjs WebSocket接続・受信処理
 var SeisjsWS_Client;
+var SeisjsWS_timer;
 function SeisjsWS() {
   if (!config.Source.wolfx.GetDataFromSeisJS) return;
   SeisjsWS_Client = new WebSocketClient();
@@ -2204,7 +2209,11 @@ function SeisjsWS() {
       } catch {
         UpdateStatus("wolfx", "Error");
       }
-      setInterval(function () {
+      if (SeisjsWS_timer) {
+        SeisjsWS_timer = null;
+        clearInterval(SeisjsWS_timer);
+      }
+      SeisjsWS_timer = setInterval(function () {
         SeisjsConnection.sendUTF("ping");
       }, 60000);
     });
@@ -2225,7 +2234,7 @@ function Connect_SeisjsWS() {
 
 var SeisJSData = {};
 function MargeSeisJS(json) {
-  var rgb = KmoniColorTable[Math.max(-3, Math.floor(json.CalcShindo * 10) / 10)];
+  var rgb = KmoniColorTable[Math.min(7, Math.max(-3, Math.floor(json.CalcShindo * 10) / 10))];
   SeisJSData[json.type] = {
     Type: "Wolfx_SeisJS",
     shindo: json.CalcShindo,
@@ -2240,8 +2249,8 @@ function MargeSeisJS(json) {
   };
 
   Object.keys(SeisJSData).forEach(function (elm) {
-    var dif = Number(new Date() - new Date(Number(new Date(SeisJSData[elm].update_at)) + 31200000));
-    if (dif > 15 * 1000) delete SeisJSData[elm];
+    var dif = Number(new Date() - new Date(Number(new Date(SeisJSData[elm].update_at))));
+    if (dif > 15000) delete SeisJSData[elm];
   });
 
   IntervalRun(500, function () {
@@ -2318,7 +2327,7 @@ async function SetKmoniOffset(func) {
             return r.json();
           }).then((json) => {
             var resTime = new Date(json.latest_time);
-            if (resTimeTmp !== resTime) KmoniOffset = new Date() - resTime - (new Date() - reqTime) / 2;
+            if (Number(resTimeTmp) !== Number(resTime)) KmoniOffset = new Date() - resTime - (new Date() - reqTime) / 2;
             resTimeTmp = resTime;
           }).catch((err) => {
             GeneralError_handler(err)
@@ -2483,7 +2492,7 @@ function DetectEEW(type, json) {
         source: "wolfx",
       };
 
-      MargeEEW(EEWdata, json);
+      MargeEEW(EEWdata);
     } catch {
       UpdateStatus("wolfx", "Error");
     }
@@ -2685,10 +2694,13 @@ function MargeEEW(data) {
         }
         if (data.depth <= 150) {
           var maxShindo = 0;
+          var sects = Object.keys(EQIAreaLoc);
           JMA_Int_Points.forEach(function (elm) {
             if (elm.a && elm.s) {
-              var sect = Object.keys(EQIAreaLoc)[elm.s];
+              var sect = sects[elm.s];
               if (!sect) return;
+              //(magJMA, depth, epiLat, epiLng, pointLat, pointLng, arv, max)
+
               var estInt = calcInt(
                 data.magnitude,
                 data.depth,
@@ -2768,18 +2780,21 @@ function MargeEEW(data) {
 
           if (Array.isArray(data.warnZones)) {
             data.warnZones.forEach(function (elm) {
+              if (!Array.isArray(oneBeforeData.warnZones)) return;
+
               //一致する細分区域のデータを検索
               var SectData = oneBeforeData.warnZones.find(function (elm2) {
                 return elm.Name == elm2.Name;
               });
               if (SectData) {
-                Object.keys(SectData).forEach((key) => {
-                  if (SectData[key] === null) delete SectData[key];
-                });
                 Object.keys(elm).forEach((key) => {
-                  if (elm[key] === null) delete elm[key];
+                  if (elm[key]) {
+                    SectData[key] = elm[key];
+                    changed = true;
+                  }
                 });
-                elm = Object.assign(SectData, elm); //データをマージ
+              } else {
+                oneBeforeData.warnZones.push({ ...elm });
                 changed = true;
               }
             });
@@ -2864,14 +2879,10 @@ function MargeEarlyEst(data) {
       });
       if (!EEWJSON) {
         //最新の報かどうか
-        var newest = data.serial >
-          Math.max.apply(null, EQJSON.data.map(function (o) { return o.serial; }));
+        var newest = data.serial > Math.max.apply(null, EQJSON.data.map((o) => o.serial));
 
         if (newest) {
           //第２報以降
-          var EQJSON = EarlyEst_Data.find(function (elm) {
-            return elm.EQ_id == data.EventID;
-          });
           EarlyEst_Alert(data, false);
           EQJSON.data.push(data);
           if (data.is_cancel) {
@@ -3137,7 +3148,7 @@ function Req_JMAXMLList(count, longFeed) {
 
       UpdateStatus("JMAXML", "success");
     }).catch((err) => {
-      NetError_handler(err)
+      GeneralError_handler(err)
       UpdateStatus("JMAXML", "Error");
     });
 }
@@ -3153,7 +3164,7 @@ function Req_JMAJSONList() {
       })
       if (HokkaidoSanrikuURL) Req_Hokkaidosanriku_JSON(`https://www.jma.go.jp/bosai/quake/data/${HokkaidoSanrikuURL.json}`)
     }).catch((err) => {
-      NetError_handler(err)
+      GeneralError_handler(err)
     });
 }
 
@@ -3183,30 +3194,27 @@ function Req_Hokkaidosanriku_JSON(url) {
 
       Process_Hokkaidosanriku(data)
     }).catch((err) => {
-      NetError_handler(err)
+      GeneralError_handler(err)
     });
 }
 
 function Process_Hokkaidosanriku(data) {
   HokkaidoSanrikuInfoAll.push(data);
-  HokkaidoSanrikuInfoAll = HokkaidoSanrikuInfoAll.sort(function (a, b) {
-    return a.reportDate > b.reportDate ? -1 : 1;
-  });
+  HokkaidoSanrikuInfoAll = HokkaidoSanrikuInfoAll
+    .sort((a, b) => a.reportDate > b.reportDate ? -1 : 1);
 
   messageToMainWindow({
     action: "HokkaidoSanrikuInfo",
     data: HokkaidoSanrikuInfoAll[0],
   });
-  if (HokkaidoSanrikuWindow && HokkaidoSanrikuInfoAll[0]) {
-    if (data) {
-      HokkaidoSanrikuWindow.webContents.send("message2", {
-        action: "HokkaidoSanrikuInfo",
-        data: HokkaidoSanrikuInfoAll[0],
-      });
-    }
+  if (HokkaidoSanrikuWindow && HokkaidoSanrikuInfoAll[0] && data) {
+    HokkaidoSanrikuWindow.webContents.send("message2", {
+      action: "HokkaidoSanrikuInfo",
+      data: HokkaidoSanrikuInfoAll[0],
+    });
   }
-
 }
+
 //気象庁XML 取得・フォーマット変更→MargeEQInfo
 function Req_JMAXML(url, count) {
   if (!url || jmaXML_Fetched.includes(url)) return;
@@ -3254,9 +3262,10 @@ function Req_JMAXML(url, count) {
           maxIntTmp = NormalizeShindo(
             IntensityElm.getElementsByTagName("Observation")[0].getElementsByTagName("MaxInt")[0].textContent
           );
-          if (IntensityElm.getElementsByTagName("Observation")[0].getElementsByTagName("MaxLgInt")[0])
+          if (IntensityElm.getElementsByTagName("Observation")[0].getElementsByTagName("MaxLgInt")[0]) {
             maxLgInt = IntensityElm.getElementsByTagName("Observation")[0]
               .getElementsByTagName("MaxLgInt")[0].textContent;
+          }
         }
         if (maxIntTmp == "[objectHTMLUnknownElement]") maxIntTmp = null;
         var headline = xml.getElementsByTagName("Head")[0].getElementsByTagName("Headline")[0].getElementsByTagName("Text")[0].textContent;
@@ -3367,9 +3376,8 @@ function Req_JMAXML(url, count) {
         if (Text2Elm) data.Text2 = Text2Elm.textContent;
 
         NankaiTroughInfoAll.push(data);
-        NankaiTroughInfoAll = NankaiTroughInfoAll.sort(function (a, b) {
-          return a.reportDate > b.reportDate ? -1 : 1;
-        });
+        NankaiTroughInfoAll = NankaiTroughInfoAll
+          .sort((a, b) => a.reportDate > b.reportDate ? -1 : 1);
 
         var teirei;
         var rinji = NankaiTroughInfoAll.find(function (elm) {
@@ -3691,7 +3699,7 @@ function Req_JMAXML(url, count) {
                       var stationElm = tsunamiItem.stations.findIndex(function (elm3) {
                         return elm3.name == elm2.name;
                       });
-                      if (stationElm > -1) tsunamiItem.stations[stationElm] = Object.assign(elm2, tsunamiItem.stations[stationElm]);
+                      if (stationElm > -1) tsunamiItem.stations[stationElm] = Object.assign(tsunamiItem.stations[stationElm], elm2);
                       else tsunamiItem.stations.push(elm2);
                     });
                   } else {
@@ -3761,9 +3769,8 @@ function Req_JMAXML(url, count) {
 
 
         KatsudoJokyoInfoAll.push(data);
-        KatsudoJokyoInfoAll = KatsudoJokyoInfoAll.sort(function (a, b) {
-          return a.reportDate > b.reportDate ? -1 : 1;
-        });
+        KatsudoJokyoInfoAll = KatsudoJokyoInfoAll
+          .sort((a, b) => a.reportDate > b.reportDate ? -1 : 1);
 
         messageToMainWindow({
           action: "KatsudoJokyoInfo",
@@ -3786,7 +3793,7 @@ function Req_JMAXML(url, count) {
         jmaXML_Fetched.push(url);
       }
     }).catch((err) => {
-      NetError_handler(err)
+      GeneralError_handler(err)
       UpdateStatus("JMAXML", "Error");
     });
 }
@@ -3822,18 +3829,16 @@ var Req_USGS = throttle(function () {
           eventId: elm.id,
           category: null,
           OriginTime: new Date(elm.properties.time),
-          epiCenter: FECode.properties.nameJA,
+          epiCenter: FECode ? FECode.properties.nameJA : "",
           M: Math.round(elm.properties.mag * 10) / 10,
           maxI: maxi,
           DetailURL: [elm.properties.url],
         });
       });
-      dataTmp2 = dataTmp2.sort(function (a, b) {
-        return a.OriginTime > b.OriginTime ? -1 : 1;
-      });
+      dataTmp2 = dataTmp2.sort((a, b) => a.OriginTime > b.OriginTime ? -1 : 1);
       AlertEQInfo(dataTmp2, "usgs");
     }).catch((err) => {
-      NetError_handler(err)
+      GeneralError_handler(err)
     });
 }, 2000);
 
@@ -3881,7 +3886,7 @@ function Req_NarikakunList(count) {
 
       UpdateStatus("ntool", "success");
     }).catch((err) => {
-      NetError_handler(err)
+      GeneralError_handler(err)
       UpdateStatus("ntool", "Error");
     });
 }
@@ -3894,10 +3899,10 @@ function MargeEQInfo(dataList, count) {
     var UpdateEQInfoTmp = [];
 
     var audioNotification = false;
-    var changed = false;
 
     dataList.forEach(function (data) {
       if (!data.eventId) return;
+      var changed = false;
       var EQElm = EQInfoData[data.eventId];
       if (EQElm) {
         var EQInfo_Item = {
@@ -3915,9 +3920,8 @@ function MargeEQInfo(dataList, count) {
           axisData: [],
         };
         EQElm.raw_data.push(data);
-        var rawData = EQElm.raw_data.sort(function (a, b) {
-          return a.reportDateTime < b.reportDateTime ? -1 : 1;
-        });
+        var rawData = EQElm.raw_data
+          .sort((a, b) => a.reportDateTime < b.reportDateTime ? -1 : 1);
 
         //キャンセル報を受信時、同一カテゴリの過去情報のキャンセルフラグを立てる（気象庁仕様に準拠）
         rawData.forEach(function (elm, index) {
@@ -3984,15 +3988,23 @@ function MargeEQInfo(dataList, count) {
             EQElm[key] = EQInfo_Item[key];
           } else if (key == "DetailURL") {//DetailURLは配列を結合
             if (Array.isArray(EQInfo_Item[key]) && Array.isArray(EQElm[key])) {//データ検証
+              EQElm[key] = Array.from(new Set([...EQElm[key], ...EQInfo_Item[key]]));
               changed = true;//変更ありフラグ
-              EQElm[key] = [...EQElm[key], ...EQInfo_Item[key]];
             }
+          } else if (key == "axisData") {
+            EQInfo_Item[key].forEach(function (elm) {
+              var uuid = elm.message.uuid_
+              var exists = EQElm[key].find((el) => {
+                return el.message && el.message.uuid_ == uuid
+              });
+              if (!exists) EQElm[key].push(elm)
+            })
           } else if (key == "audioNotification") {
             return;//前の部分で判定済みなので上書きしないよう飛ばす
           } else {
             if (EQElm[key] !== EQInfo_Item[key] && Boolean2(EQInfo_Item[key])) {
-              changed = true;//変更ありフラグ
               EQElm[key] = EQInfo_Item[key];
+              changed = true;//変更ありフラグ
             }
           }
         });
@@ -4007,8 +4019,8 @@ function MargeEQInfo(dataList, count) {
       } else {
         data.EEW = data.category == "EEW"
 
-        EQInfoData[data.eventId] = Object.assign({}, data);//値渡しにする
-        EQInfoData[data.eventId].raw_data = [Object.assign({}, data)];//値渡しにする
+        EQInfoData[data.eventId] = { ...data };//値渡しにする
+        EQInfoData[data.eventId].raw_data = [{ ...data }];//値渡しにする
 
         eqInfoTmp.push(data);
         eqInfo.jma.push(data);
@@ -4030,12 +4042,10 @@ function MargeEQInfo(dataList, count) {
 var EQCount_data = {};
 function EQCount_process(data) {
   if (data) EQCount_data[data.eventId] = data
-  var EQCount_data_array = [];
-  Object.keys(EQCount_data).forEach(function (key) {
-    EQCount_data_array.push(EQCount_data[key])
-  })
+  var EQCount_data_array = Object.values(EQCount_data);
 
-  EQCount_data_array = EQCount_data_array.sort(function (a, b) { return Number(a.reportDateTime) - Number(b.reportDateTime) })
+  EQCount_data_array = EQCount_data_array
+    .sort((a, b) => Number(a.reportDateTime) - Number(b.reportDateTime))
 
   messageToMainWindow({
     action: "EQCount",
@@ -4049,7 +4059,7 @@ function timeDifference(miliseconds) {
   if (isNaN(miliseconds)) return "";
   if (miliseconds < 60000) return { num: Math.round(miliseconds / 1000), unit: "秒" };
   else if (miliseconds < 31200000) return { num: Math.round(miliseconds / 60000), unit: "分" };
-  else if (miliseconds < 86400000) return { num: Math.round(miliseconds / 31200000), unit: "時間" };
+  else if (miliseconds < 86400000) return { num: Math.round(miliseconds / 3600000), unit: "時間" };
   else return { num: Math.round(miliseconds / 86400000), unit: "日" };
 }
 
@@ -4064,11 +4074,11 @@ function AlertEQInfo(data, source, update) {
       })
 
       //音声通知条件を満たす最新のデータ
-      var dataToNotify = data.sort(function (a, b) {
-        return a.DateForSort > b.DateForSort ? -1 : 1;
-      }).find(function (elm) {
-        return elm.audioNotification
-      })
+      var dataToNotify = data
+        .sort((a, b) => a.DateForSort > b.DateForSort ? -1 : 1)
+        .find(function (elm) {
+          return elm.audioNotification
+        })
 
       //音声通知
       if (dataToNotify) {
@@ -4079,9 +4089,8 @@ function AlertEQInfo(data, source, update) {
         }
       }
 
-      eqInfo.jma = eqInfo.jma.sort(function (a, b) {
-        return a.DateForSort > b.DateForSort ? -1 : 1;
-      });
+      eqInfo.jma = eqInfo.jma
+        .sort((a, b) => a.DateForSort > b.DateForSort ? -1 : 1);
 
       messageToMainWindow({
         action: "EQInfo",
@@ -4151,31 +4160,24 @@ function ConvertTsunamiInfo(data) {
         }
 
         if (areaItem) {
-          if (elm.code) areaItem.code = elm.code;
-          if (elm.grade) areaItem.grade = elm.grade;
-          if (elm.cancelled) areaItem.cancelled = elm.cancelled;
-          if (elm.firstHeight) areaItem.firstHeight = elm.firstHeight;
-          if (elm.firstHeightCondition) areaItem.firstHeightCondition = elm.firstHeightCondition;
-          if (elm.maxHeight) areaItem.maxHeight = elm.maxHeight;
+          var keys = ["code", "grade", "cancelled", "firstHeight", "firstHeightCondition", "maxHeight"]
+          keys.forEach(function (key) {
+            if (elm[key]) areaItem[key] = elm[key];
+          });
 
           if (elm.stations) {
             elm.stations.forEach(function (elm2) {
-              var stItem
-              if (Array.isArray(areaItem.stations)) {
+              var stItem;
+              if (areaItem.stations && Array.isArray(areaItem.stations)) {
                 stItem = areaItem.stations.find(function (elm3) {
-                  return elm3.name == elm2.name;
+                  return elm3.code == elm2.code || elm3.name == elm2.name;
                 });
               }
               if (stItem) {
-                if (elm2.code) stItem.code = elm2.code;
-                if (elm2.ArrivedTime) stItem.ArrivedTime = elm2.ArrivedTime;
-                if (elm2.firstHeightCondition) stItem.firstHeightCondition = elm2.firstHeightCondition;
-                if (elm2.firstHeightInitial) stItem.firstHeightInitial = elm2.firstHeightInitial;
-                if (elm2.omaxHeight) stItem.omaxHeight = elm2.omaxHeight;
-                if (elm2.maxHeightRising) stItem.maxHeightRising = elm2.maxHeightRising;
-                if (elm2.maxHeightTime) stItem.maxHeightTime = elm2.maxHeightTime;
-                if (elm2.maxHeightCondition) stItem.maxHeightCondition = elm2.maxHeightCondition;
-              } else elm.stations.push(elm2);
+                Object.keys(elm2).forEach(function (key) {
+                  if (elm2[key]) stItem[key] = elm2[key];
+                });
+              } else areaItem.stations.push(elm2);
             });
           }
         } else {
@@ -4217,66 +4219,61 @@ function ConvertTsunamiInfo(data) {
     }
 
     Tsunami_data_Marged = { issue: {}, areas: [] };
-    Tsunami_Data = Tsunami_Data.sort((a, b) =>
-      Number(new Date(a.issue.time)) > Number(new Date(b.issue.time)) ? 1 : -1
-    );
+    Tsunami_Data = Tsunami_Data
 
-    Tsunami_Data.forEach(function (elm0) {
-      Tsunami_data_Marged.revocation = elm0.revocation;
-      Tsunami_data_Marged.cancelled = elm0.cancelled;
-      if (elm0.revocation || elm0.cancelled) return;
+    Tsunami_Data
+      .sort((a, b) => Number(new Date(a.issue.time)) > Number(new Date(b.issue.time)) ? 1 : -1)
+      //↑非破壊でソートしないと自動解除処理のTsunami_Data.forEach()内から呼んだときに競合
+      .forEach(function (elm0) {
+        Tsunami_data_Marged.revocation = elm0.revocation;
+        Tsunami_data_Marged.cancelled = elm0.cancelled;
+        if (elm0.revocation || elm0.cancelled) return;
 
-      if (elm0.headline) Tsunami_data_Marged.headline = elm0.headline;
-      if (elm0.comment) Tsunami_data_Marged.comment = elm0.comment;
-      if (elm0.status) Tsunami_data_Marged.status = elm0.status;
+        var keys = ["headline", "comment", "status", "cancelled", "ValidDateTime"]
+        keys.forEach((key) => {
+          if (elm0[key]) Tsunami_data_Marged[key] = elm0[key];
+        })
 
-      if (elm0.issue.EventID) Tsunami_data_Marged.issue.EventID = elm0.issue.EventID;
-      if (elm0.issue.EarthQuake) Tsunami_data_Marged.issue.EarthQuake = elm0.issue.EarthQuake;
-      if (elm0.cancelled) Tsunami_data_Marged.cancelled = elm0.cancelled;
-      if (elm0.ValidDateTime) Tsunami_data_Marged.ValidDateTime = elm0.ValidDateTime;
-      if (elm0.issue.time) Tsunami_data_Marged.issue.time = elm0.issue.time;
-
-      elm0.areas.forEach(function (elm) {
-        var areaItem;
-        if (Array.isArray(Tsunami_data_Marged.areas)) {
-          areaItem = Tsunami_data_Marged.areas.find(function (elm2) {
-            return elm2.name == elm.name;
-          });
+        if (elm0.issue) {
+          if (elm0.issue.time) Tsunami_data_Marged.issue.time = elm0.issue.time;
+          if (elm0.issue.EventID) Tsunami_data_Marged.issue.EventID = elm0.issue.EventID;
+          if (elm0.issue.EarthQuake) Tsunami_data_Marged.issue.EarthQuake = elm0.issue.EarthQuake;
         }
-        if (areaItem) {
-          if (elm.code) areaItem.code = elm.code;
-          if (elm.grade) areaItem.grade = elm.grade;
-          if (elm.cancelled) areaItem.cancelled = elm.cancelled;
-          if (elm.firstHeight) areaItem.firstHeight = elm.firstHeight;
-          if (elm.firstHeightCondition) areaItem.firstHeightCondition = elm.firstHeightCondition;
-          if (elm.maxHeight) areaItem.maxHeight = elm.maxHeight;
 
-          if (elm.stations) {
-            elm.stations.forEach(function (elm2) {
-              var stItem;
-              if (Array.isArray(areaItem.stations)) {
-                stItem = areaItem.stations.find(function (elm3) {
-                  return elm3.name == elm2.name;
-                });
-              }
-
-              if (stItem) {
-                if (elm2.code) stItem.code = elm2.code;
-                if (elm2.ArrivedTime) stItem.ArrivedTime = elm2.ArrivedTime;
-                if (elm2.firstHeightCondition) stItem.firstHeightCondition = elm2.firstHeightCondition;
-                if (elm2.firstHeightInitial) stItem.firstHeightInitial = elm2.firstHeightInitial;
-                if (elm2.omaxHeight) stItem.omaxHeight = elm2.omaxHeight;
-                if (elm2.maxHeightRising) stItem.maxHeightRising = elm2.maxHeightRising;
-                if (elm2.maxHeightTime) stItem.maxHeightTime = elm2.maxHeightTime;
-                if (elm2.maxHeightCondition) stItem.maxHeightCondition = elm2.maxHeightCondition;
-              } else areaItem.stations.push(elm2);
+        elm0.areas.forEach(function (elm) {
+          var areaItem;
+          if (Array.isArray(Tsunami_data_Marged.areas)) {
+            areaItem = Tsunami_data_Marged.areas.find(function (elm2) {
+              return elm2.name == elm.name;
             });
           }
-        } else {
-          Tsunami_data_Marged.areas.push(elm);
-        }
+          if (areaItem) {
+            var keys = ["code", "grade", "cancelled", "firstHeight", "firstHeightCondition", "maxHeight"]
+            keys.forEach(function (key) {
+              if (elm[key]) areaItem[key] = elm[key];
+            });
+
+            if (elm.stations) {
+              elm.stations.forEach(function (elm2) {
+                var stItem;
+                if (Array.isArray(areaItem.stations)) {
+                  stItem = areaItem.stations.find(function (elm3) {
+                    return elm3.name == elm2.name;
+                  });
+                }
+
+                if (stItem) {
+                  Object.keys(elm2).forEach(function (key) {
+                    if (elm2[key]) stItem[key] = elm2[key];
+                  });
+                } else areaItem.stations.push(elm2);
+              });
+            }
+          } else {
+            Tsunami_data_Marged.areas.push(elm);
+          }
+        });
       });
-    });
 
     messageToMainWindow({ action: "tsunamiUpdate", data: Tsunami_data_Marged });
     if (TsunamiWindow) {
@@ -4455,15 +4452,21 @@ function GenerateTsunamiText(data) {
       text = text.replaceAll("{max_height1}", MaxHeightTmp);
 
       var MaxHeightTmp2 = "";
-      if (homeArea.maxHeight == "巨大") MaxHeightTmp2 = "巨大";
-      else if (homeArea.maxHeight == "高い") MaxHeightTmp2 = "高い";
-      else if (homeArea.maxHeight)
+      if (homeArea.maxHeight == "巨大") {
+        MaxHeightTmp2 = "巨大";
+      } else if (homeArea.maxHeight == "高い") {
+        MaxHeightTmp2 = "高い";
+      } else if (homeArea.maxHeight) {
         MaxHeightTmp2 = homeArea.maxHeight.replace("m", "メートル");
-      else if (!homeArea.maxHeight && homeArea.grade == "Yoho")
+      } else if (!homeArea.maxHeight && homeArea.grade == "Yoho") {
         MaxHeightTmp2 = "若干の海面変動";
-      else MaxHeightTmp2 = "不明";
+      } else {
+        MaxHeightTmp2 = "不明";
+      }
       text = text.replaceAll("{max_height2}", MaxHeightTmp2);
-    } else text = text.replace(/\[.*?\]/g, "");
+    } else {
+      text = text.replace(/\[.*?\]/g, "");
+    }
 
     text = text.replace(/\[|\]/g, "");
     return text;
@@ -4681,7 +4684,7 @@ function mergeDeeply(target, source, opts) {
   try {
     const isObject = (obj) => obj && typeof obj === "object" && !Array.isArray(obj);
     const isConcatArray = opts && opts.concatArray;
-    let result = Object.assign({}, target);
+    let result = { ...target };//参照渡しを切る
     if (isObject(target) && isObject(source)) {
       for (const [sourceKey, sourceValue] of Object.entries(source)) {
         const targetValue = target[sourceKey];
@@ -4699,7 +4702,9 @@ function mergeDeeply(target, source, opts) {
 }
 function ConvertJST(time) {
   try {
-    return new Date(time.setHours(time.getHours() + 9));
+    var copy = new Date(time);
+    copy.setHours(copy.getHours() + 9)
+    return copy;
   } catch (err) {
     throw new Error("内部の情報処理でエラーが発生しました。(タイムゾーンの変換 - UTC to JST)", { cause: err });
   }
