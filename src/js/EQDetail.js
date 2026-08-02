@@ -1,6 +1,6 @@
 /* global NormalizeDate NormalizeShindo LgIntConvert maplibregl pmtiles removeChild*/
 
-var pointList = {};
+var JMA_Int_Points = {};
 
 var data_time = document.getElementById("data_time");
 var data_maxI = document.getElementById("data_maxI");
@@ -34,12 +34,14 @@ var ZoomBounds;
 var high_contrast = window.matchMedia("(forced-colors: active)").matches;
 var movedByUser = false;
 
-fetch("Resource/PointSeismicIntensityLocation.json")
+fetch("Resource/JMA_Int_Points.json")
   .then(function (res) {
     return res.json();
   })
   .then(function (data) {
-    pointList = data;
+    data.forEach(function (elm) {
+      JMA_Int_Points[elm.c] = elm;
+    })
   });
 
 window.addEventListener("scroll", function () {
@@ -1793,20 +1795,19 @@ function jmaXMLFetch(url) {
                     if (elm3.querySelectorAll("IntensityStation")[0]) {
                       elm3.querySelectorAll("IntensityStation")
                         .forEach(function (elm4) {
-                          var pointT =
-                            pointList[Number(elm4.querySelector("Code").textContent)];
+                          var pointT = JMA_Int_Points[Number(elm4.querySelector("Code").textContent)];
                           if (elm4.querySelector("Int")) {
                             stData.push({
-                              lat: pointT ? pointT.location[0] : null,
-                              lng: pointT ? pointT.location[1] : null,
+                              lat: pointT ? pointT.y : null,
+                              lng: pointT ? pointT.x : null,
                               name: elm4.querySelector("Name").textContent,
                               int: elm4.querySelector("Int").textContent,
                             });
                           }
                           if (elm4.querySelector("LgInt")) {
                             stDataL.push({
-                              lat: pointT ? pointT.location[0] : null,
-                              lng: pointT ? pointT.location[1] : null,
+                              lat: pointT ? pointT.y : null,
+                              lng: pointT ? pointT.x : null,
                               name: elm4.querySelector("Name").textContent,
                               lgint: elm4.querySelector("LgInt").textContent,
                             });
@@ -1824,19 +1825,19 @@ function jmaXMLFetch(url) {
                   var stDataL = [];
                   elm2.querySelectorAll("IntensityStation")
                     .forEach(function (elm4) {
-                      var pointT = pointList[Number(elm4.querySelector("Code").textContent)];
+                      var pointT = JMA_Int_Points[Number(elm4.querySelector("Code").textContent)];
                       if (elm4.querySelector("Int")) {
                         stData.push({
-                          lat: pointT ? pointT.location[0] : null,
-                          lng: pointT ? pointT.location[1] : null,
+                          lat: pointT ? pointT.y : null,
+                          lng: pointT ? pointT.x : null,
                           name: elm4.querySelector("Name").textContent,
                           int: elm4.querySelector("Int").textContent,
                         });
                       }
                       if (elm4.querySelector("LgInt")) {
                         stDataL.push({
-                          lat: pointT ? pointT.location[0] : null,
-                          lng: pointT ? pointT.location[1] : null,
+                          lat: pointT ? pointT.y : null,
+                          lng: pointT ? pointT.x : null,
                           name: elm4.querySelector("Name").textContent,
                           lgint: elm4.querySelector("LgInt").textContent,
                         });
@@ -1940,10 +1941,10 @@ function narikakun_Fetch(url) {
                     var stData = [];
                     if (elm3.IntensityStation) {
                       elm3.IntensityStation.forEach(function (elm4) {
-                        var pointT = pointList[Number(elm4.Code)];
+                        var pointT = JMA_Int_Points[Number(elm4.Code)];
                         stData.push({
-                          lat: pointT ? pointT.location[0] : null,
-                          lng: pointT ? pointT.location[1] : null,
+                          lat: pointT ? pointT.y : null,
+                          lng: pointT ? pointT.x : null,
                           name: elm4.Name,
                           int: elm4.Int,
                         });
@@ -2031,10 +2032,10 @@ function axisInfoCtrl(json) {
               var stData = [];
               if (elm3.IntensityStation) {
                 elm3.IntensityStation.forEach(function (elm4) {
-                  var pointT = pointList[Number(elm4.Code)];
+                  var pointT = JMA_Int_Points[Number(elm4.Code)];
                   stData.push({
-                    lat: pointT ? pointT.location[0] : null,
-                    lng: pointT ? pointT.location[1] : null,
+                    lat: pointT ? pointT.y : null,
+                    lng: pointT ? pointT.x : null,
                     name: elm4.Name,
                     int: elm4.Int,
                   });
