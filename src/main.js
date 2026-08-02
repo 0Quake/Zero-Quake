@@ -2697,7 +2697,6 @@ function MargeEEW(data) {
                 elm.y,
                 elm.x,
                 elm.a,
-                config.home.arv,
                 config.Info.EEW.IntType == "max"
               );
               if (maxShindo < estInt) maxShindo = estInt;
