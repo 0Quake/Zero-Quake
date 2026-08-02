@@ -2689,17 +2689,18 @@ function ConvertEQInfo(data) {
     else if (elm.category == "EEW") EQInfoTmp.EEW = true;
     else if (elm.category != "EEW" && EQInfoTmp.EEW == true) {
       //EEW以外の情報が入ってきたとき、EEWによる情報を破棄
-      EQInfoTmp.EEW == false;
+      EQInfoTmp.EEW = false;
       EQInfoTmp = {};
     }
 
     if (!elm.cancel) {
+      console.log(elm)
       if (Boolean2(elm.category)) EQInfoTmp.category = elm.category;
       if (Boolean2(elm.status)) EQInfoTmp.status = elm.status;
       if (Boolean2(elm.reportTime)) EQInfoTmp.reportTime = elm.reportTime;
       if (Boolean2(elm.originTime)) EQInfoTmp.originTime = elm.originTime;
       if (Boolean2(elm.maxI) && elm.maxI !== "?") EQInfoTmp.maxI = elm.maxI;
-      if (Boolean2(elm.mag) && elm.M != "Ｍ不明" && elm.M != "NaN") EQInfoTmp.mag = elm.mag;
+      if (Boolean2(elm.mag) && elm.mag != "Ｍ不明" && elm.mag != "NaN") EQInfoTmp.mag = elm.mag;
       if (Boolean2(elm.magType)) EQInfoTmp.magType = elm.magType;
       if (Boolean2(elm.lat)) EQInfoTmp.lat = elm.lat;
       if (Boolean2(elm.lng)) EQInfoTmp.lng = elm.lng;
@@ -2713,11 +2714,12 @@ function ConvertEQInfo(data) {
     }
   });
 
-  EQInfoData.filter(function (elm) { return elm.category == "長周期地震動に関する観測情報"; }).forEach(function (elm) {
+  //長周期のデータを先に追加し、長周期以外を後から追加することで、長周期以外のものを優先
+  EQInfoData.filter((elm) => elm.category == "長周期地震動に関する観測情報").forEach(function (elm) {
     if (Boolean2(elm.IntData)) EQInfoTmp.IntData = elm.IntData;
   });
 
-  EQInfoData.filter(function (elm) { return elm.category !== "長周期地震動に関する観測情報"; }).forEach(function (elm) {
+  EQInfoData.filter((elm) => elm.category !== "長周期地震動に関する観測情報").forEach(function (elm) {
     if (Boolean2(elm.IntData)) EQInfoTmp.IntData = elm.IntData;
   });
 

@@ -74,7 +74,6 @@ var updateVersion = document.getElementById("update-version");
 var updateBtnWrap = document.getElementById("update_BtnWrap");
 var downloadLink = document.getElementById("downloadLink");
 var update_detail = document.getElementById("update-detail");
-document.getele;
 downloadLink.addEventListener("click", function () {
   var lnk = document.createElement("a");
   lnk.href =

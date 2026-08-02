@@ -34,7 +34,7 @@ function NormalizeShindo(str, responseType) {
       IntIndex = 9;
       break;
     default:
-      IntIndex = 11;
+      IntIndex = 10;
   }
 
   switch (responseType) {
@@ -111,10 +111,17 @@ self.addEventListener("message", (event) => {
               else if (Math.abs(r - 165) < 16 && g < 16 && Math.abs(b - 33) < 16) var color = intColor["6+"];
               else if (Math.abs(r - 180) < 16 && g < 16 && Math.abs(b - 104) < 16) var color = intColor["7"];
 
-              imgData_out.data[i * 1280 + j * 4] = color[0];
-              imgData_out.data[i * 1280 + j * 4 + 1] = color[1];
-              imgData_out.data[i * 1280 + j * 4 + 2] = color[2];
-              imgData_out.data[i * 1280 + j * 4 + 3] = 255;
+              if (color) {
+                imgData_out.data[i * 1280 + j * 4] = color[0];
+                imgData_out.data[i * 1280 + j * 4 + 1] = color[1];
+                imgData_out.data[i * 1280 + j * 4 + 2] = color[2];
+                imgData_out.data[i * 1280 + j * 4 + 3] = 255;
+              } else {
+                imgData_out.data[i * 1280 + j * 4] = 0;
+                imgData_out.data[i * 1280 + j * 4 + 1] = 0;
+                imgData_out.data[i * 1280 + j * 4 + 2] = 0;
+                imgData_out.data[i * 1280 + j * 4 + 3] = 0;
+              }
             }
             x += 3 - (j % 2);
           }
