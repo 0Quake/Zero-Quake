@@ -3122,7 +3122,6 @@ tab1c4.addEventListener('scroll', () => {
       window.electronAPI.messageReturn({
         action: "Req_additionalEQInfo_USGS",
       });
-      console.log("Req_additionalEQInfo_USGS")
     } else {
       document.getElementById("USGS_loading_more").style.display = "none";
       document.getElementById("USGS_loading_status_txt").style.display = "block";

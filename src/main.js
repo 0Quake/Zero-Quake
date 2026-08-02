@@ -3083,7 +3083,6 @@ function Req_JMAXMLList(count, longFeed) {
       if (!r.ok) throw new Error(`HTTP Error: ${r.status}`);
       return r.text();
     }).then((text) => {
-      console.log(12345)
       const parser = new new JSDOM().window.DOMParser();
       const xml = parser.parseFromString(text, "text/xml");
       if (!xml) throw new Error("XMLのパースに失敗");
