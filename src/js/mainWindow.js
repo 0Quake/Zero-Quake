@@ -1906,9 +1906,9 @@ function generatePopupContent_K(params) {
     if (!Array.isArray(params.rgb)) {
       params.rgb = JSON.parse(params.rgb);
     }
-    var content = `<h3 class='PointName' style='border-bottom-color:rgb(${params.rgb.join(",")})'>${params.Name ? params.Name : ""}<span>${params.Type}_${params.Code}</span></h3>`;
+    var content = `<h3 class='PointName' style='border-bottom-color:rgb(${params.rgb.join(",")})'>${params.Name || ""}<span>${params.Type}_${params.Code}</span></h3>`;
   } else {
-    var content = `<h3 class='PointName' style='border-bottom:solid 2px rgba(128,128,128,0.5)'>${params.Name ? params.Name : ""}<span>${params.Type}_${params.Code}</span></h3>`
+    var content = `<h3 class='PointName' style='border-bottom:solid 2px rgba(128,128,128,0.5)'>${params.Name || ""}<span>${params.Type}_${params.Code}</span></h3>`
   }
 
   return content;
@@ -2656,10 +2656,7 @@ function tsunamiDataUpdate(data) {
     }
     tsunamiAlertNow = alertNowTmp;
 
-    document.getElementById("tsunamiHeadline").innerText =
-      (data.headline ? data.headline : "") +
-      (data.issue.time ? ` (${NormalizeDate(10, data.issue.time)
-        })` : "");
+    document.getElementById("tsunamiHeadline").innerText = `${data.headline || ""}${data.issue.time ? ` (${NormalizeDate(10, data.issue.time)})` : ""}`;
     document.getElementById("tsunami_MajorWarning").style.display = Tsunami_MajorWarning ? "inline-block" : "none";
     document.getElementById("tsunami_Warning").style.display = Tsunami_Warning ? "inline-block" : "none";
     document.getElementById("tsunami_Watch").style.display = Tsunami_Watch ? "inline-block" : "none";
@@ -3151,16 +3148,16 @@ function GenerateEEWText(EEWData, form) {
   try {
     var text = form;
 
-    text = text.replaceAll("{grade}", EEWData.alertflg ? EEWData.alertflg : "");
-    text = text.replaceAll("{serial}", EEWData.serial ? EEWData.serial : "");
+    text = text.replaceAll("{grade}", EEWData.alertflg || "");
+    text = text.replaceAll("{serial}", EEWData.serial || "");
     text = text.replaceAll("{final}", EEWData.is_final ? "最終報" : "");
     text = text.replaceAll("{location}", config.home.name ? config.home.name : "現在地");
-    text = text.replaceAll("{magnitude}", EEWData.magnitude ? EEWData.magnitude : "");
+    text = text.replaceAll("{magnitude}", Boolean2(EEWData.magnitude) || "");
     text = text.replaceAll("{maxInt}", EEWData.maxInt ? NormalizeShindo(EEWData.maxInt, 1) : "");
-    text = text.replaceAll("{depth}", EEWData.depth ? EEWData.depth : "");
+    text = text.replaceAll("{depth}", Boolean2(EEWData.depth) ? EEWData.depth : "");
     text = text.replaceAll("{training}", EEWData.is_training ? "訓練報。" : "");
     text = text.replaceAll("{training2}", EEWData.is_training ? "これは訓練報です。" : "");
-    text = text.replaceAll("{region_name}", EEWData.region_name ? EEWData.region_name : "");
+    text = text.replaceAll("{region_name}", EEWData.region_name || "");
     text = text.replaceAll("{report_time}", EEWData.report_time ? NormalizeDate(8, EEWData.report_time) : "");
     text = text.replaceAll("{origin_time}", EEWData.origin_time ? NormalizeDate(8, EEWData.origin_time) : "");
     var userInt;
@@ -3212,7 +3209,7 @@ function GenerateTsunamiText(data, text) {
     text = text.replaceAll("{max_grade}", grade_arr[0] ? grade_arr[0] : "津波情報");
     text = text.replaceAll("{all_grade}", grade_arr[0] ? grade_arr.join("、") : "津波情報");
     text = text.replaceAll("{report_time}", data.issue.time ? NormalizeDate(9, data.issue.time) : "不明な時刻");
-    text = text.replaceAll("{headline}", data.headline ? data.headline : "");
+    text = text.replaceAll("{headline}", data.headline || "");
 
     if (homeArea && !homeArea.cancelled) {
       text = text.replaceAll("{home_area}", homeArea.name ? homeArea.name : "設定地点");

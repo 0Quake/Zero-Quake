@@ -1493,8 +1493,6 @@ function jma_ListReq() {
           jma_Fetch(elm);
         }
       });
-
-
     })
     .catch(function () { });
   fetch("https://www.jma.go.jp/bosai/ltpgm/data/list.json")
@@ -1556,12 +1554,14 @@ function jma_Fetch(url) {
         if (json.Body.Earthquake.Hypocenter.Area.Name) epiCenterTmp = json.Body.Earthquake.Hypocenter.Area.Name;
         if (json.Body.Earthquake.Magnitude) magnitudeTmp = Number(json.Body.Earthquake.Magnitude);
       }
-      if (json.Body.Intensity && json.Body.Intensity.Observation.MaxInt)
+      if (json.Body.Intensity && json.Body.Intensity.Observation.MaxInt) {
         maxIntTmp = json.Body.Intensity.Observation.MaxInt;
-      if (LatLngDepth && !isNaN(LatLngDepth[1]) && LatLngDepth[1]) LatTmp = Number(LatLngDepth[1]);
-      if (LatLngDepth && !isNaN(LatLngDepth[2]) && LatLngDepth[2]) LngTmp = Number(LatLngDepth[2]);
-      if (LatLngDepth && !isNaN(LatLngDepth[3]) && LatLngDepth[3]) depthTmp = Math.abs(Number(LatLngDepth[3]) / 1000);
-
+      }
+      if (LatLngDepth) {
+        if (!isNaN(LatLngDepth[1]) && LatLngDepth[1]) LatTmp = Number(LatLngDepth[1]);
+        if (!isNaN(LatLngDepth[2]) && LatLngDepth[2]) LngTmp = Number(LatLngDepth[2]);
+        if (!isNaN(LatLngDepth[3]) && LatLngDepth[3]) depthTmp = Math.abs(Number(LatLngDepth[3]) / 1000);
+      }
       var cancelTmp = json.Head.InfoType == "取消";
 
       var commentText = {
@@ -1570,12 +1570,15 @@ function jma_Fetch(url) {
         FreeFormComment: "",
       };
       if (json.Body.Comments) {
-        if (json.Body.Comments.ForecastComment && json.Body.Comments.ForecastComment.Text)
+        if (json.Body.Comments.ForecastComment && json.Body.Comments.ForecastComment.Text) {
           commentText.ForecastComment = json.Body.Comments.ForecastComment.Text;
-        if (json.Body.Comments.VarComment && json.Body.Comments.VarComment.Text)
+        }
+        if (json.Body.Comments.VarComment && json.Body.Comments.VarComment.Text) {
           commentText.VarComment = json.Body.Comments.VarComment.Text;
-        if (json.Body.Comments.FreeFormComment)
+        }
+        if (json.Body.Comments.FreeFormComment) {
           commentText.FreeFormComment = json.Body.Comments.FreeFormComment;
+        }
       }
 
       var IntData = [];
@@ -1658,14 +1661,18 @@ function jmaL_Fetch(url) {
         if (json.Body.Earthquake.Hypocenter.Area.Name) var epiCenterTmp = json.Body.Earthquake.Hypocenter.Area.Name;
         if (json.Body.Earthquake.Magnitude) var magnitudeTmp = Number(json.Body.Earthquake.Magnitude);
       }
-      if (json.Body.Intensity && json.Body.Intensity.Observation.MaxInt)
+      if (json.Body.Intensity && json.Body.Intensity.Observation.MaxInt) {
         var maxIntTmp = json.Body.Intensity.Observation.MaxInt;
-      if (LatLngDepth && !isNaN(LatLngDepth[1]) && LatLngDepth[1])
+      }
+      if (LatLngDepth && !isNaN(LatLngDepth[1]) && LatLngDepth[1]) {
         var LatTmp = Number(LatLngDepth[1]);
-      if (LatLngDepth && !isNaN(LatLngDepth[2]) && LatLngDepth[2])
+      }
+      if (LatLngDepth && !isNaN(LatLngDepth[2]) && LatLngDepth[2]) {
         var LngTmp = Number(LatLngDepth[2]);
-      if (LatLngDepth && !isNaN(LatLngDepth[3]) && LatLngDepth[3])
+      }
+      if (LatLngDepth && !isNaN(LatLngDepth[3]) && LatLngDepth[3]) {
         var depthTmp = Math.abs(Number(LatLngDepth[3]) / 1000);
+      }
 
       var cancelTmp = json.Head.InfoType == "取消";
 
@@ -1675,12 +1682,15 @@ function jmaL_Fetch(url) {
           VarComment: "",
           FreeFormComment: "",
         };
-        if (json.Body.Comments.ForecastComment && json.Body.Comments.ForecastComment.Text)
+        if (json.Body.Comments.ForecastComment && json.Body.Comments.ForecastComment.Text) {
           commentText.ForecastComment = json.Body.Comments.ForecastComment.Text;
-        if (json.Body.Comments.VarComment && json.Body.Comments.VarComment.Text)
+        }
+        if (json.Body.Comments.VarComment && json.Body.Comments.VarComment.Text) {
           commentText.VarComment = json.Body.Comments.VarComment.Text;
-        if (json.Body.Comments.FreeFormComment && json.Body.Comments.FreeFormComment)
+        }
+        if (json.Body.Comments.FreeFormComment && json.Body.Comments.FreeFormComment) {
           commentText.FreeFormComment = json.Body.Comments.FreeFormComment;
+        }
       }
 
       var LngIntData = [];
@@ -2022,16 +2032,24 @@ function axisInfoCtrl(json) {
 
   var originTimeTmp, epiCenterTmp, magnitudeTmp, maxIntTmp, LatTmp, LngTmp, depthTmp;
 
-  if (Earthquake.OriginTime) originTimeTmp = new Date(Earthquake.OriginTime);
-  if (Earthquake.Hypocenter.Area.Name)
+  if (Earthquake.OriginTime) {
+    originTimeTmp = new Date(Earthquake.OriginTime);
+  }
+  if (Earthquake.Hypocenter.Area.Name) {
     epiCenterTmp = Earthquake.Hypocenter.Area.Name;
-  if (Earthquake.Magnitude) magnitudeTmp = Number(Earthquake.Magnitude);
-  if (json.Body.Intensity && json.Body.Intensity.Observation.MaxInt)
+  }
+  if (Earthquake.Magnitude) {
+    magnitudeTmp = Number(Earthquake.Magnitude);
+  }
+  if (json.Body.Intensity && json.Body.Intensity.Observation.MaxInt) {
     maxIntTmp = json.Body.Intensity.Observation.MaxInt;
+  }
 
-  if (LatLngDepth && !isNaN(LatLngDepth[1]) && LatLngDepth[1]) LatTmp = Number(LatLngDepth[1]);
-  if (LatLngDepth && !isNaN(LatLngDepth[2]) && LatLngDepth[2]) LngTmp = Number(LatLngDepth[2]);
-  if (LatLngDepth && !isNaN(LatLngDepth[3]) && LatLngDepth[3]) depthTmp = Math.abs(Number(LatLngDepth[3]) / 1000);
+  if (LatLngDepth) {
+    if (!isNaN(LatLngDepth[1]) && LatLngDepth[1]) LatTmp = Number(LatLngDepth[1]);
+    if (!isNaN(LatLngDepth[2]) && LatLngDepth[2]) LngTmp = Number(LatLngDepth[2]);
+    if (!isNaN(LatLngDepth[3]) && LatLngDepth[3]) depthTmp = Math.abs(Number(LatLngDepth[3]) / 1000);
+  }
 
   var cancelTmp = json.Head.InfoType == "取消";
 
@@ -2041,12 +2059,15 @@ function axisInfoCtrl(json) {
     FreeFormComment: "",
   };
   if (json.Body.Comments) {
-    if (json.Body.Comments.ForecastComment && json.Body.Comments.ForecastComment.Text)
+    if (json.Body.Comments.ForecastComment && json.Body.Comments.ForecastComment.Text) {
       commentText.ForecastComment = json.Body.Comments.ForecastComment.Text;
-    if (json.Body.Comments.VarComment && json.Body.Comments.VarComment.Text)
+    }
+    if (json.Body.Comments.VarComment && json.Body.Comments.VarComment.Text) {
       commentText.VarComment = json.Body.Comments.VarComment.Text;
-    if (json.Body.Comments.FreeFormComment)
+    }
+    if (json.Body.Comments.FreeFormComment) {
       commentText.FreeFormComment = json.Body.Comments.FreeFormComment;
+    }
   }
 
   var IntData = [];
@@ -2694,18 +2715,15 @@ function ConvertEQInfo(data) {
     }
 
     if (!elm.cancel) {
-      console.log(elm)
-      if (Boolean2(elm.category)) EQInfoTmp.category = elm.category;
-      if (Boolean2(elm.status)) EQInfoTmp.status = elm.status;
-      if (Boolean2(elm.reportTime)) EQInfoTmp.reportTime = elm.reportTime;
-      if (Boolean2(elm.originTime)) EQInfoTmp.originTime = elm.originTime;
-      if (Boolean2(elm.maxI) && elm.maxI !== "?") EQInfoTmp.maxI = elm.maxI;
-      if (Boolean2(elm.mag) && elm.mag != "Ｍ不明" && elm.mag != "NaN") EQInfoTmp.mag = elm.mag;
-      if (Boolean2(elm.magType)) EQInfoTmp.magType = elm.magType;
-      if (Boolean2(elm.lat)) EQInfoTmp.lat = elm.lat;
-      if (Boolean2(elm.lng)) EQInfoTmp.lng = elm.lng;
-      if (Boolean2(elm.depth)) EQInfoTmp.depth = elm.depth;
-      if (Boolean2(elm.epiCenter)) EQInfoTmp.epiCenter = elm.epiCenter;
+      function Boolean3(a) {
+        return Boolean2(a) && elm.maxI !== "?" && elm.mag != "Ｍ不明" && elm.mag != "NaN";
+      }
+
+      var keys = ["category", "status", "reportTime", "originTime", "maxI", "mag", "magType", "lat", "lng", "depth", "epiCenter"]
+      keys.forEach((key) => {
+        if (Boolean3(elm[key])) EQInfoTmp[key] = elm[key];
+      })
+
       if (Boolean2(elm.comment) && (Boolean2(elm.comment.ForecastComment) || Boolean2(elm.comment.VarComment) || Boolean2(elm.comment.FreeFormComment))) {
         if (!EQInfoTmp.comment) EQInfoTmp.comment = elm.comment;
       }
@@ -2741,14 +2759,10 @@ function ConvertEQInfo(data) {
 
   document.getElementById("cancelled").style.display = EQInfoMarged.cancel ? "flex" : "none";
 
-  if (EQInfoMarged.originTime) EQInfo.originTime = EQInfoMarged.originTime;
-  if (EQInfoMarged.maxI) EQInfo.maxI = EQInfoMarged.maxI;
-  if (EQInfoMarged.mag) EQInfo.mag = EQInfoMarged.mag;
-  if (EQInfoMarged.lat || EQInfoMarged.lat == 0) EQInfo.lat = EQInfoMarged.lat;
-  if (EQInfoMarged.lng || EQInfoMarged.lng == 0) EQInfo.lng = EQInfoMarged.lng;
-
-  if (EQInfoMarged.depth || EQInfoMarged.depth === 0) EQInfo.depth = Math.abs(EQInfoMarged.depth);
-  if (EQInfoMarged.epiCenter) EQInfo.epiCenter = EQInfoMarged.epiCenter;
+  var keys = ["originTime", "maxI", "mag", "lat", "lng", "epiCenter", "depth"];
+  keys.forEach((key) => {
+    if (Boolean2(EQInfoMarged[key])) EQInfo[key] = EQInfoMarged[key];
+  });
 
   if (EQInfo.originTime) data_time.innerText = NormalizeDate(4, EQInfo.originTime);
   if (EQInfo.maxI) data_maxI.innerText = NormalizeShindo(EQInfo.maxI, 1);

@@ -3329,7 +3329,7 @@ function Req_JMAXML(url, count) {
             reportDateTime: new Date(
               xml.getElementsByTagName("ReportDateTime")[0].textContent
             ),
-            headline: headline ? headline : "",
+            headline: headline || "",
             hourly: hourly,
             sum: sum,
             std: std,
@@ -4303,16 +4303,16 @@ function GenerateEEWText(EEWData, update) {
     else if (update) var text = config.notice.voice.EEWUpdate;
     else var text = config.notice.voice.EEW;
 
-    text = text.replaceAll("{grade}", EEWData.alertflg ? EEWData.alertflg : "");
-    text = text.replaceAll("{serial}", EEWData.serial ? EEWData.serial : "");
+    text = text.replaceAll("{grade}", EEWData.alertflg || "");
+    text = text.replaceAll("{serial}", EEWData.serial || "");
     text = text.replaceAll("{final}", EEWData.is_final ? "最終報" : "");
     text = text.replaceAll("{location}", config.home.name ? config.home.name : "現在地");
-    text = text.replaceAll("{magnitude}", EEWData.magnitude ? EEWData.magnitude : "");
+    text = text.replaceAll("{magnitude}", Boolean2(EEWData.magnitude) ? EEWData.magnitude : "");
     text = text.replaceAll("{maxInt}", EEWData.maxInt ? NormalizeShindo(EEWData.maxInt, 1) : "");
-    text = text.replaceAll("{depth}", EEWData.depth ? EEWData.depth : "");
+    text = text.replaceAll("{depth}", Boolean2(EEWData.depth) ? EEWData.depth : "");
     text = text.replaceAll("{training}", EEWData.is_training ? "訓練報。" : "");
     text = text.replaceAll("{training2}", EEWData.is_training ? "これは訓練報です。" : "");
-    text = text.replaceAll("{region_name}", EEWData.region_name ? EEWData.region_name : "");
+    text = text.replaceAll("{region_name}", EEWData.region_name || "");
     text = text.replaceAll("{report_time}", EEWData.report_time ? NormalizeDate(8, EEWData.report_time) : "");
     text = text.replaceAll("{origin_time}", EEWData.origin_time ? NormalizeDate(8, EEWData.origin_time) : "");
     if (EEWData.source == "simulation") text = `シミュレーションです。${text}`;
@@ -4351,16 +4351,16 @@ function GenerateEQInfoText(EQData) {
     if (category == "Tsunami") category = "津波情報に付帯する地震情報";
 
     var dif = timeDifference(Number(new Date() - new Date(EQData.OriginTime)));
-    text = text.replaceAll("{category}", category ? category : "");
+    text = text.replaceAll("{category}", category || "");
     text = text.replaceAll("{training}", EQData.status == "訓練" ? "訓練報。" : "");
     text = text.replaceAll("{training2}", EQData.status == "訓練" ? "これは訓練報です。" : "");
     text = text.replaceAll("{report_time}", EQData.reportDateTime ? NormalizeDate(9, EQData.reportDateTime) : "");
     text = text.replaceAll("{origin_time}", EQData.OriginTime ? NormalizeDate(9, EQData.OriginTime) : "");
     text = text.replaceAll("{origin_time2}", EQData.OriginTime ? `${dif.num}${dif.unit}前` : "先ほど");
-    text = text.replaceAll("{region_name}", EQData.epiCenter ? EQData.epiCenter : "");
-    text = text.replaceAll("{magnitude}", EQData.M ? EQData.M : "");
+    text = text.replaceAll("{region_name}", EQData.epiCenter || "");
+    text = text.replaceAll("{magnitude}", EQData.M || "");
     text = text.replaceAll("{maxInt}", EQData.maxI ? NormalizeShindo(EQData.maxI, 1) : "");
-    text = text.replaceAll("{headline}", EQData.headline ? EQData.headline : "");
+    text = text.replaceAll("{headline}", EQData.headline || "");
 
     if (!EQData.epiCenter) text = text.replace(/\[.*?\]/g, "");
     if (!EQData.maxI) text = text.replace(/<.*?>/g, "");
@@ -4402,7 +4402,7 @@ function GenerateTsunamiText(data) {
     text = text.replaceAll("{max_grade}", grade_arr[0] ? grade_arr[0] : "津波情報");
     text = text.replaceAll("{all_grade}", grade_arr[0] ? grade_arr.join("、") : "津波情報");
     text = text.replaceAll("{report_time}", data.issue.time ? NormalizeDate(9, data.issue.time) : "不明な時刻");
-    text = text.replaceAll("{headline}", data.headline ? data.headline : "");
+    text = text.replaceAll("{headline}", data.headline || "");
 
     if (homeArea && !homeArea.cancelled) {
       text = text.replaceAll("{home_area}", homeArea.name ? homeArea.name : "設定地点");
