@@ -1098,7 +1098,7 @@ function Int_Sta_Popup(e) {
 
   var mi_description = NormalizeShindo(elm.int) == "未" ? "<div class = 'description'>震度5弱以上と考えられるが<br>現在震度を入手していない。</div>" : "";
 
-  var content = `<div class='popupContent'><div class='shindoItem' style='background:${color[0]};color:${color[1]}'>震度 ${+ elm.intStr}</div><div class='pointName'>${elm.name}</div>${mi_description}<div class='pointHead'>観測点</div></div><div></div>`;
+  var content = `<div class='popupContent'><div class='shindoItem' style='background:${color[0]};color:${color[1]}'>震度 ${elm.intStr}</div><div class='pointName'>${elm.name}</div>${mi_description}<div class='pointHead'>観測点</div></div><div></div>`;
   new maplibregl.Popup({ offset: [0, -17] })
     .setHTML(content)
     .setLngLat(e.features[0].geometry.coordinates)
