@@ -193,7 +193,9 @@ document.querySelectorAll("input[type=number]").forEach(function (elm) {
     var min = this.getAttribute("min");
     if (Number(min) > Number(this.value)) this.value = min;
     var step = this.getAttribute("step");
-    if (Number(this.value) % Number(step) == 0) this.value = Math.floor(this.value / step) * step;
+    if (Number(this.value) % Number(step) !== 0) {
+      this.value = Math.floor(this.value / step) * step;
+    }
   });
 });
 
@@ -373,3 +375,6 @@ window.addEventListener("keydown", (event) => {
     if (tagname == "DIV" || tagname == "SPAN") document.activeElement.dispatchEvent(new PointerEvent("click"));
   }
 });
+function Boolean2(elm) {
+  return Boolean(elm !== null && elm !== undefined && elm !== "" && !Number.isNaN(elm) && elm != "Invalid Date" && (!Array.isArray(elm) || elm.length > 0) && elm || elm === 0);
+}

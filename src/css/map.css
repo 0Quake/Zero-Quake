@@ -535,6 +535,7 @@ body {
   display: none;
   text-align: left;
   font-size: 0;
+  padding: 6px;
 }
 #fillLegend p {
   font-size: 14px;

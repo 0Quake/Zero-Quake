@@ -37,8 +37,8 @@ function tsunamiUpdate(dataTmp) {
   var has_condition = false;
   var has_tide = false;
   var has_obs = false;
-  dataTmp.areas.reverse();
-  dataTmp.areas.forEach((elm) => {
+  var revered = [...dataTmp.areas].reverse();
+  revered.forEach((elm) => {
     if (!elm.cancelled) {
       var condition = "";
       var arrivalTime = "";

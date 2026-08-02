@@ -366,8 +366,8 @@ var template2 = document.getElementById("EQListTemplate");
 var template2_2 = document.getElementById("EQListTemplate2");
 var template2_3 = document.getElementById("EQListTemplate3");
 var EQListWrap;
-var eqInfoDataJMA;
-var eqInfoDataUSGS;
+var eqInfoDataJMA = [];
+var eqInfoDataUSGS = [];
 function eqInfoDraw(data, source) {
   var EQTemplate;
   if (source == "jma") {
@@ -381,6 +381,8 @@ function eqInfoDraw(data, source) {
     EQTemplate = template2;
     EQListWrap = document.getElementById("JMA_EqInfo_Data");
     var sort_key = document.getElementById("JMA_EqInfo_Sort").value
+
+    var data_to_draw = [...data, ...eqCount];
   } else if (source == "usgs") {
     eqInfoDataUSGS = data;
     EQTemplate = template2_2;
@@ -394,11 +396,11 @@ function eqInfoDraw(data, source) {
       document.getElementById("usgs_update_time").setAttribute("aria-label", `更新時刻、${NormalizeDate("h時m分s秒", new Date())}`);
     }
     var sort_key = document.getElementById("USGS_EqInfo_Sort").value
+
+    var data_to_draw = [...data];
   }
   removeChild(EQListWrap);
 
-
-  var data_to_draw = [...data, ...eqCount];
 
   //ソート用にOriginTimeがないデータはReportTimeを参照する専用Dateを用意
   data_to_draw.forEach(function (elm) {
@@ -646,18 +648,20 @@ function EQDetect(data) {
 }
 //地震検知終了
 function EQDetectFinish(id) {
-  EQDetectItem.find(function (elmA, index) {
-    if (elmA.id == id) {
-      if (map && map.getLayer(`EQDItemF_${id}`)) map.removeLayer(`EQDItemF_${id}`);
-      if (map && map.getSource(`EQDItem_${id}`)) map.removeSource(`EQDItem_${id}`);
-      elmA.ECMarker.remove();
-
-      EQDetectItem.splice(index, 1);
-      returnToUserPosition();
-
-      return true;
-    }
+  var delIndex = EQDetectItem.findIndex(function (elmA, index) {
+    return elmA.id == id
   });
+
+  if (delIndex > -1) {
+    var delElm = EQDetectItem[delIndex];
+    if (map && map.getLayer(`EQDItemF_${delElm.id}`)) map.removeLayer(`EQDItemF_${delElm.id}`);
+    if (map && map.getSource(`EQDItem_${delElm.id}`)) map.removeSource(`EQDItem_${delElm.id}`);
+    delElm.ECMarker.remove();
+
+    returnToUserPosition();
+
+    EQDetectItem.splice(delIndex, 1);
+  }
 
   var eqdItem = document.getElementById(`EQDItem_${id}`);
   if (eqdItem) eqdItem.remove();
@@ -687,7 +691,7 @@ document.getElementById("setting").addEventListener("click", function () {
 });
 
 //情報更新時刻更新
-var UpdateTime = [];
+var UpdateTime = {};
 function UpdateStatus(timestamp, LocalTime, type, condition) {
   if (timestamp > (new Date() - Replay + 60000)) return;//ホストとの時刻ズレを考慮し現在時刻+1分まで受け入れる
   UpdateTime[type] = {
@@ -1913,8 +1917,8 @@ function generatePopupContent_K(params) {
 function generatePopupContent_TREM(params) {
   var shindoColor = NormalizeShindo(params.shindo, 2);
   if (!Array.isArray(params.rgb)) params.rgb = JSON.parse(params.rgb);
-  return `< h3 class= 'PointName' style = 'border-bottom-color:rgb(${params.rgb.join(",")})' >
-      <span>${params.Type}_${params.Code}</span></h3 > <div class='popupContentWrap'>
+  return `<h3 class='PointName' style='border-bottom-color:rgb(${params.rgb.join(",")})'>
+      <span>${params.Type}_${params.Code}</span></h3><div class='popupContentWrap'>
         <div class='obsShindoWrap' style='background:${shindoColor[0]};color:${shindoColor[1]};'>震度 ${NormalizeShindo(params.shindo, 1)}
           <span>${params.shindo.toFixed(2)}</span></div>
         <div class='obsPGAWrap'>PGA ${(Math.floor(params.PGA * 100) / 100).toFixed(2)}</div></div>`;
@@ -1953,8 +1957,8 @@ function TREMRTSUpdate(dataTmp) {
 function generatePopupContent_SEISJS(params) {
   var shindoColor = NormalizeShindo(params.shindo, 2);
   if (!Array.isArray(params.rgb)) params.rgb = JSON.parse(params.rgb);
-  return `< h3 class= 'PointName' style = 'border-bottom-color:rgb(${params.rgb.join(",")})' > ${params.Name}
-    < span > ${params.Code}</span ></h3 >
+  return `<h3 class= 'PointName' style='border-bottom-color:rgb(${params.rgb.join(",")})'> ${params.Name}
+    <span> ${params.Code}</span></h3>
       <div class='popupContentWrap'><div class='obsShindoWrap' style='background:${shindoColor[0]};color:${shindoColor[1]};'>震度 ${NormalizeShindo(params.shindo, 1)}
         <span>${params.shindo.toFixed(2)}</span></div>
         <div class='obsPGAWrap'>PGA ${(Math.floor(params.PGA * 100) / 100).toFixed(2)}</div></div>`;
@@ -2061,7 +2065,7 @@ function JMAEstShindoControl(data) {
         break;
     }
   });
-  document.getElementById("fillLegend").style.display = Object.keys(JMAEstShindoData) == 0 ? "none" : "inline-block";
+  document.getElementById("fillLegend").style.display = Object.keys(JMAEstShindoData).length == 0 ? "none" : "inline-block";
   JMAEstShindoDraw();
 }
 
@@ -2138,8 +2142,8 @@ function psWaveEntry() {
       if (map.getLayer(`SCircle_${elm.id}`)) map.removeLayer(`SCircle_${elm.id}`);
       if (map.getLayer(`SCircle_${elm.id}_FILL`)) map.removeLayer(`SCircle_${elm.id}_FILL`);
 
-      if (map.getLayer(`PCircle_${elm.id}`)) map.removeSource(`PCircle_${elm.id}`);
-      if (map.getLayer(`SCircle_${elm.id}`)) map.removeSource(`SCircle_${elm.id}`);
+      if (map.getSource(`PCircle_${elm.id}`)) map.removeSource(`PCircle_${elm.id}`);
+      if (map.getSource(`SCircle_${elm.id}`)) map.removeSource(`SCircle_${elm.id}`);
       if (elm.SIElm) elm.SIElm.remove();
     }
     return stillEEW;
@@ -2170,7 +2174,9 @@ function psWaveCalc(eid) {
             break;
           }
         }
+        i++;
       }
+      var i = 0;
       for (const elm of TTable.s) {
         if (!SRadius && SfirstArrival < passedTime) {
           if (elm.t >= passedTime) {
@@ -2346,9 +2352,9 @@ function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrive
       const el = document.createElement("div");
       el.classList.add("SWaveProgress");
       el.innerHTML =
-        `< svg width = "50" height = "50" ><circle cx="25" cy="25" r="22" fill="none" stroke-width="5px" stroke="#777"/>
+        `<svg width="50" height="50"><circle cx="25" cy="25" r="22" fill="none" stroke-width="5px" stroke="#777"/>
         <circle id="SWprogressValue_${EventID}" class="SWprogressValue" cx="25" cy="25" r="22" fill="none" stroke-width="5px" stroke-linecap="round" stroke-dasharray="138"
-          stroke-dashoffset="${(138 - 138 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect)))}"/></svg > `;
+          stroke-dashoffset="${(138 - 138 * ((nowDistance - EQElm.firstDetect) / (SArriveTime - EQElm.firstDetect)))}"/></svg>`;
 
       SIElm = new maplibregl.Marker({ element: el })
         .setLngLat([longitude, latitude])
@@ -2768,13 +2774,6 @@ function tsunamiPopup(e) {
 //🔴南海トラフ情報🔴
 function NankaiTroughInfo(data) {
   if (data.rinji) {
-    document.getElementById("NankaiTroughInfo_Rinji")
-      .addEventListener("click", function () {
-        window.electronAPI.messageReturn({
-          action: "NankaiWindowOpen",
-          type: "rinji",
-        });
-      });
     document.getElementById("NankaiTroughInfo_Rinji").style.display = "block";
     document.getElementById("NankaiTroughInfo_Rinji")
       .setAttribute("title", `クリックして詳細を表示\n${data.rinji.HeadLine}`);
@@ -2811,12 +2810,6 @@ function NankaiTroughInfo(data) {
   }
 
   if (data.teirei) {
-    document.getElementById("NankaiTroughInfo_Teirei").addEventListener("click", function () {
-      window.electronAPI.messageReturn({
-        action: "NankaiWindowOpen",
-        type: "teirei",
-      });
-    });
     document.getElementById("NankaiTroughInfo_Teirei").style.display = "block";
     document.getElementById("NankaiTroughInfo_Teirei")
       .setAttribute("title", `クリックして詳細を表示\n${data.teirei.HeadLine}`);
@@ -2841,6 +2834,18 @@ function NankaiTroughInfo(data) {
       document.getElementById("NankaiTroughInfo_Teirei").classList.add("nankaiWarn");
   } else document.getElementById("NankaiTroughInfo_Teirei").style.display = "none";
 }
+document.getElementById("NankaiTroughInfo_Rinji").addEventListener("click", function () {
+  window.electronAPI.messageReturn({
+    action: "NankaiWindowOpen",
+    type: "rinji",
+  });
+});
+document.getElementById("NankaiTroughInfo_Teirei").addEventListener("click", function () {
+  window.electronAPI.messageReturn({
+    action: "NankaiWindowOpen",
+    type: "teirei",
+  });
+});
 
 //北海道・三陸沖後発地震注意情報
 function HokkaidoSanrikuInfo(data) {
@@ -2969,7 +2974,7 @@ function draw_tide(data) {
     clone.querySelector(".EQI_point_adv").style.display = (elm.threshold_advisory || elm.threshold_advisory == 0) ? "block" : "none";
     clone.querySelector(".EQI_point_warn").style.display = (elm.threshold_warn || elm.threshold_warn == 0) ? "block" : "none";
 
-    clone.setAttribute("aria-label", `潮位観測情報、観測点名は${elm.name} (${elm.by})。潮位${elm.height.toFixed(0)} センチ、${dateToSpeak} 時点。なお、天文潮位は${elm.astro} センチ、高潮注意報基準は${elm.threshold_advisory} センチ、高潮警報基準は${elm.threshold_warn} センチ。クリックして詳細を表示。`);
+    clone.setAttribute("aria-label", `潮位観測情報、観測点名は${elm.name} (${elm.by})。潮位${Boolean2(elm.height) ? `${elm.height.toFixed(0)}センチ` : "不明"}、${dateToSpeak} 時点。なお、天文潮位は${elm.astro} センチ、高潮注意報基準は${elm.threshold_advisory} センチ、高潮警報基準は${elm.threshold_warn} センチ。クリックして詳細を表示。`);
     clone.addEventListener("click", function () {
       window.open(`https://www.jma.go.jp/bosai/tidelevel/#point_code=${data[key].code}`);
     });
