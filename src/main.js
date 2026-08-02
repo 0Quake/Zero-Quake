@@ -4563,74 +4563,69 @@ function NormalizeDate(type, date) {
 //震度の形式変換
 function NormalizeShindo(str, responseType) {
   try {
-    var ShindoTmp;
-    if (str === null || str === undefined) ShindoTmp = 11;
-    else if (isNaN(str)) {
+    var p2p_table = { "10": 1, "20": 2, "30": 3, "40": 4, "45": 5, "50": 6, "55": 7, "60": 8, "70": 9 }
+    var IntIndex = 11;
+    if (str === null || str === undefined) {
+      IntIndex = 11;//不明
+    } else if (p2p_table[str]) {
+      IntIndex = p2p_table[str]//p2pの2桁フォーマット
+    } else if (isNaN(str)) {
       str = String(str)
         .replace(/[０-９]/g, function (s) {
           return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
         }).replaceAll("＋", "+").replaceAll("－", "-").replaceAll("強", "+").replaceAll("弱", "-").replace(/\s+/g, "");
       switch (str) {
         case "1":
-        case "10":
-          ShindoTmp = 1;
+          IntIndex = 1;
           break;
         case "2":
-        case "20":
-          ShindoTmp = 2;
+          IntIndex = 2;
           break;
         case "3":
-        case "30":
-          ShindoTmp = 3;
+          IntIndex = 3;
           break;
         case "4":
-        case "40":
-          ShindoTmp = 4;
+          IntIndex = 4;
           break;
         case "5-":
-        case "45":
-          ShindoTmp = 5;
+          IntIndex = 5;
           break;
         case "5+":
-        case "50":
-          ShindoTmp = 6;
+          IntIndex = 6;
           break;
         case "6-":
-        case "55":
-          ShindoTmp = 7;
+          IntIndex = 7;
           break;
         case "6+":
-        case "60":
-          ShindoTmp = 8;
+          IntIndex = 8;
           break;
         case "7":
-        case "70":
-          ShindoTmp = 9;
+          IntIndex = 9;
           break;
         case "未":
         case "５弱以上未入電":
         case "震度5-以上未入電":
         case "5+?":
-          ShindoTmp = 10;
+          IntIndex = 10;
           break;
         case "-1":
         case "?":
         case "不明":
         default:
-          ShindoTmp = 11;
+          IntIndex = 11;
       }
     } else {
-      if (str < 0.5) ShindoTmp = 0;
-      else if (str < 1.5) ShindoTmp = 1;
-      else if (str < 2.5) ShindoTmp = 2;
-      else if (str < 3.5) ShindoTmp = 3;
-      else if (str < 4.5) ShindoTmp = 4;
-      else if (str < 5) ShindoTmp = 5;
-      else if (str < 5.5) ShindoTmp = 6;
-      else if (str < 6) ShindoTmp = 7;
-      else if (str < 6.5) ShindoTmp = 8;
-      else if (6.5 <= str) ShindoTmp = 9;
-      else ShindoTmp = 11;
+      if (str < 0.5) IntIndex = 0;
+      else if (str < 1.5) IntIndex = 1;
+      else if (str < 2.5) IntIndex = 2;
+      else if (str < 3.5) IntIndex = 3;
+      else if (str < 4.5) IntIndex = 4;
+      else if (str < 5) IntIndex = 5;
+      else if (str < 5.5) IntIndex = 6;
+      else if (str < 6) IntIndex = 7;
+      else if (str < 6.5) IntIndex = 8;
+      else if (6.5 <= str) IntIndex = 9;
+      else IntIndex = 11;
     }
     switch (responseType) {
       case 1:
@@ -4667,9 +4662,9 @@ function NormalizeShindo(str, responseType) {
         var ConvTable = ["0", "1", "2", "3", "4", "5-", "5+", "6-", "6+", "7", "未", "?"];
         break;
     }
-    return ConvTable[ShindoTmp];
+    return ConvTable[IntIndex];
   } catch {
-    return "";
+    return "?";
   }
 }
 

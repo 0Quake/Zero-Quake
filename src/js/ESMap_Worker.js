@@ -4,37 +4,37 @@ var config;
 var intColor;
 
 function NormalizeShindo(str, responseType) {
-  var ShindoTmp;
+  var IntIndex;
   switch (str) {
     case "1":
-      ShindoTmp = 1;
+      IntIndex = 1;
       break;
     case "2":
-      ShindoTmp = 2;
+      IntIndex = 2;
       break;
     case "3":
-      ShindoTmp = 3;
+      IntIndex = 3;
       break;
     case "4":
-      ShindoTmp = 4;
+      IntIndex = 4;
       break;
     case "5-":
-      ShindoTmp = 5;
+      IntIndex = 5;
       break;
     case "5+":
-      ShindoTmp = 6;
+      IntIndex = 6;
       break;
     case "6-":
-      ShindoTmp = 7;
+      IntIndex = 7;
       break;
     case "6+":
-      ShindoTmp = 8;
+      IntIndex = 8;
       break;
     case "7":
-      ShindoTmp = 9;
+      IntIndex = 9;
       break;
     default:
-      ShindoTmp = 11;
+      IntIndex = 11;
   }
 
   switch (responseType) {
@@ -55,7 +55,7 @@ function NormalizeShindo(str, responseType) {
       ];
       break;
   }
-  return ConvTable[ShindoTmp];
+  return ConvTable[IntIndex];
 }
 
 self.addEventListener("message", (event) => {
