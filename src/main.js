@@ -1468,7 +1468,7 @@ function Req_JMA_gaikyo() {
 }
 
 function Req_JMA_wepa() {
-  fetch(`https://www.jma.go.jp/bosai/pacifictsunami/data/list.json?_=${Number(new Date())}`)//🔴🔴🔴🔴🔴🔴
+  fetch(`https://www.jma.go.jp/bosai/pacifictsunami/data/list.json?_=${Number(new Date())}`)
     .then((r) => {
       if (!r.ok) throw new Error(`HTTP Error: ${r.status}`);
       return r.json();

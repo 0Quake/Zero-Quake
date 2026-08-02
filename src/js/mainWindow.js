@@ -1621,10 +1621,7 @@ function init() {
 
       map.on("click", eq_name, hinanjoPopup);
       map.on("click", ts_name, hinanjoPopup);
-      hinanjoLayers.push(
-        eq_name,
-        ts_name
-      );
+      hinanjoLayers.push(eq_name, ts_name);
     }
   });
 
@@ -3065,7 +3062,6 @@ var usgs_lastUpdate = 0;
 
 
 function hinanjoPopup(e) {
-  if (e.originalEvent.cancelBubble) return;
   e.originalEvent.cancelBubble = true;
 
   var DataTmp = e.features[0].properties;
