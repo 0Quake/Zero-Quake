@@ -15,7 +15,7 @@ function replay(ReplayDate) {
       Replay = 0;
     }
     EQDetect_List = [];
-    EEW_nowList = [];
+    EEW_Active = [];
     if (worker) worker.postMessage({ action: "Replay", data: Replay });
     messageToMainWindow({ action: "Replay", data: Replay });
     if (SettingWindow) {
@@ -190,12 +190,11 @@ store.set("config", config);
 
 var psBlock;
 var kmoniTimeTmp = {};
-var EEW_Data = []; //地震速報リスト
-var EEW_nowList = []; //現在発報中リスト
+var EEW_Storage = []; //地震速報リスト
+var EEW_Active = []; //現在発報中リスト
 var EarlyEst_Data = []; //Earlyest地震速報リスト
 
 var KmoniOffset = 2500;
-var EEWNow = false;
 
 var EQDetect_List = [];
 
@@ -482,6 +481,7 @@ var errorMsgBox = false;
 process.on("uncaughtException", function (err) {
   try {
     if (!errorMsgBox && app.isReady()) {
+      GeneralError_handler(causeTree(err))
       if (String(err.stack).startsWith("Error: net::ERR_")) return false;
       errorMsgBox = true;
       options.detail = `よろしければ、以下のエラーメッセージのスクリーンショット等を開発者へご報告ください。\n=================\nZeroQuake v${package_ver ? package_ver : "?.?.?"}\n\n${causeTree(err)}\n=================\n\n動作を選択してください。`;
@@ -501,7 +501,7 @@ process.on("uncaughtException", function (err) {
       SystemNotification("予期しないエラーが発生しました。");
     }
   } catch {
-    return;
+    return;//ここでエラーだすとループするので何が何でもreturnだけ
   }
 });
 
@@ -670,7 +670,7 @@ ipcMain.on("message", (_event, response) => {
       }
       break;
     case "EEWSimulation":
-      MargeEEW(response.data);
+      EEW_Marge(response.data);
       break;
     case "checkForUpdate":
       checkUpdate(true);
@@ -808,10 +808,6 @@ function CreateMainWindow() {
       if (store.get("Maximized", null)) MainWindow.maximize()
       else MainWindow.unmaximize()
 
-      if (Replay !== 0) {
-        messageToMainWindow({ action: "Replay", data: Replay });
-      }
-
       MainWindow.webContents.on("did-finish-load", () => {
         MainWindow.webContents.setZoomFactor(config.system.zoom);
 
@@ -834,8 +830,8 @@ function CreateMainWindow() {
 
         messageToMainWindow({ action: "setting", data: config });
 
-        if (EEWNow) {
-          messageToMainWindow({ action: "EEW_AlertUpdate", data: EEW_nowList });
+        if (EEW_Active.length > 0) {
+          messageToMainWindow({ action: "EEW_AlertUpdate", data: EEW_Active });
         }
 
         if (eqInfo.jma.length > 0) {
@@ -1325,8 +1321,8 @@ function EQInfo_createWindow(response, IS_WebURL) {
     });
 
     if (!IS_WebURL) {
-      var EEWDataItem = EEW_Data.find(function (elm) {
-        return elm.EQ_id == response.eid;
+      var EEWDataItem = EEW_Storage.find(function (elm) {
+        return elm.EventID == response.eid;
       });
       var metadata = {
         action: "metaData",
@@ -1363,10 +1359,10 @@ function EQInfo_createWindow(response, IS_WebURL) {
   }
 }
 
-var TimeTable_JMA2001 = JSON.parse(
+var TTT_JMA2001 = JSON.parse(
   await readFile(path.join(__dirname, "./Resource/TimeTable_JMA2001.json"))
 );
-var TimeTable_AK135 = JSON.parse(
+var TTT_AK135 = JSON.parse(
   await readFile(path.join(__dirname, "./Resource/ak135table.json"))
 );
 
@@ -1565,13 +1561,13 @@ function Req_TremRts() {
 
 function sort_by_dist_TIDE(data) {
   return data.sort((a, b) => {
-    var a_dist = geosailing(a.lat, a.lon, config.home.latitude, config.home.longitude)
-    var b_dist = geosailing(b.lat, b.lon, config.home.latitude, config.home.longitude)
+    var a_dist = turf.distance([a.lon, a.lat], [config.home.longitude, config.home.latitude]);
+    var b_dist = turf.distance([b.lon, b.lat], [config.home.longitude, config.home.latitude]);
     return a_dist - b_dist
   })
 }
 
-var JMATide_sta = [];
+var JMATide_sta;
 function Req_JMATide_sta() {
   fetch(`https://www.jma.go.jp/bosai/tidelevel/const/tide_area.json?_=${Number(new Date())}`)
     .then((r) => {
@@ -1695,7 +1691,7 @@ function Req_EarlyEst() {
           if (!elm) return;
           var latitude = elm.querySelector("origin latitude value") ? Number(elm.querySelector("origin latitude value").textContent) : null;
           var longitude = elm.querySelector("origin longitude value") ? Number(elm.querySelector("origin longitude value").textContent) : null;
-          if (!latitude || !longitude) return;
+          if (!Boolean2(latitude) || !Boolean2(longitude)) return;
 
           var FECode = FERegion.features.find(function (elm2) {
             return turf.booleanPointInPolygon([longitude, latitude], elm2);
@@ -1715,7 +1711,7 @@ function Req_EarlyEst() {
             origin_time: elm.querySelector("origin time value") ? ConvertJST(new Date(elm.querySelector("origin time value").textContent)) : null,
             source: "EarlyEst",
           };
-          MargeEarlyEst(data);
+          EarlyEst_Marge(data);
         }
       );
     }).catch((err) => {
@@ -1901,7 +1897,7 @@ function Req_SNet() {
               UpdateStatus("msilImg", "Error");
             });
         }
-        var unique_id = String(Number(new Date())) + String(Math.floor(Math.random * 100));
+        var unique_id = String(Number(new Date())) + String(Math.floor(Math.random() * 100));
         Req_SNet_core(11, unique_id);
         Req_SNet_core(12, unique_id);
         Msil_LastRecv = basetime;
@@ -1976,7 +1972,7 @@ function P2P() {
 }
 var P2PReconnectTimeout = 500;
 function TryConnect_P2P() {
-  P2PReconnectTimeout *= 2;
+  P2PReconnectTimeout = Math.min(30000, P2PReconnectTimeout * 2);
   setTimeout(Connect_P2P, P2PReconnectTimeout);
 }
 function Connect_P2P() {
@@ -2071,6 +2067,7 @@ function Connect_AXIS() {
 //ProjectBS WebSocket接続・受信処理
 var ProjectBS_Client;
 var ProjectBS_Connection;
+var ProjectBS_Ping_Timer;
 function ProjectBS() {
   if (!config.Source.ProjectBS.GetData) return;
   ProjectBS_Client = new WebSocketClient();
@@ -2102,7 +2099,11 @@ function ProjectBS() {
     connection.sendUTF("queryjson");
 
     UpdateStatus("ProjectBS", "success");
-    setInterval(function () {
+    if (ProjectBS_Ping_Timer) {
+      clearInterval(ProjectBS_Ping_Timer);
+      ProjectBS_Ping_Timer = null;
+    }
+    ProjectBS_Ping_Timer = setInterval(function () {
       connection.sendUTF("ping");
     }, 1200000);
   });
@@ -2132,21 +2133,21 @@ function WolfxWS() {
     TryConnect_WolfxWS();
   });
 
-  WolfxWS_Client.on("connect", function (WolfxConnection) {
-    WolfxConnection.on("error", function () {
+  WolfxWS_Client.on("connect", function (connection) {
+    connection.on("error", function () {
       UpdateStatus("wolfx", "Error");
     });
-    WolfxConnection.on("close", function () {
+    connection.on("close", function () {
       UpdateStatus("wolfx", "Disconnect");
       TryConnect_WolfxWS();
     });
-    WolfxConnection.on("message", function (message) {
+    connection.on("message", function (message) {
       if (Replay !== 0) return;
       UpdateStatus("wolfx", "success");
       try {
         var json = ParseJSON(message.utf8Data);
         if (json.type == "heartbeat") {
-          WolfxConnection.sendUTF("ping");
+          connection.sendUTF("ping");
         } else if (json.type == "jma_eew") {
           DetectEEW(2, json);
         } else if (json.type == "jma_eqlist") {
@@ -2160,10 +2161,10 @@ function WolfxWS() {
         Wolfx_Timer = null;
       }
       Wolfx_Timer = setInterval(function () {
-        WolfxConnection.sendUTF("ping");
+        connection.sendUTF("ping");
       }, 60000);
     });
-    WolfxConnection.sendUTF("query_jmaeew");
+    connection.sendUTF("query_jmaeew");
     UpdateStatus("wolfx", "success");
   });
 
@@ -2210,8 +2211,8 @@ function SeisjsWS() {
         UpdateStatus("wolfx", "Error");
       }
       if (SeisjsWS_timer) {
-        SeisjsWS_timer = null;
         clearInterval(SeisjsWS_timer);
+        SeisjsWS_timer = null;
       }
       SeisjsWS_timer = setInterval(function () {
         SeisjsConnection.sendUTF("ping");
@@ -2285,7 +2286,7 @@ function IntervalRun(msec, func) {
 function RegularExecution(loop) {
   try {
     //EEW解除
-    EEW_nowList.forEach(function (elm) {
+    EEW_Active.forEach(function (elm) {
       if (new Date() - Replay - new Date(elm.origin_time) > 300000)
         EEW_Clear(elm.EventID);
     });
@@ -2431,7 +2432,7 @@ function DetectEEW(type, json) {
         warnZones: EBIData,
         source: "ProjectBS",
       };
-      MargeEEW(EEWdata);
+      EEW_Marge(EEWdata);
     } catch {
       UpdateStatus("ProjectBS", "Error");
     }
@@ -2493,7 +2494,7 @@ function DetectEEW(type, json) {
         source: "wolfx",
       };
 
-      MargeEEW(EEWdata);
+      EEW_Marge(EEWdata);
     } catch {
       UpdateStatus("wolfx", "Error");
     }
@@ -2535,21 +2536,15 @@ function DetectEEW(type, json) {
         warnZones: EBIData,
         source: "axis",
       };
-      MargeEEW(EEWdata);
+      EEW_Marge(EEWdata);
     } catch {
       UpdateStatus("axis", "Error");
     }
   } else if (type == 4) {
     //P2P
     try {
-      var maxIntTmp = Math.floor(
-        Math.max.apply(
-          null,
-          json.areas.map(function (p) {
-            return p.scaleTo;
-          })
-        )
-      );
+      var scaleTo_arr = json.areas.map((p) => p.scaleTo);
+      var maxIntTmp = Math.floor(Math.max(...scaleTo_arr));
 
       var latitudeTmp;
       var longitudeTmp;
@@ -2600,7 +2595,7 @@ function DetectEEW(type, json) {
         source: "P2P_EEW",
       };
 
-      MargeEEW(EEWdata);
+      EEW_Marge(EEWdata);
     } catch {
       UpdateStatus("P2P_EEW", "Error");
     }
@@ -2612,208 +2607,202 @@ var JMA_Int_Points = JSON.parse(
 );
 
 //EEW情報マージ
-function MargeEEW(data) {
+function EEW_Marge(data) {
   if (!data) return; //データがない場合、処理終了
   try {
     if (!config.Info.EEW.showtraining && data.is_training) return; //訓練法を受信するかどうか（設定に準拠）
     if (!config.Info.EEW.kodoriyou && data.alertflg == "予報") return; //高度利用者向けを受信するかどうか（設定に準拠）
-    if (!data.origin_time || !data.EventID || !data.serial || !data.latitude || !data.longitude) return;
-
-    //現在地との距離
-    if (data.latitude && data.longitude) data.distance = geosailing(data.latitude, data.longitude, config.home.latitude, config.home.longitude);
-
-    var EQJSON = EEW_Data.find(function (elm) {
-      return elm.EQ_id == data.EventID;
-    });
-
-    var showing = Boolean(EEW_nowList.find(function (elm) {
-      return elm.EventID == data.EventID;
-    }));
+    if (!data.origin_time || !data.EventID || !data.serial || !data.latitude || !data.longitude) return;//不正データをはねる
 
     //５分以上前の地震／未来の地震（リプレイ時）を除外 ただし既に表示中の地震の更新報は通す
     var pastTime = new Date() - Replay - data.origin_time;
+    var showing = Boolean(EEW_Active.find((elm) => elm.EventID == data.EventID));
     if (!showing && (pastTime > 300000 || pastTime < 0)) return;
 
-    data.TimeTable = {
-      p: TimeTable_JMA2001.p[getClosestNum(data.depth, Object.keys(TimeTable_JMA2001.p))],
-      s: TimeTable_JMA2001.s[getClosestNum(data.depth, Object.keys(TimeTable_JMA2001.s))]
-    }
-    data.TimeTable2 = {
-      p: TimeTable_AK135.p[getClosestNum(data.depth, Object.keys(TimeTable_AK135.p))],
-      s: TimeTable_AK135.s[getClosestNum(data.depth, Object.keys(TimeTable_AK135.s))]
-    }
     if (data.source == "simulation") {
-      var EEWdataTmp = EEW_nowList.find(function (elm) {
-        return elm.source !== "simulation";
-      });
-      if (EEWdataTmp) return;
+      var EEWActive = EEW_Active.find((e) => e.source !== "simulation");
+      if (EEWActive) return;//通常報発報中ならシミュレーション開始拒否
     } else {
-      EEW_nowList.forEach(function (elm) {
+      //通常報受信時にシミュレーションをクリアー
+      EEW_Active.forEach(function (elm) {
         if (elm.source == "simulation") EEW_Clear(elm.EventID);
       });
     }
-    //以下はシミュレーション機能においてのみ有効。実地震で行うと予報業務となり気象業務法違反のおそれあり。
-    if (data.source == "simulation" && !data.isPlum) {
-      var estIntTmp = {};
-      if (!data.is_cancel) {
-        if (!data.userIntensity && data.depth <= 150) {
-          data.userIntensity = calcInt(
-            data.magnitude,
-            data.depth,
-            data.latitude,
-            data.longitude,
-            config.home.latitude,
-            config.home.longitude,
-            config.home.arv,
-            config.Info.EEW.IntType == "max"
-          );
+
+    //現在地との距離
+
+    data.distance = turf.distance([data.longitude, data.latitude], [config.home.longitude, config.home.latitude])
+    data.TimeTable = {
+      p: TTT_JMA2001.p[getClosestNum(data.depth, Object.keys(TTT_JMA2001.p))],
+      s: TTT_JMA2001.s[getClosestNum(data.depth, Object.keys(TTT_JMA2001.s))]
+    }
+    data.TimeTable2 = {
+      p: TTT_AK135.p[getClosestNum(data.depth, Object.keys(TTT_AK135.p))],
+      s: TTT_AK135.s[getClosestNum(data.depth, Object.keys(TTT_AK135.s))]
+    }
+
+
+    //シミュレーション機能における仮想地震限定の地震動予測
+    if (data.source == "simulation" && !data.isPlum && !data.is_cancel) {
+      //このif内はシミュレーション機能においてのみ有効。実地震で行うと気象業務法違反のおそれあり。
+      //登録地点の震度予測
+      if (!data.userIntensity && data.depth <= 150) {
+        data.userIntensity = calcInt(
+          data.magnitude,
+          data.depth,
+          data.latitude,
+          data.longitude,
+          config.home.latitude,
+          config.home.longitude,
+          config.home.arv,
+          config.Info.EEW.IntType == "max"
+        );
+      }
+
+      //到達時刻の予測
+      function calc_arTime(distance, TimeTable) {
+        for (let index = 0; index < TimeTable.s.length; index++) {
+          var elm = TimeTable.s[index];
+          if ((elm.r) > distance) {
+            if (index > 1) {
+              var elm2 = TimeTable.s[index - 1];
+              var SSec = elm.t + (elm2.t - elm.t) * (distance - elm.r) / (elm2.r - elm.r);
+            } else SSec = null;
+            break;
+          }
         }
+        return (SSec || SSec == 0) ? SSec : null;
+      }
 
+      if (!data.arrivalTime) {//JMA2001走時表での到達時刻予想
+        var res = calc_arTime(data.distance, data.TimeTable)
+        if (res) data.arrivalTime = new Date(Number(data.origin_time) + res * 1000)
+      }
 
-        function calc_arTime(distance, TimeTable) {
-          for (let index = 0; index < TimeTable.s.length; index++) {
-            var elm = TimeTable.s[index];
-            if ((elm.r * 111) > distance) {
-              if (index > 0) {
-                var elm2 = TimeTable.s[index - 1];
-                var SSec = elm2.s + ((elm.t - elm2.t) * (distance - (elm2.r * 111))) / (elm2.t - (elm2.r * 111));
-              } else SSec = null;
-              break;
+      if (!data.arrivalTime) {//AK135走時表での到達時刻予想
+        var res = calc_arTime(data.distance, data.TimeTable2)
+        if (res) data.arrivalTime = new Date(Number(data.origin_time) + res * 1000)
+      }
+
+      //全国の震度予測      
+      var estIntTmp = {};
+      if (data.depth <= 150) {
+        var maxShindo = 0;
+        var sects = Object.keys(EQIAreaLoc);
+        JMA_Int_Points.forEach(function (elm) {
+          if (elm.a && elm.s) {
+            var sect = sects[elm.s];
+            if (!sect) return;
+
+            var estInt = calcInt(
+              data.magnitude,
+              data.depth,
+              data.latitude,
+              data.longitude,
+              elm.y,
+              elm.x,
+              elm.a,
+              config.Info.EEW.IntType == "max"
+            );
+            if (maxShindo < estInt) {
+              maxShindo = estInt;
+            }
+            if (!estIntTmp[sect] || estInt > estIntTmp[sect]) {
+              estIntTmp[sect] = estInt;
             }
           }
-          return (SSec || SSec == 0) ? SSec : null;
+        });
+
+        //最大震度の設定（必要なら）
+        if (NormalizeShindo(data.maxInt, 4) === null) {
+          data.maxInt = NormalizeShindo(maxShindo);
         }
 
-        if (!data.arrivalTime) {//JMA2001走時表での到達時刻予想
-          var res = calc_arTime(data.distance, data.TimeTable)
-          if (res) data.arrivalTime = new Date(Number(data.origin_time) + res * 1000)
-        }
 
-        if (!data.arrivalTime) {//AK135走時表での到達時刻予想
-          var res = calc_arTime(data.distance, data.TimeTable2)
-          if (res) data.arrivalTime = new Date(Number(data.origin_time) + res * 1000)
-        }
-        if (data.depth <= 150) {
-          var maxShindo = 0;
-          var sects = Object.keys(EQIAreaLoc);
-          JMA_Int_Points.forEach(function (elm) {
-            if (elm.a && elm.s) {
-              var sect = sects[elm.s];
-              if (!sect) return;
-              //(magJMA, depth, epiLat, epiLng, pointLat, pointLng, arv, max)
-
-              var estInt = calcInt(
-                data.magnitude,
-                data.depth,
-                data.latitude,
-                data.longitude,
-                elm.y,
-                elm.x,
-                elm.a,
-                config.Info.EEW.IntType == "max"
-              );
-              if (maxShindo < estInt) maxShindo = estInt;
-              if (!estIntTmp[sect] || estInt > estIntTmp[sect])
-                estIntTmp[sect] = estInt;
-            }
-          });
-
-          if (NormalizeShindo(data.maxInt, 4) === null)
-            data.maxInt = NormalizeShindo(maxShindo);
-          Object.keys(estIntTmp).forEach(function (elm) {
-            var shindo = NormalizeShindo(estIntTmp[elm]);
-            var sectData;
-            if (data.warnZones) {
-              var sectData = data.warnZones.find(function (elm2) {
-                return elm2.Name == elm;
-              });
-            } else data.warnZones = [];
-            if (!sectData) {
-              data.warnZones.push({
-                Name: elm,
-                IntTo: shindo, //通常レンダラープロセスの方で下限・上限選択するが、シミュレーションではこの時点で選択済みのため同値を代入
-                IntFrom: shindo,
-                Alert: data.source == "simulation" ? NormalizeShindo(shindo, 5) >= 5 : null,
-              });
-            }
-          });
-        }
+        Object.keys(estIntTmp).forEach(function (key) {
+          var shindo = NormalizeShindo(estIntTmp[key]);
+          var SameZone;
+          if (data.warnZones) {
+            var SameZone = data.warnZones.find((elm) => elm.Name == key);
+          } else {
+            data.warnZones = [];
+          }
+          if (!SameZone) {
+            data.warnZones.push({
+              Name: key,
+              IntTo: shindo, //レンダラープロセス側で下限・上限を選択するが、シミュレーションでは計算時点で設定を反映済みのため同値を代入
+              IntFrom: shindo,
+              Alert: NormalizeShindo(shindo, 5) >= 5,
+            });
+          }
+        });
       }
     }
 
-    if (data.warnZones && data.warnZones.length) {
+    //現在地の予想震度・到達予想時刻を設定
+    if (Array.isArray(data.warnZones)) {
       //設定された細分区域のデータ参照
-      var userSect = data.warnZones.find(function (elm2) {
+      var SameZone = data.warnZones.find(function (elm2) {
         return elm2.Name == config.home.Section;
       });
 
-      //現在地の予想震度・到達予想時刻
-      if (userSect) {
-        if (!data.userIntensity) data.userIntensity = config.Info.EEW.IntType == "max" ? userSect.IntTo : userSect.IntFrom;
-        if (userSect.ArrivalTime) data.arrivalTime = userSect.ArrivalTime;
+      if (SameZone) {
+        var EstInt = (config.Info.EEW.IntType == "max") ? SameZone.IntTo : SameZone.IntFrom;
+        if (!data.userIntensity) data.userIntensity = EstInt;
+        if (SameZone.ArrivalTime) data.arrivalTime = SameZone.ArrivalTime;
       }
     }
 
-    if (EQJSON) {
-      //同一地震のデータが既に存在する場合
-      var EEWJSON = EQJSON.data.find(function (elm2) {
-        return elm2.serial == data.serial;
-      });
-      if (EEWJSON) {
-        //同じ報数の情報が既に存在する（マージ処理へ）
-        // prettier-ignore
-        var oneBefore = data.serial == Math.max.apply(null, EQJSON.data.map(function (o) { return o.serial; }));
-        if (oneBefore) {
-          //最新報である場合
+    var SameEEW = EEW_Storage.find((elm) => elm.EventID == data.EventID);
+    if (SameEEW) {//同一地震のデータが既に存在する場合
+
+      var SameReport = SameEEW.data.find((elm) => elm.serial == data.serial);
+      if (SameReport) {//同じ報数の情報が既に存在する（マージ処理へ）
+
+        var MaxSerial = Math.max(...SameEEW.data.map((o) => o.serial));
+        if (data.serial == MaxSerial) {//最新報である場合
+
           var changed = false;
           //マージ元のデータ
-          var oneBeforeData = EQJSON.data.find(function (elm) {
-            return elm.serial == data.serial;
-          });
+          var CurrentData = SameEEW.data.find((elm) => elm.serial == data.serial);
 
           //キーごとにマージ
-          Object.keys(oneBeforeData).forEach(function (elm) {
-            if (data[elm] && (!oneBeforeData[elm] || oneBeforeData[elm].length == 0)) {
-              oneBeforeData[elm] = data[elm];
+          Object.keys(CurrentData).forEach(function (key) {
+            if (key == "warnZones") return;//warnZonesは後で別処理
+            if (data[key] && (!Array.isArray(data[key]) || data[key].length > 0)) {
+              CurrentData[key] = data[key];
               changed = true;
             }
           });
 
-          if (Array.isArray(data.warnZones)) {
-            data.warnZones.forEach(function (elm) {
-              if (!Array.isArray(oneBeforeData.warnZones)) return;
-
+          //warnZonesをマージ
+          if (Array.isArray(data.warnZones) && Array.isArray(CurrentData.warnZones)) {
+            data.warnZones.forEach(function (zone) {
               //一致する細分区域のデータを検索
-              var SectData = oneBeforeData.warnZones.find(function (elm2) {
-                return elm.Name == elm2.Name;
-              });
-              if (SectData) {
-                Object.keys(elm).forEach((key) => {
-                  if (elm[key]) {
-                    SectData[key] = elm[key];
+              var SameZone = CurrentData.warnZones.find((el) => el.Name == zone.Name);
+              if (SameZone) {
+                Object.keys(zone).forEach((key) => {
+                  if (zone[key]) {
+                    SameZone[key] = zone[key];
                     changed = true;
                   }
                 });
               } else {
-                oneBeforeData.warnZones.push({ ...elm });
+                CurrentData.warnZones.push({ ...zone });
                 changed = true;
               }
             });
           }
           //データに変化があれば、警報処理へ
-          if (changed) EEW_Alert(oneBeforeData, true);
+          if (changed) EEW_Alert(CurrentData, true);
         }
       } else {
         //同じ報数の情報がない場合（データ登録）
-        var newest = data.serial >
-          Math.max.apply(null, EQJSON.data.map(function (o) { return o.serial; }));
-        if (newest) {
+        var MaxSerial = Math.max(...SameEEW.data.map((o) => o.serial));
+        if (data.serial > MaxSerial) {
           //最新の報である
-          var EQJSON = EEW_Data.find(function (elm) {
-            return elm.EQ_id == data.EventID;
-          });
-          EQJSON.data.push(data); //データ追加
-          if (data.is_cancel) EQJSON.cancelled = true;
+          SameEEW.data.push(data);//データ追加
+          if (data.is_cancel) SameEEW.cancelled = true;
           EEW_Alert(data); //警報処理
         }
       }
@@ -2821,8 +2810,8 @@ function MargeEEW(data) {
       //第１報
 
       //データ追加
-      EEW_Data.push({
-        EQ_id: data.EventID,
+      EEW_Storage.push({
+        EventID: data.EventID,
         cancelled: false,
         simulation: data.source == "simulation",
         data: [data],
@@ -2838,7 +2827,7 @@ function MargeEEW(data) {
 function calcInt(magJMA, depth, epiLat, epiLng, pointLat, pointLng, arv, max) {
   const magW = magJMA - 0.171;
   const long = 10 ** (0.5 * magW - 1.85) / 2;
-  const epicenterDistance = geosailing(epiLat, epiLng, pointLat, pointLng);
+  const epicenterDistance = turf.distance([epiLng, epiLat], [pointLng, pointLat])
   const hypocenterDistance = (depth ** 2 + epicenterDistance ** 2) ** 0.5 - (max ? long : 0); //上限なら断層長を引かない
   const x = Math.max(hypocenterDistance, 3);
   const gpv600 = 10 ** (0.58 * magW + 0.0038 * depth - 1.29 - Math.log10(x + 0.0028 * 10 ** (0.5 * magW)) - 0.002 * x);
@@ -2850,44 +2839,38 @@ function calcInt(magJMA, depth, epiLat, epiLng, pointLat, pointLng, arv, max) {
 }
 
 //EarlyEst地震情報マージ
-function MargeEarlyEst(data) {
+function EarlyEst_Marge(data) {
   try {
     if (!data) return;
-    if (!data.origin_time) return;
+    if (!data.origin_time || !data.latitude || !data.longitude) return;
 
     var pastTime = new Date() - Replay - data.origin_time;
     if (pastTime > 300000 || pastTime < 0) return;
 
-    if (data.latitude && data.longitude)
-      data.distance = geosailing(data.latitude, data.longitude, config.home.latitude, config.home.longitude);
+    data.distance = turf.distance([data.longitude, data.latitude], [config.home.longitude, config.home.latitude]);
 
     data.TimeTable = {
-      p: TimeTable_JMA2001.p[getClosestNum(data.depth, Object.keys(TimeTable_JMA2001.p))],
-      s: TimeTable_JMA2001.s[getClosestNum(data.depth, Object.keys(TimeTable_JMA2001.s))]
+      p: TTT_JMA2001.p[getClosestNum(data.depth, Object.keys(TTT_JMA2001.p))],
+      s: TTT_JMA2001.s[getClosestNum(data.depth, Object.keys(TTT_JMA2001.s))]
     }
     data.TimeTable2 = {
-      p: TimeTable_AK135.p[getClosestNum(data.depth, Object.keys(TimeTable_AK135.p))],
-      s: TimeTable_AK135.s[getClosestNum(data.depth, Object.keys(TimeTable_AK135.s))]
+      p: TTT_AK135.p[getClosestNum(data.depth, Object.keys(TTT_AK135.p))],
+      s: TTT_AK135.s[getClosestNum(data.depth, Object.keys(TTT_AK135.s))]
     }
 
-    var EQJSON = EarlyEst_Data.find(function (elm) {
-      return elm.EQ_id == data.EventID;
-    });
-    if (EQJSON) {
+    var SameEEW = EarlyEst_Data.find((elm) => elm.EventID == data.EventID);
+    if (SameEEW) {
       //ID・報の両方一致した情報が存在するか
-      var EEWJSON = EQJSON.data.find(function (elm2) {
-        return elm2.serial == data.serial;
-      });
-      if (!EEWJSON) {
+      var SameReport = SameEEW.data.find((elm) => elm.serial == data.serial);
+      if (!SameReport) {
         //最新の報かどうか
-        var newest = data.serial > Math.max.apply(null, EQJSON.data.map((o) => o.serial));
-
-        if (newest) {
+        var MaxSerial = Math.max(...SameEEW.data.map((o) => o.serial));
+        if (data.serial > MaxSerial) {
           //第２報以降
           EarlyEst_Alert(data, false);
-          EQJSON.data.push(data);
+          SameEEW.data.push(data);
           if (data.is_cancel) {
-            EQJSON.cancelled = true;
+            SameEEW.cancelled = true;
           }
         }
       }
@@ -2895,7 +2878,7 @@ function MargeEarlyEst(data) {
       //第１報
       EarlyEst_Alert(data, true);
       EarlyEst_Data.push({
-        EQ_id: data.EventID,
+        EventID: data.EventID,
         cancelled: false,
         data: [data],
       });
@@ -2908,18 +2891,17 @@ function MargeEarlyEst(data) {
 //EEW解除処理
 function EEW_Clear(EventID) {
   try {
-    EEW_nowList = EEW_nowList.filter(function (elm) {
-      return elm.EventID !== EventID;
-    });
-    messageToMainWindow({ action: "EEW_AlertUpdate", data: EEW_nowList });
+    //EEWデータ削除
+    EEW_Active = EEW_Active.filter((elm) => elm.EventID !== EventID);
 
-    if (EEW_nowList.length == 0) {
-      EEWNow = false;
+    messageToMainWindow({ action: "EEW_AlertUpdate", data: EEW_Active });
+
+    if (EEW_Active.length == 0) {
       //パワーセーブ再開
       if (psBlock && powerSaveBlocker.isStarted(psBlock)) {
         powerSaveBlocker.stop(psBlock);
       }
-      worker.postMessage({ action: "EEWNow", data: EEWNow });
+      worker.postMessage({ action: "EEWNow", data: true });
     }
   } catch (err) {
     throw new Error("緊急地震速報の解除処理でエラーが発生しました。", { cause: err });
@@ -2929,41 +2911,48 @@ function EEW_Clear(EventID) {
 //EEW通知（音声・画面表示等）
 function EEW_Alert(data, update) {
   try {
-    EEWNow = true;
-    worker.postMessage({ action: "EEWNow", data: EEWNow });
+    worker.postMessage({ action: "EEWNow", data: true });
 
     //通知条件の判定
     var show_alert = false;
     if (NormalizeShindo(data.maxInt) == "?") {
-      if (config.Info.EEW.IntQuestion) show_alert = true; //予想震度不明を無視するか（設定に準拠）
-    } else if (NormalizeShindo(config.Info.EEW.IntThreshold, 5) <= NormalizeShindo(data.maxInt, 5))
+      if (config.Info.EEW.IntQuestion) {//予想震度不明を無視するか（設定に準拠）
+        show_alert = true;
+      }
+    } else if (NormalizeShindo(config.Info.EEW.IntThreshold, 5) <= NormalizeShindo(data.maxInt, 5)) {
       show_alert = true//予想最大震度通知条件（設定に準拠）
+    }
 
     if (NormalizeShindo(data.userIntensity) == "?") {
-      if (config.Info.EEW.userIntQuestion) show_alert = true; //予想震度不明を無視するか（設定に準拠）
-    } else if (NormalizeShindo(config.Info.EEW.userIntThreshold, 5) <= NormalizeShindo(data.userIntensity, 5))
+      if (config.Info.EEW.userIntQuestion) {//予想震度不明を無視するか（設定に準拠）
+        show_alert = true;
+      }
+    } else if (NormalizeShindo(config.Info.EEW.userIntThreshold, 5) <= NormalizeShindo(data.userIntensity, 5)) {
       show_alert = true; //予想震度（細分区域）通知条件（設定に準拠）
+    }
 
-    var old = EEW_nowList.find(function (elm) {
-      return elm.EventID == data.EventID;
-    });
-    var first = !old || !old.shown
+    var SameEEW = EEW_Storage.find((elm) => elm.EventID == data.EventID);
+    var first = !SameEEW || !SameEEW.isNotified;
+    var PrevData;
+    if (SameEEW) {
+      SameEEW.isNotified = true;
+      PrevData = SameEEW.data
+        .filter((e) => e.serial < data.serial)//本データより古く
+        .sort((a, b) => b.serial - a.serial)[0]//降順[0]でserial最大
+    }
 
-
-    var old_i = old ? NormalizeShindo(old.maxInt, 5) : -9;
+    var old_i = PrevData ? NormalizeShindo(PrevData.maxInt, 5) : -9;
     var new_i = NormalizeShindo(data.maxInt, 5);
-    var int_increased = new_i > old_i || !new_i || !old_i
+    var int_increased = new_i > old_i || !Boolean2(new_i) || !Boolean2(old_i);
 
-    var notified = false;
-
-    if (!update && show_alert && !(!int_increased && config.Info.EEW.IntTerm1)) {
+    if (!update && show_alert && (int_increased || !config.Info.EEW.IntTerm1)) {
       //同一報の更新時でなく、条件に合致
-      notified = true
-      PlayAudio(data.alertflg == "警報" ? "EEW1" : "EEW2");
+      PlayAudio((data.alertflg == "警報") ? "EEW1" : "EEW2");
       speak(GenerateEEWText(data, !first));
 
       var notice_setting = first ? config.notice.window.EEW : config.notice.window.EEW_Update;
-      if (notice_setting == "push" && (!MainWindow || MainWindow.isMinimized() || !MainWindow.isFocused() || !MainWindow.isVisible())) {
+      var WindowInvisible = !MainWindow || MainWindow.isMinimized() || !MainWindow.isFocused() || !MainWindow.isVisible();
+      if (notice_setting == "push" && WindowInvisible) {
         var EEWNotification = new Notification({
           title: `${data.is_training ? "【訓練報】 " : ""}緊急地震速報 ${data.alertflg} #${data.serial}`,
           body: `${data.region_name}\n予想最大震度：${NormalizeShindo(data.maxInt, 1)} ／ M${data.magnitude ? data.magnitude : "不明"} ／ 深さ：${data.depth ? `${data.depth}km` : "不明"}${data.userIntensity ? `\n現在地の予想震度：${NormalizeShindo(data.userIntensity, 1)}` : ""}`,
@@ -2971,23 +2960,22 @@ function EEW_Alert(data, update) {
         });
         EEWNotification.show();
         EEWNotification.on("click", CreateMainWindow);
-      } else if (notice_setting == "openWindow") CreateMainWindow();
+      } else if (notice_setting == "openWindow") {
+        CreateMainWindow();
+      }
     }
 
     //【現在のEEW】から同一地震、古い報を取得・削除
-    EEW_nowList = EEW_nowList.filter(function (elm) {
+    EEW_Active = EEW_Active.filter(function (elm) {
       return elm.EventID !== data.EventID;
     });
 
-    //初回通知か否か
-    if ((old && old.shown) || notified) data.shown = true;
-
     //【現在のEEW】配列に追加
-    EEW_nowList.push(data);
+    EEW_Active.push(data);
 
     messageToMainWindow({
       action: "EEW_AlertUpdate",
-      data: EEW_nowList,
+      data: EEW_Active,
       update: update,
     });
 
@@ -3018,45 +3006,35 @@ function EEW_Alert(data, update) {
 }
 
 //EarlyEst通知（音声・画面表示等）
-function EarlyEst_Alert(data, first, update) {
+function EarlyEst_Alert(data, first) {
   try {
-    EEWNow = true;
-
     //【現在のEEW】から同一地震、古い報を削除
-    EEW_nowList = EEW_nowList.filter(function (elm) {
+    EEW_Active = EEW_Active.filter(function (elm) {
       return elm.EventID !== data.EventID;
     });
     //【現在のEEW】配列に追加
-    EEW_nowList.push(data);
+    EEW_Active.push(data);
 
-    if (!update) {
-      if (first) {
-        CreateMainWindow();
-        PlayAudio("EEW2");
-      }
-      messageToMainWindow({
-        action: "EEW_AlertUpdate",
-        data: EEW_nowList,
-        update: false,
+    if (first) {
+      CreateMainWindow();
+      PlayAudio("EEW2");
+    }
+    messageToMainWindow({
+      action: "EEW_AlertUpdate",
+      data: EEW_Active,
+    });
+    if (!MainWindow) {
+      var EEWNotification = new Notification({
+        title: `Early-Est 地震情報 #${data.serial}`,
+        body: `${data.region_name}\n M${data.magnitude}  深さ：${data.depth}km`,
+        icon: path.join(__dirname, "img/icon.ico"),
       });
-      if (!MainWindow) {
-        var EEWNotification = new Notification({
-          title: `Early-Est 地震情報 #${data.serial}`,
-          body: `${data.region_name}\n M${data.magnitude}  深さ：${data.depth}km`,
-          icon: path.join(__dirname, "img/icon.ico"),
-        });
-        EEWNotification.show();
-        EEWNotification.on("click", function () {
-          CreateMainWindow();
-        });
-      }
-    } else {
-      messageToMainWindow({
-        action: "EEW_AlertUpdate",
-        data: EEW_nowList,
-        update: true,
+      EEWNotification.show();
+      EEWNotification.on("click", function () {
+        CreateMainWindow();
       });
     }
+
 
     //スリープ回避開始
     if (config.system.powerSaveBlocking && (!psBlock || !powerSaveBlocker.isStarted(psBlock))) {
@@ -3089,7 +3067,8 @@ var UpdateEQInfo = throttle(function (loop) {
 
 //気象庁XMLリスト取得→Req_JMAXML
 function Req_JMAXMLList(count, longFeed) {
-  fetch(`https://www.data.jma.go.jp/developer/xml/feed/${longFeed ? "eqvol_l.xml" : "eqvol.xml"}`)
+  var url = `https://www.data.jma.go.jp/developer/xml/feed/${longFeed ? "eqvol_l.xml" : "eqvol.xml"}`
+  fetch(url)
     .then((r) => {
       if (!r.ok) throw new Error(`HTTP Error: ${r.status}`);
       return r.text();
@@ -3101,7 +3080,7 @@ function Req_JMAXMLList(count, longFeed) {
       Array.prototype.forEach.call(xml.getElementsByTagName("entry"), function (elm) {
         var url;
         var urlElm = elm.getElementsByTagName("id");
-        if (urlElm) url = urlElm[0].textContent;
+        if (urlElm && urlElm[0]) url = urlElm[0].textContent;
         if (!url) return;
         var title = elm.getElementsByTagName("title")[0].textContent;
         if (
@@ -3137,7 +3116,7 @@ function Req_JMAXMLList(count, longFeed) {
 
       if (nankai) Req_JMAXML(nankai.getElementsByTagName("link")[0].getAttribute("href"));
 
-      var nankai = Array.from(xml.getElementsByTagName("entry")).forEach(
+      Array.from(xml.getElementsByTagName("entry")).forEach(
         function (elm) {
           var ttl = elm.getElementsByTagName("title")[0];
 
@@ -3200,6 +3179,9 @@ function Req_Hokkaidosanriku_JSON(url) {
 }
 
 function Process_Hokkaidosanriku(data) {
+  var SameData = HokkaidoSanrikuInfoAll.find((el) => el.reportDate = data.reportDate);
+  if (SameData) return;
+
   HokkaidoSanrikuInfoAll.push(data);
   HokkaidoSanrikuInfoAll = HokkaidoSanrikuInfoAll
     .sort((a, b) => a.reportDate > b.reportDate ? -1 : 1);
@@ -3430,7 +3412,7 @@ function Req_JMAXML(url, count) {
           xml.getElementsByTagName("Earthquake"),
           function (elm, index) {
             var magTmp = elm.getElementsByTagName("jmx_eb:Magnitude")[0];
-            magTmp = magTmp !== "NaN" && magTmp ? magTmp.textContent : null;
+            magTmp = (magTmp && magTmp.textContent !== "NaN") ? magTmp.textContent : null;
             var ECTmp = elm.getElementsByTagName("Name")[0];
             ECTmp = ECTmp ? ECTmp.textContent : null;
 
@@ -3779,17 +3761,15 @@ function Req_JMAXML(url, count) {
         });
 
         if (KatsudoJokyoWindow && KatsudoJokyoInfoAll[0]) {
-          if (data) {
-            KatsudoJokyoWindow.webContents.send("message2", {
-              action: "KatsudoJokyoInfo",
-              data: KatsudoJokyoInfoAll[0],
-            });
-          }
+          KatsudoJokyoWindow.webContents.send("message2", {
+            action: "KatsudoJokyoInfo",
+            data: KatsudoJokyoInfoAll[0],
+          });
         }
 
       }
       UpdateStatus("JMAXML", "success");
-      if (new Date(xml.getElementsByTagName("ReportDateTime")[0].textContent) < new Date() - Replay) {
+      if (new Date(xml.getElementsByTagName("ReportDateTime")[0].textContent) < (new Date() - Replay)) {
         //未来のデータ（リプレイ時）のため無視した場合、取得済みリストに入れない
         jmaXML_Fetched.push(url);
       }
@@ -4012,10 +3992,8 @@ function MargeEQInfo(dataList, count) {
 
         if (changed) {
           UpdateEQInfoTmp.push(EQElm);
-          var i = eqInfo.jma.findIndex(function (elm2) {
-            return elm2.eventId == EQElm.eventId;
-          });
-          eqInfo.jma[i] = EQElm;
+          var i = eqInfo.jma.findIndex((el) => el.eventId == EQElm.eventId);
+          if (-1 < i) eqInfo.jma[i] = EQElm;
         }
       } else {
         data.EEW = data.category == "EEW"
@@ -4057,11 +4035,17 @@ function EQCount_process(data) {
 
 //時間(ms)を「～分[秒,分,時間,日]」の形にする
 function timeDifference(miliseconds) {
-  if (isNaN(miliseconds)) return "";
-  if (miliseconds < 60000) return { num: Math.round(miliseconds / 1000), unit: "秒" };
-  else if (miliseconds < 31200000) return { num: Math.round(miliseconds / 60000), unit: "分" };
-  else if (miliseconds < 86400000) return { num: Math.round(miliseconds / 3600000), unit: "時間" };
-  else return { num: Math.round(miliseconds / 86400000), unit: "日" };
+  if (isNaN(miliseconds) || miliseconds < 0) return "";
+
+  var sec = Math.round(miliseconds / 1000);
+  var min = Math.round(miliseconds / 60000);
+  var hrs = Math.round(miliseconds / 3600000);
+  var day = Math.round(miliseconds / 86400000)
+
+  if (sec < 60) return { num: sec, unit: "秒" };
+  if (min < 60) return { num: min, unit: "分" };
+  if (hrs < 24) return { num: hrs, unit: "時間" };
+  return { num: day, unit: "日" };
 }
 
 //地震情報通知（音声・画面表示等）
@@ -4103,8 +4087,8 @@ function AlertEQInfo(data, source, update) {
       data.forEach(function (elm) {
         if (EQI_Window[elm.eventId]) {
           var metadata = EQI_Window[elm.eventId].metadata;
-          var EEWDataItem = EEW_Data.find(function (elm2) {
-            return elm2.EQ_id == elm.eventId;
+          var EEWDataItem = EEW_Storage.find(function (elm2) {
+            return elm2.EventID == elm.eventId;
           });
 
           metadata.urls = elm.urls;
@@ -4330,11 +4314,11 @@ function GenerateEEWText(EEWData, update) {
     if (EEWData.userIntensity) {
       userInt = EEWData.userIntensity;
     } else if (EEWData.warnZones && EEWData.warnZones.length) {
-      var userSect = EEWData.warnZones.find(function (elm2) {
+      var SameZone = EEWData.warnZones.find(function (elm2) {
         return elm2.Name == config.home.Section;
       });
 
-      if (userSect) userInt = config.Info.EEW.IntType == "max" ? userSect.IntTo : userSect.IntFrom;
+      if (SameZone) userInt = config.Info.EEW.IntType == "max" ? SameZone.IntTo : SameZone.IntFrom;
     }
 
     text = text.replaceAll("{local_Int}", userInt ? NormalizeShindo(userInt, 1) : "不明");
@@ -4680,14 +4664,6 @@ function NormalizeShindo(str, responseType) {
   }
 }
 
-//２地点の緯度経度から距離（km）を算出
-function geosailing(lat1, lon1, lat2, lon2) {
-  try {
-    var a = Math.pow(Math.sin((lon2 - lon1) * Math.PI / 360), 2) + Math.pow(Math.sin((lat2 - lat1) * Math.PI / 360), 2) * Math.cos(lon1 * Math.PI / 180) * Math.cos(lon2 * Math.PI / 180);
-    return 12746 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  } catch { return 0 }
-};
-
 //連想配列オブジェクトのマージ
 function mergeDeeply(target, source, opts) {
   try {
@@ -4720,7 +4696,9 @@ function ConvertJST(time) {
 }
 function ConvertUTC(time) {
   try {
-    return new Date(time.setHours(time.getHours() - 9));
+    var copy = new Date(time)
+    copy.setHours(copy.getHours() - 9)
+    return copy;
   } catch (err) {
     throw new Error("内部の情報処理でエラーが発生しました。(タイムゾーンの変換 - JST to UTC)", { cause: err });
   }

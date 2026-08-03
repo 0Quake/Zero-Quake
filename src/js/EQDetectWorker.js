@@ -3,6 +3,7 @@ import path from "path";
 import { readFile } from "fs/promises";
 import { fileURLToPath } from "url";
 var __dirname = path.dirname(fileURLToPath(import.meta.url));
+import * as turf from "@turf/turf";
 
 var EEWNow = false; //EEW発令中かどうか
 var EQDetectID = 0; //独自の地震ID
@@ -117,7 +118,7 @@ function EQDetect(data, date, detect) {
 
         //自観測点が地震アイテムの半径+閾値の範囲内に入っている地震アイテムを探す
         EQD_ItemTmp = EQDetect_List.find(function (elm2) {
-          return geosailing(elm.Location.Longitude, elm.Location.Latitude, elm2.lng, elm2.lat) - elm2.Radius <= MargeRangeTmp;
+          return turf.distance([elm.Location.Longitude, elm.Location.Latitude], [elm2.lng, elm2.lat]) - elm2.Radius <= MargeRangeTmp;
         });
 
         if (EQD_ItemTmp) {
@@ -130,7 +131,7 @@ function EQDetect(data, date, detect) {
             var nearpointslength = 0;
             var detectPointsLength = 0;
             data.forEach(function (station) {
-              if (station.data && station.Code !== elm.Code && geosailing(station.Location.Longitude, station.Location.Latitude, elm.Location.Longitude, elm.Location.Latitude) <= 100) {
+              if (station.data && station.Code !== elm.Code && turf.distance([station.Location.Longitude, station.Location.Latitude], [elm.Location.Longitude, elm.Location.Latitude]) <= 100) {
                 nearpointslength++;
                 if (station.detect) detectPointsLength++;
               }
@@ -151,7 +152,7 @@ function EQDetect(data, date, detect) {
 
       MargeRangeTmp = elm.isCity ? thresholds.MargeRangeC : thresholds.MargeRange;
       var nearEvent = EQDetect_List.find(function (EQD_ItemTmp) {
-        return geosailing(elm.Location.Longitude, elm.Location.Latitude, EQD_ItemTmp.lng, EQD_ItemTmp.lat) <= MargeRangeTmp;
+        return turf.distance([elm.Location.Longitude, elm.Location.Latitude], [EQD_ItemTmp.lng, EQD_ItemTmp.lat]) <= MargeRangeTmp;
       });
       if (!ptData.Event && elm.detect2 && !nearEvent) {
         //自観測点がどの地震アイテムにも属さず、検知レベルがLv.2以上の場合
@@ -165,7 +166,7 @@ function EQDetect(data, date, detect) {
   for (const EQD_ItemTmp of EQDetect_List) {
     MargeRangeTmp = EQD_ItemTmp.isCity ? thresholds.MargeRangeC : thresholds.MargeRange;
     var ArroundPoints = data.filter(function (station) {
-      return station.data && geosailing(station.Location.Longitude, station.Location.Latitude, EQD_ItemTmp.lng2, EQD_ItemTmp.lat2) <= MargeRangeTmp;
+      return station.data && turf.distance([station.Location.Longitude, station.Location.Latitude], [EQD_ItemTmp.lng2, EQD_ItemTmp.lat2]) <= MargeRangeTmp;
     });
     threshold01Tmp = EQD_ItemTmp.isCity ? thresholds.threshold01C : thresholds.threshold01;
     threshold01Tmp = Math.min(Math.max(ArroundPoints.length, 2), threshold01Tmp); //周囲の観測点数に応じて閾値を調整（離島対応）
@@ -253,15 +254,15 @@ function GuessHypocenter(EQElm, data) {
   return [result, originTime];
 }
 
-var TimeTable_JMA2001 = JSON.parse(await readFile(path.join(__dirname, "../Resource/TimeTable_JMA2001.json")));
+var TTT_JMA2001 = JSON.parse(await readFile(path.join(__dirname, "../Resource/TimeTable_JMA2001.json")));
 function calcDifference(lat, lng, stations, data, originTime, dep) {
-  var TimeTable = TimeTable_JMA2001.s[dep];
+  var TimeTable = TTT_JMA2001.s[dep];
   var f_arrivalTime_min = Infinity;
   var radius = 0;
 
   var distance = [];
   for (const station of stations.Codes) {
-    station.distance = geosailing(lng, lat, station.Location.Longitude, station.Location.Latitude);
+    station.distance = turf.distance([lng, lat], [station.Location.Longitude, station.Location.Latitude]);
     distance.push(station.distance);
 
     if (radius < station.distance) radius = station.distance;
@@ -288,7 +289,7 @@ function calcDifference(lat, lng, stations, data, originTime, dep) {
   });
 
   var ArroundPoints = data.filter(function (station) {
-    return station.data && geosailing(station.Location.Longitude, station.Location.Latitude, lng, lat) <= radius;
+    return station.data && turf.distance([station.Location.Longitude, station.Location.Latitude], [lng, lat]) <= radius;
   });
 
   Difference = Difference / stations.Codes.length;
@@ -298,11 +299,3 @@ function calcDifference(lat, lng, stations, data, originTime, dep) {
 
   return [Difference, radius];
 }
-
-//緯度・経度から2地点間の距離を算出
-function geosailing(a, b, c, d) {
-  try {
-    var n = Math.pow(Math.sin((d - b) * Math.PI / 360), 2) + Math.pow(Math.sin((c - a) * Math.PI / 360), 2) * Math.cos(b * Math.PI / 180) * Math.cos(d * Math.PI / 180);
-    return 12746 * Math.atan2(Math.sqrt(n), Math.sqrt(1 - n));
-  } catch { return 0 }
-};

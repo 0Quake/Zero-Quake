@@ -3162,11 +3162,11 @@ function GenerateEEWText(EEWData, form) {
     if (EEWData.userIntensity) {
       userInt = EEWData.userIntensity;
     } else if (EEWData.warnZones && EEWData.warnZones.length) {
-      var userSect = EEWData.warnZones.find(function (elm2) {
+      var UserZone = EEWData.warnZones.find(function (elm2) {
         return elm2.Name == config.home.Section;
       });
 
-      if (userSect) userInt = config.Info.EEW.IntType == "max" ? userSect.IntTo : userSect.IntFrom;
+      if (UserZone) userInt = config.Info.EEW.IntType == "max" ? UserZone.IntTo : UserZone.IntFrom;
     }
 
     text = text.replaceAll("{local_Int}", userInt ? NormalizeShindo(userInt, 1) : "不明");
