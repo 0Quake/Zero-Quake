@@ -1869,7 +1869,7 @@ function Req_SNet() {
     }).then((text) => {
       var json = JSON.parse(text.replace(/\s+/g, ''));
 
-      if (!json || !Array.isArray(json)) throw new Error("msil.go.jpが無効なJSONを返しました。");
+      if (!Array.isArray(json)) throw new Error("msil.go.jpが不正なフォーマットのJSONを返しました。");
       var basetime = 0;
       var NowUTC = Number(NormalizeDate(1, ConvertUTC(new Date(new Date() - Replay))));
       json.forEach(function (elm) {
@@ -2294,6 +2294,7 @@ function RegularExecution(loop) {
     Tsunami_Data.forEach(function (elm) {
       if (elm.ValidDateTime <= new Date() - Replay && !elm.revocation) {
         elm.revocation = true;
+        elm.issue.time = new Date() - Replay;
         ConvertTsunamiInfo(elm); //ダミーデータを送信、再度マージ処理
       }
     });
@@ -4134,97 +4135,104 @@ function ConvertTsunamiInfo(data) {
     if (!config.Info.TsunamiInfo.GetData) return;
     if (!config.Info.TsunamiInfo.showtraining && data.status == "訓練") return;
     if (!config.Info.TsunamiInfo.showTest && data.status == "試験") return;
-    if (new Date(data.issue.time) > (new Date() - Replay)) return;
+    if (!data.issue || !data.issue.time) return;//発報時刻欠損は破棄
+    if (new Date(data.issue.time) > (new Date() - Replay)) return;//リプレイなどによって未来のデータが来たら破棄
 
-    let tsunamiItem = Tsunami_Data.find(function (elm) {
+    //同一報（同EIDかつ同じ時刻）
+    let SameData = Tsunami_Data.find(function (elm) {
       return (Number(new Date(elm.issue.time)) == Number(new Date(data.issue.time)) &&
         (!elm.issue.EventID || !data.issue.EventID || IncludesDuplicates(elm.issue.EventID, data.issue.EventID)));
     });
 
-    if (tsunamiItem) {
-      if (!tsunamiItem.headline) tsunamiItem.headline = data.headline;
-      if (!tsunamiItem.comment) tsunamiItem.comment = data.comment;
-      if (!tsunamiItem.status) tsunamiItem.status = data.status;
-      if (!tsunamiItem.issue) tsunamiItem.issue = {};
-      if (data.issue.EventID) tsunamiItem.issue.EventID = data.issue.EventID;
-      if (data.issue.EarthQuake) tsunamiItem.issue.EarthQuake = data.issue.EarthQuake;
-      tsunamiItem.revocation = data.revocation;
-      if (data.cancelled) tsunamiItem.cancelled = data.cancelled;
-      if (data.ValidDateTime) tsunamiItem.ValidDateTime = data.ValidDateTime;
+    if (SameData) {//同一報が既存ならマージ
+
+      //各キーをコピー
+      var keys = ["headline", "comment", "status", "cancelled", "ValidDateTime", "revocation"]
+      keys.forEach(function (key) {
+        if (Boolean2(data[key])) SameData[key] = data[key];
+      })
+
+      if (data.issue.EventID) SameData.issue.EventID = data.issue.EventID;
+      if (data.issue.EarthQuake) SameData.issue.EarthQuake = data.issue.EarthQuake;
+
       data.areas.forEach(function (elm) {
-        var areaItem;
-        if (tsunamiItem.areas) {
-          areaItem = tsunamiItem.areas.find(function (elm2) {
-            return elm2.name == elm.name;
+        var SameArea;
+        if (Array.isArray(SameData.areas)) {
+          SameArea = SameData.areas.find(function (elm2) {
+            return elm2.name == elm.name || elm2.code == elm.code;
           });
         }
 
-        if (areaItem) {
+        if (!SameArea) {//同予報区のデータがないなら登録
+          SameData.areas.push(elm);
+        } else {//同予報区のデータがあるならマージ
           var keys = ["code", "grade", "cancelled", "firstHeight", "firstHeightCondition", "maxHeight"]
           keys.forEach(function (key) {
-            if (elm[key]) areaItem[key] = elm[key];
+            if (elm[key]) SameArea[key] = elm[key];
           });
 
           if (elm.stations) {
             elm.stations.forEach(function (elm2) {
-              var stItem;
-              if (areaItem.stations && Array.isArray(areaItem.stations)) {
-                stItem = areaItem.stations.find(function (elm3) {
+              var SameSta;
+              if (Array.isArray(SameArea.stations)) {
+                SameSta = SameArea.stations.find(function (elm3) {
                   return elm3.code == elm2.code || elm3.name == elm2.name;
                 });
               }
-              if (stItem) {
+              if (!SameSta) {//同観測点のデータがないなら登録
+                SameArea.stations.push(elm2)
+              } else {//同観測点のデータがあるならマージ
                 Object.keys(elm2).forEach(function (key) {
-                  if (elm2[key]) stItem[key] = elm2[key];
+                  if (Boolean2(elm2[key])) SameSta[key] = elm2[key];
                 });
-              } else areaItem.stations.push(elm2);
+              }
             });
           }
-        } else {
-          tsunamiItem.areas.push(elm);
         }
       });
     } else {
       Tsunami_Data.push(data);
-      //アラート
-      CreateMainWindow();
 
-      var grade_num = { MajorWarning: 3, Warning: 2, Watch: 1, Yoho: 0 };
+      //アラートするかどうかの判定
 
-      var home_grade = 0;
+      var GradeID = { "MajorWarning": 3, "Warning": 2, "Watch": 1, "Yoho": 0 };
+
+      var home_grade = -1;//家地域にはなにも発表されていない「-1」
+      //階級を数字に変換しつつ家の階級を調べる
       var grades = data.areas.map(function (elm) {
-        if (config.home.TsunamiSect && elm.name == config.home.TsunamiSect)
-          home_grade = grade_num[elm.grade];
-        return grade_num[elm.grade] ? grade_num[elm.grade] : 0;
+        if (config.home.TsunamiSect && elm.name == config.home.TsunamiSect) {
+          home_grade = GradeID[elm.grade];
+        }
+        return GradeID[elm.grade] || 0;
       });
 
       var max_grade = Math.max(...grades);
 
       if (config.Info.TsunamiInfo.NotificationSound) {
-        let NOTnewest = Tsunami_Data.find(function (elm) {
-          return (Number(new Date(elm.issue.time)) > Number(new Date(data.issue.time)) &&
+        //同EIDで最新の報かどうか
+        let isNewest = !Boolean(Tsunami_Data.find(function (elm) {
+          return (new Date(elm.issue.time) > new Date(data.issue.time) &&
             (!elm.issue.EventID || !data.issue.EventID || IncludesDuplicates(elm.issue.EventID, data.issue.EventID)));
-        });
-        if (
-          !NOTnewest && (
-            max_grade >= config.Info.TsunamiInfo.Global_threshold ||
-            home_grade >= config.Info.TsunamiInfo.Local_threshold ||
-            config.Info.TsunamiInfo.Bypass_threshold
-          )
-        ) {
+        }));
+
+        var Global_C = max_grade >= config.Info.TsunamiInfo.Global_threshold;
+        var Local_C = home_grade >= config.Info.TsunamiInfo.Local_threshold;
+        var Bypass_C = config.Info.TsunamiInfo.Bypass_threshold;
+        if (isNewest && (Global_C || Local_C || Bypass_C)) {
           PlayAudio("TsunamiInfo");
           speak(GenerateTsunamiText(data));
+          CreateMainWindow();
         }
       }
     }
 
     Tsunami_data_Marged = { issue: {}, areas: [] };
     let sortedTsunamiData = [...Tsunami_Data]
-      .sort((a, b) => new Date(a.issue.time) - new Date(b.issue.time));
+      .sort((a, b) => new Date(a.issue.time) - new Date(b.issue.time));//古→新（非破壊）
     //↑非破壊でソートしないと自動解除処理のTsunami_Data.forEach()内から呼んだときに競合
 
     sortedTsunamiData.forEach(function (elm0) {
-      Tsunami_data_Marged.revocation = elm0.revocation;
+      Tsunami_data_Marged.revocation = elm0.revocation;//キャンセル・失効は常に新しいものを優先
       Tsunami_data_Marged.cancelled = elm0.cancelled;
       if (elm0.revocation || elm0.cancelled) return;
 
@@ -4240,39 +4248,41 @@ function ConvertTsunamiInfo(data) {
       }
 
       elm0.areas.forEach(function (elm) {
-        var areaItem;
+        var SameArea;
         if (Array.isArray(Tsunami_data_Marged.areas)) {
-          areaItem = Tsunami_data_Marged.areas.find(function (elm2) {
+          SameArea = Tsunami_data_Marged.areas.find(function (elm2) {
             return elm2.name == elm.name;
           });
         }
-        if (areaItem) {
+        if (SameArea) {
           var keys = ["code", "grade", "cancelled", "firstHeight", "firstHeightCondition", "maxHeight"]
           keys.forEach(function (key) {
-            if (elm[key]) areaItem[key] = elm[key];
+            if (elm[key]) SameArea[key] = elm[key];
           });
 
-            if (elm.stations) {
-              elm.stations.forEach(function (elm2) {
-                var stItem;
-                if (Array.isArray(areaItem.stations)) {
-                  stItem = areaItem.stations.find(function (elm3) {
-                    return elm3.name == elm2.name;
-                  });
-                }
-
-                if (stItem) {
-                  Object.keys(elm2).forEach(function (key) {
-                    if (elm2[key]) stItem[key] = elm2[key];
-                  });
-                } else areaItem.stations.push(elm2);
-              });
-            }
-          } else {
+          if (!elm.stations) {
             Tsunami_data_Marged.areas.push(elm);
+          } else {
+            elm.stations.forEach(function (elm2) {
+              var SameSta;
+              if (Array.isArray(SameArea.stations)) {
+                SameSta = SameArea.stations.find(function (elm3) {
+                  return elm3.name == elm2.name;
+                });
+              }
+
+              if (!SameSta) {
+                SameArea.stations.push(elm2);
+              } else {
+                Object.keys(elm2).forEach(function (key) {
+                  if (Boolean2(elm2[key])) SameSta[key] = elm2[key];
+                });
+              }
+            });
           }
-        });
+        }
       });
+    });
 
     messageToMainWindow({ action: "tsunamiUpdate", data: Tsunami_data_Marged });
     if (TsunamiWindow) {
@@ -4349,7 +4359,7 @@ function GenerateEQInfoText(EQData) {
     var category = EQData.category;
     if (category == "Tsunami") category = "津波情報に付帯する地震情報";
 
-    var dif = timeDifference(Number(new Date() - new Date(EQData.OriginTime)));
+    var dif = timeDifference(new Date() - new Date(EQData.OriginTime));
     text = text.replaceAll("{category}", category || "");
     text = text.replaceAll("{training}", EQData.status == "訓練" ? "訓練報。" : "");
     text = text.replaceAll("{training2}", EQData.status == "訓練" ? "これは訓練報です。" : "");
