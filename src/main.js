@@ -4219,39 +4219,38 @@ function ConvertTsunamiInfo(data) {
     }
 
     Tsunami_data_Marged = { issue: {}, areas: [] };
-    Tsunami_Data = Tsunami_Data
+    let sortedTsunamiData = [...Tsunami_Data]
+      .sort((a, b) => new Date(a.issue.time) - new Date(b.issue.time));
+    //↑非破壊でソートしないと自動解除処理のTsunami_Data.forEach()内から呼んだときに競合
 
-    Tsunami_Data
-      .sort((a, b) => Number(new Date(a.issue.time)) > Number(new Date(b.issue.time)) ? 1 : -1)
-      //↑非破壊でソートしないと自動解除処理のTsunami_Data.forEach()内から呼んだときに競合
-      .forEach(function (elm0) {
-        Tsunami_data_Marged.revocation = elm0.revocation;
-        Tsunami_data_Marged.cancelled = elm0.cancelled;
-        if (elm0.revocation || elm0.cancelled) return;
+    sortedTsunamiData.forEach(function (elm0) {
+      Tsunami_data_Marged.revocation = elm0.revocation;
+      Tsunami_data_Marged.cancelled = elm0.cancelled;
+      if (elm0.revocation || elm0.cancelled) return;
 
-        var keys = ["headline", "comment", "status", "cancelled", "ValidDateTime"]
-        keys.forEach((key) => {
-          if (elm0[key]) Tsunami_data_Marged[key] = elm0[key];
-        })
+      var keys = ["headline", "comment", "status", "cancelled", "ValidDateTime"]
+      keys.forEach((key) => {
+        if (elm0[key]) Tsunami_data_Marged[key] = elm0[key];
+      })
 
-        if (elm0.issue) {
-          if (elm0.issue.time) Tsunami_data_Marged.issue.time = elm0.issue.time;
-          if (elm0.issue.EventID) Tsunami_data_Marged.issue.EventID = elm0.issue.EventID;
-          if (elm0.issue.EarthQuake) Tsunami_data_Marged.issue.EarthQuake = elm0.issue.EarthQuake;
+      if (elm0.issue) {
+        if (elm0.issue.time) Tsunami_data_Marged.issue.time = elm0.issue.time;
+        if (elm0.issue.EventID) Tsunami_data_Marged.issue.EventID = elm0.issue.EventID;
+        if (elm0.issue.EarthQuake) Tsunami_data_Marged.issue.EarthQuake = elm0.issue.EarthQuake;
+      }
+
+      elm0.areas.forEach(function (elm) {
+        var areaItem;
+        if (Array.isArray(Tsunami_data_Marged.areas)) {
+          areaItem = Tsunami_data_Marged.areas.find(function (elm2) {
+            return elm2.name == elm.name;
+          });
         }
-
-        elm0.areas.forEach(function (elm) {
-          var areaItem;
-          if (Array.isArray(Tsunami_data_Marged.areas)) {
-            areaItem = Tsunami_data_Marged.areas.find(function (elm2) {
-              return elm2.name == elm.name;
-            });
-          }
-          if (areaItem) {
-            var keys = ["code", "grade", "cancelled", "firstHeight", "firstHeightCondition", "maxHeight"]
-            keys.forEach(function (key) {
-              if (elm[key]) areaItem[key] = elm[key];
-            });
+        if (areaItem) {
+          var keys = ["code", "grade", "cancelled", "firstHeight", "firstHeightCondition", "maxHeight"]
+          keys.forEach(function (key) {
+            if (elm[key]) areaItem[key] = elm[key];
+          });
 
             if (elm.stations) {
               elm.stations.forEach(function (elm2) {

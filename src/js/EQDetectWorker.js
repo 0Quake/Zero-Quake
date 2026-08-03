@@ -188,9 +188,7 @@ function EQDetect(data, date, detect) {
   }
 
   //地震検知解除
-  var index = 0;
-  var del_index = -1;
-  for (const elm of EQDetect_List) {
+  EQDetect_List = EQDetect_List.filter(function (elm) {
     if (EEWNow || new Date() - Replay - elm.origin_Time > thresholds.time00 || new Date() - Replay - elm.last_Detect > thresholds.time01 || elm.Codes.length < elm.Codes_history.length * thresholds.threshold05) {
       //EEW発令中・発生から閾値以上経過・最後の検知から閾値以上経過・観測点数が最大時より一定割合減少
       workerThreads.parentPort.postMessage({
@@ -203,11 +201,11 @@ function EQDetect(data, date, detect) {
       elm.Codes.forEach(function (elm2) {
         pointsData[elm2.Code].Event = false;
       });
+      return false
+    } else {
+      return true;
     }
-    del_index = index;
-    index++;
-  }
-  if (-1 < del_index) EQDetect_List.splice(del_index, 1);
+  })
 
   //mainProcessへ情報送信
   workerThreads.parentPort.postMessage({

@@ -648,19 +648,21 @@ function EQDetect(data) {
 }
 //地震検知終了
 function EQDetectFinish(id) {
-  var delIndex = EQDetectItem.findIndex(function (elmA, index) {
-    return elmA.id == id
+  var delIndex = -1;
+  EQDetectItem = EQDetectItem.filter(function (elm, index) {
+    if (elm.id == id) delIndex = index;
+    return elm.id !== id
   });
 
-  if (delIndex > -1) {
+  if (delIndex != -1) {
     var delElm = EQDetectItem[delIndex];
-    if (map && map.getLayer(`EQDItemF_${delElm.id}`)) map.removeLayer(`EQDItemF_${delElm.id}`);
-    if (map && map.getSource(`EQDItem_${delElm.id}`)) map.removeSource(`EQDItem_${delElm.id}`);
-    delElm.ECMarker.remove();
+    if (map) {
+      if (map.getLayer(`EQDItemF_${delElm.id}`)) map.removeLayer(`EQDItemF_${delElm.id}`);
+      if (map.getSource(`EQDItem_${delElm.id}`)) map.removeSource(`EQDItem_${delElm.id}`);
+    }
+    if (delElm.ECMarker) delElm.ECMarker.remove();
 
     returnToUserPosition();
-
-    EQDetectItem.splice(delIndex, 1);
   }
 
   var eqdItem = document.getElementById(`EQDItem_${id}`);
