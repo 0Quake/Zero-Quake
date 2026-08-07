@@ -67,7 +67,7 @@
     "eslint": "^10.8.0"
   },
   "dependencies": {
-    "@turf/turf": "^7.3.5",
+    "@turf/turf": "^7.4.0",
     "electron-store": "^11.0.2",
     "maplibre-gl": "^6.1.0",
     "jsdom": "^30.0.1",
