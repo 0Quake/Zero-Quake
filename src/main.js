@@ -1368,7 +1368,7 @@ var TTT_AK135 = JSON.parse(
   await readFile(path.join(__dirname, "./Resource/ak135table.json"))
 );
 
-var TsunamiValidate_bypass = true;
+var TsunamiValidate_bypass = false;
 //開始処理
 function start() {
   //replay("2026/4/20 16:55:40")
@@ -3467,7 +3467,7 @@ function Req_JMAXML(url, count) {
               ValidDateTimeTmp.setHours(ValidDateTimeTmp.getHours() + 12);
             }
           }
-          if (ValidDateTimeTmp < new Date() - Replay) return;
+          if (ValidDateTimeTmp < new Date() - Replay && !TsunamiValidate_bypass) return;
 
           var headline = xml.getElementsByTagName("Headline")?.[0]?.getElementsByTagName("Text")?.[0]?.textContent || "";
 
