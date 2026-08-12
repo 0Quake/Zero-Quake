@@ -1583,8 +1583,8 @@ function Req_JMATide_sta() {
           if (Array.isArray(cl.stations)) {
             cl.stations.forEach(function (st) {
               if (st.code && st.lat && st.lon && st.name) {//データ有効性チェック
-                st.threshold_warn = cl.standard.level4
-                st.threshold_advisory = cl.standard.level5
+                st.threshold_warn = cl.standard.level5
+                st.threshold_advisory = cl.standard.level4
                 stations.push(st);
               }
             });
@@ -1605,7 +1605,7 @@ function Req_JMATide_sta() {
 var JMATide_astro = {};
 var JMATide_obs = {};
 function Req_JMATide() {
-  if (!JMATide_sta) Req_JMATide_sta();
+  if (!JMATide_sta) return Req_JMATide_sta();
   JMATide_sta.forEach(function (st) {
 
     if (!JMATide_astro[st.code]) {
