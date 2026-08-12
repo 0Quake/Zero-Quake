@@ -3264,8 +3264,9 @@ function Req_JMAXML(url, count) {
         }], count);
       } else if (title == "地震回数に関する情報") {
         if (xml.getElementsByTagName("EarthquakeCount")[0]) {
-          var hourly = []
-          var sum, std;
+          var hourly = [];
+          var std = [];
+          var sum;
           xml.querySelectorAll("EarthquakeCount Item").forEach(function (el) {
             var type = el?.getAttribute("type")
 
@@ -3290,7 +3291,7 @@ function Req_JMAXML(url, count) {
             } else if (type == "累積地震回数") {
               sum = data
             } else if (type == "地震回数") {
-              std = data
+              std.push(data);
             }
           })
 
