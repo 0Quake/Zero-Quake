@@ -2939,13 +2939,12 @@ function draw_tide(data) {
     range_max = Math.max(range_max_tmp, range_max)
   })
   var margin = (range_max - range_min) * 0.07
-  range_max += margin
-  range_min -= margin
+  range_max += margin;
+  range_min -= margin;
 
   Object.keys(data).forEach(function (key, index) {
     elm = data[key];
-    var clone = document.getElementById("tide-item")
-      .content.cloneNode(true).querySelector(".EQItem");
+    var clone = document.getElementById("tide-item").content.cloneNode(true).querySelector(".EQItem");
 
     if (index == 0) clone.setAttribute("tabindex", 2);
 
@@ -2961,14 +2960,10 @@ function draw_tide(data) {
     function to_percent(v) {
       return (v || v == 0) ? (v - range_min) / (range_max - range_min) * 100 : null
     }
-    clone.querySelector(".EQI_databar_v").style.width = `${to_percent(elm.height)
-      }% `;
-    clone.querySelector(".EQI_point_astro").style.left = `calc(${to_percent(elm.astro)
-      }% - 2px)`;
-    clone.querySelector(".EQI_point_adv").style.left = `calc(${to_percent(elm.threshold_advisory)
-      }% - 2px)`;
-    clone.querySelector(".EQI_point_warn").style.left = `calc(${to_percent(elm.threshold_warn)
-      }% - 2px)`;
+    clone.querySelector(".EQI_databar_v").style.width = `${to_percent(elm.height)}% `;
+    clone.querySelector(".EQI_point_astro").style.left = `calc(${to_percent(elm.astro)}% - 2px)`;
+    clone.querySelector(".EQI_point_adv").style.left = `calc(${to_percent(elm.threshold_advisory)}% - 2px)`;
+    clone.querySelector(".EQI_point_warn").style.left = `calc(${to_percent(elm.threshold_warn)}% - 2px)`;
 
     clone.querySelector(".EQI_databar_v").style.display = (elm.height || elm.height == 0) ? "block" : "none";
     clone.querySelector(".EQI_point_astro").style.display = (elm.astro || elm.astro == 0) ? "block" : "none";
@@ -2979,6 +2974,17 @@ function draw_tide(data) {
     clone.addEventListener("click", function () {
       window.open(`https://www.jma.go.jp/bosai/tidelevel/#point_code=${data[key].code}`);
     });
+
+    var boderColor = "";
+    if (elm.height >= elm.threshold_warn) {
+      boderColor = config.color.Tsunami.TsunamiWarningColor;
+    } else if (elm.height >= elm.threshold_advisory) {
+      boderColor = config.color.Tsunami.TsunamiWatchColor;
+    }
+
+    clone.style.border = "solid 1px #FFF"
+    clone.style.borderColor = boderColor
+
     document.getElementById("tide-Wrap").appendChild(clone);
   });
 }
