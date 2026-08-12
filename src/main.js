@@ -2828,7 +2828,7 @@ function calcInt(magJMA, depth, epiLat, epiLng, pointLat, pointLng, arv, max) {
   const magW = magJMA - 0.171;
   const long = 10 ** (0.5 * magW - 1.85) / 2;
   const epicenterDistance = turf.distance([epiLng, epiLat], [pointLng, pointLat])
-  const hypocenterDistance = (depth ** 2 + epicenterDistance ** 2) ** 0.5 - (max ? long : 0); //上限なら断層長を引かない
+  const hypocenterDistance = (depth ** 2 + epicenterDistance ** 2) ** 0.5 - (max ? 0 : long); //上限なら断層長を引かない
   const x = Math.max(hypocenterDistance, 3);
   const gpv600 = 10 ** (0.58 * magW + 0.0038 * depth - 1.29 - Math.log10(x + 0.0028 * 10 ** (0.5 * magW)) - 0.002 * x);
 
