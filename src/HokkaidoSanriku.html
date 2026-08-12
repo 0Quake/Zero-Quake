@@ -50,29 +50,26 @@
     <script>
         window.electronAPI.messageSend((event, request) => {
             if (request.action == "HokkaidoSanrikuInfo") {
+                console.log(request)
                 document.title = (request.data.kind == "取消" ? "取消／" : "") + request.data.title + " - Zero Quake"
 
                 if (request.data.kind == "取消") document.getElementById("title").classList.remove("happyo")
                 else document.getElementById("title").classList.add("happyo")
 
-                document.getElementById("title").innerText = (request.data.kind == "取消" ? "取消／" : "") + request.data.title;
-                document.getElementById("headline").innerText = `${request.data.HeadLine} (${NormalizeDate(4, request.data.reportDate)})`;
-                document.getElementById("Text_body").innerText = removeFirstBR(request.data.Text)
-                document.getElementById("Appendix_body").innerText = removeFirstBR(request.data.Appendix)
-                document.getElementById("Text2_body").innerText = removeFirstBR(request.data.Text2)
+                document.getElementById("title").innerText = (request.data?.kind == "取消" ? "取消／" : "") + request.data?.title;
+                document.getElementById("headline").innerText = `${request.data?.HeadLine} (${NormalizeDate(4, request.data?.reportDate)})`;
+                document.getElementById("Text_body").innerText = String(request.data?.Text || "").trim();
+                document.getElementById("Appendix_body").innerText = String(request.data?.Appendix || "").trim();
+                document.getElementById("Text2_body").innerText = String(request.data?.Text2 || "").trim();
 
-                document.getElementById("Text").style.display = request.data.Text ? "block" : "none"
-                document.getElementById("Appendix").style.display = request.data.Appendix ? "block" : "none"
-                document.getElementById("Text2").style.display = request.data.Text2 ? "block" : "none"
+                document.getElementById("Text").style.display = request.data?.Text ? "block" : "none"
+                document.getElementById("Appendix").style.display = request.data?.Appendix ? "block" : "none"
+                document.getElementById("Text2").style.display = request.data?.Text2 ? "block" : "none"
 
                 document.getElementById("splash").style.display = "none";
             }
         });
 
-        function removeFirstBR(str) {
-            if (str.startsWith("\n")) return str.replace("\n", "")
-            else return str
-        }
     </script>
 
     <style>
