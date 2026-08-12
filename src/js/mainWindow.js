@@ -424,13 +424,12 @@ function eqInfoDraw(data, source) {
       var dataToUse;
 
       if (elm.std) {
-        dataToUse = elm.std
+        dataToUse = elm.std[0]
       } else if (elm.sum) {
         dataToUse = elm.sum
       } else if (elm.hourly[0]) {
         dataToUse = elm.hourly[0]
       }
-      console.log(dataToUse)
 
       if (dataToUse.StartTime && dataToUse.EndTime) {
         var StartTime = NormalizeDate("YYYY/M/D h時", new Date(dataToUse.StartTime))
@@ -447,6 +446,8 @@ function eqInfoDraw(data, source) {
           var content = `${dataToUse.Number}回`
         } else if (fnAvailable) {
           var content = `有感${dataToUse.FeltNumber}回`
+        } else {
+          return false;
         }
 
         clone.querySelector(".EQI_datetime").textContent = dateRangeStr;

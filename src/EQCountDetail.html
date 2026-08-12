@@ -52,59 +52,83 @@
     <script>
         window.electronAPI.messageSend((event, request) => {
             if (request.action == "metaData") {
-                document.title = `${request.data.status != "通常" ? `${request.data.status}／` : ""}${request.data.title} - Zero Quake`;
+                var data = request.data;
+                if (!data) return;
 
-                if (request.data.kind == "取消") document.getElementById("title").classList.remove("happyo")
+                document.title = `${data.status != "通常" ? `${data.status}／` : ""}${data.title} - Zero Quake`;
+
+                if (data.kind == "取消") document.getElementById("title").classList.remove("happyo")
                 else document.getElementById("title").classList.add("happyo")
 
 
                 var Content = "";
 
                 function generate_Text(data) {
-                    if (!(data.StartTime && data.EndTime && data.Number)) return "";
+                    if (!data.StartTime || !data.EndTime || (!data.Number && !data.FeltNumber)) return "";
                     var StartTime = NormalizeDate("YYYY/M/D h時", new Date(data.StartTime))
                     var sameDate = NormalizeDate("YYYYMMDD", new Date(data.StartTime)) == NormalizeDate("YYYYMMDD", new Date(data.EndTime))
-                    if (sameDate) var EndTime = NormalizeDate("h時", new Date(data.EndTime))
-                    else var EndTime = NormalizeDate("M/D h時", new Date(data.EndTime))
+                    if (sameDate) {
+                        var EndTime = NormalizeDate("h時", new Date(data.EndTime))
+                    } else {
+                        var EndTime = NormalizeDate("M/D h時", new Date(data.EndTime))
+                    }
                     var dateRangeStr = `${StartTime} ～ ${EndTime}`;
 
-                    if (data.FeltNumber || data.FeltNumber === 0) {
+                    var nAvailable = data.Number || data.Number == 0;
+                    var fnAvailable = data.FeltNumber || data.FeltNumber == 0;
+                    if (fnAvailable && nAvailable) {
                         var content = `${data.Number}回 （うち有感${data.FeltNumber}回）`
-                    } else {
+                    } else if (nAvailable) {
                         var content = `${data.Number}回`
+                    } else if (fnAvailable) {
+                        var content = `有感${data.FeltNumber}回`
+                    } else {
+                        return false;
                     }
+
+
                     return `<div class="CountItem"><h4>${dateRangeStr}</h4><div>${content}</div></div>`;
                 }
-
-                if (request.data.std) Content += `<h3>地震回数</h3>${generate_Text(request.data.std)}`;
-                if (request.data.sum) Content += `<h3>累積地震回数</h3>${generate_Text(request.data.sum)}`;
-                if (request.data.hourly) {
-                    Content += "<h3>１時間地震回数</h3>"
-                    request.data.hourly.forEach(function (el) {
-                        Content += generate_Text(el)
-                    })
+                var sum_Str = generate_Text(data.sum);
+                if (sum_Str) {
+                    Content += `<h3>累積地震回数</h3>${sum_Str}`;
                 }
 
+                var hrs_Str = ""
+                if (Array.isArray(data.hourly)) {
+                    data.hourly.forEach(function (el) {
+                        hrs_Str += generate_Text(el)
+                    });
+                }
+                if (hrs_Str) {
+                    Content += `<h3>１時間地震回数</h3>${hrs_Str}`;
+                }
+
+                var std_Str = ""
+                if (Array.isArray(data.std)) {
+                    data.std.forEach(function (el) {
+                        std_Str += generate_Text(el)
+                    });
+                }
+                if (std_Str) {
+                    Content += `<h3>地震回数</h3>${std_Str}`;
+                }
                 document.getElementById("Content_body").innerHTML = Content
 
-                document.getElementById("title").innerText = (request.data.cancel ? "取消／" : "") + request.data.category;
-                document.getElementById("headline").innerText = `${request.data.headline} (${NormalizeDate(4, request.data.reportDateTime)})`;
-                document.getElementById("Text_body").innerText = removeFirstBR(request.data.Text)
-                document.getElementById("NextAdvisory_body").innerText = removeFirstBR(request.data.NextAdvisory)
-                document.getElementById("FreeFormComment_body").innerText = removeFirstBR(request.data.FreeFormComment)
+                document.getElementById("title").innerText = (data.cancel ? "取消／" : "") + data.category;
+                document.getElementById("headline").innerText = `${data.headline} (${NormalizeDate(4, data.reportDateTime)})`;
+                document.getElementById("Text_body").innerText = String(data.Text || "").trim();
+                document.getElementById("NextAdvisory_body").innerText = String(data.NextAdvisory || "").trim();
+                document.getElementById("FreeFormComment_body").innerText = String(data.FreeFormComment || "").trim();
 
-                document.getElementById("Text").style.display = request.data.Text ? "block" : "none"
-                document.getElementById("NextAdvisory").style.display = request.data.NextAdvisory ? "block" : "none"
-                document.getElementById("FreeFormComment").style.display = request.data.FreeFormComment ? "block" : "none"
+                document.getElementById("Text").style.display = data.Text ? "block" : "none"
+                document.getElementById("NextAdvisory").style.display = data.NextAdvisory ? "block" : "none"
+                document.getElementById("FreeFormComment").style.display = data.FreeFormComment ? "block" : "none"
 
                 document.getElementById("splash").style.display = "none";
             }
         });
 
-        function removeFirstBR(str) {
-            if (str.startsWith("\n")) return str.replace("\n", "")
-            else return str
-        }
     </script>
 
     <style>
