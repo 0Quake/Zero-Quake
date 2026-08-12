@@ -15,20 +15,17 @@ function tsunamiUpdate(dataTmp) {
   document.getElementById("revocation").style.display = "none";
   document.getElementById("no-data").style.display = "none";
 
-  if (dataTmp.revocation) document.getElementById("revocation").style.display = "block";
-  else if (!dataTmp || dataTmp.areas.length == 0) {
+  if (dataTmp.revocation) {
+    document.getElementById("revocation").style.display = "block";
+  } else if (!Array.isArray(dataTmp.areas) || dataTmp.areas.length == 0) {
     document.getElementById("no-data").style.display = "table-row";
   }
 
-  if (dataTmp.issue.time)
-    document.getElementById("dateTime").textContent = NormalizeDate(5, dataTmp.issue.time);
-  if (dataTmp.ValidDateTime)
-    document.getElementById("validdateTime").textContent = NormalizeDate(5, dataTmp.ValidDateTime);
+  document.getElementById("dateTime").textContent = dataTmp.issue?.time ? NormalizeDate(5, dataTmp.issue?.time) : "";
+  document.getElementById("validdateTime").textContent = dataTmp.ValidDateTime ? NormalizeDate(5, dataTmp.ValidDateTime) : "";
 
-  document.getElementById("headline").innerText = dataTmp.headline
-    ? dataTmp.headline
-    : "";
-  document.getElementById("comment").innerText = dataTmp.comment ? dataTmp.comment : "";
+  document.getElementById("headline").innerText = dataTmp.headline || "";
+  document.getElementById("comment").innerText = dataTmp.comment || "";
 
   document.querySelectorAll(".add-content").forEach(function (elm) {
     elm.remove();
@@ -46,21 +43,30 @@ function tsunamiUpdate(dataTmp) {
       var maxHeightStr = "";
       if (elm.firstHeight) {
         arrivalTime = NormalizeDate(10, elm.firstHeight);
-        if (elm.firstHeightCondition == "早いところでは既に津波到達と推定") condition = "早いところでは到達と推定";
-        else if (elm.firstHeightCondition) condition = elm.firstHeightCondition;
+        if (elm.firstHeightCondition == "早いところでは既に津波到達と推定") {
+          condition = "早いところでは到達と推定";
+        } else if (elm.firstHeightCondition) {
+          condition = elm.firstHeightCondition;
+        }
       } else if (elm.firstHeightCondition) {
-        if (elm.firstHeightCondition == "第１波の到達を確認") arrivalTime = "到達";
-        else if (elm.firstHeightCondition == "津波到達中と推測")
+        if (elm.firstHeightCondition == "第１波の到達を確認") {
+          arrivalTime = "到達";
+        } else if (elm.firstHeightCondition == "津波到達中と推測") {
           arrivalTime = "到達中と推測";
-        else arrivalTime = elm.firstHeightCondition;
+        } else {
+          arrivalTime = elm.firstHeightCondition;
+        }
       }
       if (condition) has_condition = true;
 
       if (elm.maxHeight) {
-        maxHeight = elm.maxHeight;
-        maxHeightStr = elm.maxHeight.replace("m", "メートル");
-        if (maxHeight.match(/未満/)) maxHeight = `<${maxHeight.replace("未満", "")}`;
-        else if (maxHeight.match(/超/)) maxHeight = `>${maxHeight.replace("超", "")}`;
+        maxHeight = String(elm.maxHeight);
+        maxHeightStr = maxHeight.replace("m", "メートル");
+        if (maxHeight.match(/未満/)) {
+          maxHeight = `<${maxHeight.replace("未満", "")}`;
+        } else if (maxHeight.match(/超/)) {
+          maxHeight = `>${maxHeight.replace("超", "")}`;
+        }
       }
       var IconTxt = "";
       var FullTxt = "";
@@ -105,8 +111,11 @@ function tsunamiUpdate(dataTmp) {
       new_tr.classList.add("add-content");
       new_tr.classList.add(`ListItem_${elm.grade}`);
       new_tr.setAttribute("tabindex", "0");
-      if (elm.grade) document.getElementById(elm.grade + "Info").after(new_tr);
-      else document.getElementById("no-data").before(new_tr);
+      if (elm.grade) {
+        document.getElementById(elm.grade + "Info").after(new_tr);
+      } else {
+        document.getElementById("no-data").before(new_tr);
+      }
       if (config && config.home.TsunamiSect && elm.name == config.home.TsunamiSect) {
         mySectElm = new_tr;
         mySectElm.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -130,12 +139,12 @@ function tsunamiUpdate(dataTmp) {
           var rising = "";
           var risingStr = "";
 
-          if (elm2.Conditions) condition = elm2.Conditions;
-
+          condition = elm2.Conditions || "";
           if (condition) has_condition = true;
 
-          if (elm2.HighTideDateTime)
+          if (elm2.HighTideDateTime) {
             HighTideDateTime = NormalizeDate(6, elm2.HighTideDateTime);
+          }
           if (HighTideDateTime) has_tide = true;
 
           if (elm2.omaxHeight) {
@@ -143,16 +152,15 @@ function tsunamiUpdate(dataTmp) {
             if (elm2.firstHeightInitial) {
               omaxHeight = `${elm2.omaxHeight} ${elm2.firstHeightInitial}`;
             }
-          } else if (
-            elm2.maxHeightCondition &&
-            elm2.maxHeightCondition.includes("観測中")
-          )
+          } else if (String(elm2.maxHeightCondition).includes("観測中")) {
             omaxHeight = "観測中";
-          else if (elm2.maxHeightCondition && elm2.maxHeightCondition.includes("微弱"))
+          } else if (String(elm2.maxHeightCondition).includes("微弱")) {
             omaxHeight = "微弱";
-          else if (elm2.maxHeightCondition && elm2.maxHeightCondition.includes("欠測"))
+          } else if (String(elm2.maxHeightCondition).includes("欠測")) {
             omaxHeight = "欠測";
-          else if (elm2.maxHeightCondition) omaxHeight = elm2.maxHeightCondition;
+          } else if (elm2.maxHeightCondition) {
+            omaxHeight = elm2.maxHeightCondition;
+          }
           if (elm2.maxHeightRising) {
             rising = " <span class='rising'>上昇中↗</span>";
             risingStr = "上昇中";
@@ -162,13 +170,23 @@ function tsunamiUpdate(dataTmp) {
             maxHeightTime = `（${NormalizeDate(10, elm2.maxHeightTime)}）`;
           }
 
-          if (elm2.ArrivedTime) ArrivedTime = NormalizeDate(10, elm2.ArrivedTime);
-          else if (elm2.firstHeightCondition == "欠測") ArrivedTime = "欠測";
-          else if (elm2.Condition == "第１波の到達を確認") ArrivedTime = "到達";
-          else if (elm2.Condition == "津波到達中と推測") ArrivedTime = "到達と推測";
-          else if (elm2.firstHeightCondition == "第１波識別不能") ArrivedTime = elm2.firstHeightCondition;
-          if (elm2.firstHeightInitial) ArrivedTime += ` ${elm2.firstHeightInitial}`;
-          if (elm2.ArrivalTime) arrivalTime = NormalizeDate(10, elm2.ArrivalTime);
+          if (elm2.ArrivedTime) {
+            ArrivedTime = NormalizeDate(10, elm2.ArrivedTime);
+          } else if (elm2.firstHeightCondition == "欠測") {
+            ArrivedTime = "欠測";
+          } else if (elm2.Condition == "第１波の到達を確認") {
+            ArrivedTime = "到達";
+          } else if (elm2.Condition == "津波到達中と推測") {
+            ArrivedTime = "到達と推測";
+          } else if (elm2.firstHeightCondition == "第１波識別不能") {
+            ArrivedTime = elm2.firstHeightCondition;
+          }
+          if (elm2.firstHeightInitial) {
+            ArrivedTime += ` ${elm2.firstHeightInitial}`;
+          }
+          if (elm2.ArrivalTime) {
+            arrivalTime = NormalizeDate(10, elm2.ArrivalTime);
+          }
 
           var new_tr2 = document.createElement("tr");
           var ihtml = "";

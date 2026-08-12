@@ -3626,9 +3626,9 @@ function Req_JMAXML(url, count) {
                   var maxHeightRising = false;
                   var nameTmp = elm2.getElementsByTagName("Name")?.[0]?.textContent;
 
-                  var fHeightElm = elm2.getElementsByTagName("FirstHeight")[0];
+                  var fHeightElm = elm2.getElementsByTagName("FirstHeight")?.[0];
                   if (fHeightElm) {
-                    var arTimeStr = fHeightElm.getElementsByTagName("ArrivalTime")[0].textContent;
+                    var arTimeStr = fHeightElm.getElementsByTagName("ArrivalTime")?.[0]?.textContent;
                     if (arTimeStr) ArrivalTimeTmp = new Date(arTimeStr);
                     firstHeightConditionTmp = fHeightElm.getElementsByTagName("Condition")?.[0]?.textContent;
                     firstHeightInitialTmp = fHeightElm.getElementsByTagName("Initial")?.[0]?.textContent;
