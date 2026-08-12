@@ -297,25 +297,25 @@ var checkUpdate = throttle(async function (userAction) {
           } else if (latest_v[1] == current_v[1]) {
             if (latest_v[2] > current_v[2]) {
               update_available = true;
-
-              if (!userAction) {
-                var options4 = {
-                  type: "question",
-                  title: "アプリケーションの更新",
-                  message: "Zero Quake で更新が利用可能です。",
-                  detail: `v.${current_verTmp} > v.${latest_verTmp}\n操作を選択してください。`,
-                  buttons: ["後で確認", "詳細を確認"],
-                  noLink: true,
-                };
-
-                dialog.showMessageBox(MainWindow, options4).then(function (result) {
-                  if (result.response == 1) {
-                    Create_SettingWindow(true);
-                  }
-                });
-              }
             }
           }
+        }
+
+        if (update_available && !userAction) {
+          var options4 = {
+            type: "question",
+            title: "アプリケーションの更新",
+            message: "Zero Quake で更新が利用可能です。",
+            detail: `v.${current_verTmp} > v.${latest_verTmp}\n操作を選択してください。`,
+            buttons: ["後で確認", "詳細を確認"],
+            noLink: true,
+          };
+
+          dialog.showMessageBox(MainWindow, options4).then(function (result) {
+            if (result.response == 1) {
+              Create_SettingWindow(true);
+            }
+          });
         }
 
         update_data = {
@@ -750,10 +750,10 @@ function setOpenAtLogin(openAtLogin) {
   } else {
     app.setLoginItemSettings({ openAtLogin: false });
 
-    const homePath = String(app.getPath("home")).replace("\\\\", "/");
+    const homePath = String(app.getPath("home")).replace(/\\/g, "/");
     const dist = `${homePath}/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup/ZeroQuake.lnk`;
     if (openAtLogin) {
-      const source = String(app.getPath("exe")).replace("\\\\", "/");
+      const source = String(app.getPath("exe")).replace(/\\/g, "/");
       let command = `
   $WshShell = New-Object -ComObject WScript.Shell;
   $ShortCut = $WshShell.CreateShortcut("${dist}");
@@ -1001,7 +1001,7 @@ function Create_SettingWindow(update) {
         });
       }
 
-      const homePath = String(app.getPath("home")).replace("\\\\", "/");
+      const homePath = String(app.getPath("home")).replace(/\\/g, "/");
       SettingWindow.webContents.send("message2", {
         action: "initialData",
         config: config,
@@ -1603,7 +1603,7 @@ function Req_JMATide_sta() {
 var JMATide_astro = {};
 var JMATide_obs = {};
 function Req_JMATide() {
-  if (!JMATide_sta) Req_TremRts_sta();
+  if (!JMATide_sta) Req_JMATide_sta();
   JMATide_sta.forEach(function (st) {
 
     if (!JMATide_astro[st.code]) {
@@ -1700,7 +1700,7 @@ function Req_EarlyEst() {
 
           var data = {
             alertflg: "EarlyEst",
-            EventID: 901471985000000000000 + Number(String(elm.getAttribute("publicID")).slice(-12)), //気象庁EIDと確実に区別するため、EarlyEstのIPアドレスと連結,
+            EventID: Number(String(elm.getAttribute("publicID")).slice(-12)),
             serial: Number(elm.querySelector("origin quality").getElementsByTagName("ee:report_count")[0].textContent) + 1,
             report_time: elm.querySelector("creationInfo creationTime") ? ConvertJST(new Date(elm.querySelector("creationInfo creationTime").textContent)) : null,
             magnitude: elm.querySelector("magnitude mag value") ? Number(elm.querySelector("magnitude mag value").textContent) : null,
@@ -1792,7 +1792,7 @@ function ConvertSnet(data, date, y, uid) {
       timestamp: new Date(date),
       LocalTime: new Date(),
       data: {
-        data: Object.values(mergeDeeply(data, msil_latest[another][1]))
+        data: [...data, ...msil_latest[another][1]]
       },
     };
     messageToMainWindow(SnetPointsDataTmp);
@@ -1915,7 +1915,7 @@ function P2P() {
   P2P_Client = new WebSocketClient();
   P2P_Client.on("connectFailed", function () {
     UpdateStatus("P2P_EEW", "Error");
-    setTimeout(TryConnect_P2P, 5000);
+    TryConnect_P2P();
   });
   P2P_Client.on("connect", function (connection) {
     connection.on("error", function () {
@@ -1923,7 +1923,7 @@ function P2P() {
     });
     connection.on("close", function () {
       UpdateStatus("P2P_EEW", "Disconnect");
-      setTimeout(TryConnect_P2P, 5000);
+      TryConnect_P2P();
     });
     connection.on("message", function (message) {
       try {
@@ -1967,6 +1967,7 @@ function P2P() {
       }
     });
     UpdateStatus("P2P_EEW", "success");
+    P2PReconnectTimeout = 500;
   });
   Connect_P2P();
 }
@@ -2134,6 +2135,7 @@ function WolfxWS() {
   });
 
   WolfxWS_Client.on("connect", function (connection) {
+    WolfxConnection = connection;
     connection.on("error", function () {
       UpdateStatus("wolfx", "Error");
     });
@@ -3179,7 +3181,7 @@ function Req_Hokkaidosanriku_JSON(url) {
 }
 
 function Process_Hokkaidosanriku(data) {
-  var SameData = HokkaidoSanrikuInfoAll.find((el) => el.reportDate = data.reportDate);
+  var SameData = HokkaidoSanrikuInfoAll.find((el) => el.reportDate == data.reportDate);
   if (SameData) return;
 
   HokkaidoSanrikuInfoAll.push(data);
@@ -3341,9 +3343,9 @@ function Req_JMAXML(url, count) {
         var Body = xml.getElementsByTagName("Body")[0];
         var EarthQuakeInfo = Body.getElementsByTagName("EarthquakeInfo")[0];
         if (EarthQuakeInfo) {
-          if (EarthQuakeInfo.getElementsByTagName("InfoSerial")[0])
+          if (EarthQuakeInfo.getElementsByTagName("InfoSerial")[0]) {
             data.kind = EarthQuakeInfo.getElementsByTagName("InfoSerial")[0].getElementsByTagName("Name")[0].textContent;
-
+          }
           data.Text = EarthQuakeInfo.getElementsByTagName("Text")[0].textContent;
 
           if (EarthQuakeInfo.getElementsByTagName("Appendix")[0])
@@ -3792,7 +3794,7 @@ var Req_USGS = throttle(function () {
       if (!r.ok) throw new Error(`HTTP Error: ${r.status}`);
       return r.json();
     }).then((json) => {
-      if (!json || !json.features[0].properties || !json.features[0].properties.updated) throw new Error("usgs.govが不正なデータを返しました。");
+      if (!json || !json.features[0] || !json.features[0].properties || !json.features[0].properties.updated) throw new Error("usgs.govが不正なデータを返しました。");
       if (usgsLastGenerated > json.features[0].properties.updated) throw new Error("usgs.govが古いデータを返しました。");
 
       usgsLastGenerated = json.features[0].properties.updated;
@@ -3939,6 +3941,7 @@ function MargeEQInfo(dataList, count) {
             };
           }
 
+          EQInfo_Item.reportDateTime = elm.reportDateTime;
           EQInfo_Item.category = elm.category;
           if (Boolean2(elm.OriginTime)) EQInfo_Item.OriginTime = elm.OriginTime;
           if (Boolean2(elm.epiCenter)) EQInfo_Item.epiCenter = elm.epiCenter;
@@ -4035,7 +4038,7 @@ function EQCount_process(data) {
 
 //時間(ms)を「～分[秒,分,時間,日]」の形にする
 function timeDifference(miliseconds) {
-  if (isNaN(miliseconds) || miliseconds < 0) return "";
+  if (isNaN(miliseconds) || miliseconds < 0) return null;
 
   var sec = Math.round(miliseconds / 1000);
   var min = Math.round(miliseconds / 60000);
@@ -4091,7 +4094,7 @@ function AlertEQInfo(data, source, update) {
             return elm2.EventID == elm.eventId;
           });
 
-          metadata.urls = elm.urls;
+          metadata.urls = elm.DetailURL;
           metadata.eew = EEWDataItem;
           metadata.axisData = elm.axisData;
           EQI_Window[elm.eventId].window.webContents.send("message2", metadata);
@@ -4323,7 +4326,7 @@ function GenerateEEWText(EEWData, update) {
 
     text = text.replaceAll("{local_Int}", userInt ? NormalizeShindo(userInt, 1) : "不明");
 
-    if (!userInt) text = text.replace(/\[.*?\]/g, "");
+    if (!Boolean2(userInt)) text = text.replace(/\[.*?\]/g, "");
     text = text.replace(/\[|\]/g, "");
 
     return text;
@@ -4349,7 +4352,7 @@ function GenerateEQInfoText(EQData) {
     text = text.replaceAll("{training2}", EQData.status == "訓練" ? "これは訓練報です。" : "");
     text = text.replaceAll("{report_time}", EQData.reportDateTime ? NormalizeDate(9, EQData.reportDateTime) : "");
     text = text.replaceAll("{origin_time}", EQData.OriginTime ? NormalizeDate(9, EQData.OriginTime) : "");
-    text = text.replaceAll("{origin_time2}", EQData.OriginTime ? `${dif.num}${dif.unit}前` : "先ほど");
+    text = text.replaceAll("{origin_time2}", (EQData.OriginTime && dif) ? `${dif.num}${dif.unit}前` : "先ほど");
     text = text.replaceAll("{region_name}", EQData.epiCenter || "");
     text = text.replaceAll("{magnitude}", EQData.M || "");
     text = text.replaceAll("{maxInt}", EQData.maxI ? NormalizeShindo(EQData.maxI, 1) : "");
@@ -4436,7 +4439,7 @@ function GenerateTsunamiText(data) {
       } else if (homeArea.maxHeight == "高い") {
         MaxHeightTmp = "高い津波";
       } else if (homeArea.maxHeight) {
-        MaxHeightTmp = `今後最大${homeArea.maxHeight.replace("m", "メートル")}の津波`;
+        MaxHeightTmp = `今後最大${String(homeArea.maxHeight).replace("m", "メートル")}の津波`;
       } else if (!homeArea.maxHeight && homeArea.grade == "Yoho") {
         MaxHeightTmp = "若干の海面変動";
       } else {
@@ -4725,7 +4728,10 @@ function Boolean2(elm) {
 }
 
 function IncludesDuplicates(arr1, arr2) {
-  return [...arr1, ...arr2].filter(item => arr1.includes(item) && arr2.includes(item)).length > 0
+  const a1 = Array.isArray(arr1) ? arr1 : [];
+  const a2 = Array.isArray(arr2) ? arr2 : [];
+
+  return a1.some(item => a2.includes(item));
 }
 
 function throttle(anonymousFunction, limit) {
