@@ -430,18 +430,23 @@ function eqInfoDraw(data, source) {
       } else if (elm.hourly[0]) {
         dataToUse = elm.hourly[0]
       }
+      console.log(dataToUse)
 
-      if (dataToUse.StartTime && dataToUse.EndTime && dataToUse.Number) {
+      if (dataToUse.StartTime && dataToUse.EndTime) {
         var StartTime = NormalizeDate("YYYY/M/D h時", new Date(dataToUse.StartTime))
         var sameDate = NormalizeDate("YYYYMMDD", new Date(dataToUse.StartTime)) == NormalizeDate("YYYYMMDD", new Date(dataToUse.EndTime))
         if (sameDate) var EndTime = NormalizeDate("h時", new Date(dataToUse.EndTime))
         else var EndTime = NormalizeDate("M/D h時", new Date(dataToUse.EndTime))
         var dateRangeStr = `${StartTime} ～ ${EndTime}`;
 
-        if (dataToUse.FeltNumber || dataToUse.FeltNumber == 0) {
+        var nAvailable = dataToUse.Number || dataToUse.Number == 0;
+        var fnAvailable = dataToUse.FeltNumber || dataToUse.FeltNumber == 0;
+        if (fnAvailable && nAvailable) {
           var content = `${dataToUse.Number}回 （うち有感${dataToUse.FeltNumber}回）`
-        } else {
+        } else if (nAvailable) {
           var content = `${dataToUse.Number}回`
+        } else if (fnAvailable) {
+          var content = `有感${dataToUse.FeltNumber}回`
         }
 
         clone.querySelector(".EQI_datetime").textContent = dateRangeStr;
@@ -473,7 +478,6 @@ function eqInfoDraw(data, source) {
         document.getElementById("JMA_EqInfo_Data").appendChild(clone);
       }
 
-      //EQI_detail
     } else {
       var clone = EQTemplate.content.cloneNode(true);
 
