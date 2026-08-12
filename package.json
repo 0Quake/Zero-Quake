@@ -60,19 +60,19 @@
   "homepage": "https://0quake.github.io/ZeroQuake_Website/",
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "electron": "^43.3.0",
+    "electron": "^43.4.0",
     "electron-builder": "^26.15.3",
-    "globals": "^17.9.0",
+    "globals": "^17.11.0",
     "prettier": "^3.9.6",
     "eslint": "^10.8.1"
   },
   "dependencies": {
     "@turf/turf": "^7.4.0",
     "electron-store": "^11.0.2",
-    "maplibre-gl": "^6.2.0",
+    "maplibre-gl": "^6.3.0",
     "jsdom": "^30.0.1",
     "path": "^0.12.7",
-    "pmtiles": "^4.4.1",
+    "pmtiles": "^4.5.0",
     "websocket": "^1.0.35"
   }
 }
