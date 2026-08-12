@@ -69,28 +69,25 @@
     <script>
         window.electronAPI.messageSend((event, request) => {
             if (request.action == "KatsudoJokyoInfo") {
-                document.title = `${request.data.kind == "取消" ? "取消／" : ""}${request.data.title} - Zero Quake`;
+                var data = request.data;
+                if (!data) return;
+                document.title = `${data?.kind == "取消" ? "取消／" : ""}${data?.title} - Zero Quake`;
 
-                document.getElementById("title").innerText = (request.data.kind == "取消" ? "取消／" : "") + request.data.title;
-                document.getElementById("headline").innerText = `${request.data.HeadLine} (${NormalizeDate(4, request.data.reportDate)})`;
-                document.getElementById("Text_body").innerText = removeFirstBR(request.data.Text)
-                document.getElementById("Text2_body").innerText = removeFirstBR(request.data.Comments)
+                document.getElementById("title").innerText = (data.kind == "取消" ? "取消／" : "") + data.title;
+                document.getElementById("headline").innerText = `${data.HeadLine} (${NormalizeDate(4, data.reportDate)})`;
+                document.getElementById("Text_body").innerText = String(data.Text || "").trim();
+                document.getElementById("Text2_body").innerText = String(data.Comments || "").trim();
 
-                document.getElementById("EQ_Naming").innerText = request.data.Naming
-                document.getElementById("EQ_NamingEN").innerText = request.data.NamingEn
+                document.getElementById("EQ_Naming").innerText = data.Naming
+                document.getElementById("EQ_NamingEN").innerText = data.NamingEn
 
-                document.getElementById("Naming").style.display = (request.data.Naming || request.data.NamingEn) ? "block" : "none"
-                document.getElementById("Text").style.display = request.data.Text ? "block" : "none"
-                document.getElementById("Text2").style.display = request.data.Comments ? "block" : "none"
+                document.getElementById("Naming").style.display = (data.Naming || data.NamingEn) ? "block" : "none"
+                document.getElementById("Text").style.display = data.Text ? "block" : "none"
+                document.getElementById("Text2").style.display = data.Comments ? "block" : "none"
 
                 document.getElementById("splash").style.display = "none";
             }
         });
-
-        function removeFirstBR(str) {
-            if (str.startsWith("\n")) return str.replace("\n", "")
-            else return str
-        }
     </script>
 
     <style>

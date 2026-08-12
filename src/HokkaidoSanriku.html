@@ -50,21 +50,22 @@
     <script>
         window.electronAPI.messageSend((event, request) => {
             if (request.action == "HokkaidoSanrikuInfo") {
-                console.log(request)
-                document.title = (request.data.kind == "取消" ? "取消／" : "") + request.data.title + " - Zero Quake"
+                var data = request.data;
+                if (!data) return;
+                document.title = (data.kind == "取消" ? "取消／" : "") + data.title + " - Zero Quake"
 
-                if (request.data.kind == "取消") document.getElementById("title").classList.remove("happyo")
+                if (data.kind == "取消") document.getElementById("title").classList.remove("happyo")
                 else document.getElementById("title").classList.add("happyo")
 
-                document.getElementById("title").innerText = (request.data?.kind == "取消" ? "取消／" : "") + request.data?.title;
-                document.getElementById("headline").innerText = `${request.data?.HeadLine} (${NormalizeDate(4, request.data?.reportDate)})`;
-                document.getElementById("Text_body").innerText = String(request.data?.Text || "").trim();
-                document.getElementById("Appendix_body").innerText = String(request.data?.Appendix || "").trim();
-                document.getElementById("Text2_body").innerText = String(request.data?.Text2 || "").trim();
+                document.getElementById("title").innerText = (data?.kind == "取消" ? "取消／" : "") + data?.title;
+                document.getElementById("headline").innerText = `${data?.HeadLine} (${NormalizeDate(4, data?.reportDate)})`;
+                document.getElementById("Text_body").innerText = String(data?.Text || "").trim();
+                document.getElementById("Appendix_body").innerText = String(data?.Appendix || "").trim();
+                document.getElementById("Text2_body").innerText = String(data?.Text2 || "").trim();
 
-                document.getElementById("Text").style.display = request.data?.Text ? "block" : "none"
-                document.getElementById("Appendix").style.display = request.data?.Appendix ? "block" : "none"
-                document.getElementById("Text2").style.display = request.data?.Text2 ? "block" : "none"
+                document.getElementById("Text").style.display = data?.Text ? "block" : "none"
+                document.getElementById("Appendix").style.display = data?.Appendix ? "block" : "none"
+                document.getElementById("Text2").style.display = data?.Text2 ? "block" : "none"
 
                 document.getElementById("splash").style.display = "none";
             }
