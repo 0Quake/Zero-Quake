@@ -308,7 +308,7 @@
             document.getElementById("revision").style.display = json.hypocentral_parameters.status == "REVISION" ? "inline" : "none"
 
             document.getElementById("hypocentral_parameters").style.display = json.hypocentral_parameters ? "block" : "none"
-            if (json.hypocentral_parameters.origin_time) {
+            if (json.hypocentral_parameters?.origin_time) {
                 var ot = json.hypocentral_parameters.origin_time
                 var date = new Date(ot.year, ot.month_num - 1, ot.date, ot.hour, ot.minute)
                 if (date.toString() !== "Invalid Date") {
@@ -391,7 +391,7 @@
             document.getElementById("observation_wrap").style.display = json.observation ? "block" : "none"
             if (json.observation) {
                 var clone = document.getElementById('table_base2').content.cloneNode(true);
-                json.observation.locatios.forEach(function (elm) {
+                json.observation.locations.forEach(function (elm) {
                     var arrival = new Date(gen_YYYY(elm.max_wave_arrival.month_num), elm.max_wave_arrival.month_num - 1, elm.max_wave_arrival.date, elm.max_wave_arrival.hour, elm.max_wave_arrival.minute)
                     arrival = NormalizeDate("MM/DD hh:mm", ConvertJST(arrival)) + " JST"
                     var ampl = elm.ampl.value
@@ -626,7 +626,7 @@
 
                 json.observation = {
                     status: status,
-                    locatios: observation,
+                    locations: observation,
                     remarks: "MAXIMUM TSUNAMI WAVE - HALF THE AMPLITUDE FROM THE TROUGH TO THE CREST"
                 }
             }
@@ -655,7 +655,9 @@
         }
 
         function ConvertJST(time) {
-            return new Date(time.setHours(time.getHours() + 9));
+            var copy = new Date(time);
+            copy.setHours(copy.getHours() + 9)
+            return copy;
         }
 
         //年をまたぐ情報の場合を考慮し、発表年から年を類推
