@@ -1368,6 +1368,7 @@ var TTT_AK135 = JSON.parse(
   await readFile(path.join(__dirname, "./Resource/ak135table.json"))
 );
 
+var TsunamiValidate_bypass = true;
 //開始処理
 function start() {
   //replay("2026/4/20 16:55:40")
@@ -1579,7 +1580,7 @@ function Req_JMATide_sta() {
       Object.keys(json).forEach(function (key) {
         var el = json[key]
         el.class30s.forEach(function (cl) {
-          if (cl.stations) {
+          if (Array.isArray(cl.stations)) {
             cl.stations.forEach(function (st) {
               if (st.code && st.lat && st.lon && st.name) {//データ有効性チェック
                 st.threshold_warn = cl.standard.level4
@@ -1613,8 +1614,8 @@ function Req_JMATide() {
           if (!r.ok) throw new Error(`HTTP Error: ${r.status}`);
           return r.json();
         }).then((json) => {
-          if (json.tide) {
-            var tide = json.tide;
+          var tide = json.tide;
+          if (tide && st.code) {
             JMATide_astro[st.code] = tide
 
             if (JMATide_obs[st.code]) {//★1と同じ
@@ -1637,7 +1638,7 @@ function Req_JMATide() {
           var obsdata = {
             code: st.code,
             name: st.name,
-            by: st.typeName ? st.typeName.replaceAll("（地図では自治体等）", "") : "-",
+            by: st.typeName ? String(st.typeName).replaceAll("（地図では自治体等）", "") : "-",
             date: new Date(Number(new Date(json.time)) + (json.interval * json.tide.length * 1000)),
             threshold_warn: st.threshold_warn,
             threshold_advisory: st.threshold_advisory
@@ -1689,8 +1690,8 @@ function Req_EarlyEst() {
         function (parent) {
           var elm = parent.getElementsByTagName("event")[0];
           if (!elm) return;
-          var latitude = elm.querySelector("origin latitude value") ? Number(elm.querySelector("origin latitude value").textContent) : null;
-          var longitude = elm.querySelector("origin longitude value") ? Number(elm.querySelector("origin longitude value").textContent) : null;
+          var latitude = Number(elm?.querySelector("origin latitude value")?.textContent) || null;
+          var longitude = Number(elm?.querySelector("origin longitude value")?.textContent) || null;
           if (!Boolean2(latitude) || !Boolean2(longitude)) return;
 
           var FECode = FERegion.features.find(function (elm2) {
@@ -1700,15 +1701,15 @@ function Req_EarlyEst() {
 
           var data = {
             alertflg: "EarlyEst",
-            EventID: Number(String(elm.getAttribute("publicID")).slice(-12)),
-            serial: Number(elm.querySelector("origin quality").getElementsByTagName("ee:report_count")[0].textContent) + 1,
-            report_time: elm.querySelector("creationInfo creationTime") ? ConvertJST(new Date(elm.querySelector("creationInfo creationTime").textContent)) : null,
-            magnitude: elm.querySelector("magnitude mag value") ? Number(elm.querySelector("magnitude mag value").textContent) : null,
-            depth: elm.querySelector("origin depth value") ? Number(elm.querySelector("origin depth value").textContent) / 1000 : null,
+            EventID: Number(String(elm.getAttribute("publicID")).slice(-12)) || 1,
+            serial: Number((elm.querySelector("origin quality")?.getElementsByTagName("ee:report_count")?.[0]?.textContent) || 0) + 1,
+            report_time: ConvertJST(newDate2(elm.querySelector("creationInfo creationTime")?.textContent)) || null,
+            magnitude: Number(elm.querySelector("magnitude mag value")?.textContent) || null,
+            depth: (Number(elm.querySelector("origin depth value")?.textContent) / 1000) || null,
             latitude: latitude,
             longitude: longitude,
             region_name: FECode.properties.nameJA,
-            origin_time: elm.querySelector("origin time value") ? ConvertJST(new Date(elm.querySelector("origin time value").textContent)) : null,
+            origin_time: ConvertJST(newDate2(elm.querySelector("origin time value")?.textContent)) || null,
             source: "EarlyEst",
           };
           EarlyEst_Marge(data);
@@ -1938,21 +1939,15 @@ function P2P() {
               break;
             case 552:
               //津波情報
-              data.issue.time = new Date(data.issue.time);
+              data.issue.time = new Date(data.issue?.time);
               data.cancelled = false;
               data.revocation = false;
               data.source = "P2P";
 
               data.areas.forEach((elm) => {
-                if (elm.firstHeight) {
-                  if (elm.firstHeight.condition)
-                    elm.firstHeightCondition = elm.firstHeight.condition;
-                  if (elm.firstHeight.arrivalTime)
-                    elm.firstHeight = new Date(elm.firstHeight.arrivalTime);
-                  else elm.firstHeight = null;
-                }
-                if (elm.maxHeight && elm.maxHeight.description)
-                  elm.maxHeight = elm.maxHeight.description;
+                elm.firstHeightCondition = elm.firstHeight?.condition;
+                elm.firstHeight = newDate2(elm.firstHeight?.arrivalTime) || null;
+                elm.maxHeight = elm.maxHeight?.description;
               });
               ConvertTsunamiInfo(data);
               break;
@@ -2019,25 +2014,26 @@ function AXIS() {
               };
               var IntensityElm = { Observation: { MaxInt: null } };
               var OriginTimeTmp;
-              if (data.message.Body.Earthquake[0]) {
-                EarthquakeElm = data.message.Body.Earthquake[0];
-                OriginTimeTmp = new Date(EarthquakeElm.OriginTime);
-              }
-              if (!OriginTimeTmp) OriginTimeTmp = new Date(data.message.Head.TargetDateTime);
-              if (data.message.Body.Intensity) IntensityElm = data.message.Body.Intensity;
+
+              EarthquakeElm = data.message?.Body?.Earthquake?.[0];
+
+              OriginTimeTmp = newDate2(EarthquakeElm?.OriginTime);
+              if (!OriginTimeTmp) OriginTimeTmp = new Date(data.message?.Head?.TargetDateTime);
+
+              IntensityElm = data.message?.Body?.Intensity;
 
               MargeEQInfo([{
-                status: data.message.Control.Status,
-                eventId: data.message.Head.EventID,
-                category: data.message.Head.Title,
-                reportDateTime: new Date(data.message.Head.ReportDateTime),
+                status: data.message?.Control?.Status,
+                eventId: data.message?.Head?.EventID,
+                category: data.message?.Head?.Title,
+                reportDateTime: newDate2(data.message?.Head?.ReportDateTime),
                 OriginTime: OriginTimeTmp,
-                epiCenter: EarthquakeElm.Hypocenter.Area.Name,
-                M: Number(EarthquakeElm.Magnitude[0].valueOf_),
-                maxI: NormalizeShindo(IntensityElm.Observation.MaxInt),
-                cancel: data.message.Head.InfoType == "取消",
+                epiCenter: EarthquakeElm?.Hypocenter?.Area?.Name,
+                M: Number(EarthquakeElm?.Magnitude?.[0]?.valueOf_) || null,
+                maxI: NormalizeShindo(IntensityElm?.Observation?.MaxInt),
+                cancel: data.message?.Head?.InfoType == "取消",
                 DetailURL: [],
-                headline: data.message.Head.Headline.Text,
+                headline: data.message?.Head?.Headline?.Text,
                 axisData: data,
               }]);
               break;
@@ -2294,13 +2290,15 @@ function RegularExecution(loop) {
     });
 
     //津波情報解除
-    Tsunami_Data.forEach(function (elm) {
-      if (elm.ValidDateTime <= new Date() - Replay && !elm.revocation) {
-        elm.revocation = true;
-        elm.issue.time = new Date() - Replay;
-        ConvertTsunamiInfo(elm); //ダミーデータを送信、再度マージ処理
-      }
-    });
+    if (TsunamiValidate_bypass) {
+      Tsunami_Data.forEach(function (elm) {
+        if (elm.ValidDateTime <= new Date() - Replay && !elm.revocation) {
+          elm.revocation = true;
+          elm.issue.time = new Date() - Replay;
+          ConvertTsunamiInfo(elm); //ダミーデータを送信、再度マージ処理
+        }
+      });
+    }
 
     if (loop) {
       setTimeout(function () {
@@ -2414,20 +2412,20 @@ function DetectEEW(type, json) {
 
       var EEWdata = {
         alertflg: json.isWarn ? "警報" : "予報",
-        EventID: Number(json.eventID),
+        EventID: Number(json.eventID) || null,
         serial: json.serial,
-        report_time: new Date(json.issue.time),
-        magnitude: json.hypocenter.magnitude,
+        report_time: newDate2(json.issue?.time),
+        magnitude: json.hypocenter?.magnitude,
         maxInt: NormalizeShindo(json.maxIntensity, 0),
-        depth: json.hypocenter.location.depth,
+        depth: json.hypocenter?.location?.depth,
         is_cancel: json.isCancel,
         is_final: json.isFinal,
         is_training: codeData[2] == "01" || codeData[2] == "30",
-        latitude: json.hypocenter.location.lat,
-        longitude: json.hypocenter.location.lng,
-        region_name: json.hypocenter.name,
+        latitude: json.hypocenter?.location?.lat,
+        longitude: json.hypocenter?.location?.lng,
+        region_name: json.hypocenter?.name,
         origin_time: new Date(json.originTime),
-        isPlum: json.hypocenter.isEstimate,
+        isPlum: json.hypocenter?.isEstimate,
         userIntensity: null,
         arrivalTime: null,
         intensityAreas: null,
@@ -2475,9 +2473,9 @@ function DetectEEW(type, json) {
       }
       var EEWdata = {
         alertflg: json.isWarn ? "警報" : "予報",
-        EventID: Number(json.EventID),
+        EventID: Number(json.EventID) || null,
         serial: json.Serial,
-        report_time: new Date(json.AnnouncedTime),
+        report_time: newDate2(json.AnnouncedTime),
         magnitude: json.Magunitude,
         maxInt: NormalizeShindo(json.MaxIntensity, 0),
         depth: json.Depth,
@@ -2487,7 +2485,7 @@ function DetectEEW(type, json) {
         latitude: json.Latitude,
         longitude: json.Longitude,
         region_name: json.Hypocenter,
-        origin_time: new Date(json.OriginTime),
+        origin_time: newDate2(json.OriginTime),
         isPlum: json.isAssumption,
         userIntensity: null,
         arrivalTime: null,
@@ -2510,27 +2508,27 @@ function DetectEEW(type, json) {
           Code: elm.Code,
           Name: elm.Name,
           Alert: null,
-          IntTo: NormalizeShindo(elm.Intensity.To),
-          IntFrom: NormalizeShindo(elm.Intensity.From),
+          IntTo: NormalizeShindo(elm.Intensity?.To),
+          IntFrom: NormalizeShindo(elm.Intensity?.From),
           ArrivalTime: null,
           Arrived: null,
         });
       });
       var EEWdata = {
         alertflg: alertflgTmp,
-        EventID: Number(json.EventID),
+        EventID: Number(json.EventID) || null,
         serial: json.Serial,
-        report_time: new Date(json.ReportDateTime),
-        magnitude: Number(json.Magnitude),
+        report_time: newDate2(json.ReportDateTime) || null,
+        magnitude: Number(json.Magnitude) || null,
         maxInt: NormalizeShindo(json.Intensity),
-        depth: Number(json.Hypocenter.Depth.replace("km", "")),
-        is_cancel: json.Flag.is_cancel,
-        is_final: json.Flag.is_final,
-        is_training: json.Flag.is_training,
-        latitude: json.Hypocenter.Coordinate[1],
-        longitude: json.Hypocenter.Coordinate[0],
-        region_name: json.Hypocenter.Name,
-        origin_time: new Date(json.OriginDateTime),
+        depth: Number(String(json.Hypocenter?.Depth).replace("km", "")),
+        is_cancel: json.Flag?.is_cancel,
+        is_final: json.Flag?.is_final,
+        is_training: json.Flag?.is_training,
+        latitude: json.Hypocenter?.Coordinate?.[1],
+        longitude: json.Hypocenter?.Coordinate?.[0],
+        region_name: json.Hypocenter?.Name,
+        origin_time: newDate2(json.OriginDateTime),
         isPlum: null,
         userIntensity: null,
         arrivalTime: null,
@@ -2555,15 +2553,15 @@ function DetectEEW(type, json) {
       var region_nameTmp;
       var origin_timeTmp;
       var conditionTmp = false;
-      if (json.earthquake) {
-        latitudeTmp = json.earthquake.hypocenter.latitude;
-        longitudeTmp = json.earthquake.hypocenter.longitude;
-        depthTmp = json.earthquake.hypocenter.depth;
-        magnitudeTmp = json.earthquake.hypocenter.magnitude;
-        region_nameTmp = json.earthquake.hypocenter.name;
-        origin_timeTmp = new Date(json.earthquake.originTime);
-        conditionTmp = json.earthquake.condition == "仮定震源要素";
-      }
+
+      latitudeTmp = json.earthquake?.hypocenter?.latitude;
+      longitudeTmp = json.earthquake?.hypocenter?.longitude;
+      depthTmp = json.earthquake?.hypocenter?.depth;
+      magnitudeTmp = json.earthquake?.hypocenter?.magnitude;
+      region_nameTmp = json.earthquake?.hypocenter?.name;
+      origin_timeTmp = newDate2(json.earthquake?.originTime);
+      conditionTmp = json.earthquake?.condition == "仮定震源要素";
+
       var EBIData = [];
       json.areas.forEach(function (elm) {
         EBIData.push({
@@ -2579,9 +2577,9 @@ function DetectEEW(type, json) {
       if (!json.issue) return;
       var EEWdata = {
         alertflg: "警報",
-        EventID: Number(json.issue.eventId),
-        serial: Number(json.issue.serial),
-        report_time: new Date(json.issue.time),
+        EventID: Number(json.issue?.eventId) || null,
+        serial: Number(json.issue?.serial) || 1,
+        report_time: newDate2(json.issue?.time),
         magnitude: magnitudeTmp,
         maxInt: NormalizeShindo(maxIntTmp, 0),
         depth: depthTmp,
@@ -3157,21 +3155,18 @@ function Req_Hokkaidosanriku_JSON(url) {
     }).then((json) => {
       var data = {
         title: "北海道・三陸沖後発地震注意情報",
-        kind: json.Head.InfoType,//発表/取消
-        reportDate: new Date(json.Head.ReportDateTime), //時刻
-        HeadLine: json.Head.Headline.Text, //要約
+        kind: json.Head?.InfoType,//発表/取消
+        reportDate: newDate2(json.Head?.ReportDateTime), //時刻
+        HeadLine: json.Head?.Headline?.Text, //要約
         Text: "",
         Appendix: "",
         Text2: "",
       };
 
-      var EarthQuakeInfo = json.Body.EarthquakeInfo;
-      if (EarthQuakeInfo) {
-        data.Text = EarthQuakeInfo.Text;
-        if (EarthQuakeInfo.Appendix) data.Appendix = EarthQuakeInfo.Appendix;
-      }
 
-      if (json.Body.Text) data.Text2 = json.Body.Text;
+      data.Text = json.Body?.EarthquakeInfo?.Text;
+      data.Appendix = json.Body?.EarthquakeInfo?.Appendix;
+      data.Text2 = json.Body?.Text;
 
       Process_Hokkaidosanriku(data)
     }).catch((err) => {
@@ -3224,47 +3219,44 @@ function Req_JMAXML(url, count) {
       ) {
         //地震情報
         var EarthquakeElm = xml.getElementsByTagName("Body")[0].getElementsByTagName("Earthquake")[0];
-        var originTimeTmp;
+        var originTime;
         var epiCenterTmp;
         var magnitudeTmp;
         if (EarthquakeElm) {
-          originTimeTmp = new Date(
-            EarthquakeElm.getElementsByTagName("OriginTime")[0].textContent
-          );
-          epiCenterTmp = EarthquakeElm.getElementsByTagName("Name")[0].textContent;
-          var magElm = EarthquakeElm.getElementsByTagName("jmx_eb:Magnitude")[0];
-          if (magElm) magnitudeTmp = Number(magElm.textContent);
+          var OTimeStr = EarthquakeElm.getElementsByTagName("OriginTime")?.[0]?.textContent;
+          if (OTimeStr) originTime = new Date(OTimeStr);
+          epiCenterTmp = EarthquakeElm.getElementsByTagName("Name")?.[0]?.textContent;
+          var magStr = EarthquakeElm.getElementsByTagName("jmx_eb:Magnitude")?.[0]?.textContent;
+          if (magStr) magnitudeTmp = Number(magStr);
           if (!Boolean2(magnitudeTmp)) magnitudeTmp = null;
         }
 
-        if (!originTimeTmp) originTimeTmp = new Date(xml.getElementsByTagName("TargetDateTime")[0].textContent);
-        var IntensityElm = xml.getElementsByTagName("Body")[0].getElementsByTagName("Intensity")[0];
-        var maxIntTmp;
+        var TgDateStr = xml.getElementsByTagName("TargetDateTime")?.[0]?.textContent
+        if (TgDateStr && !originTime) originTime = new Date(TgDateStr);
+
+        var IntElm = xml.getElementsByTagName("Body")?.[0]?.getElementsByTagName("Intensity")?.[0];
+        var maxInt;
         var maxLgInt;
-        if (IntensityElm) {
-          maxIntTmp = NormalizeShindo(
-            IntensityElm.getElementsByTagName("Observation")[0].getElementsByTagName("MaxInt")[0].textContent
-          );
-          if (IntensityElm.getElementsByTagName("Observation")[0].getElementsByTagName("MaxLgInt")[0]) {
-            maxLgInt = IntensityElm.getElementsByTagName("Observation")[0]
-              .getElementsByTagName("MaxLgInt")[0].textContent;
-          }
+        if (IntElm) {
+          var ObsElm = IntElm.getElementsByTagName("Observation")?.[0];
+          maxInt = ObsElm?.getElementsByTagName("MaxInt")?.[0]?.textContent;
+          maxLgInt = ObsElm?.getElementsByTagName("MaxLgInt")?.[0]?.textContent;
+          if (maxInt == "[objectHTMLUnknownElement]") maxInt = null;
         }
-        if (maxIntTmp == "[objectHTMLUnknownElement]") maxIntTmp = null;
-        var headline = xml.getElementsByTagName("Head")[0].getElementsByTagName("Headline")[0].getElementsByTagName("Text")[0].textContent;
+        var headline = xml?.getElementsByTagName("Head")?.[0]?.getElementsByTagName("Headline")?.[0]?.getElementsByTagName("Text")?.[0]?.textContent;
 
         MargeEQInfo([{
-          status: xml.getElementsByTagName("Status")[0].textContent,
-          eventId: xml.getElementsByTagName("EventID")[0].textContent,
-          category: xml.getElementsByTagName("Title")[0].textContent,
-          OriginTime: originTimeTmp,
+          status: xml.getElementsByTagName("Status")?.[0]?.textContent,
+          eventId: xml.getElementsByTagName("EventID")?.[0]?.textContent,
+          category: xml.getElementsByTagName("Title")?.[0]?.textContent,
+          OriginTime: originTime,
           epiCenter: epiCenterTmp,
           M: magnitudeTmp,
-          maxI: NormalizeShindo(maxIntTmp),
+          maxI: NormalizeShindo(maxInt),
           maxLgInt: maxLgInt,
           cancel: Boolean(cancel),
           reportDateTime: new Date(
-            xml.getElementsByTagName("ReportDateTime")[0].textContent
+            xml.getElementsByTagName("ReportDateTime")?.[0]?.textContent
           ),
           DetailURL: [url],
           headline: headline,
@@ -3275,12 +3267,16 @@ function Req_JMAXML(url, count) {
           var hourly = []
           var sum, std;
           xml.querySelectorAll("EarthquakeCount Item").forEach(function (el) {
-            var type = el.getAttribute("type")
+            var type = el?.getAttribute("type")
 
-            if (el.getElementsByTagName("StartTime")[0]) var StartTime = new Date(el.getElementsByTagName("StartTime")[0].textContent)
-            if (el.getElementsByTagName("EndTime")[0]) var EndTime = new Date(el.getElementsByTagName("EndTime")[0].textContent)
-            if (el.getElementsByTagName("Number")[0] && Number(el.getElementsByTagName("Number")[0].textContent) !== -1) var _Number = Number(el.getElementsByTagName("Number")[0].textContent)
-            if (el.getElementsByTagName("FeltNumber")[0] && Number(el.getElementsByTagName("FeltNumber")[0].textContent) !== -1) var FeltNumber = Number(el.getElementsByTagName("FeltNumber")[0].textContent)
+            var StTimeStr = el?.getElementsByTagName("StartTime")?.[0]?.textContent
+            var EnTimeStr = el?.getElementsByTagName("EndTime")?.[0]?.textContent
+            var NumStr = el?.getElementsByTagName("Number")?.[0]?.textContent
+            var FNumStr = el?.getElementsByTagName("FeltNumber")?.[0]?.textContent
+            if (StTimeStr) var StartTime = new Date(StTimeStr)
+            if (EnTimeStr) var EndTime = new Date(EnTimeStr)
+            if (NumStr && Number(NumStr) !== -1) var _Number = Number(NumStr)
+            if (FNumStr && Number(FNumStr) !== -1) var FeltNumber = Number(FNumStr)
 
             var data = {
               StartTime: StartTime,
@@ -3298,20 +3294,20 @@ function Req_JMAXML(url, count) {
             }
           })
 
-          var headline = xml.getElementsByTagName("Head")[0].getElementsByTagName("Headline")[0].getElementsByTagName("Text")[0].textContent;
-          var Text = xml.querySelector("Body Text") ? xml.querySelector("Body Text").textContent : ""
-          var NextAdvisory = xml.querySelector("NextAdvisory") ? xml.querySelector("NextAdvisory").textContent : ""
-          var FreeFormComment = xml.querySelector("Comments FreeFormComment") ? xml.querySelector("Comments FreeFormComment").textContent : ""
+          var headline = xml.getElementsByTagName("Head")?.[0]?.getElementsByTagName("Headline")?.[0]?.getElementsByTagName("Text")?.[0]?.textContent;
+          var Text = xml.querySelector("Body Text")?.textContent || "";
+          var NextAdvisory = xml.querySelector("NextAdvisory")?.textContent || ""
+          var FreeFormComment = xml.querySelector("Comments FreeFormComment")?.textContent || ""
 
+          var rdtStr = xml.getElementsByTagName("ReportDateTime")?.[0]?.textContent
+          var rdt = newDate2(rdtStr);
 
           EQCount_process({
-            status: xml.getElementsByTagName("Status")[0].textContent,
-            eventId: xml.getElementsByTagName("EventID")[0].textContent,
-            category: xml.getElementsByTagName("Title")[0].textContent,
+            status: xml.getElementsByTagName("Status")?.[0]?.textContent,
+            eventId: xml.getElementsByTagName("EventID")?.[0]?.textContent,
+            category: xml.getElementsByTagName("Title")?.[0]?.textContent,
             cancel: Boolean(cancel),
-            reportDateTime: new Date(
-              xml.getElementsByTagName("ReportDateTime")[0].textContent
-            ),
+            reportDateTime: rdt,
             headline: headline || "",
             hourly: hourly,
             sum: sum,
@@ -3323,35 +3319,38 @@ function Req_JMAXML(url, count) {
         }
 
       } else if (title == "南海トラフ地震関連解説情報" || title == "南海トラフ地震臨時情報") {
+        var kind = xml.getElementsByTagName("Head")?.[0]?.getElementsByTagName("InfoType")?.[0]?.textContent;
+
+        var rdtStr = xml.getElementsByTagName("ReportDateTime")[0].textContent;
+        var rdt = newDate2(rdtStr)
+
+        var headline = xml.getElementsByTagName("Headline")?.[0]?.getElementsByTagName("Text")?.[0]?.textContent
+
         var data = {
           title: title, //南海トラフ地震関連解説情報など
           kind: null, //定例など
-          reportKind: xml.getElementsByTagName("Head")[0].getElementsByTagName("InfoType")[0].textContent, //発表/取消
-          reportDate: new Date(xml.getElementsByTagName("ReportDateTime")[0].textContent), //時刻
+          reportKind: kind, //発表/取消
+          reportDate: rdt, //時刻
           Serial: null,
-          HeadLine: xml.getElementsByTagName("Headline")[0].getElementsByTagName("Text")[0].textContent, //要約
+          HeadLine: headline, //要約
           Text: "",
           Appendix: "",
           NextAdvisory: "",
           Text2: "",
         };
 
-        if (xml.getElementsByTagName("Serial")[0] && xml.getElementsByTagName("Serial")[0].textContent)
-          data.Serial = Number(xml.getElementsByTagName("Serial")[0].textContent);
+
+        var SerialStr = xml.getElementsByTagName("Serial")?.[0]?.textContent
+        if (SerialStr) data.Serial = Number(SerialStr);
+
         var Body = xml.getElementsByTagName("Body")[0];
         var EarthQuakeInfo = Body.getElementsByTagName("EarthquakeInfo")[0];
-        if (EarthQuakeInfo) {
-          if (EarthQuakeInfo.getElementsByTagName("InfoSerial")[0]) {
-            data.kind = EarthQuakeInfo.getElementsByTagName("InfoSerial")[0].getElementsByTagName("Name")[0].textContent;
-          }
-          data.Text = EarthQuakeInfo.getElementsByTagName("Text")[0].textContent;
 
-          if (EarthQuakeInfo.getElementsByTagName("Appendix")[0])
-            data.Appendix = EarthQuakeInfo.getElementsByTagName("Appendix")[0].textContent;
-        }
+        data.kind = EarthQuakeInfo?.getElementsByTagName("InfoSerial")?.[0]?.getElementsByTagName("Name")?.[0]?.textContent;
+        data.Text = EarthQuakeInfo?.getElementsByTagName("Text")?.[0]?.textContent;
+        data.Appendix = EarthQuakeInfo?.getElementsByTagName("Appendix")?.[0]?.textContent;
 
-        if (Body.getElementsByTagName("NextAdvisory")[0])
-          data.NextAdvisory = Body.getElementsByTagName("NextAdvisory")[0].textContent;
+        data.NextAdvisory = Body?.getElementsByTagName("NextAdvisory")?.[0]?.textContent;
 
         var Text2Elm = Array.from(xml.getElementsByTagName("Body")[0].children)
           .find(function (elm) { return elm.tagName == "Text"; });
@@ -3411,21 +3410,28 @@ function Req_JMAXML(url, count) {
         Array.prototype.forEach.call(
           xml.getElementsByTagName("Earthquake"),
           function (elm, index) {
-            var magTmp = elm.getElementsByTagName("jmx_eb:Magnitude")[0];
-            magTmp = (magTmp && magTmp.textContent !== "NaN") ? magTmp.textContent : null;
-            var ECTmp = elm.getElementsByTagName("Name")[0];
-            ECTmp = ECTmp ? ECTmp.textContent : null;
+            var magStr = elm.getElementsByTagName("jmx_eb:Magnitude")?.[0]?.textContent;
+
+            var ECTmp = elm.getElementsByTagName("Name")?.[0]?.textContent;
+
+            var rdtStr = xml.getElementsByTagName("ReportDateTime")?.[0]?.textContent;
+            var rdt = newDate2(rdtStr);
+
+            var odtStr = elm.getElementsByTagName("OriginTime")?.[0]?.textContent;
+            var odt = newDate2(odtStr);
+
+            if (!odt) odt = rdt;
 
             EQData.push({
-              status: xml.getElementsByTagName("Status")[0].textContent,
+              status: xml.getElementsByTagName("Status")?.[0]?.textContent,
               eventId: EventID[index],
               category: "Tsunami",
-              OriginTime: elm.getElementsByTagName("OriginTime")[0] ? new Date(elm.getElementsByTagName("OriginTime")[0].textContent) : new Date(),
+              OriginTime: odt,
               epiCenter: ECTmp,
-              M: Number(magTmp),
+              M: Number(Number(magStr)) || null,
               maxI: null,
               cancel: Boolean(cancel),
-              reportDateTime: new Date(xml.getElementsByTagName("ReportDateTime")[0].textContent),
+              reportDateTime: rdt,
               DetailURL: [url],
               Headline: "",
               axisData: null,
@@ -3435,10 +3441,13 @@ function Req_JMAXML(url, count) {
         MargeEQInfo(EQData, count);
 
         if (cancel) {
+          var rdtStr = xml.getElementsByTagName("ReportDateTime")[0].textContent;
+          var rdt = newDate2(rdtStr);
+
           tsunamiDataTmp = {
-            status: xml.getElementsByTagName("Status")[0].textContent,
+            status: xml.getElementsByTagName("Status")?.[0]?.textContent,
             issue: {
-              time: new Date(xml.getElementsByTagName("ReportDateTime")[0].textContent),
+              time: rdt,
               EventID: null,
               EarthQuake: null,
             },
@@ -3448,50 +3457,44 @@ function Req_JMAXML(url, count) {
             ValidDateTime: null,
           };
         } else {
-          var ValidDateTimeElm = xml.getElementsByTagName("ValidDateTime")[0];
-          if (ValidDateTimeElm) var ValidDateTimeTmp = new Date(ValidDateTimeElm.textContent);
-          else {
-            var ValidDateTimeTmp = new Date(xml.getElementsByTagName("ReportDateTime")[0].textContent);
-            ValidDateTimeTmp.setHours(ValidDateTimeTmp.getHours() + 12);
+          var VDateStr = xml.getElementsByTagName("ValidDateTime")?.[0]?.textContent;
+          if (VDateStr) {
+            var ValidDateTimeTmp = new Date(VDateStr);
+          } else {
+            var rdtStr = xml.getElementsByTagName("ReportDateTime")?.[0]?.textContent;
+            if (rdtStr) {
+              var ValidDateTimeTmp = new Date(rdtStr);
+              ValidDateTimeTmp.setHours(ValidDateTimeTmp.getHours() + 12);
+            }
           }
           if (ValidDateTimeTmp < new Date() - Replay) return;
 
-          var headline = "";
-          var headlineElm = xml.getElementsByTagName("Headline")[0];
-          if (headlineElm && headlineElm.getElementsByTagName("Text")[0])
-            headline = headlineElm.getElementsByTagName("Text")[0].textContent;
+          var headline = xml.getElementsByTagName("Headline")?.[0]?.getElementsByTagName("Text")?.[0]?.textContent || "";
 
           var Text1 = "";
           var WarningComment = "";
           var FreeFormComment = "";
+          var Comment_Joined = "";
           //付加文取得の不具合による処理停止を回避
           try {
-            if (xml.querySelector("Body  > Text")) {
-              Text1 = `${xml.querySelector("Body  > Text").textContent}\n\n`;
+            Text1 = xml.querySelector("Body  > Text")?.textContent || "";
+
+            var cmt_el = xml.getElementsByTagName("Comments")[0];
+            if (cmt_el) {
+              WarningComment = cmt_el.getElementsByTagName("WarningComment")?.[0]?.getElementsByTagName("Text")?.[0]?.textContent;
+              FreeFormComment = cmt_el.getElementsByTagName("FreeFormComment")[0].textContent;
             }
 
-            var comments_elm = xml.getElementsByTagName("Comments")[0];
-            if (comments_elm) {
-              var WarningComment_elm =
-                comments_elm.getElementsByTagName("WarningComment")[0];
-              if (WarningComment_elm)
-                WarningComment = `${WarningComment_elm.getElementsByTagName("Text")[0].textContent}\n\n`;
-
-              var FreeFormComment_elm =
-                comments_elm.getElementsByTagName("FreeFormComment")[0];
-              if (FreeFormComment_elm)
-                FreeFormComment = FreeFormComment_elm.textContent;
-            }
-            // eslint-disable-next-line no-empty
+            Comment_Joined = [Text1, WarningComment, FreeFormComment].filter(Boolean).join("\n\n")
           } catch { }
 
           //P2PのAPIとの整合性のため、津波情報においてのみ、Control > DateTimeを発表時刻として扱う
-          var dateTime = new Date(
-            xml.getElementsByTagName("Control")[0].getElementsByTagName("DateTime")[0].textContent
-          );
+          var dateStr = xml.getElementsByTagName("Control")[0]?.getElementsByTagName("DateTime")?.[0]?.textContent;
+
+          if (dateStr) var dateTime = new Date(dateStr);
 
           tsunamiDataTmp = {
-            status: xml.getElementsByTagName("Status")[0].textContent,
+            status: xml.getElementsByTagName("Status")?.[0]?.textContent,
             issue: {
               time: dateTime,
               EventID: EventID,
@@ -3500,256 +3503,244 @@ function Req_JMAXML(url, count) {
             areas: [],
             revocation: false,
             headline: headline,
-            comment: Text1 + WarningComment + FreeFormComment,
+            comment: Comment_Joined,
             source: "jmaXML",
             ValidDateTime: ValidDateTimeTmp,
           };
 
-          var tsunamiElm = xml.getElementsByTagName("Body")[0].getElementsByTagName("Tsunami")[0];
-          if (tsunamiElm) {
-            var forecastElm;
-            if (tsunamiElm.getElementsByTagName("Forecast")[0])
-              forecastElm = tsunamiElm.getElementsByTagName("Forecast")[0];
-            if (tsunamiElm.getElementsByTagName("Estimation")[0])
-              forecastElm = tsunamiElm.getElementsByTagName("Estimation")[0];
-            if (forecastElm) {
+          var tsunamiElm = xml.getElementsByTagName("Body")?.[0]?.getElementsByTagName("Tsunami")?.[0];
+          var forecastElm = tsunamiElm?.getElementsByTagName("Forecast")?.[0];
+          if (!forecastElm) forecastElm = tsunamiElm?.getElementsByTagName("Estimation")?.[0];
+
+
+          for (const elm of (forecastElm?.getElementsByTagName("Item") || [])) {
+            var gradeTmp;
+            var cancelledTmp = false;
+
+            var codeStr = elm.getElementsByTagName("Category")?.[0]?.getElementsByTagName("Kind")?.[0]?.getElementsByTagName("Code")?.[0]?.textContent;
+
+            if (elm.getElementsByTagName("Category")[0]) {
+              switch (Number(codeStr || 0)) {
+                case 52:
+                case 53:
+                  gradeTmp = "MajorWarning";
+                  break;
+                case 51:
+                  gradeTmp = "Warning";
+                  break;
+                case 62:
+                  gradeTmp = "Watch";
+                  break;
+                case 71:
+                case 72:
+                case 73:
+                  gradeTmp = "Yoho";
+                  break;
+                case 50:
+                case 60:
+                  cancelledTmp = true;
+                  break;
+              }
+            }
+            var firstHeightTmp;
+            var firstHeightConditionTmp;
+            var maxHeightTmp;
+
+            var fHgtStr = elm.getElementsByTagName("FirstHeight")?.[0]?.getElementsByTagName("ArrivalTime")?.[0]?.textContent;
+            if (fHgtStr) firstHeightTmp = new Date(fHgtStr);
+            firstHeightConditionTmp = elm.getElementsByTagName("FirstHeight")?.[0]?.getElementsByTagName("Condition")?.[0]?.textContent;
+
+            var maxHeightElm = elm.getElementsByTagName("MaxHeight")?.[0]?.getElementsByTagName("jmx_eb:TsunamiHeight");
+            var mHeightStr = maxHeightElm?.[0]?.getAttribute("description");
+            if (mHeightStr) {
+              maxHeightTmp = mHeightStr
+                .replace(/[Ａ-Ｚａ-ｚ０-９．]/g, function (s) {
+                  return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
+                });
+            } else {
+              maxHeightTmp = elm.getElementsByTagName("MaxHeight")?.[0]?.getElementsByTagName("Condition")?.[0]?.textContent;
+            }
+
+
+            var stations = [];
+            if (elm.getElementsByTagName("Station")[0]) {
               Array.prototype.forEach.call(
-                forecastElm.getElementsByTagName("Item"),
-                function (elm) {
-                  var gradeTmp;
-                  var cancelledTmp = false;
-                  if (elm.getElementsByTagName("Category")[0]) {
-                    switch (
-                    Number(
-                      elm.getElementsByTagName("Category")[0].getElementsByTagName("Kind")[0].getElementsByTagName("Code")[0].textContent
-                    )
-                    ) {
-                      case 52:
-                      case 53:
-                        gradeTmp = "MajorWarning";
-                        break;
-                      case 51:
-                        gradeTmp = "Warning";
-                        break;
-                      case 62:
-                        gradeTmp = "Watch";
-                        break;
-                      case 71:
-                      case 72:
-                      case 73:
-                        gradeTmp = "Yoho";
-                        break;
-                      case 50:
-                      case 60:
-                        cancelledTmp = true;
-                        break;
-                    }
-                  }
-                  var firstHeightTmp;
-                  var firstHeightConditionTmp;
-                  var maxHeightTmp;
-                  if (elm.getElementsByTagName("FirstHeight")[0]) {
-                    if (elm.getElementsByTagName("FirstHeight")[0].getElementsByTagName("ArrivalTime")[0]) {
-                      firstHeightTmp = new Date(elm.getElementsByTagName("FirstHeight")[0].getElementsByTagName("ArrivalTime")[0].textContent);
-                    }
-                    if (elm.getElementsByTagName("FirstHeight")[0].getElementsByTagName("Condition")[0]) {
-                      firstHeightConditionTmp = elm.getElementsByTagName("FirstHeight")[0].getElementsByTagName("Condition")[0].textContent;
-                    }
-                  }
-                  if (elm.getElementsByTagName("MaxHeight")[0]) {
-                    var maxHeightElm = elm.getElementsByTagName("MaxHeight")[0].getElementsByTagName("jmx_eb:TsunamiHeight");
-                    if (maxHeightElm[0]) {
-                      maxHeightTmp = maxHeightElm[0].getAttribute("description")
-                        .replace(/[Ａ-Ｚａ-ｚ０-９．]/g, function (s) {
-                          return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
-                        });
-                    } else if (elm.getElementsByTagName("MaxHeight")[0].getElementsByTagName("Condition")[0]) {
-                      maxHeightTmp = elm.getElementsByTagName("MaxHeight")[0].getElementsByTagName("Condition")[0].textContent;
-                    }
-                  }
+                elm.getElementsByTagName("Station"),
+                function (elm2) {
+                  var ArrivalTimeTmp;
+                  var ConditionTmp;
+                  var highTideTimeTmp;
+                  var nameTmp = elm2.getElementsByTagName("Name")?.[0]?.textContent;
+                  var codeTmp = elm2.getElementsByTagName("Code")?.[0]?.textContent;
 
-                  var stations = [];
-                  if (elm.getElementsByTagName("Station")[0]) {
-                    Array.prototype.forEach.call(
-                      elm.getElementsByTagName("Station"),
-                      function (elm2) {
-                        var ArrivalTimeTmp;
-                        var ConditionTmp;
-                        var nameTmp = elm2.getElementsByTagName("Name")[0].textContent;
-                        var codeTmp = elm2.getElementsByTagName("Code")[0].textContent;
-                        var highTideTimeTmp = new Date(elm2.getElementsByTagName("HighTideDateTime")[0].textContent);
-                        if (elm2.getElementsByTagName("FirstHeight")[0].getElementsByTagName("ArrivalTime")[0])
-                          ArrivalTimeTmp = new Date(elm2.getElementsByTagName("FirstHeight")[0].getElementsByTagName("ArrivalTime")[0].textContent);
-                        if (elm2.getElementsByTagName("Condition")[0])
-                          ConditionTmp = elm2.getElementsByTagName("Condition")[0].textContent;
-                        stations.push({
-                          name: nameTmp,
-                          code: codeTmp,
-                          HighTideDateTime: highTideTimeTmp,
-                          ArrivalTime: ArrivalTimeTmp,
-                          Condition: ConditionTmp,
-                        });
-                      }
-                    );
-                  }
+                  var highTideStr = elm2.getElementsByTagName("HighTideDateTime")?.[0]?.textContent;
+                  if (highTideStr) highTideTimeTmp = new Date(highTideStr);
 
-                  var codeTmp;
-                  if (elm.getElementsByTagName("Category")[0])
-                    codeTmp = Number(elm.getElementsByTagName("Category")[0].getElementsByTagName("Kind")[0].getElementsByTagName("Code")[0].textContent);
+                  var arDateStr = elm2.getElementsByTagName("FirstHeight")?.[0]?.getElementsByTagName("ArrivalTime")?.[0]?.textContent;
+                  if (arDateStr) ArrivalTimeTmp = new Date(arDateStr);
 
-                  tsunamiDataTmp.areas.push({
+                  ConditionTmp = elm2.getElementsByTagName("Condition")?.[0]?.textContent;
+
+                  stations.push({
+                    name: nameTmp,
                     code: codeTmp,
-                    grade: gradeTmp,
-                    name: elm.getElementsByTagName("Name")[0].textContent,
-                    cancelled: cancelledTmp,
-                    firstHeight: firstHeightTmp,
-                    firstHeightCondition: firstHeightConditionTmp,
-                    stations: stations,
-                    maxHeight: maxHeightTmp,
+                    HighTideDateTime: highTideTimeTmp,
+                    ArrivalTime: ArrivalTimeTmp,
+                    Condition: ConditionTmp,
                   });
                 }
               );
             }
 
-            if (tsunamiElm.getElementsByTagName("Observation")[0]) {
-              Array.prototype.forEach.call(
-                tsunamiElm.getElementsByTagName("Observation")[0].getElementsByTagName("Item"),
-                function (elm) {
-                  var stations = [];
-                  if (elm.getElementsByTagName("Station")[0]) {
-                    Array.prototype.forEach.call(
-                      elm.getElementsByTagName("Station"),
-                      function (elm2) {
-                        var ArrivalTimeTmp;
-                        var firstHeightConditionTmp;
-                        var firstHeightInitialTmp;
-                        var maxHeightTime;
-                        var maxHeightCondition;
-                        var oMaxHeightTmp;
-                        var maxHeightRising = false;
-                        var nameTmp = elm2.getElementsByTagName("Name")[0].textContent;
+            var codeStr = elm.getElementsByTagName("Category")?.[0]?.getElementsByTagName("Kind")?.[0]?.getElementsByTagName("Code")?.[0]?.textContent
+            var codeTmp;
+            if (codeStr) codeTmp = Number(codeStr);
 
-                        if (elm2.getElementsByTagName("FirstHeight")[0]) {
-                          var firstHeightTag = elm2.getElementsByTagName("FirstHeight")[0];
-                          if (firstHeightTag.getElementsByTagName("ArrivalTime")[0])
-                            ArrivalTimeTmp = new Date(firstHeightTag.getElementsByTagName("ArrivalTime")[0].textContent);
-                          if (firstHeightTag.getElementsByTagName("Condition")[0])
-                            firstHeightConditionTmp = firstHeightTag.getElementsByTagName("Condition")[0].textContent;
-                          if (firstHeightTag.getElementsByTagName("Initial")[0])
-                            firstHeightInitialTmp = firstHeightTag.getElementsByTagName("Initial")[0].textContent;
-                        }
-                        if (elm2.getElementsByTagName("MaxHeight")[0]) {
-                          var maxHeightElm = elm2.getElementsByTagName("MaxHeight")[0].getElementsByTagName("jmx_eb:TsunamiHeight")[0];
-                          if (maxHeightElm) {
-                            oMaxHeightTmp = maxHeightElm.getAttribute("description");
-                            oMaxHeightTmp = oMaxHeightTmp.replace(/[Ａ-Ｚａ-ｚ０-９．]/g, function (s) {
-                              return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
-                            });
-                            if (maxHeightElm.getAttribute("condition"))
-                              maxHeightRising = maxHeightElm.getAttribute("condition") == "上昇中";
-                          }
+            var name = elm.getElementsByTagName("Name")?.[0]?.textContent;
 
-                          var maxHeightTimeElm = elm2.getElementsByTagName("MaxHeight")[0].getElementsByTagName("DateTime")[0];
-                          if (maxHeightTimeElm) maxHeightTime = new Date(maxHeightTimeElm.textContent);
+            tsunamiDataTmp.areas.push({
+              code: codeTmp,
+              grade: gradeTmp,
+              name: name,
+              cancelled: cancelledTmp,
+              firstHeight: firstHeightTmp,
+              firstHeightCondition: firstHeightConditionTmp,
+              stations: stations,
+              maxHeight: maxHeightTmp,
+            });
+          }
 
-                          var maxHeightConditionElm = elm2.getElementsByTagName("MaxHeight")[0].getElementsByTagName("Condition")[0];
-                          if (maxHeightConditionElm) maxHeightCondition = maxHeightConditionElm.textContent;
-                        }
 
-                        var codeTmp = elm2.getElementsByTagName("Code")[0].textContent;
+          if (tsunamiElm.getElementsByTagName("Observation")[0]) {
+            for (const elm of (tsunamiElm.getElementsByTagName("Observation")?.[0]?.getElementsByTagName("Item") || [])) {
+              var stations = [];
+              if (elm.getElementsByTagName("Station")[0]) {
 
-                        stations.push({
-                          name: nameTmp,
-                          code: codeTmp,
-                          ArrivedTime: ArrivalTimeTmp,
-                          firstHeightCondition: firstHeightConditionTmp,
-                          firstHeightInitial: firstHeightInitialTmp,
-                          omaxHeight: oMaxHeightTmp,
-                          maxHeightRising: maxHeightRising,
-                          maxHeightTime: maxHeightTime,
-                          maxHeightCondition: maxHeightCondition,
-                        });
-                      }
-                    );
+                for (const elm2 of elm.getElementsByTagName("Station") || []) {
+                  var ArrivalTimeTmp;
+                  var firstHeightConditionTmp;
+                  var firstHeightInitialTmp;
+                  var maxHeightTime;
+                  var maxHeightCondition;
+                  var oMaxHeightTmp;
+                  var maxHeightRising = false;
+                  var nameTmp = elm2.getElementsByTagName("Name")?.[0]?.textContent;
+
+                  var fHeightElm = elm2.getElementsByTagName("FirstHeight")[0];
+                  if (fHeightElm) {
+                    var arTimeStr = fHeightElm.getElementsByTagName("ArrivalTime")[0].textContent;
+                    if (arTimeStr) ArrivalTimeTmp = new Date(arTimeStr);
+                    firstHeightConditionTmp = fHeightElm.getElementsByTagName("Condition")?.[0]?.textContent;
+                    firstHeightInitialTmp = fHeightElm.getElementsByTagName("Initial")?.[0]?.textContent;
                   }
-
-                  var areaName = title == "沖合の津波観測に関する情報" ? "（海上）" : elm.getElementsByTagName("Name")[0].textContent;
-                  var tsunamiItem = tsunamiDataTmp.areas.find(function (elm2) {
-                    return elm2.name == areaName;
-                  });
-                  if (tsunamiItem) {
-                    stations.forEach(function (elm2) {
-                      var stationElm = tsunamiItem.stations.findIndex(function (elm3) {
-                        return elm3.name == elm2.name;
+                  if (elm2.getElementsByTagName("MaxHeight")[0]) {
+                    var maxHeightElm = elm2.getElementsByTagName("MaxHeight")[0].getElementsByTagName("jmx_eb:TsunamiHeight")[0];
+                    if (maxHeightElm) {
+                      oMaxHeightTmp = maxHeightElm.getAttribute("description");
+                      oMaxHeightTmp = oMaxHeightTmp.replace(/[Ａ-Ｚａ-ｚ０-９．]/g, function (s) {
+                        return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
                       });
-                      if (stationElm > -1) tsunamiItem.stations[stationElm] = Object.assign(tsunamiItem.stations[stationElm], elm2);
-                      else tsunamiItem.stations.push(elm2);
-                    });
-                  } else {
-                    tsunamiDataTmp.areas.push({
-                      name: areaName,
-                      stations: stations,
-                    });
+                      if (maxHeightElm.getAttribute("condition"))
+                        maxHeightRising = maxHeightElm.getAttribute("condition") == "上昇中";
+                    }
+
+                    var mhTimeStr = elm2.getElementsByTagName("MaxHeight")?.[0]?.getElementsByTagName("DateTime")?.[0]?.textContent;
+                    if (mhTimeStr) maxHeightTime = new Date(mhTimeStr);
+
+                    maxHeightCondition = elm2.getElementsByTagName("MaxHeight")?.[0]?.getElementsByTagName("Condition")?.[0]?.textContent;
                   }
+
+                  var codeTmp = elm2.getElementsByTagName("Code")?.[0]?.textContent;
+
+                  stations.push({
+                    name: nameTmp,
+                    code: codeTmp,
+                    ArrivedTime: ArrivalTimeTmp,
+                    firstHeightCondition: firstHeightConditionTmp,
+                    firstHeightInitial: firstHeightInitialTmp,
+                    omaxHeight: oMaxHeightTmp,
+                    maxHeightRising: maxHeightRising,
+                    maxHeightTime: maxHeightTime,
+                    maxHeightCondition: maxHeightCondition,
+                  });
                 }
-              );
+              }
+
+              var areaName = title == "沖合の津波観測に関する情報" ? "（海上）" : elm.getElementsByTagName("Name")[0].textContent;
+              var tsunamiItem = tsunamiDataTmp.areas.find(function (elm2) {
+                return elm2.name == areaName;
+              });
+              if (tsunamiItem) {
+                stations.forEach(function (elm2) {
+                  var stationElm = tsunamiItem.stations.findIndex(function (elm3) {
+                    return elm3.name == elm2.name;
+                  });
+                  if (stationElm > -1) tsunamiItem.stations[stationElm] = Object.assign(tsunamiItem.stations[stationElm], elm2);
+                  else tsunamiItem.stations.push(elm2);
+                });
+              } else {
+                tsunamiDataTmp.areas.push({
+                  name: areaName,
+                  stations: stations,
+                });
+              }
+
             }
           }
+
         }
         ConvertTsunamiInfo(tsunamiDataTmp);
       } else if (title == "北海道・三陸沖後発地震注意情報") {
+        var kind = xml.getElementsByTagName("Head")?.[0]?.getElementsByTagName("InfoType")?.[0]?.textContent;
+        var headline = xml.getElementsByTagName("Headline")?.[0]?.getElementsByTagName("Text")?.[0]?.textContent;
+        var rdt = newDate2(xml.getElementsByTagName("ReportDateTime")?.[0]?.textContent);
         var data = {
           title: title, //北海道・三陸沖後発地震注意情報
-          kind: xml.getElementsByTagName("Head")[0].getElementsByTagName("InfoType")[0].textContent,//発表/取消
-          reportDate: new Date(xml.getElementsByTagName("ReportDateTime")[0].textContent), //時刻
-          HeadLine: xml.getElementsByTagName("Headline")[0].getElementsByTagName("Text")[0].textContent, //要約
+          kind: kind,//発表/取消
+          reportDate: rdt, //時刻
+          HeadLine: headline, //要約
           Text: "",
           Appendix: "",
           Text2: "",
         };
 
-        var Body = xml.getElementsByTagName("Body")[0];
-        var EarthQuakeInfo = Body.getElementsByTagName("EarthquakeInfo")[0];
-        if (EarthQuakeInfo) {
-          data.Text = EarthQuakeInfo.getElementsByTagName("Text")[0].textContent;
-          if (EarthQuakeInfo.getElementsByTagName("Appendix")[0])
-            data.Appendix = EarthQuakeInfo.getElementsByTagName("Appendix")[0].textContent;
-        }
+        var Body = xml.getElementsByTagName("Body")?.[0];
+        var EarthQuakeInfo = Body?.getElementsByTagName("EarthquakeInfo")?.[0];
+        data.Text = EarthQuakeInfo?.getElementsByTagName("Text")?.[0]?.textContent;
+        data.Appendix = EarthQuakeInfo?.getElementsByTagName("Appendix")?.[0]?.textContent;
 
-        var Text2Elm = Array.from(xml.getElementsByTagName("Body")[0].children)
+        var Text2Elm = Array.from(xml.getElementsByTagName("Body")?.[0]?.children || [])
           .find(function (elm) { return elm.tagName == "Text"; });
-        if (Text2Elm) data.Text2 = Text2Elm.textContent;
+        data.Text2 = Text2Elm?.textContent;
 
         Process_Hokkaidosanriku(data)
       } else if (title == "地震の活動状況等に関する情報") {
-        var headline = xml.getElementsByTagName("Headline")[0].getElementsByTagName("Text")[0].textContent
+        var headline = xml.getElementsByTagName("Headline")?.[0]?.getElementsByTagName("Text")?.[0]?.textContent
         if (headline.includes("南海トラフ地震に関連する情報")) return;//南海トラフ地震関連解説情報（移行措置電文）の重複をはじく
+
+        var kind = xml.getElementsByTagName("Head")?.[0]?.getElementsByTagName("InfoType")?.[0]?.textContent;
+        var rdt = newDate2(xml.getElementsByTagName("ReportDateTime")?.[0]?.textContent)
 
         var data = {
           title: title, //地震の活動状況等に関する情報
-          kind: xml.getElementsByTagName("Head")[0].getElementsByTagName("InfoType")[0].textContent,//発表/取消
-          reportDate: new Date(xml.getElementsByTagName("ReportDateTime")[0].textContent), //時刻
-          HeadLine: xml.getElementsByTagName("Headline")[0].getElementsByTagName("Text")[0].textContent, //要約
+          kind: kind,//発表/取消
+          reportDate: rdt, //時刻
+          HeadLine: headline, //要約
           Naming: null,
           NamingEn: null,
           Text: "",
           Comments: "",
         };
 
-        var Body = xml.getElementsByTagName("Body")[0];
-        data.Text = Body.getElementsByTagName("Text")[0].textContent;
+        var Body = xml.getElementsByTagName("Body")?.[0];
+        data.Text = Body?.getElementsByTagName("Text")?.[0]?.textContent;
 
-        var commentsEl = Body.getElementsByTagName("Comments")[0];
-        if (commentsEl && commentsEl.getElementsByTagName("FreeFormComment")[0])
-          data.Comments = commentsEl.getElementsByTagName("FreeFormComment")[0].textContent;
+        var commentsEl = Body?.getElementsByTagName("Comments")?.[0];
+        data.Comments = commentsEl?.getElementsByTagName("FreeFormComment")?.[0]?.textContent;
 
-        var NamingElm = Body.getElementsByTagName("Naming")[0]
-        if (NamingElm) {
-          data.Naming = NamingElm.textContent
-          if (NamingElm.getAttribute("english")) data.NamingEn = NamingElm.getAttribute("english")
-        }
-
-
+        var NamingElm = Body?.getElementsByTagName("Naming")?.[0]
+        data.Naming = NamingElm?.textContent
+        data.NamingEn = NamingElm?.getAttribute("english")
 
         KatsudoJokyoInfoAll.push(data);
         KatsudoJokyoInfoAll = KatsudoJokyoInfoAll
@@ -3792,10 +3783,11 @@ var Req_USGS = throttle(function () {
       if (!r.ok) throw new Error(`HTTP Error: ${r.status}`);
       return r.json();
     }).then((json) => {
-      if (!json || !json.features[0] || !json.features[0].properties || !json.features[0].properties.updated) throw new Error("usgs.govが不正なデータを返しました。");
-      if (usgsLastGenerated > json.features[0].properties.updated) throw new Error("usgs.govが古いデータを返しました。");
+      var LastGenTmp = Number(json?.features?.[0]?.properties?.updated || new Date());
+      if (!LastGenTmp) throw new Error("usgs.govが不正なデータを返しました。");
+      if (usgsLastGenerated > LastGenTmp) throw new Error("usgs.govが古いデータを返しました。");
 
-      usgsLastGenerated = json.features[0].properties.updated;
+      usgsLastGenerated = LastGenTmp;
 
       var dataTmp2 = [];
       json.features.forEach(function (elm) {
@@ -3806,12 +3798,13 @@ var Req_USGS = throttle(function () {
         var maxi;
         if (elm.properties.mmi !== null) maxi = elm.properties.mmi;
 
+        var magTmp = elm?.properties?.mag;
         dataTmp2.push({
           eventId: elm.id,
           category: null,
-          OriginTime: new Date(elm.properties.time),
-          epiCenter: FECode ? FECode.properties.nameJA : "",
-          M: Math.round(elm.properties.mag * 10) / 10,
+          OriginTime: newDate2(elm?.properties?.time),
+          epiCenter: FECode?.properties?.nameJA || "",
+          M: magTmp ? (Math.round(magTmp * 10) / 10) : null,
           maxI: maxi,
           DetailURL: [elm.properties.url],
         });
@@ -3837,11 +3830,11 @@ function Req_NarikakunList(count) {
         //if (!originTimeTmp) originTimeTmp = new Date(json.Head.TargetDateTime);　保留
 
         for (let elm of item.lists) {
-          var originTime = (elm.data && elm.data.originTimeNew) ? new Date(elm.data.originTimeNew) : null;
-          var reportDateTime = elm.datetime ? new Date(elm.datetime) : null;
-          var epiCenter = (elm.data && elm.data.hypoName) ? elm.data.hypoName : null;
-          var Magnitude = (elm.data && elm.data.magnitude) ? Number(elm.data.magnitude) : null;
-          var MaxI = (elm.data && elm.data.int) ? NormalizeShindo(elm.data.int) : null;
+          var originTime = newDate2(elm.data?.originTimeNew);
+          var reportDateTime = newDate2(elm.datetime);
+          var epiCenter = elm.data?.hypoName;
+          var Magnitude = elm.data?.magnitude ? Number(elm.data?.magnitude) : null;
+          var MaxI = elm.data?.int ? NormalizeShindo(elm.data?.int) : null;
           var cancel = (elm.type == "取消");
           var url_list = elm.url ? [elm.url] : [];
 
@@ -3977,7 +3970,7 @@ function MargeEQInfo(dataList, count) {
             EQInfo_Item[key].forEach(function (elm) {
               var uuid = elm.message.uuid_
               var exists = EQElm[key].find((el) => {
-                return el.message && el.message.uuid_ == uuid
+                return el.message?.uuid_ == uuid
               });
               if (!exists) EQElm[key].push(elm)
             })
@@ -4226,11 +4219,9 @@ function ConvertTsunamiInfo(data) {
         if (elm0[key]) Tsunami_data_Marged[key] = elm0[key];
       })
 
-      if (elm0.issue) {
-        if (elm0.issue.time) Tsunami_data_Marged.issue.time = elm0.issue.time;
-        if (elm0.issue.EventID) Tsunami_data_Marged.issue.EventID = elm0.issue.EventID;
-        if (elm0.issue.EarthQuake) Tsunami_data_Marged.issue.EarthQuake = elm0.issue.EarthQuake;
-      }
+      if (elm0.issue?.time) Tsunami_data_Marged.issue.time = elm0.issue.time;
+      if (elm0.issue?.EventID) Tsunami_data_Marged.issue.EventID = elm0.issue.EventID;
+      if (elm0.issue?.EarthQuake) Tsunami_data_Marged.issue.EarthQuake = elm0.issue.EarthQuake;
 
       elm0.areas.forEach(function (elm) {
         var SameArea;
@@ -4265,6 +4256,8 @@ function ConvertTsunamiInfo(data) {
               }
             });
           }
+        } else {
+          Tsunami_data_Marged.areas.push(elm)
         }
       });
     });
@@ -4314,7 +4307,7 @@ function GenerateEEWText(EEWData, update) {
     var userInt;
     if (EEWData.userIntensity) {
       userInt = EEWData.userIntensity;
-    } else if (EEWData.warnZones && EEWData.warnZones.length) {
+    } else if (Array.isArray(EEWData.warnZones)) {
       var SameZone = EEWData.warnZones.find(function (elm2) {
         return elm2.Name == config.home.Section;
       });
@@ -4368,10 +4361,13 @@ function GenerateEQInfoText(EQData) {
 //津波情報時読み上げ文章 生成
 function GenerateTsunamiText(data) {
   try {
-    if (data.Torikeshi) var text = config.notice.voice.TsunamiTorikeshi;
-    else if (data.revocation || data.cancelled)
+    if (data.Torikeshi) {
+      var text = config.notice.voice.TsunamiTorikeshi;
+    } else if (data.revocation || data.cancelled) {
       var text = config.notice.voice.TsunamiRevocation;
-    else var text = config.notice.voice.Tsunami;
+    } else {
+      var text = config.notice.voice.Tsunami;
+    }
     var grades = { MajorWarning: false, Warning: false, Watch: false, Yoho: false, };
     var grades_JA = {
       MajorWarning: "大津波警報",
@@ -4384,30 +4380,33 @@ function GenerateTsunamiText(data) {
     var grade_arr = [];
     var homeArea;
     data.areas.forEach(function (area) {
-      if (area.grade) grades[area.grade] = true;
-      if (config.home.TsunamiSect && area.name == config.home.TsunamiSect)
+      if (area.grade) {
+        grades[area.grade] = true;
+      }
+      if (config.home.TsunamiSect && area.name == config.home.TsunamiSect) {
         homeArea = area;
+      }
     });
 
     Object.keys(grades).forEach(function (key) {
       if (grades[key]) grade_arr.push(grades_JA[key]);
     });
 
-    text = text.replaceAll("{max_grade}", grade_arr[0] ? grade_arr[0] : "津波情報");
+    text = text.replaceAll("{max_grade}", grade_arr[0] || "津波情報");
     text = text.replaceAll("{all_grade}", grade_arr[0] ? grade_arr.join("、") : "津波情報");
     text = text.replaceAll("{report_time}", data.issue.time ? NormalizeDate(9, data.issue.time) : "不明な時刻");
     text = text.replaceAll("{headline}", data.headline || "");
 
-    if (homeArea && !homeArea.cancelled) {
-      text = text.replaceAll("{home_area}", homeArea.name ? homeArea.name : "設定地点");
-      text = text.replaceAll("{home_grade}", homeArea.grade ? grades_JA[homeArea.grade] : "津波情報");
+    if (homeArea && !homeArea?.cancelled) {
+      text = text.replaceAll("{home_area}", homeArea?.name || "設定地点");
+      text = text.replaceAll("{home_grade}", grades_JA?.[homeArea?.grade] || "津波情報");
 
       var firstHeightTmp = "";
-      if (homeArea.firstHeight) {
-        firstHeightTmp = `第１波が${NormalizeDate(9, homeArea.firstHeight)}に予想され、`;
-      } else if (homeArea.firstHeightCondition == "津波到達中と推測") {
+      if (homeArea?.firstHeight) {
+        firstHeightTmp = `第１波が${NormalizeDate(9, homeArea?.firstHeight)}に予想され、`;
+      } else if (homeArea?.firstHeightCondition == "津波到達中と推測") {
         firstHeightTmp = "津波が到達中とみられ、";
-      } else if (homeArea.firstHeightCondition == "第１波の到達を確認") {
+      } else if (homeArea?.firstHeightCondition == "第１波の到達を確認") {
         firstHeightTmp = "既に第１波が到達し、";
       } else {
         firstHeightTmp = "";
@@ -4415,11 +4414,11 @@ function GenerateTsunamiText(data) {
       text = text.replaceAll("{first_height1}", firstHeightTmp);
 
       var firstHeightTmp2 = "";
-      if (homeArea.firstHeight) {
-        firstHeightTmp2 = `到達予想時刻は${NormalizeDate(9, homeArea.firstHeight)}`;
-      } else if (homeArea.firstHeightCondition == "津波到達中と推測") {
+      if (homeArea?.firstHeight) {
+        firstHeightTmp2 = `到達予想時刻は${NormalizeDate(9, homeArea?.firstHeight)}`;
+      } else if (homeArea?.firstHeightCondition == "津波到達中と推測") {
         firstHeightTmp2 = "津波到達中と推測";
-      } else if (homeArea.firstHeightCondition == "第１波の到達を確認") {
+      } else if (homeArea?.firstHeightCondition == "第１波の到達を確認") {
         firstHeightTmp2 = "第１波の到達を確認";
       } else {
         firstHeightTmp2 = "到達時刻は不明";
@@ -4427,18 +4426,19 @@ function GenerateTsunamiText(data) {
       text = text.replaceAll("{first_height2}", firstHeightTmp2);
 
       var immediately = "";
-      if (homeArea.firstHeightCondition == "ただちに津波来襲と予測")
+      if (homeArea?.firstHeightCondition == "ただちに津波来襲と予測") {
         immediately = "ただちに津波が来襲すると予測されます。";
+      }
       text = text.replaceAll("{immediately}", immediately);
 
       var MaxHeightTmp = "";
-      if (homeArea.maxHeight == "巨大") {
+      if (homeArea?.maxHeight == "巨大") {
         MaxHeightTmp = "巨大な津波";
-      } else if (homeArea.maxHeight == "高い") {
+      } else if (homeArea?.maxHeight == "高い") {
         MaxHeightTmp = "高い津波";
-      } else if (homeArea.maxHeight) {
-        MaxHeightTmp = `今後最大${String(homeArea.maxHeight).replace("m", "メートル")}の津波`;
-      } else if (!homeArea.maxHeight && homeArea.grade == "Yoho") {
+      } else if (homeArea?.maxHeight) {
+        MaxHeightTmp = `今後最大${String(homeArea?.maxHeight).replace("m", "メートル")}の津波`;
+      } else if (!homeArea?.maxHeight && homeArea.grade == "Yoho") {
         MaxHeightTmp = "若干の海面変動";
       } else {
         MaxHeightTmp = "高さ不明の津波";
@@ -4446,13 +4446,13 @@ function GenerateTsunamiText(data) {
       text = text.replaceAll("{max_height1}", MaxHeightTmp);
 
       var MaxHeightTmp2 = "";
-      if (homeArea.maxHeight == "巨大") {
+      if (homeArea?.maxHeight == "巨大") {
         MaxHeightTmp2 = "巨大";
-      } else if (homeArea.maxHeight == "高い") {
+      } else if (homeArea?.maxHeight == "高い") {
         MaxHeightTmp2 = "高い";
-      } else if (homeArea.maxHeight) {
-        MaxHeightTmp2 = homeArea.maxHeight.replace("m", "メートル");
-      } else if (!homeArea.maxHeight && homeArea.grade == "Yoho") {
+      } else if (homeArea?.maxHeight) {
+        MaxHeightTmp2 = String(homeArea?.maxHeight).replace("m", "メートル");
+      } else if (!homeArea?.maxHeight && homeArea?.grade == "Yoho") {
         MaxHeightTmp2 = "若干の海面変動";
       } else {
         MaxHeightTmp2 = "不明";
@@ -4723,6 +4723,14 @@ function getClosestNum(needle, haystack) {
 }
 function Boolean2(elm) {
   return Boolean(elm !== null && elm !== undefined && elm !== "" && !Number.isNaN(elm) && elm != "Invalid Date" && (!Array.isArray(elm) || elm.length > 0) && elm || elm === 0);
+}
+
+function newDate2(e) {
+  var dt = new Date(e);
+
+  const isInvalidDate = Number.isNaN(dt.getTime());
+  if (dt && !isInvalidDate) return dt
+  else return null;
 }
 
 function IncludesDuplicates(arr1, arr2) {
