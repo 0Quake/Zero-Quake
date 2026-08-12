@@ -52,31 +52,35 @@
     <script>
         window.electronAPI.messageSend((event, request) => {
             if (request.action == "NankaiTroughInfo") {
-                var title = String(request.data.title || "")
-                var kind = String(request.data.kind || "")
-                var prefix = request.data.reportKind == "取消" ? "取消／" : ""
+                var data = request.data;
+                if (!data) return;
+
+                var title = String(data.title || "")
+                var kind = String(data.kind || "")
+                var prefix = data.reportKind == "取消" ? "取消／" : ""
                 document.title = `${prefix}${title} (${kind}) - Zero Quake`;
 
                 document.getElementById("title").innerText = `${prefix}${title} (${kind})`;
 
-                if (request.data.reportKind == "取消") document.getElementById("title").classList.remove("happyo")
+                if (data.reportKind == "取消") document.getElementById("title").classList.remove("happyo")
                 else document.getElementById("title").classList.add("happyo")
 
-                var SerialStr = request.data.Serial ? `, 情報番号#${request.data.Serial}` : ""
-                document.getElementById("headline").innerText = `${request.data.HeadLine || ""} (${NormalizeDate(4, request.data.reportDate)}${SerialStr})`;
-                document.getElementById("Text_body").innerText = removeFirstBR(request.data.Text)
-                document.getElementById("Appendix_body").innerText = removeFirstBR(request.data.Appendix)
-                document.getElementById("NextAdvisory_body").innerText = removeFirstBR(request.data.NextAdvisory)
-                document.getElementById("Text2_body").innerText = removeFirstBR(request.data.Text2)
 
-                document.getElementById("Text").style.display = request.data.Text ? "block" : "none"
-                document.getElementById("Appendix").style.display = request.data.Appendix ? "block" : "none"
-                document.getElementById("NextAdvisory").style.display = request.data.NextAdvisory ? "block" : "none"
-                document.getElementById("Text2").style.display = request.data.Text2 ? "block" : "none"
+                var SerialStr = data.Serial ? `, 情報番号#${data.Serial}` : ""
+                document.getElementById("headline").innerText = `${data.HeadLine || ""} (${NormalizeDate(4, data.reportDate)}${SerialStr})`;
+                document.getElementById("Text_body").innerText = String(data.Text || "").trim()
+                document.getElementById("Appendix_body").innerText = String(data.Appendix || "").trim()
+                document.getElementById("NextAdvisory_body").innerText = String(data.NextAdvisory || "").trim()
+                document.getElementById("Text2_body").innerText = String(data.Text2 || "").trim()
+
+                document.getElementById("Text").style.display = data.Text ? "block" : "none"
+                document.getElementById("Appendix").style.display = data.Appendix ? "block" : "none"
+                document.getElementById("NextAdvisory").style.display = data.NextAdvisory ? "block" : "none"
+                document.getElementById("Text2").style.display = data.Text2 ? "block" : "none"
 
                 document.getElementById("splash").style.display = "none";
 
-                switch (request.data.kind) {
+                switch (data.kind) {
                     case "巨大地震警戒":
                         document.body.classList.add("nankaiAlert");
                         break;
@@ -91,11 +95,6 @@
                 }
             }
         });
-
-        function removeFirstBR(str) {
-            if (str.startsWith("\n")) return str.replace("\n", "")
-            else return str
-        }
     </script>
 
     <style>
