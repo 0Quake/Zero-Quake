@@ -1659,7 +1659,7 @@ function Req_JMATide() {
           obsdata.height = height;
 
           if (JMATide_astro[st.code]) {//★1と同じ処理
-            obsdata.astro = JMATide_astro[st.code][NormalizeDate("MMDD", new Date() - Replay)][NormalizeDate("h", new Date() - Replay)]
+            obsdata.astro = JMATide_astro[st.code]?.[NormalizeDate("MMDD", new Date() - Replay)]?.[NormalizeDate("h", new Date() - Replay)];
           }
 
           JMATide_obs[st.code] = obsdata
