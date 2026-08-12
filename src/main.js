@@ -59,6 +59,7 @@ var packageJson = JSON.parse(await readFile(path.join(__dirname, "../package.jso
 var package_ver = packageJson.version;
 var EQ_FetchCount = 0;
 
+const DomPsr = new (new JSDOM()).window.DOMParser();
 
 const store = new Store();
 var defaultConfigVal = {
@@ -1026,7 +1027,8 @@ function Create_SettingWindow(update) {
     SettingWindow.webContents.on("will-navigate", handleUrlOpen);
     SettingWindow.webContents.on("new-window", handleUrlOpen);
     SettingWindow.webContents.on("will-prevent-unload", (event) => {
-      if (handling_url) return handling_url = false;
+      console.log(event)
+      //if (handling_url) return handling_url = false;
 
       const choice = dialog.showMessageBoxSync(SettingWindow, {
         type: "question",
@@ -1290,7 +1292,7 @@ function messageToMainWindow(message) {
 var EQI_Window = {};
 var handling_url = false;
 function handleUrlOpen(e, url) {
-  if (url.match(/^http/)) {
+  if (url.startsWith("http")) {
     handling_url = true;
     setTimeout(function () {
       handling_url = false;
@@ -1402,8 +1404,7 @@ function Req_JMA_gaikyo() {
       if (!r.ok) throw new Error(`HTTP Error: ${r.status}`);
       return r.text();
     }).then((text) => {
-      const parser = new new JSDOM().window.DOMParser();
-      const doc = parser.parseFromString(text, "text/html");
+      const doc = DomPsr.parseFromString(text, "text/html");
       var data = [];
       doc.querySelectorAll("ul.subMenu li a").forEach(function (elm) {
         var href = elm.getAttribute("href");
@@ -1682,8 +1683,7 @@ function Req_EarlyEst() {
       return r.text();
     }).then((text) => {
       UpdateStatus("Early-est", "success");
-      let parser = new new JSDOM().window.DOMParser();
-      let doc = parser.parseFromString(text, "text/xml");
+      let doc = DomPsr.parseFromString(text, "text/xml");
       Array.prototype.forEach.call(
         doc.getElementsByTagName("eventParameters"),
         function (parent) {
@@ -2666,7 +2666,7 @@ function EEW_Marge(data) {
         for (let index = 0; index < TimeTable.s.length; index++) {
           var elm = TimeTable.s[index];
           if ((elm.r) > distance) {
-            if (index > 1) {
+            if (index >= 1) {
               var elm2 = TimeTable.s[index - 1];
               var SSec = elm.t + (elm2.t - elm.t) * (distance - elm.r) / (elm2.r - elm.r);
             } else SSec = null;
@@ -2768,7 +2768,7 @@ function EEW_Marge(data) {
           //マージ元のデータ
           var CurrentData = SameEEW.data.find((elm) => elm.serial == data.serial);
 
-          //キーごとにマージ
+          //キーごとにマージ（同一報のためBool値も「Falsyでない場合のみ上書きする」方法でマージ）
           Object.keys(CurrentData).forEach(function (key) {
             if (key == "warnZones") return;//warnZonesは後で別処理
             if (data[key] && (!Array.isArray(data[key]) || data[key].length > 0)) {
@@ -3075,8 +3075,7 @@ function Req_JMAXMLList(count, longFeed) {
       if (!r.ok) throw new Error(`HTTP Error: ${r.status}`);
       return r.text();
     }).then((text) => {
-      const parser = new new JSDOM().window.DOMParser();
-      const xml = parser.parseFromString(text, "text/xml");
+      const xml = DomPsr.parseFromString(text, "text/xml");
       if (!xml) throw new Error("XMLのパースに失敗");
       var EQInfoCount = 0;
       Array.prototype.forEach.call(xml.getElementsByTagName("entry"), function (elm) {
@@ -3181,7 +3180,7 @@ function Req_Hokkaidosanriku_JSON(url) {
 }
 
 function Process_Hokkaidosanriku(data) {
-  var SameData = HokkaidoSanrikuInfoAll.find((el) => el.reportDate == data.reportDate);
+  var SameData = HokkaidoSanrikuInfoAll.find((el) => Number(new Date(el.reportDate)) == Number(new Date(data.reportDate)));
   if (SameData) return;
 
   HokkaidoSanrikuInfoAll.push(data);
@@ -3209,8 +3208,7 @@ function Req_JMAXML(url, count) {
       if (!r.ok) throw new Error(`HTTP Error: ${r.status}`);
       return r.text();
     }).then((text) => {
-      const parser = new new JSDOM().window.DOMParser();
-      const xml = parser.parseFromString(text, "text/xml");
+      const xml = DomPsr.parseFromString(text, "text/xml");
       if (!xml) throw new Error("XMLのパースに失敗");
 
       var title = xml.getElementsByTagName("Control")[0].getElementsByTagName("Title")[0].textContent;
@@ -4137,7 +4135,7 @@ function ConvertTsunamiInfo(data) {
       var keys = ["headline", "comment", "status", "cancelled", "ValidDateTime", "revocation"]
       keys.forEach(function (key) {
         if (Boolean2(data[key])) SameData[key] = data[key];
-      })
+      });//同一報なのでcancelledなどのBool値も「Falsyでない場合のみ上書きする方法」でマージ
 
       if (data.issue.EventID) SameData.issue.EventID = data.issue.EventID;
       if (data.issue.EarthQuake) SameData.issue.EarthQuake = data.issue.EarthQuake;
@@ -4304,7 +4302,7 @@ function GenerateEEWText(EEWData, update) {
     text = text.replaceAll("{final}", EEWData.is_final ? "最終報" : "");
     text = text.replaceAll("{location}", config.home.name ? config.home.name : "現在地");
     text = text.replaceAll("{magnitude}", Boolean2(EEWData.magnitude) ? EEWData.magnitude : "");
-    text = text.replaceAll("{maxInt}", EEWData.maxInt ? NormalizeShindo(EEWData.maxInt, 1) : "");
+    text = text.replaceAll("{maxInt}", Boolean2(EEWData.maxInt) ? NormalizeShindo(EEWData.maxInt, 1) : "");
     text = text.replaceAll("{depth}", Boolean2(EEWData.depth) ? EEWData.depth : "");
     text = text.replaceAll("{training}", EEWData.is_training ? "訓練報。" : "");
     text = text.replaceAll("{training2}", EEWData.is_training ? "これは訓練報です。" : "");
