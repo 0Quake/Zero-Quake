@@ -73,12 +73,13 @@ window.electronAPI.messageSend((event, request) => {
       request.urls.filter(function (e) {
         return e && e.includes("www.data.jma.go.jp")
       }).sort((a, b) => {
-        var timeStampA = a.match(".+/(.+?).[a-z]+([?#;].*)?$")[1].split("_")[0]
-        var timeStampB = b.match(".+/(.+?).[a-z]+([?#;].*)?$")[1].split("_")[0]
+        var timeStampA = a.match(".+/(.+?).[a-z]+([?#;].*)?$")?.[1]?.split("_")?.[0];
+        var timeStampB = b.match(".+/(.+?).[a-z]+([?#;].*)?$")?.[1]?.split("_")?.[0];
+        if (!timeStampA || !timeStampB) return 0;
         return timeStampB - timeStampA;
       }).forEach(function (elm) {
-        var kindCode = elm.match(".+/(.+?).[a-z]+([?#;].*)?$")[1].split("_")[2]
-        if (!kindCode_history[kindCode]) {
+        var kindCode = elm.match(".+/(.+?).[a-z]+([?#;].*)?$")?.[1]?.split("_")?.[2];
+        if (kindCode && !kindCode_history[kindCode]) {
           //より新しい同一種別の情報がなければ受信
           kindCode_history[kindCode] = true;
           jmaXMLFetch(elm);
@@ -89,12 +90,13 @@ window.electronAPI.messageSend((event, request) => {
       request.urls.filter(function (e) {
         return e && e.includes("www.jma.go.jp")
       }).sort((a, b) => {
-        var timeStampA = a.match(".+/(.+?).[a-z]+([?#;].*)?$")[1].split("_")[0]
-        var timeStampB = b.match(".+/(.+?).[a-z]+([?#;].*)?$")[1].split("_")[0]
+        var timeStampA = a.match(".+/(.+?).[a-z]+([?#;].*)?$")?.[1]?.split("_")?.[0];
+        var timeStampB = b.match(".+/(.+?).[a-z]+([?#;].*)?$")?.[1]?.split("_")?.[0];
+        if (!timeStampA || !timeStampB) return 0;
         return timeStampB - timeStampA;
       }).forEach(function (elm) {
-        var kindCode = elm.match(".+/(.+?).[a-z]+([?#;].*)?$")[1].split("_")[2]
-        if (!json_kindCode_history[kindCode]) {
+        var kindCode = elm.match(".+/(.+?).[a-z]+([?#;].*)?$")?.[1]?.split("_")?.[2];
+        if (kindCode && !json_kindCode_history[kindCode]) {
           //より新しい同一種別の情報がなければ受信
           json_kindCode_history[kindCode] = true;
           jma_Fetch(elm);
@@ -178,7 +180,7 @@ function Mapinit() {
     dragRotate: false,
     style: {
       version: 8,
-      projection: { type: config.data.globeView ? "globe" : "mercator" },
+      projection: { type: config?.data?.globeView ? "globe" : "mercator" },
       glyphs: "https://gsi-cyberjapan.github.io/optimal_bvmap/glyphs/{fontstack}/{range}.pbf",
       sources: {
         submarine: {
@@ -1086,7 +1088,7 @@ function Int_Area_Popup(e) {
     current_Popup = null;
   }
 
-  color = NormalizeShindo(elm.int, 2);
+  var color = NormalizeShindo(elm.int, 2);
   var content = `<div class='popupContent'><div class='shindoItem_S' style='background:${color[0]};color:${color[1]}'>震度 ${elm.intStr}</div><div class='pointName'>${elm.name}</div><div class='pointHead'>細分区域</div></div><div></div>`;
 
   current_Popup = new maplibregl.Popup({ offset: [0, -17] })
@@ -1105,7 +1107,7 @@ function Int_Sta_Popup(e) {
     current_Popup = null;
   }
 
-  color = NormalizeShindo(elm.int, 2);
+  var color = NormalizeShindo(elm.int, 2);
 
   var mi_description = NormalizeShindo(elm.int) == "未" ? "<div class = 'description'>震度5弱以上と考えられるが<br>現在震度を入手していない。</div>" : "";
 
@@ -1125,7 +1127,7 @@ function LgInt_Area_Popup(e) {
     current_Popup = null;
   }
 
-  color = LgIntConvert(elm.lgint);
+  var color = LgIntConvert(elm.lgint);
 
   var content = `<div class='popupContent'><div class='shindoItem_S' style='background:${color[0]};color:${color[1]}'>長周期地震動階級 ${elm.lgintStr}</div><div class='pointName'>${elm.name}</div><div class='pointHead'>細分区域</div></div><div></div>`;
 
@@ -1145,7 +1147,7 @@ function LgInt_Sta_Popup(e) {
     current_Popup = null;
   }
 
-  color = LgIntConvert(elm.lgint);
+  var color = LgIntConvert(elm.lgint);
 
   var content = `<div class='popupContent'><div class='shindoItem' style='background:${color[0]};color:${color[1]}'>長周期地震動階級 ${elm.lgintStr}</div><div class='pointName'>${elm.name}</div><div class='pointHead'>観測点</div></div><div></div>`;
 
@@ -1267,7 +1269,7 @@ mapSelect.forEach(function (elm) {
 });
 document.getElementById("globeView").addEventListener("change", function () {
   config.data.globeView = this.checked;
-  map.setProjection({ type: config.data.globeView ? "globe" : "mercator" });
+  map.setProjection({ type: config?.data?.globeView ? "globe" : "mercator" });
   window.electronAPI.messageReturn({
     action: "ChangeConfig",
     from: "Other",
@@ -1482,12 +1484,13 @@ function jma_ListReq() {
       }).map(function (elm) {
         return `https://www.jma.go.jp/bosai/quake/data/${elm.json}`;
       }).sort((a, b) => {
-        var timeStampA = a.match(".+/(.+?).[a-z]+([?#;].*)?$")[1].split("_")[0]
-        var timeStampB = b.match(".+/(.+?).[a-z]+([?#;].*)?$")[1].split("_")[0]
+        var timeStampA = a.match(".+/(.+?).[a-z]+([?#;].*)?$")?.[1]?.split("_")?.[0];
+        var timeStampB = b.match(".+/(.+?).[a-z]+([?#;].*)?$")?.[1]?.split("_")?.[0];
+        if (!timeStampA || !timeStampB) return 0;
         return timeStampB - timeStampA;
       }).forEach(function (elm) {
-        var kindCode = elm.match(".+/(.+?).[a-z]+([?#;].*)?$")[1].split("_")[2]
-        if (!json_kindCode_history2[kindCode]) {
+        var kindCode = elm.match(".+/(.+?).[a-z]+([?#;].*)?$")?.[1]?.split("_")?.[2];
+        if (kindCode && json_kindCode_history2[kindCode]) {
           //より新しい同一種別の情報がなければ受信
           json_kindCode_history2[kindCode] = true;
           jma_Fetch(elm);
@@ -2677,7 +2680,7 @@ function ConvertEQInfo(data) {
   }
   var EQI_EEW = EQInfoData.filter((e) => { return e.category == "EEW" }).sort(sortByReportDT);
   var EQI_NOT_EEW = EQInfoData.filter((e) => { return e.category != "EEW" }).sort(sortByReportDT);
-  EQInfoData = EQI_EEW.concat(EQI_NOT_EEW)
+  EQInfoData = [...EQI_EEW, ...EQI_NOT_EEW];
 
   EQInfoData.forEach(function (elm, index) {
     if (elm.cancel) {
@@ -2786,10 +2789,11 @@ function ConvertEQInfo(data) {
       .replace(/(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#/%?=~_|!:,.;]*[-A-Z0-9+&@#/%=~_|])/gi, "<a href='$1'>$1</a>")
       .trim();
 
-    var comments = EQInfoMarged.comment.ForecastComment.split("\n").concat(
-      EQInfoMarged.comment.VarComment.split("\n"),
-      EQInfoMarged.comment.FreeFormComment.split("\n")
-    );
+    var comments = [
+      ...(EQInfoMarged?.comment?.ForecastComment?.split("\n") || []),
+      ...(EQInfoMarged?.comment?.VarComment?.split("\n") || []),
+      ...(EQInfoMarged?.comment?.FreeFormComment?.split("\n") || [])
+    ];
 
     var TsunamiShortMsg;
     var TsunamiColor;
