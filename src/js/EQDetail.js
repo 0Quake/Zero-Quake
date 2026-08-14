@@ -2990,22 +2990,27 @@ function parse_LatLngDepth(str) {
     return []
   }
 }
-function throttle(anonymousFunction, limit) {
-  let lastFunctionTimerId;
-  let lastExecute;
-
-  return function () {
-    const context = this;
-    const args = arguments;
-    if (!lastExecute) {
-      anonymousFunction.apply(context, args);
-      lastExecute = Date.now();
-      return;
+function throttle(cb, delay = 1000) {
+  let shouldWait = false
+  let waitingArgs
+  const timeoutFunc = () => {
+    if (waitingArgs == null) {
+      shouldWait = false
+    } else {
+      cb(...waitingArgs)
+      waitingArgs = null
+      setTimeout(timeoutFunc, delay)
     }
-    clearTimeout(lastFunctionTimerId);
-    lastFunctionTimerId = setTimeout(function () {
-      anonymousFunction.apply(context, args);
-      lastExecute = Date.now();
-    }, limit - (Date.now() - lastExecute));
+  }
+
+  return (...args) => {
+    if (shouldWait) {
+      waitingArgs = args
+      return
+    }
+
+    cb(...args)
+    shouldWait = true
+    setTimeout(timeoutFunc, delay)
   }
 }

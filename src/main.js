@@ -4741,26 +4741,27 @@ function IncludesDuplicates(arr1, arr2) {
   return a1.some(item => a2.includes(item));
 }
 
-function throttle(anonymousFunction, limit) {
-  let lastFunctionTimerId;
-  let lastExecute;
+function throttle(cb, delay = 1000) {
+  let shouldWait = false
+  let waitingArgs
+  const timeoutFunc = () => {
+    if (waitingArgs == null) {
+      shouldWait = false
+    } else {
+      cb(...waitingArgs)
+      waitingArgs = null
+      setTimeout(timeoutFunc, delay)
+    }
+  }
 
-  return function () {
-    const context = this;
-    const args = arguments;
-
-    // 最初の1回はすぐ実行
-    if (!lastExecute) {
-      anonymousFunction.apply(context, args);
-      lastExecute = Date.now();
-      return;
+  return (...args) => {
+    if (shouldWait) {
+      waitingArgs = args
+      return
     }
 
-    clearTimeout(lastFunctionTimerId);
-    lastFunctionTimerId = setTimeout(function () {
-      anonymousFunction.apply(context, args);
-      lastExecute = Date.now();
-      // 1秒以上経過している場合は即実行、そうでなければ残り時間経過後に実行
-    }, limit - (Date.now() - lastExecute));
+    cb(...args)
+    shouldWait = true
+    setTimeout(timeoutFunc, delay)
   }
 }
