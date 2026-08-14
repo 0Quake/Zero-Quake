@@ -1510,17 +1510,7 @@ function jma_ListReq() {
 }
 //narikakun地震情報APIリスト取得→narikakun_Fetch
 function narikakun_ListReq() {
-  var EID_Date = parseEID(eid);
-
-  //eventIdは厳密にはDateではないので1h前後をとって日付範囲を選ぶ
-  var bDate = new Date(EID_Date);
-  var aDate = new Date(EID_Date);
-  bDate.setHours(bDate.getHours() - 1);
-  aDate.setHours(aDate.getHours() + 1);
-  var bDate_s = NormalizeDate("YYYY-MM-DD", bDate);
-  var aDate_s = NormalizeDate("YYYY-MM-DD", aDate);
-
-  fetch(`https://earthquake-api-v2.nakn.jp/api/v2/list?beforeDate=${bDate_s}&afterDate=${aDate_s}&limit=2000`)
+  fetch(`https://earthquake-api-v2.nakn.jp/api/v2/list?eventId=${eid}`)
     .then(function (res) { return res.json(); })
     .then(function (data) {
       if (!data || !data.items || !data.items.length) return;
