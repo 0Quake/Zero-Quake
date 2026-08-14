@@ -1421,7 +1421,7 @@ function estimated_intensity_mapReq() {
     .then(function (res) { return res.json(); })
     .then(function (json) {
       var ItemTmp = json.find(function (elm) {
-        return elm.url.split("_")[0] == String(eid).substring(0, 12);
+        return (elm?.url?.split("_")?.[0] || 1) == (String(eid)?.substring(0, 12) || 2);//||による代替値は左右辺で別の値
       });
       if (ItemTmp) {
         ConvertEQInfo({
@@ -1772,7 +1772,7 @@ function jmaXMLFetch(url) {
       var parser = new DOMParser();
       var xml = parser.parseFromString(data, "application/xml");
       var cancelTmp = xml.querySelector("InfoType").textContent == "取消";
-      var ReportTime = new Date(xml.querySelector("Head ReportDateTime").textContent);
+      var ReportTime = new Date(xml.querySelector("Head ReportDateTime")?.textContent);
       if (!newInfoDateTime || newInfoDateTime <= ReportTime) {
         newInfoDateTime = ReportTime;
       }
@@ -1790,9 +1790,9 @@ function jmaXMLFetch(url) {
       if (EarthquakeElm) {
         originTimeTmp = new Date(EarthquakeElm.querySelector("OriginTime").textContent);
         epiCenterTmp = EarthquakeElm.querySelector("Name").textContent;
-        magnitudeTmp = Number(EarthquakeElm.getElementsByTagName("jmx_eb:Magnitude")[0].textContent);
-        magnitudeTypeTmp = EarthquakeElm.getElementsByTagName("jmx_eb:Magnitude")[0].getAttribute("type");
-        LatLngDepth = parse_LatLngDepth(xml.querySelector("Body Earthquake Hypocenter").getElementsByTagName("jmx_eb:Coordinate")[0].textContent)
+        magnitudeTmp = Number(EarthquakeElm.getElementsByTagName("jmx_eb:Magnitude")?.[0]?.textContent);
+        magnitudeTypeTmp = EarthquakeElm.getElementsByTagName("jmx_eb:Magnitude")?.[0]?.getAttribute("type");
+        LatLngDepth = parse_LatLngDepth(xml.querySelector("Body Earthquake Hypocenter")?.getElementsByTagName("jmx_eb:Coordinate")?.[0]?.textContent)
         LatTmp = Number(LatLngDepth[1]);
         LngTmp = Number(LatLngDepth[2]);
         DepthTmp = Number(LatLngDepth[3] / 1000);
@@ -2414,12 +2414,13 @@ function add_IntensityStation_info(lat, lng, name, int) {
   }
 
   newDiv.addEventListener("click", function () {
+    if (!lat || !lng) return;
     map.flyTo({ center: [lng, lat], zoom: 11, duration: 800 });
 
     if (icon) Int_Sta_Popup({ features: [icon] });
   });
 
-  wrap3[wrap3.length - 1].append(newDiv);
+  wrap3[wrap3.length - 1]?.append(newDiv);
 }
 
 var WaitingToDraw = null
@@ -2639,7 +2640,7 @@ function add_IntensityStation_infoL(lat, lng, name, int) {
   newDiv.setAttribute("title", `観測点：${name} \nクリックで地図を観測点に移動`);
   newDiv.setAttribute("aria-expanded", "false");
   newDiv.setAttribute("role", "treeitem");
-  wrap3[wrap3.length - 1].append(newDiv);
+  wrap3[wrap3.length - 1]?.append(newDiv);
 
   if (lat !== null && lng !== null) {
     var lgint_num = Number(int) || 0;
