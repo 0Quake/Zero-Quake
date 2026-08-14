@@ -270,7 +270,7 @@ var checkUpdate = throttle(async function (userAction) {
         if (!r.ok) throw new Error(`HTTP Error: ${r.status}`);
         return r.json();
       }).then((json) => {
-        var latest_verTmp = String(json[0].tag_name.replace("v", ""));
+        var latest_verTmp = String(json[0].tag_name).replace("v", "");
 
         var current_verTmp = packageJson.version;
         var latest_v = String(latest_verTmp).split(".").map(Number);
@@ -642,23 +642,23 @@ ipcMain.on("message", (_event, response) => {
       }
 
       if (response.from == "ConfigWindow") {
-        if (MainWindow) {
+        if (MainWindow && !MainWindow.isDestroyed()) {
           MainWindow.reload();
           MainWindow.webContents.setZoomFactor(config.system.zoom);
         }
-        if (WorkerWindow) {
+        if (WorkerWindow && !WorkerWindow.isDestroyed()) {
           WorkerWindow.reload();
           WorkerWindow.webContents.setZoomFactor(config.system.zoom);
         }
-        if (TsunamiWindow) {
+        if (TsunamiWindow && !TsunamiWindow.isDestroyed()) {
           TsunamiWindow.reload();
           TsunamiWindow.webContents.setZoomFactor(config.system.zoom);
         }
-        if (NankaiWindow.window) {
+        if (NankaiWindow.window && !NankaiWindow.window.isDestroyed()) {
           NankaiWindow.window.reload();
           NankaiWindow.window.webContents.setZoomFactor(config.system.zoom);
         }
-        if (SettingWindow) {
+        if (SettingWindow && !SettingWindow.isDestroyed()) {
           SettingWindow.reload();
           SettingWindow.webContents.setZoomFactor(config.system.zoom);
         }
