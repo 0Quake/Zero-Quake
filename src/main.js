@@ -1804,8 +1804,8 @@ var Kmoni_URLIndex = 0;
 var Kmoni_ErrorCount = 0;
 var Kmoni_Timer;
 var Kmoni_URLs = [
-  `https://smi.lmoniexp.bosai.go.jp/data/map_img/RealTimeImg/jma_s/[YYYYMMDD]/[YYYYMMDDhhmmss].jma_s.gif`,
   `http://www.kmoni.bosai.go.jp/data/map_img/RealTimeImg/jma_s/[YYYYMMDD]/[YYYYMMDDhhmmss].jma_s.gif`,
+  `https://www.lmoni.bosai.go.jp/img_svr/data/map_img/RealTimeImg/jma_s/[YYYYMMDD]/[YYYYMMDDhhmmss].jma_s.gif`,
 ];
 
 //強震モニタへのHTTPリクエスト
@@ -1820,31 +1820,31 @@ function Req_kmoni() {//済
   var url = Kmoni_URLs[Kmoni_URLIndex]
     .replace("[YYYYMMDD]", NormalizeDate(2, ReqTime))
     .replace("[YYYYMMDDhhmmss]", NormalizeDate(1, ReqTime));
-
-  fetch(url)
-    .then((r) => {
-      if (!r.ok) throw new Error(`HTTP Error: ${r.status}`);
-      return r.arrayBuffer();
-    }).then((buffer) => {
+  fetch(url, {
+    signal: AbortSignal.timeout(5000)
+  }).then((r) => {
+    if (!r.ok) throw new Error(`HTTP Error: ${r.status}`);
+    return r.arrayBuffer();
+  }).then((buffer) => {
+    Kmoni_ErrorCount = 0;
+    if (WorkerWindow) {
+      var imgBase64 = Buffer.from(buffer).toString("base64")
+      WorkerWindow.webContents.send("message2", {
+        action: "KmoniImgUpdate",
+        data: `data:image/gif;base64,${imgBase64}`,
+        date: ReqTime,
+      });
+    }
+  }).catch((err) => {
+    GeneralError_handler(err)
+    Kmoni_ErrorCount++;
+    if (Kmoni_ErrorCount > 3) {//エラー回数が溜まったらURLを替える
       Kmoni_ErrorCount = 0;
-      if (WorkerWindow) {
-        var imgBase64 = Buffer.from(buffer).toString("base64")
-        WorkerWindow.webContents.send("message2", {
-          action: "KmoniImgUpdate",
-          data: `data:image/gif;base64,${imgBase64}`,
-          date: ReqTime,
-        });
-      }
-    }).catch((err) => {
-      GeneralError_handler(err)
-      Kmoni_ErrorCount++;
-      if (Kmoni_ErrorCount > 3) {//エラー回数が溜まったらURLを替える
-        Kmoni_ErrorCount = 0;
-        Kmoni_URLIndex = (Kmoni_URLIndex + 1) % Kmoni_URLs.length//モニタURLをローリングで選択
-        SetKmoniOffset(Req_kmoni);
-      }
-      UpdateStatus("kmoniImg", "Error");
-    });
+      Kmoni_URLIndex = (Kmoni_URLIndex + 1) % Kmoni_URLs.length//モニタURLをローリングで選択
+      SetKmoniOffset(Req_kmoni);
+    }
+    UpdateStatus("kmoniImg", "Error");
+  });
 }
 
 var Msil_Timer;
