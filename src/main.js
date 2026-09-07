@@ -2476,7 +2476,7 @@ function DetectEEW(type, json) {
         EventID: Number(json.EventID) || null,
         serial: json.Serial,
         report_time: newDate2(json.AnnouncedTime),
-        magnitude: json.Magunitude,
+        magnitude: json.Magnitude,
         maxInt: NormalizeShindo(json.MaxIntensity, 0),
         depth: json.Depth,
         is_cancel: json.isCancel,
