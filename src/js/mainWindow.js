@@ -19,6 +19,25 @@ var high_contrast = window.matchMedia("(forced-colors: active)").matches;
 document.body.addEventListener("mouseover", function () {
   background = false;
 });
+
+document.addEventListener("visibilitychange", function () {
+  if (document.hidden) {
+    background = true;
+  } else if (background) {
+    activateWindow();
+  }
+});
+
+/**
+ * 前面復帰時の処理。background を解除し、バックグラウンド中にスキップした描画を最新値で復元する。
+ */
+function activateWindow() {
+  background = false;
+  if (knetMapData) kmoniMapUpdate(knetMapData, "knet");
+  if (snetMapData) kmoniMapUpdate(snetMapData, "snet");
+  if (TREMRTS_TMP) TREMRTSUpdate(TREMRTS_TMP);
+  if (SeisJS_TMP) SeisJSUpdate(SeisJS_TMP);
+}
 var tsunamiStations = [];
 
 fetch("./Resource/TsunamiStations.json")
@@ -85,11 +104,7 @@ window.electronAPI.messageSend((event, request) => {
   if (request.action == "init") {
     init();
   } else if (request.action == "activate") {
-    background = false;
-    if (knetMapData) kmoniMapUpdate(knetMapData, "knet");
-    if (snetMapData) kmoniMapUpdate(snetMapData, "snet");
-    if (TREMRTS_TMP) TREMRTSUpdate(TREMRTS_TMP);
-    if (SeisJS_TMP) SeisJSUpdate(SeisJS_TMP);
+    activateWindow();
   } else if (request.action == "deactivate") {
     background = true;
   } else if (request.action == "EEW_AlertUpdate") {
