@@ -955,9 +955,11 @@ function CreateMainWindow() {
 function Create_WorkerWindow() {
   if (WorkerWindow) WorkerWindow.close();
   WorkerWindow = new BrowserWindow({
-    webPreferences: { preload: path.join(__dirname, "js/preload.js") },
-    backgroundThrottling: false,
-    //show: false,
+    webPreferences: {
+      preload: path.join(__dirname, "js/preload.js"),
+      backgroundThrottling: false,
+    },
+    show: false,
   });
   WorkerWindow.on("close", () => {
     WorkerWindow = null;
