@@ -2094,6 +2094,7 @@ function ProjectBS() {
     connection.on("close", function () {
       UpdateStatus("ProjectBS", "Disconnect");
       TryConnect_ProjectBS();
+      clearInterval(ProjectBS_Ping_Timer);
     });
     connection.on("message", function (message) {
       if (Replay !== 0) return;
@@ -2150,6 +2151,7 @@ function WolfxWS() {
     connection.on("close", function () {
       UpdateStatus("wolfx", "Disconnect");
       TryConnect_WolfxWS();
+      clearInterval(Wolfx_Timer)
     });
     connection.on("message", function (message) {
       if (Replay !== 0) return;
@@ -2167,6 +2169,9 @@ function WolfxWS() {
         UpdateStatus("wolfx", "Error");
       }
     });
+    connection.sendUTF("query_jmaeew");
+    UpdateStatus("wolfx", "success");
+
     if (Wolfx_Timer) {
       clearInterval(Wolfx_Timer)
       Wolfx_Timer = null;
@@ -2174,8 +2179,6 @@ function WolfxWS() {
     Wolfx_Timer = setInterval(function () {
       connection.sendUTF("ping");
     }, 60000);
-    connection.sendUTF("query_jmaeew");
-    UpdateStatus("wolfx", "success");
   });
 
   Connect_WolfxWS();
