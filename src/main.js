@@ -49,7 +49,6 @@ import * as turf from "@turf/turf";
 import workerThreads from "worker_threads";
 import { readFile } from "fs/promises";
 import fs from "fs";
-import url from "url";
 import { exec } from "child_process";
 var __dirname = path.dirname(fileURLToPath(import.meta.url));
 var FERegion = JSON.parse(
