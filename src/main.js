@@ -3205,6 +3205,11 @@ function Req_JMAXML(url, count) {
       const xml = DomPsr.parseFromString(text, "text/xml");
       if (!xml) throw new Error("XMLのパースに失敗");
 
+      if (new Date(xml.getElementsByTagName("ReportDateTime")[0].textContent) < (new Date() - Replay)) {
+        //未来のデータ（リプレイ時）のため無視した場合、取得済みリストに入れない
+        jmaXML_Fetched.push(url);
+      }
+
       var title = xml.getElementsByTagName("Control")[0].getElementsByTagName("Title")[0].textContent;
       var cancel = xml.getElementsByTagName("InfoType")[0].textContent == "取消";
 
@@ -3760,10 +3765,6 @@ function Req_JMAXML(url, count) {
 
       }
       UpdateStatus("JMAXML", "success");
-      if (new Date(xml.getElementsByTagName("ReportDateTime")[0].textContent) < (new Date() - Replay)) {
-        //未来のデータ（リプレイ時）のため無視した場合、取得済みリストに入れない
-        jmaXML_Fetched.push(url);
-      }
     }).catch((err) => {
       GeneralError_handler(err)
       UpdateStatus("JMAXML", "Error");
