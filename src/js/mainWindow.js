@@ -2615,6 +2615,7 @@ function tsunamiDataUpdate(data) {
   if (data.cancelled || data.revocation || data.Torikeshi) {
     document.getElementById("tsunamiWrap").style.display = "none";
     document.body.classList.remove("TsunamiMode");
+    tsunamiData = null;
   } else {
     EQInfoLink.style.display = "none";
     if (Array.isArray(data.issue.EventID) && data.issue.EventID.length) {
@@ -2830,6 +2831,7 @@ function tsunamiDataUpdate(data) {
     if (data.revocation) {
       document.getElementById("tsunamiWrap").style.display = "none";
       document.body.classList.remove("TsunamiMode");
+      tsunamiData = null;
       Tsunami_MajorWarning = Tsunami_Warning = Tsunami_Watch = false;
     } else if (!alertNowTmp && tsunamiAlertNow) {
       document.getElementById("tsunamiWrap").style.display = "none";
@@ -2908,7 +2910,7 @@ function tsunamiColorConv(str) {
 function tsunamiPopup(e) {
   if (e.originalEvent.cancelBubble) return;
 
-  if (tsunamiData.areas) {
+  if (tsunamiData?.areas) {
     var elm = tsunamiData.areas.find(function (elm) {
       return elm.name == e.features[0].properties.name;
     });
