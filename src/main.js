@@ -957,7 +957,7 @@ function Create_WorkerWindow() {
   WorkerWindow = new BrowserWindow({
     webPreferences: { preload: path.join(__dirname, "js/preload.js") },
     backgroundThrottling: false,
-    show: false,
+    //show: false,
   });
   WorkerWindow.on("close", () => {
     WorkerWindow = null;
@@ -1840,10 +1840,9 @@ function Req_kmoni() {//済
   }).then((buffer) => {
     Kmoni_ErrorCount = 0;
     if (WorkerWindow) {
-      var imgBase64 = Buffer.from(buffer).toString("base64")
       WorkerWindow.webContents.send("message2", {
         action: "KmoniImgUpdate",
-        data: `data:image/gif;base64,${imgBase64}`,
+        data: Buffer.from(buffer),
         date: ReqTime,
       });
     }
@@ -1894,12 +1893,11 @@ function Req_SNet() {
               return r.arrayBuffer();
             }).then((buffer) => {
               if (WorkerWindow) {
-                var imgBase64 = Buffer.from(buffer).toString("base64");
                 WorkerWindow.webContents.send("message2", {
                   action: "SnetImgUpdate",
                   y: y,
                   unique_id: unique_id,
-                  data: `data:image/png;base64,${imgBase64}`,
+                  data: Buffer.from(buffer),
                   date: new Date(),
                 });
               }

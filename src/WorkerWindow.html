@@ -67,20 +67,6 @@
     var kmoni_date2;
     var image_loaded = false;
     var image2_loaded = false;
-    var image = new Image();
-    image.onload = function () {
-      context.clearRect(0, 0, canvas.width, canvas.height);
-      context.drawImage(image, 0, 0);
-      image_loaded = true
-      kmoniRedraw();
-    };
-    var image2 = new Image();
-    image2.onload = function () {
-      Scontext.clearRect(0, 0, Scanvas.width, Scanvas.height);
-      Scontext.drawImage(image2, 0, 0);
-      image2_loaded = true
-      SnetRedraw(image2.getAttribute("current_uid"), image2.getAttribute("current_y"));
-    };
 
     window.electronAPI.messageSend((event, request) => {
       if (request.action == "setting") {
@@ -98,13 +84,25 @@
 
         if (lost_text) speak(lost_text.text, lost_text.engine)
       } else if (request.action == "KmoniImgUpdate") {
-        kmoni_date = request.date
-        image.src = request.data;
+        createImageBitmap(new Blob([request.data], { type: "image/gif" })).then(function (bitmap) {
+          context.clearRect(0, 0, canvas.width, canvas.height);
+          context.drawImage(bitmap, 0, 0);
+          bitmap.close();
+        }).then(function () {
+          kmoni_date = request.date;
+          image_loaded = true;
+          kmoniRedraw();
+        });
       } else if (request.action == "SnetImgUpdate") {
-        kmoni_date2 = request.date
-        image2.src = request.data;
-        image2.setAttribute("current_y", request.y)
-        image2.setAttribute("current_uid", request.unique_id)
+        createImageBitmap(new Blob([request.data], { type: "image/gif" })).then(function (bitmap) {
+          Scontext.clearRect(0, 0, Scanvas.width, Scanvas.height);
+          Scontext.drawImage(bitmap, 0, 0);
+          bitmap.close();
+        }).then(function () {
+          kmoni_date2 = request.date;
+          image2_loaded = true;
+          SnetRedraw(request.unique_id, request.y);
+        });
       } else if (request.action == "speak") {
         speak(request.data)
       } else if (request.action == "PlayAudio") {
@@ -244,7 +242,7 @@
       });
       window.electronAPI.messageReturn({
         action: "SnetReturn",
-        data: Spoints,
+        data: Spoints_f,
         date: kmoni_date2,
         uid: uid,
         y: y,
