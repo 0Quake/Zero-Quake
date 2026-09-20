@@ -1526,8 +1526,10 @@ var Trem_URLs = {
     "https://api-2.exptech.dev/api/v1/trem/rts/[UNIXTIME]"
   ]
 }
+var TremRts_Timer;
 function Req_TremRts() {
-  setTimeout(Req_TremRts, config.Source.TREMRTS.Interval);
+  if (TremRts_Timer) clearTimeout(TremRts_Timer);
+  TremRts_Timer = setTimeout(Req_TremRts, config.Source.TREMRTS.Interval);
 
   if (!config.Source.TREMRTS.GetData) return;
   if (!TremRts_sta) Req_TremRts_sta();
@@ -1687,8 +1689,10 @@ function Req_JMATide() {
 }
 
 
+var EarlyEst_Timer;
 function Req_EarlyEst() {
-  setTimeout(Req_EarlyEst, config.Source.EarlyEst.Interval);
+  if (EarlyEst_Timer) clearTimeout(EarlyEst_Timer);
+  EarlyEst_Timer = setTimeout(Req_EarlyEst, config.Source.EarlyEst.Interval);
 
   if (!config.Source.EarlyEst.GetData) return;
 
@@ -2327,6 +2331,7 @@ function IntervalRun(msec, func) {
 }
 
 //定期実行
+var RegularExecution_Timer;
 function RegularExecution(loop) {
   try {
     //EEW解除
@@ -2347,7 +2352,8 @@ function RegularExecution(loop) {
     }
 
     if (loop) {
-      setTimeout(function () {
+      if (RegularExecution_Timer) clearTimeout(RegularExecution_Timer);
+      RegularExecution_Timer = setTimeout(function () {
         RegularExecution(true);
       }, 1000);
     }
