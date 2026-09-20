@@ -217,17 +217,19 @@ electron.protocol.registerSchemesAsPrivileged([
   }
 ]);
 
+/*
 app.whenReady().then(() => {
   // アプリ全体のネットワークリクエストの発生を事前に検知するフック
   electron.session.defaultSession.webRequest.onBeforeRequest((details, callback) => {
     if (details.url.includes("https://")) {
-      //console.log(`[Request detected] ${details.url}`);
+      console.log(`[Request detected] ${details.url}`);
     }
 
     // キャンセルしない場合は空オブジェクトを渡してリクエストを続行
     callback({});
   });
 });
+*/
 
 if (app.isPackaged) {
   //メニューバー非表示
@@ -707,6 +709,7 @@ ipcMain.on("message", (_event, response) => {
         if (WolfxConnection) WolfxConnection.sendUTF("query_jmaeew");
         if (ProjectBS_Connection) ProjectBS_Connection.sendUTF("queryjson");
         Req_TremRts_sta();
+        Req_Seisjs_sta();
       }
       break;
     case "Request_gaikyo":
@@ -829,6 +832,15 @@ function CreateMainWindow() {
         });
 
         messageToMainWindow({ action: "setting", data: config });
+
+        messageToMainWindow({
+          action: "TremRts_sta",
+          data: TremRts_sta,
+        });
+        messageToMainWindow({
+          action: "Seisjs_sta",
+          data: Seisjs_sta,
+        });
 
         if (EEW_Active.length > 0) {
           messageToMainWindow({ action: "EEW_AlertUpdate", data: EEW_Active });
@@ -1394,6 +1406,7 @@ function start() {
 
   //一回限り
   Req_TremRts_sta();
+  Req_Seisjs_sta();
   Req_JMATide_sta();
 
 }
@@ -1479,19 +1492,24 @@ function Req_JMA_wepa() {
 
 var TremRts_sta;
 var Trem_server = true;
-function Req_TremRts_sta() {
+var Req_TremRts_sta = throttle(function () {
   fetch(`https://api-${Trem_server ? 1 : 2}.exptech.dev/api/v1/trem/station?_=${Number(new Date())}`)
     .then((r) => {
       if (!r.ok) throw new Error(`HTTP Error: ${r.status}`);
       return r.json();
     }).then((json) => {
       TremRts_sta = json;
+      messageToMainWindow({
+        action: "TremRts_sta",
+        data: TremRts_sta,
+      });
+
     }).catch((err) => {
       GeneralError_handler(err)
       UpdateStatus("TREM-RTS", "Error");
       Trem_server = !Trem_server;
     });
-}
+}, 5000);
 
 var TremRTS_server = true;
 var Trem_URLs = {
@@ -1524,24 +1542,19 @@ function Req_TremRts() {
       var TremRtsData = {};
       Object.keys(json.station).forEach(function (StID) {
         var st = json.station[StID];
-        var stationData = TremRts_sta ? TremRts_sta[StID] : null;
+        var stationData = TremRts_sta?.[StID];
         if (stationData) {
           var JPShindo = st.i; //おおむね対応するため、現時点では変換不要と判断
           var rgb = KmoniColorTable[Math.min(7, Math.max(-3, Math.floor(JPShindo * 10) / 10))];
           TremRtsData[StID] = {
-            Type: "TREMRTS",
+            Type: stationData.net,
             shindo: JPShindo,
             PGA: st.pga,
             Code: StID,
-            Name: "",
-            IsSuspended: false,
-            Region: "",
-            Location: {
-              Longitude: stationData.info[0].lon,
-              Latitude: stationData.info[0].lat,
-            },
             rgb: [rgb.r, rgb.g, rgb.b],
           };
+        } else {
+          Req_TremRts_sta();
         }
       });
       TremRtsData_Marged = {
@@ -2178,6 +2191,24 @@ function Connect_WolfxWS() {
 }
 
 //Seisjs WebSocket接続・受信処理
+var Seisjs_sta = {};
+function Req_Seisjs_sta() {
+  fetch(`https://api.wolfx.jp/seis_list.json?_=${Number(new Date())}`)
+    .then((r) => {
+      if (!r.ok) throw new Error(`HTTP Error: ${r.status}`);
+      return r.json();
+    }).then((json) => {
+      Seisjs_sta = json;
+      messageToMainWindow({
+        action: "Seisjs_sta",
+        data: Seisjs_sta,
+      });
+    }).catch((err) => {
+      GeneralError_handler(err);
+      UpdateStatus("wolfx", "Error");
+    });
+}
+
 var SeisjsWS_Client;
 var SeisjsWS_timer;
 function SeisjsWS() {
@@ -2239,16 +2270,29 @@ function MargeSeisJS(json) {
     PGA: json.PGA,
     Code: json.type,
     Name: json.region,
-    IsSuspended: false,
-    Region: "",
     Location: { Longitude: json.longitude, Latitude: json.latitude },
     rgb: [rgb.r, rgb.g, rgb.b],
     update_at: json.update_at,
   };
 
+  if (!Seisjs_sta[json.type]) {
+    Seisjs_sta[json.type] = {
+      "enable": true,
+      "name": json.type,
+      "location": json.region,
+      "latitude": json.latitude,
+      "longitude": json.longitude,
+    };
+    messageToMainWindow({
+      action: "Seisjs_sta",
+      data: Seisjs_sta,
+    });
+  }
+
+
   Object.keys(SeisJSData).forEach(function (elm) {
     var dif = Number(new Date() - new Date(Number(new Date(SeisJSData[elm].update_at))));
-    if (dif > 15000) delete SeisJSData[elm];
+    if (dif > (15000 + 3600000)) delete SeisJSData[elm];//中国標準時のことがあるので1h分余裕とる
   });
 
   IntervalRun(500, function () {

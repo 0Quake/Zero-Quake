@@ -28,6 +28,58 @@ fetch("./Resource/TsunamiStations.json")
     tsunamiStations = data;
   });
 
+var KNET_geometry;
+fetch("./Resource/Knet_Points.json")
+  .then(function (res) { return res.json(); })
+  .then(function (data) {
+    var geojson = { type: "FeatureCollection", features: [] };
+    data.forEach(function (elm) {
+      if (elm.IsSuspended) return;
+      geojson.features.push({
+        type: "Feature",
+        properties: {
+          Code: elm.Code,
+          Name: elm.Name,
+          Region: elm.Region,
+          Type: elm.Type,
+        },
+        geometry: {
+          type: "Point",
+          coordinates: [elm.Location.Longitude, elm.Location.Latitude],
+        },
+      });
+    });
+    KNET_geometry = geojson;
+    if (map) map.getSource("knet_points")?.setData(KNET_geometry);
+
+  });
+
+
+var Snet_geometry;
+fetch("./Resource/Snet_Points.json")
+  .then(function (res) { return res.json(); })
+  .then(function (data) {
+    var geojson = { type: "FeatureCollection", features: [] };
+    data.forEach(function (elm) {
+      geojson.features.push({
+        type: "Feature",
+        properties: {
+          Code: elm.Code,
+          Type: elm.Type,
+        },
+        geometry: {
+          type: "Point",
+          coordinates: [elm.Location.Longitude, elm.Location.Latitude],
+        },
+      });
+    });
+    Snet_geometry = geojson;
+    if (map) map.getSource("snet_points")?.setData(Snet_geometry);
+  });
+
+var TREMRTS_geometry;
+var SeisJS_geometry;
+
 var TREMRTS_TMP;
 var SeisJS_TMP;
 window.electronAPI.messageSend((event, request) => {
@@ -63,12 +115,11 @@ window.electronAPI.messageSend((event, request) => {
     Replay = request.data;
     document.getElementById("replayFrame").style.display = Replay == 0 ? "none" : "block";
 
-    var geojson = { type: "FeatureCollection", features: [] };
     if (map) {
-      map.getSource("SEISJS_points").setData(geojson);
-      map.getSource("TREMRTS_points").setData(geojson);
-      map.getSource("snet_points").setData(geojson);
-      map.getSource("knet_points").setData(geojson);
+      map.removeFeatureState({ source: "knet_points" });
+      map.removeFeatureState({ source: "snet_points" });
+      map.removeFeatureState({ source: "TREMRTS_points" });
+      map.removeFeatureState({ source: "SEISJS_points" });
     }
     psWaveEntry();
   } else if (request.action == "EQInfo") eqInfoDraw(request.data, request.source);
@@ -84,7 +135,48 @@ window.electronAPI.messageSend((event, request) => {
   else if (request.action == "Return_wepa") draw_wepa(request.data);
   else if (request.action == "Deny_additionalEQInfo_JMA") deny_additionalEQInfo_JMA();
   else if (request.action == "Deny_additionalEQInfo_USGS") deny_additionalEQInfo_USGS();
+  else if (request.action == "TremRts_sta") {
+    var geojson = { type: "FeatureCollection", features: [] };
+    Object.keys(request.data).forEach(function (key) {
+      var elm = request.data[key];
+      var info = elm?.info?.[elm.info.length - 1];
+      if (!info?.lon || !info?.lat) return;
+      geojson.features.push({
+        type: "Feature",
+        properties: {
+          Code: key,
+          Type: elm.net,
+        },
+        geometry: {
+          type: "Point",
+          coordinates: [info.lon, info.lat],
+        },
+      });
+    });
+    TREMRTS_geometry = geojson;
+    if (map) map.getSource("TREMRTS_points")?.setData(TREMRTS_geometry);
 
+  } else if (request.action == "Seisjs_sta") {
+    var geojson = { type: "FeatureCollection", features: [] };
+    Object.keys(request.data).forEach(function (key) {
+      var elm = request.data[key];
+      geojson.features.push({
+        type: "Feature",
+        properties: {
+          Code: elm.name,
+          Name: elm.location,
+          Type: "SeisJS",
+        },
+        geometry: {
+          type: "Point",
+          coordinates: [elm.longitude, elm.latitude],
+        },
+      });
+    });
+    SeisJS_geometry = geojson;
+    if (map) map.getSource("SEISJS_points")?.setData(SeisJS_geometry);
+
+  }
   document.getElementById("splash").style.display = "none";
   return true;
 });
@@ -1045,18 +1137,22 @@ function init() {
         knet_points: {
           type: "geojson",
           data: { type: "FeatureCollection", features: [] },
+          promoteId: "Code",
         },
         snet_points: {
           type: "geojson",
           data: { type: "FeatureCollection", features: [] },
+          promoteId: "Code",
         },
         TREMRTS_points: {
           type: "geojson",
           data: { type: "FeatureCollection", features: [] },
+          promoteId: "Code",
         },
         SEISJS_points: {
           type: "geojson",
           data: { type: "FeatureCollection", features: [] },
+          promoteId: "Code",
         },
       },
       layers: [
@@ -1461,13 +1557,17 @@ function init() {
           paint: {
             "circle-color": [
               "rgb",
-              ["at", 0, ["get", "rgb"]],
-              ["at", 1, ["get", "rgb"]],
-              ["at", 2, ["get", "rgb"]],
+              ["coalesce", ["feature-state", "rgb_r"], 0],
+              ["coalesce", ["feature-state", "rgb_g"], 0],
+              ["coalesce", ["feature-state", "rgb_b"], 0],
             ],
-            "circle-radius": ["interpolate", ["linear"], ["zoom"], 2, 1, 5, 3.75, 15, 33.75,],
-            "circle-stroke-width": 2,
-            "circle-stroke-color": ["match", ["get", "detectLv"], 0, "transparent", 1, "#cb732b", 2, "#cb2b2b", "#0000",],
+            "circle-radius": ["interpolate", ["linear"], ["zoom"],
+              2, ["case", ["boolean", ["feature-state", "visible"], false], 1, 0],
+              5, ["case", ["boolean", ["feature-state", "visible"], false], 3.75, 0],
+              15, ["case", ["boolean", ["feature-state", "visible"], false], 33.75, 0],
+            ],
+            "circle-stroke-width": ["case", ["boolean", ["feature-state", "visible"], false], 2, 0],//invisibleな場合線を消す
+            "circle-stroke-color": ["match", ["feature-state", "detectLv"], 0, "transparent", 1, "#cb732b", 2, "#cb2b2b", "#0000",],
           },
         },
         {
@@ -1480,11 +1580,15 @@ function init() {
           paint: {
             "circle-color": [
               "rgb",
-              ["at", 0, ["get", "rgb"]],
-              ["at", 1, ["get", "rgb"]],
-              ["at", 2, ["get", "rgb"]],
+              ["coalesce", ["feature-state", "rgb_r"], 0],
+              ["coalesce", ["feature-state", "rgb_g"], 0],
+              ["coalesce", ["feature-state", "rgb_b"], 0],
             ],
-            "circle-radius": ["interpolate", ["linear"], ["zoom"], 2, 1, 5, 3.75, 15, 33.75,],
+            "circle-radius": ["interpolate", ["linear"], ["zoom"],
+              2, ["case", ["boolean", ["feature-state", "visible"], false], 1, 0],
+              5, ["case", ["boolean", ["feature-state", "visible"], false], 3.75, 0],
+              15, ["case", ["boolean", ["feature-state", "visible"], false], 33.75, 0],
+            ],
           },
         },
         {
@@ -1497,11 +1601,15 @@ function init() {
           paint: {
             "circle-color": [
               "rgb",
-              ["at", 0, ["get", "rgb"]],
-              ["at", 1, ["get", "rgb"]],
-              ["at", 2, ["get", "rgb"]],
+              ["coalesce", ["feature-state", "rgb_r"], 0],
+              ["coalesce", ["feature-state", "rgb_g"], 0],
+              ["coalesce", ["feature-state", "rgb_b"], 0],
             ],
-            "circle-radius": ["interpolate", ["linear"], ["zoom"], 2, 1, 5, 3.75, 15, 33.75,],
+            "circle-radius": ["interpolate", ["linear"], ["zoom"],
+              2, ["case", ["boolean", ["feature-state", "visible"], false], 1, 0],
+              5, ["case", ["boolean", ["feature-state", "visible"], false], 3.75, 0],
+              15, ["case", ["boolean", ["feature-state", "visible"], false], 33.75, 0],
+            ],
           },
         },
         {
@@ -1514,11 +1622,15 @@ function init() {
           paint: {
             "circle-color": [
               "rgb",
-              ["at", 0, ["get", "rgb"]],
-              ["at", 1, ["get", "rgb"]],
-              ["at", 2, ["get", "rgb"]],
+              ["coalesce", ["feature-state", "rgb_r"], 0],
+              ["coalesce", ["feature-state", "rgb_g"], 0],
+              ["coalesce", ["feature-state", "rgb_b"], 0],
             ],
-            "circle-radius": ["interpolate", ["linear"], ["zoom"], 2, 1, 5, 3.75, 15, 33.75,],
+            "circle-radius": ["interpolate", ["linear"], ["zoom"],
+              2, ["case", ["boolean", ["feature-state", "visible"], false], 1, 0],
+              5, ["case", ["boolean", ["feature-state", "visible"], false], 3.75, 0],
+              15, ["case", ["boolean", ["feature-state", "visible"], false], 33.75, 0],
+            ],
           },
         },
         { "id": "注記シンボル付きソート順100以上", "type": "symbol", "source": "v", "source-layer": "Anno", "filter": ["step", ["zoom"], ["all", ["==", ["geometry-type"], "Point"], ["in", ["get", "vt_code"], ["literal", [653, 661, 662, 3201, 3202, 3203, 3204, 3211, 3215, 3216, 3217, 3218, 3231, 3232, 3242, 3243, 3244, 3261, 4101, 4102, 4103, 4104, 4105, 6301, 6311, 6312, 6313, 6314, 6321, 6322, 6323, 6324, 6325, 6326, 6327, 6332, 6342, 6351, 6362, 7101, 7102, 7103, 7711, 8103, 8105]]]], 16, ["all", ["==", ["geometry-type"], "Point"], ["in", ["get", "vt_flag17"], ["literal", [0, 1]]], ["in", ["get", "vt_code"], ["literal", [653, 661, 662, 3201, 3202, 3203, 3204, 3211, 3215, 3216, 3217, 3218, 3231, 3232, 3242, 3243, 3244, 3261, 4101, 4102, 4103, 4104, 4105, 6301, 6311, 6312, 6313, 6314, 6321, 6322, 6323, 6324, 6325, 6326, 6327, 6332, 6342, 6351, 6362, 7101, 7102, 7103, 7711, 8103, 8105]]]], 17, ["all", ["==", ["geometry-type"], "Point"], ["in", ["get", "vt_flag17"], ["literal", [1, 2]]], ["in", ["get", "vt_code"], ["literal", [653, 661, 662, 3201, 3202, 3203, 3204, 3211, 3215, 3216, 3217, 3218, 3231, 3232, 3242, 3243, 3244, 3261, 4101, 4102, 4103, 4104, 4105, 6301, 6311, 6312, 6313, 6314, 6321, 6322, 6323, 6324, 6325, 6326, 6327, 6332, 6342, 6351, 6362, 7101, 7102, 7103, 7711, 8103, 8105]]]]], "layout": { "visibility": "none", "text-allow-overlap": false, "text-font": ["match", ["get", "vt_code"], [321, 322, 341, 342, 344, 345, 347, 820, 840, 841, 842], ["literal", ["NotoSerifJP-SemiBold"]], ["literal", ["NotoSansJP-Regular"]]], "text-justify": "auto", "text-size": ["let", "size", ["match", ["get", "vt_code"], [361, 1403, 7101, 7102, 7103, 7201, 7221], 10, [334, 730], 11, [312, 313, 314, 315, 316, 322, 323, 332, 342, 353, 412, 533, 621, 631, 632, 633, 634, 653, 654, 720, 999, 2941, 2942, 2943, 2944, 2945], 12, [343, 1402, 7711], 13, [311, 346, 347, 413, 422, 1303], 14, [210, 220, 321, 331, 352, 411, 421, 423, 431, 432, 441, 511, 521, 522, 523, 531, 532, 534, 611, 612, 613, 615, 651, 661, 662, 671, 672, 673, 681, 1302], 15, [130, 1301, 1401], 16, [140, 333, 351], 18, [110, 120, 341, 344, 345], 20, [348, 800, 810, 820, 822, 830, 831, 832, 833, 840, 841, 842, 843, 850, 860, 870, 880, 881, 882, 883, 884, 885, 886, 887, 888, 889, 890, 899], 24, 10], ["interpolate", ["linear"], ["zoom"], 4, ["*", 0.6, ["var", "size"]], 8, ["var", "size"], 11, ["match", ["get", "vt_code"], [1401, 1402, 1403], 20, 422, ["*", 0.7, ["var", "size"]], ["var", "size"]], 12, ["var", "size"], 14, ["var", "size"], 17, ["match", ["get", "vt_code"], [412, 422], ["*", 2, ["var", "size"]], ["var", "size"]]]], "text-field": ["get", "vt_text"], "text-max-width": 100, "text-radial-offset": 0.5, "text-variable-anchor": ["top", "bottom", "left", "right"], "text-writing-mode": ["horizontal"] }, "paint": { "text-color": ["let", "color", ["match", ["get", "vt_code"], 521, "rgba(80,80,80,1)", 348, "rgba(150,150,150,1)", [411, 412, 413, 421, 422, 423, 431, 432, 441, 860, 2941, 2942, 2943, 2944, 2945], "rgba(230,230,230,1)", [7372, 7711], "rgba(80,80,80,1)", 7352, "rgba(50,50,50,1)", [2901, 2903, 2904], "rgba(255,255,255,1)", [321, 322, 341, 344, 345, 820, 840, 841], "rgba(80,80,80,1)", 220, "rgba(150,150,150,1)", 312, "rgba(150,150,150,1)", [333, 346], "rgba(150,150,150,1)", [511, 522, 523, 531, 532, 534, 611, 612, 613, 614, 615, 621, 623, 631, 632, 633, 634, 641, 642, 651, 652, 653, 654, 661, 662, 671, 672, 673, 681, 720, 730, 870, 880, 881, 882, 883, 884, 885, 886, 887, 888, 889, 890, 899, 999, 3201, 3202, 3203, 3204, 3205, 3206, 3211, 3212, 3213, 3214, 3215, 3216, 3217, 3218, 3221, 3231, 3232, 3241, 3242, 3243, 3244], "rgba(150,150,150,1)", "rgba(200,200,200,1)"], ["step", ["zoom"], ["match", ["get", "vt_code"], [661, 662], "rgba(200,200,200,0)", ["var", "color"]], 14, ["match", ["get", "vt_code"], [3201, 3204, 3215, 3216, 3217, 3218, 3243], "rgba(200,200,200,0)", ["var", "color"]]]], "text-halo-color": ["step", ["zoom"], ["match", ["get", "vt_code"], [661, 662], "rgba(50,50,50,0)", "rgba(50,50,50,1)"], 14, ["match", ["get", "vt_code"], [3201, 3204, 3215, 3216, 3217, 3218, 3243], "rgba(50,50,50,0)", "rgba(50,50,50,1)"]], "text-halo-width": 1 } },
@@ -1764,6 +1876,11 @@ function init() {
   };
   zoomLevelContinue();
   map.on("load", async () => {
+    if (KNET_geometry) map.getSource("knet_points")?.setData(KNET_geometry);
+    if (Snet_geometry) map.getSource("snet_points")?.setData(Snet_geometry);
+    if (TREMRTS_geometry) map.getSource("TREMRTS_points")?.setData(TREMRTS_geometry);
+    if (SeisJS_geometry) map.getSource("SEISJS_points")?.setData(SeisJS_geometry);
+
     var image = await map.loadImage("./img/AlertOverlay.png");
     map.addImage("pattern", image.data);
     map.addLayer(
@@ -1852,162 +1969,199 @@ function map_gethome() {
 var kmoni_popup = {};
 function kmoniMapUpdate(dataTmp, type) {
   if (!dataTmp.data || background) return;
-  var geojson = { type: "FeatureCollection", features: [] };
+  if (!map) return;
 
   if (type == "knet") {
+    dataTmp.data.forEach(function (elm, i) {
+      var currentState = map.getFeatureState({ source: "knet_points", id: elm.Code });
+      var detectLv = elm.detect2 ? 2 : elm.detect ? 1 : 0;
+      var isVisible = Boolean(elm.data);
+      if (currentState.pga !== elm.pga || currentState.detectLv !== detectLv || currentState.visible !== isVisible) {
+        map.setFeatureState(
+          {
+            source: "knet_points",
+            id: elm.Code
+          },
+          {
+            visible: isVisible,
+            detectLv: detectLv,
+            rgb_r: elm?.rgb?.[0] || 0,
+            rgb_g: elm?.rgb?.[1] || 0,
+            rgb_b: elm?.rgb?.[2] || 0,
+            pga: elm.pga,
+          }
+        );
+      }
+
+      if (kmoni_popup[elm.Code] && kmoni_popup[elm.Code].isOpen()) {
+        kmoni_popup[elm.Code].setHTML(generatePopupContent_K(elm));
+      }
+    });
+
     knetMapData = dataTmp;
-    dataTmp.data.forEach(function (elm) {
-      if (elm.data) {
-        geojson.features.push({
-          type: "Feature",
-          properties: {
-            Code: elm.Code,
-            IsSuspended: elm.IsSuspended,
-            Name: elm.Name,
-            Region: elm.Region,
-            Type: elm.Type,
-            checked: elm.checked,
-            data: elm.data,
-            detect: elm.detect,
-            detect2: elm.detect2,
-            detectLv: elm.detect2 ? 2 : elm.detect ? 1 : 0,
-            pga: elm.pga,
-            rgb: elm.rgb,
-            shindo: elm.shindo,
-          },
-          geometry: {
-            type: "Point",
-            coordinates: [elm.Location.Longitude, elm.Location.Latitude],
-          },
-        });
-      }
-      if (kmoni_popup[elm.Code] && kmoni_popup[elm.Code].isOpen()) {
-        kmoni_popup[elm.Code].setHTML(generatePopupContent_K(elm));
-      }
-    });
-    if (map) map.getSource("knet_points")?.setData(geojson);
-
-    return;
   } else {
-    snetMapData = dataTmp;
-
     dataTmp.data.forEach(function (elm) {
-      if (elm.data) {
-        geojson.features.push({
-          type: "Feature",
-          properties: {
-            Code: elm.Code,
-            Type: elm.Type,
-            data: elm.data,
+      var currentState = map.getFeatureState({ source: "snet_points", id: elm.Code });
+      var isVisible = Boolean(elm.data);
+      if (currentState.pga !== elm.pga || currentState.visible !== isVisible) {
+        map.setFeatureState(
+          {
+            source: "snet_points",
+            id: elm.Code
+          },
+          {
+            visible: isVisible,
+            rgb_r: elm?.rgb?.[0],
+            rgb_g: elm?.rgb?.[1],
+            rgb_b: elm?.rgb?.[2],
             pga: elm.pga,
-            rgb: elm.rgb,
-            shindo: elm.shindo,
-          },
-          geometry: {
-            type: "Point",
-            coordinates: [elm.Location.Longitude, elm.Location.Latitude],
-          },
-        });
+          }
+        );
       }
       if (kmoni_popup[elm.Code] && kmoni_popup[elm.Code].isOpen()) {
         kmoni_popup[elm.Code].setHTML(generatePopupContent_K(elm));
       }
     });
-    if (map) map.getSource("snet_points").setData(geojson);
+    snetMapData = dataTmp;
   }
 }
 function generatePopupContent_K(params) {
-  if (params.data) {
-    if (!Array.isArray(params.rgb)) {
-      params.rgb = JSON.parse(params.rgb);
-    }
-    var content = `<h3 class='PointName' style='border-bottom-color:rgb(${params.rgb.join(",")})'>${params.Name || ""}<span>${params.Type}_${params.Code}</span></h3>`;
-  } else {
-    var content = `<h3 class='PointName' style='border-bottom:solid 2px rgba(128,128,128,0.5)'>${params.Name || ""}<span>${params.Type}_${params.Code}</span></h3>`
-  }
+  if (!map?.isStyleLoaded()) return "";
+  var targetSource = (params.Type == "S-net" || params.Type == "Sagami") ? "snet_points" : "knet_points";
+  var state = map.getFeatureState({ source: targetSource, id: params.Code });
+
+  var rgb = `${state.rgb_r || 0},${state.rgb_g || 0},${state.rgb_b || 0}`;
+  var content = `<h3 class='PointName' style='border-bottom-color:rgb(${rgb})'>${params.Name || ""}<span>${params.Type}_${params.Code}</span></h3>`;
 
   return content;
 }
 
 function generatePopupContent_TREM(params) {
-  var shindoColor = NormalizeShindo(params.shindo, 2);
-  if (!Array.isArray(params.rgb)) params.rgb = JSON.parse(params.rgb);
-  return `<h3 class='PointName' style='border-bottom-color:rgb(${params.rgb.join(",")})'>
+  if (!map?.isStyleLoaded()) return "";
+  var state = map.getFeatureState({ source: "TREMRTS_points", id: params.Code });
+
+  var shindoColor = NormalizeShindo(state.shindo, 2);
+  var rgb = `${state.rgb_r || 0},${state.rgb_g || 0},${state.rgb_b || 0}`;
+  return `<h3 class='PointName' style='border-bottom-color:rgb(${rgb})'>
       <span>${params.Type}_${params.Code}</span></h3><div class='popupContentWrap'>
-        <div class='obsShindoWrap' style='background:${shindoColor[0]};color:${shindoColor[1]};'>震度 ${NormalizeShindo(params.shindo, 1)}
-          <span>${params.shindo.toFixed(2)}</span></div>
-        <div class='obsPGAWrap'>PGA ${(Math.floor(params.PGA * 100) / 100).toFixed(2)}</div></div>`;
+        <div class='obsShindoWrap' style='background:${shindoColor[0]};color:${shindoColor[1]};'>震度 ${NormalizeShindo(state.shindo, 1)}
+          <span>${Number(state.shindo || 0).toFixed(2)}</span></div>
+        <div class='obsPGAWrap'>PGA ${Number(state.PGA).toFixed(2)}</div></div>`;
 }
 
+var TREMRTS_LastUpdate = {};
 function TREMRTSUpdate(dataTmp) {
-  if (!background) {
-    var geojson = { type: "FeatureCollection", features: [] };
-    Object.keys(dataTmp).forEach(function (key) {
-      var elm = dataTmp[key];
-      geojson.features.push({
-        type: "Feature",
-        properties: {
-          Code: elm.Code,
-          IsSuspended: elm.IsSuspended,
-          Name: elm.Name,
-          Region: elm.Region,
-          Type: elm.Type,
+  if (background) return;
+  if (!map) return;
+  Object.keys(dataTmp).forEach(function (key) {
+    TREMRTS_LastUpdate[key] = new Date();
+    var elm = dataTmp[key];
+    var currentState = map.getFeatureState({ source: "TREMRTS_points", id: elm.Code });
+    if (currentState.PGA !== elm.PGA) {
+      map.setFeatureState(
+        {
+          source: "TREMRTS_points",
+          id: elm.Code
+        },
+        {
+          visible: true,
+          rgb_r: elm?.rgb?.[0],
+          rgb_g: elm?.rgb?.[1],
+          rgb_b: elm?.rgb?.[2],
           PGA: elm.PGA,
-          rgb: elm.rgb,
           shindo: elm.shindo,
-        },
-        geometry: {
-          type: "Point",
-          coordinates: [elm.Location.Longitude, elm.Location.Latitude],
-        },
-      });
-      if (kmoni_popup[elm.Code] && kmoni_popup[elm.Code].isOpen()) {
-        kmoni_popup[elm.Code].setHTML(generatePopupContent_TREM(elm));
-      }
-    });
-    if (map) map.getSource("TREMRTS_points").setData(geojson);
-  }
+        }
+      );
+    }
+    if (kmoni_popup[elm.Code] && kmoni_popup[elm.Code].isOpen()) {
+      kmoni_popup[elm.Code].setHTML(generatePopupContent_TREM(elm));
+    }
+  });
 }
 
 function generatePopupContent_SEISJS(params) {
-  var shindoColor = NormalizeShindo(params.shindo, 2);
-  if (!Array.isArray(params.rgb)) params.rgb = JSON.parse(params.rgb);
-  return `<h3 class= 'PointName' style='border-bottom-color:rgb(${params.rgb.join(",")})'> ${params.Name}
+  if (!map?.isStyleLoaded()) return "";
+  var state = map.getFeatureState({ source: "SEISJS_points", id: params.Code });
+
+  var shindoColor = NormalizeShindo(state.shindo, 2);
+  var rgb = `${state.rgb_r || 0},${state.rgb_g || 0},${state.rgb_b || 0}`;
+
+  return `<h3 class= 'PointName' style='border-bottom-color:rgb(${rgb})'> ${params.Name}
     <span> ${params.Code}</span></h3>
-      <div class='popupContentWrap'><div class='obsShindoWrap' style='background:${shindoColor[0]};color:${shindoColor[1]};'>震度 ${NormalizeShindo(params.shindo, 1)}
-        <span>${params.shindo.toFixed(2)}</span></div>
-        <div class='obsPGAWrap'>PGA ${(Math.floor(params.PGA * 100) / 100).toFixed(2)}</div></div>`;
+      <div class='popupContentWrap'><div class='obsShindoWrap' style='background:${shindoColor[0]};color:${shindoColor[1]};'>震度 ${NormalizeShindo(state.shindo, 1)}
+        <span>${Number(state.shindo || 0).toFixed(2)}</span></div>
+        <div class='obsPGAWrap'>PGA ${Number(state.PGA).toFixed(2)}</div></div>`;
 }
 
+var SeisJS_LastUpdate = {};
 function SeisJSUpdate(dataTmp) {
-  if (!background) {
-    var geojson = { type: "FeatureCollection", features: [] };
-    Object.keys(dataTmp).forEach(function (key) {
-      var elm = dataTmp[key];
-      geojson.features.push({
-        type: "Feature",
-        properties: {
-          Code: elm.Code,
-          IsSuspended: elm.IsSuspended,
-          Name: elm.Name,
-          Region: elm.Region,
-          Type: elm.Type,
+  if (background) return;
+  if (!map) return;
+
+  Object.keys(dataTmp).forEach(function (key) {
+    SeisJS_LastUpdate[key] = new Date();
+    var elm = dataTmp[key];
+    var currentState = map.getFeatureState({ source: "SEISJS_points", id: elm.Code });
+    if (currentState.PGA !== elm.PGA) {
+      map.setFeatureState(
+        {
+          source: "SEISJS_points",
+          id: elm.Code
+        },
+        {
+          visible: true,
+          rgb_r: elm?.rgb?.[0],
+          rgb_g: elm?.rgb?.[1],
+          rgb_b: elm?.rgb?.[2],
           PGA: elm.PGA,
-          rgb: elm.rgb,
           shindo: elm.shindo,
-        },
-        geometry: {
-          type: "Point",
-          coordinates: [elm.Location.Longitude, elm.Location.Latitude],
-        },
-      });
-      if (kmoni_popup[elm.Code] && kmoni_popup[elm.Code].isOpen()) {
-        kmoni_popup[elm.Code].setHTML(generatePopupContent_SEISJS(elm));
-      }
-    });
-    if (map) map.getSource("SEISJS_points").setData(geojson);
-  }
+        }
+      );
+    }
+    if (kmoni_popup[elm.Code] && kmoni_popup[elm.Code].isOpen()) {
+      kmoni_popup[elm.Code].setHTML(generatePopupContent_SEISJS(elm));
+    }
+  });
 }
+
+//最終受信が古い点を削除
+setInterval(function () {
+  Object.keys(SeisJS_LastUpdate).forEach(function (key) {
+    var val = SeisJS_LastUpdate[key];
+    if (new Date() - val > 2000) {
+      if (map?.isStyleLoaded()) {
+        map.setFeatureState(
+          {
+            source: "SEISJS_points",
+            id: key
+          },
+          {
+            visible: false,
+          }
+        );
+      }
+      delete SeisJS_LastUpdate[key];
+    }
+  });
+  Object.keys(TREMRTS_LastUpdate).forEach(function (key) {
+    var val = TREMRTS_LastUpdate[key];
+    if (new Date() - val > 2000) {
+      if (map?.isStyleLoaded()) {
+        map.setFeatureState(
+          {
+            source: "TREMRTS_points",
+            id: key
+          },
+          {
+            visible: false,
+          }
+        );
+      }
+      delete TREMRTS_LastUpdate[key];
+    }
+  });
+
+}, 3000)
 
 var Int0T = ["any"], Int1T = ["any"], Int2T = ["any"], Int3T = ["any"], Int4T = ["any"], Int5mT = ["any"], Int5pT = ["any"], Int6mT = ["any"], Int6pT = ["any"], Int7T = ["any"], AlertT = ["any"];
 
