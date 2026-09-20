@@ -5,7 +5,6 @@ var Tsunami_MajorWarning, Tsunami_Warning, Tsunami_Watch, Tsunami_Yoho;
 var psWaveList = [];
 var tsunamiAlertNow = false;
 var hinanjoLayers = [];
-var knet_already_draw = false;
 var current_EEW = [];
 var Replay = 0;
 var background = false;
@@ -101,7 +100,7 @@ window.electronAPI.messageSend((event, request) => {
     UpdateStatus(request.timestamp, request.LocalTime, request.type, request.condition);
   } else if (request.action == "kmoniUpdate") {
     UpdateStatus(request.timestamp, request.LocalTime, "kmoniImg", "success");
-    if (!background || !knet_already_draw) kmoniMapUpdate(request.data, "knet");
+    if (!background) kmoniMapUpdate(request.data, "knet");
   } else if (request.action == "SnetUpdate") {
     UpdateStatus(request.timestamp, request.LocalTime, "msilImg", "success");
     kmoniMapUpdate(request.data, "snet");
