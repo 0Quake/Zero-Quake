@@ -3901,9 +3901,11 @@ function MargeEQInfo(dataList, count) {
         //キャンセル報を受信時、同一カテゴリの過去情報のキャンセルフラグを立てる（気象庁仕様に準拠）
         rawData.forEach(function (elm, index) {
           if (elm.cancel) {
-            rawData.slice(0, index).forEach(function (elm2, index2) {
-              if (elm2.category == elm.category) rawData[index2].cancel = true;
-            });
+            for (var j = 0; j < index; j++) {
+              if (rawData[j].category == elm.category) {
+                rawData[j].cancel = true;
+              }
+            }
           }
         });
         rawData.forEach(function (elm) {
