@@ -3086,11 +3086,6 @@ function EarlyEst_Alert(data, first) {
       });
     }
 
-
-    //スリープ回避開始
-    if (config.system.powerSaveBlocking && (!psBlock || !powerSaveBlocker.isStarted(psBlock))) {
-      psBlock = powerSaveBlocker.start("prevent-display-sleep");
-    }
   } catch (err) {
     throw new Error("Early-Est地震情報の通知処理でエラーが発生しました。", { cause: err });
   }
