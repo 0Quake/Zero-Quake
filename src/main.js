@@ -2154,14 +2154,14 @@ function WolfxWS() {
       } catch {
         UpdateStatus("wolfx", "Error");
       }
-      if (Wolfx_Timer) {
-        clearInterval(Wolfx_Timer)
-        Wolfx_Timer = null;
-      }
-      Wolfx_Timer = setInterval(function () {
-        connection.sendUTF("ping");
-      }, 60000);
     });
+    if (Wolfx_Timer) {
+      clearInterval(Wolfx_Timer)
+      Wolfx_Timer = null;
+    }
+    Wolfx_Timer = setInterval(function () {
+      connection.sendUTF("ping");
+    }, 60000);
     connection.sendUTF("query_jmaeew");
     UpdateStatus("wolfx", "success");
   });
