@@ -2319,7 +2319,6 @@ async function SetKmoniOffset(func) {
     KmoniOffset = null;
     while (!KmoniOffset && index < 10) {
       await new Promise((resolve) => {
-        var dataTmp = "";
         var reqTime = new Date();
 
         fetch(`http://www.kmoni.bosai.go.jp/webservice/server/pros/latest.json?_=${Number(new Date())}`)
