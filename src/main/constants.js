@@ -248,10 +248,11 @@ export function Boolean2(elm) {
 
 
 export function newDate2(e) {
+  if (e === null || e === undefined || e === "") return null;
   var dt = new Date(e);
 
   const isInvalidDate = Number.isNaN(dt.getTime());
-  if (dt && !isInvalidDate) return dt
+  if (dt && !isInvalidDate) return dt;
   else return null;
 }
 

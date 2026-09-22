@@ -4,7 +4,8 @@
   "version": "0.9.9",
   "description": "Zero Quake",
   "scripts": {
-    "start": "electron . --develop --debug-mode"
+    "start": "electron . --develop --debug-mode",
+    "test": "node --test"
   },
   "build": {
     "productName": "Zero Quake",

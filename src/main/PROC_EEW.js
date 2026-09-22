@@ -542,7 +542,7 @@ export function EEW_Clear(EventID) {
       if (psBlock && powerSaveBlocker.isStarted(psBlock)) {
         powerSaveBlocker.stop(psBlock);
       }
-      worker.postMessage({ action: "EEWNow", data: true });
+      worker?.postMessage({ action: "EEWNow", data: true });
     }
   } catch (err) {
     throw new Error("緊急地震速報の解除処理でエラーが発生しました。", { cause: err });
@@ -553,7 +553,7 @@ export function EEW_Clear(EventID) {
 export function EEW_Alert(data, update) {
   const config = eewCtx.getConfig();
   try {
-    worker.postMessage({ action: "EEWNow", data: true });
+    worker?.postMessage({ action: "EEWNow", data: true });
 
     //通知条件の判定
     var show_alert = false;

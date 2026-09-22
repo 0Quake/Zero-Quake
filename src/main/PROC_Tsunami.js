@@ -90,7 +90,7 @@ export function ConvertTsunamiInfo(data) {
       var home_grade = -1;//家地域にはなにも発表されていない「-1」
       //階級を数字に変換しつつ家の階級を調べる
       var grades = data.areas.map(function (elm) {
-        if (config.home.TsunamiSect && elm.name == config.home.TsunamiSect) {
+        if (config.home?.TsunamiSect && elm.name == config.home.TsunamiSect) {
           home_grade = GradeID[elm.grade];
         }
         return GradeID[elm.grade] || 0;
