@@ -76,21 +76,6 @@ export function initWindowContext(ctx) {
 export function CreateMainWindow() {
   const store = winCtx.getStore();
   const config = winCtx.getConfig();
-  const TremRts_sta = winCtx.getTremRts_sta();
-  const Seisjs_sta = winCtx.getSeisjs_sta();
-  const EEW_Active = winCtx.getEEWActive();
-  const eqInfo = winCtx.getEqInfo();
-  const EQDetect_List = winCtx.getEQDetectList();
-  const JMA_CurrentInfoNumber = winCtx.getJMAInfoNumber();
-  const USGS_CurrentInfoNumber = winCtx.getUSGSInfoNumber();
-  const kmoniTimeTmp = winCtx.getKmoniTimeTmp();
-  const EQCount_process = winCtx.getEQCountProcess();
-  const kmoniPointsDataTmp = winCtx.getKmoniPointsDataTmp();
-  const SnetPointsDataTmp = winCtx.getSnetPointsDataTmp();
-  const NankaiTroughInfo = winCtx.getNankaiTroughInfo();
-  const HokkaidoSanrikuInfoAll = winCtx.getHokkaidoSanrikuInfoAll();
-  const KatsudoJokyoInfoAll = winCtx.getKatsudoJokyoInfoAll();
-  const thresholds = winCtx.getThresholds();
   try {
     if (MainWindow && !MainWindow.isDestroyed()) {
       if (MainWindow.isMinimized()) MainWindow.restore();
@@ -120,6 +105,22 @@ export function CreateMainWindow() {
       MainWindow.webContents.on("did-finish-load", () => {
         const config = winCtx.getConfig();
         const Replay = winCtx.getReplay();
+        const TremRts_sta = winCtx.getTremRts_sta();
+        const Seisjs_sta = winCtx.getSeisjs_sta();
+        const EEW_Active = winCtx.getEEWActive();
+        const eqInfo = winCtx.getEqInfo();
+        const EQDetect_List = winCtx.getEQDetectList();
+        const JMA_CurrentInfoNumber = winCtx.getJMAInfoNumber();
+        const USGS_CurrentInfoNumber = winCtx.getUSGSInfoNumber();
+        const kmoniTimeTmp = winCtx.getKmoniTimeTmp();
+        const EQCount_process = winCtx.getEQCountProcess();
+        const kmoniPointsDataTmp = winCtx.getKmoniPointsDataTmp();
+        const SnetPointsDataTmp = winCtx.getSnetPointsDataTmp();
+        const NankaiTroughInfo = winCtx.getNankaiTroughInfo();
+        const HokkaidoSanrikuInfoAll = winCtx.getHokkaidoSanrikuInfoAll();
+        const KatsudoJokyoInfoAll = winCtx.getKatsudoJokyoInfoAll();
+        const thresholds = winCtx.getThresholds();
+
         MainWindow.webContents.setZoomFactor(config.system.zoom);
 
         if (notifyData) messageToMainWindow(notifyData);
@@ -128,54 +129,64 @@ export function CreateMainWindow() {
           messageToMainWindow({ action: "Replay", data: Replay });
         }
 
-        Object.keys(kmoniTimeTmp).forEach(function (key) {
-          var elm = kmoniTimeTmp[key];
-          messageToMainWindow({
-            action: "UpdateStatus",
-            timestamp: elm.timestamp,
-            LocalTime: elm.LocalTime,
-            type: elm.type,
-            condition: elm.condition,
+        if (kmoniTimeTmp) {
+          Object.keys(kmoniTimeTmp).forEach(function (key) {
+            var elm = kmoniTimeTmp[key];
+            messageToMainWindow({
+              action: "UpdateStatus",
+              timestamp: elm.timestamp,
+              LocalTime: elm.LocalTime,
+              type: elm.type,
+              condition: elm.condition,
+            });
           });
-        });
+        }
 
         messageToMainWindow({ action: "setting", data: config });
 
-        messageToMainWindow({
-          action: "TremRts_sta",
-          data: TremRts_sta,
-        });
-        messageToMainWindow({
-          action: "Seisjs_sta",
-          data: Seisjs_sta,
-        });
+        if (TremRts_sta) {
+          messageToMainWindow({
+            action: "TremRts_sta",
+            data: TremRts_sta,
+          });
+        }
+        if (Seisjs_sta && Object.keys(Seisjs_sta).length > 0) {
+          messageToMainWindow({
+            action: "Seisjs_sta",
+            data: Seisjs_sta,
+          });
+        }
 
-        if (EEW_Active.length > 0) {
+        if (EEW_Active && EEW_Active.length > 0) {
           messageToMainWindow({ action: "EEW_AlertUpdate", data: EEW_Active });
         }
 
-        if (eqInfo.jma.length > 0) {
+        if (eqInfo?.jma?.length > 0) {
           messageToMainWindow({
             action: "EQInfo",
             source: "jma",
             data: eqInfo.jma.slice(0, JMA_CurrentInfoNumber),
           });
         }
-        if (eqInfo.usgs.length > 0) {
+        if (eqInfo?.usgs?.length > 0) {
           messageToMainWindow({
             action: "EQInfo",
             source: "usgs",
             data: eqInfo.usgs.slice(0, USGS_CurrentInfoNumber),
           });
         }
-        EQCount_process(null)
+        if (typeof EQCount_process === "function") {
+          EQCount_process(null);
+        }
 
-        EQDetect_List.forEach(function (elm) {
-          var threshold01Tmp = elm.isCity ? thresholds.threshold01C : thresholds.threshold01;
-          if (elm.Codes.length >= threshold01Tmp) {
-            messageToMainWindow({ action: "EQDetect", data: elm });
-          }
-        });
+        if (Array.isArray(EQDetect_List) && thresholds) {
+          EQDetect_List.forEach(function (elm) {
+            var threshold01Tmp = elm.isCity ? thresholds.threshold01C : thresholds.threshold01;
+            if (elm.Codes.length >= threshold01Tmp) {
+              messageToMainWindow({ action: "EQDetect", data: elm });
+            }
+          });
+        }
 
         if (kmoniPointsDataTmp) messageToMainWindow(kmoniPointsDataTmp);
         if (SnetPointsDataTmp) messageToMainWindow(SnetPointsDataTmp);
@@ -185,13 +196,13 @@ export function CreateMainWindow() {
             data: NankaiTroughInfo,
           });
         }
-        if (HokkaidoSanrikuInfoAll[0]) {
+        if (HokkaidoSanrikuInfoAll?.[0]) {
           messageToMainWindow({
             action: "HokkaidoSanrikuInfo",
             data: HokkaidoSanrikuInfoAll[0],
           });
         }
-        if (KatsudoJokyoInfoAll[0]) {
+        if (KatsudoJokyoInfoAll?.[0]) {
           messageToMainWindow({
             action: "KatsudoJokyoInfo",
             data: KatsudoJokyoInfoAll[0],
@@ -294,9 +305,6 @@ export function Create_WorkerWindow() {
 //設定ウィンドウ表示処理
 export function Create_SettingWindow(update) {
   const config = winCtx.getConfig();
-  const defaultConfigVal = winCtx.getDefaultConfigVal();
-  const package_ver = winCtx.getPackageVer();
-  const update_data = winCtx.getUpdateData();
   try {
     if (SettingWindow) {
       if (SettingWindow.isMinimized()) SettingWindow.restore();
@@ -321,6 +329,10 @@ export function Create_SettingWindow(update) {
     SettingWindow.webContents.on("did-finish-load", () => {
       const config = winCtx.getConfig();
       const Replay = winCtx.getReplay();
+      const defaultConfigVal = winCtx.getDefaultConfigVal();
+      const package_ver = winCtx.getPackageVer();
+      const update_data = winCtx.getUpdateData();
+
       SettingWindow.webContents.setZoomFactor(config.system.zoom);
 
       if (Replay !== 0) {

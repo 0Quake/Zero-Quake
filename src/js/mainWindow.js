@@ -150,6 +150,7 @@ window.electronAPI.messageSend((event, request) => {
   else if (request.action == "Deny_additionalEQInfo_JMA") deny_additionalEQInfo_JMA();
   else if (request.action == "Deny_additionalEQInfo_USGS") deny_additionalEQInfo_USGS();
   else if (request.action == "TremRts_sta") {
+    if (!request.data) return;
     var geojson = { type: "FeatureCollection", features: [] };
     Object.keys(request.data).forEach(function (key) {
       var elm = request.data[key];
@@ -171,6 +172,7 @@ window.electronAPI.messageSend((event, request) => {
     if (map) map.getSource("TREMRTS_points")?.setData(TREMRTS_geometry);
 
   } else if (request.action == "Seisjs_sta") {
+    if (!request.data) return;
     var geojson = { type: "FeatureCollection", features: [] };
     Object.keys(request.data).forEach(function (key) {
       var elm = request.data[key];
