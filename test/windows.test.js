@@ -1,7 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import {
-  initWindowContext,
   messageToSettingWindow,
   messageToTsunamiWindow,
   messageToWorkerWindow,
@@ -9,14 +8,13 @@ import {
   TsunamiWindow,
   WorkerWindow,
 } from "../src/main/windows.js";
+import { setConfig, setPackageVer } from "../src/main/state.js";
 
 describe("windows.js - Unit Tests", () => {
-  it("should initialize windows context safely", () => {
+  it("should initialize windows state safely", () => {
     assert.doesNotThrow(() => {
-      initWindowContext({
-        getConfig: () => ({}),
-        getPackageVer: () => "0.9.9",
-      });
+      setConfig({});
+      setPackageVer("0.9.9");
     });
   });
 

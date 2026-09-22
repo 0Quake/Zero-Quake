@@ -1,31 +1,26 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { initEEWRxContext } from "../src/main/RX_EEW.js";
-import { initOtherAPIsContext, checkUpdate } from "../src/main/RX_OtherAPIs.js";
+import { checkUpdate } from "../src/main/RX_OtherAPIs.js";
+import {
+  setConfig,
+  setReplay,
+  setPackageVer,
+  setPackageJson,
+  UpdateStatus,
+} from "../src/main/state.js";
 
 describe("RX_EEW.js and RX_OtherAPIs.js - Unit Tests", () => {
-  it("should initialize EEW Rx context correctly", () => {
-    let statusUpdated = false;
-    initEEWRxContext({
-      getConfig: () => ({}),
-      getReplay: () => 0,
-      UpdateStatus: () => {
-        statusUpdated = true;
-      },
-    });
+  it("should configure state and UpdateStatus correctly", () => {
+    setConfig({ test: 1 });
+    setReplay(0);
     assert.doesNotThrow(() => {
-      initEEWRxContext({ getReplay: () => 100 });
+      UpdateStatus("test_type", "ok");
     });
   });
 
-  it("should initialize OtherAPIs context and expose checkUpdate function", () => {
-    initOtherAPIsContext({
-      getConfig: () => ({}),
-      getPackageVer: () => "0.9.9",
-      getPackageJson: () => ({ version: "0.9.9" }),
-      UpdateStatus: () => {},
-      GeneralError_handler: () => {},
-    });
+  it("should configure OtherAPIs state and expose checkUpdate function", () => {
+    setPackageVer("0.9.9");
+    setPackageJson({ version: "0.9.9" });
     assert.equal(typeof checkUpdate, "function");
   });
 });

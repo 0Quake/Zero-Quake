@@ -5,36 +5,21 @@ import { throttle, NormalizeShindo, newDate2, FERegion } from "./constants.js";
 import { MainWindow, SettingWindow, Create_SettingWindow } from "./windows.js";
 import { MargeEQInfo, AlertEQInfo } from "./PROC_EQInfo.js";
 
-let otherCtx = {
-  getConfig: () => ({}),
-  getReplay: () => 0,
-  getPackageVer: () => "",
-  getPackageJson: () => null,
-  getJMAInfoNumber: () => 20,
-  getUSGSInfoNumber: () => 20,
-  UpdateStatus: () => { },
-  GeneralError_handler: () => { },
-};
-
-export function initOtherAPIsContext(ctx) {
-  otherCtx = Object.assign(otherCtx, ctx);
-}
-
-const packageJson = {
-  get version() {
-    return otherCtx.getPackageJson?.()?.version || otherCtx.getPackageVer();
-  },
-};
-
-const UpdateStatus = (...args) => otherCtx.UpdateStatus(...args);
-const GeneralError_handler = (...args) => otherCtx.GeneralError_handler(...args);
+import {
+  package_ver,
+  packageJson,
+  JMA_CurrentInfoNumber,
+  USGS_CurrentInfoNumber,
+  UpdateStatus,
+  GeneralError_handler,
+} from "./state.js";
 
 export var update_data;
 export var downloadURL;
 
 //アップデートの確認
 export var checkUpdate = throttle(async function (userAction) {
-  const package_ver = otherCtx.getPackageVer();
+
   try {
     var UpdateError = function () {
       var current_verTmp = package_ver;
@@ -139,7 +124,6 @@ export var checkUpdate = throttle(async function (userAction) {
 
 var usgsLastGenerated = 0;
 export var Req_USGS = throttle(function () {
-  const USGS_CurrentInfoNumber = otherCtx.getUSGSInfoNumber();
   fetch(`https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&limit=${USGS_CurrentInfoNumber}`)
     .then((r) => {
       if (!r.ok) throw new Error(`HTTP Error: ${r.status}`);
@@ -180,7 +164,6 @@ export var Req_USGS = throttle(function () {
 
 //narikakun地震情報API リスト取得→Req_Narikakun
 export function Req_NarikakunList(count) {
-  const JMA_CurrentInfoNumber = otherCtx.getJMAInfoNumber();
   fetch(`https://earthquake-api-v2.nakn.jp/api/v2/list?limit=${JMA_CurrentInfoNumber}`)
     .then((r) => {
       if (!r.ok) throw new Error(`HTTP Error: ${r.status}`);

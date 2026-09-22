@@ -1,26 +1,17 @@
 import { Boolean2, IncludesDuplicates, NormalizeDate } from "./constants.js";
 import { TsunamiWindow, CreateMainWindow, messageToMainWindow, PlayAudio, speak } from "./windows.js";
+import { config, Replay } from "./state.js";
 
 export function resetTsunamiData() {
   Tsunami_Data = [];
   Tsunami_data_Marged = null;
 }
 
-let tsunamiCtx = {
-  getConfig: () => ({}),
-  getReplay: () => 0,
-};
-
-export function initTsunamiContext(ctx) {
-  tsunamiCtx = Object.assign(tsunamiCtx, ctx);
-}
-
 export var Tsunami_Data = [];
 export var Tsunami_data_Marged;
 export var TsunamiValidate_bypass = false;
 export function ConvertTsunamiInfo(data) {
-  const config = tsunamiCtx.getConfig();
-  const Replay = tsunamiCtx.getReplay();
+
   try {
     if (!config.Info.TsunamiInfo.GetData) return;
     if (!config.Info.TsunamiInfo.showtraining && data.status == "訓練") return;
@@ -188,7 +179,6 @@ export function ConvertTsunamiInfo(data) {
 
 
 export function GenerateTsunamiText(data) {
-  const config = tsunamiCtx.getConfig();
   try {
     if (data.Torikeshi) {
       var text = config.notice.voice.TsunamiTorikeshi;

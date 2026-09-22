@@ -1,25 +1,14 @@
 import { NormalizeShindo, Boolean2, NormalizeDate } from "./constants.js";
 import { messageToMainWindow, PlayAudio, speak, EQI_Window } from "./windows.js";
+import { config, Replay, JMA_CurrentInfoNumber, USGS_CurrentInfoNumber } from "./state.js";
+import { EEW_Storage } from "./PROC_EEW.js";
 
 export var eqInfo = { jma: [], usgs: [] };
-
-let eqCtx = {
-  getConfig: () => ({}),
-  getReplay: () => 0,
-  getEEWStorage: () => [],
-  getJMAInfoNumber: () => 20,
-  getUSGSInfoNumber: () => 20,
-};
-
-export function initEQInfoContext(ctx) {
-  eqCtx = Object.assign(eqCtx, ctx);
-}
 
 export var EQInfoData = {};
 //地震情報マージ→AlertEQInfo
 export function MargeEQInfo(dataList, count) {
-  const config = eqCtx.getConfig();
-  const Replay = eqCtx.getReplay();
+
   try {
     var eqInfoTmp = [];
     var UpdateEQInfoTmp = [];
@@ -197,10 +186,6 @@ export function timeDifference(miliseconds) {
 
 //地震情報通知（音声・画面表示等）
 export function AlertEQInfo(data, source) {
-  const config = eqCtx.getConfig();
-  const EEW_Storage = eqCtx.getEEWStorage();
-  const JMA_CurrentInfoNumber = eqCtx.getJMAInfoNumber();
-  const USGS_CurrentInfoNumber = eqCtx.getUSGSInfoNumber();
   try {
     if (source == "jma") {
 
@@ -264,7 +249,6 @@ export function AlertEQInfo(data, source) {
 
 
 export function GenerateEQInfoText(EQData) {
-  const config = eqCtx.getConfig();
   try {
     if (EQData.category == "EEW") return ""; //EEWは専用の読み上げシステムに任せる
     if (!EQData.epiCenter && !EQData.maxI) return; //震度も震源もわからない（壊れたデータ）をはねる

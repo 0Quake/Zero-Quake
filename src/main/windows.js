@@ -42,40 +42,35 @@ const unresponsiveMsg = {
   noLink: true,
 };
 
-let winCtx = {
-  getStore: () => null,
-  getConfig: () => ({}),
-  getDefaultConfigVal: () => ({}),
-  getPackageVer: () => "",
-  getReplay: () => 0,
-  getUpdateData: () => null,
-  getTremRts_sta: () => null,
-  getSeisjs_sta: () => null,
-  getEEWActive: () => [],
-  getEqInfo: () => ({ jma: [], usgs: [] }),
-  getEQDetectList: () => [],
-  getJMAIntPoints: () => null,
-  getJMAInfoNumber: () => 20,
-  getUSGSInfoNumber: () => 20,
-  getKmoniTimeTmp: () => ({}),
-  getEQCountProcess: () => (() => { }),
-  getTsunamiDataMarged: () => null,
-  getNankaiTroughInfo: () => null,
-  getHokkaidoSanrikuInfoAll: () => [],
-  getKatsudoJokyoInfoAll: () => [],
-  getKmoniPointsDataTmp: () => null,
-  getSnetPointsDataTmp: () => null,
-  getThresholds: () => null,
-  getEEWStorage: () => [],
-};
-
-export function initWindowContext(ctx) {
-  winCtx = Object.assign(winCtx, ctx);
-}
+import {
+  config,
+  defaultConfigVal,
+  store,
+  Replay,
+  package_ver,
+  update_data,
+  kmoniTimeTmp,
+  JMA_CurrentInfoNumber,
+  USGS_CurrentInfoNumber,
+} from "./state.js";
+import { EEW_Active, EEW_Storage } from "./PROC_EEW.js";
+import { eqInfo, EQCount_process } from "./PROC_EQInfo.js";
+import { Tsunami_data_Marged } from "./PROC_Tsunami.js";
+import {
+  TremRts_sta,
+  Seisjs_sta,
+  kmoniPointsDataTmp,
+  SnetPointsDataTmp,
+  thresholds,
+  EQDetect_List,
+} from "./RX_RTSeis.js";
+import {
+  NankaiTroughInfo,
+  HokkaidoSanrikuInfoAll,
+  KatsudoJokyoInfoAll,
+} from "./RX_JMAXML.js";
 
 export function CreateMainWindow() {
-  const store = winCtx.getStore();
-  const config = winCtx.getConfig();
   try {
     if (MainWindow && !MainWindow.isDestroyed()) {
       if (MainWindow.isMinimized()) MainWindow.restore();
@@ -103,24 +98,6 @@ export function CreateMainWindow() {
       else MainWindow.unmaximize()
 
       MainWindow.webContents.on("did-finish-load", () => {
-        const config = winCtx.getConfig();
-        const Replay = winCtx.getReplay();
-        const TremRts_sta = winCtx.getTremRts_sta();
-        const Seisjs_sta = winCtx.getSeisjs_sta();
-        const EEW_Active = winCtx.getEEWActive();
-        const eqInfo = winCtx.getEqInfo();
-        const EQDetect_List = winCtx.getEQDetectList();
-        const JMA_CurrentInfoNumber = winCtx.getJMAInfoNumber();
-        const USGS_CurrentInfoNumber = winCtx.getUSGSInfoNumber();
-        const kmoniTimeTmp = winCtx.getKmoniTimeTmp();
-        const EQCount_process = winCtx.getEQCountProcess();
-        const kmoniPointsDataTmp = winCtx.getKmoniPointsDataTmp();
-        const SnetPointsDataTmp = winCtx.getSnetPointsDataTmp();
-        const NankaiTroughInfo = winCtx.getNankaiTroughInfo();
-        const HokkaidoSanrikuInfoAll = winCtx.getHokkaidoSanrikuInfoAll();
-        const KatsudoJokyoInfoAll = winCtx.getKatsudoJokyoInfoAll();
-        const thresholds = winCtx.getThresholds();
-
         MainWindow.webContents.setZoomFactor(config.system.zoom);
 
         if (notifyData) messageToMainWindow(notifyData);
@@ -285,7 +262,6 @@ export function Create_WorkerWindow() {
     setTimeout(Create_WorkerWindow, 2000)
   });
   WorkerWindow.webContents.on("did-finish-load", () => {
-    const config = winCtx.getConfig();
     WorkerWindow.webContents.send("message2", {
       action: "setting",
       data: config,
@@ -304,7 +280,6 @@ export function Create_WorkerWindow() {
 }
 //設定ウィンドウ表示処理
 export function Create_SettingWindow(update) {
-  const config = winCtx.getConfig();
   try {
     if (SettingWindow) {
       if (SettingWindow.isMinimized()) SettingWindow.restore();
@@ -327,12 +302,6 @@ export function Create_SettingWindow(update) {
     });
 
     SettingWindow.webContents.on("did-finish-load", () => {
-      const config = winCtx.getConfig();
-      const Replay = winCtx.getReplay();
-      const defaultConfigVal = winCtx.getDefaultConfigVal();
-      const package_ver = winCtx.getPackageVer();
-      const update_data = winCtx.getUpdateData();
-
       SettingWindow.webContents.setZoomFactor(config.system.zoom);
 
       if (Replay !== 0) {
@@ -385,8 +354,6 @@ export function Create_SettingWindow(update) {
 }
 //津波情報ウィンドウ表示処理
 export function Create_TsunamiWindow() {
-  const config = winCtx.getConfig();
-  const Tsunami_data_Marged = winCtx.getTsunamiDataMarged();
   try {
     if (TsunamiWindow) {
       if (TsunamiWindow.isMinimized()) TsunamiWindow.restore();
@@ -406,7 +373,6 @@ export function Create_TsunamiWindow() {
     });
 
     TsunamiWindow.webContents.on("did-finish-load", () => {
-      const config = winCtx.getConfig();
       TsunamiWindow.webContents.setZoomFactor(config.system.zoom);
 
       TsunamiWindow.webContents.send("message2", {
@@ -430,8 +396,6 @@ export function Create_TsunamiWindow() {
 //南海トラフ関連情報ウィンドウの作成
 export var NankaiWindow = { type: null, window: null };
 export function Create_NankaiWindow(type) {
-  const config = winCtx.getConfig();
-  const NankaiTroughInfo = winCtx.getNankaiTroughInfo();
   try {
     var win = NankaiWindow.window;
     if (win) {
@@ -459,7 +423,6 @@ export function Create_NankaiWindow(type) {
       });
 
       NankaiWindow.window.webContents.on("did-finish-load", () => {
-        const config = winCtx.getConfig();
         NankaiWindow.window.webContents.setZoomFactor(config.system.zoom);
 
         var data =
@@ -490,7 +453,6 @@ export function Create_NankaiWindow(type) {
 //WEPA40 国際津波関連情報ウィンドウ
 export var WepaWindow = {};
 export function Create_WepaWindow(fname) {
-  const config = winCtx.getConfig();
   try {
     if (WepaWindow[fname]) {
       if (WepaWindow[fname].isMinimized()) WepaWindow[fname].restore();
@@ -511,7 +473,6 @@ export function Create_WepaWindow(fname) {
     });
 
     WepaWindow[fname].webContents.on("did-finish-load", () => {
-      const config = winCtx.getConfig();
       WepaWindow[fname].webContents.setZoomFactor(config.system.zoom);
 
       if (fname) {
@@ -539,8 +500,6 @@ export function Create_WepaWindow(fname) {
 //北海道・三陸沖後発地震注意情報ウィンドウ
 export var HokkaidoSanrikuWindow;
 export function Create_HokkaidoSanrikuWindow() {
-  const config = winCtx.getConfig();
-  const HokkaidoSanrikuInfoAll = winCtx.getHokkaidoSanrikuInfoAll();
   try {
     if (HokkaidoSanrikuWindow) {
       if (HokkaidoSanrikuWindow.isMinimized()) HokkaidoSanrikuWindow.restore();
@@ -561,7 +520,6 @@ export function Create_HokkaidoSanrikuWindow() {
     });
 
     HokkaidoSanrikuWindow.webContents.on("did-finish-load", () => {
-      const config = winCtx.getConfig();
       HokkaidoSanrikuWindow.webContents.setZoomFactor(config.system.zoom);
 
       if (HokkaidoSanrikuInfoAll[0]) {
@@ -589,8 +547,6 @@ export function Create_HokkaidoSanrikuWindow() {
 //地震の活動状況等に関する情報ウィンドウ
 export var KatsudoJokyoWindow;
 export function Create_KatsudoJokyoWindow() {
-  const config = winCtx.getConfig();
-  const KatsudoJokyoInfoAll = winCtx.getKatsudoJokyoInfoAll();
   try {
     if (KatsudoJokyoWindow) {
       if (KatsudoJokyoWindow.isMinimized()) KatsudoJokyoWindow.restore();
@@ -611,7 +567,6 @@ export function Create_KatsudoJokyoWindow() {
     });
 
     KatsudoJokyoWindow.webContents.on("did-finish-load", () => {
-      const config = winCtx.getConfig();
       KatsudoJokyoWindow.webContents.setZoomFactor(config.system.zoom);
 
       if (KatsudoJokyoInfoAll[0]) {
@@ -651,8 +606,6 @@ export function handleUrlOpen(e, url) {
   }
 }
 export function EQInfo_createWindow(response, IS_WebURL) {
-  const config = winCtx.getConfig();
-  const EEW_Storage = winCtx.getEEWStorage();
   try {
     var EQInfoWindowT = EQI_Window[response.eid];
     if (EQInfoWindowT) {
@@ -688,7 +641,6 @@ export function EQInfo_createWindow(response, IS_WebURL) {
       EQI_Window[response.eid] = { window: EQInfoWindow, metadata: metadata };
 
       EQInfoWindow.webContents.on("did-finish-load", () => {
-        const config = winCtx.getConfig();
         EQInfoWindow.webContents.setZoomFactor(config.system.zoom);
 
         EQInfoWindow.webContents.send("message2", {

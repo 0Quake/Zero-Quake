@@ -1,12 +1,17 @@
-// eslint-disable-next-line no-undef
 process.env.TZ = "Asia/Tokyo";
-// eslint-disable-next-line no-undef
 process.title = 'Zero Quake';
 
 import {
-  JMA_Int_Points,
-  Boolean2,
-} from "./main/constants.js";
+  setConfig,
+  setDefaultConfigVal,
+  setStore,
+  setReplay,
+  setPackageVer,
+  setPackageJson,
+  setStatusListener,
+  UpdateStatus,
+  GeneralError_handler,
+} from "./main/state.js";
 import {
   MainWindow,
   SettingWindow,
@@ -14,7 +19,6 @@ import {
   WorkerWindow,
   NankaiWindow,
   EQI_Window,
-  initWindowContext,
   messageToMainWindow,
   SystemNotification,
   CreateMainWindow,
@@ -28,30 +32,20 @@ import {
   EQInfo_createWindow,
 } from "./main/windows.js";
 import {
-  eqInfo,
-  initEQInfoContext,
-  EQCount_process,
-} from "./main/PROC_EQInfo.js";
-import {
   Tsunami_Data,
   Tsunami_data_Marged,
-  initTsunamiContext,
   ConvertTsunamiInfo,
   TsunamiValidate_bypass,
 } from "./main/PROC_Tsunami.js";
 import {
-  EEW_Storage,
   EEW_Active,
   clearEEWActive,
-  initEEWContext,
   EEW_Marge,
   EEW_Clear,
 } from "./main/PROC_EEW.js";
 import {
   createWorker,
   worker,
-  thresholds,
-  EQDetect_List,
   clearEQDetectList,
   ConvertKmoni,
   Req_kmoni,
@@ -64,29 +58,20 @@ import {
   Req_JMATide,
   Req_EarlyEst,
   TremRtsData_Marged,
-  TremRts_sta,
   kmoniPointsDataTmp,
   SnetPointsDataTmp,
   SeisjsWS,
   Req_Seisjs_sta,
-  Seisjs_sta,
-  initRTSeisContext,
 } from "./main/RX_RTSeis.js";
 import {
   Req_JMAXMLList,
   Req_JMA_gaikyo,
   Req_JMA_wepa,
-  NankaiTroughInfo,
-  HokkaidoSanrikuInfoAll,
-  KatsudoJokyoInfoAll,
   UpdateEQInfo,
-  initJMAXMLContext,
 } from "./main/RX_JMAXML.js";
 import {
-  update_data,
   checkUpdate,
   Req_USGS,
-  initOtherAPIsContext,
 } from "./main/RX_OtherAPIs.js";
 import {
   P2P,
@@ -95,7 +80,6 @@ import {
   WolfxWS,
   WolfxConnection,
   ProjectBS_Connection,
-  initEEWRxContext,
 } from "./main/RX_EEW.js";
 
 import electron from "electron";
@@ -109,7 +93,6 @@ import { exec } from "child_process";
 var __dirname = path.dirname(fileURLToPath(import.meta.url));
 var packageJson = JSON.parse(await readFile(path.join(__dirname, "../package.json")));
 var package_ver = packageJson.version;
-var EQ_FetchCount = 0;
 
 electron.protocol.registerSchemesAsPrivileged([
   {
@@ -262,6 +245,22 @@ var isFirstRun = !config || config.system.isFirstRun !== false;//ここじゃな
 config = mergeDeeply(defaultConfigVal, config);
 store.set("config", config);
 
+setConfig(config);
+setDefaultConfigVal(defaultConfigVal);
+setStore(store);
+setPackageJson(packageJson);
+setPackageVer(package_ver);
+
+setStatusListener((type, condition, timeStamp) => {
+  messageToMainWindow({
+    action: "UpdateStatus",
+    timestamp: timeStamp,
+    LocalTime: new Date(),
+    type: type,
+    condition: condition,
+  });
+});
+
 //リプレイ
 var Replay = 0;
 function replay(ReplayDate) {
@@ -271,6 +270,7 @@ function replay(ReplayDate) {
     } else {
       Replay = 0;
     }
+    setReplay(Replay);
     clearEQDetectList();
     clearEEWActive();
     if (worker) worker.postMessage({ action: "Replay", data: Replay });
@@ -287,94 +287,8 @@ function replay(ReplayDate) {
   }
 }
 
-var kmoniTimeTmp = {};
-var kmoniOffset = 2500;
 let tray;
 
-initWindowContext({
-  getStore: () => store,
-  getConfig: () => config,
-  getDefaultConfigVal: () => defaultConfigVal,
-  getPackageVer: () => package_ver,
-  getReplay: () => Replay,
-  getUpdateData: () => update_data,
-  getTremRts_sta: () => TremRts_sta,
-  getSeisjs_sta: () => Seisjs_sta,
-  getEEWActive: () => EEW_Active,
-  getEqInfo: () => eqInfo,
-  getEQDetectList: () => EQDetect_List,
-  getJMAIntPoints: () => JMA_Int_Points,
-  getJMAInfoNumber: () => JMA_CurrentInfoNumber,
-  getUSGSInfoNumber: () => USGS_CurrentInfoNumber,
-  getKmoniTimeTmp: () => kmoniTimeTmp,
-  getEQCountProcess: () => EQCount_process,
-  getTsunamiDataMarged: () => Tsunami_data_Marged,
-  getNankaiTroughInfo: () => NankaiTroughInfo,
-  getHokkaidoSanrikuInfoAll: () => HokkaidoSanrikuInfoAll,
-  getKatsudoJokyoInfoAll: () => KatsudoJokyoInfoAll,
-  getKmoniPointsDataTmp: () => kmoniPointsDataTmp,
-  getSnetPointsDataTmp: () => SnetPointsDataTmp,
-  getThresholds: () => thresholds,
-  getEEWStorage: () => EEW_Storage,
-});
-
-initEQInfoContext({
-  getConfig: () => config,
-  getReplay: () => Replay,
-  getEEWStorage: () => EEW_Storage,
-  getJMAInfoNumber: () => JMA_CurrentInfoNumber,
-  getUSGSInfoNumber: () => USGS_CurrentInfoNumber,
-});
-
-initTsunamiContext({
-  getConfig: () => config,
-  getReplay: () => Replay,
-});
-
-initEEWContext({
-  getConfig: () => config,
-  getReplay: () => Replay,
-  getKmoniTimeTmp: () => kmoniTimeTmp,
-  UpdateStatus: (type, condition, timeStamp) => UpdateStatus(type, condition, timeStamp),
-});
-
-initRTSeisContext({
-  getConfig: () => config,
-  getReplay: () => Replay,
-  getKmoniOffset: () => kmoniOffset,
-  setKmoniOffset: (val) => { kmoniOffset = val; },
-  UpdateStatus: (type, condition, timeStamp) => UpdateStatus(type, condition, timeStamp),
-  GeneralError_handler: (err) => GeneralError_handler(err),
-  IntervalRun: (msec, func) => IntervalRun(msec, func),
-  getThresholds: () => thresholds,
-});
-
-initJMAXMLContext({
-  getConfig: () => config,
-  getReplay: () => Replay,
-  getEQFetchCount: () => EQ_FetchCount,
-  incEQFetchCount: () => { EQ_FetchCount++; },
-  getJMAInfoNumber: () => JMA_CurrentInfoNumber,
-  UpdateStatus: (type, condition, timeStamp) => UpdateStatus(type, condition, timeStamp),
-  GeneralError_handler: (err) => GeneralError_handler(err),
-});
-
-initOtherAPIsContext({
-  getConfig: () => config,
-  getReplay: () => Replay,
-  getPackageVer: () => package_ver,
-  getPackageJson: () => packageJson,
-  getJMAInfoNumber: () => JMA_CurrentInfoNumber,
-  getUSGSInfoNumber: () => USGS_CurrentInfoNumber,
-  UpdateStatus: (type, condition, timeStamp) => UpdateStatus(type, condition, timeStamp),
-  GeneralError_handler: (err) => GeneralError_handler(err),
-});
-
-initEEWRxContext({
-  getConfig: () => config,
-  getReplay: () => Replay,
-  UpdateStatus: (type, condition, timeStamp) => UpdateStatus(type, condition, timeStamp),
-});
 
 function ScheduledExecution() {
   //axisのアクセストークン確認
@@ -390,16 +304,19 @@ function ScheduledExecution() {
         if (json.token) {
           config.Source.axis.AccessToken = String(json.token);
           store.set("config", config);
+          setConfig(config);
           SystemNotification("Axisのアクセストークンを自動で更新しました。");
         }
       } else if (json.status == "contract has expired") {
         //トークン期限切れ
         config.Source.axis.GetData = false;
         store.set("config", config);
+        setConfig(config);
         SystemNotification("Axisのアクセストークンの期限が切れました。手動でトークンを更新しください。");
       } else if (json.status == "invalid header authorization") {
         config.Source.axis.GetData = false;
         store.set("config", config);
+        setConfig(config);
         SystemNotification("Axisのアクセストークンが不正です。設定を修正してください。");
       }
     }).catch((err) => {
@@ -536,10 +453,6 @@ process.on("uncaughtException", function (err) {
   }
 });
 
-function GeneralError_handler(err) {
-  console.error(new Date().toLocaleString(), err)
-}
-
 //エラーメッセージの作成。エラー原因のツリー
 function causeTree(err) {
   try {
@@ -663,6 +576,7 @@ ipcMain.on("message", (_event, response) => {
     case "ChangeConfig":
       config = response.data;
       store.set("config", config);
+      setConfig(config);
 
       if (SettingWindow) {
         SettingWindow.webContents.send("message2", {
@@ -836,25 +750,6 @@ function start() {
   Req_JMATide_sta();
 }
 
-var LastRunTime = 0;
-var RunnningTimer;
-function IntervalRun(msec, func) {
-  if (RunnningTimer) {
-    clearInterval(RunnningTimer);
-    RunnningTimer = null;
-  }
-  var dif = new Date() - LastRunTime;
-  if (dif > msec) {
-    func();
-    LastRunTime = new Date();
-  } else {
-    RunnningTimer = setTimeout(function () {
-      func();
-      LastRunTime = new Date();
-    }, msec - dif);
-  }
-}
-
 //定期実行
 var RegularExecution_Timer;
 function RegularExecution(loop) {
@@ -885,26 +780,6 @@ function RegularExecution(loop) {
   } catch (err) {
     throw new Error("内部の情報処理でエラーが発生しました。", { cause: err });
   }
-}
-
-//情報最終更新時刻を更新
-function UpdateStatus(type, condition, timeStamp) {
-  if (!timeStamp || !Boolean2(new Date(timeStamp))) timeStamp = new Date(new Date() - Replay)
-  else timeStamp = new Date(timeStamp)
-  messageToMainWindow({
-    action: "UpdateStatus",
-    timestamp: timeStamp,
-    LocalTime: new Date(),
-    type: type,
-    condition: condition,
-  });
-
-  kmoniTimeTmp[type] = {
-    type: type,
-    timestamp: timeStamp,
-    LocalTime: new Date(),
-    condition: condition,
-  };
 }
 
 

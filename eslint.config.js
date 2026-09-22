@@ -17,7 +17,16 @@ export default [
       "no-redeclare": "off",
       "no-undef": "error",
       "no-empty": "off",
-      "no-unused-vars": "off",
+      "no-unused-vars": [
+        "warn",
+        {
+          vars: "all",
+          args: "after-used",
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrors: "none",
+        },
+      ],
     },
   },
 ];

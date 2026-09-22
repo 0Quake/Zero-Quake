@@ -12,6 +12,8 @@ import { worker } from "./RX_RTSeis.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+import { config, Replay, UpdateStatus } from "./state.js";
+
 var psBlock;
 export var EEW_Storage = []; //地震速報リスト
 export var EEW_Active = []; //現在発報中リスト
@@ -28,19 +30,6 @@ export function resetEEWStorage() {
 export function resetEarlyEstData() {
   EarlyEst_Data = [];
 }
-
-let eewCtx = {
-  getConfig: () => ({}),
-  getReplay: () => 0,
-  getKmoniTimeTmp: () => ({}),
-  UpdateStatus: () => { },
-};
-
-export function initEEWContext(ctx) {
-  eewCtx = Object.assign(eewCtx, ctx);
-}
-
-const UpdateStatus = (...args) => eewCtx.UpdateStatus(...args);
 
 export function DetectEEW(type, json) {
   if (!json) return;
@@ -274,8 +263,6 @@ export function DetectEEW(type, json) {
 
 
 export function EEW_Marge(data) {
-  const config = eewCtx.getConfig();
-  const Replay = eewCtx.getReplay();
   if (!data) return; //データがない場合、処理終了
   try {
     if (!config.Info.EEW.showtraining && data.is_training) return; //訓練法を受信するかどうか（設定に準拠）
@@ -479,8 +466,6 @@ export function EEW_Marge(data) {
 
 
 export function EarlyEst_Marge(data) {
-  const config = eewCtx.getConfig();
-  const Replay = eewCtx.getReplay();
   try {
     if (!data) return;
     if (!data.origin_time || !data.latitude || !data.longitude) return;
@@ -551,7 +536,6 @@ export function EEW_Clear(EventID) {
 
 //EEW通知（音声・画面表示等）
 export function EEW_Alert(data, update) {
-  const config = eewCtx.getConfig();
   try {
     worker?.postMessage({ action: "EEWNow", data: true });
 
@@ -684,7 +668,6 @@ export function EarlyEst_Alert(data, first) {
 
 
 export function GenerateEEWText(EEWData, update) {
-  const config = eewCtx.getConfig();
   try {
     if (EEWData.is_cancel) var text = config.notice.voice.EEWCancel;
     else if (update) var text = config.notice.voice.EEWUpdate;

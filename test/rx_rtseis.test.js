@@ -1,31 +1,24 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import {
-  initRTSeisContext,
   SetKmoniOffset,
   KmoniOffset,
   ConvertSnet,
   SnetPointsDataTmp,
 } from "../src/main/RX_RTSeis.js";
+import {
+  setKmoniOffset,
+  kmoniOffset,
+} from "../src/main/state.js";
 
 describe("RX_RTSeis.js - Unit Tests", () => {
   it("should handle SetKmoniOffset error gracefully and fallback to 2500ms", async () => {
-    let savedOffset = null;
-    initRTSeisContext({
-      getConfig: () => ({}),
-      getReplay: () => 0,
-      getKmoniOffset: () => 2500,
-      setKmoniOffset: (val) => {
-        savedOffset = val;
-      },
-      UpdateStatus: () => {},
-      GeneralError_handler: () => {},
-    });
+    setKmoniOffset(2500);
 
     // In non-electron testing environment without electron.net, it will catch and fallback to 2500
     await SetKmoniOffset();
     assert.equal(KmoniOffset, 2500);
-    assert.equal(savedOffset, 2500);
+    assert.equal(kmoniOffset, 2500);
   });
 
   it("should correctly merge Snet pair data when uid matches", () => {

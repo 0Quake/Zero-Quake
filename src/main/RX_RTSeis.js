@@ -21,27 +21,17 @@ export function clearEQDetectList() { EQDetect_List = []; }
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-let rtCtx = {
-  getConfig: () => ({}),
-  getReplay: () => 0,
-  getKmoniOffset: () => 2500,
-  setKmoniOffset: () => { },
-  UpdateStatus: () => { },
-  GeneralError_handler: () => { },
-  IntervalRun: () => { },
-  getThresholds: () => null,
-};
-
-export function initRTSeisContext(ctx) {
-  rtCtx = Object.assign(rtCtx, ctx);
-}
+import {
+  config,
+  Replay,
+  setKmoniOffset,
+  UpdateStatus,
+  GeneralError_handler,
+  IntervalRun,
+} from "./state.js";
 
 export var KmoniOffset = 2500;
 export var kmoniPointsDataTmp, SnetPointsDataTmp, TremRtsData_Marged;
-
-const UpdateStatus = (...args) => rtCtx.UpdateStatus(...args);
-const GeneralError_handler = (...args) => rtCtx.GeneralError_handler(...args);
-const IntervalRun = (...args) => rtCtx.IntervalRun(...args);
 
 export var TremRts_sta;
 var Trem_server = true;
@@ -86,8 +76,6 @@ var Trem_URLs = {
 var TremErrorCounter = 0;
 var TremRts_Timer;
 export function Req_TremRts() {
-  const config = rtCtx.getConfig();
-  const Replay = rtCtx.getReplay();
   if (TremRts_Timer) clearTimeout(TremRts_Timer);
   TremRts_Timer = setTimeout(Req_TremRts, config.Source.TREMRTS.Interval);
 
@@ -147,7 +135,6 @@ export function Req_TremRts() {
 }
 
 function sort_by_dist_TIDE(data) {
-  const config = rtCtx.getConfig();
   return data.sort((a, b) => {
     var a_dist = turf.distance([a.lon, a.lat], [config.home.longitude, config.home.latitude]);
     var b_dist = turf.distance([b.lon, b.lat], [config.home.longitude, config.home.latitude]);
@@ -193,8 +180,6 @@ export function Req_JMATide_sta() {
 var JMATide_astro = {};
 var JMATide_obs = {};
 export function Req_JMATide() {
-  const config = rtCtx.getConfig();
-  const Replay = rtCtx.getReplay();
   if (!JMATide_sta) return Req_JMATide_sta();
   JMATide_sta.forEach(function (st) {
 
@@ -265,7 +250,6 @@ export function Req_JMATide() {
 
 var EarlyEst_Timer;
 export function Req_EarlyEst() {
-  const config = rtCtx.getConfig();
   if (EarlyEst_Timer) clearTimeout(EarlyEst_Timer);
   EarlyEst_Timer = setTimeout(Req_EarlyEst, config.Source.EarlyEst.Interval);
 
@@ -317,7 +301,6 @@ export function Req_EarlyEst() {
 }
 
 export function createWorker() {
-  const config = rtCtx.getConfig();
   worker = new workerThreads.Worker(path.join(__dirname, "../js/EQDetectWorker.js"));
   worker.on("message", (message) => {
     switch (message.action) {
@@ -370,7 +353,6 @@ export function createWorker() {
 
 //強震モニタリアルタイム揺れ情報処理（地震検知など）
 export function ConvertKmoni(data, date) {
-  const config = rtCtx.getConfig();
   worker.postMessage({
     action: "EQDetect",
     data: data,
@@ -407,9 +389,6 @@ const Kmoni_URLs = [
 
 //強震モニタへのHTTPリクエスト
 export function Req_kmoni() {//済
-  const config = rtCtx.getConfig();
-  const Replay = rtCtx.getReplay();
-  let KmoniOffset = rtCtx.getKmoniOffset();
   //タイマー処理
   if (Kmoni_Timer) clearTimeout(Kmoni_Timer);
   Kmoni_Timer = setTimeout(Req_kmoni, config.Source.kmoni.kmoni.Interval);
@@ -450,9 +429,6 @@ var Msil_LastRecv = 0;
 
 //海しるへのHTTPリクエスト処理
 export function Req_SNet() {
-  const config = rtCtx.getConfig();
-  const Replay = rtCtx.getReplay();
-
   if (Msil_Timer) clearTimeout(Msil_Timer);
   Msil_Timer = setTimeout(Req_SNet, config.Source.msil.Interval);
 
@@ -534,8 +510,6 @@ export function Req_Seisjs_sta() {
 var SeisjsWS_Client;
 var SeisjsWS_timer;
 export function SeisjsWS() {
-  const config = rtCtx.getConfig();
-  const Replay = rtCtx.getReplay();
   if (!config.Source.wolfx.GetDataFromSeisJS) return;
   SeisjsWS_Client = new WebSocketClient();
 
@@ -668,7 +642,7 @@ export async function SetKmoniOffset(func) {
     GeneralError_handler(err)
   }
   KmoniOffset = calculatedOffset;
-  rtCtx.setKmoniOffset(calculatedOffset);
+  setKmoniOffset(calculatedOffset);
   if (func) setTimeout(func, 200);
 }
 

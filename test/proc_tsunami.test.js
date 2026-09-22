@@ -1,38 +1,36 @@
-import { test, describe, it, beforeEach } from "node:test";
+import { describe, it, beforeEach } from "node:test";
 import assert from "node:assert/strict";
 import {
   ConvertTsunamiInfo,
-  initTsunamiContext,
   resetTsunamiData,
   Tsunami_Data,
 } from "../src/main/PROC_Tsunami.js";
+import { setConfig, setReplay } from "../src/main/state.js";
 
 describe("PROC_Tsunami.js - ConvertTsunamiInfo", () => {
   beforeEach(() => {
     resetTsunamiData();
-    initTsunamiContext({
-      getConfig: () => ({
-        home: {
-          TsunamiSect: "オホーツク海沿岸",
+    setConfig({
+      home: {
+        TsunamiSect: "オホーツク海沿岸",
+      },
+      Info: {
+        TsunamiInfo: {
+          GetData: true,
+          showtraining: false,
+          showTest: false,
+          NotificationSound: false,
+          Global_threshold: 1,
+          Local_threshold: 1,
         },
-        Info: {
-          TsunamiInfo: {
-            GetData: true,
-            showtraining: false,
-            showTest: false,
-            NotificationSound: false,
-            Global_threshold: 1,
-            Local_threshold: 1,
-          },
+      },
+      notice: {
+        voice: {
+          TsunamiTorikeshi: "津波警報等は解除されました。",
         },
-        notice: {
-          voice: {
-            TsunamiTorikeshi: "津波警報等は解除されました。",
-          },
-        },
-      }),
-      getReplay: () => 0,
+      },
     });
+    setReplay(0);
   });
 
   it("should discard future tsunami data compared to Date.now()", () => {

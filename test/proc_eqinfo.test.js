@@ -1,34 +1,36 @@
 import { describe, it, beforeEach } from "node:test";
 import assert from "node:assert/strict";
 import {
-  initEQInfoContext,
   timeDifference,
   GenerateEQInfoText,
 } from "../src/main/PROC_EQInfo.js";
+import {
+  setConfig,
+  setReplay,
+  setJMAInfoNumber,
+  setUSGSInfoNumber,
+} from "../src/main/state.js";
 
 describe("PROC_EQInfo.js - Unit Tests", () => {
   beforeEach(() => {
-    initEQInfoContext({
-      getConfig: () => ({
-        Info: {
-          EQInfo: {
-            showtraining: false,
-            showTest: false,
-          },
+    setConfig({
+      Info: {
+        EQInfo: {
+          showtraining: false,
+          showTest: false,
         },
-        notice: {
-          voice: {
-            EQInfo_VoiceIntro: "地震情報",
-            EQInfo_Detail_Domestic: "{time}頃、{epicenter}で地震がありました。最大震度は{shindo}、マグニチュードは{magnitude}、深さは{depth}と推定されます。",
-            EQInfo_VoiceOutro: "",
-          },
+      },
+      notice: {
+        voice: {
+          EQInfo_VoiceIntro: "地震情報",
+          EQInfo_Detail_Domestic: "{time}頃、{epicenter}で地震がありました。最大震度は{shindo}、マグニチュードは{magnitude}、深さは{depth}と推定されます。",
+          EQInfo_VoiceOutro: "",
         },
-      }),
-      getReplay: () => 0,
-      getEEWStorage: () => [],
-      getJMAInfoNumber: () => 10,
-      getUSGSInfoNumber: () => 10,
+      },
     });
+    setReplay(0);
+    setJMAInfoNumber(10);
+    setUSGSInfoNumber(10);
   });
 
   describe("timeDifference", () => {

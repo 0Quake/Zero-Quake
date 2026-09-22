@@ -7,21 +7,10 @@ import { UpdateEQInfo } from "./RX_JMAXML.js";
 import { ConvertTsunamiInfo } from "./PROC_Tsunami.js";
 import { MargeEQInfo } from "./PROC_EQInfo.js";
 
-let eewRxCtx = {
-  getConfig: () => ({}),
-  getReplay: () => 0,
-  UpdateStatus: () => { },
-};
-
-export function initEEWRxContext(ctx) {
-  eewRxCtx = Object.assign(eewRxCtx, ctx);
-}
-
-const UpdateStatus = (...args) => eewRxCtx.UpdateStatus(...args);
+import { config, Replay, UpdateStatus } from "./state.js";
 
 var P2P_Client;
 export function P2P() {
-  const Replay = eewRxCtx.getReplay();
   P2P_Client = new WebSocketClient();
   P2P_Client.on("connectFailed", function () {
     UpdateStatus("P2P_EEW", "Error");
@@ -87,8 +76,6 @@ function Connect_P2P() {
 //AXIS WebSocket接続・受信処理
 var AXIS_Client;
 export function AXIS() {
-  const config = eewRxCtx.getConfig();
-  const Replay = eewRxCtx.getReplay();
   if (!config.Source.axis.GetData) return;
   AXIS_Client = new WebSocketClient();
 
@@ -165,7 +152,6 @@ function TryConnect_AXIS() {
   setTimeout(Connect_AXIS, timeoutTmp);
 }
 function Connect_AXIS() {
-  const config = eewRxCtx.getConfig();
   if (AXIS_Client)
     AXIS_Client.connect("wss://ws.axis.prioris.jp/socket", null, null, {
       Authorization: `Bearer ${config.Source.axis.AccessToken}`,
@@ -178,8 +164,6 @@ var ProjectBS_Client;
 export var ProjectBS_Connection;
 var ProjectBS_Ping_Timer;
 export function ProjectBS() {
-  const config = eewRxCtx.getConfig();
-  const Replay = eewRxCtx.getReplay();
   if (!config.Source.ProjectBS.GetData) return;
   ProjectBS_Client = new WebSocketClient();
 
@@ -237,8 +221,6 @@ var WolfxWS_Client;
 export var WolfxConnection;
 var Wolfx_Timer;
 export function WolfxWS() {
-  const config = eewRxCtx.getConfig();
-  const Replay = eewRxCtx.getReplay();
   if (!config.Source.wolfx.GetData) return;
   WolfxWS_Client = new WebSocketClient();
 

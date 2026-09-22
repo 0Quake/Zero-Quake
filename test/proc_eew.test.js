@@ -1,39 +1,35 @@
 import { describe, it, beforeEach } from "node:test";
 import assert from "node:assert/strict";
 import {
-  initEEWContext,
   GenerateEEWText,
   EEW_Clear,
   EEW_Storage,
   EEW_Active,
 } from "../src/main/PROC_EEW.js";
+import { setConfig, setReplay } from "../src/main/state.js";
 
 describe("PROC_EEW.js - Unit Tests", () => {
   beforeEach(() => {
-    initEEWContext({
-      getConfig: () => ({
-        home: {
-          name: "東京",
-          Section: "東京都２３区",
+    setConfig({
+      home: {
+        name: "東京",
+        Section: "東京都２３区",
+      },
+      Info: {
+        EEW: {
+          showtraining: false,
+          IntType: "max",
         },
-        Info: {
-          EEW: {
-            showtraining: false,
-            IntType: "max",
-          },
+      },
+      notice: {
+        voice: {
+          EEW: "緊急地震速報。{region_name}で地震。最大震度{maxInt}。",
+          EEWUpdate: "緊急地震速報更新。{region_name}で地震。最大震度{maxInt}。",
+          EEWCancel: "先ほどの緊急地震速報は取り消されました。",
         },
-        notice: {
-          voice: {
-            EEW: "緊急地震速報。{region_name}で地震。最大震度{maxInt}。",
-            EEWUpdate: "緊急地震速報更新。{region_name}で地震。最大震度{maxInt}。",
-            EEWCancel: "先ほどの緊急地震速報は取り消されました。",
-          },
-        },
-      }),
-      getReplay: () => 0,
-      getKmoniTimeTmp: () => ({}),
-      UpdateStatus: () => {},
+      },
     });
+    setReplay(0);
   });
 
   describe("GenerateEEWText", () => {

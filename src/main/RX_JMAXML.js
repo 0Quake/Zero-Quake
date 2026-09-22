@@ -7,24 +7,17 @@ import { MargeEQInfo, EQCount_process } from "./PROC_EQInfo.js";
 import { ConvertTsunamiInfo, TsunamiValidate_bypass } from "./PROC_Tsunami.js";
 import { Req_NarikakunList } from "./RX_OtherAPIs.js";
 
+import {
+  config,
+  Replay,
+  EQ_FetchCount,
+  incEQFetchCount,
+  JMA_CurrentInfoNumber,
+  UpdateStatus,
+  GeneralError_handler,
+} from "./state.js";
+
 var jmaXML_Fetched = [];
-
-let jmaCtx = {
-  getConfig: () => ({}),
-  getReplay: () => 0,
-  getEQFetchCount: () => 0,
-  incEQFetchCount: () => 0,
-  getJMAInfoNumber: () => 20,
-  UpdateStatus: () => { },
-  GeneralError_handler: () => { },
-};
-
-export function initJMAXMLContext(ctx) {
-  jmaCtx = Object.assign(jmaCtx, ctx);
-}
-
-const UpdateStatus = (...args) => jmaCtx.UpdateStatus(...args);
-const GeneralError_handler = (...args) => jmaCtx.GeneralError_handler(...args);
 
 export function Req_JMA_gaikyo() {
   fetch(`https://www.data.jma.go.jp/svd/eqev/data/gaikyo/?_=${Number(new Date())}`)
@@ -107,8 +100,6 @@ export function Req_JMA_wepa() {
 
 
 export var UpdateEQInfo = throttle(function (loop) {
-  const config = jmaCtx.getConfig();
-  const EQ_FetchCount = jmaCtx.getEQFetchCount();
   try {
     Req_JMAXMLList(EQ_FetchCount, EQ_FetchCount == 0);
     Req_JMAJSONList();
@@ -116,7 +107,7 @@ export var UpdateEQInfo = throttle(function (loop) {
   } catch (err) {
     throw new Error("地震情報の処理でエラーが発生しました。", { cause: err });
   }
-  jmaCtx.incEQFetchCount();
+  incEQFetchCount();
 
   if (loop) {
     setTimeout(function () {
@@ -127,7 +118,6 @@ export var UpdateEQInfo = throttle(function (loop) {
 
 //気象庁XMLリスト取得→Req_JMAXML
 export function Req_JMAXMLList(count, longFeed) {
-  const JMA_CurrentInfoNumber = jmaCtx.getJMAInfoNumber();
   var url = `https://www.data.jma.go.jp/developer/xml/feed/${longFeed ? "eqvol_l.xml" : "eqvol.xml"}`
   fetch(url)
     .then((r) => {
@@ -257,7 +247,6 @@ export function Process_Hokkaidosanriku(data) {
 
 //気象庁XML 取得・フォーマット変更→MargeEQInfo
 export function Req_JMAXML(url, count) {
-  const Replay = jmaCtx.getReplay();
   if (!url || jmaXML_Fetched.includes(url)) return;
 
   fetch(url)
