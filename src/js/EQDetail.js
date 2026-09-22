@@ -2407,6 +2407,11 @@ function add_IntensityStation_info(lat, lng, name, int) {
     if (!lat || !lng) return;
     map.flyTo({ center: [lng, lat], zoom: 11, duration: 800 });
 
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+
     if (icon) Int_Sta_Popup({ features: [icon] });
   });
 
