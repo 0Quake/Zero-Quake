@@ -1,11 +1,5 @@
-import path from "path";
-import { fileURLToPath } from "url";
-import * as turf from "@turf/turf";
-
-import { FERegion, NormalizeShindo, Boolean2, NormalizeDate, newDate2 } from "./constants.js";
-import { messageToMainWindow, messageToSettingWindow, playAudio, PlayAudio, speak, EQI_Window } from "./windows.js";
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+import { NormalizeShindo, Boolean2, NormalizeDate } from "./constants.js";
+import { messageToMainWindow, PlayAudio, speak, EQI_Window } from "./windows.js";
 
 export var eqInfo = { jma: [], usgs: [] };
 
@@ -26,14 +20,9 @@ export var EQInfoData = {};
 export function MargeEQInfo(dataList, count) {
   const config = eqCtx.getConfig();
   const Replay = eqCtx.getReplay();
-  const EEW_Storage = eqCtx.getEEWStorage();
-  const JMA_CurrentInfoNumber = eqCtx.getJMAInfoNumber();
-  const USGS_CurrentInfoNumber = eqCtx.getUSGSInfoNumber();
   try {
     var eqInfoTmp = [];
     var UpdateEQInfoTmp = [];
-
-    var audioNotification = false;
 
     dataList.forEach(function (data) {
       if (!data.eventId) return;
@@ -71,7 +60,7 @@ export function MargeEQInfo(dataList, count) {
         rawData.forEach(function (elm) {
           if (!config.Info.EQInfo.showtraining && elm.status == "訓練") return;
           if (!config.Info.EQInfo.showTest && elm.status == "試験") return;
-          if (new Date(elm.reportDateTime) > new Date() - Replay) return;
+          if (Number(new Date(elm.reportDateTime)) > (Date.now() - Replay)) return;
 
 
           if (elm.category == "EEW" && EQElm.EEW === false) return;//EEW以外の情報が既に入っているとき、EEWによる情報を破棄
@@ -207,9 +196,8 @@ export function timeDifference(miliseconds) {
 }
 
 //地震情報通知（音声・画面表示等）
-export function AlertEQInfo(data, source, update) {
+export function AlertEQInfo(data, source) {
   const config = eqCtx.getConfig();
-  const Replay = eqCtx.getReplay();
   const EEW_Storage = eqCtx.getEEWStorage();
   const JMA_CurrentInfoNumber = eqCtx.getJMAInfoNumber();
   const USGS_CurrentInfoNumber = eqCtx.getUSGSInfoNumber();
@@ -277,7 +265,6 @@ export function AlertEQInfo(data, source, update) {
 
 export function GenerateEQInfoText(EQData) {
   const config = eqCtx.getConfig();
-  const Replay = eqCtx.getReplay();
   try {
     if (EQData.category == "EEW") return ""; //EEWは専用の読み上げシステムに任せる
     if (!EQData.epiCenter && !EQData.maxI) return; //震度も震源もわからない（壊れたデータ）をはねる

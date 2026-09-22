@@ -1,13 +1,9 @@
-import path from "path";
-import { fileURLToPath } from "url";
 import electron from "electron";
-const { app, shell, dialog } = electron;
+const { dialog } = electron;
 import * as turf from "@turf/turf";
-import { throttle, NormalizeDate, NormalizeShindo, newDate2, FERegion } from "./constants.js";
-import { MainWindow, SettingWindow, Create_SettingWindow, messageToMainWindow, messageToSettingWindow } from "./windows.js";
+import { throttle, NormalizeShindo, newDate2, FERegion } from "./constants.js";
+import { MainWindow, SettingWindow, Create_SettingWindow } from "./windows.js";
 import { MargeEQInfo, AlertEQInfo } from "./PROC_EQInfo.js";
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 let otherCtx = {
   getConfig: () => ({}),
@@ -38,10 +34,9 @@ export var downloadURL;
 
 //アップデートの確認
 export var checkUpdate = throttle(async function (userAction) {
-  const config = otherCtx.getConfig();
   const package_ver = otherCtx.getPackageVer();
   try {
-    var UpdateError = function (err) {
+    var UpdateError = function () {
       var current_verTmp = package_ver;
 
       update_data = {
@@ -136,16 +131,14 @@ export var checkUpdate = throttle(async function (userAction) {
       });
 
   } catch (err) {
-    throw new Error("アップデートの確認で深刻なエラーが発生しました。");
+    throw new Error("アップデートの確認で深刻なエラーが発生しました。", { cause: err });
   }
 }, 2000);
 
 //定期実行
 
-export var usgsLastGenerated = 0;
+var usgsLastGenerated = 0;
 export var Req_USGS = throttle(function () {
-  const config = otherCtx.getConfig();
-  const Replay = otherCtx.getReplay();
   const USGS_CurrentInfoNumber = otherCtx.getUSGSInfoNumber();
   fetch(`https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&limit=${USGS_CurrentInfoNumber}`)
     .then((r) => {
@@ -187,8 +180,6 @@ export var Req_USGS = throttle(function () {
 
 //narikakun地震情報API リスト取得→Req_Narikakun
 export function Req_NarikakunList(count) {
-  const config = otherCtx.getConfig();
-  const Replay = otherCtx.getReplay();
   const JMA_CurrentInfoNumber = otherCtx.getJMAInfoNumber();
   fetch(`https://earthquake-api-v2.nakn.jp/api/v2/list?limit=${JMA_CurrentInfoNumber}`)
     .then((r) => {
@@ -199,7 +190,7 @@ export function Req_NarikakunList(count) {
 
       var data_array = [];
       for (let item of json.items) {
-        //if (!originTimeTmp) originTimeTmp = new Date(json.Head.TargetDateTime);　保留
+        //if (!originTimeTmp) originTimeTmp = new Date(json.Head.TargetDateTime); 保留
 
         for (let elm of item.lists) {
           var originTime = newDate2(elm.data?.originTimeNew);

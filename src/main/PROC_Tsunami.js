@@ -1,10 +1,5 @@
-import path from "path";
-import { fileURLToPath } from "url";
-
 import { Boolean2, IncludesDuplicates, NormalizeDate } from "./constants.js";
-import { MainWindow, SettingWindow, TsunamiWindow, Create_TsunamiWindow, CreateMainWindow, messageToMainWindow, messageToTsunamiWindow, PlayAudio, speak } from "./windows.js";
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+import { TsunamiWindow, CreateMainWindow, messageToMainWindow, PlayAudio, speak } from "./windows.js";
 
 export function resetTsunamiData() {
   Tsunami_Data = [];
@@ -31,7 +26,7 @@ export function ConvertTsunamiInfo(data) {
     if (!config.Info.TsunamiInfo.showtraining && data.status == "訓練") return;
     if (!config.Info.TsunamiInfo.showTest && data.status == "試験") return;
     if (!data.issue || !data.issue.time) return;//発報時刻欠損は破棄
-    if (new Date(data.issue.time) > (new Date() - Replay)) return;//リプレイなどによって未来のデータが来たら破棄
+    if (Number(new Date(data.issue.time)) > (Date.now() - Replay)) return;//リプレイなどによって未来のデータが来たら破棄
 
     //同一報（同EIDかつ同じ時刻）
     let SameData = Tsunami_Data.find(function (elm) {
@@ -105,10 +100,10 @@ export function ConvertTsunamiInfo(data) {
 
       if (config.Info.TsunamiInfo.NotificationSound) {
         //同EIDで最新の報かどうか
-        let isNewest = !Boolean(Tsunami_Data.find(function (elm) {
+        let isNewest = !Tsunami_Data.find(function (elm) {
           return (new Date(elm.issue.time) > new Date(data.issue.time) &&
             (!elm.issue.EventID || !data.issue.EventID || IncludesDuplicates(elm.issue.EventID, data.issue.EventID)));
-        }));
+        });
 
         var Global_C = max_grade >= config.Info.TsunamiInfo.Global_threshold;
         var Local_C = home_grade >= config.Info.TsunamiInfo.Local_threshold;
@@ -194,7 +189,6 @@ export function ConvertTsunamiInfo(data) {
 
 export function GenerateTsunamiText(data) {
   const config = tsunamiCtx.getConfig();
-  const Replay = tsunamiCtx.getReplay();
   try {
     if (data.Torikeshi) {
       var text = config.notice.voice.TsunamiTorikeshi;

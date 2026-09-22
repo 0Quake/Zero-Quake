@@ -97,7 +97,7 @@ export function NormalizeDate(type, date) {
 }
 //震度の形式変換
 
-export const DefaultShindoColor = {
+const DefaultShindoColor = {
   "0": { "background": "rgb(80, 81, 83)", "color": "rgb(194, 195, 197)" },
   "1": { "background": "rgb(157, 175, 194)", "color": "rgb(61, 64, 89)" },
   "2": { "background": "rgb(89, 123, 171)", "color": "rgb(0, 1, 6)" },

@@ -1,17 +1,13 @@
-import path from "path";
-import { fileURLToPath } from "url";
 import { JSDOM } from "jsdom";
 const DomPsr = new (new JSDOM()).window.DOMParser();
 
-import { throttle, NormalizeDate, NormalizeShindo, ConvertJST, IncludesDuplicates, Boolean2, newDate2 } from "./constants.js";
-import { MainWindow, SettingWindow, NankaiWindow, WepaWindow, HokkaidoSanrikuWindow, KatsudoJokyoWindow, Create_NankaiWindow, Create_WepaWindow, Create_HokkaidoSanrikuWindow, Create_KatsudoJokyoWindow, messageToMainWindow, messageToSettingWindow, PlayAudio, speak } from "./windows.js";
+import { throttle, NormalizeShindo, Boolean2, newDate2 } from "./constants.js";
+import { NankaiWindow, HokkaidoSanrikuWindow, KatsudoJokyoWindow, messageToMainWindow } from "./windows.js";
 import { MargeEQInfo, EQCount_process } from "./PROC_EQInfo.js";
 import { ConvertTsunamiInfo, TsunamiValidate_bypass } from "./PROC_Tsunami.js";
-import { Req_USGS, Req_NarikakunList } from "./RX_OtherAPIs.js";
+import { Req_NarikakunList } from "./RX_OtherAPIs.js";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-export var jmaXML_Fetched = [];
+var jmaXML_Fetched = [];
 
 let jmaCtx = {
   getConfig: () => ({}),
@@ -31,9 +27,6 @@ const UpdateStatus = (...args) => jmaCtx.UpdateStatus(...args);
 const GeneralError_handler = (...args) => jmaCtx.GeneralError_handler(...args);
 
 export function Req_JMA_gaikyo() {
-  const config = jmaCtx.getConfig();
-  const Replay = jmaCtx.getReplay();
-  const JMA_CurrentInfoNumber = jmaCtx.getJMAInfoNumber();
   fetch(`https://www.data.jma.go.jp/svd/eqev/data/gaikyo/?_=${Number(new Date())}`)
     .then((r) => {
       if (!r.ok) throw new Error(`HTTP Error: ${r.status}`);
@@ -100,9 +93,6 @@ export function Req_JMA_gaikyo() {
 }
 
 export function Req_JMA_wepa() {
-  const config = jmaCtx.getConfig();
-  const Replay = jmaCtx.getReplay();
-  const JMA_CurrentInfoNumber = jmaCtx.getJMAInfoNumber();
   fetch(`https://www.jma.go.jp/bosai/pacifictsunami/data/list.json?_=${Number(new Date())}`)
     .then((r) => {
       if (!r.ok) throw new Error(`HTTP Error: ${r.status}`);
@@ -137,8 +127,6 @@ export var UpdateEQInfo = throttle(function (loop) {
 
 //気象庁XMLリスト取得→Req_JMAXML
 export function Req_JMAXMLList(count, longFeed) {
-  const config = jmaCtx.getConfig();
-  const Replay = jmaCtx.getReplay();
   const JMA_CurrentInfoNumber = jmaCtx.getJMAInfoNumber();
   var url = `https://www.data.jma.go.jp/developer/xml/feed/${longFeed ? "eqvol_l.xml" : "eqvol.xml"}`
   fetch(url)
@@ -221,9 +209,6 @@ export function Req_JMAJSONList() {
 }
 
 export function Req_Hokkaidosanriku_JSON(url) {
-  const config = jmaCtx.getConfig();
-  const Replay = jmaCtx.getReplay();
-  const JMA_CurrentInfoNumber = jmaCtx.getJMAInfoNumber();
   fetch(url)
     .then((r) => {
       if (!r.ok) throw new Error(`HTTP Error: ${r.status}`);
@@ -272,9 +257,7 @@ export function Process_Hokkaidosanriku(data) {
 
 //気象庁XML 取得・フォーマット変更→MargeEQInfo
 export function Req_JMAXML(url, count) {
-  const config = jmaCtx.getConfig();
   const Replay = jmaCtx.getReplay();
-  const JMA_CurrentInfoNumber = jmaCtx.getJMAInfoNumber();
   if (!url || jmaXML_Fetched.includes(url)) return;
 
   fetch(url)
@@ -286,7 +269,7 @@ export function Req_JMAXML(url, count) {
       const xml = DomPsr.parseFromString(text, "text/xml");
       if (!xml) throw new Error("XMLのパースに失敗");
 
-      if (new Date(xml.getElementsByTagName("ReportDateTime")[0].textContent) < (new Date() - Replay)) {
+      if (Number(new Date(xml.getElementsByTagName("ReportDateTime")[0].textContent)) < (Date.now() - Replay)) {
         //未来のデータ（リプレイ時）のため無視した場合、取得済みリストに入れない
         jmaXML_Fetched.push(url);
       }
@@ -359,17 +342,17 @@ export function Req_JMAXML(url, count) {
             var EnTimeStr = el?.getElementsByTagName("EndTime")?.[0]?.textContent
             var NumStr = el?.getElementsByTagName("Number")?.[0]?.textContent
             var FNumStr = el?.getElementsByTagName("FeltNumber")?.[0]?.textContent
-            if (StTimeStr) var StartTime = new Date(StTimeStr)
-            if (EnTimeStr) var EndTime = new Date(EnTimeStr)
-            if (NumStr && Number(NumStr) !== -1) var _Number = Number(NumStr)
-            if (FNumStr && Number(FNumStr) !== -1) var FeltNumber = Number(FNumStr)
+            var StartTime = StTimeStr ? new Date(StTimeStr) : null;
+            var EndTime = EnTimeStr ? new Date(EnTimeStr) : null;
+            var _Number = (NumStr && Number(NumStr) !== -1) ? Number(NumStr) : null;
+            var FeltNumber = (FNumStr && Number(FNumStr) !== -1) ? Number(FNumStr) : null;
 
             var data = {
               StartTime: StartTime,
               EndTime: EndTime,
               Number: _Number,
               FeltNumber: FeltNumber
-            }
+            };
 
             if (type == "１時間地震回数") {
               hourly.push(data)
@@ -543,21 +526,22 @@ export function Req_JMAXML(url, count) {
             ValidDateTime: null,
           };
         } else {
+          var ValidDateTimeTmp = null;
           var VDateStr = xml.getElementsByTagName("ValidDateTime")?.[0]?.textContent;
           if (VDateStr) {
-            var ValidDateTimeTmp = new Date(VDateStr);
+            ValidDateTimeTmp = new Date(VDateStr);
           } else {
             var rdtStr = xml.getElementsByTagName("ReportDateTime")?.[0]?.textContent;
             if (rdtStr) {
-              var ValidDateTimeTmp = new Date(rdtStr);
+              ValidDateTimeTmp = new Date(rdtStr);
               ValidDateTimeTmp.setHours(ValidDateTimeTmp.getHours() + 12);
             }
           }
-          if (ValidDateTimeTmp < new Date() - Replay && !TsunamiValidate_bypass) return;
+          if (ValidDateTimeTmp && Number(ValidDateTimeTmp) < (Date.now() - Replay) && !TsunamiValidate_bypass) return;
 
           var headline = xml.getElementsByTagName("Headline")?.[0]?.getElementsByTagName("Text")?.[0]?.textContent || "";
 
-          var Text1 = "";
+          var Text1;
           var WarningComment = "";
           var FreeFormComment = "";
           var Comment_Joined = "";
@@ -568,7 +552,7 @@ export function Req_JMAXML(url, count) {
             var cmt_el = xml.getElementsByTagName("Comments")[0];
             if (cmt_el) {
               WarningComment = cmt_el.getElementsByTagName("WarningComment")?.[0]?.getElementsByTagName("Text")?.[0]?.textContent;
-              FreeFormComment = cmt_el.getElementsByTagName("FreeFormComment")[0].textContent;
+              FreeFormComment = cmt_el.getElementsByTagName("FreeFormComment")[0]?.textContent || "";
             }
 
             Comment_Joined = [Text1, WarningComment, FreeFormComment].filter(Boolean).join("\n\n")
@@ -576,8 +560,7 @@ export function Req_JMAXML(url, count) {
 
           //P2PのAPIとの整合性のため、津波情報においてのみ、Control > DateTimeを発表時刻として扱う
           var dateStr = xml.getElementsByTagName("Control")[0]?.getElementsByTagName("DateTime")?.[0]?.textContent;
-
-          if (dateStr) var dateTime = new Date(dateStr);
+          var dateTime = dateStr ? new Date(dateStr) : null;
 
           tsunamiDataTmp = {
             status: xml.getElementsByTagName("Status")?.[0]?.textContent,

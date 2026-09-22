@@ -4,49 +4,18 @@ process.env.TZ = "Asia/Tokyo";
 process.title = 'Zero Quake';
 
 import {
-  EEWSect,
-  KmoniColorTable,
-  EQIAreaLoc,
-  FERegion,
-  TTT_JMA2001,
-  TTT_AK135,
   JMA_Int_Points,
-  ParseJSON,
   Boolean2,
-  IncludesDuplicates,
-  NormalizeDate,
-  NormalizeShindo,
-  ConvertJST,
-  ConvertUTC,
-  newDate2,
-  throttle,
 } from "./main/constants.js";
-import {
-  depthFilter,
-  getClosestNum,
-  calc_arTime,
-  calcInt,
-} from "./main/CALC_PSWave.js";
 import {
   MainWindow,
   SettingWindow,
   TsunamiWindow,
   WorkerWindow,
   NankaiWindow,
-  WepaWindow,
-  HokkaidoSanrikuWindow,
-  KatsudoJokyoWindow,
   EQI_Window,
-  notifyData,
   initWindowContext,
-  handleUrlOpen,
   messageToMainWindow,
-  messageToSettingWindow,
-  messageToTsunamiWindow,
-  messageToWorkerWindow,
-  playAudio,
-  PlayAudio,
-  speak,
   SystemNotification,
   CreateMainWindow,
   Create_WorkerWindow,
@@ -59,46 +28,29 @@ import {
   EQInfo_createWindow,
 } from "./main/windows.js";
 import {
-  EQInfoData,
-  EQCount_data,
   eqInfo,
   initEQInfoContext,
-  timeDifference,
-  GenerateEQInfoText,
   EQCount_process,
-  AlertEQInfo,
-  MargeEQInfo,
 } from "./main/PROC_EQInfo.js";
 import {
   Tsunami_Data,
   Tsunami_data_Marged,
   initTsunamiContext,
-  resetTsunamiData,
-  GenerateTsunamiText,
   ConvertTsunamiInfo,
   TsunamiValidate_bypass,
 } from "./main/PROC_Tsunami.js";
 import {
   EEW_Storage,
   EEW_Active,
-  EarlyEst_Data,
   clearEEWActive,
-  resetEEWStorage,
-  resetEarlyEstData,
   initEEWContext,
-  DetectEEW,
   EEW_Marge,
-  EarlyEst_Marge,
   EEW_Clear,
-  EEW_Alert,
-  EarlyEst_Alert,
-  GenerateEEWText,
 } from "./main/PROC_EEW.js";
 import {
   createWorker,
   worker,
   thresholds,
-  setThresholds,
   EQDetect_List,
   clearEQDetectList,
   ConvertKmoni,
@@ -111,27 +63,20 @@ import {
   Req_JMATide_sta,
   Req_JMATide,
   Req_EarlyEst,
-  kmoniPointsDataTmp,
-  SnetPointsDataTmp,
   TremRtsData_Marged,
   TremRts_sta,
+  kmoniPointsDataTmp,
+  SnetPointsDataTmp,
   SeisjsWS,
   Req_Seisjs_sta,
   Seisjs_sta,
-  SeisJSData,
-  KmoniOffset,
   initRTSeisContext,
 } from "./main/RX_RTSeis.js";
 import {
   Req_JMAXMLList,
-  Req_JMAJSONList,
-  Req_Hokkaidosanriku_JSON,
-  Process_Hokkaidosanriku,
-  Req_JMAXML,
   Req_JMA_gaikyo,
   Req_JMA_wepa,
   NankaiTroughInfo,
-  NankaiTroughInfoAll,
   HokkaidoSanrikuInfoAll,
   KatsudoJokyoInfoAll,
   UpdateEQInfo,
@@ -139,10 +84,8 @@ import {
 } from "./main/RX_JMAXML.js";
 import {
   update_data,
-  downloadURL,
   checkUpdate,
   Req_USGS,
-  Req_NarikakunList,
   initOtherAPIsContext,
 } from "./main/RX_OtherAPIs.js";
 import {
@@ -156,16 +99,10 @@ import {
 } from "./main/RX_EEW.js";
 
 import electron from "electron";
-const { app, BrowserWindow, ipcMain, net, Notification, shell, dialog, Menu, powerSaveBlocker, } = electron;
+const { app, BrowserWindow, ipcMain, dialog, Menu } = electron;
 import { fileURLToPath } from "url";
 import path from "path";
-import jsdom from "jsdom";
-const JSDOM = jsdom.JSDOM;
 import Store from "electron-store";
-import WebSocket from "websocket";
-var WebSocketClient = WebSocket.client;
-import * as turf from "@turf/turf";
-import workerThreads from "worker_threads";
 import { readFile } from "fs/promises";
 import fs from "fs";
 import { exec } from "child_process";
@@ -173,8 +110,6 @@ var __dirname = path.dirname(fileURLToPath(import.meta.url));
 var packageJson = JSON.parse(await readFile(path.join(__dirname, "../package.json")));
 var package_ver = packageJson.version;
 var EQ_FetchCount = 0;
-
-const DomPsr = new (new JSDOM()).window.DOMParser();
 
 electron.protocol.registerSchemesAsPrivileged([
   {
@@ -353,6 +288,7 @@ function replay(ReplayDate) {
 }
 
 var kmoniTimeTmp = {};
+var kmoniOffset = 2500;
 let tray;
 
 initWindowContext({
@@ -405,8 +341,8 @@ initEEWContext({
 initRTSeisContext({
   getConfig: () => config,
   getReplay: () => Replay,
-  getKmoniOffset: () => KmoniOffset,
-  setKmoniOffset: (val) => { KmoniOffset = val; },
+  getKmoniOffset: () => kmoniOffset,
+  setKmoniOffset: (val) => { kmoniOffset = val; },
   UpdateStatus: (type, condition, timeStamp) => UpdateStatus(type, condition, timeStamp),
   GeneralError_handler: (err) => GeneralError_handler(err),
   IntervalRun: (msec, func) => IntervalRun(msec, func),
@@ -626,7 +562,7 @@ function causeTree(err) {
     } catch { }
 
     return ErrString;
-  } catch (e) {
+  } catch {
     return "エラーログツリーの作成に失敗";
   }
 }

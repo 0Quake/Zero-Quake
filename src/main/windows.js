@@ -26,7 +26,9 @@ export function messageToTsunamiWindow(message) {
 
 export function messageToWorkerWindow(message) {
   if (WorkerWindow && !WorkerWindow.isDestroyed()) {
-    WorkerWindow.webContents.send("message2", message);
+    try {
+      WorkerWindow.webContents.send("message2", message);
+    } catch { }
   }
 }
 
@@ -56,7 +58,7 @@ let winCtx = {
   getJMAInfoNumber: () => 20,
   getUSGSInfoNumber: () => 20,
   getKmoniTimeTmp: () => ({}),
-  getEQCountProcess: () => (() => {}),
+  getEQCountProcess: () => (() => { }),
   getTsunamiDataMarged: () => null,
   getNankaiTroughInfo: () => null,
   getHokkaidoSanrikuInfoAll: () => [],
@@ -74,13 +76,11 @@ export function initWindowContext(ctx) {
 export function CreateMainWindow() {
   const store = winCtx.getStore();
   const config = winCtx.getConfig();
-  const Replay = winCtx.getReplay();
   const TremRts_sta = winCtx.getTremRts_sta();
   const Seisjs_sta = winCtx.getSeisjs_sta();
   const EEW_Active = winCtx.getEEWActive();
   const eqInfo = winCtx.getEqInfo();
   const EQDetect_List = winCtx.getEQDetectList();
-  const JMA_Int_Points = winCtx.getJMAIntPoints();
   const JMA_CurrentInfoNumber = winCtx.getJMAInfoNumber();
   const USGS_CurrentInfoNumber = winCtx.getUSGSInfoNumber();
   const kmoniTimeTmp = winCtx.getKmoniTimeTmp();
@@ -103,12 +103,12 @@ export function CreateMainWindow() {
         width: store.get("width", 800),
         height: store.get("height", 640),
 
+        title: "Zero Quake",
         minWidth: 650,
         minHeight: 400,
         icon: path.join(__dirname, "../img/icon.ico"),
         webPreferences: {
           preload: path.join(__dirname, "../js/preload.js"),
-          title: "Zero Quake",
           backgroundThrottling: false,
         },
         backgroundColor: "#222225",
@@ -261,7 +261,6 @@ export function CreateMainWindow() {
 }
 //ワーカーウィンドウ表示処理
 export function Create_WorkerWindow() {
-  const config = winCtx.getConfig();
   if (WorkerWindow) WorkerWindow.close();
   WorkerWindow = new BrowserWindow({
     webPreferences: {
@@ -298,7 +297,6 @@ export function Create_SettingWindow(update) {
   const defaultConfigVal = winCtx.getDefaultConfigVal();
   const package_ver = winCtx.getPackageVer();
   const update_data = winCtx.getUpdateData();
-  const Replay = winCtx.getReplay();
   try {
     if (SettingWindow) {
       if (SettingWindow.isMinimized()) SettingWindow.restore();
@@ -307,14 +305,14 @@ export function Create_SettingWindow(update) {
     }
 
     SettingWindow = new BrowserWindow({
+      title: "設定 - Zero Quake",
+      parent: MainWindow ? MainWindow : null,
+      center: true,
       minWidth: 650,
       minHeight: 400,
       icon: path.join(__dirname, "../img/icon.ico"),
       webPreferences: {
         preload: path.join(__dirname, "../js/preload.js"),
-        title: "設定 - Zero Quake",
-        parent: MainWindow ? MainWindow : null,
-        center: true,
       },
       backgroundColor: "#222225",
       alwaysOnTop: config.system.alwaysOnTop,
@@ -357,8 +355,6 @@ export function Create_SettingWindow(update) {
     SettingWindow.webContents.on("will-navigate", handleUrlOpen);
     SettingWindow.webContents.on("new-window", handleUrlOpen);
     SettingWindow.webContents.on("will-prevent-unload", (event) => {
-      console.log(event)
-      //if (handling_url) return handling_url = false;
 
       const choice = dialog.showMessageBoxSync(SettingWindow, {
         type: "question",
@@ -386,12 +382,12 @@ export function Create_TsunamiWindow() {
       return false;
     }
     TsunamiWindow = new BrowserWindow({
+      title: "津波詳細情報 - Zero Quake",
       minWidth: 650,
       minHeight: 400,
       icon: path.join(__dirname, "../img/icon.ico"),
       webPreferences: {
         preload: path.join(__dirname, "../js/preload.js"),
-        title: "津波詳細情報 - Zero Quake",
       },
       backgroundColor: "#222225",
       alwaysOnTop: config.system.alwaysOnTop,
@@ -439,12 +435,12 @@ export function Create_NankaiWindow(type) {
     } else {
       NankaiWindow.type = type;
       NankaiWindow.window = new BrowserWindow({
+        title: "南海トラフ地震に関連する情報 - Zero Quake",
         minWidth: 650,
         minHeight: 400,
         icon: path.join(__dirname, "../img/icon.ico"),
         webPreferences: {
           preload: path.join(__dirname, "../js/preload.js"),
-          title: "南海トラフ地震に関連する情報 - Zero Quake",
         },
         backgroundColor: "#222225",
         alwaysOnTop: config.system.alwaysOnTop,
@@ -491,12 +487,12 @@ export function Create_WepaWindow(fname) {
     }
 
     WepaWindow[fname] = new BrowserWindow({
+      title: "国際津波関連情報 - Zero Quake",
       minWidth: 650,
       minHeight: 400,
       icon: path.join(__dirname, "../img/icon.ico"),
       webPreferences: {
         preload: path.join(__dirname, "../js/preload.js"),
-        title: "国際津波関連情報 - Zero Quake",
       },
       backgroundColor: "#222225",
       alwaysOnTop: config.system.alwaysOnTop,
@@ -541,12 +537,12 @@ export function Create_HokkaidoSanrikuWindow() {
     }
 
     HokkaidoSanrikuWindow = new BrowserWindow({
+      title: "北海道・三陸沖後発地震注意情報 - Zero Quake",
       minWidth: 650,
       minHeight: 400,
       icon: path.join(__dirname, "../img/icon.ico"),
       webPreferences: {
         preload: path.join(__dirname, "../js/preload.js"),
-        title: "北海道・三陸沖後発地震注意情報 - Zero Quake",
       },
       backgroundColor: "#222225",
       alwaysOnTop: config.system.alwaysOnTop,
@@ -591,12 +587,12 @@ export function Create_KatsudoJokyoWindow() {
     }
 
     KatsudoJokyoWindow = new BrowserWindow({
+      title: "地震の活動状況等に関する情報 - Zero Quake",
       minWidth: 650,
       minHeight: 400,
       icon: path.join(__dirname, "../img/icon.ico"),
       webPreferences: {
         preload: path.join(__dirname, "../js/preload.js"),
-        title: "地震の活動状況等に関する情報 - Zero Quake",
       },
       backgroundColor: "#222225",
       alwaysOnTop: config.system.alwaysOnTop,
@@ -634,12 +630,9 @@ export function messageToMainWindow(message) {
 
 //地震情報ウィンドウ表示処理
 export var EQI_Window = {};
-export var handling_url = false;
 export function handleUrlOpen(e, url) {
   if (url.startsWith("http")) {
-    handling_url = true;
     setTimeout(function () {
-      handling_url = false;
     }, 5)
     e.preventDefault();
     shell.openExternal(url);
@@ -657,12 +650,12 @@ export function EQInfo_createWindow(response, IS_WebURL) {
     }
 
     var EQInfoWindow = new BrowserWindow({
+      title: "地震詳細情報 - Zero Quake",
       minWidth: 650,
       minHeight: 400,
       icon: path.join(__dirname, "../img/icon.ico"),
       webPreferences: {
         preload: path.join(__dirname, "../js/preload.js"),
-        title: "地震詳細情報 - Zero Quake",
       },
       backgroundColor: IS_WebURL ? null : "#222225",
       alwaysOnTop: config.system.alwaysOnTop,
@@ -702,7 +695,12 @@ export function EQInfo_createWindow(response, IS_WebURL) {
     if (IS_WebURL) EQInfoWindow.loadURL(response.url);
     else EQInfoWindow.loadFile(response.url);
     EQInfoWindow.webContents.on("will-navigate", handleUrlOpen);
-    EQInfoWindow.webContents.on("new-window", handleUrlOpen);
+    EQInfoWindow.webContents.setWindowOpenHandler(({ url }) => {
+      if (url.startsWith("http")) {
+        shell.openExternal(url);
+      }
+      return { action: "deny" };
+    });
   } catch (err) {
     throw new Error("地震情報ウィンドウの作成でエラーが発生しました。", { cause: err });
   }
@@ -727,7 +725,7 @@ export function PlayAudio(name) {
 }
 
 //メインウィンドウ内通知
-export var notifyData;
+export var notifyData = null;
 export function SystemNotification(message) {
   var Push = new Notification({
     title: "Zero Quake システム通知",

@@ -10,7 +10,7 @@ import { MargeEQInfo } from "./PROC_EQInfo.js";
 let eewRxCtx = {
   getConfig: () => ({}),
   getReplay: () => 0,
-  UpdateStatus: () => {},
+  UpdateStatus: () => { },
 };
 
 export function initEEWRxContext(ctx) {
@@ -19,9 +19,8 @@ export function initEEWRxContext(ctx) {
 
 const UpdateStatus = (...args) => eewRxCtx.UpdateStatus(...args);
 
-export var P2P_Client;
+var P2P_Client;
 export function P2P() {
-  const config = eewRxCtx.getConfig();
   const Replay = eewRxCtx.getReplay();
   P2P_Client = new WebSocketClient();
   P2P_Client.on("connectFailed", function () {
@@ -76,17 +75,17 @@ export function P2P() {
   });
   Connect_P2P();
 }
-export var P2PReconnectTimeout = 500;
-export function TryConnect_P2P() {
+var P2PReconnectTimeout = 500;
+function TryConnect_P2P() {
   P2PReconnectTimeout = Math.min(30000, P2PReconnectTimeout * 2);
   setTimeout(Connect_P2P, P2PReconnectTimeout);
 }
-export function Connect_P2P() {
+function Connect_P2P() {
   if (P2P_Client) P2P_Client.connect("wss://api.p2pquake.net/v2/ws");
 }
 
 //AXIS WebSocket接続・受信処理
-export var AXIS_Client;
+var AXIS_Client;
 export function AXIS() {
   const config = eewRxCtx.getConfig();
   const Replay = eewRxCtx.getReplay();
@@ -160,14 +159,13 @@ export function AXIS() {
 
   Connect_AXIS();
 }
-export var AXIS_ConnectedDate = new Date();
-export function TryConnect_AXIS() {
+var AXIS_ConnectedDate = new Date();
+function TryConnect_AXIS() {
   var timeoutTmp = Math.max(30000 - (new Date() - AXIS_ConnectedDate), 100);
   setTimeout(Connect_AXIS, timeoutTmp);
 }
-export function Connect_AXIS() {
+function Connect_AXIS() {
   const config = eewRxCtx.getConfig();
-  const Replay = eewRxCtx.getReplay();
   if (AXIS_Client)
     AXIS_Client.connect("wss://ws.axis.prioris.jp/socket", null, null, {
       Authorization: `Bearer ${config.Source.axis.AccessToken}`,
@@ -176,9 +174,9 @@ export function Connect_AXIS() {
 }
 
 //ProjectBS WebSocket接続・受信処理
-export var ProjectBS_Client;
+var ProjectBS_Client;
 export var ProjectBS_Connection;
-export var ProjectBS_Ping_Timer;
+var ProjectBS_Ping_Timer;
 export function ProjectBS() {
   const config = eewRxCtx.getConfig();
   const Replay = eewRxCtx.getReplay();
@@ -224,20 +222,20 @@ export function ProjectBS() {
 
   Connect_ProjectBS();
 }
-export var ProjectBS_ConnectedDate = new Date();
-export function TryConnect_ProjectBS() {
+var ProjectBS_ConnectedDate = new Date();
+function TryConnect_ProjectBS() {
   var timeout = Math.max(30000 - (new Date() - ProjectBS_ConnectedDate), 100);
   setTimeout(Connect_ProjectBS, timeout);
 }
-export function Connect_ProjectBS() {
+function Connect_ProjectBS() {
   if (ProjectBS_Client) ProjectBS_Client.connect("wss://telegram-cf.projectbs.cn/jmaeewws/");
   ProjectBS_ConnectedDate = new Date();
 }
 
 //Wolfx WebSocket接続・受信処理
-export var WolfxWS_Client;
+var WolfxWS_Client;
 export var WolfxConnection;
-export var Wolfx_Timer;
+var Wolfx_Timer;
 export function WolfxWS() {
   const config = eewRxCtx.getConfig();
   const Replay = eewRxCtx.getReplay();
@@ -289,12 +287,12 @@ export function WolfxWS() {
 
   Connect_WolfxWS();
 }
-export var Wolfx_ConnectedDate = new Date();
-export function TryConnect_WolfxWS() {
+var Wolfx_ConnectedDate = new Date();
+function TryConnect_WolfxWS() {
   var timeoutTmp = Math.max(30000 - (new Date() - Wolfx_ConnectedDate), 100);
   setTimeout(Connect_WolfxWS, timeoutTmp);
 }
-export function Connect_WolfxWS() {
+function Connect_WolfxWS() {
   if (WolfxWS_Client) WolfxWS_Client.connect("wss://ws-api.wolfx.jp/all_eew");
   Wolfx_ConnectedDate = new Date();
 }

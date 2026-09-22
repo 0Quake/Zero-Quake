@@ -10,8 +10,8 @@ import WebSocket from "websocket";
 const WebSocketClient = WebSocket.client;
 
 import { throttle, NormalizeDate, KmoniColorTable, Boolean2, FERegion, ConvertJST, ConvertUTC, newDate2, ParseJSON } from "./constants.js";
-import { MainWindow, WorkerWindow, messageToMainWindow, messageToWorkerWindow, PlayAudio, CreateMainWindow } from "./windows.js";
-import { EarlyEst_Marge, DetectEEW } from "./PROC_EEW.js";
+import { messageToMainWindow, messageToWorkerWindow, PlayAudio, CreateMainWindow } from "./windows.js";
+import { EarlyEst_Marge } from "./PROC_EEW.js";
 
 export var worker = null;
 export var thresholds;
@@ -44,7 +44,7 @@ const GeneralError_handler = (...args) => rtCtx.GeneralError_handler(...args);
 const IntervalRun = (...args) => rtCtx.IntervalRun(...args);
 
 export var TremRts_sta;
-export var Trem_server = true;
+var Trem_server = true;
 export var Req_TremRts_sta = throttle(function () {
   fetch(
     `https://api-${Trem_server ? 1 : 2}.exptech.dev/api/v1/trem/station?_=${Number(new Date())}`,
@@ -88,8 +88,6 @@ var TremRts_Timer;
 export function Req_TremRts() {
   const config = rtCtx.getConfig();
   const Replay = rtCtx.getReplay();
-  let KmoniOffset = rtCtx.getKmoniOffset();
-  const thresholds = rtCtx.getThresholds();
   if (TremRts_Timer) clearTimeout(TremRts_Timer);
   TremRts_Timer = setTimeout(Req_TremRts, config.Source.TREMRTS.Interval);
 
@@ -148,11 +146,8 @@ export function Req_TremRts() {
     });
 }
 
-export function sort_by_dist_TIDE(data) {
+function sort_by_dist_TIDE(data) {
   const config = rtCtx.getConfig();
-  const Replay = rtCtx.getReplay();
-  let KmoniOffset = rtCtx.getKmoniOffset();
-  const thresholds = rtCtx.getThresholds();
   return data.sort((a, b) => {
     var a_dist = turf.distance([a.lon, a.lat], [config.home.longitude, config.home.latitude]);
     var b_dist = turf.distance([b.lon, b.lat], [config.home.longitude, config.home.latitude]);
@@ -195,13 +190,11 @@ export function Req_JMATide_sta() {
   });
 }
 
-export var JMATide_astro = {};
-export var JMATide_obs = {};
+var JMATide_astro = {};
+var JMATide_obs = {};
 export function Req_JMATide() {
   const config = rtCtx.getConfig();
   const Replay = rtCtx.getReplay();
-  let KmoniOffset = rtCtx.getKmoniOffset();
-  const thresholds = rtCtx.getThresholds();
   if (!JMATide_sta) return Req_JMATide_sta();
   JMATide_sta.forEach(function (st) {
 
@@ -270,12 +263,9 @@ export function Req_JMATide() {
 }
 
 
-export var EarlyEst_Timer;
+var EarlyEst_Timer;
 export function Req_EarlyEst() {
   const config = rtCtx.getConfig();
-  const Replay = rtCtx.getReplay();
-  let KmoniOffset = rtCtx.getKmoniOffset();
-  const thresholds = rtCtx.getThresholds();
   if (EarlyEst_Timer) clearTimeout(EarlyEst_Timer);
   EarlyEst_Timer = setTimeout(Req_EarlyEst, config.Source.EarlyEst.Interval);
 
@@ -356,7 +346,7 @@ export function createWorker() {
         messageToMainWindow(message.data);
         break;
       case "sendDataToWorkerWindow":
-        if (WorkerWindow) WorkerWindow.webContents.send("message2", message.data);
+        messageToWorkerWindow(message.data);
         break;
       case "thresholds":
         thresholds = message.data;
@@ -381,9 +371,6 @@ export function createWorker() {
 //強震モニタリアルタイム揺れ情報処理（地震検知など）
 export function ConvertKmoni(data, date) {
   const config = rtCtx.getConfig();
-  const Replay = rtCtx.getReplay();
-  let KmoniOffset = rtCtx.getKmoniOffset();
-  const thresholds = rtCtx.getThresholds();
   worker.postMessage({
     action: "EQDetect",
     data: data,
@@ -393,7 +380,7 @@ export function ConvertKmoni(data, date) {
 }
 
 //海しるリアルタイム揺れ情報処理
-export var msil_latest = { 11: null, 12: null };
+var msil_latest = { 11: null, 12: null };
 export function ConvertSnet(data, date, y, uid) {
   msil_latest[y] = [uid, data]
   var another = ((y == 11) ? 12 : 11)
@@ -410,10 +397,10 @@ export function ConvertSnet(data, date, y, uid) {
   }
 }
 
-export var Kmoni_URLIndex = 0;
-export var Kmoni_ErrorCount = 0;
-export var Kmoni_Timer;
-export var Kmoni_URLs = [
+var Kmoni_URLIndex = 0;
+var Kmoni_ErrorCount = 0;
+var Kmoni_Timer;
+const Kmoni_URLs = [
   `http://www.kmoni.bosai.go.jp/data/map_img/RealTimeImg/jma_s/[YYYYMMDD]/[YYYYMMDDhhmmss].jma_s.gif`,
   `https://www.lmoni.bosai.go.jp/img_svr/data/map_img/RealTimeImg/jma_s/[YYYYMMDD]/[YYYYMMDDhhmmss].jma_s.gif`,
 ];
@@ -423,7 +410,6 @@ export function Req_kmoni() {//済
   const config = rtCtx.getConfig();
   const Replay = rtCtx.getReplay();
   let KmoniOffset = rtCtx.getKmoniOffset();
-  const thresholds = rtCtx.getThresholds();
   //タイマー処理
   if (Kmoni_Timer) clearTimeout(Kmoni_Timer);
   Kmoni_Timer = setTimeout(Req_kmoni, config.Source.kmoni.kmoni.Interval);
@@ -442,13 +428,11 @@ export function Req_kmoni() {//済
     return r.arrayBuffer();
   }).then((buffer) => {
     Kmoni_ErrorCount = 0;
-    if (WorkerWindow) {
-      WorkerWindow.webContents.send("message2", {
-        action: "KmoniImgUpdate",
-        data: Buffer.from(buffer),
-        date: ReqTime,
-      });
-    }
+    messageToWorkerWindow({
+      action: "KmoniImgUpdate",
+      data: Buffer.from(buffer),
+      date: ReqTime,
+    });
   }).catch((err) => {
     GeneralError_handler(err)
     Kmoni_ErrorCount++;
@@ -461,15 +445,13 @@ export function Req_kmoni() {//済
   });
 }
 
-export var Msil_Timer;
-export var Msil_LastRecv = 0;
+var Msil_Timer;
+var Msil_LastRecv = 0;
 
 //海しるへのHTTPリクエスト処理
 export function Req_SNet() {
   const config = rtCtx.getConfig();
   const Replay = rtCtx.getReplay();
-  let KmoniOffset = rtCtx.getKmoniOffset();
-  const thresholds = rtCtx.getThresholds();
 
   if (Msil_Timer) clearTimeout(Msil_Timer);
   Msil_Timer = setTimeout(Req_SNet, config.Source.msil.Interval);
@@ -503,15 +485,13 @@ export function Req_SNet() {
           if (!r.ok) throw new Error(`HTTP Error: ${r.status}`);
           return r.arrayBuffer();
         }).then((buffer) => {
-          if (WorkerWindow) {
-            WorkerWindow.webContents.send("message2", {
-              action: "SnetImgUpdate",
-              y: y,
-              unique_id: unique_id,
-              data: Buffer.from(buffer),
-              date: new Date(),
-            });
-          }
+          messageToWorkerWindow({
+            action: "SnetImgUpdate",
+            y: y,
+            unique_id: unique_id,
+            data: Buffer.from(buffer),
+            date: new Date(),
+          });
           UpdateStatus("msilImg", "success");
 
         }).catch((err) => {
@@ -551,13 +531,11 @@ export function Req_Seisjs_sta() {
   });
 }
 
-export var SeisjsWS_Client;
-export var SeisjsWS_timer;
+var SeisjsWS_Client;
+var SeisjsWS_timer;
 export function SeisjsWS() {
   const config = rtCtx.getConfig();
   const Replay = rtCtx.getReplay();
-  let KmoniOffset = rtCtx.getKmoniOffset();
-  const thresholds = rtCtx.getThresholds();
   if (!config.Source.wolfx.GetDataFromSeisJS) return;
   SeisjsWS_Client = new WebSocketClient();
 
@@ -597,22 +575,18 @@ export function SeisjsWS() {
 
   Connect_SeisjsWS();
 }
-export var Seisjs_ConnectedDate = new Date();
-export function TryConnect_SeisjsWS() {
+var Seisjs_ConnectedDate = new Date();
+function TryConnect_SeisjsWS() {
   var timeoutTmp = Math.max(30000 - (new Date() - Seisjs_ConnectedDate), 100);
   setTimeout(Connect_SeisjsWS, timeoutTmp);
 }
-export function Connect_SeisjsWS() {
+function Connect_SeisjsWS() {
   if (SeisjsWS_Client) SeisjsWS_Client.connect("wss://seisjs.wolfx.jp/all_seis");
   Seisjs_ConnectedDate = new Date();
 }
 
 export var SeisJSData = {};
-export function MargeSeisJS(json) {
-  const config = rtCtx.getConfig();
-  const Replay = rtCtx.getReplay();
-  let KmoniOffset = rtCtx.getKmoniOffset();
-  const thresholds = rtCtx.getThresholds();
+function MargeSeisJS(json) {
   var rgb = KmoniColorTable[Math.min(7, Math.max(-3, Math.floor(json.CalcShindo * 10) / 10))];
   SeisJSData[json.type] = {
     Type: "Wolfx_SeisJS",
@@ -656,17 +630,13 @@ export function MargeSeisJS(json) {
 
 
 export async function SetKmoniOffset(func) {
-  const config = rtCtx.getConfig();
-  const Replay = rtCtx.getReplay();
-  let KmoniOffset = rtCtx.getKmoniOffset();
-  const thresholds = rtCtx.getThresholds();
+  let calculatedOffset = null;
   try {
     if (!net.online) throw new Error();
 
     var index = 0;
     var resTimeTmp;
-    KmoniOffset = null;
-    while (!KmoniOffset && index < 10) {
+    while (!calculatedOffset && index < 10) {
       await new Promise((resolve) => {
         var reqTime = new Date();
 
@@ -678,7 +648,7 @@ export async function SetKmoniOffset(func) {
           return r.json();
         }).then((json) => {
           var resTime = new Date(json.latest_time);
-          if (Number(resTimeTmp) !== Number(resTime)) KmoniOffset = new Date() - resTime - (new Date() - reqTime) / 2;
+          if (Number(resTimeTmp) !== Number(resTime)) calculatedOffset = new Date() - resTime - (new Date() - reqTime) / 2;
           resTimeTmp = resTime;
         }).catch((err) => {
           GeneralError_handler(err)
@@ -691,12 +661,14 @@ export async function SetKmoniOffset(func) {
       index++;
     }
 
-    if (!KmoniOffset) throw new Error();
-    KmoniOffset += 200;
+    if (!calculatedOffset) throw new Error();
+    calculatedOffset += 200;
   } catch (err) {
-    KmoniOffset = 2500;
+    calculatedOffset = 2500;
     GeneralError_handler(err)
   }
+  KmoniOffset = calculatedOffset;
+  rtCtx.setKmoniOffset(calculatedOffset);
   if (func) setTimeout(func, 200);
 }
 

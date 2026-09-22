@@ -5,14 +5,14 @@ import { fileURLToPath } from "url";
 import * as turf from "@turf/turf";
 
 import { calcInt, calc_arTime, getClosestNum, } from "./CALC_PSWave.js";
-import { FERegion, TTT_JMA2001, TTT_AK135, JMA_Int_Points, NormalizeShindo, NormalizeDate, ConvertJST, Boolean2, EEWSect, EQIAreaLoc, newDate2 } from "./constants.js";
-import { MainWindow, SettingWindow, messageToMainWindow, messageToSettingWindow, PlayAudio, speak, CreateMainWindow } from "./windows.js";
+import { TTT_JMA2001, TTT_AK135, JMA_Int_Points, NormalizeShindo, NormalizeDate, Boolean2, EEWSect, EQIAreaLoc, newDate2 } from "./constants.js";
+import { MainWindow, messageToMainWindow, PlayAudio, speak, CreateMainWindow } from "./windows.js";
 import { MargeEQInfo } from "./PROC_EQInfo.js";
 import { worker } from "./RX_RTSeis.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-export var psBlock;
+var psBlock;
 export var EEW_Storage = []; //地震速報リスト
 export var EEW_Active = []; //現在発報中リスト
 export var EarlyEst_Data = []; //Earlyest地震速報リスト
@@ -43,9 +43,6 @@ export function initEEWContext(ctx) {
 const UpdateStatus = (...args) => eewCtx.UpdateStatus(...args);
 
 export function DetectEEW(type, json) {
-  const config = eewCtx.getConfig();
-  const Replay = eewCtx.getReplay();
-  const kmoniTimeTmp = eewCtx.getKmoniTimeTmp();
   if (!json) return;
   if (type == 1) {
     //ProjectBS
@@ -279,7 +276,6 @@ export function DetectEEW(type, json) {
 export function EEW_Marge(data) {
   const config = eewCtx.getConfig();
   const Replay = eewCtx.getReplay();
-  const kmoniTimeTmp = eewCtx.getKmoniTimeTmp();
   if (!data) return; //データがない場合、処理終了
   try {
     if (!config.Info.EEW.showtraining && data.is_training) return; //訓練法を受信するかどうか（設定に準拠）
@@ -389,7 +385,7 @@ export function EEW_Marge(data) {
               Name: key,
               IntTo: shindo, //レンダラープロセス側で下限・上限を選択するが、シミュレーションでは計算時点で設定を反映済みのため同値を代入
               IntFrom: shindo,
-              Alert: NormalizeShindo(shindo, 5) >= 5,
+              Alert: Number(NormalizeShindo(shindo, 5)) >= 5,
             });
           }
         });
@@ -485,7 +481,6 @@ export function EEW_Marge(data) {
 export function EarlyEst_Marge(data) {
   const config = eewCtx.getConfig();
   const Replay = eewCtx.getReplay();
-  const kmoniTimeTmp = eewCtx.getKmoniTimeTmp();
   try {
     if (!data) return;
     if (!data.origin_time || !data.latitude || !data.longitude) return;
@@ -557,8 +552,6 @@ export function EEW_Clear(EventID) {
 //EEW通知（音声・画面表示等）
 export function EEW_Alert(data, update) {
   const config = eewCtx.getConfig();
-  const Replay = eewCtx.getReplay();
-  const kmoniTimeTmp = eewCtx.getKmoniTimeTmp();
   try {
     worker.postMessage({ action: "EEWNow", data: true });
 
@@ -656,9 +649,6 @@ export function EEW_Alert(data, update) {
 
 //EarlyEst通知（音声・画面表示等）
 export function EarlyEst_Alert(data, first) {
-  const config = eewCtx.getConfig();
-  const Replay = eewCtx.getReplay();
-  const kmoniTimeTmp = eewCtx.getKmoniTimeTmp();
   try {
     //【現在のEEW】から同一地震、古い報を削除
     EEW_Active = EEW_Active.filter(function (elm) {
@@ -695,8 +685,6 @@ export function EarlyEst_Alert(data, first) {
 
 export function GenerateEEWText(EEWData, update) {
   const config = eewCtx.getConfig();
-  const Replay = eewCtx.getReplay();
-  const kmoniTimeTmp = eewCtx.getKmoniTimeTmp();
   try {
     if (EEWData.is_cancel) var text = config.notice.voice.EEWCancel;
     else if (update) var text = config.notice.voice.EEWUpdate;
