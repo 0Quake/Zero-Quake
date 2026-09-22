@@ -11,7 +11,12 @@ import {
   setStatusListener,
   UpdateStatus,
   GeneralError_handler,
+  JMA_CurrentInfoNumber,
+  USGS_CurrentInfoNumber,
+  setJMAInfoNumber,
+  setUSGSInfoNumber,
 } from "./main/state.js";
+import { eqInfo } from "./main/PROC_EQInfo.js";
 import {
   MainWindow,
   SettingWindow,
@@ -72,6 +77,7 @@ import {
 import {
   checkUpdate,
   Req_USGS,
+  Req_NarikakunList,
 } from "./main/RX_OtherAPIs.js";
 import {
   P2P,
@@ -672,15 +678,29 @@ ipcMain.on("message", (_event, response) => {
       break;
     case "Req_additionalEQInfo_JMA":
       if (JMA_CurrentInfoNumber < 1000) {//naknのMAX3000件以下にすべし
-        JMA_CurrentInfoNumber += 5;
-        UpdateEQInfo();
+        setJMAInfoNumber(JMA_CurrentInfoNumber + 5);
+        if (eqInfo.jma.length >= JMA_CurrentInfoNumber) {
+          messageToMainWindow({
+            action: "EQInfo",
+            source: "jma",
+            data: eqInfo.jma.slice(0, JMA_CurrentInfoNumber),
+          });
+        }
+        Req_NarikakunList();
       } else {
         messageToMainWindow({ action: "Deny_additionalEQInfo_JMA" });
       }
       break;
     case "Req_additionalEQInfo_USGS":
       if (USGS_CurrentInfoNumber < 1000) {
-        USGS_CurrentInfoNumber += 25;
+        setUSGSInfoNumber(USGS_CurrentInfoNumber + 25);
+        if (eqInfo.usgs.length >= USGS_CurrentInfoNumber) {
+          messageToMainWindow({
+            action: "EQInfo",
+            source: "usgs",
+            data: eqInfo.usgs.slice(0, USGS_CurrentInfoNumber),
+          });
+        }
         Req_USGS();
       } else {
         messageToMainWindow({ action: "Deny_additionalEQInfo_USGS" });
@@ -716,9 +736,6 @@ function setOpenAtLogin(openAtLogin) {
   }
 }
 
-
-var JMA_CurrentInfoNumber = 20;
-var USGS_CurrentInfoNumber = 20;
 
 //開始処理
 function start() {

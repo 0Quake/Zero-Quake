@@ -2,8 +2,8 @@ import electron from "electron";
 const { dialog } = electron;
 import * as turf from "@turf/turf";
 import { throttle, NormalizeShindo, newDate2, FERegion } from "./constants.js";
-import { MainWindow, SettingWindow, Create_SettingWindow } from "./windows.js";
-import { MargeEQInfo, AlertEQInfo } from "./PROC_EQInfo.js";
+import { MainWindow, SettingWindow, Create_SettingWindow, messageToMainWindow } from "./windows.js";
+import { MargeEQInfo, AlertEQInfo, eqInfo } from "./PROC_EQInfo.js";
 
 import {
   package_ver,
@@ -157,8 +157,12 @@ export var Req_USGS = throttle(function () {
       });
       dataTmp2 = dataTmp2.sort((a, b) => a.OriginTime > b.OriginTime ? -1 : 1);
       AlertEQInfo(dataTmp2, "usgs");
+      if (dataTmp2.length < USGS_CurrentInfoNumber) {
+        messageToMainWindow({ action: "Deny_additionalEQInfo_USGS" });
+      }
     }).catch((err) => {
-      GeneralError_handler(err)
+      GeneralError_handler(err);
+      messageToMainWindow({ action: "Deny_additionalEQInfo_USGS" });
     });
 }, 2000);
 
@@ -202,12 +206,26 @@ export function Req_NarikakunList(count) {
         }
       }
 
+      var prevCount = eqInfo.jma.length;
       MargeEQInfo(data_array, count);
+
+      // 新規データが追加されなかった場合、最新のスライスを送信
+      if (eqInfo.jma.length === prevCount) {
+        messageToMainWindow({
+          action: "EQInfo",
+          source: "jma",
+          data: eqInfo.jma.slice(0, JMA_CurrentInfoNumber),
+        });
+        if (eqInfo.jma.length < JMA_CurrentInfoNumber) {
+          messageToMainWindow({ action: "Deny_additionalEQInfo_JMA" });
+        }
+      }
 
       UpdateStatus("ntool", "success");
     }).catch((err) => {
-      GeneralError_handler(err)
+      GeneralError_handler(err);
       UpdateStatus("ntool", "Error");
+      messageToMainWindow({ action: "Deny_additionalEQInfo_JMA" });
     });
 }
 
