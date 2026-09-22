@@ -34,7 +34,7 @@ export function MargeEQInfo(dataList, count) {
         };
         EQElm.raw_data.push(data);
         var rawData = EQElm.raw_data
-          .sort((a, b) => a.reportDateTime < b.reportDateTime ? -1 : 1);
+          .sort((a, b) => new Date(a.reportDateTime) - new Date(b.reportDateTime));
 
         //キャンセル報を受信時、同一カテゴリの過去情報のキャンセルフラグを立てる（気象庁仕様に準拠）
         rawData.forEach(function (elm, index) {
@@ -49,7 +49,7 @@ export function MargeEQInfo(dataList, count) {
         rawData.forEach(function (elm) {
           if (!config.Info.EQInfo.showtraining && elm.status == "訓練") return;
           if (!config.Info.EQInfo.showTest && elm.status == "試験") return;
-          if (Number(new Date(elm.reportDateTime)) > (Date.now() - Replay)) return;
+          if (Replay !== 0 && Number(new Date(elm.reportDateTime)) > (Date.now() - Replay)) return;
 
 
           if (elm.category == "EEW" && EQElm.EEW === false) return;//EEW以外の情報が既に入っているとき、EEWによる情報を破棄
@@ -100,8 +100,11 @@ export function MargeEQInfo(dataList, count) {
         Object.keys(EQInfo_Item).forEach(function (key) {
           if (!EQInfo_Item[key]) return;//新しい側の値がなかったら無視
 
-          if (key == "reportDateTime") {//reportDateTimeは常に更新、フラグ立てない
-            EQElm[key] = EQInfo_Item[key];
+          if (key == "reportDateTime") {
+            if (EQElm[key] !== EQInfo_Item[key]) {
+              EQElm[key] = EQInfo_Item[key];
+              changed = true;
+            }
           } else if (key == "DetailURL") {//DetailURLは配列を結合
             if (Array.isArray(EQInfo_Item[key]) && Array.isArray(EQElm[key])) {//データ検証
               EQElm[key] = Array.from(new Set([...EQElm[key], ...EQInfo_Item[key]]));
@@ -119,12 +122,16 @@ export function MargeEQInfo(dataList, count) {
           } else if (key == "audioNotification") {
             return;//前の部分で判定済みなので上書きしないよう飛ばす
           } else {
-            if (EQElm[key] !== EQInfo_Item[key] && Boolean2(EQInfo_Item[key])) {
+            if (EQElm[key] !== EQInfo_Item[key] && (Boolean2(EQInfo_Item[key]) || key == "cancel")) {
               EQElm[key] = EQInfo_Item[key];
               changed = true;//変更ありフラグ
             }
           }
         });
+
+        if (data.category == "EEW") {
+          changed = true;
+        }
 
         if (changed) {
           UpdateEQInfoTmp.push(EQElm);
@@ -227,6 +234,7 @@ export function AlertEQInfo(data, source) {
             return elm2.EventID == elm.eventId;
           });
 
+          metadata.data = elm;
           metadata.urls = elm.DetailURL;
           metadata.eew = EEWDataItem;
           metadata.axisData = elm.axisData;

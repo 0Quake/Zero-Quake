@@ -113,7 +113,7 @@ window.electronAPI.messageSend((event, request) => {
     if (request.axisData && Array.isArray(request.axisData))
       axisDatas = request.axisData;
 
-    if (request.eew && !request.eew.cancelled) {
+    if (request.eew) {
       var eewItem = request.eew.data[request.eew.data.length - 1];
 
       EEWData = {
@@ -128,7 +128,7 @@ window.electronAPI.messageSend((event, request) => {
         depth: eewItem.isPlum ? null : eewItem.depth,
         epiCenter: eewItem.region_name,
         comment: "",
-        cancel: false,
+        cancel: Boolean(request.eew.cancelled || eewItem.is_cancel),
         eew: true,
       };
     }
@@ -878,7 +878,7 @@ function jma_ListReq() {
         return timeStampB - timeStampA;
       }).forEach(function (elm) {
         var kindCode = elm.match(".+/(.+?).[a-z]+([?#;].*)?$")?.[1]?.split("_")?.[2];
-        if (kindCode && json_kindCode_history2[kindCode]) {
+        if (kindCode && !json_kindCode_history2[kindCode]) {
           //より新しい同一種別の情報がなければ受信
           json_kindCode_history2[kindCode] = true;
           jma_Fetch(elm);
@@ -2102,14 +2102,14 @@ function ConvertEQInfo(data) {
     }
 
     if (!elm.cancel) {
-      function Boolean3(a) {
-        return Boolean2(a) && elm.maxI !== "?" && elm.mag != "Ｍ不明" && elm.mag != "NaN";
-      }
-
-      var keys = ["category", "status", "reportTime", "originTime", "maxI", "mag", "magType", "lat", "lng", "depth", "epiCenter"]
+      var keys = ["category", "status", "reportTime", "originTime", "maxI", "mag", "magType", "lat", "lng", "depth", "epiCenter"];
       keys.forEach((key) => {
-        if (Boolean3(elm[key])) EQInfoTmp[key] = elm[key];
-      })
+        var val = elm[key];
+        if (!Boolean2(val)) return;
+        if (key === "maxI" && val === "?") return;
+        if (key === "mag" && (val === "Ｍ不明" || val === "NaN" || Number.isNaN(val))) return;
+        EQInfoTmp[key] = val;
+      });
 
       if (Boolean2(elm.comment) && (Boolean2(elm.comment.ForecastComment) || Boolean2(elm.comment.VarComment) || Boolean2(elm.comment.FreeFormComment))) {
         if (!EQInfoTmp.comment) EQInfoTmp.comment = elm.comment;

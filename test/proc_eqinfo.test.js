@@ -66,4 +66,49 @@ describe("PROC_EQInfo.js - Unit Tests", () => {
       assert.equal(text, undefined);
     });
   });
+
+  describe("MargeEQInfo", () => {
+    it("should process and update EEW reports when an update arrives", async () => {
+      const { MargeEQInfo, eqInfo } = await import("../src/main/PROC_EQInfo.js");
+      const eventId = "20260923999999";
+      const now = Date.now();
+      const initialReport = {
+        eventId,
+        category: "EEW",
+        status: "通常",
+        reportDateTime: new Date(now - 60000),
+        OriginTime: new Date(now - 120000),
+        epiCenter: "東京湾",
+        M: 4.5,
+        maxI: "3",
+        cancel: false,
+        DetailURL: [],
+        axisData: null,
+      };
+
+      MargeEQInfo([initialReport], 1);
+      const found = eqInfo.jma.find((e) => e.eventId === eventId);
+      assert.ok(found);
+      assert.equal(found.maxI, "3");
+
+      // Send update with same M and maxI but new reportDateTime
+      const updateReport = {
+        eventId,
+        category: "EEW",
+        status: "通常",
+        reportDateTime: new Date(now - 30000),
+        OriginTime: new Date(now - 120000),
+        epiCenter: "東京湾",
+        M: 4.5,
+        maxI: "3",
+        cancel: false,
+        DetailURL: [],
+        axisData: null,
+      };
+
+      MargeEQInfo([updateReport], 2);
+      const updated = eqInfo.jma.find((e) => e.eventId === eventId);
+      assert.equal(Number(updated.reportDateTime), Number(updateReport.reportDateTime));
+    });
+  });
 });
