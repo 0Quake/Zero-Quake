@@ -750,6 +750,11 @@ function start() {
   WolfxWS();
   SeisjsWS();
 
+  //一回限り
+  Req_TremRts_sta();
+  Req_Seisjs_sta();
+  Req_JMATide_sta();
+
   //HTTP定期GET着火
   Req_SNet();
   Req_kmoni();
