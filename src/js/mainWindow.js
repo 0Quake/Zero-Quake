@@ -154,8 +154,7 @@ window.electronAPI.messageSend((event, request) => {
     var geojson = { type: "FeatureCollection", features: [] };
     Object.keys(request.data).forEach(function (key) {
       var elm = request.data[key];
-      var info = elm?.info?.[elm.info.length - 1];
-      if (!info?.lon || !info?.lat) return;
+      if (!elm?.lon || !elm?.lat) return;
       geojson.features.push({
         type: "Feature",
         properties: {
@@ -164,7 +163,7 @@ window.electronAPI.messageSend((event, request) => {
         },
         geometry: {
           type: "Point",
-          coordinates: [info.lon, info.lat],
+          coordinates: [elm.lon, elm.lat],
         },
       });
     });
@@ -2720,7 +2719,7 @@ tab1c1.addEventListener('scroll', () => {
 
     if (sortKey == "t") {//新しい順の時のみさらに読み込む
       if (document.getElementById("JMA_loading_more").style.display === "block" ||
-          document.getElementById("JMA_loading_status_txt").innerText === "最大件数まで読み込みました") {
+        document.getElementById("JMA_loading_status_txt").innerText === "最大件数まで読み込みました") {
         return;
       }
       document.getElementById("JMA_loading_status_txt").style.display = "none";
@@ -2750,7 +2749,7 @@ tab1c4.addEventListener('scroll', () => {
 
     if (sortKey == "t") {//新しい順の時のみさらに読み込む
       if (document.getElementById("USGS_loading_more").style.display === "block" ||
-          document.getElementById("USGS_loading_status_txt").innerText === "最大件数まで読み込みました") {
+        document.getElementById("USGS_loading_status_txt").innerText === "最大件数まで読み込みました") {
         return;
       }
       document.getElementById("USGS_loading_status_txt").style.display = "none";

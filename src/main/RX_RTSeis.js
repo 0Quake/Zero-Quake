@@ -8,6 +8,8 @@ import { JSDOM } from "jsdom";
 const DomPsr = new (new JSDOM()).window.DOMParser();
 import WebSocket from "websocket";
 const WebSocketClient = WebSocket.client;
+import zlib from "zlib";
+import { EventSource } from 'eventsource';
 
 import { throttle, NormalizeDate, KmoniColorTable, Boolean2, FERegion, ConvertJST, ConvertUTC, newDate2, ParseJSON } from "./constants.js";
 import { messageToMainWindow, messageToWorkerWindow, PlayAudio, CreateMainWindow } from "./windows.js";
@@ -33,17 +35,79 @@ import {
 export var KmoniOffset = 2500;
 export var kmoniPointsDataTmp, SnetPointsDataTmp, TremRtsData_Marged;
 
-export var TremRts_sta;
-var Trem_server = true;
+export function TREMRTS_SSE() {
+  if (!config.Source.TREMRTS.GetData) return;
+
+  function unzip(value) {
+    //base64デコード→gzip解凍
+    const buffer = Buffer.from(value, 'base64');
+    const result = zlib.unzipSync(buffer);
+    const str = result.toString('utf-8');
+    return str;
+  }
+
+  const es = new EventSource("https://api.lb.exptech.dev/api/v1/trem/sse?topics=trem.intensity.v1,trem.rts.v1&mode=live");
+  es.addEventListener('open', () => {
+    UpdateStatus("TREM-RTS", "success", new Date());
+  });
+  es.addEventListener('trem.rts.v1', (e) => {
+    const json = JSON.parse(unzip(e.data));
+
+    var TremRtsData = {};
+    Object.keys(json.stations).forEach(function (StID) {
+      var st = json.stations[StID];
+      if (!TremRts_sta) return Req_TremRts_sta();
+      var StMeta = TremRts_sta?.[StID];
+      if (StMeta) {
+        var rgb = KmoniColorTable[Math.min(7, Math.max(-3, Math.floor(st.i * 10) / 10))];
+        TremRtsData[StID] = {
+          Type: StMeta.net,
+          shindo: st.i,
+          PGA: st.pga,
+          Code: StID,
+          rgb: [rgb.r, rgb.g, rgb.b],
+        };
+      }
+    });
+    TremRtsData_Marged = {
+      action: "TREM-RTSUpdate",
+      LocalTime: new Date(),
+      data: TremRtsData,
+    };
+    messageToMainWindow(TremRtsData_Marged);
+
+    UpdateStatus("TREM-RTS", "success", new Date(json.ts));
+  });
+  es.addEventListener('error', (err) => {
+    GeneralError_handler(err);
+    UpdateStatus("TREM-RTS", "Error", new Date());
+  });
+}
+
+export var TremRts_sta = {};
 export var Req_TremRts_sta = throttle(function () {
   fetch(
-    `https://api-${Trem_server ? 1 : 2}.exptech.dev/api/v1/trem/station?_=${Number(new Date())}`,
+    `https://static.core.exptech.dev/resource/station?_=${Number(new Date())}`,
     { signal: AbortSignal.timeout(4000) }
   ).then((r) => {
     if (!r.ok) throw new Error(`HTTP Error: ${r.status}`);
-    return r.json();
-  }).then((json) => {
-    TremRts_sta = json;
+    return r.text();
+  }).then((text) => {
+    text.split(/\r?\n/).forEach(function (line) {
+      var frame = line.split(",");
+      TremRts_sta[frame[1]] = {
+        loc_code: frame[0],
+        id: frame[1],
+        lat: Number(frame[2]),
+        lon: Number(frame[3]),
+        floor: Number(frame[4]),
+        code: frame[5],
+        net: frame[6],
+        time: new Date(frame[7]),
+        work: frame[8]
+      };
+    })
+
     messageToMainWindow({
       action: "TremRts_sta",
       data: TremRts_sta,
@@ -52,87 +116,8 @@ export var Req_TremRts_sta = throttle(function () {
   }).catch((err) => {
     GeneralError_handler(err)
     UpdateStatus("TREM-RTS", "Error");
-    Trem_server = !Trem_server;
   });
 }, 5000);
-
-
-var TremRTS_server = {
-  RT: 0,
-  Hi: 0
-};
-var Trem_URLs = {
-  RT: [//リアルタイム
-    "https://lb-1.exptech.dev/api/v1/trem/rts",
-    "https://lb-2.exptech.dev/api/v1/trem/rts",
-    "https://lb-3.exptech.dev/api/v1/trem/rts",
-    "https://lb-4.exptech.dev/api/v1/trem/rts",
-  ],
-  Hi: [//History
-    "https://api-1.exptech.dev/api/v1/trem/rts/[UNIXTIME]",
-    "https://api-2.exptech.dev/api/v1/trem/rts/[UNIXTIME]"
-  ]
-}
-var TremErrorCounter = 0;
-var TremRts_Timer;
-export function Req_TremRts() {
-  if (TremRts_Timer) clearTimeout(TremRts_Timer);
-  TremRts_Timer = setTimeout(Req_TremRts, config.Source.TREMRTS.Interval);
-
-  if (!config.Source.TREMRTS.GetData) return;
-  if (!TremRts_sta) Req_TremRts_sta();
-
-  var realtime = Replay == 0;
-  if (realtime) var url = Trem_URLs.RT[TremRTS_server.RT] + `?_=${Number(new Date())}`;
-  else var url = Trem_URLs.Hi[TremRTS_server.Hi].replace("[UNIXTIME]", Number(new Date() - Replay));
-
-  fetch(url, { signal: AbortSignal.timeout(4000) })
-    .then((r) => {
-      if (!r.ok) throw new Error(`HTTP Error: ${r.status}`);
-      return r.json();
-    }).then((json) => {
-      var TremRtsData = {};
-      Object.keys(json.station).forEach(function (StID) {
-        var st = json.station[StID];
-        var stationData = TremRts_sta?.[StID];
-        if (stationData) {
-          var JPShindo = st.i; //おおむね対応するため、現時点では変換不要と判断
-          var rgb = KmoniColorTable[Math.min(7, Math.max(-3, Math.floor(JPShindo * 10) / 10))];
-          TremRtsData[StID] = {
-            Type: stationData.net,
-            shindo: JPShindo,
-            PGA: st.pga,
-            Code: StID,
-            rgb: [rgb.r, rgb.g, rgb.b],
-          };
-        } else {
-          Req_TremRts_sta();
-        }
-      });
-      TremRtsData_Marged = {
-        action: "TREM-RTSUpdate",
-        LocalTime: new Date(),
-        data: TremRtsData,
-      };
-      messageToMainWindow(TremRtsData_Marged);
-      UpdateStatus("TREM-RTS", "success", new Date(json.time));
-
-      TremErrorCounter = 0;
-    }).catch((err) => {
-      GeneralError_handler(err)
-      UpdateStatus("TREM-RTS", "Error");
-
-      TremErrorCounter++;
-      if (TremErrorCounter >= 3) {
-        TremErrorCounter = 0;
-        if (realtime) {
-          TremRTS_server.RT = (TremRTS_server.RT + 1) % Trem_URLs.RT.length;
-        } else {
-          TremRTS_server.Hi = (TremRTS_server.Hi + 1) % Trem_URLs.Hi.length;
-        }
-      }
-    });
-}
 
 function sort_by_dist_TIDE(data) {
   return data.sort((a, b) => {

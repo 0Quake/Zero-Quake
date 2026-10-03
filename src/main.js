@@ -58,7 +58,7 @@ import {
   ConvertSnet,
   Req_SNet,
   Req_TremRts_sta,
-  Req_TremRts,
+  TREMRTS_SSE,
   Req_JMATide_sta,
   Req_JMATide,
   Req_EarlyEst,
@@ -761,15 +761,10 @@ function start() {
   SetKmoniOffset(Req_kmoni);
   UpdateEQInfo(true); //地震情報定期取得 着火
   Req_EarlyEst();
-  Req_TremRts();
+  TREMRTS_SSE();
 
   //定期実行 着火
   RegularExecution(true);
-
-  //一回限り
-  Req_TremRts_sta();
-  Req_Seisjs_sta();
-  Req_JMATide_sta();
 }
 
 //定期実行
