@@ -73,7 +73,6 @@
     "eventsource": "^5.1.2",
     "jsdom": "^30.1.1",
     "maplibre-gl": "^6.11.2",
-    "pmtiles": "^4.5.0",
-    "websocket": "^1.0.35"
+    "pmtiles": "^4.5.0"
   }
 }

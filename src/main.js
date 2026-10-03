@@ -548,8 +548,8 @@ electron.app.on("ready", () => {
   electron.powerMonitor.on("resume", () => {
     UpdateEQInfo();
     RegularExecution();
-    if (WolfxConnection) WolfxConnection.sendUTF("query_jmaeew");
-    if (ProjectBS_Connection) ProjectBS_Connection.sendUTF("queryjson");
+    if (WolfxConnection?.readyState === WebSocket.OPEN) WolfxConnection.send("query_jmaeew");
+    if (ProjectBS_Connection?.readyState === WebSocket.OPEN) ProjectBS_Connection.send("queryjson");
   });
 });
 
@@ -655,8 +655,8 @@ ipcMain.on("message", (_event, response) => {
       if (response.internetConnection) {
         UpdateEQInfo();
         RegularExecution();
-        if (WolfxConnection) WolfxConnection.sendUTF("query_jmaeew");
-        if (ProjectBS_Connection) ProjectBS_Connection.sendUTF("queryjson");
+        if (WolfxConnection?.readyState === WebSocket.OPEN) WolfxConnection.send("query_jmaeew");
+        if (ProjectBS_Connection?.readyState === WebSocket.OPEN) ProjectBS_Connection.send("queryjson");
         Req_TremRts_sta();
         Req_Seisjs_sta();
       }

@@ -1,6 +1,3 @@
-import WebSocket from "websocket";
-const WebSocketClient = WebSocket.client;
-
 import { DetectEEW } from "./PROC_EEW.js";
 import { ParseJSON, newDate2, NormalizeShindo } from "./constants.js";
 import { UpdateEQInfo } from "./RX_JMAXML.js";
@@ -9,25 +6,38 @@ import { MargeEQInfo } from "./PROC_EQInfo.js";
 
 import { config, Replay, UpdateStatus } from "./state.js";
 
-var P2P_Client;
+var P2P_WS;
+var P2PReconnectTimeout = 500;
 export function P2P() {
-  P2P_Client = new WebSocketClient();
-  P2P_Client.on("connectFailed", function () {
-    UpdateStatus("P2P_EEW", "Error");
-    TryConnect_P2P();
-  });
-  P2P_Client.on("connect", function (connection) {
-    connection.on("error", function () {
+  Connect_P2P();
+}
+function TryConnect_P2P() {
+  P2PReconnectTimeout = Math.min(30000, P2PReconnectTimeout * 2);
+  setTimeout(Connect_P2P, P2PReconnectTimeout);
+}
+function Connect_P2P() {
+  try {
+    if (P2P_WS) {
+      P2P_WS.onclose = null;
+      P2P_WS.close();
+    }
+    P2P_WS = new WebSocket("wss://api.p2pquake.net/v2/ws");
+
+    P2P_WS.onopen = function () {
+      UpdateStatus("P2P_EEW", "success");
+      P2PReconnectTimeout = 500;
+    };
+    P2P_WS.onerror = function () {
       UpdateStatus("P2P_EEW", "Error");
-    });
-    connection.on("close", function () {
+    };
+    P2P_WS.onclose = function () {
       UpdateStatus("P2P_EEW", "Disconnect");
       TryConnect_P2P();
-    });
-    connection.on("message", function (message) {
+    };
+    P2P_WS.onmessage = function (event) {
       try {
-        if (Replay == 0 && message.type === "utf8") {
-          var data = JSON.parse(message.utf8Data);
+        if (Replay == 0 && typeof event.data === "string") {
+          var data = JSON.parse(event.data);
           if (data.time) UpdateStatus("P2P_EEW", "success", new Date(data.time));
           else UpdateStatus("P2P_EEW", "success");
 
@@ -58,45 +68,53 @@ export function P2P() {
       } catch {
         UpdateStatus("P2P_EEW", "Error");
       }
-    });
-    UpdateStatus("P2P_EEW", "success");
-    P2PReconnectTimeout = 500;
-  });
-  Connect_P2P();
-}
-var P2PReconnectTimeout = 500;
-function TryConnect_P2P() {
-  P2PReconnectTimeout = Math.min(30000, P2PReconnectTimeout * 2);
-  setTimeout(Connect_P2P, P2PReconnectTimeout);
-}
-function Connect_P2P() {
-  if (P2P_Client) P2P_Client.connect("wss://api.p2pquake.net/v2/ws");
+    };
+  } catch {
+    UpdateStatus("P2P_EEW", "Error");
+    TryConnect_P2P();
+  }
 }
 
 //AXIS WebSocket接続・受信処理
-var AXIS_Client;
+var AXIS_WS;
+var AXIS_ConnectedDate = new Date();
 export function AXIS() {
   if (!config.Source.axis.GetData) return;
-  AXIS_Client = new WebSocketClient();
-
-  AXIS_Client.on("connectFailed", function () {
-    UpdateStatus("axis", "Error");
-    TryConnect_AXIS();
-  });
-
-  AXIS_Client.on("connect", function (connection) {
-    connection.on("error", function () {
-      UpdateStatus("axis", "Error");
+  Connect_AXIS();
+}
+function TryConnect_AXIS() {
+  var timeoutTmp = Math.max(30000 - (new Date() - AXIS_ConnectedDate), 100);
+  setTimeout(Connect_AXIS, timeoutTmp);
+}
+function Connect_AXIS() {
+  if (!config.Source.axis.GetData) return;
+  try {
+    if (AXIS_WS) {
+      AXIS_WS.onclose = null;
+      AXIS_WS.close();
+    }
+    AXIS_WS = new WebSocket("wss://ws.axis.prioris.jp/socket", {
+      headers: {
+        Authorization: `Bearer ${config.Source.axis.AccessToken}`,
+      },
     });
-    connection.on("close", function () {
+
+    AXIS_WS.onopen = function () {
+      UpdateStatus("axis", "success");
+      AXIS_ConnectedDate = new Date();
+    };
+    AXIS_WS.onerror = function () {
+      UpdateStatus("axis", "Error");
+    };
+    AXIS_WS.onclose = function () {
       UpdateStatus("axis", "Disconnect");
       TryConnect_AXIS();
-    });
-    connection.on("message", function (message) {
+    };
+    AXIS_WS.onmessage = function (event) {
       if (Replay !== 0) return;
       UpdateStatus("axis", "success");
       try {
-        var dataStr = message.utf8Data;
+        var dataStr = event.data;
         if (dataStr == "hello") return;
         var data = ParseJSON(dataStr);
         if (data && data.channel) {
@@ -140,112 +158,122 @@ export function AXIS() {
       } catch {
         UpdateStatus("axis", "Error");
       }
-    });
-    UpdateStatus("axis", "success");
-  });
-
-  Connect_AXIS();
-}
-var AXIS_ConnectedDate = new Date();
-function TryConnect_AXIS() {
-  var timeoutTmp = Math.max(30000 - (new Date() - AXIS_ConnectedDate), 100);
-  setTimeout(Connect_AXIS, timeoutTmp);
-}
-function Connect_AXIS() {
-  if (AXIS_Client)
-    AXIS_Client.connect("wss://ws.axis.prioris.jp/socket", null, null, {
-      Authorization: `Bearer ${config.Source.axis.AccessToken}`,
-    });
-  AXIS_ConnectedDate = new Date();
+    };
+  } catch {
+    UpdateStatus("axis", "Error");
+    TryConnect_AXIS();
+  }
 }
 
 //ProjectBS WebSocket接続・受信処理
-var ProjectBS_Client;
-export var ProjectBS_Connection;
+export var ProjectBS_Connection = null;
 var ProjectBS_Ping_Timer;
+var ProjectBS_ConnectedDate = new Date();
 export function ProjectBS() {
   if (!config.Source.ProjectBS.GetData) return;
-  ProjectBS_Client = new WebSocketClient();
-
-  ProjectBS_Client.on("connectFailed", function () {
-    UpdateStatus("ProjectBS", "Error");
-    TryConnect_ProjectBS();
-  });
-
-  ProjectBS_Client.on("connect", function (connection) {
-    ProjectBS_Connection = connection;
-    connection.on("error", function () {
-      UpdateStatus("ProjectBS", "Error");
-    });
-    connection.on("close", function () {
-      UpdateStatus("ProjectBS", "Disconnect");
-      TryConnect_ProjectBS();
-      clearInterval(ProjectBS_Ping_Timer);
-    });
-    connection.on("message", function (message) {
-      if (Replay !== 0) return;
-      UpdateStatus("ProjectBS", "success");
-      try {
-        var dataStr = message.utf8Data;
-        if (dataStr !== "pong") DetectEEW(1, ParseJSON(dataStr));
-      } catch {
-        UpdateStatus("ProjectBS", "Error");
-      }
-    });
-    connection.sendUTF("queryjson");
-
-    UpdateStatus("ProjectBS", "success");
-    if (ProjectBS_Ping_Timer) {
-      clearInterval(ProjectBS_Ping_Timer);
-      ProjectBS_Ping_Timer = null;
-    }
-    ProjectBS_Ping_Timer = setInterval(function () {
-      connection.sendUTF("ping");
-    }, 1200000);
-  });
-
   Connect_ProjectBS();
 }
-var ProjectBS_ConnectedDate = new Date();
 function TryConnect_ProjectBS() {
   var timeout = Math.max(30000 - (new Date() - ProjectBS_ConnectedDate), 100);
   setTimeout(Connect_ProjectBS, timeout);
 }
 function Connect_ProjectBS() {
-  if (ProjectBS_Client) ProjectBS_Client.connect("wss://telegram-cf.projectbs.cn/jmaeewws/");
-  ProjectBS_ConnectedDate = new Date();
+  if (!config.Source.ProjectBS.GetData) return;
+  try {
+    if (ProjectBS_Connection) {
+      ProjectBS_Connection.onclose = null;
+      ProjectBS_Connection.close();
+    }
+    const ws = new WebSocket("wss://telegram-cf.projectbs.cn/jmaeewws/");
+    ws.sendUTF = ws.send.bind(ws);
+    ProjectBS_Connection = ws;
+    ProjectBS_ConnectedDate = new Date();
+
+    ws.onopen = function () {
+      ws.send("queryjson");
+      UpdateStatus("ProjectBS", "success");
+      if (ProjectBS_Ping_Timer) {
+        clearInterval(ProjectBS_Ping_Timer);
+        ProjectBS_Ping_Timer = null;
+      }
+      ProjectBS_Ping_Timer = setInterval(function () {
+        if (ws.readyState === WebSocket.OPEN) ws.send("ping");
+      }, 1200000);
+    };
+    ws.onerror = function () {
+      UpdateStatus("ProjectBS", "Error");
+    };
+    ws.onclose = function () {
+      UpdateStatus("ProjectBS", "Disconnect");
+      TryConnect_ProjectBS();
+      clearInterval(ProjectBS_Ping_Timer);
+    };
+    ws.onmessage = function (event) {
+      if (Replay !== 0) return;
+      UpdateStatus("ProjectBS", "success");
+      try {
+        var dataStr = event.data;
+        if (dataStr !== "pong") DetectEEW(1, ParseJSON(dataStr));
+      } catch {
+        UpdateStatus("ProjectBS", "Error");
+      }
+    };
+  } catch {
+    UpdateStatus("ProjectBS", "Error");
+    TryConnect_ProjectBS();
+  }
 }
 
 //Wolfx WebSocket接続・受信処理
-var WolfxWS_Client;
-export var WolfxConnection;
+export var WolfxConnection = null;
 var Wolfx_Timer;
+var Wolfx_ConnectedDate = new Date();
 export function WolfxWS() {
   if (!config.Source.wolfx.GetData) return;
-  WolfxWS_Client = new WebSocketClient();
+  Connect_WolfxWS();
+}
+function TryConnect_WolfxWS() {
+  var timeoutTmp = Math.max(30000 - (new Date() - Wolfx_ConnectedDate), 100);
+  setTimeout(Connect_WolfxWS, timeoutTmp);
+}
+function Connect_WolfxWS() {
+  if (!config.Source.wolfx.GetData) return;
+  try {
+    if (WolfxConnection) {
+      WolfxConnection.onclose = null;
+      WolfxConnection.close();
+    }
+    const ws = new WebSocket("wss://ws-api.wolfx.jp/all_eew");
+    ws.sendUTF = ws.send.bind(ws);
+    WolfxConnection = ws;
+    Wolfx_ConnectedDate = new Date();
 
-  WolfxWS_Client.on("connectFailed", function () {
-    UpdateStatus("wolfx", "Error");
-    TryConnect_WolfxWS();
-  });
-
-  WolfxWS_Client.on("connect", function (connection) {
-    WolfxConnection = connection;
-    connection.on("error", function () {
+    ws.onopen = function () {
+      ws.send("query_jmaeew");
+      UpdateStatus("wolfx", "success");
+      if (Wolfx_Timer) {
+        clearInterval(Wolfx_Timer);
+        Wolfx_Timer = null;
+      }
+      Wolfx_Timer = setInterval(function () {
+        if (ws.readyState === WebSocket.OPEN) ws.send("ping");
+      }, 60000);
+    };
+    ws.onerror = function () {
       UpdateStatus("wolfx", "Error");
-    });
-    connection.on("close", function () {
+    };
+    ws.onclose = function () {
       UpdateStatus("wolfx", "Disconnect");
       TryConnect_WolfxWS();
-      clearInterval(Wolfx_Timer)
-    });
-    connection.on("message", function (message) {
+      clearInterval(Wolfx_Timer);
+    };
+    ws.onmessage = function (event) {
       if (Replay !== 0) return;
       UpdateStatus("wolfx", "success");
       try {
-        var json = ParseJSON(message.utf8Data);
+        var json = ParseJSON(event.data);
         if (json.type == "heartbeat") {
-          connection.sendUTF("ping");
+          ws.send("ping");
         } else if (json.type == "jma_eew") {
           DetectEEW(2, json);
         } else if (json.type == "jma_eqlist") {
@@ -254,29 +282,11 @@ export function WolfxWS() {
       } catch {
         UpdateStatus("wolfx", "Error");
       }
-    });
-    connection.sendUTF("query_jmaeew");
-    UpdateStatus("wolfx", "success");
-
-    if (Wolfx_Timer) {
-      clearInterval(Wolfx_Timer)
-      Wolfx_Timer = null;
-    }
-    Wolfx_Timer = setInterval(function () {
-      connection.sendUTF("ping");
-    }, 60000);
-  });
-
-  Connect_WolfxWS();
-}
-var Wolfx_ConnectedDate = new Date();
-function TryConnect_WolfxWS() {
-  var timeoutTmp = Math.max(30000 - (new Date() - Wolfx_ConnectedDate), 100);
-  setTimeout(Connect_WolfxWS, timeoutTmp);
-}
-function Connect_WolfxWS() {
-  if (WolfxWS_Client) WolfxWS_Client.connect("wss://ws-api.wolfx.jp/all_eew");
-  Wolfx_ConnectedDate = new Date();
+    };
+  } catch {
+    UpdateStatus("wolfx", "Error");
+    TryConnect_WolfxWS();
+  }
 }
 
 //Seisjs WebSocket接続・受信処理

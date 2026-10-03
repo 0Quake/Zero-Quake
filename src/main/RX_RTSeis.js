@@ -6,8 +6,7 @@ const { net } = electron;
 import * as turf from "@turf/turf";
 import { JSDOM } from "jsdom";
 const DomPsr = new (new JSDOM()).window.DOMParser();
-import WebSocket from "websocket";
-const WebSocketClient = WebSocket.client;
+
 import zlib from "zlib";
 import { EventSource } from 'eventsource';
 
@@ -494,28 +493,45 @@ export function Req_Seisjs_sta() {
 
 var SeisjsWS_Client;
 var SeisjsWS_timer;
+var Seisjs_ConnectedDate = new Date();
 export function SeisjsWS() {
   if (!config.Source.wolfx.GetDataFromSeisJS) return;
-  SeisjsWS_Client = new WebSocketClient();
+  Connect_SeisjsWS();
+}
+function TryConnect_SeisjsWS() {
+  var timeoutTmp = Math.max(30000 - (new Date() - Seisjs_ConnectedDate), 100);
+  setTimeout(Connect_SeisjsWS, timeoutTmp);
+}
+function Connect_SeisjsWS() {
+  if (!config.Source.wolfx.GetDataFromSeisJS) return;
+  try {
+    if (SeisjsWS_Client) {
+      SeisjsWS_Client.onclose = null;
+      SeisjsWS_Client.close();
+    }
+    const ws = new WebSocket("wss://seisjs.wolfx.jp/all_seis");
+    SeisjsWS_Client = ws;
+    Seisjs_ConnectedDate = new Date();
 
-  SeisjsWS_Client.on("connectFailed", function () {
-    UpdateStatus("wolfx", "Error");
-    TryConnect_SeisjsWS();
-  });
-
-  SeisjsWS_Client.on("connect", function (SeisjsConnection) {
-    SeisjsConnection.on("error", function () {
+    ws.onopen = function () {
+      UpdateStatus("wolfx", "success");
+    };
+    ws.onerror = function () {
       UpdateStatus("wolfx", "Error");
-    });
-    SeisjsConnection.on("close", function () {
+    };
+    ws.onclose = function () {
       UpdateStatus("wolfx", "Disconnect");
       TryConnect_SeisjsWS();
-    });
-    SeisjsConnection.on("message", function (message) {
+      if (SeisjsWS_timer) {
+        clearInterval(SeisjsWS_timer);
+        SeisjsWS_timer = null;
+      }
+    };
+    ws.onmessage = function (event) {
       if (Replay !== 0) return;
       UpdateStatus("wolfx", "success");
       try {
-        var json = ParseJSON(message.utf8Data);
+        var json = ParseJSON(event.data);
         if (!json || json.type == "pong" || json.type == "heartbeat") return;
         MargeSeisJS(json);
       } catch {
@@ -526,22 +542,13 @@ export function SeisjsWS() {
         SeisjsWS_timer = null;
       }
       SeisjsWS_timer = setInterval(function () {
-        SeisjsConnection.sendUTF("ping");
+        if (ws.readyState === WebSocket.OPEN) ws.send("ping");
       }, 60000);
-    });
-    UpdateStatus("wolfx", "success");
-  });
-
-  Connect_SeisjsWS();
-}
-var Seisjs_ConnectedDate = new Date();
-function TryConnect_SeisjsWS() {
-  var timeoutTmp = Math.max(30000 - (new Date() - Seisjs_ConnectedDate), 100);
-  setTimeout(Connect_SeisjsWS, timeoutTmp);
-}
-function Connect_SeisjsWS() {
-  if (SeisjsWS_Client) SeisjsWS_Client.connect("wss://seisjs.wolfx.jp/all_seis");
-  Seisjs_ConnectedDate = new Date();
+    };
+  } catch {
+    UpdateStatus("wolfx", "Error");
+    TryConnect_SeisjsWS();
+  }
 }
 
 export var SeisJSData = {};
