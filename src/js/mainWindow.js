@@ -1407,7 +1407,7 @@ function kmoniMapUpdate(dataTmp, type) {
       var currentState = map.getFeatureState({ source: "knet_points", id: elm.Code });
       var detectLv = elm.detect2 ? 2 : elm.detect ? 1 : 0;
       var isVisible = Boolean(elm.data);
-      if (currentState.pga !== elm.pga || currentState.detectLv !== detectLv || currentState.visible !== isVisible) {
+      if (currentState.shindo !== elm.shindo || currentState.detectLv !== detectLv || currentState.visible !== isVisible) {
         map.setFeatureState(
           {
             source: "knet_points",
@@ -1419,7 +1419,7 @@ function kmoniMapUpdate(dataTmp, type) {
             rgb_r: elm?.rgb?.[0] || 0,
             rgb_g: elm?.rgb?.[1] || 0,
             rgb_b: elm?.rgb?.[2] || 0,
-            pga: elm.pga,
+            shindo: elm.shindo,
           }
         );
       }
@@ -1434,7 +1434,7 @@ function kmoniMapUpdate(dataTmp, type) {
     dataTmp.data.forEach(function (elm) {
       var currentState = map.getFeatureState({ source: "snet_points", id: elm.Code });
       var isVisible = Boolean(elm.data);
-      if (currentState.pga !== elm.pga || currentState.visible !== isVisible) {
+      if (currentState.shindo !== elm.shindo || currentState.visible !== isVisible) {
         map.setFeatureState(
           {
             source: "snet_points",
@@ -1445,7 +1445,7 @@ function kmoniMapUpdate(dataTmp, type) {
             rgb_r: elm?.rgb?.[0],
             rgb_g: elm?.rgb?.[1],
             rgb_b: elm?.rgb?.[2],
-            pga: elm.pga,
+            shindo: elm.shindo,
           }
         );
       }
@@ -1488,7 +1488,7 @@ function TREMRTSUpdate(dataTmp) {
     TREMRTS_LastUpdate[key] = new Date();
     var elm = dataTmp[key];
     var currentState = map.getFeatureState({ source: "TREMRTS_points", id: elm.Code });
-    if (currentState.PGA !== elm.PGA) {
+    if (currentState.shindo !== elm.shindo) {
       map.setFeatureState(
         {
           source: "TREMRTS_points",
@@ -1533,7 +1533,7 @@ function SeisJSUpdate(dataTmp) {
     SeisJS_LastUpdate[key] = new Date();
     var elm = dataTmp[key];
     var currentState = map.getFeatureState({ source: "SEISJS_points", id: elm.Code });
-    if (currentState.PGA !== elm.PGA) {
+    if (currentState.shindo !== elm.shindo) {
       map.setFeatureState(
         {
           source: "SEISJS_points",
