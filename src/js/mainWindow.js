@@ -1517,8 +1517,8 @@ function generatePopupContent_SEISJS(params) {
   var shindoColor = NormalizeShindo(state.shindo, 2);
   var rgb = `${state.rgb_r || 0},${state.rgb_g || 0},${state.rgb_b || 0}`;
 
-  return `<h3 class= 'PointName' style='border-bottom-color:rgb(${rgb})'> ${params.Name}
-    <span> ${params.Code}</span></h3>
+  return `<h3 class='PointName' style='border-bottom-color:rgb(${rgb})'>${params.Name}
+    <span>${params.Type}_${params.Code.slice(0, 5)}</span></h3>
       <div class='popupContentWrap'><div class='obsShindoWrap' style='background:${shindoColor[0]};color:${shindoColor[1]};'>震度 ${NormalizeShindo(state.shindo, 1)}
         <span>${Number(state.shindo || 0).toFixed(2)}</span></div>
         <div class='obsPGAWrap'>PGA ${Number(state.PGA).toFixed(2)}</div></div>`;

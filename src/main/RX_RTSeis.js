@@ -548,12 +548,11 @@ export var SeisJSData = {};
 function MargeSeisJS(json) {
   var rgb = KmoniColorTable[Math.min(7, Math.max(-3, Math.floor(json.CalcShindo * 10) / 10))];
   SeisJSData[json.type] = {
-    Type: "Wolfx_SeisJS",
+    Type: "SeisJS",
     shindo: json.CalcShindo,
     PGA: json.PGA,
     Code: json.type,
     Name: json.region,
-    Location: { Longitude: json.longitude, Latitude: json.latitude },
     rgb: [rgb.r, rgb.g, rgb.b],
     update_at: json.update_at,
   };
