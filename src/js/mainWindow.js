@@ -572,7 +572,7 @@ function eqInfoDraw(data, source) {
         } else {
           clone.querySelector(".EQItem")
             .setAttribute("aria-label",
-              `過去の気象庁による地震情報アイテム：${elm.status == "訓練" ? "訓練報、" : ""}${elm.status == "試験" ? "試験報、" : ""}${elm.headline}${content}
+              `気象庁の地震履歴アイテム：${elm.status == "訓練" ? "訓練報、" : ""}${elm.status == "試験" ? "試験報、" : ""}${elm.headline}${content}
         `//エンターキーで詳細情報を確認。
             );
           clone.querySelector(".EQItem").addEventListener("click", function () {
@@ -643,7 +643,7 @@ function eqInfoDraw(data, source) {
         clone.querySelector(".EQI_maxI").style.color = colorTmp[1];
         var MMIStr = elm.maxI ? `最大改正メルカリ震度${NormalizeMMI(elm.maxI, 3)} ` : "";
 
-        var ariaLabel = `過去のUSGSによる地震情報アイテム：${MMIStr}、${elm.M || elm.M === 0 ? `マグニチュード${elm.M.toFixed(1)}、` : ""}${elm.epiCenter ? `震源は${elm.epiCenter}、` : ""}発生時刻は${NormalizeDate("M月D日h時m分", elm.OriginTime)}。エンターキーで詳細情報を確認。`;
+        var ariaLabel = `USGSの地震履歴アイテム：${MMIStr}、${elm.M || elm.M === 0 ? `マグニチュード${elm.M.toFixed(1)}、` : ""}${elm.epiCenter ? `震源は${elm.epiCenter}、` : ""}発生時刻は${NormalizeDate("M月D日h時m分", elm.OriginTime)}。エンターキーで詳細情報を確認。`;
         clone.querySelector(".EQItem").setAttribute("aria-label", ariaLabel);
 
         clone.querySelector(".EQItem").addEventListener("click", function () {
@@ -2583,7 +2583,7 @@ function draw_tide(data) {
     clone.querySelector(".EQI_point_adv").style.display = (elm.threshold_advisory || elm.threshold_advisory == 0) ? "block" : "none";
     clone.querySelector(".EQI_point_warn").style.display = (elm.threshold_warn || elm.threshold_warn == 0) ? "block" : "none";
 
-    clone.setAttribute("aria-label", `潮位観測情報、観測点名は${elm.name} (${elm.by})。潮位${Boolean2(elm.height) ? `${elm.height.toFixed(0)}センチ` : "不明"}、${dateToSpeak} 時点。なお、天文潮位は${elm.astro} センチ、高潮注意報基準は${elm.threshold_advisory} センチ、高潮警報基準は${elm.threshold_warn} センチ。クリックして詳細を表示。`);
+    clone.setAttribute("aria-label", `潮位観測情報、${elm.by}の${elm.name}観測点では、潮位${Boolean2(elm.height) ? `${elm.height.toFixed(0)}センチ` : "不明"}、${dateToSpeak}時点。なお、天文潮位は${elm.astro}センチ、レベル4危険警報基準は${elm.threshold_advisory}センチ、レベル5特別警報基準は${elm.threshold_warn}センチ。クリックして詳細を表示。`);
     clone.addEventListener("click", function () {
       if (data?.[key]?.code) {
         window.open(`https://www.jma.go.jp/bosai/tidelevel/#point_code=${data[key].code}`);
@@ -2642,7 +2642,7 @@ function draw_gaikyo(data) {
       }
       clone.querySelector(".EQI_datetime").textContent = dateStr;
 
-      clone.setAttribute("aria-label", `気象庁による解説情報：${elm.title}、${dateToSpeak}`);
+      clone.setAttribute("aria-label", `気象庁の解説情報：${elm.title}、${dateToSpeak}`);
       clone.addEventListener("click", function () {
         window.open(elm.url);
       });
