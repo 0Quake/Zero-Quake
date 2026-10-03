@@ -159,7 +159,7 @@ window.electronAPI.messageSend((event, request) => {
         type: "Feature",
         properties: {
           Code: key,
-          Type: elm.net,
+          Type: "TREM-RTS",
         },
         geometry: {
           type: "Point",
@@ -1080,16 +1080,35 @@ function init() {
           visibility: config.data.kmoni_points_show ? "visible" : "none",
         },
         paint: {
+          "circle-radius": ["interpolate", ["linear"], ["zoom"],
+            2, ["case", ["boolean", ["feature-state", "visible"], false], 1, 0],
+            5, ["case", ["boolean", ["feature-state", "visible"], false], 3.75, 0],
+            15, ["case", ["boolean", ["feature-state", "visible"], false], 33.75, 0],
+          ],
           "circle-color": [
             "rgb",
             ["coalesce", ["feature-state", "rgb_r"], 0],
             ["coalesce", ["feature-state", "rgb_g"], 0],
             ["coalesce", ["feature-state", "rgb_b"], 0],
           ],
-          "circle-radius": ["interpolate", ["linear"], ["zoom"],
-            2, ["case", ["boolean", ["feature-state", "visible"], false], 1, 0],
-            5, ["case", ["boolean", ["feature-state", "visible"], false], 3.75, 0],
-            15, ["case", ["boolean", ["feature-state", "visible"], false], 33.75, 0],
+          "circle-stroke-color": [
+            "rgb",
+            ["coalesce", ["feature-state", "rgb_r"], 0],
+            ["coalesce", ["feature-state", "rgb_g"], 0],
+            ["coalesce", ["feature-state", "rgb_b"], 0],
+          ],
+
+          "circle-stroke-width": [
+            "case", [
+              "all",
+              ["boolean", ["feature-state", "visible"], false],
+              ["<=", ["coalesce", ["feature-state", "shindo"], 0], 0.3]
+            ],
+            1, 0
+          ],
+          "circle-opacity": [
+            "case", ["<=", ["coalesce", ["feature-state", "shindo"], 0], 0.3],
+            0, 1
           ],
         },
       },
@@ -1488,7 +1507,8 @@ function TREMRTSUpdate(dataTmp) {
     TREMRTS_LastUpdate[key] = new Date();
     var elm = dataTmp[key];
     var currentState = map.getFeatureState({ source: "TREMRTS_points", id: elm.Code });
-    if (currentState.shindo !== elm.shindo) {
+    var isVisible = true;//TREM-RTSではエントリ有⇔データ有
+    if (currentState.shindo !== elm.shindo || currentState.visible !== isVisible) {
       map.setFeatureState(
         {
           source: "TREMRTS_points",
@@ -1533,7 +1553,8 @@ function SeisJSUpdate(dataTmp) {
     SeisJS_LastUpdate[key] = new Date();
     var elm = dataTmp[key];
     var currentState = map.getFeatureState({ source: "SEISJS_points", id: elm.Code });
-    if (currentState.shindo !== elm.shindo) {
+    var isVisible = true;//SeisJSではエントリ有⇔データ有
+    if (currentState.shindo !== elm.shindo || currentState.visible !== isVisible) {
       map.setFeatureState(
         {
           source: "SEISJS_points",

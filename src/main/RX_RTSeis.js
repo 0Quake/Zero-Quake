@@ -34,6 +34,7 @@ import {
 export var KmoniOffset = 2500;
 export var kmoniPointsDataTmp, SnetPointsDataTmp, TremRtsData_Marged;
 
+var TremRts_es;
 export function TREMRTS_SSE() {
   if (!config.Source.TREMRTS.GetData) return;
 
@@ -45,42 +46,81 @@ export function TREMRTS_SSE() {
     return str;
   }
 
-  const es = new EventSource("https://api.lb.exptech.dev/api/v1/trem/sse?topics=trem.intensity.v1,trem.rts.v1&mode=live");
-  es.addEventListener('open', () => {
+  TremRts_es?.close();//既存なら破棄
+  TremRts_es = new EventSource("https://api.lb.exptech.dev/api/v1/trem/sse?topics=trem.intensity.v1,trem.rts.v1&mode=live");
+  TremRts_es.addEventListener('open', () => {
     UpdateStatus("TREM-RTS", "success", new Date());
   });
-  es.addEventListener('trem.rts.v1', (e) => {
+  TremRts_es.addEventListener('trem.rts.v1', (e) => {
+    if (Replay !== 0) return;
     const json = JSON.parse(unzip(e.data));
+    const TremRtsData = formatTremData(json);
 
-    var TremRtsData = {};
-    Object.keys(json.stations).forEach(function (StID) {
-      var st = json.stations[StID];
-      if (!TremRts_sta) return Req_TremRts_sta();
-      var StMeta = TremRts_sta?.[StID];
-      if (StMeta) {
-        var rgb = KmoniColorTable[Math.min(7, Math.max(-3, Math.floor(st.i * 10) / 10))];
-        TremRtsData[StID] = {
-          Type: StMeta.net,
-          shindo: st.i,
-          PGA: st.pga,
-          Code: StID,
-          rgb: [rgb.r, rgb.g, rgb.b],
-        };
-      }
-    });
     TremRtsData_Marged = {
       action: "TREM-RTSUpdate",
-      LocalTime: new Date(),
+      LocalTime: new Date((new Date() - Replay)),
       data: TremRtsData,
     };
     messageToMainWindow(TremRtsData_Marged);
 
     UpdateStatus("TREM-RTS", "success", new Date(json.ts));
   });
-  es.addEventListener('error', (err) => {
+  TremRts_es.addEventListener('error', (err) => {
     GeneralError_handler(err);
     UpdateStatus("TREM-RTS", "Error", new Date());
   });
+}
+
+let TremRts_ReplayTimer;
+export function TREMRTS_Replay() {
+  if (TremRts_ReplayTimer) clearTimeout(TremRts_ReplayTimer);
+  TremRts_ReplayTimer = setTimeout(TREMRTS_Replay, 1000);
+
+  if (!config.Source.TREMRTS.GetData) return;
+  if (Replay == 0) return;
+
+  var Time10Dig = Math.floor((new Date() - Replay) / 1000);
+  console.log(`https://api.core.exptech.dev/api/v3/trem/rts/${Time10Dig}`);
+  fetch(
+    `https://api.core.exptech.dev/api/v3/trem/rts/${Time10Dig}`,
+    { signal: AbortSignal.timeout(4000) }
+  ).then((r) => {
+    if (!r.ok) throw new Error(`HTTP Error: ${r.status}`);
+    return r.json();
+  }).then((json) => {
+    const TremRtsData = formatTremData(json);
+
+    TremRtsData_Marged = {
+      action: "TREM-RTSUpdate",
+      LocalTime: new Date((new Date() - Replay)),
+      data: TremRtsData,
+    };
+    messageToMainWindow(TremRtsData_Marged);
+    UpdateStatus("TREM-RTS", "success", new Date(json.ts));
+  }).catch((err) => {
+    GeneralError_handler(err);
+    UpdateStatus("TREM-RTS", "Error", new Date());
+  });
+}
+
+function formatTremData(json) {
+  var TremRtsData = {};
+  Object.keys(json.stations).forEach(function (StID) {
+    var st = json.stations[StID];
+    if (!TremRts_sta) return Req_TremRts_sta();
+    var StMeta = TremRts_sta?.[StID];
+    if (StMeta) {
+      var rgb = KmoniColorTable[Math.min(7, Math.max(-3, Math.floor(st.i * 10) / 10))];
+      TremRtsData[StID] = {
+        Type: "TREM-RTS",
+        shindo: st.i,
+        PGA: st.pga,
+        Code: StID,
+        rgb: [rgb.r, rgb.g, rgb.b],
+      };
+    }
+  });
+  return TremRtsData;
 }
 
 export var TremRts_sta = {};

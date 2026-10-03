@@ -67,6 +67,7 @@ import {
   SnetPointsDataTmp,
   SeisjsWS,
   Req_Seisjs_sta,
+  TREMRTS_Replay
 } from "./main/RX_RTSeis.js";
 import {
   Req_JMAXMLList,
@@ -186,7 +187,7 @@ var defaultConfigVal = {
     axis: { GetData: false, AccessToken: "" },
     ProjectBS: { GetData: true },
     wolfx: { GetData: true, GetDataFromSeisJS: false },
-    TREMRTS: { GetData: true, Interval: 1000 },
+    TREMRTS: { GetData: true },
     EarlyEst: { GetData: false, Interval: 60000 },
   },
   notice: {
@@ -591,6 +592,8 @@ ipcMain.on("message", (_event, response) => {
         });
       }
 
+      TREMRTS_SSE();//TREMRTS_SSEの再接続（無効→有効に対応）
+
       if (response.from == "ConfigWindow") {
         if (MainWindow && !MainWindow.isDestroyed()) {
           MainWindow.reload();
@@ -762,6 +765,7 @@ function start() {
   UpdateEQInfo(true); //地震情報定期取得 着火
   Req_EarlyEst();
   TREMRTS_SSE();
+  TREMRTS_Replay();
 
   //定期実行 着火
   RegularExecution(true);
