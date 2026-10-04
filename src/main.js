@@ -51,7 +51,6 @@ import {
 import {
   createWorker,
   worker,
-  clearEQDetectList,
   ConvertKmoni,
   Req_kmoni,
   SetKmoniOffset,
@@ -278,7 +277,6 @@ function replay(ReplayDate) {
       Replay = 0;
     }
     setReplay(Replay);
-    clearEQDetectList();
     clearEEWActive();
     if (worker) worker.postMessage({ action: "Replay", data: Replay });
     messageToMainWindow({ action: "Replay", data: Replay });

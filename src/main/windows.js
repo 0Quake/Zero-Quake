@@ -61,8 +61,6 @@ import {
   Seisjs_sta,
   kmoniPointsDataTmp,
   SnetPointsDataTmp,
-  thresholds,
-  EQDetect_List,
 } from "./RX_RTSeis.js";
 import {
   NankaiTroughInfo,
@@ -154,15 +152,6 @@ export function CreateMainWindow() {
         }
         if (typeof EQCount_process === "function") {
           EQCount_process(null);
-        }
-
-        if (Array.isArray(EQDetect_List) && thresholds) {
-          EQDetect_List.forEach(function (elm) {
-            var threshold01Tmp = elm.isCity ? thresholds.threshold01C : thresholds.threshold01;
-            if (elm.Codes.length >= threshold01Tmp) {
-              messageToMainWindow({ action: "EQDetect", data: elm });
-            }
-          });
         }
 
         if (kmoniPointsDataTmp) messageToMainWindow(kmoniPointsDataTmp);

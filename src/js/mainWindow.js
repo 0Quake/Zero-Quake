@@ -115,10 +115,12 @@ window.electronAPI.messageSend((event, request) => {
     UpdateStatus(request.timestamp, request.LocalTime, request.type, request.condition);
   } else if (request.action == "kmoniUpdate") {
     UpdateStatus(request.timestamp, request.LocalTime, "kmoniImg", "success");
-    if (!background) kmoniMapUpdate(request.data, "knet");
+    if (!background) kmoniMapUpdate(request, "knet");
+    knetMapData = request.data;
   } else if (request.action == "SnetUpdate") {
     UpdateStatus(request.timestamp, request.LocalTime, "msilImg", "success");
     kmoniMapUpdate(request.data, "snet");
+    if (!background) snetMapData = request.data;
   } else if (request.action == "TREM-RTSUpdate") {
     TREMRTS_TMP = request.data;
     TREMRTSUpdate(request.data);
@@ -138,8 +140,8 @@ window.electronAPI.messageSend((event, request) => {
     psWaveEntry();
   } else if (request.action == "EQInfo") eqInfoDraw(request.data, request.source);
   else if (request.action == "EQCount") eqCountDraw(request.data);
-  else if (request.action == "EQDetect") EQDetect(request.data);
-  else if (request.action == "EQDetectFinish") EQDetectFinish(request.data);
+  else if (request.action == "EQDetectUpdate") EQDetectUpdate(request.data);
+  else if (request.action == "EQDetectFinish") EQDetectFinish(request.id);
   else if (request.action == "tsunamiUpdate") tsunamiDataUpdate(request.data);
   else if (request.action == "NankaiTroughInfo") NankaiTroughInfo(request.data);
   else if (request.action == "HokkaidoSanrikuInfo") HokkaidoSanrikuInfo(request.data);
@@ -688,36 +690,47 @@ function eqCountDraw(data) {
 //🔴地震検知🔴
 var EQDetectItem = [];
 var EQDetectTemplate = document.getElementById("EQDetectTemplate");
-function EQDetect(data) {
+function EQDetectUpdate(data) {
   if (!map.loaded()) return;
   var EQD_Item = EQDetectItem.find(function (elm) {
     return elm.id == data.id;
   });
 
-  var DetectRegions = data.Codes.map(function (elm) {
-    return elm.Region;
-  });
+  var DetectRegions = data.member.map(m => {
+    var stData = KNET_geometry.features.find(e => e.properties.Code == m).properties;
+    return stData.Region
+  })
   DetectRegions = Array.from(new Set(DetectRegions));
+
+  var coordinates = data.member.map(m => {
+    var stData = KNET_geometry.features.find(e => e.properties.Code == m).geometry.coordinates;
+    return {
+      lon: stData[0],
+      lat: stData[1]
+    }
+  })
+
+  let _ellipse = getEllipseSigma(coordinates);
+  var color = config.color.Tsunami[data.Lv == 1 ? "TsunamiWatchColor" : "TsunamiWarningColor"];
 
   if (EQD_Item) {
     //情報更新
-    EQD_Item.lat = data.lat;
-    EQD_Item.lng = data.lng;
+    EQD_Item.serial = data.serial;
+    EQD_Item.maxInt = data.maxInt;
+    EQD_Item.member = data.member;
+    EQD_Item.active_member = data.active_member;
 
-    let _center = turf.point([data.lng, data.lat]);
-    let _radius = data.Radius + 5;
-    let _options = { steps: 80, units: "kilometers" };
-
-    let _circle = turf.circle(_center, _radius, _options);
-    if (map && map.getSource(`EQDItem_${data.id}`)) {
-      map.getSource(`EQDItem_${data.id}`).setData(_circle);
+    if (map?.getSource(`EQDItem_${data.id}`)) {
+      map.getSource(`EQDItem_${data.id}`).setData(_ellipse);
     }
-    EQD_Item.ECMarker.setLngLat([data.lng, data.lat]);
 
     var EQDItem = document.getElementById(`EQDItem_${data.id}`);
     EQDItem.classList.remove("lv1", "lv2");
     EQDItem.classList.add(`lv${data.Lv}`);
     EQDItem.querySelector(".EQD_Regions").innerText = DetectRegions.join(" ");
+
+    if (map.getLayer(`EQDItemF_${data.id}`)) map.setPaintProperty(`EQDItemF_${data.id}`, 'fill-color', color);
+    if (map.getLayer(`EQDItemS_${data.id}`)) map.setPaintProperty(`EQDItemS_${data.id}`, 'line-color', color);
   } else {
     //初回検知
     var clone = EQDetectTemplate.content.cloneNode(true);
@@ -727,39 +740,28 @@ function EQDetect(data) {
     EQDItem.querySelector(".EQD_Regions").innerText = DetectRegions.join(" ");
     document.getElementById("EQDetect-Panel").prepend(clone);
 
-    const img = document.createElement("img");
-    img.src = "./img/epicenter_EQDetect.svg";
-    img.classList.add("epicenterIcon");
+    EQDetectItem.push(data);
 
-    var ECMarker = new maplibregl.Marker({ element: img })
-      .setLngLat([data.lng, data.lat])
-      .addTo(map);
-    ECMarker.getElement().removeAttribute("tabindex");
-
-    EQDetectItem.push({
-      id: data.id,
-      lat: data.lat,
-      lng: data.lng,
-      ECMarker: ECMarker,
-    });
-
-    let _center = turf.point([data.lng, data.lat]);
-    let _radius = data.Radius + 5;
-    let _options = { steps: 80, units: "kilometers" };
-
-    let _circle = turf.circle(_center, _radius, _options);
-
-    map.addSource(`EQDItem_${data.id}`, { type: "geojson", data: _circle });
+    map.addSource(`EQDItem_${data.id}`, { type: "geojson", data: _ellipse });
 
     map.addLayer({
       id: `EQDItemF_${data.id}`,
       type: "fill",
       source: `EQDItem_${data.id}`,
-      paint: { "fill-color": "#FFF", "fill-opacity": 0.3 },
+      paint: { "fill-color": color, "fill-opacity": 0.3 },
+    }, "tsunami_Yoho");
+    map.addLayer({
+      id: `EQDItemS_${data.id}`,
+      type: "line",
+      source: `EQDItem_${data.id}`,
+      paint: {
+        "line-color": color,
+        "line-width": 2,
+        'line-dasharray': [2, 2]
+      },
     });
-
     map.panTo([data.lng, data.lat], { animate: false });
-    map.fitBounds(turf.bbox(_circle), {
+    map.fitBounds(turf.bbox(_ellipse), {
       maxZoom: 7,
       animate: false,
       padding: 100,
@@ -770,7 +772,7 @@ function EQDetect(data) {
 }
 //地震検知終了
 function EQDetectFinish(id) {
-  var delIndex = EQDetectItem.findIndex(function (elm, index) {
+  var delIndex = EQDetectItem.findIndex(function (elm) {
     return elm.id == id;
   });
 
@@ -778,9 +780,9 @@ function EQDetectFinish(id) {
     var delElm = EQDetectItem[delIndex];
     if (map) {
       if (map.getLayer(`EQDItemF_${delElm.id}`)) map.removeLayer(`EQDItemF_${delElm.id}`);
+      if (map.getLayer(`EQDItemS_${delElm.id}`)) map.removeLayer(`EQDItemS_${delElm.id}`);
       if (map.getSource(`EQDItem_${delElm.id}`)) map.removeSource(`EQDItem_${delElm.id}`);
     }
-    if (delElm.ECMarker) delElm.ECMarker.remove();
 
     EQDetectItem.splice(delIndex, 1);
 
@@ -1048,7 +1050,7 @@ function init() {
             15, ["case", ["boolean", ["feature-state", "visible"], false], 33.75, 0],
           ],
           "circle-stroke-width": ["case", ["boolean", ["feature-state", "visible"], false], 2, 0],//invisibleな場合線を消す
-          "circle-stroke-color": ["match", ["feature-state", "detectLv"], 0, "transparent", 1, "#cb732b", 2, "#cb2b2b", "#0000",],
+          "circle-stroke-color": ["case", ["boolean", ["feature-state", "isTriggered"], false], "#cb732b", "#0000"]
         },
       },
       {
@@ -1418,15 +1420,14 @@ function map_gethome() {
 //観測点情報更新
 var kmoni_popup = {};
 function kmoniMapUpdate(dataTmp, type) {
-  if (!dataTmp.data || background) return;
+  if (!dataTmp.data) return;
   if (!map) return;
 
   if (type == "knet") {
     dataTmp.data.forEach(function (elm, i) {
       var currentState = map.getFeatureState({ source: "knet_points", id: elm.Code });
-      var detectLv = elm.detect2 ? 2 : elm.detect ? 1 : 0;
       var isVisible = Boolean(elm.data);
-      if (currentState.shindo !== elm.shindo || currentState.detectLv !== detectLv || currentState.visible !== isVisible) {
+      if (currentState.shindo !== elm.shindo || currentState.isTriggered !== elm.isTriggered || currentState.visible !== isVisible) {
         map.setFeatureState(
           {
             source: "knet_points",
@@ -1434,7 +1435,7 @@ function kmoniMapUpdate(dataTmp, type) {
           },
           {
             visible: isVisible,
-            detectLv: detectLv,
+            isTriggered: elm?.isTriggered,
             rgb_r: elm?.rgb?.[0] || 0,
             rgb_g: elm?.rgb?.[1] || 0,
             rgb_b: elm?.rgb?.[2] || 0,
@@ -1448,7 +1449,6 @@ function kmoniMapUpdate(dataTmp, type) {
       }
     });
 
-    knetMapData = dataTmp;
   } else {
     dataTmp.data.forEach(function (elm) {
       var currentState = map.getFeatureState({ source: "snet_points", id: elm.Code });
@@ -1472,7 +1472,6 @@ function kmoniMapUpdate(dataTmp, type) {
         kmoni_popup[elm.Code].setHTML(generatePopupContent_K(elm));
       }
     });
-    snetMapData = dataTmp;
   }
 }
 function generatePopupContent_K(params) {
@@ -2932,4 +2931,18 @@ function GenerateTsunamiText(data, text) {
   } catch {
     return "";
   }
+}
+
+//点群を内包する楕円を取得
+//デフォルトでは 1σ（約68%内包）なのでsigmaを乗じて拡大。sigma=2で役95%、3で約99.7%。
+function getEllipseSigma(points) {
+  const sigma = 2;//ここでは95%内包にする
+  const fc = turf.featureCollection(points.map(p => turf.point([p.lon, p.lat])));
+  const { meanCenterCoordinates, semiMajorAxis, semiMinorAxis, angle } =
+    turf.standardDeviationalEllipse(fc).properties.standardDeviationalEllipse;
+
+  return turf.ellipse(meanCenterCoordinates, semiMajorAxis * sigma, semiMinorAxis * sigma, {
+    units: "degrees",
+    angle: angle,
+  });
 }

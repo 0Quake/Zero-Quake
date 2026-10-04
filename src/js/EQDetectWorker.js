@@ -1,301 +1,399 @@
 import workerThreads from "worker_threads";
 import path from "path";
-import { readFile } from "fs/promises";
 import { fileURLToPath } from "url";
+import { readFile } from "fs/promises";
+import { distance } from "@turf/turf";
+
 var __dirname = path.dirname(fileURLToPath(import.meta.url));
-import * as turf from "@turf/turf";
 
-var EEWNow = false; //EEW発令中かどうか
-var EQDetectID = 0; //独自の地震ID
-var EQDetect_List = []; //地震アイテムのリスト
-var pointsData = {}; //毎秒クリアされない、観測点のデータ
-var Replay = 0;
-
-var thresholds = {
-  historyCount: 30, //比較する件数
-  threshold01: 5, //検出とする観測点数
-  threshold01C: 5, //検出とする観測点数【都会】
-  threshold02: null, //1次フラグ条件のPGA増加量[gal]
-  threshold03: null, //2次フラグ条件のPGA増加量[gal]
-  threshold04: 3, //1次フラグ条件の震度
-  threshold05: 0.1, //イベントの観測点数が最大時のn倍未満で解除
-  MargeRange: 40, //地震の同定範囲[km]
-  MargeRangeC: 20, //地震の同定範囲[km]【都会】
-  time00: 300000, //最初の検出~解除[ms](優先)
-  time01: 60000, //最後の検出~解除[ms]
-};
-
-workerThreads.parentPort.postMessage({
-  action: "thresholds",
-  data: thresholds,
-});
+var EEW_Active = false; //EEW発令中かどうか
 
 workerThreads.parentPort.on("message", (message) => {
   switch (message.action) {
-    case "EQDetect":
-      EQDetect(message.data, message.date, message.detect); //観測点ごとのデータを毎秒受信
+    case "EQDetect"://観測点ごとのデータを毎秒受信
+      dataStream({
+        data: message.data,
+        date: Number(new Date(message.date)),
+        enabled: message.enabled
+      });
       break;
-    case "EEWNow":
-      EEWNow = message.data;
+    case "EEW_Active":
+      //気象庁のEEW入電時に全イベントを破棄し検知処理を一時停止
+      EEW_Active = message.data;
+      clearAllEvents();
       break;
     case "Replay":
-      Replay = message.data;
-      pointsData = {};
+      //リプレイオフセットの変更（０含む）時に既存イベントを全破棄
+      clearAllEvents();
+      //過去値に基づくノイズフロア情報もリセット
+      for (const st of stationStates.values()) {
+        st.noiseFloor = null;
+      }
       break;
   }
 });
 
-function EQDetect(data, date, detect) {
-  var ptData, detect0, pgaAvr;
-  for (const elm of data) {
-    //ポイントごとの処理
-    ptData = pointsData[elm.Code];
-    if (!ptData) {
-      //都会かどうか
-      var isCity = elm.Region == "東京都" || elm.Region == "千葉県" || elm.Region == "埼玉県" || elm.Region == "神奈川県";
-      ptData = pointsData[elm.Code] = { detectCount: 0, SUMTmp: [elm.pga], SUM: elm.pga, Event: false, isCity: isCity, UpCount: 0, o_arrivalTime: null };
-    }
-
-    if (elm.data) {
-      if (!EEWNow && detect) {
-        //PGAのn回平均を求める
-        pgaAvr = ptData.SUM / ptData.SUMTmp.length;
-
-        //平均PGAから閾値を決定
-        var city_coefficient = ptData.isCity ? 2 : 1; //都会係数 都会ではしきい値を大きく
-        var threshold02 = (1.19 * pgaAvr + 0.02) * city_coefficient;
-        var threshold03 = (1.7 * pgaAvr + 0.2) * city_coefficient;
-
-        detect0 = elm.pga >= threshold02 || elm.shindo >= thresholds.threshold04; //PGAの時間軸偏差・震度絶対値で評価
-        elm.detect = detect0 && ptData.detectCount > 0; //elm.detectに加え、連続検出回数を加えて評価
-        elm.detect2 = elm.detect && ((elm.pga >= threshold03 && ptData.UpCount > 0) || elm.shindo > thresholds.threshold04);
-
-        //連続上昇回数（変化なし含む）
-        if (elm.pga >= ptData.SUMTmp[ptData.SUMTmp.length - 1]) ptData.UpCount++;
-        else ptData.UpCount = 0;
-
-        if (ptData.detectCount == 0 && detect0) {
-          elm.o_arrivalTime = new Date() - Replay;
-          ptData.o_arrivalTime = new Date() - Replay;
-        }
-
-        //連続検出回数（elm.detectは連続検出回数を指標に含み循環になるため、detect0で判定）
-        if (detect0) ptData.detectCount++;
-        else ptData.detectCount = 0;
-      }
-
-      //PGA平均を求めるためのデータ追加
-      ptData.SUMTmp.push(elm.pga);
-      ptData.SUM += elm.pga//合計に最新の値を加算
-      if (ptData.SUMTmp.length > thresholds.historyCount) {
-        ptData.SUM -= ptData.SUMTmp[0];//合計から比較対象から外れる古い値を減算
-        ptData.SUMTmp = ptData.SUMTmp.slice(-thresholds.historyCount);//比較対象から外れる古い値を削除
-      }
-    }
-
-    if (!elm.detect && ptData.Event) {
-      //検出中ではない場合、地震アイテムから観測点データを削除
-      ptData.Event = false;
-      for (const elm2 of EQDetect_List) {
-        elm2.Codes = elm2.Codes.filter(function (elm3) {
-          if (elm3.Code == elm.Code) elm2.last_changed = new Date() - Replay;
-          return elm3.Code !== elm.Code;
-        });
-      }
-    }
-  }
-
-  var MargeRangeTmp, threshold01Tmp, ptData, EQD_ItemTmp;
-  //単独点の検知情報をグルーピング
-  for (const elm of data) {
-    if (elm.detect) {
-      ptData = pointsData[elm.Code];
-
-      if (!ptData.Event) {
-        //すでに自観測点が地震アイテムに属していない場合
-        //都会かどうかで閾値調整
-        MargeRangeTmp = ptData.isCity ? thresholds.MargeRangeC : thresholds.MargeRange;
-
-        //自観測点が地震アイテムの半径+閾値の範囲内に入っている地震アイテムを探す
-        EQD_ItemTmp = EQDetect_List.find(function (elm2) {
-          return turf.distance([elm.Location.Longitude, elm.Location.Latitude], [elm2.lng, elm2.lat]) - elm2.Radius <= MargeRangeTmp;
-        });
-
-        if (EQD_ItemTmp) {
-          //EQD_ItemTmpに属する観測点から、自観測点からの距離が閾値以下の観測点があるか確認
-          //地震アイテムに自観測点を追加
-          var SameST = EQD_ItemTmp.Codes.find(function (elm2) {
-            return elm2.Code == elm.Code;
-          });
-          if (!SameST) {
-            var nearpointslength = 0;
-            var detectPointsLength = 0;
-            data.forEach(function (station) {
-              if (station.data && station.Code !== elm.Code && turf.distance([station.Location.Longitude, station.Location.Latitude], [elm.Location.Longitude, elm.Location.Latitude]) <= 100) {
-                nearpointslength++;
-                if (station.detect) detectPointsLength++;
-              }
-            });
-
-            if (detectPointsLength / nearpointslength > 0.15 || nearpointslength < 1) {
-              EQD_ItemTmp.Codes.push(elm);
-              if (!EQD_ItemTmp.Codes_history.includes(elm.Code)) EQD_ItemTmp.Codes_history.push(elm.Code);
-              ptData.Event = true;
-
-              //最終検知時間（解除時に使用）を更新
-              EQD_ItemTmp.last_Detect = new Date() - Replay;
-              EQD_ItemTmp.last_changed = new Date() - Replay;
-            }
-          }
-        }
-      }
-
-      MargeRangeTmp = elm.isCity ? thresholds.MargeRangeC : thresholds.MargeRange;
-      var nearEvent = EQDetect_List.find(function (EQD_ItemTmp) {
-        return turf.distance([elm.Location.Longitude, elm.Location.Latitude], [EQD_ItemTmp.lng, EQD_ItemTmp.lat]) <= MargeRangeTmp;
-      });
-      if (!ptData.Event && elm.detect2 && !nearEvent) {
-        //自観測点がどの地震アイテムにも属さず、検知レベルがLv.2以上の場合
-        //自観測点を中心とした新規地震アイテム作成
-        EQDetect_List.push({ id: EQDetectID, lat: elm.Location.Latitude, lng: elm.Location.Longitude, lat2: elm.Location.Latitude, lng2: elm.Location.Longitude, Codes: [elm], Codes_history: [elm.Code], Radius: 0, maxPGA: elm.pga, maxInt: elm.shindo, detectCount: 1, Up: false, Lv: 0, last_Detect: new Date() - Replay, last_changed: new Date() - Replay, origin_Time: new Date() - Replay, showed: false, isCity: ptData.isCity });
-        EQDetectID++;
-      }
-    }
-  }
-
-  for (const EQD_ItemTmp of EQDetect_List) {
-    MargeRangeTmp = EQD_ItemTmp.isCity ? thresholds.MargeRangeC : thresholds.MargeRange;
-    var ArroundPoints = data.filter(function (station) {
-      return station.data && turf.distance([station.Location.Longitude, station.Location.Latitude], [EQD_ItemTmp.lng2, EQD_ItemTmp.lat2]) <= MargeRangeTmp;
+const events = new Map();
+const stationStates = new Map();//観測点ごとのワーカー側保持データ
+//データフレームなどの初期化
+async function init() {
+  var Knet_PointsJson = JSON.parse(await readFile(path.join(__dirname, "../Resource/Knet_Points.json")));
+  Knet_PointsJson.forEach((elm) => {
+    if (elm.IsSuspended) return;
+    stationStates.set(elm.Code, {
+      code: elm.Code,
+      lat: elm.Location.Latitude,
+      lon: elm.Location.Longitude,
+      neighborsA: [],    //80km以内の観測点のcode
+      neighborsB: [],  //100km以内・近い順最大8点のcode
+      noiseFloor: null,     //ノイズレベル基準値/初期値null
+      isOnset: false,       //単点検知中フラグ
+      isTriggered: false,   //統合検知中フラグ
+      onsetTime: null, //単点検知時刻
     });
-    threshold01Tmp = EQD_ItemTmp.isCity ? thresholds.threshold01C : thresholds.threshold01;
-    threshold01Tmp = Math.min(Math.max(ArroundPoints.length, 2), threshold01Tmp); //周囲の観測点数に応じて閾値を調整（離島対応）
-    if (EQD_ItemTmp.Codes.length >= threshold01Tmp) {
-      //地震アイテムに属する観測点数が閾値以上なら
-      if (Math.abs(EQD_ItemTmp.last_Detect - (new Date() - Replay)) < 500) {
-        var result = GuessHypocenter(EQD_ItemTmp, data);
-        if (Math.abs(EQD_ItemTmp.lat - result[0].lat) > 0.5) EQD_ItemTmp.lat = result[0].lat;
-        if (Math.abs(EQD_ItemTmp.lng - result[0].lng) > 0.5) EQD_ItemTmp.lng = result[0].lng;
-        if (result[0].rad) EQD_ItemTmp.Radius = result[0].rad;
-      }
+  });
 
-      //情報をmainプロセスへ送信
-      workerThreads.parentPort.postMessage({
-        action: "EQDetectAdd",
-        data: EQD_ItemTmp,
-      });
-      EQD_ItemTmp.showed = true; //新地震アイテムかどうかの判別用
+  for (const a of stationStates.values()) {
+    var neighborsA_Tmp1 = [];
+    var neighborsA_Tmp2 = [];
+    var neighborsB_Tmp = [];
+    for (const b of stationStates.values()) {
+      if (a.code == b.code) continue;
+
+      var dist = distance([a.lon, a.lat], [b.lon, b.lat]);
+      if (dist <= 60) neighborsA_Tmp1.push({ code: b.code, dist: dist });
+      if (dist <= 300) neighborsA_Tmp2.push({ code: b.code, dist: dist });
+
+      if (dist <= 150) neighborsB_Tmp.push({ code: b.code, dist: dist });
     }
+    if (4 <= neighborsA_Tmp1.length) {
+      a.neighborsA = neighborsA_Tmp1.map((x) => x.code);
+    } else {
+      neighborsA_Tmp2.sort((x, y) => x.dist - y.dist)
+      a.neighborsA = neighborsA_Tmp2.slice(0, 4).map((x) => x.code);
+    }
+
+    neighborsB_Tmp.sort((x, y) => x.dist - y.dist);
+    a.neighborsB = neighborsB_Tmp.slice(0, 12).map((x) => x.code);
+  }
+}
+init();
+
+function dataStream(stream) {
+  if (!EEW_Active) {
+    singlePointProcess(stream);
+    const uf = make_union();
+    const groups = groupUnion(uf);
+    update_events(groups, stream.date);
+    cleanup_events(stream.date);
   }
 
-  //地震検知解除
-  EQDetect_List = EQDetect_List.filter(function (elm) {
-    if (EEWNow || new Date() - Replay - elm.origin_Time > thresholds.time00 || new Date() - Replay - elm.last_Detect > thresholds.time01 || elm.Codes.length < elm.Codes_history.length * thresholds.threshold05) {
-      //EEW発令中・発生から閾値以上経過・最後の検知から閾値以上経過・観測点数が最大時より一定割合減少
-      workerThreads.parentPort.postMessage({
-        action: "sendDataToMainWindow",
-        data: {
-          action: "EQDetectFinish",
-          data: elm.id,
-        },
-      });
-      elm.Codes.forEach(function (elm2) {
-        pointsData[elm2.Code].Event = false;
-      });
-      return false
-    } else {
-      return true;
-    }
-  })
-
-  //mainProcessへ情報送信
   workerThreads.parentPort.postMessage({
     action: "PointsData_Update",
-    data: data,
-    date: date,
-    EQDetect_List: EQDetect_List,
+    data: stream.data,
+    date: stream.date,
   });
 }
 
-function GuessHypocenter(EQElm, data) {
-  var o_arrivalTime_min = Infinity;
-  for (const station of EQElm.Codes) {
-    if (o_arrivalTime_min > pointsData[station.Code].o_arrivalTime) o_arrivalTime_min = pointsData[station.Code].o_arrivalTime;
-  }
-  if (EQElm.origin_Time - o_arrivalTime_min < 10000) var originTime = new Date(o_arrivalTime_min - 2000);
-  else var originTime = new Date(EQElm.origin_Time - 6000);
+function singlePointProcess(stream) {
+  if (!stationStates.size) return;
+  var onsetStations = [];
+  stream.data.forEach((st) => {
+    const state = stationStates.get(st.Code);
+    if (!state) return;
 
-  var Tmp = { dif: Infinity };
-  for (let lat = Math.floor(EQElm.lat2) - 3; lat <= Math.floor(EQElm.lat2) + 3; lat++) {
-    for (let lng = Math.floor(EQElm.lng2) - 3; lng <= Math.floor(EQElm.lng2) + 3; lng++) {
-      for (var depth of [10, 40, 100, 300]) {
-        var res = calcDifference(lat, lng, EQElm, data, originTime, depth);
-        if (res) {
-          var item = { lat: lat, lng: lng, dif: res[0], rad: res[1] };
-          if (Tmp.dif > item.dif) Tmp = item;
-        }
-      }
+    //初回でノイズフロア未設定の場合
+    if (state.noiseFloor === null) state.noiseFloor = Math.max(st.shindo, -0.5);
+
+    //単点検知判定
+    //閾値式の検討：https://www.desmos.com/calculator/vkhen3u8cp
+    const onsetTmp =
+      0.17 * state.noiseFloor + 0.85 <= st.shindo - state.noiseFloor &&
+      -1.3 <= st.shindo;
+    if (!state.isOnset && onsetTmp) {
+      state.onsetTime = Number(new Date(stream.date));//単点検知開始時刻
     }
-  }
+    state.isOnset = onsetTmp;
+    st.isOnset = state.isOnset;
+    state.shindo = st.shindo;
 
-  var result = { ...Tmp };
-  for (let lat = Tmp.lat - 0.5; lat <= Tmp.lat + 0.5; lat += 0.2) {
-    for (let lng = Tmp.lng - 0.5; lng <= Tmp.lng + 0.5; lng += 0.2) {
-      for (var depth of [0, 10, 30, 70, 100, 300, 700]) {
-        var res = calcDifference(lat, lng, EQElm, data, originTime, depth);
-        if (res) {
-          var item = { lat: lat, lng: lng, dif: res[0], rad: res[1] };
-          if (result.dif > item.dif) result = item;
-        }
-      }
-    }
-  }
+    //ノイズフロアの更新
+    const a = state.isOnset ? 0.01 : 0.1;//単点検知中はノイズフロアへの影響を小さくする
+    state.noiseFloor = (1 - a) * state.noiseFloor + a * st.shindo;
 
-  return [result, originTime];
-}
+    //統合検知判定の下処理
+    if (state.isOnset) onsetStations.push({ state, st });
+    state.isTriggered = false; //トリガ判定をfalseで初期化 
+  });
 
-var TTT_JMA2001 = JSON.parse(await readFile(path.join(__dirname, "../Resource/TimeTable_JMA2001.json")));
-function calcDifference(lat, lng, stations, data, originTime, dep) {
-  var TimeTable = TTT_JMA2001.s[dep];
-  var f_arrivalTime_min = Infinity;
-  var radius = 0;
-
-  var distance = [];
-  for (const station of stations.Codes) {
-    station.distance = turf.distance([lng, lat], [station.Location.Longitude, station.Location.Latitude]);
-    distance.push(station.distance);
-
-    if (radius < station.distance) radius = station.distance;
-    var index = TimeTable.findIndex(function (elm) {
-      return elm.r >= station.distance;
+  //統合検知判定
+  onsetStations.forEach(({ state, st }) => {
+    let knn_onsetCount = 0;//近隣点の単点検知数
+    state.neighborsB.forEach(b => {
+      const stateb = stationStates.get(b);
+      if (stateb?.isOnset) knn_onsetCount++;
     });
-    if (index >= 0) {
-      var elm0 = TimeTable[Math.max(index - 1, 0)];
-      var elm2 = TimeTable[index];
-      if (elm0.r == station.distance) station.f_arrivalTime = elm0.s;
-      else station.f_arrivalTime = elm0.t + ((elm2.t - elm0.t) * (station.distance - elm0.r)) / (elm2.r - elm0.r);
-      station.o_arrivalTime = pointsData[station.Code].o_arrivalTime;
+    //近傍150km以内の近傍点(最大10点)における単点検知中が２以上あるいは先述の近傍点数と一致
+    let isTriggered = knn_onsetCount >= Math.min(1, state.neighborsB.length);
+    st.isTriggered = state.isTriggered = isTriggered;
+  });
+}
 
-      if (f_arrivalTime_min > station.f_arrivalTime) f_arrivalTime_min = station.f_arrivalTime;
-    } else return null;
+function createUnionFind() {
+  const parent = new Map();
+  function find(x) {
+    if (!parent.has(x)) parent.set(x, x);
+    if (parent.get(x) !== x) {
+      parent.set(x, find(parent.get(x))); // 経路圧縮
+    }
+    return parent.get(x);
   }
-  /*radius = distance.sort((a, b) => {
-    return (a < b) ? -1 : 1;
-  })[Math.abs(distance.length*0.8)];*/
+  function union(x, y) {
+    const rootX = find(x);
+    const rootY = find(y);
+    if (rootX !== rootY) parent.set(rootX, rootY);
+  }
+  return { parent, find, union };
+}
 
-  var Difference = 0;
-  stations.Codes.forEach((station) => {
-    Difference += Math.abs((station.o_arrivalTime - originTime) / 1000 - station.f_arrivalTime - f_arrivalTime_min);
-  });
+function make_union() {
+  function check_travelTime(a, b) {
+    const dt = Math.abs(a.onsetTime - b.onsetTime) / 1000;
+    const dist = distance([a.lon, a.lat], [b.lon, b.lat]);
+    const vs_min = 0.5; //km/s
+    return dt <= dist / vs_min + 5;//震央付近での1sサンプリング周期の影響大に対して10秒の余裕
+  }
 
-  var ArroundPoints = data.filter(function (station) {
-    return station.data && turf.distance([station.Location.Longitude, station.Location.Latitude], [lng, lat]) <= radius;
-  });
+  var uf = createUnionFind();
 
-  Difference = Difference / stations.Codes.length;
-  Difference = Difference / (stations.Codes.length / ArroundPoints.length) ** 2;
-  if (stations.Codes.length / ArroundPoints.length < 0.5) Difference *= 10;
-  if (stations.Codes.length / ArroundPoints.length < 0.3) Difference *= 1000;
+  for (const st of stationStates.values()) {
+    if (!st.isTriggered) continue;//統合検知中の点のみ処理
 
-  return [Difference, radius];
+    //観測点-観測点結合
+    st.neighborsA.forEach((neighborCode) => {
+      const neighbor = stationStates.get(neighborCode);
+      if (
+        neighbor &&
+        st.code != neighbor.code &&
+        st.isTriggered && neighbor.isTriggered &&
+        check_travelTime(st, neighbor)
+      ) {
+        uf.union(st.code, neighbor.code);
+      }
+    });
+
+    //観測点-イベント結合
+    for (const event of events.values()) {
+      event.member.forEach(memberCode => {
+        const member = stationStates.get(memberCode);
+        const isNeighbor = member.neighborsA.includes(st.code) ||
+          st.neighborsA.includes(member.code);//neighborsAは非対称な判定なので両方向で判断する。
+        if (st.code != member.code &&
+          st.isTriggered && member.isTriggered &&
+          isNeighbor &&
+          check_travelTime(st, member)
+        ) {
+          uf.union(st.code, event.id);
+        }
+      });
+    }
+  }
+
+  //イベント-イベント結合
+  if (events.size >= 2) {
+    for (const eventA of events.values()) {
+      if (!eventA) continue;
+      eventA.member.forEach(codeA => {
+        const stA = stationStates.get(codeA);
+        for (const eventB of events.values()) {
+          if (eventA.id >= eventB.id) continue;
+          if (!eventB.member.includes(codeA)) {
+            eventB.member.forEach(codeB => {
+              const stB = stationStates.get(codeB);
+              if (!stA || !stB) return;
+              const isNeighbor = stA.neighborsA.includes(stB.code) ||
+                stB.neighborsA.includes(stA.code);//neighborsAは非対称な判定なので両方向で判断する。
+
+              if (
+                stA != stB &&
+                stA.isTriggered && stB.isTriggered &&
+                isNeighbor &&
+                check_travelTime(stA, stB)
+              ) {
+                uf.union(eventA.id, eventB.id);
+              }
+            });
+          }
+        }
+      });
+    }
+  }
+
+  return uf;
+}
+
+function groupUnion(uf) {
+  var unionGroups = new Map();
+
+  for (var key of uf.parent.keys()) {
+    var root = uf.find(key);
+    if (!unionGroups.has(root)) {
+      unionGroups.set(root, { stations: [], events: [] });
+    }
+    var group = unionGroups.get(root);
+    if (key.startsWith("evt_")) {
+      group.events.push(key);
+    } else {
+      group.stations.push(key);
+    }
+  }
+
+  return unionGroups;
+}
+
+let current_eventId = 0;
+function update_events(groups, date) {
+
+  //イベントの各種パラメータを更新
+  function update_prams(eid) {
+    var event = events.get(eid)
+    var maxInt = event.member.reduce((max, elm) => {
+      const elmShindo = stationStates.get(elm)?.shindo ?? -9;
+      return elmShindo > max ? elmShindo : max
+    }, -Infinity);
+    event.maxInt = maxInt;
+
+    event.active_member = event.member.filter((st) => {
+      const state = stationStates.get(st);
+      return state?.isTriggered
+    });
+
+    //検知中の観測点数3以上になったらイベントを有効化（以降そのまま）
+    if (3 <= event.active_member.length) event.isConfirmed = true;
+
+    //検知レベル
+    event.Prev_Lv = event.Lv;
+    event.Lv = event.maxInt > 2.5 ? 2 : 1;
+  }
+
+
+  function send_event(event) {
+    event.serial++;
+    workerThreads.parentPort.postMessage({
+      action: "EQDetectUpdate",
+      data: {
+        id: event.id,
+        serial: event.serial,
+        maxInt: event.maxInt,
+        member: event.member,
+        active_member: event.active_member,
+        originTime: event.originTime,
+        Lv: event.Lv,
+        Prev_Lv: event.Prev_Lv,
+      },
+    });
+  }
+
+  //UnionをもとにEventを追加・更新
+  for (const val of groups.values()) {
+    var target_event;
+    var event_count = val.events.length;
+    if (event_count == 0) {
+
+      var eid_str = `evt_${current_eventId}`;
+      target_event = {
+        id: eid_str,
+        serial: 0,//送信と同時に++されるので0
+        maxInt: null,//この後一括で設定する
+        member: val.stations,
+        originTime: Number(date),
+        update: Number(date),
+        decayTimer: 0,//この後一括で設定する
+        isConfirmed: false,//条件満たし次第
+        Lv: 0,//この後一括で設定する
+        Prev_Lv: 0,//この後一括で設定する
+      };
+      events.set(eid_str, target_event);
+
+      current_eventId++;
+    } else {//複数のイベントがUnion内にある
+      const minEID = val.events.reduce((a, b) => a.replace('evt_', '') - b.replace('evt_', '') < 0 ? a : b);
+      target_event = events.get(minEID);//複数イベントのうち、残すイベント（最も若いID）
+
+      val.stations.forEach(code => {//新規検知点の重複なし追加
+        if (!target_event.member.includes(code)) {
+          target_event.member.push(code)
+          target_event.update = Number(date);
+        }
+      });
+
+      val.events.forEach(codeA => {//既存イベント内点の重複なし追加
+        if (codeA == minEID) return;
+        var eventA = events.get(codeA);
+        if (!eventA) return;
+        eventA.member.forEach(codeB => {
+          if (!target_event.member.includes(codeB)) {
+            target_event.member.push(codeB)
+            target_event.update = Number(date);
+          }
+        })
+      });
+
+      val.events.forEach(eidToDel => {
+        if (minEID != eidToDel) {
+          var event = events.get(eidToDel);
+          if (event?.isConfirmed) {
+            workerThreads.parentPort.postMessage({
+              action: "EQDetectFinish",
+              id: eidToDel,
+            });
+          }
+          events.delete(eidToDel);
+        }
+      });
+    }
+
+    update_prams(target_event.id);
+    if (target_event.isConfirmed) send_event(target_event);
+
+  }
+}
+
+function cleanup_events(date) {
+  for (const event of events.values()) {
+
+    //event.active_memberは古いので再計算
+    let active_member = event.member.filter((st) => {
+      const state = stationStates.get(st);
+      return state?.isTriggered
+    });
+    if (4 > active_member.length) event.decayTimer++;
+    else event.decayTimer = 0;
+
+    if (
+      (10 <= event.decayTimer &&
+        30000 <= date - event.update) ||
+      300000 <= date - event.originTime
+    ) {
+      events.delete(event.id);
+      if (event.isConfirmed) {
+        workerThreads.parentPort.postMessage({
+          action: "EQDetectFinish",
+          id: event.id,
+        });
+      }
+    }
+  }
+}
+
+function clearAllEvents() {
+  for (const event of events.values()) {
+    events.delete(event.id);
+    if (event.isConfirmed) {
+      workerThreads.parentPort.postMessage({
+        action: "EQDetectFinish",
+        id: event.id,
+      });
+    }
+  }
 }

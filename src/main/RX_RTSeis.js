@@ -15,10 +15,6 @@ import { messageToMainWindow, messageToWorkerWindow, PlayAudio, CreateMainWindow
 import { EarlyEst_Marge } from "./PROC_EEW.js";
 
 export var worker = null;
-export var thresholds;
-export function setThresholds(t) { thresholds = t; }
-export var EQDetect_List = [];
-export function clearEQDetectList() { EQDetect_List = []; }
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -80,7 +76,6 @@ export function TREMRTS_Replay() {
   if (Replay == 0) return;
 
   var Time10Dig = Math.floor((new Date() - Replay) / 1000);
-  console.log(`https://api.core.exptech.dev/api/v3/trem/rts/${Time10Dig}`);
   fetch(
     `https://api.core.exptech.dev/api/v3/trem/rts/${Time10Dig}`,
     { signal: AbortSignal.timeout(4000) }
@@ -328,26 +323,27 @@ export function createWorker() {
   worker = new workerThreads.Worker(path.join(__dirname, "../js/EQDetectWorker.js"));
   worker.on("message", (message) => {
     switch (message.action) {
-      case "EQDetectAdd":
-        var EQD_ItemTmp = message.data;
-        var LvTmp = EQD_ItemTmp.maxPGA > 1.3 ? 2 : 1;
+      case "EQDetectUpdate":
+        var event = message.data;
 
-        if (config.Info.RealTimeShake.noticeLv <= LvTmp) {
-          if (EQD_ItemTmp.showed) {//続報時
-            if (LvTmp == 2 && EQD_ItemTmp.Lv == 1) {
+        if (config.Info.RealTimeShake.noticeLv <= event.Lv) {
+          if (event.serial > 1) {//続報時
+            if (event.Lv == 2 && event.Prev_Lv == 1) {
               //既存イベントのレベルが上がったときの通知音
               PlayAudio("EQDetectLv2");
             }
-          } else if (LvTmp == 2) {//初報時・大
+          } else if (event.Lv == 2) {//初報時・Lv2
             PlayAudio("EQDetectLv2");
             CreateMainWindow();
-          } else if (LvTmp == 1) {//初報時・小
+          } else if (event.Lv == 1) {//初報時・Lv1
             PlayAudio("EQDetectLv1");
             CreateMainWindow();
           }
         }
-        EQD_ItemTmp.Lv = LvTmp;
-        messageToMainWindow({ action: "EQDetect", data: message.data });
+        messageToMainWindow({ action: "EQDetectUpdate", data: message.data });
+        break;
+      case "EQDetectFinish":
+        messageToMainWindow({ action: "EQDetectFinish", id: message.id });
         break;
       case "sendDataToMainWindow":
         messageToMainWindow(message.data);
@@ -355,16 +351,12 @@ export function createWorker() {
       case "sendDataToWorkerWindow":
         messageToWorkerWindow(message.data);
         break;
-      case "thresholds":
-        thresholds = message.data;
-        break;
       case "PointsData_Update":
-        EQDetect_List = message.EQDetect_List;
         kmoniPointsDataTmp = {
           action: "kmoniUpdate",
           timestamp: new Date(message.date),
           LocalTime: new Date(),
-          data: message,
+          data: message.data,
         };
         messageToMainWindow(kmoniPointsDataTmp);
         break;
@@ -381,7 +373,7 @@ export function ConvertKmoni(data, date) {
     action: "EQDetect",
     data: data,
     date: date,
-    detect: config.Info.RealTimeShake.DetectEarthquake,
+    enabled: config.Info.RealTimeShake.DetectEarthquake,
   });
 }
 
