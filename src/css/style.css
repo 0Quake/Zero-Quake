@@ -418,7 +418,37 @@ h2 {
 .EEWWrap.EarlyEst .alertflg {
   display: none;
 }
-
+.EQDItem h2 {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+#EQD_sample_circle{
+  display: inline-block;
+  position: relative;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  vertical-align: sub;
+  border: dashed 2px #0000;
+}
+#EQD_sample_circle div{
+  position: absolute;
+  inset: 0;
+  opacity: 0.3;
+}
+.EQDItem.lv1 #EQD_sample_circle{
+  border-color: var(--TsunamiWatchColor);
+}
+.EQDItem.lv2 #EQD_sample_circle{
+  border-color: var(--TsunamiWarningColor);
+}
+.EQDItem.lv1 #EQD_sample_circle div{
+  background: var(--TsunamiWatchColor);
+}
+.EQDItem.lv2 #EQD_sample_circle div{
+  background: var(--TsunamiWarningColor);
+}
 .EQDItem.lv1 h2::after {
   content: " 弱い検知";
 }

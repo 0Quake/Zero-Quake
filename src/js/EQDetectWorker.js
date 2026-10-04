@@ -45,7 +45,6 @@ async function init() {
       lat: elm.Location.Latitude,
       lon: elm.Location.Longitude,
       neighborsA: [],    //80km以内の観測点のcode
-      neighborsB: [],  //100km以内・近い順最大8点のcode
       noiseFloor: null,     //ノイズレベル基準値/初期値null
       isOnset: false,       //単点検知中フラグ
       isTriggered: false,   //統合検知中フラグ
@@ -56,25 +55,20 @@ async function init() {
   for (const a of stationStates.values()) {
     var neighborsA_Tmp1 = [];
     var neighborsA_Tmp2 = [];
-    var neighborsB_Tmp = [];
     for (const b of stationStates.values()) {
       if (a.code == b.code) continue;
 
       var dist = distance([a.lon, a.lat], [b.lon, b.lat]);
       if (dist <= 60) neighborsA_Tmp1.push({ code: b.code, dist: dist });
       if (dist <= 300) neighborsA_Tmp2.push({ code: b.code, dist: dist });
-
-      if (dist <= 150) neighborsB_Tmp.push({ code: b.code, dist: dist });
     }
     if (4 <= neighborsA_Tmp1.length) {
+      neighborsA_Tmp1.sort((x, y) => x.dist - y.dist)
       a.neighborsA = neighborsA_Tmp1.map((x) => x.code);
     } else {
       neighborsA_Tmp2.sort((x, y) => x.dist - y.dist)
       a.neighborsA = neighborsA_Tmp2.slice(0, 4).map((x) => x.code);
     }
-
-    neighborsB_Tmp.sort((x, y) => x.dist - y.dist);
-    a.neighborsB = neighborsB_Tmp.slice(0, 12).map((x) => x.code);
   }
 }
 init();
@@ -108,8 +102,8 @@ function singlePointProcess(stream) {
     //単点検知判定
     //閾値式の検討：https://www.desmos.com/calculator/vkhen3u8cp
     const onsetTmp =
-      0.17 * state.noiseFloor + 0.85 <= st.shindo - state.noiseFloor &&
-      -1.3 <= st.shindo;
+      1.19 * state.noiseFloor + 0.95 <= st.shindo &&
+      -1.5 <= st.shindo;
     if (!state.isOnset && onsetTmp) {
       state.onsetTime = Number(new Date(stream.date));//単点検知開始時刻
     }
@@ -118,23 +112,29 @@ function singlePointProcess(stream) {
     state.shindo = st.shindo;
 
     //ノイズフロアの更新
-    const a = state.isOnset ? 0.01 : 0.1;//単点検知中はノイズフロアへの影響を小さくする
+    const a = state.isTriggered ? 0.005 : 0.1;//単点検知中はノイズフロアへの影響を小さくする
     state.noiseFloor = (1 - a) * state.noiseFloor + a * st.shindo;
 
     //統合検知判定の下処理
     if (state.isOnset) onsetStations.push({ state, st });
+    state.Prev_isTriggered = state.isTriggered;//値渡し
     state.isTriggered = false; //トリガ判定をfalseで初期化 
   });
 
   //統合検知判定
   onsetStations.forEach(({ state, st }) => {
-    let knn_onsetCount = 0;//近隣点の単点検知数
-    state.neighborsB.forEach(b => {
-      const stateb = stationStates.get(b);
-      if (stateb?.isOnset) knn_onsetCount++;
-    });
-    //近傍150km以内の近傍点(最大10点)における単点検知中が２以上あるいは先述の近傍点数と一致
-    let isTriggered = knn_onsetCount >= Math.min(1, state.neighborsB.length);
+    let isTriggered = false;
+    if (state.Prev_isTriggered) {
+      isTriggered = true;
+    } else {
+      let knn_onsetCount = 0;//近隣点の単点検知数
+      state.neighborsA.forEach(b => {
+        const stateb = stationStates.get(b);
+        if (stateb?.isOnset) knn_onsetCount++;
+      });
+      //近傍150km以内の近傍点(最大10点)における単点検知中が２以上あるいは先述の近傍点数と一致
+      isTriggered = state.neighborsA.length / knn_onsetCount <= 30;
+    }
     st.isTriggered = state.isTriggered = isTriggered;
   });
 }
