@@ -1475,7 +1475,7 @@ function kmoniMapUpdate(dataTmp, type) {
   }
 }
 function generatePopupContent_K(params) {
-  if (!map?.isStyleLoaded()) return "";
+  if (!map?.style?._loaded) return "";
   var targetSource = (params.Type == "S-net" || params.Type == "Sagami") ? "snet_points" : "knet_points";
   var state = map.getFeatureState({ source: targetSource, id: params.Code });
 
@@ -1486,7 +1486,7 @@ function generatePopupContent_K(params) {
 }
 
 function generatePopupContent_TREM(params) {
-  if (!map?.isStyleLoaded()) return "";
+  if (!map?.style?._loaded) return "";
   var state = map.getFeatureState({ source: "TREMRTS_points", id: params.Code });
 
   var shindoColor = NormalizeShindo(state.shindo, 2);
@@ -1530,7 +1530,7 @@ function TREMRTSUpdate(dataTmp) {
 }
 
 function generatePopupContent_SEISJS(params) {
-  if (!map?.isStyleLoaded()) return "";
+  if (!map?.style?._loaded) return "";
   var state = map.getFeatureState({ source: "SEISJS_points", id: params.Code });
 
   var shindoColor = NormalizeShindo(state.shindo, 2);
@@ -1580,7 +1580,7 @@ setInterval(function () {
   Object.keys(SeisJS_LastUpdate).forEach(function (key) {
     var val = SeisJS_LastUpdate[key];
     if (new Date() - val > 2000) {
-      if (map?.isStyleLoaded()) {
+      if (map?.style?._loaded) {
         map.setFeatureState(
           {
             source: "SEISJS_points",
@@ -1597,7 +1597,7 @@ setInterval(function () {
   Object.keys(TREMRTS_LastUpdate).forEach(function (key) {
     var val = TREMRTS_LastUpdate[key];
     if (new Date() - val > 2000) {
-      if (map?.isStyleLoaded()) {
+      if (map?.style?._loaded) {
         map.setFeatureState(
           {
             source: "TREMRTS_points",
