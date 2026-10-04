@@ -71,8 +71,8 @@
     "@turf/turf": "^7.4.0",
     "electron-store": "^11.0.2",
     "eventsource": "^5.1.2",
-    "jsdom": "^30.1.1",
-    "maplibre-gl": "^6.11.2",
+    "jsdom": "^30.1.2",
+    "maplibre-gl": "^6.12.0",
     "pmtiles": "^4.5.0"
   }
 }
