@@ -760,7 +760,6 @@ function EQDetectUpdate(data) {
         'line-dasharray': [2, 2]
       },
     });
-    map.panTo([data.lng, data.lat], { animate: false });
     map.fitBounds(turf.bbox(_ellipse), {
       maxZoom: 7,
       animate: false,
