@@ -367,12 +367,13 @@ function cleanup_events(date) {
       const state = stationStates.get(st);
       return state?.isTriggered
     });
-    if (4 > active_member.length) event.decayTimer++;
+    if (3 > active_member.length) event.decayTimer++;
     else event.decayTimer = 0;
 
     if (
-      (10 <= event.decayTimer &&
-        30000 <= date - event.update) ||
+      10 <= event.decayTimer ||
+      //  30000 <= date - event.update) ||
+      active_member.length / event.member.length < 0.2 ||
       300000 <= date - event.originTime
     ) {
       events.delete(event.id);
