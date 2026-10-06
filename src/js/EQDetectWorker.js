@@ -44,7 +44,7 @@ async function init() {
       code: elm.Code,
       lat: elm.Location.Latitude,
       lon: elm.Location.Longitude,
-      neighborsA: [],    //80km以内の観測点のcode
+      neighborsA: [],    //60km以内or近傍4点の観測点
       noiseFloor: null,     //ノイズレベル基準値/初期値null
       isOnset: false,       //単点検知中フラグ
       isTriggered: false,   //統合検知中フラグ
@@ -106,14 +106,14 @@ function singlePointProcess(stream) {
       -1.5 <= st.shindo ||
       2.5 <= st.shindo;
     if (!state.isOnset && onsetTmp) {
-      state.onsetTime = Number(new Date(stream.date));//単点検知開始時刻
+      state.onsetTime = Number(stream.date);//単点検知開始時刻
     }
     state.isOnset = onsetTmp;
     st.isOnset = state.isOnset;
     state.shindo = st.shindo;
 
     //ノイズフロアの更新
-    const a = state.isTriggered ? 0.005 : 0.1;//単点検知中はノイズフロアへの影響を小さくする
+    const a = state.isTriggered ? 0.005 : 0.1;//統合検知中はノイズフロアへの影響を小さくする
     state.noiseFloor = (1 - a) * state.noiseFloor + a * st.shindo;
 
     //統合検知判定の下処理
@@ -162,7 +162,7 @@ function make_union() {
     const dt = Math.abs(a.onsetTime - b.onsetTime) / 1000;
     const dist = distance([a.lon, a.lat], [b.lon, b.lat]);
     const vs_min = 0.5; //km/s
-    return dt <= dist / vs_min + 5;//震央付近での1sサンプリング周期の影響大に対して10秒の余裕
+    return dt <= dist / vs_min + 5;//震央付近での1sサンプリング周期の影響大に対して5秒の余裕
   }
 
   var uf = createUnionFind();
