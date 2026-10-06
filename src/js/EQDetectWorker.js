@@ -44,7 +44,8 @@ async function init() {
       code: elm.Code,
       lat: elm.Location.Latitude,
       lon: elm.Location.Longitude,
-      neighborsA: [],    //60km以内or近傍4点の観測点
+      neighborsA: new Map(),    //近傍点A:60km以内or近傍4点の観測点
+      neighborsA_Pair: new Map(),    //近傍点Aペア:近傍点Aおよび自点が近傍点Aにあたる点
       noiseFloor: null,     //ノイズレベル基準値/初期値null
       isOnset: false,       //単点検知中フラグ
       isTriggered: false,   //統合検知中フラグ
@@ -59,22 +60,30 @@ async function init() {
       if (a.code == b.code) continue;
 
       var dist = distance([a.lon, a.lat], [b.lon, b.lat]);
-      if (dist <= 60) neighborsA_Tmp1.push({ code: b.code, dist: dist });
-      if (dist <= 300) neighborsA_Tmp2.push({ code: b.code, dist: dist });
+      if (dist <= 60) neighborsA_Tmp1.push({ st: b, dist: dist });
+      if (dist <= 300) neighborsA_Tmp2.push({ st: b, dist: dist });
     }
+    var neighborsA_array;
     if (4 <= neighborsA_Tmp1.length) {
       neighborsA_Tmp1.sort((x, y) => x.dist - y.dist)
-      a.neighborsA = neighborsA_Tmp1.map((x) => x.code);
+      neighborsA_array = neighborsA_Tmp1;
     } else {
       neighborsA_Tmp2.sort((x, y) => x.dist - y.dist)
-      a.neighborsA = neighborsA_Tmp2.slice(0, 4).map((x) => x.code);
+      neighborsA_array = neighborsA_Tmp2.slice(0, 4);
+    }
+    for (const { st, dist } of neighborsA_array) {
+      a.neighborsA.set(st.code, { st: st, dist: dist });
+
+      //双方向参照
+      a.neighborsA_Pair.set(st.code, { st: st, dist: dist });
+      st.neighborsA_Pair.set(a.code, { st: a, dist: dist });
     }
   }
 }
 init();
 
 function dataStream(stream) {
-  if (!EEW_Active) {
+  if (!EEW_Active && !stream.enabled) {
     singlePointProcess(stream);
     const uf = make_union();
     const groups = groupUnion(uf);
@@ -129,12 +138,12 @@ function singlePointProcess(stream) {
       isTriggered = true;
     } else {
       let knn_onsetCount = 0;//近隣点の単点検知数
-      state.neighborsA.forEach(b => {
-        const stateb = stationStates.get(b);
+      state.neighborsA.values().forEach(b => {
+        const stateb = stationStates.get(b.st.code);
         if (stateb?.isOnset) knn_onsetCount++;
       });
       //近傍点Aにおける単点検知中点の割合で判定
-      isTriggered = knn_onsetCount / state.neighborsA.length >= 0.07;
+      isTriggered = knn_onsetCount / state.neighborsA.size >= 0.07;
     }
     st.isTriggered = state.isTriggered = isTriggered;
   });
@@ -158,9 +167,9 @@ function createUnionFind() {
 }
 
 function make_union() {
-  function check_travelTime(a, b) {
+  function check_travelTime(a, b, dist) {
     const dt = Math.abs(a.onsetTime - b.onsetTime) / 1000;
-    const dist = distance([a.lon, a.lat], [b.lon, b.lat]);
+    //dist = dist ? dist : distance([a.lon, a.lat], [b.lon, b.lat]);//distが与えられない場合計算
     const vs_min = 0.5; //km/s
     return dt <= dist / vs_min + 5;//震央付近での1sサンプリング周期の影響大に対して5秒の余裕
   }
@@ -171,32 +180,31 @@ function make_union() {
     if (!st.isTriggered) continue;//統合検知中の点のみ処理
 
     //観測点-観測点結合
-    st.neighborsA.forEach((neighborCode) => {
-      const neighbor = stationStates.get(neighborCode);
+    st.neighborsA.values().forEach((neighbor) => {
       if (
-        neighbor &&
-        st.code != neighbor.code &&
-        st.isTriggered && neighbor.isTriggered &&
-        check_travelTime(st, neighbor)
+        neighbor.st &&
+        st.code != neighbor.st.code &&
+        st.isTriggered && neighbor.st.isTriggered &&
+        check_travelTime(st, neighbor.st, neighbor.dist)
       ) {
-        uf.union(st.code, neighbor.code);
+        uf.union(st.code, neighbor.st.code);
       }
     });
 
     //観測点-イベント結合
     for (const event of events.values()) {
-      event.member.forEach(memberCode => {
+      for (const memberCode of event.member) {
         const member = stationStates.get(memberCode);
-        const isNeighbor = member.neighborsA.includes(st.code) ||
-          st.neighborsA.includes(member.code);//neighborsAは非対称な判定なので両方向で判断する。
+        const Pair = member.neighborsA_Pair.get(st.code);//neighborsAは非対称な判定なので両方向で判断する。
         if (st.code != member.code &&
           st.isTriggered && member.isTriggered &&
-          isNeighbor &&
-          check_travelTime(st, member)
+          Pair &&
+          check_travelTime(st, member, Pair.dist)
         ) {
           uf.union(st.code, event.id);
+          break;
         }
-      });
+      }
     }
   }
 
@@ -212,14 +220,13 @@ function make_union() {
             eventB.member.forEach(codeB => {
               const stB = stationStates.get(codeB);
               if (!stA || !stB) return;
-              const isNeighbor = stA.neighborsA.includes(stB.code) ||
-                stB.neighborsA.includes(stA.code);//neighborsAは非対称な判定なので両方向で判断する。
+              const Pair = stA.neighborsA_Pair.get(stB.code);//neighborsAは非対称な判定なので両方向で判断する。
 
               if (
                 stA != stB &&
                 stA.isTriggered && stB.isTriggered &&
-                isNeighbor &&
-                check_travelTime(stA, stB)
+                Pair &&
+                check_travelTime(stA, stB, Pair.dist)
               ) {
                 uf.union(eventA.id, eventB.id);
               }
