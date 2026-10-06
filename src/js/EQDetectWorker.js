@@ -102,8 +102,9 @@ function singlePointProcess(stream) {
     //単点検知判定
     //閾値式の検討：https://www.desmos.com/calculator/vkhen3u8cp
     const onsetTmp =
-      1.19 * state.noiseFloor + 0.95 <= st.shindo &&
-      -1.5 <= st.shindo;
+      1.19 * state.noiseFloor + 1.0 <= st.shindo &&
+      -1.5 <= st.shindo ||
+      2.5 <= st.shindo;
     if (!state.isOnset && onsetTmp) {
       state.onsetTime = Number(new Date(stream.date));//単点検知開始時刻
     }
@@ -132,8 +133,8 @@ function singlePointProcess(stream) {
         const stateb = stationStates.get(b);
         if (stateb?.isOnset) knn_onsetCount++;
       });
-      //近傍150km以内の近傍点(最大10点)における単点検知中が２以上あるいは先述の近傍点数と一致
-      isTriggered = state.neighborsA.length / knn_onsetCount <= 30;
+      //近傍点Aにおける単点検知中点の割合で判定
+      isTriggered = knn_onsetCount / state.neighborsA.length >= 0.07;
     }
     st.isTriggered = state.isTriggered = isTriggered;
   });
@@ -373,7 +374,7 @@ function cleanup_events(date) {
     if (
       10 <= event.decayTimer ||
       //  30000 <= date - event.update) ||
-      active_member.length / event.member.length < 0.2 ||
+      (active_member.length / event.member.length < 0.2 && active_member.length < 5) ||
       300000 <= date - event.originTime
     ) {
       events.delete(event.id);
