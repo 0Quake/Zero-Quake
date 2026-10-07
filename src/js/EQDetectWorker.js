@@ -6,21 +6,15 @@ import { distance } from "@turf/turf";
 
 var __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-var EEW_Active = false; //EEW発令中かどうか
-
 workerThreads.parentPort.on("message", (message) => {
   switch (message.action) {
     case "EQDetect"://観測点ごとのデータを毎秒受信
       dataStream({
         data: message.data,
         date: Number(new Date(message.date)),
-        enabled: message.enabled
+        enabled: message.enabled,
+        EEW_Active: message.EEW_Active
       });
-      break;
-    case "EEW_Active":
-      //気象庁のEEW入電時に全イベントを破棄し検知処理を一時停止
-      EEW_Active = message.data;
-      clearAllEvents();
       break;
     case "Replay":
       //リプレイオフセットの変更（０含む）時に既存イベントを全破棄
@@ -83,13 +77,17 @@ async function init() {
 init();
 
 function dataStream(stream) {
-  if (!EEW_Active && !stream.enabled) {
+  if (stream.enabled) {
     singlePointProcess(stream);
-    const uf = make_union();
-    const groups = groupUnion(uf);
-    update_events(groups, stream.date);
-    cleanup_events(stream.date);
+    if (stream.EEW_Active) {
+      clearAllEvents();
+    } else {
+      const uf = make_union();
+      const groups = groupUnion(uf);
+      update_events(groups, stream.date);
+    }
   }
+  cleanup_events(stream.date);
 
   workerThreads.parentPort.postMessage({
     action: "PointsData_Update",

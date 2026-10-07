@@ -12,7 +12,7 @@ import { EventSource } from 'eventsource';
 
 import { throttle, NormalizeDate, KmoniColorTable, Boolean2, FERegion, ConvertJST, ConvertUTC, newDate2, ParseJSON } from "./constants.js";
 import { messageToMainWindow, messageToWorkerWindow, PlayAudio, CreateMainWindow } from "./windows.js";
-import { EarlyEst_Marge } from "./PROC_EEW.js";
+import { EarlyEst_Marge, EEW_Active } from "./PROC_EEW.js";
 
 export var worker = null;
 
@@ -374,6 +374,7 @@ export function ConvertKmoni(data, date) {
     data: data,
     date: date,
     enabled: config.Info.RealTimeShake.DetectEarthquake,
+    EEW_Active: EEW_Active.length > 0
   });
 }
 
