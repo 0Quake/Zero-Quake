@@ -188,13 +188,22 @@ function NormalizeShindo(str, responseType) {
 
 document.querySelectorAll("input[type=number]").forEach(function (elm) {
   elm.addEventListener("change", function () {
-    var max = this.getAttribute("max");
-    if (Number(max) < Number(this.value)) this.value = max;
-    var min = this.getAttribute("min");
-    if (Number(min) > Number(this.value)) this.value = min;
-    var step = this.getAttribute("step");
-    if (Number(this.value) % Number(step) !== 0) {
-      this.value = Math.floor(this.value / step) * step;
+    if (!elm?.value || isNaN(elm?.value)) {
+      elm.value = 0;
+      return;
+    }
+    var val = Number(this?.value);
+    if (elm.hasAttribute("max")) {
+      var max = Number(elm.getAttribute("max"));
+      if (!isNaN(max) && max < val) {
+        elm.value = max;
+      }
+    }
+    if (elm.hasAttribute("min")) {
+      var min = Number(elm.getAttribute("min"));
+      if (!isNaN(min) && min > val) {
+        elm.value = min;
+      }
     }
   });
 });
