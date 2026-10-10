@@ -1119,15 +1119,15 @@
                             <table class="sampleTextTable">
                                 <tr>
                                     <td>呼びかけ</td>
-                                    <td>{max_grade}が発表されました。[直ちに逃げてください。直ちに逃げてください。]</td>
+                                    <td>{test}{training}{max_grade}が発表されました。[直ちに逃げてください。直ちに逃げてください。]</td>
                                 </tr>
                                 <tr>
                                     <td>一般向け</td>
-                                    <td>{max_grade}が発表されました。{headline}[{home_area}には{home_grade}が発表されています。{immediately}{home_area}には、{first_height1}{max_height1}が予想されます。]</td>
+                                    <td>{test}{training}{max_grade}が発表されました。{headline}[{home_area}には{home_grade}が発表されています。{immediately}{home_area}には、{first_height1}{max_height1}が予想されます。]</td>
                                 </tr>
                                 <tr>
                                     <td>詳細</td>
-                                    <td>{max_grade}。{max_grade}。[{home_area}には{home_grade}が発表されています。{home_area}への{first_height2}、最大波予想は{max_height2}です。{immediately}]{report_time}発表。</td>
+                                    <td>{test}{training}{max_grade}。{max_grade}。[{home_area}には{home_grade}が発表されています。{home_area}への{first_height2}、最大波予想は{max_height2}です。{immediately}]{report_time}発表。</td>
                                 </tr>
                                 <tr>
                                     <td>解除・失効</td>
@@ -1150,6 +1150,18 @@
                                     <th>意味</th>
                                     <th>とりうる値</th>
                                 </tr>
+
+                                <tr>
+                                    <td>{test}</td>
+                                    <td>試験報かどうか</td>
+                                    <td>"試験報、", ""</td>
+                                </tr>
+                                <tr>
+                                    <td>{training}</td>
+                                    <td>訓練報かどうか</td>
+                                    <td>"訓練報、", ""</td>
+                                </tr>
+
                                 <tr>
                                     <td>{max_grade}</td>
                                     <td>震央地名</td>

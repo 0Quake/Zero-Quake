@@ -211,6 +211,9 @@ export function GenerateTsunamiText(data) {
       if (grades[key]) grade_arr.push(grades_JA[key]);
     });
 
+    text = text.replaceAll("{test}", data.status == "試験" ? "試験報、" : "");
+    text = text.replaceAll("{training}", data.status == "訓練" ? "訓練報、" : "");
+
     text = text.replaceAll("{max_grade}", grade_arr[0] || "津波情報");
     text = text.replaceAll("{all_grade}", grade_arr[0] ? grade_arr.join("、") : "津波情報");
     text = text.replaceAll("{report_time}", data.issue.time ? NormalizeDate(9, data.issue.time) : "不明な時刻");
