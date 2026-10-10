@@ -141,7 +141,7 @@ function singlePointProcess(stream) {
         if (stateb?.isOnset) knn_onsetCount++;
       });
       //近傍点Aにおける単点検知中点の割合で判定
-      isTriggered = knn_onsetCount / state.neighborsA.size >= 0.07;
+      isTriggered = knn_onsetCount / state.neighborsA.size >= 0.08;
     }
     st.isTriggered = state.isTriggered = isTriggered;
   });
