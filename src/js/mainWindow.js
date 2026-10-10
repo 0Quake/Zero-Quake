@@ -2184,20 +2184,20 @@ function tsunamiDataUpdate(data) {
           var st = tsunamiStations[elm2.code];
           if (st) {
             if (elm2.omaxHeight) {
-              var omaxHeight = Number(
+              var omaxHeightNum = Number(
                 elm2.omaxHeight.replace("m", "").replace("以上", "")
               );
 
-              if (omaxHeight < 0.2) {
+              if (omaxHeightNum < 0.2) {
                 var classname = "TsunamiST02";
                 var color = config.color.Tsunami.TsunamiYohoColor;
-              } else if (omaxHeight <= 1) {
+              } else if (omaxHeightNum <= 1) {
                 var classname = "TsunamiST10";
                 var color = config.color.Tsunami.TsunamiWatchColor;
-              } else if (omaxHeight <= 3) {
+              } else if (omaxHeightNum <= 3) {
                 var classname = "TsunamiST30";
                 var color = config.color.Tsunami.TsunamiWarningColor;
-              } else if (omaxHeight > 3) {
+              } else if (omaxHeightNum > 3) {
                 var classname = "TsunamiST99";
                 var color = config.color.Tsunami.TsunamiMajorWarningColor;
               }
@@ -2235,6 +2235,12 @@ function tsunamiDataUpdate(data) {
                 if (elm2.firstHeightInitial) {
                   omaxHeight = `${elm2.omaxHeight} ${elm2.firstHeightInitial}`;
                 }
+              } else if (String(elm2.maxHeightCondition).includes("観測中")) {
+                omaxHeight = "観測中";
+              } else if (String(elm2.maxHeightCondition).includes("微弱")) {
+                omaxHeight = "微弱";
+              } else if (String(elm2.maxHeightCondition).includes("欠測")) {
+                omaxHeight = "欠測";
               } else if (elm2.maxHeightCondition) {
                 omaxHeight = elm2.maxHeightCondition;
               }
@@ -2246,12 +2252,21 @@ function tsunamiDataUpdate(data) {
               if (omaxHeight) omaxHeight = `観測最大波：${omaxHeight}`;
               if (elm2.maxHeightRising) omaxHeight += " （上昇中）";
 
-              if (elm2.ArrivedTime) ArrivedTime = `第１波観測時刻：${NormalizeDate(10, elm2.ArrivedTime)}`;
-              else if (elm2.Condition == "第１波の到達を確認") ArrivedTime = "第1波到達";
-              else if (elm2.Condition == "津波到達中と推測") ArrivedTime = "津波到達中と推測";
-              else if (elm2.firstHeightCondition == "第１波識別不能") ArrivedTime = "第1波識別不能";
+              if (elm2.ArrivedTime) {
+                ArrivedTime = `第１波観測時刻：${NormalizeDate(10, elm2.ArrivedTime)}`;
+              } else if (elm2.firstHeightCondition == "欠測") {
+                ArrivedTime = "第1波欠測";
+              } else if (elm2.Condition == "第１波の到達を確認") {
+                ArrivedTime = "第1波到達";
+              } else if (elm2.Condition == "津波到達中と推測") {
+                ArrivedTime = "津波到達中と推測";
+              } else if (elm2.firstHeightCondition == "第１波識別不能") {
+                ArrivedTime = "第1波識別不能";
+              }
 
-              if (elm2.firstHeightInitial) ArrivedTime += ` ${elm2.firstHeightInitial}`;
+              if (elm2.firstHeightInitial && ArrivedTime) {
+                ArrivedTime += ` ${elm2.firstHeightInitial}`;
+              }
               if (elm2.ArrivalTime) arrivalTime = `第1波予想：${NormalizeDate(10, elm2.ArrivalTime)}`;
 
               var content = [arrivalTime, omaxHeight, ArrivedTime, HighTideDateTime, condition]
@@ -2313,7 +2328,7 @@ function tsunamiDataUpdate(data) {
 var EQinfo_Index = 0;
 EQInfoLink.addEventListener("click", function (e) {
   e.preventDefault();
-  if (EQInfoLink?.dataset?.eventid) return;
+  if (!EQInfoLink?.dataset?.eventid) return;
   var EIDs = EQInfoLink.dataset.eventid.split(",");
   EIDs.forEach(function (elm, index) {
     if (elm) var EQItemElm = document.querySelector(elm);
@@ -2388,16 +2403,35 @@ function tsunamiPopup(e) {
         var firstCondition = "";
         if (elm.firstHeight) {
           firstWave = `<div>第１波予想:${NormalizeDate(10, elm.firstHeight)}</div>`;
+          if (elm.firstHeightCondition == "早いところでは既に津波到達と推定") {
+            firstCondition = "<div>早いところでは到達と推定</div>";
+          } else if (elm.firstHeightCondition) {
+            firstCondition = `<div>${elm.firstHeightCondition}</div>`;
+          }
+        } else if (elm.firstHeightCondition) {
+          if (elm.firstHeightCondition == "第１波の到達を確認") {
+            firstWave = "<div>第１波:到達</div>";
+          } else if (elm.firstHeightCondition == "津波到達中と推測") {
+            firstWave = "<div>第１波:到達中と推測</div>";
+          } else {
+            firstWave = `<div>第１波:${elm.firstHeightCondition}</div>`;
+          }
         }
 
-        if (elm.maxHeight) maxWave = `<div>最大波予想:${elm.maxHeight}</div>`;
-        else if (elm.grade == "Yoho") maxWave = "<div>最大波予想:若干の海面変動</div>";
-
-        if (elm.firstHeightCondition) {
-          firstCondition = `<div>${elm.firstHeightCondition}</div>`;
+        if (elm.maxHeight) {
+          var maxHeight = String(elm.maxHeight);
+          if (maxHeight.match(/未満/)) {
+            maxHeight = `<${maxHeight.replace("未満", "")}`;
+          } else if (maxHeight.match(/超/)) {
+            maxHeight = `>${maxHeight.replace("超", "")}`;
+          }
+          maxWave = `<div>最大波予想:${maxHeight}</div>`;
+        } else if (elm.grade == "Yoho") {
+          maxWave = "<div>最大波予想:若干の海面変動</div>";
         }
 
-        var popupContent = `<h3 style='border-bottom:solid 2px ${tsunamiColorConv(elm.grade)}'>${elm.name}</h3><div class='tsunamidetailwrap'><p>${gradeJa} 発令中</p>${firstWave}${maxWave}${firstCondition}</div>`;
+        var statusJa = elm.grade == "Yoho" ? `${gradeJa} 発表中` : `${gradeJa} 発令中`;
+        var popupContent = `<h3 style='border-bottom:solid 2px ${tsunamiColorConv(elm.grade)}'>${elm.name}</h3><div class='tsunamidetailwrap'><p>${statusJa}</p>${firstWave}${maxWave}${firstCondition}</div>`;
         new maplibregl.Popup().setLngLat(e.lngLat).setHTML(popupContent).addTo(map);
       }
     }
