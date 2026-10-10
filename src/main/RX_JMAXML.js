@@ -132,6 +132,11 @@ export function Req_JMAXMLList(count, longFeed) {
         var urlElm = elm.getElementsByTagName("id");
         if (urlElm && urlElm[0]) url = urlElm[0].textContent;
         if (!url) return;
+        try {
+          if (new URL(url).hostname !== "www.data.jma.go.jp") return;
+        } catch (e) {
+          return;
+        }
         var title = elm.getElementsByTagName("title")[0].textContent;
         if (
           title == "震度速報" ||
