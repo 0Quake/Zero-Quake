@@ -63,6 +63,12 @@
 
                 var Content = "";
 
+                function escapeHtml(str) {
+                    return String(str).replace(/[&<>"']/g, function (c) {
+                        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[c];
+                    });
+                }
+
                 function generate_Text(data) {
                     if (!data.StartTime || !data.EndTime || (!data.Number && !data.FeltNumber)) return "";
                     var StartTime = NormalizeDate("YYYY/M/D h時", new Date(data.StartTime))
@@ -72,16 +78,16 @@
                     } else {
                         var EndTime = NormalizeDate("M/D h時", new Date(data.EndTime))
                     }
-                    var dateRangeStr = `${StartTime} ～ ${EndTime}`;
+                    var dateRangeStr = `${escapeHtml(StartTime)} ～ ${escapeHtml(EndTime)}`;
 
                     var nAvailable = data.Number || data.Number == 0;
                     var fnAvailable = data.FeltNumber || data.FeltNumber == 0;
                     if (fnAvailable && nAvailable) {
-                        var content = `${data.Number}回 （うち有感${data.FeltNumber}回）`
+                        var content = `${escapeHtml(data.Number)}回 （うち有感${escapeHtml(data.FeltNumber)}回）`
                     } else if (nAvailable) {
-                        var content = `${data.Number}回`
+                        var content = `${escapeHtml(data.Number)}回`
                     } else if (fnAvailable) {
-                        var content = `有感${data.FeltNumber}回`
+                        var content = `有感${escapeHtml(data.FeltNumber)}回`
                     } else {
                         return false;
                     }
