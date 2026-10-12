@@ -782,10 +782,14 @@ function RegularExecution(loop) {
     //津波情報解除
     if (!TsunamiValidate_bypass) {
       Tsunami_Data.forEach(function (elm) {
-        if (elm.ValidDateTime <= new Date() - Replay && !elm.revocation) {
+        if (elm.ValidDateTime && Number(new Date(elm.ValidDateTime)) <= (Date.now() - Replay) && !elm.revocation) {
           elm.revocation = true;
-          elm.issue.time = new Date() - Replay;
-          ConvertTsunamiInfo(elm); //ダミーデータを送信、再度マージ処理
+          if (Array.isArray(elm.areas)) {
+            elm.areas.forEach(function (area) {
+              area.cancelled = true;
+            });
+          }
+          ConvertTsunamiInfo(elm); //失効処理、再度マージ
         }
       });
     }

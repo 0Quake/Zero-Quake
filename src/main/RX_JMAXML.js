@@ -510,17 +510,21 @@ export function Req_JMAXML(url, count) {
               EarthQuake: null,
             },
             areas: [],
-            revocation: true,
+            Torikeshi: true,
+            cancelled: true,
+            revocation: false,
             source: "jmaXML",
             ValidDateTime: null,
           };
         } else {
           var ValidDateTimeTmp = null;
-          var VDateStr = xml.getElementsByTagName("ValidDateTime")?.[0]?.textContent;
+          var VDateStr = xml.getElementsByTagName("ValidDateTime")?.[0]?.textContent ||
+            xml.getElementsByTagNameNS("*", "ValidDateTime")?.[0]?.textContent;
           if (VDateStr) {
             ValidDateTimeTmp = new Date(VDateStr);
           } else {
-            var rdtStr = xml.getElementsByTagName("ReportDateTime")?.[0]?.textContent;
+            var rdtStr = xml.getElementsByTagName("ReportDateTime")?.[0]?.textContent ||
+              xml.getElementsByTagNameNS("*", "ReportDateTime")?.[0]?.textContent;
             if (rdtStr) {
               ValidDateTimeTmp = new Date(rdtStr);
               ValidDateTimeTmp.setHours(ValidDateTimeTmp.getHours() + 12);

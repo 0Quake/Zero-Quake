@@ -2297,11 +2297,11 @@ function tsunamiDataUpdate(data) {
       document.getElementById("tsunamiWrap").style.display = "none";
       document.body.classList.remove("TsunamiMode");
       tsunamiData = null;
-      Tsunami_MajorWarning = Tsunami_Warning = Tsunami_Watch = false;
+      Tsunami_MajorWarning = Tsunami_Warning = Tsunami_Watch = Tsunami_Yoho = false;
     } else if (!alertNowTmp && tsunamiAlertNow) {
       document.getElementById("tsunamiWrap").style.display = "none";
       document.body.classList.remove("TsunamiMode");
-      Tsunami_MajorWarning = Tsunami_Warning = Tsunami_Watch = false;
+      Tsunami_MajorWarning = Tsunami_Warning = Tsunami_Watch = Tsunami_Yoho = false;
     }
     tsunamiAlertNow = alertNowTmp;
 

@@ -28,7 +28,7 @@ export function ConvertTsunamiInfo(data) {
     if (SameData) {//同一報が既存ならマージ
 
       //各キーをコピー
-      var keys = ["headline", "comment", "status", "cancelled", "ValidDateTime", "revocation"]
+      var keys = ["headline", "comment", "status", "cancelled", "ValidDateTime", "revocation", "Torikeshi"]
       keys.forEach(function (key) {
         if (Boolean2(data[key])) SameData[key] = data[key];
       });//同一報なのでcancelledなどのBool値も「Falsyでない場合のみ上書きする方法」でマージ
@@ -112,58 +112,115 @@ export function ConvertTsunamiInfo(data) {
       .sort((a, b) => new Date(a.issue.time) - new Date(b.issue.time));//古→新（非破壊）
     //↑非破壊でソートしないと自動解除処理のTsunami_Data.forEach()内から呼んだときに競合
 
-    sortedTsunamiData.forEach(function (elm0) {
-      Tsunami_data_Marged.revocation = elm0.revocation;//キャンセル・失効は常に新しいものを優先
-      Tsunami_data_Marged.cancelled = elm0.cancelled;
-      if (elm0.revocation || elm0.cancelled) return;
+    let latestRevocation = false;
+    let latestCancelled = false;
+    let latestTorikeshi = false;
 
-      var keys = ["headline", "comment", "status", "cancelled", "ValidDateTime"]
+    sortedTsunamiData.forEach(function (elm0) {
+      if (elm0.Torikeshi) {
+        latestTorikeshi = true;
+        if (elm0.issue?.EventID && Array.isArray(elm0.issue.EventID) && elm0.issue.EventID.length > 0) {
+          Tsunami_data_Marged.areas = Tsunami_data_Marged.areas.filter(a =>
+            !elm0.issue.EventID.includes(Number(a.eventId))
+          );
+        } else {
+          Tsunami_data_Marged.areas = [];
+        }
+        return;
+      }
+
+      if (elm0.revocation) {
+        latestRevocation = true;
+        // 失効した報の予報区を解除扱いに更新
+        if (Array.isArray(elm0.areas)) {
+          elm0.areas.forEach(function (revokedArea) {
+            var existing = Tsunami_data_Marged.areas.find(a => a.name == revokedArea.name || a.code == revokedArea.code);
+            if (existing) {
+              existing.cancelled = true;
+            }
+          });
+        }
+        return;
+      }
+
+      if (elm0.cancelled) {
+        latestCancelled = true;
+        // 全域解除電文等の場合
+        if (Array.isArray(elm0.areas) && elm0.areas.length > 0) {
+          elm0.areas.forEach(function (cancelledArea) {
+            var existing = Tsunami_data_Marged.areas.find(a => a.name == cancelledArea.name || a.code == cancelledArea.code);
+            if (existing) {
+              existing.cancelled = true;
+            }
+          });
+        } else {
+          Tsunami_data_Marged.areas.forEach(a => { a.cancelled = true; });
+        }
+        return;
+      }
+
+      var keys = ["headline", "comment", "status", "ValidDateTime"];
       keys.forEach((key) => {
         if (elm0[key]) Tsunami_data_Marged[key] = elm0[key];
-      })
+      });
 
       if (elm0.issue?.time) Tsunami_data_Marged.issue.time = elm0.issue.time;
       if (elm0.issue?.EventID) Tsunami_data_Marged.issue.EventID = elm0.issue.EventID;
       if (elm0.issue?.EarthQuake) Tsunami_data_Marged.issue.EarthQuake = elm0.issue.EarthQuake;
 
-      elm0.areas.forEach(function (elm) {
-        var SameArea;
-        if (Array.isArray(Tsunami_data_Marged.areas)) {
-          SameArea = Tsunami_data_Marged.areas.find(function (elm2) {
-            return elm2.name == elm.name;
-          });
-        }
-        if (SameArea) {
-          var keys = ["code", "grade", "cancelled", "firstHeight", "firstHeightCondition", "maxHeight"]
-          keys.forEach(function (key) {
-            if (elm[key]) SameArea[key] = elm[key];
-          });
-
-          if (!elm.stations) {
-            Tsunami_data_Marged.areas.push(elm);
-          } else {
-            elm.stations.forEach(function (elm2) {
-              var SameSta;
-              if (Array.isArray(SameArea.stations)) {
-                SameSta = SameArea.stations.find(function (elm3) {
-                  return elm3.name == elm2.name;
-                });
-              }
-
-              if (!SameSta) {
-                SameArea.stations.push(elm2);
-              } else {
-                Object.keys(elm2).forEach(function (key) {
-                  if (Boolean2(elm2[key])) SameSta[key] = elm2[key];
-                });
-              }
+      if (Array.isArray(elm0.areas)) {
+        elm0.areas.forEach(function (elm) {
+          var SameArea;
+          if (Array.isArray(Tsunami_data_Marged.areas)) {
+            SameArea = Tsunami_data_Marged.areas.find(function (elm2) {
+              return elm2.name == elm.name;
             });
           }
-        } else {
-          Tsunami_data_Marged.areas.push(elm)
-        }
-      });
+          if (SameArea) {
+            var keys = ["code", "grade", "cancelled", "firstHeight", "firstHeightCondition", "maxHeight"];
+            keys.forEach(function (key) {
+              if (elm[key] !== undefined) SameArea[key] = elm[key];
+            });
+
+            if (elm.stations) {
+              if (!SameArea.stations) SameArea.stations = [];
+              elm.stations.forEach(function (elm2) {
+                var SameSta;
+                if (Array.isArray(SameArea.stations)) {
+                  SameSta = SameArea.stations.find(function (elm3) {
+                    return elm3.name == elm2.name;
+                  });
+                }
+
+                if (!SameSta) {
+                  SameArea.stations.push(elm2);
+                } else {
+                  Object.keys(elm2).forEach(function (key) {
+                    if (Boolean2(elm2[key])) SameSta[key] = elm2[key];
+                  });
+                }
+              });
+            }
+          } else {
+            Tsunami_data_Marged.areas.push({ ...elm });
+          }
+        });
+      }
     });
+
+    // まだ有効なエリア（未解除）が残っているか
+    const hasActiveAreas = Tsunami_data_Marged.areas.some(a => !a.cancelled);
+
+    if (hasActiveAreas) {
+      Tsunami_data_Marged.revocation = false;
+      Tsunami_data_Marged.cancelled = false;
+      Tsunami_data_Marged.Torikeshi = false;
+    } else {
+      Tsunami_data_Marged.Torikeshi = latestTorikeshi;
+      Tsunami_data_Marged.revocation = latestRevocation;
+      Tsunami_data_Marged.cancelled = latestCancelled || (!latestTorikeshi && !latestRevocation);
+      Tsunami_data_Marged.areas = [];
+    }
 
     messageToMainWindow({ action: "tsunamiUpdate", data: Tsunami_data_Marged });
     if (TsunamiWindow) {
