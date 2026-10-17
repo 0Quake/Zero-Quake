@@ -42,7 +42,8 @@ export function ConvertTsunamiInfo(data) {
           var SameArea;
           if (Array.isArray(SameData.areas)) {
             SameArea = SameData.areas.find(function (elm2) {
-              return elm2.name == elm.name || elm2.code == elm.code;
+              return (elm.code != null && elm2.code === elm.code) ||
+                     (elm.name != null && elm2.name === elm.name);
             });
           }
 

@@ -584,7 +584,7 @@ export function Req_JMAXML(url, count) {
 
 
           for (const elm of (forecastElm?.getElementsByTagName("Item") || [])) {
-            var gradeTmp;
+            var gradeTmp = null;
             var cancelledTmp = false;
 
             var codeStr = elm.getElementsByTagName("Category")?.[0]?.getElementsByTagName("Kind")?.[0]?.getElementsByTagName("Code")?.[0]?.textContent;
@@ -612,13 +612,13 @@ export function Req_JMAXML(url, count) {
                   break;
               }
             }
-            var firstHeightTmp;
-            var firstHeightConditionTmp;
-            var maxHeightTmp;
+            var firstHeightTmp = null;
+            var firstHeightConditionTmp = null;
+            var maxHeightTmp = null;
 
             var fHgtStr = elm.getElementsByTagName("FirstHeight")?.[0]?.getElementsByTagName("ArrivalTime")?.[0]?.textContent;
             if (fHgtStr) firstHeightTmp = new Date(fHgtStr);
-            firstHeightConditionTmp = elm.getElementsByTagName("FirstHeight")?.[0]?.getElementsByTagName("Condition")?.[0]?.textContent;
+            firstHeightConditionTmp = elm.getElementsByTagName("FirstHeight")?.[0]?.getElementsByTagName("Condition")?.[0]?.textContent || null;
 
             var maxHeightElm = elm.getElementsByTagName("MaxHeight")?.[0]?.getElementsByTagName("jmx_eb:TsunamiHeight");
             var mHeightStr = maxHeightElm?.[0]?.getAttribute("description");
@@ -628,7 +628,7 @@ export function Req_JMAXML(url, count) {
                   return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
                 });
             } else {
-              maxHeightTmp = elm.getElementsByTagName("MaxHeight")?.[0]?.getElementsByTagName("Condition")?.[0]?.textContent;
+              maxHeightTmp = elm.getElementsByTagName("MaxHeight")?.[0]?.getElementsByTagName("Condition")?.[0]?.textContent || null;
             }
 
 
@@ -637,11 +637,11 @@ export function Req_JMAXML(url, count) {
               Array.prototype.forEach.call(
                 elm.getElementsByTagName("Station"),
                 function (elm2) {
-                  var ArrivalTimeTmp;
-                  var ConditionTmp;
-                  var highTideTimeTmp;
-                  var nameTmp = elm2.getElementsByTagName("Name")?.[0]?.textContent;
-                  var codeTmp = elm2.getElementsByTagName("Code")?.[0]?.textContent;
+                  var ArrivalTimeTmp = null;
+                  var ConditionTmp = null;
+                  var highTideTimeTmp = null;
+                  var nameTmp = elm2.getElementsByTagName("Name")?.[0]?.textContent || null;
+                  var codeTmp = elm2.getElementsByTagName("Code")?.[0]?.textContent || null;
 
                   var highTideStr = elm2.getElementsByTagName("HighTideDateTime")?.[0]?.textContent;
                   if (highTideStr) highTideTimeTmp = new Date(highTideStr);
@@ -649,7 +649,7 @@ export function Req_JMAXML(url, count) {
                   var arDateStr = elm2.getElementsByTagName("FirstHeight")?.[0]?.getElementsByTagName("ArrivalTime")?.[0]?.textContent;
                   if (arDateStr) ArrivalTimeTmp = new Date(arDateStr);
 
-                  ConditionTmp = elm2.getElementsByTagName("Condition")?.[0]?.textContent;
+                  ConditionTmp = elm2.getElementsByTagName("Condition")?.[0]?.textContent || null;
 
                   stations.push({
                     name: nameTmp,
@@ -662,11 +662,11 @@ export function Req_JMAXML(url, count) {
               );
             }
 
-            var codeStr = elm.getElementsByTagName("Category")?.[0]?.getElementsByTagName("Kind")?.[0]?.getElementsByTagName("Code")?.[0]?.textContent
-            var codeTmp;
-            if (codeStr) codeTmp = Number(codeStr);
+            var areaElm = elm.getElementsByTagName("Area")?.[0];
+            var areaCodeStr = areaElm?.getElementsByTagName("Code")?.[0]?.textContent;
+            var codeTmp = areaCodeStr ? Number(areaCodeStr) : null;
 
-            var name = elm.getElementsByTagName("Name")?.[0]?.textContent;
+            var name = areaElm?.getElementsByTagName("Name")?.[0]?.textContent || elm.getElementsByTagName("Name")?.[0]?.textContent || null;
 
             tsunamiDataTmp.areas.push({
               code: codeTmp,
@@ -687,40 +687,43 @@ export function Req_JMAXML(url, count) {
               if (elm.getElementsByTagName("Station")[0]) {
 
                 for (const elm2 of elm.getElementsByTagName("Station") || []) {
-                  var ArrivalTimeTmp;
-                  var firstHeightConditionTmp;
-                  var firstHeightInitialTmp;
-                  var maxHeightTime;
-                  var maxHeightCondition;
-                  var oMaxHeightTmp;
+                  var ArrivalTimeTmp = null;
+                  var firstHeightConditionTmp = null;
+                  var firstHeightInitialTmp = null;
+                  var maxHeightTime = null;
+                  var maxHeightCondition = null;
+                  var oMaxHeightTmp = null;
                   var maxHeightRising = false;
-                  var nameTmp = elm2.getElementsByTagName("Name")?.[0]?.textContent;
+                  var nameTmp = elm2.getElementsByTagName("Name")?.[0]?.textContent || null;
 
                   var fHeightElm = elm2.getElementsByTagName("FirstHeight")?.[0];
                   if (fHeightElm) {
                     var arTimeStr = fHeightElm.getElementsByTagName("ArrivalTime")?.[0]?.textContent;
                     if (arTimeStr) ArrivalTimeTmp = new Date(arTimeStr);
-                    firstHeightConditionTmp = fHeightElm.getElementsByTagName("Condition")?.[0]?.textContent;
-                    firstHeightInitialTmp = fHeightElm.getElementsByTagName("Initial")?.[0]?.textContent;
+                    firstHeightConditionTmp = fHeightElm.getElementsByTagName("Condition")?.[0]?.textContent || null;
+                    firstHeightInitialTmp = fHeightElm.getElementsByTagName("Initial")?.[0]?.textContent || null;
                   }
                   if (elm2.getElementsByTagName("MaxHeight")[0]) {
                     var maxHeightElm = elm2.getElementsByTagName("MaxHeight")[0].getElementsByTagName("jmx_eb:TsunamiHeight")[0];
                     if (maxHeightElm) {
-                      oMaxHeightTmp = maxHeightElm.getAttribute("description");
-                      oMaxHeightTmp = oMaxHeightTmp.replace(/[Ａ-Ｚａ-ｚ０-９．]/g, function (s) {
-                        return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
-                      });
-                      if (maxHeightElm.getAttribute("condition"))
-                        maxHeightRising = maxHeightElm.getAttribute("condition") == "上昇中";
+                      var desc = maxHeightElm.getAttribute("description");
+                      if (desc) {
+                        oMaxHeightTmp = desc.replace(/[Ａ-Ｚａ-ｚ０-９．]/g, function (s) {
+                          return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
+                        });
+                      }
+                      if (maxHeightElm.getAttribute("condition")) {
+                        maxHeightRising = maxHeightElm.getAttribute("condition") === "上昇中";
+                      }
                     }
 
                     var mhTimeStr = elm2.getElementsByTagName("MaxHeight")?.[0]?.getElementsByTagName("DateTime")?.[0]?.textContent;
                     if (mhTimeStr) maxHeightTime = new Date(mhTimeStr);
 
-                    maxHeightCondition = elm2.getElementsByTagName("MaxHeight")?.[0]?.getElementsByTagName("Condition")?.[0]?.textContent;
+                    maxHeightCondition = elm2.getElementsByTagName("MaxHeight")?.[0]?.getElementsByTagName("Condition")?.[0]?.textContent || null;
                   }
 
-                  var codeTmp = elm2.getElementsByTagName("Code")?.[0]?.textContent;
+                  var codeTmp = elm2.getElementsByTagName("Code")?.[0]?.textContent || null;
 
                   stations.push({
                     name: nameTmp,
@@ -736,7 +739,7 @@ export function Req_JMAXML(url, count) {
                 }
               }
 
-              var areaName = title == "沖合の津波観測に関する情報" ? "（海上）" : elm.getElementsByTagName("Name")[0].textContent;
+              var areaName = title == "沖合の津波観測に関する情報" ? "（海上）" : elm.getElementsByTagName("Name")[0]?.textContent;
               var tsunamiItem = tsunamiDataTmp.areas.find(function (elm2) {
                 return elm2.name == areaName;
               });
