@@ -924,8 +924,8 @@ function jma_Fetch(url) {
       if (json.Body.Earthquake) {
         if (json.Body.Earthquake.Hypocenter.Area.Coordinate_WGS) {
           LatLngDepth = parse_LatLngDepth(json.Body.Earthquake.Hypocenter.Area.Coordinate_WGS);
-          LatLngDepth[1] /= 100
-          LatLngDepth[2] /= 100
+          if (LatLngDepth && LatLngDepth[1] != null) LatLngDepth[1] /= 100;
+          if (LatLngDepth && LatLngDepth[2] != null) LatLngDepth[2] /= 100;
         } else {
           LatLngDepth = parse_LatLngDepth(json.Body.Earthquake.Hypocenter.Area.Coordinate);
         }
@@ -1031,8 +1031,8 @@ function jmaL_Fetch(url) {
       if (json.Body.Earthquake) {
         if (json.Body.Earthquake.Hypocenter.Area.Coordinate_WGS) {
           LatLngDepth = parse_LatLngDepth(json.Body.Earthquake.Hypocenter.Area.Coordinate_WGS);
-          LatLngDepth[1] /= 100
-          LatLngDepth[2] /= 100
+          if (LatLngDepth && LatLngDepth[1] != null) LatLngDepth[1] /= 100;
+          if (LatLngDepth && LatLngDepth[2] != null) LatLngDepth[2] /= 100;
         } else {
           var LatLngDepth = parse_LatLngDepth(json.Body.Earthquake.Hypocenter.Area.Coordinate);
         }
@@ -1166,14 +1166,17 @@ function jmaXMLFetch(url) {
         maxIntTmp;
 
       if (EarthquakeElm) {
-        originTimeTmp = new Date(EarthquakeElm.querySelector("OriginTime").textContent);
-        epiCenterTmp = EarthquakeElm.querySelector("Name").textContent;
+        var originTimeStr = EarthquakeElm.querySelector("OriginTime")?.textContent;
+        if (originTimeStr) originTimeTmp = new Date(originTimeStr);
+        epiCenterTmp = EarthquakeElm.querySelector("Name")?.textContent;
         magnitudeTmp = Number(EarthquakeElm.getElementsByTagName("jmx_eb:Magnitude")?.[0]?.textContent);
         magnitudeTypeTmp = EarthquakeElm.getElementsByTagName("jmx_eb:Magnitude")?.[0]?.getAttribute("type");
-        LatLngDepth = parse_LatLngDepth(xml.querySelector("Body Earthquake Hypocenter")?.getElementsByTagName("jmx_eb:Coordinate")?.[0]?.textContent)
-        LatTmp = Number(LatLngDepth[1]);
-        LngTmp = Number(LatLngDepth[2]);
-        DepthTmp = Number(LatLngDepth[3] / 1000);
+        LatLngDepth = parse_LatLngDepth(xml.querySelector("Body Earthquake Hypocenter")?.getElementsByTagName("jmx_eb:Coordinate")?.[0]?.textContent);
+        if (LatLngDepth && LatLngDepth.length) {
+          LatTmp = Number(LatLngDepth[1]);
+          LngTmp = Number(LatLngDepth[2]);
+          DepthTmp = Number(LatLngDepth[3] / 1000);
+        }
       }
 
       var IntensityElm = xml.querySelector("Body Intensity");
@@ -1234,9 +1237,13 @@ function jmaXMLFetch(url) {
                           }
                         });
                     }
+                    //５弱以上未入電をConditionから拾う
+                    var cityInt = elm3.querySelector(":scope > MaxInt")?.textContent || elm3.querySelector(":scope > Condition")?.textContent || null;
+                    var cityName = elm3.querySelector(":scope > Name")?.textContent || elm3.querySelector("Name")?.textContent || "";
                     cityData.push({
-                      name: elm3.querySelector("Name").textContent,
-                      int: elm3.querySelector("MaxInt").textContent,
+                      name: cityName,
+                      int: NormalizeShindo(cityInt),
+                      condition: elm3.querySelector(":scope > Condition")?.textContent || null,
                       station: stData,
                     });
                   });
@@ -1245,51 +1252,54 @@ function jmaXMLFetch(url) {
                   var stDataL = [];
                   elm2.querySelectorAll("IntensityStation")
                     .forEach(function (elm4) {
-                      var pointT = JMA_Int_Points[Number(elm4.querySelector("Code").textContent)];
+                      var pointT = JMA_Int_Points[Number(elm4.querySelector("Code")?.textContent)];
                       if (elm4.querySelector("Int")) {
                         stData.push({
                           lat: pointT ? pointT.y : null,
                           lng: pointT ? pointT.x : null,
-                          name: elm4.querySelector("Name").textContent,
-                          int: elm4.querySelector("Int").textContent,
+                          name: elm4.querySelector("Name")?.textContent || "",
+                          int: elm4.querySelector("Int")?.textContent || "",
                         });
                       }
                       if (elm4.querySelector("LgInt")) {
                         stDataL.push({
                           lat: pointT ? pointT.y : null,
                           lng: pointT ? pointT.x : null,
-                          name: elm4.querySelector("Name").textContent,
-                          lgint: elm4.querySelector("LgInt").textContent,
+                          name: elm4.querySelector("Name")?.textContent || "",
+                          lgint: elm4.querySelector("LgInt")?.textContent || "",
                         });
                       }
                     });
                 }
+                var areaInt = elm2.querySelector(":scope > MaxInt")?.textContent || elm2.querySelector(":scope > Condition")?.textContent || null;
+                var areaName = elm2.querySelector(":scope > Name")?.textContent || elm2.querySelector("Name")?.textContent || "";
                 areaData.push({
-                  name: elm2.querySelector("Name").textContent,
-                  int: elm2.querySelector("MaxInt").textContent,
+                  name: areaName,
+                  int: NormalizeShindo(areaInt),
+                  condition: elm2.querySelector(":scope > Condition")?.textContent || null,
                   city: cityData,
                   station: stData,
                 });
-                if (elm2.querySelector("MaxLgInt")) {
+                if (elm2.querySelector(":scope > MaxLgInt")) {
                   areaDataL.push({
-                    name: elm2.querySelector("Name").textContent,
-                    lgint: elm2.querySelector("MaxLgInt").textContent,
+                    name: areaName,
+                    lgint: elm2.querySelector(":scope > MaxLgInt").textContent,
                     station: stDataL,
                   });
                 }
               });
             }
-            if (elm.querySelector("MaxInt")) {
+            if (elm.querySelector(":scope > MaxInt")) {
               IntData.push({
-                name: elm.querySelector("Name").textContent,
-                int: elm.querySelector("MaxInt").textContent,
+                name: elm.querySelector(":scope > Name")?.textContent || elm.querySelector("Name").textContent,
+                int: elm.querySelector(":scope > MaxInt").textContent,
                 area: areaData,
               });
             }
-            if (elm.querySelector("MaxLgInt")) {
+            if (elm.querySelector(":scope > MaxLgInt")) {
               LngIntData.push({
-                name: elm.querySelector("Name").textContent,
-                lgint: elm.querySelector("MaxLgInt").textContent,
+                name: elm.querySelector(":scope > Name")?.textContent || elm.querySelector("Name").textContent,
+                lgint: elm.querySelector(":scope > MaxLgInt").textContent,
                 area: areaDataL,
               });
             }
@@ -2374,9 +2384,8 @@ function parse_LatLngDepth(str) {
     if (str) {
       return String(str).replaceAll("+", "｜+").replaceAll("-", "｜-").replaceAll("/", "").split("｜");
     }
-  } catch {
-    return []
-  }
+  } catch { }
+  return [];
 }
 function throttle(cb, delay = 1000) {
   let shouldWait = false

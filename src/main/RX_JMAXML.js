@@ -155,7 +155,8 @@ export function Req_JMAXMLList(count, longFeed) {
           title == "津波警報・注意報・予報a" ||
           title == "沖合の津波観測に関する情報" ||
           title == "北海道・三陸沖後発地震注意情報" ||
-          title == "地震の活動状況等に関する情報"
+          title == "地震の活動状況等に関する情報" ||
+          title == "地震回数に関する情報"
         )
           Req_JMAXML(url, count);
       });
@@ -325,10 +326,10 @@ export function Req_JMAXML(url, count) {
           axisData: null,
         }], count);
       } else if (title == "地震回数に関する情報") {
+        var hourly = [];
+        var std = [];
+        var sum = null;
         if (xml.getElementsByTagName("EarthquakeCount")[0]) {
-          var hourly = [];
-          var std = [];
-          var sum;
           xml.querySelectorAll("EarthquakeCount Item").forEach(function (el) {
             var type = el?.getAttribute("type")
 
@@ -356,30 +357,31 @@ export function Req_JMAXML(url, count) {
               std.push(data);
             }
           })
-
-          var headline = xml.getElementsByTagName("Head")?.[0]?.getElementsByTagName("Headline")?.[0]?.getElementsByTagName("Text")?.[0]?.textContent;
-          var Text = xml.querySelector("Body Text")?.textContent || "";
-          var NextAdvisory = xml.querySelector("NextAdvisory")?.textContent || ""
-          var FreeFormComment = xml.querySelector("Comments FreeFormComment")?.textContent || ""
-
-          var rdtStr = xml.getElementsByTagName("ReportDateTime")?.[0]?.textContent
-          var rdt = newDate2(rdtStr);
-
-          EQCount_process({
-            status: xml.getElementsByTagName("Status")?.[0]?.textContent,
-            eventId: xml.getElementsByTagName("EventID")?.[0]?.textContent,
-            category: xml.getElementsByTagName("Title")?.[0]?.textContent,
-            cancel: Boolean(cancel),
-            reportDateTime: rdt,
-            headline: headline || "",
-            hourly: hourly,
-            sum: sum,
-            std: std,
-            Text: Text,
-            NextAdvisory: NextAdvisory,
-            FreeFormComment: FreeFormComment
-          })
         }
+
+        var headline = xml.getElementsByTagName("Head")?.[0]?.getElementsByTagName("Headline")?.[0]?.getElementsByTagName("Text")?.[0]?.textContent;
+        var Text = xml.querySelector("Body Text")?.textContent || "";
+        var NextAdvisory = xml.querySelector("NextAdvisory")?.textContent || ""
+        var FreeFormComment = xml.querySelector("Comments FreeFormComment")?.textContent || ""
+
+        var rdtStr = xml.getElementsByTagName("ReportDateTime")?.[0]?.textContent
+        var rdt = newDate2(rdtStr);
+        var isCancel = cancel || xml.getElementsByTagName("Status")?.[0]?.textContent == "取消";
+
+        EQCount_process({
+          status: xml.getElementsByTagName("Status")?.[0]?.textContent,
+          eventId: xml.getElementsByTagName("EventID")?.[0]?.textContent,
+          category: xml.getElementsByTagName("Title")?.[0]?.textContent,
+          cancel: Boolean(isCancel),
+          reportDateTime: rdt,
+          headline: headline || "",
+          hourly: hourly,
+          sum: sum,
+          std: std,
+          Text: Text,
+          NextAdvisory: NextAdvisory,
+          FreeFormComment: FreeFormComment
+        })
 
       } else if (title == "南海トラフ地震関連解説情報" || title == "南海トラフ地震臨時情報") {
         var kind = xml.getElementsByTagName("Head")?.[0]?.getElementsByTagName("InfoType")?.[0]?.textContent;

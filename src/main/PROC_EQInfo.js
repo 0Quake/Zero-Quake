@@ -174,7 +174,12 @@ export function MargeEQInfo(dataList, count) {
 
 export var EQCount_data = {};
 export function EQCount_process(data) {
-  if (data) EQCount_data[data.eventId] = data
+  if (data && data.eventId) {
+    var existing = EQCount_data[data.eventId];
+    if (!existing || !existing.reportDateTime || !data.reportDateTime || Number(data.reportDateTime) >= Number(existing.reportDateTime)) {
+      EQCount_data[data.eventId] = data;
+    }
+  }
   var EQCount_data_array = Object.values(EQCount_data);
 
   EQCount_data_array = EQCount_data_array
