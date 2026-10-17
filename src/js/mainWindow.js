@@ -278,7 +278,9 @@ function EEW_AlertUpdate(data) {
       EEW_LocalIDs[elm.EventID] = EEWID;
     }
 
-    if (elm.alertflg == "警報" || elm.alertflg == "予報")
+    if (elm.is_cancel)
+      var textForReader = GenerateEEWText(elm, "取り消された緊急地震速報アイテム。{training}{grade}、第{serial}報。先ほどの緊急地震速報は取り消されました。");
+    else if (elm.alertflg == "警報" || elm.alertflg == "予報")
       var textForReader = GenerateEEWText(elm, "緊急地震速報アイテム。{training}{grade}、第{serial}報。[{location}の予想震度は{local_Int}。]予想マグニチュード、{magnitude}。予想最大震度、{maxInt}。{region_name}の、深さ{depth}キロメートルで、{origin_time}に発生。{final}");
     else
       var textForReader = GenerateEEWText(elm, "アーリエスト地震情報アイテム。第{serial}報。予想マグニチュード、{magnitude}。{region_name}の、深さ{depth}キロメートルで、{origin_time}に発生。{final}");
