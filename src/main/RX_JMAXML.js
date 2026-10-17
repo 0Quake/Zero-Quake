@@ -264,10 +264,12 @@ export function Req_JMAXML(url, count) {
       const xml = DomPsr.parseFromString(text, "text/xml");
       if (!xml) throw new Error("XMLのパースに失敗");
 
-      if (Number(new Date(xml.getElementsByTagName("ReportDateTime")[0].textContent)) < (Date.now() - Replay)) {
-        //未来のデータ（リプレイ時）のため無視した場合、取得済みリストに入れない
-        jmaXML_Fetched.push(url);
+      var rdtVal = Number(new Date(xml.getElementsByTagName("ReportDateTime")[0]?.textContent));
+      if (Replay !== 0 && rdtVal > (Date.now() - Replay)) {
+        //未来のデータ（リプレイ時）のため処理を中断し、取得済みリストにも入れない
+        return;
       }
+      jmaXML_Fetched.push(url);
 
       var title = xml.getElementsByTagName("Control")[0].getElementsByTagName("Title")[0].textContent;
       var cancel = xml.getElementsByTagName("InfoType")[0].textContent == "取消";

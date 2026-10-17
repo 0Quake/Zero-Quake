@@ -15,11 +15,16 @@ export function MargeEQInfo(dataList, count) {
 
     dataList.forEach(function (data) {
       if (!data.eventId) return;
+      if (!config.Info?.EQInfo?.showtraining && data.status == "訓練") return;
+      if (!config.Info?.EQInfo?.showTest && data.status == "試験") return;
+      if (Replay !== 0 && Number(new Date(data.reportDateTime)) > (Date.now() - Replay)) return;
+
       var changed = false;
       var EQElm = EQInfoData[data.eventId];
       if (EQElm) {
         var EQInfo_Item = {
           eventId: EQElm.eventId,
+          status: null,
           category: null,
           EEW: null,
           reportDateTime: null,
@@ -36,11 +41,11 @@ export function MargeEQInfo(dataList, count) {
         var rawData = EQElm.raw_data
           .sort((a, b) => new Date(a.reportDateTime) - new Date(b.reportDateTime));
 
-        //キャンセル報を受信時、同一カテゴリの過去情報のキャンセルフラグを立てる（気象庁仕様に準拠）
+        //キャンセル報を受信時、同一カテゴリかつ同一Statusの過去情報のキャンセルフラグを立てる（気象庁仕様PDF 48Pに準拠）
         rawData.forEach(function (elm, index) {
           if (elm.cancel) {
             for (var j = 0; j < index; j++) {
-              if (rawData[j].category == elm.category) {
+              if (rawData[j].category == elm.category && rawData[j].status == elm.status) {
                 rawData[j].cancel = true;
               }
             }
@@ -73,6 +78,7 @@ export function MargeEQInfo(dataList, count) {
             EQElm.EEW = false;
             EQInfo_Item = {
               eventId: EQElm.eventId,
+              status: null,
               category: null,
               EEW: false,
               reportDateTime: null,
@@ -89,6 +95,7 @@ export function MargeEQInfo(dataList, count) {
           }
 
           EQInfo_Item.reportDateTime = elm.reportDateTime;
+          EQInfo_Item.status = elm.status;
           EQInfo_Item.category = elm.category;
           if (Boolean2(elm.OriginTime)) EQInfo_Item.OriginTime = elm.OriginTime;
           if (Boolean2(elm.epiCenter)) EQInfo_Item.epiCenter = elm.epiCenter;
@@ -112,7 +119,7 @@ export function MargeEQInfo(dataList, count) {
 
         //キーごとにマージ
         //EQInfo_Itemは有効な電文から再集約された最新状態のため、各プロパティを同期
-        var syncKeys = ["reportDateTime", "category", "OriginTime", "epiCenter", "M", "maxI", "maxLgInt", "headline", "cancel"];
+        var syncKeys = ["reportDateTime", "status", "category", "OriginTime", "epiCenter", "M", "maxI", "maxLgInt", "headline", "cancel"];
         syncKeys.forEach(function (key) {
           if (EQElm[key] !== EQInfo_Item[key]) {
             EQElm[key] = EQInfo_Item[key];
