@@ -506,12 +506,14 @@ export function Req_JMAXML(url, count) {
         if (cancel) {
           var rdtStr = xml.getElementsByTagName("ReportDateTime")[0].textContent;
           var rdt = newDate2(rdtStr);
+          var EventIDs = Array.isArray(EventID) ? EventID.map(Number) : [];
 
           tsunamiDataTmp = {
+            title: title,
             status: xml.getElementsByTagName("Status")?.[0]?.textContent,
             issue: {
               time: rdt,
-              EventID: null,
+              EventID: EventIDs,
               EarthQuake: null,
             },
             areas: [],
@@ -561,6 +563,7 @@ export function Req_JMAXML(url, count) {
           var dateTime = dateStr ? new Date(dateStr) : null;
 
           tsunamiDataTmp = {
+            title: title,
             status: xml.getElementsByTagName("Status")?.[0]?.textContent,
             issue: {
               time: dateTime,
