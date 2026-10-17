@@ -266,13 +266,17 @@ export function EEW_Marge(data) {
   if (!data) return; //データがない場合、処理終了
   try {
     if (!config.Info.EEW.showtraining && data.is_training) return; //訓練法を受信するかどうか（設定に準拠）
-    if (!config.Info.EEW.kodoriyou && data.alertflg == "予報") return; //高度利用者向けを受信するかどうか（設定に準拠）
-    if (!data.origin_time || !data.EventID || !data.serial || !data.latitude || !data.longitude) return;//不正データをはねる
+    if (!data.is_cancel && !config.Info.EEW.kodoriyou && data.alertflg == "予報") return; //高度利用者向けを受信するかどうか（設定に準拠）
+    if (!data.EventID || !data.serial) return;//不正データをはねる
+    //取消報は震源要素（origin_time, latitude, longitude等）を持たないため免除
+    if (!data.is_cancel && (!data.origin_time || !data.latitude || !data.longitude)) return;
 
-    //５分以上前の地震／未来の地震（リプレイ時）を除外 ただし既に表示中の地震の更新報は通す
-    var pastTime = new Date() - Replay - data.origin_time;
-    var showing = Boolean(EEW_Active.find((elm) => elm.EventID == data.EventID));
-    if (!showing && (pastTime > 300000 || pastTime < 0)) return;
+    //５分以上前の地震／未来の地震（リプレイ時）を除外 ただし既に表示中の地震の更新報および取消報は通す
+    if (!data.is_cancel && data.origin_time) {
+      var pastTime = new Date() - Replay - data.origin_time;
+      var showing = Boolean(EEW_Active.find((elm) => elm.EventID == data.EventID));
+      if (!showing && (pastTime > 300000 || pastTime < 0)) return;
+    }
 
     if (data.source == "simulation") {
       var EEWActive = EEW_Active.find((e) => e.source !== "simulation");
@@ -442,7 +446,12 @@ export function EEW_Marge(data) {
         if (data.serial > MaxSerial) {
           //最新の報である
           SameEEW.data.push(data);//データ追加
-          if (data.is_cancel) SameEEW.cancelled = true;
+          if (data.is_cancel) {
+            SameEEW.cancelled = true;
+            SameEEW.data.forEach(function (d) {
+              d.is_cancel = true;
+            });
+          }
           EEW_Alert(data); //警報処理
         }
       }
@@ -452,7 +461,7 @@ export function EEW_Marge(data) {
       //データ追加
       EEW_Storage.push({
         EventID: data.EventID,
-        cancelled: false,
+        cancelled: Boolean(data.is_cancel),
         simulation: data.source == "simulation",
         data: [data],
       });
@@ -568,12 +577,20 @@ export function EEW_Alert(data, update) {
     var new_i = NormalizeShindo(data.maxInt, 5);
     var int_increased = new_i > old_i || !Boolean2(new_i) || !Boolean2(old_i);
 
-    if (!update && show_alert && (int_increased || !config.Info.EEW.IntTerm1)) {
+    if (data.is_cancel) {
+      //取消報の通知判定（震度閾値に関わらず取消音声を発動）
+      PlayAudio("EEW2");
+      speak(GenerateEEWText(data, false));
+      var notice_setting = first ? config.notice?.window?.EEW : config.notice?.window?.EEW_Update;
+      if (notice_setting == "openWindow") {
+        try { CreateMainWindow(); } catch {}
+      }
+    } else if (!update && show_alert && (int_increased || !config.Info.EEW.IntTerm1)) {
       //同一報の更新時でなく、条件に合致
       PlayAudio((data.alertflg == "警報") ? "EEW1" : "EEW2");
       speak(GenerateEEWText(data, !first));
 
-      var notice_setting = first ? config.notice.window.EEW : config.notice.window.EEW_Update;
+      var notice_setting = first ? config.notice?.window?.EEW : config.notice?.window?.EEW_Update;
       var WindowInvisible = !MainWindow || MainWindow.isMinimized() || !MainWindow.isFocused() || !MainWindow.isVisible();
       if (notice_setting == "push" && WindowInvisible) {
         var EEWNotification = new Notification({
@@ -593,33 +610,46 @@ export function EEW_Alert(data, update) {
       return elm.EventID !== data.EventID;
     });
 
-    //【現在のEEW】配列に追加
-    EEW_Active.push(data);
+    if (data.is_cancel) {
+      //メインウィンドウ側へキャンセル報を送信（メインウィンドウ側が自律的に10秒間表示してDOMを削除する）
+      messageToMainWindow({
+        action: "EEW_AlertUpdate",
+        data: [...EEW_Active, data],
+        update: update,
+      });
 
-    messageToMainWindow({
-      action: "EEW_AlertUpdate",
-      data: EEW_Active,
-      update: update,
-    });
+      //バックエンドは即時クリア
+      if (EEW_Active.length == 0 && psBlock && powerSaveBlocker.isStarted(psBlock)) {
+        powerSaveBlocker.stop(psBlock);
+      }
+    } else {
+      //通常報のみ【現在のEEW】配列に追加
+      EEW_Active.push(data);
 
+      messageToMainWindow({
+        action: "EEW_AlertUpdate",
+        data: EEW_Active,
+        update: update,
+      });
+    }
 
     MargeEQInfo([{
       status: data.is_training ? "訓練" : "通常",
       eventId: data.EventID,
       category: "EEW",
-      reportDateTime: new Date(data.report_time),
-      OriginTime: new Date(data.origin_time),
-      epiCenter: data.region_name,
-      M: data.isPlum ? null : Number(data.magnitude),
-      maxI: NormalizeShindo(data.maxInt),
+      reportDateTime: data.report_time ? new Date(data.report_time) : new Date(),
+      OriginTime: data.origin_time ? new Date(data.origin_time) : null,
+      epiCenter: data.region_name || null,
+      M: (data.isPlum || data.is_cancel) ? null : Number(data.magnitude),
+      maxI: data.is_cancel ? null : NormalizeShindo(data.maxInt),
       cancel: Boolean(data.is_cancel),
       DetailURL: [],
       axisData: null,
     }], 999);
 
     //スリープ回避開始
-    if (show_alert) {
-      if (config.system.powerSaveBlocking && (!psBlock || !powerSaveBlocker.isStarted(psBlock))) {
+    if (!data.is_cancel && show_alert) {
+      if (config.system?.powerSaveBlocking && (!psBlock || !powerSaveBlocker.isStarted(psBlock))) {
         psBlock = powerSaveBlocker.start("prevent-display-sleep");
       }
     }

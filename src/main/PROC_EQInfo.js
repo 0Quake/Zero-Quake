@@ -46,11 +46,25 @@ export function MargeEQInfo(dataList, count) {
             }
           }
         });
+
+        //有効な電文（フィルタを通過し、取消されていない電文）が存在するか判定
+        var validReports = rawData.filter(function (elm) {
+          if (!config.Info?.EQInfo?.showtraining && elm.status == "訓練") return false;
+          if (!config.Info?.EQInfo?.showTest && elm.status == "試験") return false;
+          if (Replay !== 0 && Number(new Date(elm.reportDateTime)) > (Date.now() - Replay)) return false;
+          return !elm.cancel;
+        });
+
+        //全電文が取消済みなら地震イベント全体をcancelとする
+        EQInfo_Item.cancel = (validReports.length === 0);
+
         rawData.forEach(function (elm) {
-          if (!config.Info.EQInfo.showtraining && elm.status == "訓練") return;
-          if (!config.Info.EQInfo.showTest && elm.status == "試験") return;
+          if (!config.Info?.EQInfo?.showtraining && elm.status == "訓練") return;
+          if (!config.Info?.EQInfo?.showTest && elm.status == "試験") return;
           if (Replay !== 0 && Number(new Date(elm.reportDateTime)) > (Date.now() - Replay)) return;
 
+          //取消された電文（取消報自身および取消された過去報）は値集約から除外
+          if (elm.cancel) return;
 
           if (elm.category == "EEW" && EQElm.EEW === false) return;//EEW以外の情報が既に入っているとき、EEWによる情報を破棄
           else if (elm.category == "EEW") EQElm.EEW = true;
@@ -70,6 +84,7 @@ export function MargeEQInfo(dataList, count) {
               DetailURL: [],
               headline: null,
               axisData: [],
+              cancel: false,
             };
           }
 
@@ -81,7 +96,6 @@ export function MargeEQInfo(dataList, count) {
           if (Boolean2(elm.maxI) && elm.maxI !== "?") EQInfo_Item.maxI = elm.maxI;
           if (Boolean2(elm.maxLgInt) && elm.maxLgInt !== "?") EQInfo_Item.maxLgInt = elm.maxLgInt;
           if (Boolean2(elm.headline)) EQInfo_Item.headline = elm.headline;
-          EQInfo_Item.cancel = elm.cancel;
 
           if (Array.isArray(elm.DetailURL)) {
             elm.DetailURL.forEach(function (elm2) {
@@ -97,37 +111,34 @@ export function MargeEQInfo(dataList, count) {
         EQElm.audioNotification = (EQElm.category == "EEW" && EQInfo_Item.category != "EEW")
 
         //キーごとにマージ
-        Object.keys(EQInfo_Item).forEach(function (key) {
-          if (!EQInfo_Item[key]) return;//新しい側の値がなかったら無視
-
-          if (key == "reportDateTime") {
-            if (EQElm[key] !== EQInfo_Item[key]) {
-              EQElm[key] = EQInfo_Item[key];
-              changed = true;
-            }
-          } else if (key == "DetailURL") {//DetailURLは配列を結合
-            if (Array.isArray(EQInfo_Item[key]) && Array.isArray(EQElm[key])) {//データ検証
-              EQElm[key] = Array.from(new Set([...EQElm[key], ...EQInfo_Item[key]]));
-              changed = true;//変更ありフラグ
-            }
-          } else if (key == "axisData") {
-            if (!Array.isArray(EQElm[key])) EQElm[key] = [];
-            EQInfo_Item[key].forEach(function (elm) {
-              var uuid = elm.message.uuid_
-              var exists = EQElm[key].find((el) => {
-                return el.message?.uuid_ == uuid
-              });
-              if (!exists) EQElm[key].push(elm)
-            })
-          } else if (key == "audioNotification") {
-            return;//前の部分で判定済みなので上書きしないよう飛ばす
-          } else {
-            if (EQElm[key] !== EQInfo_Item[key] && (Boolean2(EQInfo_Item[key]) || key == "cancel")) {
-              EQElm[key] = EQInfo_Item[key];
-              changed = true;//変更ありフラグ
-            }
+        //EQInfo_Itemは有効な電文から再集約された最新状態のため、各プロパティを同期
+        var syncKeys = ["reportDateTime", "category", "OriginTime", "epiCenter", "M", "maxI", "maxLgInt", "headline", "cancel"];
+        syncKeys.forEach(function (key) {
+          if (EQElm[key] !== EQInfo_Item[key]) {
+            EQElm[key] = EQInfo_Item[key];
+            changed = true;
           }
         });
+
+        if (Array.isArray(EQInfo_Item.DetailURL) && Array.isArray(EQElm.DetailURL)) {
+          var mergedURL = Array.from(new Set([...EQElm.DetailURL, ...EQInfo_Item.DetailURL]));
+          if (mergedURL.length !== EQElm.DetailURL.length) {
+            EQElm.DetailURL = mergedURL;
+            changed = true;
+          }
+        }
+
+        if (Array.isArray(EQInfo_Item.axisData)) {
+          if (!Array.isArray(EQElm.axisData)) EQElm.axisData = [];
+          EQInfo_Item.axisData.forEach(function (elm) {
+            var uuid = elm.message?.uuid_;
+            var exists = EQElm.axisData.find((el) => el.message?.uuid_ == uuid);
+            if (!exists) {
+              EQElm.axisData.push(elm);
+              changed = true;
+            }
+          });
+        }
 
         if (data.category == "EEW") {
           changed = true;
@@ -210,8 +221,8 @@ export function AlertEQInfo(data, source) {
 
       //音声通知
       if (dataToNotify) {
-        if (config.Info.EQInfo.NotificationSound &&
-          (config.Info.EQInfo.Bypass_threshold || NormalizeShindo(config.Info.EQInfo.maxI_threshold, 5) <= NormalizeShindo(dataToNotify.maxI, 5) || config.Info.EQInfo.M_threshold <= dataToNotify.M)) {
+        if (config.Info?.EQInfo?.NotificationSound &&
+          (config.Info?.EQInfo?.Bypass_threshold || NormalizeShindo(config.Info?.EQInfo?.maxI_threshold, 5) <= NormalizeShindo(dataToNotify.maxI, 5) || config.Info?.EQInfo?.M_threshold <= dataToNotify.M)) {
           PlayAudio("EQInfo");
           speak(GenerateEQInfoText(dataToNotify));
         }
