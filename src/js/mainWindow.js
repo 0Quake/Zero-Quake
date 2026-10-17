@@ -534,51 +534,58 @@ function eqInfoDraw(data, source) {
       clone.querySelector(".EQItem").setAttribute("id", `EQItem_${elm.eventId}`);
       clone.querySelector(".EQItem").setAttribute("tabindex", index == 0 ? 2 : -1);
 
-      var dataToUse;
+      var dataToUse = null;
 
-      if (elm.std) {
-        dataToUse = elm.std[0]
+      if (Array.isArray(elm.std) && elm.std.length > 0) {
+        dataToUse = elm.std[0];
       } else if (elm.sum) {
-        dataToUse = elm.sum
-      } else if (elm.hourly[0]) {
-        dataToUse = elm.hourly[0]
-      } else { return; }
+        dataToUse = elm.sum;
+      } else if (Array.isArray(elm.hourly) && elm.hourly.length > 0) {
+        dataToUse = elm.hourly[0];
+      }
 
-      if (dataToUse.StartTime && dataToUse.EndTime) {
-        var StartTime = NormalizeDate("YYYY/M/D h時", new Date(dataToUse.StartTime))
-        var sameDate = NormalizeDate("YYYYMMDD", new Date(dataToUse.StartTime)) == NormalizeDate("YYYYMMDD", new Date(dataToUse.EndTime))
-        if (sameDate) var EndTime = NormalizeDate("h時", new Date(dataToUse.EndTime))
-        else var EndTime = NormalizeDate("M/D h時", new Date(dataToUse.EndTime))
-        var dateRangeStr = `${StartTime} ～ ${EndTime}`;
+      var dateRangeStr = "";
+      var content = "";
 
-        var nAvailable = dataToUse.Number || dataToUse.Number == 0;
-        var fnAvailable = dataToUse.FeltNumber || dataToUse.FeltNumber == 0;
+      if (dataToUse && dataToUse.StartTime && dataToUse.EndTime) {
+        var StartTime = NormalizeDate("YYYY/M/D h時", new Date(dataToUse.StartTime));
+        var sameDate = NormalizeDate("YYYYMMDD", new Date(dataToUse.StartTime)) == NormalizeDate("YYYYMMDD", new Date(dataToUse.EndTime));
+        if (sameDate) var EndTime = NormalizeDate("h時", new Date(dataToUse.EndTime));
+        else var EndTime = NormalizeDate("M/D h時", new Date(dataToUse.EndTime));
+        dateRangeStr = `${StartTime} ～ ${EndTime}`;
+
+        var nAvailable = (dataToUse.Number !== null && dataToUse.Number !== undefined && dataToUse.Number !== -1);
+        var fnAvailable = (dataToUse.FeltNumber !== null && dataToUse.FeltNumber !== undefined && dataToUse.FeltNumber !== -1);
         if (fnAvailable && nAvailable) {
-          var content = `${dataToUse.Number}回 （うち有感${dataToUse.FeltNumber}回）`
+          content = `${dataToUse.Number}回 （うち有感${dataToUse.FeltNumber}回)`;
         } else if (nAvailable) {
-          var content = `${dataToUse.Number}回`
+          content = `${dataToUse.Number}回`;
         } else if (fnAvailable) {
-          var content = `有感${dataToUse.FeltNumber}回`
+          content = `有感${dataToUse.FeltNumber}回`;
         } else {
-          return false;
+          content = elm.headline || elm.Text || (elm.cancel ? "取消" : "回数データなし");
         }
+      } else {
+        dateRangeStr = NormalizeDate(4, new Date(elm.reportDateTime));
+        content = elm.headline || elm.Text || (elm.cancel ? "取消" : "回数データなし");
+      }
 
-        clone.querySelector(".EQI_datetime").textContent = dateRangeStr;
-        clone.querySelector(".cancelled").style.display = elm.cancel ? "flex" : "none";
-        clone.querySelector(".TestNotes").style.display = elm.status == "試験" ? "block" : "none";
-        clone.querySelector(".trainingNotes").style.display = elm.status == "訓練" ? "block" : "none";
+      clone.querySelector(".EQI_datetime").textContent = dateRangeStr;
+      clone.querySelector(".cancelled").style.display = elm.cancel ? "flex" : "none";
+      clone.querySelector(".TestNotes").style.display = elm.status == "試験" ? "block" : "none";
+      clone.querySelector(".trainingNotes").style.display = elm.status == "訓練" ? "block" : "none";
 
-        clone.querySelector(".EQI_detail").innerText = `地震回数：${content}`;
+      clone.querySelector(".EQI_detail").innerText = elm.cancel ? "地震回数：取消" : `地震回数：${content}`;
 
-        if (elm.cancel) {
-          clone.querySelector(".EQItem").classList.add("EQI_cancelled");
-          clone.querySelector(".EQItem").setAttribute("aria-label", "取り消された地震情報アイテム");
-        } else {
-          clone.querySelector(".EQItem")
-            .setAttribute("aria-label",
-              `気象庁の地震履歴アイテム：${elm.status == "訓練" ? "訓練報、" : ""}${elm.status == "試験" ? "試験報、" : ""}${elm.headline}${content}
-        `//エンターキーで詳細情報を確認。
-            );
+      if (elm.cancel) {
+        clone.querySelector(".EQItem").classList.add("EQI_cancelled");
+        clone.querySelector(".EQItem").setAttribute("aria-label", "取り消された地震情報アイテム");
+      } else {
+        clone.querySelector(".EQItem")
+          .setAttribute("aria-label",
+            `気象庁の地震履歴アイテム：${elm.status == "訓練" ? "訓練報、" : ""}${elm.status == "試験" ? "試験報、" : ""}${elm.headline || ""}${content}
+      `//エンターキーで詳細情報を確認。
+          );
           clone.querySelector(".EQItem").addEventListener("click", function () {
             window.electronAPI.messageReturn({
               action: "EQInfoWindowOpen",
@@ -590,9 +597,7 @@ function eqInfoDraw(data, source) {
         }
 
         document.getElementById("JMA_EqInfo_Data").appendChild(clone);
-      }
-
-    } else {
+      } else {
       var clone = EQTemplate.content.cloneNode(true);
 
       clone.querySelector(".EQI_epiCenter").textContent = elm.epiCenter || "震源調査中";
