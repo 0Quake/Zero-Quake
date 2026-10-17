@@ -95,6 +95,7 @@ import path from "path";
 import Store from "electron-store";
 import { readFile } from "fs/promises";
 import fs from "fs";
+import os from "os";
 import { exec } from "child_process";
 var __dirname = path.dirname(fileURLToPath(import.meta.url));
 var packageJson = JSON.parse(await readFile(path.join(__dirname, "../package.json")));
@@ -434,21 +435,33 @@ var errorMsgBox = false;
 process.on("uncaughtException", function (err) {
   try {
     if (!errorMsgBox && app.isReady()) {
-      GeneralError_handler(causeTree(err))
-      if (String(err.stack).startsWith("Error: net::ERR_")) return false;
+      const causeTreeStr = causeTree(err);
+      GeneralError_handler(causeTreeStr);
+      if (causeTreeStr.startsWith("Error: net::ERR_")) return false;
+      if (causeTreeStr.includes("ECONNRESET")) return false;
+      if (causeTreeStr.includes("ETIMEDOUT")) return false;
+      if (causeTreeStr.includes("ENOTFOUND")) return false;
+      if (causeTreeStr.includes("ECONNREFUSED")) return false;
+      if (causeTreeStr.includes("EPIPE")) return false;
+      if (causeTreeStr.includes("EAI_AGAIN")) return false;
+
       errorMsgBox = true;
-      options.detail = `よろしければ、以下のエラーメッセージのスクリーンショット等を開発者へご報告ください。\n=================\nZeroQuake v${package_ver ? package_ver : "?.?.?"}\n\n${causeTree(err)}\n=================\n\n動作を選択してください。`;
+      options.detail = `よろしければ、以下のエラーメッセージのスクリーンショット等を開発者へご報告ください。\n=================\nZeroQuake v${package_ver ? package_ver : "?.?.?"
+        }\n  on ${process.platform} / ${os.release()} / ${process.arch
+        }\n  at ${new Date().toLocaleString()
+        }\n\n${causeTreeStr
+        }\n =================\n\n動作を選択してください。`;
 
       if (MainWindow) {
         dialog.showMessageBox(MainWindow, options).then(function (result) {
           errorMsgBox = false;
           errorResolve(result.response);
-        });
+        }).catch(() => { });
       } else {
         dialog.showMessageBox(options).then(function (result) {
           errorMsgBox = false;
           errorResolve(result.response);
-        });
+        }).catch(() => { });
       }
 
       SystemNotification("予期しないエラーが発生しました。");
@@ -458,15 +471,30 @@ process.on("uncaughtException", function (err) {
   }
 });
 
+function maskPrivatePaths(str) {
+  if (!str) return "";
+  let result = String(str).replaceAll("\\", "/");
+
+  //アプリのパス秘匿
+  const appPath = app.getAppPath().replaceAll("\\", "/");
+  result = result.replaceAll(appPath, "<0quake_root>");
+
+  //OSのユーザーフォルダ秘匿
+  const home = os.homedir().replaceAll("\\", "/");
+  result = result.replaceAll(home, "<user_home>");
+
+  return result;
+}
+
 //エラーメッセージの作成。エラー原因のツリー
 function causeTree(err) {
   try {
-    var ErrString = err.stack;
-    var i = 0;
+    var ErrString = String(err.stack);
 
     try {
+      var i = 0;
       while (err.cause && i < 10) {
-        ErrString += `\n[cause]:${err.cause.stack}`;
+        ErrString += `\n[cause]:${err.cause.stack} `;
         i++;
         err = err.cause;
       }
@@ -474,9 +502,7 @@ function causeTree(err) {
 
     try {
       //ユーザーのフォルダ構成を秘匿
-      var homeDir = app.getAppPath();
-      homeDir = homeDir.replaceAll("\\", "/");//バックスラッシュ対策
-      ErrString = ErrString.replace(homeDir, '<0quake_root>');
+      ErrString = maskPrivatePaths(ErrString)
     } catch { }
 
     return ErrString;
@@ -718,15 +744,15 @@ function setOpenAtLogin(openAtLogin) {
     app.setLoginItemSettings({ openAtLogin: false });
 
     const homePath = String(app.getPath("home")).replace(/\\/g, "/");
-    const dist = `${homePath}/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup/ZeroQuake.lnk`;
+    const dist = `${homePath} /AppData/Roaming / Microsoft / Windows / Start Menu / Programs / Startup / ZeroQuake.lnk`;
     if (openAtLogin) {
       const source = String(app.getPath("exe")).replace(/\\/g, "/");
       let command = `
-  $WshShell = New-Object -ComObject WScript.Shell;
-  $ShortCut = $WshShell.CreateShortcut("${dist}");
-  $ShortCut.TargetPath = "${source}";
-  $ShortCut.Save();
-  `;
+    $WshShell = New - Object - ComObject WScript.Shell;
+    $ShortCut = $WshShell.CreateShortcut("${dist}");
+    $ShortCut.TargetPath = "${source}";
+    $ShortCut.Save();
+    `;
       exec(command, { shell: "powershell.exe" });
     } else {
       if (fs.existsSync(dist))
