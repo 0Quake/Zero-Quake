@@ -385,15 +385,21 @@ export function Req_JMAXML(url, count) {
 
       } else if (title == "南海トラフ地震関連解説情報" || title == "南海トラフ地震臨時情報") {
         var kind = xml.getElementsByTagName("Head")?.[0]?.getElementsByTagName("InfoType")?.[0]?.textContent;
+        var status = xml.getElementsByTagName("Status")?.[0]?.textContent;
+        var eventId = xml.getElementsByTagName("EventID")?.[0]?.textContent;
 
-        var rdtStr = xml.getElementsByTagName("ReportDateTime")[0].textContent;
-        var rdt = newDate2(rdtStr)
+        var rdtStr = xml.getElementsByTagName("ReportDateTime")[0]?.textContent;
+        var rdt = newDate2(rdtStr);
 
-        var headline = xml.getElementsByTagName("Headline")?.[0]?.getElementsByTagName("Text")?.[0]?.textContent
+        var headline = xml.getElementsByTagName("Headline")?.[0]?.getElementsByTagName("Text")?.[0]?.textContent;
+
+        var isCancel = kind == "取消";
 
         var data = {
           title: title, //南海トラフ地震関連解説情報など
-          kind: null, //定例など
+          eventId: eventId,
+          status: status,//通常、訓練、試験
+          kind: isCancel ? "取消" : null, //定例など
           reportKind: kind, //発表/取消
           reportDate: rdt, //時刻
           Serial: null,
@@ -402,25 +408,48 @@ export function Req_JMAXML(url, count) {
           Appendix: "",
           NextAdvisory: "",
           Text2: "",
+          is_cancel: isCancel,
         };
 
-
-        var SerialStr = xml.getElementsByTagName("Serial")?.[0]?.textContent
+        var SerialStr = xml.getElementsByTagName("Serial")?.[0]?.textContent;
         if (SerialStr) data.Serial = Number(SerialStr);
 
-        var Body = xml.getElementsByTagName("Body")[0];
-        var EarthQuakeInfo = Body.getElementsByTagName("EarthquakeInfo")[0];
+        var Body = xml.getElementsByTagName("Body")?.[0];
+        if (Body) {
+          var EarthQuakeInfo = Body.getElementsByTagName("EarthquakeInfo")[0];
+          if (EarthQuakeInfo) {
+            var infoSerialName = EarthQuakeInfo.getElementsByTagName("InfoSerial")?.[0]?.getElementsByTagName("Name")?.[0]?.textContent;
+            var infoKindName = EarthQuakeInfo.getElementsByTagName("InfoKind")?.[0]?.textContent;
+            if (!isCancel) {
+              data.kind = infoSerialName || infoKindName || (title.startsWith("南海トラフ地震臨時情報") ? "臨時" : null);
+            }
+            data.Text = EarthQuakeInfo.getElementsByTagName("Text")?.[0]?.textContent || "";
+            data.Appendix = EarthQuakeInfo.getElementsByTagName("Appendix")?.[0]?.textContent || "";
+          }
 
-        data.kind = EarthQuakeInfo?.getElementsByTagName("InfoSerial")?.[0]?.getElementsByTagName("Name")?.[0]?.textContent;
-        data.Text = EarthQuakeInfo?.getElementsByTagName("Text")?.[0]?.textContent;
-        data.Appendix = EarthQuakeInfo?.getElementsByTagName("Appendix")?.[0]?.textContent;
+          data.NextAdvisory = Body.getElementsByTagName("NextAdvisory")?.[0]?.textContent || "";
 
-        data.NextAdvisory = Body?.getElementsByTagName("NextAdvisory")?.[0]?.textContent;
+          var Text2Elm = Array.from(Body.children)
+            .find(function (elm) { return elm.tagName == "Text"; });
 
-        var Text2Elm = Array.from(xml.getElementsByTagName("Body")[0].children)
-          .find(function (elm) { return elm.tagName == "Text"; });
+          if (Text2Elm) data.Text2 = Text2Elm.textContent || "";
+        }
 
-        if (Text2Elm) data.Text2 = Text2Elm.textContent;
+        // 取消電文を受信した場合、同EventID（または直前の同種電文）の過去報を取り消し状態にする
+        // 南海トラフ解説・臨時情報のキャンセルは、Serialが自分より若い（または同一）ものだけ遡る
+        if (isCancel) {
+          NankaiTroughInfoAll.forEach(function (prev) {
+            if (prev.title == data.title && (!data.eventId || !prev.eventId || prev.eventId == data.eventId)) {
+              if (data.Serial != null && prev.Serial != null) {
+                if (prev.Serial <= data.Serial) {
+                  prev.is_cancel = true;
+                }
+              } else if (new Date(prev.reportDate) <= new Date(data.reportDate)) {
+                prev.is_cancel = true;
+              }
+            }
+          });
+        }
 
         NankaiTroughInfoAll.push(data);
         NankaiTroughInfoAll = NankaiTroughInfoAll
@@ -429,21 +458,33 @@ export function Req_JMAXML(url, count) {
         var teirei;
         var rinji = NankaiTroughInfoAll.find(function (elm) {
           var offset = Number(new Date() - new Date(elm.reportDate));
+          if (!elm.title.startsWith("南海トラフ地震臨時情報")) return false;
+          // 最新の取消電文自体は7日間カード表示
+          if (elm.reportKind == "取消") {
+            return offset <= 604800000;
+          }
+          // 取り消された過去の電文は候補から除外
+          if (elm.is_cancel) return false;
+
           return (
-            elm.title.startsWith("南海トラフ地震臨時情報") &&
-            ((elm.kind == "巨大地震警戒" && offset <= 12091200000) || elm.kind == "巨大地震注意" || elm.kind == "調査中" || (elm.kind == "調査終了" && offset <= 604800000))
+            (elm.kind == "巨大地震警戒" && offset <= 12091200000) ||
+            elm.kind == "巨大地震注意" ||
+            elm.kind == "調査中" ||
+            (elm.kind == "調査終了" && offset <= 604800000) ||
+            (elm.kind == "臨時" && offset <= 604800000)
           );
         });
-        if (rinji) {
+        if (rinji && rinji.reportKind != "取消") {
           teirei = NankaiTroughInfoAll.find(function (elm) {
             return (
               elm.title.startsWith("南海トラフ地震関連解説情報") &&
+              !elm.is_cancel &&
               new Date(rinji.reportDate) <= new Date(elm.reportDate)
             );
           });
         } else {
           teirei = NankaiTroughInfoAll.find(function (elm) {
-            return elm.title.startsWith("南海トラフ地震関連解説情報");
+            return elm.title.startsWith("南海トラフ地震関連解説情報") && !elm.is_cancel;
           });
         }
 
