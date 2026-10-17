@@ -155,7 +155,7 @@ export function NormalizeShindo(str, responseType) {
           IntIndex = 9;
           break;
         case "未":
-        case "５弱以上未入電":
+        case "5-以上未入電":
         case "震度5-以上未入電":
         case "5+?":
           IntIndex = 10;
