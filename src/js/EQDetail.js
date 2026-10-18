@@ -1817,7 +1817,7 @@ function add_IntensityStation_info(lat, lng, name, int) {
 }
 
 var WaitingToDraw = null
-function DrawIntensity() {
+const DrawIntensity = throttle(function () {
   if (WaitingToDraw) var data = WaitingToDraw
   else return
   var has_StaShindo = false;
@@ -1872,7 +1872,7 @@ function DrawIntensity() {
   else mapContainer.classList.remove("has_StaShindo");
 
   mapFillDraw();
-}
+}, 500);
 
 function DrawLgIntensity(data) {
   LgIntIcons = [];
@@ -2146,7 +2146,7 @@ function ConvertEQInfo(data) {
 
   if (EQInfoMarged.IntData) {
     WaitingToDraw = EQInfoMarged.IntData
-    throttle(DrawIntensity, 500)()
+    DrawIntensity()
   }
 
   if (EQInfoMarged.LngIntData) {
