@@ -125,7 +125,7 @@ export function Req_JMAXMLList(count, longFeed) {
       return r.text();
     }).then((text) => {
       const xml = DomPsr.parseFromString(text, "text/xml");
-      if (!xml) throw new Error("XMLのパースに失敗");
+      if (!xml || xml.getElementsByTagName("parsererror").length > 0) throw new Error("XMLのパースに失敗");
       var EQInfoCount = 0;
       Array.prototype.forEach.call(xml.getElementsByTagName("entry"), function (elm) {
         var url;
@@ -137,7 +137,8 @@ export function Req_JMAXMLList(count, longFeed) {
         } catch (e) {
           return;
         }
-        var title = elm.getElementsByTagName("title")[0].textContent;
+        var title = elm.getElementsByTagName("title")?.[0]?.textContent;
+        if (!title) return;
         if (
           title == "震度速報" ||
           title == "震源に関する情報" ||
@@ -166,18 +167,24 @@ export function Req_JMAXMLList(count, longFeed) {
       }
 
       var nankai = Array.from(xml.getElementsByTagName("entry")).find(function (elm) {
-        var ttl = elm.getElementsByTagName("title")[0];
+        var ttl = elm.getElementsByTagName("title")?.[0];
         return ttl && ttl.textContent.startsWith("南海トラフ地震関連解説情報");
       });
 
-      if (nankai) Req_JMAXML(nankai.getElementsByTagName("link")[0].getAttribute("href"));
+      if (nankai) {
+        var nankaiUrl = nankai.getElementsByTagName("link")?.[0]?.getAttribute("href");
+        if (nankaiUrl) Req_JMAXML(nankaiUrl);
+      }
 
       Array.from(xml.getElementsByTagName("entry")).forEach(
         function (elm) {
-          var ttl = elm.getElementsByTagName("title")[0];
+          var ttl = elm.getElementsByTagName("title")?.[0];
+          var updatedStr = elm.getElementsByTagName("updated")?.[0]?.textContent;
+          var updatedTime = updatedStr ? new Date(updatedStr).getTime() : NaN;
 
-          if (ttl && ttl.textContent.startsWith("南海トラフ地震臨時情報") && Number(new Date() - new Date(elm.getElementsByTagName("updated")[0].textContent)) <= 12091200000) {
-            Req_JMAXML(elm.getElementsByTagName("link")[0].getAttribute("href"));
+          if (ttl && ttl.textContent.startsWith("南海トラフ地震臨時情報") && !Number.isNaN(updatedTime) && (Date.now() - updatedTime) <= 12091200000) {
+            var href = elm.getElementsByTagName("link")?.[0]?.getAttribute("href");
+            if (href) Req_JMAXML(href);
           }
         }
       );
