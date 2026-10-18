@@ -1187,7 +1187,7 @@ function jmaXMLFetch(url) {
         if (LatLngDepth && LatLngDepth.length) {
           LatTmp = Number(LatLngDepth[1]);
           LngTmp = Number(LatLngDepth[2]);
-          DepthTmp = Number(LatLngDepth[3] / 1000);
+          DepthTmp = LatLngDepth[3] ? Number(LatLngDepth[3] / 1000) : null;
         }
       }
 
@@ -2232,7 +2232,7 @@ function ConvertEQInfo(data) {
   }
 
   if (EQInfo.depth === 0) data_depth.innerText = "ごく浅い";
-  else if (EQInfo.depth == 700) data_depth.innerText = "700km以上";
+  else if (Math.abs(EQInfo.depth) >= 700) data_depth.innerText = "700km以上";
   else if (EQInfo.depth) data_depth.innerText = `${Math.abs(Math.round(EQInfo.depth))}km`;
   else data_depth.innerText = "不明";
 

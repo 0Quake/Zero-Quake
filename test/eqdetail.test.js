@@ -55,3 +55,28 @@ it("clears previously drawn intensity data when a correction removes it", () => 
   assert.equal(context.drawnIntensity.length, 0);
   assert.equal(context.drawnLg.length, 0);
 });
+
+it("correctly displays '700km以上' for depth -700, 700, or deeper", () => {
+  const { context, element } = renderer();
+  context.mapReady = true;
+
+  // XMLパース結果の深さ -700 (Coordinate: -700000/)
+  context.ConvertEQInfo({ category: "震源・震度情報", reportTime: 1000, depth: -700 });
+  assert.equal(element("data_depth").innerText, "700km以上");
+
+  // 正の値 700
+  context.ConvertEQInfo({ category: "震源・震度情報", reportTime: 2000, depth: 700 });
+  assert.equal(element("data_depth").innerText, "700km以上");
+
+  // 通常の深さ 10km (depth: -10)
+  context.ConvertEQInfo({ category: "震源・震度情報", reportTime: 3000, depth: -10 });
+  assert.equal(element("data_depth").innerText, "10km");
+
+  // 深さ 0km (ごく浅い)
+  context.ConvertEQInfo({ category: "震源・震度情報", reportTime: 4000, depth: 0 });
+  assert.equal(element("data_depth").innerText, "ごく浅い");
+
+  // 深さ不明 (depth: null)
+  context.ConvertEQInfo({ category: "震源・震度情報", reportTime: 5000, depth: null });
+  assert.equal(element("data_depth").innerText, "不明");
+});
