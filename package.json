@@ -72,7 +72,7 @@
     "electron-store": "^12.0.0",
     "eventsource": "^5.1.2",
     "jsdom": "^30.1.2",
-    "maplibre-gl": "^6.12.0",
+    "maplibre-gl": "^6.14.0",
     "pmtiles": "^4.5.0"
   }
 }
