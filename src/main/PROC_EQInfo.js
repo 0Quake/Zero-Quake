@@ -101,12 +101,19 @@ export function MargeEQInfo(dataList, count) {
           EQInfo_Item.reportDateTime = elm.reportDateTime;
           EQInfo_Item.status = elm.status;
           EQInfo_Item.category = elm.category;
-          if (Boolean2(elm.OriginTime)) EQInfo_Item.OriginTime = elm.OriginTime;
-          if (Boolean2(elm.epiCenter)) EQInfo_Item.epiCenter = elm.epiCenter;
-          if (Boolean2(elm.M) && elm.M != "Ｍ不明" && elm.M != "NaN") EQInfo_Item.M = elm.M;
-          if (Boolean2(elm.maxI) && elm.maxI !== "?") EQInfo_Item.maxI = elm.maxI;
-          if (Boolean2(elm.maxLgInt) && elm.maxLgInt !== "?") EQInfo_Item.maxLgInt = elm.maxLgInt;
           if (Boolean2(elm.headline)) EQInfo_Item.headline = elm.headline;
+
+          if (elm.OriginTime !== undefined) EQInfo_Item.OriginTime = elm.OriginTime;
+          if (elm.epiCenter !== undefined) EQInfo_Item.epiCenter = elm.epiCenter;
+          if (elm.M !== undefined) {
+            EQInfo_Item.M = (elm.M === "NaN" || Number.isNaN(elm.M)) ? null : elm.M;
+          }
+          if (elm.maxI !== undefined) {
+            EQInfo_Item.maxI = (elm.maxI === "?") ? null : elm.maxI;
+          }
+          if (elm.maxLgInt !== undefined) {
+            EQInfo_Item.maxLgInt = (elm.maxLgInt === "?") ? null : elm.maxLgInt;
+          }
 
           if (Array.isArray(elm.DetailURL)) {
             elm.DetailURL.forEach(function (elm2) {

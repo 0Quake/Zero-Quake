@@ -17,6 +17,8 @@ var eid;
 var ESmarkerElm;
 var newInfoDateTime = 0;
 var map;
+var mapReady = false;
+var pendingEQInfo = [];
 var config;
 var EQInfo = {
   originTime: null,
@@ -134,7 +136,7 @@ window.electronAPI.messageSend((event, request) => {
     }
 
     if (!map) Mapinit();
-    else {
+    else if (mapReady) {
       document.getElementById("shindomap_radio").setAttribute("checked", true);
       estShindoMapDraw = false;
       ShindoMapDraw = true;
@@ -439,6 +441,10 @@ function Mapinit() {
 }
 
 function drawData() {
+  mapReady = true;
+  var pending = pendingEQInfo;
+  pendingEQInfo = [];
+  pending.forEach(ConvertEQInfo);
   mapFillSwitch();
   layerSelect(config.data.layer);
   radioSet("mapSelect", config.data.layer);
@@ -2074,6 +2080,11 @@ var EQInfoMarged = {};
 var EQInfoData = [];
 //地震情報マージ
 function ConvertEQInfo(data) {
+  // 電文の取得が地図の初期化より先に完了する場合は、load後に反映する。
+  if (!mapReady) {
+    pendingEQInfo.push(data);
+    return;
+  }
   var sameData = EQInfoData.find(function (elm) {
     if (elm.category !== data.category) return false;
     if (Number(new Date(elm.reportTime)) !== Number(new Date(data.reportTime))) return false;
@@ -2153,9 +2164,9 @@ function ConvertEQInfo(data) {
       var keys = ["category", "status", "reportTime", "originTime", "maxI", "mag", "magType", "lat", "lng", "depth", "epiCenter"];
       keys.forEach((key) => {
         var val = elm[key];
-        if (!Boolean2(val)) return;
-        if (key === "maxI" && val === "?") return;
-        if (key === "mag" && (val === "Ｍ不明" || val === "NaN" || Number.isNaN(val))) return;
+        if (val === undefined) return;
+        if (key === "maxI" && val === "?") val = null;
+        if (key === "mag" && (val === "NaN" || Number.isNaN(val))) val = null;
         EQInfoTmp[key] = val;
       });
 
@@ -2168,12 +2179,12 @@ function ConvertEQInfo(data) {
   });
 
   //長周期のデータを先に追加し、長周期以外を後から追加することで、長周期以外のものを優先
-  EQInfoData.filter((elm) => elm.category == "長周期地震動に関する観測情報").forEach(function (elm) {
-    if (Boolean2(elm.IntData)) EQInfoTmp.IntData = elm.IntData;
+  EQInfoData.filter((elm) => !elm.cancel && elm.category == "長周期地震動に関する観測情報").forEach(function (elm) {
+    if (elm.IntData !== undefined) EQInfoTmp.IntData = elm.IntData;
   });
 
-  EQInfoData.filter((elm) => elm.category !== "長周期地震動に関する観測情報").forEach(function (elm) {
-    if (Boolean2(elm.IntData)) EQInfoTmp.IntData = elm.IntData;
+  EQInfoData.filter((elm) => !elm.cancel && elm.category !== "長周期地震動に関する観測情報").forEach(function (elm) {
+    if (elm.IntData !== undefined) EQInfoTmp.IntData = elm.IntData;
   });
 
   EQInfoTmp.cancel = !EQInfoData.find(function (elm) {
@@ -2182,35 +2193,51 @@ function ConvertEQInfo(data) {
 
   EQInfoMarged = EQInfoTmp;
 
-  if (EQInfoMarged.IntData) {
-    WaitingToDraw = EQInfoMarged.IntData
-    DrawIntensity()
-  }
+  WaitingToDraw = EQInfoMarged.IntData || [];
+  DrawIntensity();
 
   if (EQInfoMarged.LngIntData) {
     InfoType_add("type-7");
     DrawLgIntensity(EQInfoMarged.LngIntData);
+  } else {
+    DrawLgIntensity([]);
+    document.getElementById("lngintListWrap").style.display = "none";
   }
 
   document.getElementById("cancelled").style.display = EQInfoMarged.cancel ? "flex" : "none";
 
   var keys = ["originTime", "maxI", "mag", "lat", "lng", "epiCenter", "depth"];
   keys.forEach((key) => {
-    if (Boolean2(EQInfoMarged[key])) EQInfo[key] = EQInfoMarged[key];
+    EQInfo[key] = EQInfoMarged[key];
   });
 
   if (EQInfo.originTime) data_time.innerText = NormalizeDate(4, EQInfo.originTime);
-  if (EQInfo.maxI) data_maxI.innerText = NormalizeShindo(EQInfo.maxI, 1);
-  if (EQInfo.maxI) data_maxI.style.borderBottom = `solid 2px ${NormalizeShindo(EQInfo.maxI, 2)[0]}`;
+  else data_time.innerText = "不明";
+
+  if (EQInfo.maxI) {
+    data_maxI.innerText = NormalizeShindo(EQInfo.maxI, 1);
+    data_maxI.style.borderBottom = `solid 2px ${NormalizeShindo(EQInfo.maxI, 2)[0]}`;
+  } else {
+    data_maxI.innerText = "不明";
+    data_maxI.style.borderBottom = "";
+  }
+
   if (EQInfoMarged.magType) EQInfo.magType = EQInfoMarged.magType;
   else if (!EQInfo.magType) EQInfo.magType = "M";
-  if (EQInfo.mag) data_M.innerText = `${EQInfo.magType} ${EQInfo.mag}`;
 
-  if (EQInfo.depth == 0) data_depth.innerText = "ごく浅い";
+  if (EQInfo.mag) {
+    data_M.innerText = `${EQInfo.magType} ${EQInfo.mag}`;
+  } else {
+    data_M.innerText = "不明";
+  }
+
+  if (EQInfo.depth === 0) data_depth.innerText = "ごく浅い";
   else if (EQInfo.depth == 700) data_depth.innerText = "700km以上";
   else if (EQInfo.depth) data_depth.innerText = `${Math.abs(Math.round(EQInfo.depth))}km`;
+  else data_depth.innerText = "不明";
 
   if (EQInfo.epiCenter) data_center.innerText = EQInfo.epiCenter;
+  else data_center.innerText = "不明";
 
   if (EQInfoMarged.comment) {
     EQInfo.comment = EQInfoMarged.comment;
@@ -2306,6 +2333,9 @@ function ConvertEQInfo(data) {
       ESmarkerElm.getElement().removeAttribute("tabindex");
       ESmarkerElm.getElement().setAttribute("aria-hidden", true);
     } else ESmarkerElm.setLngLat([EQInfoMarged.lng, EQInfoMarged.lat]);
+  } else if (ESmarkerElm) {
+    ESmarkerElm.remove();
+    ESmarkerElm = null;
   }
 
   mapZoomReset();

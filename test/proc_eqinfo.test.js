@@ -163,5 +163,104 @@ describe("PROC_EQInfo.js - Unit Tests", () => {
       }], 4);
       assert.equal(EQInfoData[eventId].cancel, true, "全取消時はcancel=true");
     });
+
+    it("should clear M when corrected report explicitly specifies unknown M, while retaining intensity", async () => {
+      const { MargeEQInfo, EQInfoData } = await import("../src/main/PROC_EQInfo.js");
+      const eventId = "20261018999992";
+      const now = Date.now();
+
+      // 第1報: 震源・震度情報 (M: 5.0, 震度4)
+      MargeEQInfo([{
+        eventId,
+        category: "震源・震度に関する情報",
+        status: "通常",
+        reportDateTime: new Date(now - 30000),
+        epiCenter: "三陸沖",
+        M: 5.0,
+        maxI: "4",
+        cancel: false,
+      }], 1);
+      assert.equal(EQInfoData[eventId].M, 5.0);
+      assert.equal(EQInfoData[eventId].maxI, "4");
+
+      // 第2報: 訂正報 (M: null / "NaN" / "Ｍ不明", 震度4)
+      MargeEQInfo([{
+        eventId,
+        category: "震源・震度に関する情報",
+        status: "通常",
+        reportDateTime: new Date(now - 10000),
+        epiCenter: "三陸沖",
+        M: null,
+        maxI: "4",
+        cancel: false,
+      }], 2);
+      assert.equal(EQInfoData[eventId].M, null, "訂正報のM不明が反映され、旧M5.0が消去されること");
+      assert.equal(EQInfoData[eventId].maxI, "4", "震度4は保持されること");
+    });
+
+    it("should clear intensity when corrected report removes domestic intensity (e.g. far quake)", async () => {
+      const { MargeEQInfo, EQInfoData } = await import("../src/main/PROC_EQInfo.js");
+      const eventId = "20261018999993";
+      const now = Date.now();
+
+      // 第1報: 震源・震度情報 (M: 5.0, 震度4)
+      MargeEQInfo([{
+        eventId,
+        category: "震源・震度に関する情報",
+        status: "通常",
+        reportDateTime: new Date(now - 30000),
+        epiCenter: "南太平洋",
+        M: 5.0,
+        maxI: "4",
+        cancel: false,
+      }], 1);
+      assert.equal(EQInfoData[eventId].maxI, "4");
+
+      // 第2報: 訂正報 (遠地地震への訂正、Control/Titleは震源・震度情報、国内震度なし maxI: null)
+      MargeEQInfo([{
+        eventId,
+        category: "震源・震度に関する情報",
+        status: "通常",
+        reportDateTime: new Date(now - 10000),
+        epiCenter: "南太平洋",
+        M: 7.0,
+        maxI: null,
+        cancel: false,
+      }], 2);
+      assert.equal(EQInfoData[eventId].M, 7.0);
+      assert.equal(EQInfoData[eventId].maxI, null, "訂正報で国内震度が無くなった場合、旧震度4が消去されること");
+    });
+
+    it("should correctly complete information across different categories", async () => {
+      const { MargeEQInfo, EQInfoData } = await import("../src/main/PROC_EQInfo.js");
+      const eventId = "20261018999994";
+      const now = Date.now();
+
+      // 第1報: 震度速報 (震度4、震源・Mなし)
+      MargeEQInfo([{
+        eventId,
+        category: "震度速報",
+        status: "通常",
+        reportDateTime: new Date(now - 30000),
+        maxI: "4",
+        cancel: false,
+      }], 1);
+      assert.equal(EQInfoData[eventId].maxI, "4");
+      assert.ok(!EQInfoData[eventId].M, "震度速報ではMは未設定/null");
+
+      // 第2報: 震源に関する情報 (M: 5.2、震源地名あり、震度なし)
+      MargeEQInfo([{
+        eventId,
+        category: "震源に関する情報",
+        status: "通常",
+        reportDateTime: new Date(now - 10000),
+        epiCenter: "千葉県北東部",
+        M: 5.2,
+        cancel: false,
+      }], 2);
+      assert.equal(EQInfoData[eventId].maxI, "4", "震度速報の震度4が保持されること");
+      assert.equal(EQInfoData[eventId].M, 5.2, "震源に関する情報のM5.2が補完されること");
+      assert.equal(EQInfoData[eventId].epiCenter, "千葉県北東部");
+    });
   });
 });
