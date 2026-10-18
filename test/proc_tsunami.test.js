@@ -210,4 +210,325 @@ describe("PROC_Tsunami.js - ConvertTsunamiInfo", () => {
     assert.equal(procTsunami.Tsunami_data_Marged.Torikeshi, true);
     assert.equal(procTsunami.Tsunami_data_Marged.revocation, false);
   });
+
+  it("should generate correct cancellation voice text when Torikeshi is true", async () => {
+    const { GenerateTsunamiText } = await import("../src/main/PROC_Tsunami.js");
+    const t1 = new Date(Date.now() - 5000).toISOString();
+    const cancelData = {
+      status: "通常",
+      issue: { time: t1, EventID: ["202610120030"] },
+      areas: [],
+      Torikeshi: true,
+      cancelled: true,
+      revocation: false,
+    };
+
+    const text = GenerateTsunamiText(cancelData);
+    assert.ok(text.includes("解除されました") || text.includes("取り消"));
+  });
+
+  it("should preserve distinct stations within the same area without mismerging", async () => {
+    const procTsunami = await import("../src/main/PROC_Tsunami.js");
+    const t1 = new Date(Date.now() - 5000).toISOString();
+    const data = {
+      status: "通常",
+      issue: { time: t1, EventID: ["202610120040"] },
+      areas: [
+        {
+          name: "予報区A",
+          code: "210",
+          grade: "Warning",
+          cancelled: false,
+          stations: [
+            { name: "S1", code: "S101", omaxHeight: "1.0m" },
+            { name: "S2", code: "S102", omaxHeight: "2.0m" },
+          ],
+        },
+      ],
+      revocation: false,
+    };
+
+    ConvertTsunamiInfo(data);
+    // 再受信（同一報または更新）
+    ConvertTsunamiInfo(data);
+
+    const area = procTsunami.Tsunami_data_Marged.areas.find(a => a.name === "予報区A");
+    assert.ok(area);
+    assert.equal(area.stations.length, 2);
+    const s1 = area.stations.find(s => s.name === "S1");
+    const s2 = area.stations.find(s => s.name === "S2");
+    assert.equal(s1.omaxHeight, "1.0m");
+    assert.equal(s2.omaxHeight, "2.0m");
+  });
+
+  it("should clear maxHeightTime when station transitions to observing condition", async () => {
+    const procTsunami = await import("../src/main/PROC_Tsunami.js");
+    const t1 = new Date(Date.now() - 5000).toISOString();
+    const mhTime = new Date(Date.now() - 3000);
+    // 第1報: 1.0m, 上昇中, 時刻あり
+    const data1 = {
+      status: "通常",
+      issue: { time: t1, EventID: ["202610120050"] },
+      areas: [
+        {
+          name: "予報区B",
+          code: "220",
+          grade: "Warning",
+          cancelled: false,
+          stations: [
+            {
+              name: "S3",
+              code: "S103",
+              hasMaxHeight: true,
+              omaxHeight: "1.0m",
+              maxHeightRising: true,
+              maxHeightTime: mhTime,
+            },
+          ],
+        },
+      ],
+      revocation: false,
+    };
+    ConvertTsunamiInfo(data1);
+
+    const sBefore = procTsunami.Tsunami_data_Marged.areas.find(a => a.name === "予報区B")?.stations.find(s => s.name === "S3");
+    assert.equal(sBefore.omaxHeight, "1.0m");
+    assert.equal(sBefore.maxHeightRising, true);
+    assert.ok(sBefore.maxHeightTime);
+
+    // 第2報: 「観測中」に切り替え (hasMaxHeight: true, omaxHeight: null)
+    const t2 = new Date(Date.now() - 2000).toISOString();
+    const data2 = {
+      status: "通常",
+      issue: { time: t2, EventID: ["202610120050"] },
+      areas: [
+        {
+          name: "予報区B",
+          code: "220",
+          grade: "Warning",
+          cancelled: false,
+          stations: [
+            {
+              name: "S3",
+              code: "S103",
+              hasMaxHeight: true,
+              omaxHeight: null,
+              maxHeightCondition: "観測中",
+            },
+          ],
+        },
+      ],
+      revocation: false,
+    };
+    ConvertTsunamiInfo(data2);
+
+    const sAfter = procTsunami.Tsunami_data_Marged.areas.find(a => a.name === "予報区B")?.stations.find(s => s.name === "S3");
+    assert.equal(sAfter.omaxHeight, null);
+    assert.equal(sAfter.maxHeightRising, false);
+    assert.equal(sAfter.maxHeightTime, null);
+  });
+
+  it("should retain observation time for '微弱' condition without numeric height", async () => {
+    const procTsunami = await import("../src/main/PROC_Tsunami.js");
+    const t1 = new Date(Date.now() - 5000).toISOString();
+    const mhTime = new Date("2009-08-11T05:25:00+09:00");
+
+    // 「微弱」報: 数値波高なし、観測時刻あり (PDF Ⅱ.12-4 事例2)
+    const data = {
+      status: "通常",
+      issue: { time: t1, EventID: ["202610120060"] },
+      areas: [
+        {
+          name: "予報区C",
+          code: "230",
+          grade: "Warning",
+          cancelled: false,
+          stations: [
+            {
+              name: "S4",
+              code: "S104",
+              hasMaxHeight: true,
+              omaxHeight: null,
+              maxHeightCondition: "微弱",
+              maxHeightTime: mhTime,
+            },
+          ],
+        },
+      ],
+      revocation: false,
+    };
+    ConvertTsunamiInfo(data);
+    // 同一報の再受信
+    ConvertTsunamiInfo(data);
+
+    const s = procTsunami.Tsunami_data_Marged.areas.find(a => a.name === "予報区C")?.stations.find(st => st.name === "S4");
+    assert.ok(s);
+    assert.equal(s.omaxHeight, null);
+    assert.equal(s.maxHeightCondition, "微弱");
+    assert.equal(Number(s.maxHeightTime), Number(mhTime));
+  });
+
+  it("should clear ArrivedTime and firstHeightInitial when station transitions to '欠測', while preserving forecast ArrivalTime", async () => {
+    const procTsunami = await import("../src/main/PROC_Tsunami.js");
+    const t1 = new Date(Date.now() - 5000).toISOString();
+    const forecastTime = new Date("2010-02-28T15:00:00+09:00");
+    const obsTime = new Date("2010-02-28T15:05:00+09:00");
+
+    // 第1報: 予報（予想到達時刻 ArrivalTime あり）
+    const data1 = {
+      status: "通常",
+      issue: { time: t1, EventID: ["202610120070"] },
+      areas: [
+        {
+          name: "予報区D",
+          code: "240",
+          grade: "Warning",
+          cancelled: false,
+          stations: [
+            {
+              name: "S5",
+              code: "S105",
+              ArrivalTime: forecastTime, // 予想到達時刻
+            },
+          ],
+        },
+      ],
+      revocation: false,
+    };
+    ConvertTsunamiInfo(data1);
+
+    // 第2報: 観測（第1波観測時刻 ArrivedTime・極性あり）
+    const t2 = new Date(Date.now() - 3000).toISOString();
+    const data2 = {
+      status: "通常",
+      issue: { time: t2, EventID: ["202610120070"] },
+      areas: [
+        {
+          name: "予報区D",
+          code: "240",
+          grade: "Warning",
+          cancelled: false,
+          stations: [
+            {
+              name: "S5",
+              code: "S105",
+              hasFirstHeight: true,
+              ArrivedTime: obsTime, // 観測時刻
+              firstHeightInitial: "押し",
+              firstHeightCondition: null,
+            },
+          ],
+        },
+      ],
+      revocation: false,
+    };
+    ConvertTsunamiInfo(data2);
+
+    const sBefore = procTsunami.Tsunami_data_Marged.areas.find(a => a.name === "予報区D")?.stations.find(st => st.name === "S5");
+    assert.equal(Number(sBefore.ArrivalTime), Number(forecastTime)); // 予想到達時刻は消えない
+    assert.equal(Number(sBefore.ArrivedTime), Number(obsTime)); // 観測時刻がセットされる
+    assert.equal(sBefore.firstHeightInitial, "押し");
+
+    // 第3報: 観測が「欠測」に切り替え (hasFirstHeight: true, ArrivedTime: null, firstHeightInitial: null, firstHeightCondition: "欠測")
+    const t3 = new Date(Date.now() - 1000).toISOString();
+    const data3 = {
+      status: "通常",
+      issue: { time: t3, EventID: ["202610120070"] },
+      areas: [
+        {
+          name: "予報区D",
+          code: "240",
+          grade: "Warning",
+          cancelled: false,
+          stations: [
+            {
+              name: "S5",
+              code: "S105",
+              hasFirstHeight: true,
+              ArrivedTime: null,
+              firstHeightInitial: null,
+              firstHeightCondition: "欠測",
+            },
+          ],
+        },
+      ],
+      revocation: false,
+    };
+    ConvertTsunamiInfo(data3);
+
+    const sAfter = procTsunami.Tsunami_data_Marged.areas.find(a => a.name === "予報区D")?.stations.find(st => st.name === "S5");
+    assert.equal(Number(sAfter.ArrivalTime), Number(forecastTime)); // 予想到達時刻は保持される
+    assert.equal(sAfter.ArrivedTime, null); // 観測時刻はクリアされる
+    assert.equal(sAfter.firstHeightInitial, null); // 極性もクリアされる
+    assert.equal(sAfter.firstHeightCondition, "欠測");
+  });
+
+  it("should clear maxHeightRising when subsequent report has no rising condition", async () => {
+    const procTsunami = await import("../src/main/PROC_Tsunami.js");
+    const t1 = new Date(Date.now() - 5000).toISOString();
+    const mhTime1 = new Date("2009-08-11T05:26:00+09:00");
+    const mhTime2 = new Date("2009-08-11T05:30:00+09:00");
+
+    // 第1報: 0.3m, 上昇中 (maxHeightRising: true)
+    const data1 = {
+      status: "通常",
+      issue: { time: t1, EventID: ["202610120080"] },
+      areas: [
+        {
+          name: "予報区E",
+          code: "250",
+          grade: "Warning",
+          cancelled: false,
+          stations: [
+            {
+              name: "S6",
+              code: "S106",
+              hasMaxHeight: true,
+              omaxHeight: "0.3m",
+              maxHeightRising: true,
+              maxHeightTime: mhTime1,
+            },
+          ],
+        },
+      ],
+      revocation: false,
+    };
+    ConvertTsunamiInfo(data1);
+
+    const sBefore = procTsunami.Tsunami_data_Marged.areas.find(a => a.name === "予報区E")?.stations.find(st => st.name === "S6");
+    assert.equal(sBefore.omaxHeight, "0.3m");
+    assert.equal(sBefore.maxHeightRising, true);
+
+    // 第2報: 0.4m, 上昇中なし (maxHeightRising: false)
+    const t2 = new Date(Date.now() - 2000).toISOString();
+    const data2 = {
+      status: "通常",
+      issue: { time: t2, EventID: ["202610120080"] },
+      areas: [
+        {
+          name: "予報区E",
+          code: "250",
+          grade: "Warning",
+          cancelled: false,
+          stations: [
+            {
+              name: "S6",
+              code: "S106",
+              hasMaxHeight: true,
+              omaxHeight: "0.4m",
+              maxHeightRising: false,
+              maxHeightTime: mhTime2,
+            },
+          ],
+        },
+      ],
+      revocation: false,
+    };
+    ConvertTsunamiInfo(data2);
+
+    const sAfter = procTsunami.Tsunami_data_Marged.areas.find(a => a.name === "予報区E")?.stations.find(st => st.name === "S6");
+    assert.equal(sAfter.omaxHeight, "0.4m");
+    assert.equal(sAfter.maxHeightRising, false); // 上昇中フラグがfalseに更新されること
+    assert.equal(Number(sAfter.maxHeightTime), Number(mhTime2));
+  });
 });

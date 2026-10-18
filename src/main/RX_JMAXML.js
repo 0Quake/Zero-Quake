@@ -272,7 +272,11 @@ export function Req_JMAXML(url, count) {
     }).then((text) => {
 
       const xml = DomPsr.parseFromString(text, "text/xml");
-      if (!xml) throw new Error("XMLのパースに失敗");
+      if (!xml || xml.getElementsByTagName("parsererror").length > 0) throw new Error("XMLのパースに失敗");
+
+      var titleElm = xml.getElementsByTagName("Control")?.[0]?.getElementsByTagName("Title")?.[0];
+      if (!titleElm) throw new Error("XML構造が不正です（Control/Title不在）");
+      var title = titleElm.textContent;
 
       var rdtVal = Number(new Date(xml.getElementsByTagName("ReportDateTime")[0]?.textContent));
       if (Replay !== 0 && rdtVal > (Date.now() - Replay)) {
@@ -281,8 +285,7 @@ export function Req_JMAXML(url, count) {
       }
       jmaXML_Fetched.push(url);
 
-      var title = xml.getElementsByTagName("Control")[0].getElementsByTagName("Title")[0].textContent;
-      var cancel = xml.getElementsByTagName("InfoType")[0].textContent == "取消";
+      var cancel = (xml.getElementsByTagName("InfoType")[0]?.textContent || "").trim() == "取消";
 
       if (
         title == "震度速報" ||

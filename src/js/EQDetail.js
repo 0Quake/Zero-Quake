@@ -1143,12 +1143,16 @@ function jmaL_Fetch(url) {
 //気象庁防災XML 取得・フォーマット変更→ ConvertEQInfo
 function jmaXMLFetch(url) {
   if (fetchedURL.includes(url)) return;
-  fetchedURL.push(url);
   fetch(url)
-    .then((response) => { return response.text(); })
+    .then((response) => {
+      if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+      return response.text();
+    })
     .then((data) => {
       var parser = new DOMParser();
       var xml = parser.parseFromString(data, "application/xml");
+      if (!xml || xml.querySelector("parsererror")) throw new Error("XMLのパースに失敗");
+      fetchedURL.push(url);
       var cancelTmp = (xml.querySelector("InfoType")?.textContent || "").trim() == "取消";
       var ReportTime = new Date(xml.querySelector("Head ReportDateTime")?.textContent);
       if (!newInfoDateTime || newInfoDateTime <= ReportTime) {
@@ -1328,6 +1332,9 @@ function jmaXMLFetch(url) {
         LngIntData: jmaL_json_fetched ? null : LngIntData,//気象庁json apiとの衝突を回避（）
         IntData: IntData,
       });
+    })
+    .catch((err) => {
+      console.error("jmaXMLFetch error:", err);
     });
 }
 //narikakun地震情報API 取得・フォーマット変更→ ConvertEQInfo

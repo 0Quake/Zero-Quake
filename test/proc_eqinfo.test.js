@@ -110,5 +110,58 @@ describe("PROC_EQInfo.js - Unit Tests", () => {
       const updated = eqInfo.jma.find((e) => e.eventId === eventId);
       assert.equal(Number(updated.reportDateTime), Number(updateReport.reportDateTime));
     });
+
+    it("should clear cancelled category values while preserving valid info", async () => {
+      const { MargeEQInfo, EQInfoData } = await import("../src/main/PROC_EQInfo.js");
+      const eventId = "20261018999991";
+      const now = Date.now();
+
+      // 1. 震度速報（震度4）
+      MargeEQInfo([{
+        eventId,
+        category: "震度速報",
+        status: "通常",
+        reportDateTime: new Date(now - 40000),
+        maxI: "4",
+        cancel: false,
+      }], 1);
+      assert.equal(EQInfoData[eventId].maxI, "4");
+      assert.equal(EQInfoData[eventId].cancel, false);
+
+      // 2. 震源情報（M5.0, 駿河湾）
+      MargeEQInfo([{
+        eventId,
+        category: "震源情報",
+        status: "通常",
+        reportDateTime: new Date(now - 30000),
+        epiCenter: "駿河湾",
+        M: "5.0",
+        cancel: false,
+      }], 2);
+      assert.equal(EQInfoData[eventId].maxI, "4");
+      assert.equal(EQInfoData[eventId].M, "5.0");
+
+      // 3. 震度速報の取消報
+      MargeEQInfo([{
+        eventId,
+        category: "震度速報",
+        status: "通常",
+        reportDateTime: new Date(now - 20000),
+        cancel: true,
+      }], 3);
+      assert.equal(EQInfoData[eventId].maxI, null, "取消された速報のmaxIはクリアされる");
+      assert.equal(EQInfoData[eventId].M, "5.0", "有効な震源情報は残る");
+      assert.equal(EQInfoData[eventId].cancel, false, "他種別が有効ならcancel=false");
+
+      // 4. 震源情報の取消報（全取消）
+      MargeEQInfo([{
+        eventId,
+        category: "震源情報",
+        status: "通常",
+        reportDateTime: new Date(now - 10000),
+        cancel: true,
+      }], 4);
+      assert.equal(EQInfoData[eventId].cancel, true, "全取消時はcancel=true");
+    });
   });
 });

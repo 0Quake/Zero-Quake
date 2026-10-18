@@ -70,4 +70,66 @@ describe("PROC_EEW.js - Unit Tests", () => {
       assert.equal(EEW_Storage.some((e) => e.EventID === "20260923001"), true);
     });
   });
+
+  describe("EEW_Marge - Cancellation", () => {
+    it("should remove cancelled event from EEW_Active and propagate is_cancel to all previous reports", async () => {
+      const { EEW_Marge, resetEEWStorage, clearEEWActive } = await import("../src/main/PROC_EEW.js");
+      resetEEWStorage();
+      clearEEWActive();
+
+      const eventId = 20261018999988;
+
+      // 第1報
+      EEW_Marge({
+        alertflg: "警報",
+        EventID: eventId,
+        serial: 1,
+        report_time: new Date(),
+        origin_time: new Date(),
+        magnitude: 5.0,
+        maxInt: "4",
+        depth: 10,
+        latitude: 35.0,
+        longitude: 139.0,
+        region_name: "伊豆半島",
+        is_cancel: false,
+        is_final: false,
+        is_training: false,
+        warnZones: [],
+        source: "test",
+      });
+
+      assert.equal(EEW_Active.some((e) => e.EventID === eventId), true);
+      assert.equal(EEW_Storage.find((e) => e.EventID === eventId)?.cancelled, false);
+
+      // 取消報（座標・発生時刻なし）
+      EEW_Marge({
+        alertflg: "予報",
+        EventID: eventId,
+        serial: 2,
+        report_time: new Date(),
+        origin_time: null,
+        latitude: null,
+        longitude: null,
+        magnitude: null,
+        maxInt: null,
+        depth: null,
+        region_name: null,
+        is_cancel: true,
+        is_final: true,
+        is_training: false,
+        warnZones: [],
+        source: "test",
+      });
+
+      // EEW_Active から即時消去されていること
+      assert.equal(EEW_Active.some((e) => e.EventID === eventId), false);
+
+      // EEW_Storage の cancelled が true かつ過去報の is_cancel も true であること
+      const stored = EEW_Storage.find((e) => e.EventID === eventId);
+      assert.ok(stored);
+      assert.equal(stored.cancelled, true);
+      assert.equal(stored.data.every((d) => d.is_cancel === true), true);
+    });
+  });
 });

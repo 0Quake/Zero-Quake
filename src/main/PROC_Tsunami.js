@@ -78,9 +78,9 @@ export function ConvertTsunamiInfo(data) {
                     }
                   }
                   if (elm2.hasMaxHeight) {
+                    SameSta.maxHeightRising = Boolean(elm2.maxHeightRising);
                     if (!elm2.omaxHeight) {
                       SameSta.omaxHeight = null;
-                      SameSta.maxHeightRising = false;
                     }
                     if (!elm2.maxHeightTime) {
                       SameSta.maxHeightTime = null;
@@ -249,9 +249,9 @@ export function ConvertTsunamiInfo(data) {
                     }
                   }
                   if (elm2.hasMaxHeight) {
+                    SameSta.maxHeightRising = Boolean(elm2.maxHeightRising);
                     if (!elm2.omaxHeight) {
                       SameSta.omaxHeight = null;
-                      SameSta.maxHeightRising = false;
                     }
                     if (!elm2.maxHeightTime) {
                       SameSta.maxHeightTime = null;
