@@ -16,7 +16,7 @@ function renderer() {
     EQInfoMarged: {}, ESmarkerElm: null, ZoomBounds: null,
     config: { Info: { EQInfo: {} }, data: { overlay: [] } },
     document: { getElementById: element },
-    Boolean2: (value) => value !== null && value !== undefined && value !== "",
+    Boolean2: (value) => Boolean(value !== null && value !== undefined && value !== "" && !Number.isNaN(value) && (value || value === 0)),
     NormalizeDate: (_, value) => String(value),
     NormalizeShindo: (value, mode) => mode === 2 ? ["red"] : value,
     InfoType_add() {}, InfoType_remove() {}, mapZoomReset() {},
@@ -79,4 +79,33 @@ it("correctly displays '700km以上' for depth -700, 700, or deeper", () => {
   // 深さ不明 (depth: null)
   context.ConvertEQInfo({ category: "震源・震度情報", reportTime: 5000, depth: null });
   assert.equal(element("data_depth").innerText, "不明");
+});
+
+it("correctly sets epicenter marker when lat or lng is 0 degrees", () => {
+  const { context } = renderer();
+  context.mapReady = true;
+  context.map = {};
+  const setLngLatCalls = [];
+  context.maplibregl = {
+    Popup: function() { return { setHTML() { return this; } }; },
+    Marker: function() {
+      return {
+        setLngLat(lnglat) { setLngLatCalls.push(lnglat); return this; },
+        setPopup() { return this; },
+        addTo() { return this; },
+        getElement() { return { removeAttribute() {}, setAttribute() {} }; },
+      };
+    },
+  };
+  context.document.createElement = () => ({ classList: { add() {} } });
+
+  // 緯度0度、経度140度（赤道直下）
+  context.ConvertEQInfo({ category: "震源・震度情報", reportTime: 1000, lat: 0, lng: 140, epiCenter: "赤道付近" });
+  assert.equal(setLngLatCalls[0]?.[0], 140, "lngが140");
+  assert.equal(setLngLatCalls[0]?.[1], 0, "latが0度でもマーカーが作成・配置されること");
+
+  // 緯度10度、経度0度（本初子午線上）
+  context.ConvertEQInfo({ category: "震源・震度情報", reportTime: 2000, lat: 10, lng: 0, epiCenter: "経度0度" });
+  assert.equal(setLngLatCalls[1]?.[0], 0, "lngが0度でもマーカーが更新されること");
+  assert.equal(setLngLatCalls[1]?.[1], 10, "latが10");
 });

@@ -2316,7 +2316,7 @@ function ConvertEQInfo(data) {
     document.getElementById("TsunamiShortMsg").innerText = "";
   }
 
-  if (EQInfoMarged.lat && EQInfoMarged.lng) {
+  if (Boolean2(EQInfoMarged.lat) && Boolean2(EQInfoMarged.lng)) {
     if (ZoomBounds) ZoomBounds.extend([EQInfoMarged.lng, EQInfoMarged.lat]);
 
     if (!ESmarkerElm) {
