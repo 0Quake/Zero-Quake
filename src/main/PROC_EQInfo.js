@@ -39,7 +39,11 @@ export function MargeEQInfo(dataList, count) {
         };
         EQElm.raw_data.push(data);
         var rawData = EQElm.raw_data
-          .sort((a, b) => new Date(a.reportDateTime) - new Date(b.reportDateTime));
+          .sort((a, b) => {
+            var diff = new Date(a.reportDateTime) - new Date(b.reportDateTime);
+            return diff !== 0 ? diff : (new Date(a.ControlDateTime || a.dateTime || 0) - new Date(b.ControlDateTime || b.dateTime || 0));
+            //reportDateTime→ControlDateTimeでソート　ControlDT空、ReportDT重複（分単位のため）の回避
+          });
 
         //キャンセル報を受信時、同一カテゴリかつ同一Statusの過去情報のキャンセルフラグを立てる（気象庁仕様PDF 48Pに準拠）
         rawData.forEach(function (elm, index) {

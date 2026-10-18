@@ -1149,12 +1149,14 @@ function jmaXMLFetch(url) {
     .then((data) => {
       var parser = new DOMParser();
       var xml = parser.parseFromString(data, "application/xml");
-      var cancelTmp = xml.querySelector("InfoType").textContent == "取消";
+      var cancelTmp = (xml.querySelector("InfoType")?.textContent || "").trim() == "取消";
       var ReportTime = new Date(xml.querySelector("Head ReportDateTime")?.textContent);
       if (!newInfoDateTime || newInfoDateTime <= ReportTime) {
         newInfoDateTime = ReportTime;
       }
-      var EarthquakeElm = xml.querySelector("Body Earthquake");
+      var eventIds = (xml.querySelector("EventID")?.textContent || "").trim().split(/\s+/);
+      var eqIndex = Math.max(0, eventIds.indexOf(String(eid)));
+      var EarthquakeElm = xml.getElementsByTagName("Earthquake")?.[eqIndex];
       var originTimeTmp,
         epiCenterTmp,
         magnitudeTmp,
@@ -1171,7 +1173,7 @@ function jmaXMLFetch(url) {
         epiCenterTmp = EarthquakeElm.querySelector("Name")?.textContent;
         magnitudeTmp = Number(EarthquakeElm.getElementsByTagName("jmx_eb:Magnitude")?.[0]?.textContent);
         magnitudeTypeTmp = EarthquakeElm.getElementsByTagName("jmx_eb:Magnitude")?.[0]?.getAttribute("type");
-        LatLngDepth = parse_LatLngDepth(xml.querySelector("Body Earthquake Hypocenter")?.getElementsByTagName("jmx_eb:Coordinate")?.[0]?.textContent);
+        LatLngDepth = parse_LatLngDepth(EarthquakeElm.getElementsByTagName("jmx_eb:Coordinate")?.[0]?.textContent);
         if (LatLngDepth && LatLngDepth.length) {
           LatTmp = Number(LatLngDepth[1]);
           LngTmp = Number(LatLngDepth[2]);
@@ -1190,11 +1192,11 @@ function jmaXMLFetch(url) {
       };
       if (xml.querySelector("Body Comments")) {
         if (xml.querySelector("Body Comments ForecastComment"))
-          commentText.ForecastComment = xml.querySelector("Body Comments ForecastComment Text").textContent;
+          commentText.ForecastComment = xml.querySelector("Body Comments ForecastComment Text")?.textContent || "";
         if (xml.querySelector("Body Comments VarComment"))
-          commentText.VarComment = xml.querySelector("Body Comments VarComment Text").textContent;
+          commentText.VarComment = xml.querySelector("Body Comments VarComment Text")?.textContent || "";
         if (xml.querySelector("Body Comments FreeFormComment"))
-          commentText.FreeFormComment = xml.querySelector("Body Comments FreeFormComment").textContent;
+          commentText.FreeFormComment = xml.querySelector("Body Comments FreeFormComment")?.textContent || "";
       }
 
       var infoType = xml.querySelector("Head Title").textContent;
@@ -1306,8 +1308,11 @@ function jmaXMLFetch(url) {
           });
       }
 
+      var cdtStr = xml.querySelector("Control DateTime")?.textContent;
+
       ConvertEQInfo({
         category: infoType,
+        ControlDateTime: cdtStr ? new Date(cdtStr) : null,
         status: xml.querySelector("Control Status").textContent,
         reportTime: new Date(xml.querySelector("Head ReportDateTime").textContent),
         originTime: originTimeTmp,
@@ -2063,15 +2068,41 @@ var EQInfoData = [];
 //地震情報マージ
 function ConvertEQInfo(data) {
   var sameData = EQInfoData.find(function (elm) {
-    return (elm.category == data.category && Number(new Date(elm.reportTime)) == Number(new Date(data.reportTime)));
+    if (elm.category !== data.category) return false;
+    if (Number(new Date(elm.reportTime)) !== Number(new Date(data.reportTime))) return false;
+    if (elm.ControlDateTime && data.ControlDateTime) {
+      return Number(new Date(elm.ControlDateTime)) === Number(new Date(data.ControlDateTime));
+    }
+    return !elm.ControlDateTime && !data.ControlDateTime;
   });
-  if (sameData) return;
-
-  EQInfoData.push(data);
+  if (sameData) {
+    // 同一報の別受信元からの情報を相互補完
+    var syncKeys = ["status", "originTime", "maxI", "mag", "magType", "lat", "lng", "depth", "epiCenter"];
+    syncKeys.forEach(function (key) {
+      var val = data[key];
+      if (!Boolean2(val)) return;
+      if (key === "maxI" && val === "?") return;
+      if (key === "mag" && (val === "Ｍ不明" || val === "NaN" || Number.isNaN(val))) return;
+      sameData[key] = val;
+    });
+    var hasValidComment = (
+      Boolean2(data.comment?.ForecastComment) ||
+      Boolean2(data.comment?.VarComment) ||
+      Boolean2(data.comment?.FreeFormComment)
+    );
+    if (hasValidComment) sameData.comment = data.comment;
+    if (Boolean2(data.IntData)) sameData.IntData = data.IntData;
+    if (Boolean2(data.LngIntData)) sameData.LngIntData = data.LngIntData;
+    if (data.cancel !== undefined && data.cancel !== null) sameData.cancel = data.cancel;
+  } else {
+    EQInfoData.push(data);
+  }
 
   var sortByReportDT = function (a, b) {
-    return new Date(a.reportTime) < new Date(b.reportTime) ? -1 : 1;
-  }
+    var diff = new Date(a.reportTime) - new Date(b.reportTime);
+    return diff !== 0 ? diff : (new Date(a.ControlDateTime || 0) - new Date(b.ControlDateTime || 0));
+    //reportDateTime→ControlDateTimeでソート　ControlDT空、ReportDT重複（分単位のため）の回避
+  };
   var EQI_EEW = EQInfoData.filter((e) => { return e.category == "EEW" }).sort(sortByReportDT);
   var EQI_NOT_EEW = EQInfoData.filter((e) => { return e.category != "EEW" }).sort(sortByReportDT);
   EQInfoData = [...EQI_EEW, ...EQI_NOT_EEW];
@@ -2121,8 +2152,8 @@ function ConvertEQInfo(data) {
         EQInfoTmp[key] = val;
       });
 
-      if (Boolean2(elm.comment) && (Boolean2(elm.comment.ForecastComment) || Boolean2(elm.comment.VarComment) || Boolean2(elm.comment.FreeFormComment))) {
-        if (!EQInfoTmp.comment) EQInfoTmp.comment = elm.comment;
+      if (elm.comment !== undefined) {
+        EQInfoTmp.comment = elm.comment;
       }
 
       if (Boolean2(elm.LngIntData)) EQInfoTmp.LngIntData = elm.LngIntData;
@@ -2241,7 +2272,14 @@ function ConvertEQInfo(data) {
       document.getElementById("TsunamiShortMsg_Wrap").style.borderWidth = TsunamiColor ? "2px" : "";
       document.getElementById("TsunamiShortMsg_Wrap").style.color = TsunamiColor ? "#FFF" : "";
       document.getElementById("TsunamiShortMsg").innerText = TsunamiShortMsg;
+    } else {
+      document.getElementById("TsunamiShortMsg_Wrap").style.display = "none";
+      document.getElementById("TsunamiShortMsg").innerText = "";
     }
+  } else {
+    data_comment.innerHTML = "";
+    document.getElementById("TsunamiShortMsg_Wrap").style.display = "none";
+    document.getElementById("TsunamiShortMsg").innerText = "";
   }
 
   if (EQInfoMarged.lat && EQInfoMarged.lng) {

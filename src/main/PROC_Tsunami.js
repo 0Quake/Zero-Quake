@@ -69,6 +69,23 @@ export function ConvertTsunamiInfo(data) {
                   Object.keys(elm2).forEach(function (key) {
                     if (Boolean2(elm2[key])) SameSta[key] = elm2[key];
                   });
+                  if (elm2.hasFirstHeight) {
+                    if (!elm2.ArrivedTime) {
+                      SameSta.ArrivedTime = null;
+                    }
+                    if (!elm2.firstHeightInitial) {
+                      SameSta.firstHeightInitial = null;
+                    }
+                  }
+                  if (elm2.hasMaxHeight) {
+                    if (!elm2.omaxHeight) {
+                      SameSta.omaxHeight = null;
+                      SameSta.maxHeightRising = false;
+                    }
+                    if (!elm2.maxHeightTime) {
+                      SameSta.maxHeightTime = null;
+                    }
+                  }
                 }
               });
             }
@@ -223,6 +240,23 @@ export function ConvertTsunamiInfo(data) {
                   Object.keys(elm2).forEach(function (key) {
                     if (Boolean2(elm2[key])) SameSta[key] = elm2[key];
                   });
+                  if (elm2.hasFirstHeight) {
+                    if (!elm2.ArrivedTime) {
+                      SameSta.ArrivedTime = null;
+                    }
+                    if (!elm2.firstHeightInitial) {
+                      SameSta.firstHeightInitial = null;
+                    }
+                  }
+                  if (elm2.hasMaxHeight) {
+                    if (!elm2.omaxHeight) {
+                      SameSta.omaxHeight = null;
+                      SameSta.maxHeightRising = false;
+                    }
+                    if (!elm2.maxHeightTime) {
+                      SameSta.maxHeightTime = null;
+                    }
+                  }
                 }
               });
             }

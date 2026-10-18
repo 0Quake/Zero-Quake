@@ -214,6 +214,7 @@ export function Req_Hokkaidosanriku_JSON(url) {
         title: "北海道・三陸沖後発地震注意情報",
         kind: json.Head?.InfoType,//発表/取消
         reportDate: newDate2(json.Head?.ReportDateTime), //時刻
+        ControlDateTime: newDate2(json.Control?.DateTime),
         HeadLine: json.Head?.Headline?.Text, //要約
         Text: "",
         Appendix: "",
@@ -232,12 +233,21 @@ export function Req_Hokkaidosanriku_JSON(url) {
 }
 
 export function Process_Hokkaidosanriku(data) {
-  var SameData = HokkaidoSanrikuInfoAll.find((el) => Number(new Date(el.reportDate)) == Number(new Date(data.reportDate)));
+  var SameData = HokkaidoSanrikuInfoAll.find(function (el) {
+    if (Number(new Date(el.reportDate)) !== Number(new Date(data.reportDate))) return false;
+    if (el.ControlDateTime && data.ControlDateTime) {
+      return Number(new Date(el.ControlDateTime)) === Number(new Date(data.ControlDateTime));
+    }
+    return !el.ControlDateTime && !data.ControlDateTime;
+  });
   if (SameData) return;
 
   HokkaidoSanrikuInfoAll.push(data);
   HokkaidoSanrikuInfoAll = HokkaidoSanrikuInfoAll
-    .sort((a, b) => a.reportDate > b.reportDate ? -1 : 1);
+    .sort(function (a, b) {
+      var diff = Number(new Date(b.reportDate)) - Number(new Date(a.reportDate));
+      return diff !== 0 ? diff : (Number(new Date(b.ControlDateTime || 0)) - Number(new Date(a.ControlDateTime || 0)));
+    });
 
   messageToMainWindow({
     action: "HokkaidoSanrikuInfo",
@@ -309,11 +319,13 @@ export function Req_JMAXML(url, count) {
           if (maxInt == "[objectHTMLUnknownElement]") maxInt = null;
         }
         var headline = xml?.getElementsByTagName("Head")?.[0]?.getElementsByTagName("Headline")?.[0]?.getElementsByTagName("Text")?.[0]?.textContent;
+        var cdtStr = xml.getElementsByTagName("Control")?.[0]?.getElementsByTagName("DateTime")?.[0]?.textContent;
 
         MargeEQInfo([{
           status: xml.getElementsByTagName("Status")?.[0]?.textContent,
           eventId: xml.getElementsByTagName("EventID")?.[0]?.textContent,
           category: xml.getElementsByTagName("Title")?.[0]?.textContent,
+          ControlDateTime: cdtStr ? new Date(cdtStr) : null,
           OriginTime: originTime,
           epiCenter: epiCenterTmp,
           M: magnitudeTmp,
@@ -513,39 +525,32 @@ export function Req_JMAXML(url, count) {
       ) {
         //津波予報
         var tsunamiDataTmp;
-        var EventID = xml.getElementsByTagName("EventID")[0].textContent.split(" ").map(Number);
+        var EventID = (xml.getElementsByTagName("EventID")[0]?.textContent || "").trim().split(/\s+/).map(Number);
         var EQData = [];
-        Array.prototype.forEach.call(
-          xml.getElementsByTagName("Earthquake"),
-          function (elm, index) {
-            var magStr = elm.getElementsByTagName("jmx_eb:Magnitude")?.[0]?.textContent;
+        var status = xml.getElementsByTagName("Status")?.[0]?.textContent;
+        var rdt = newDate2(xml.getElementsByTagName("ReportDateTime")?.[0]?.textContent);
 
-            var ECTmp = elm.getElementsByTagName("Name")?.[0]?.textContent;
+        Array.from(xml.getElementsByTagName("Earthquake")).forEach(function (elm, index) {
+          var magStr = elm.getElementsByTagName("jmx_eb:Magnitude")?.[0]?.textContent;
+          var ECTmp = elm.getElementsByTagName("Name")?.[0]?.textContent;
+          var odtStr = elm.getElementsByTagName("OriginTime")?.[0]?.textContent;
+          var odt = newDate2(odtStr) || rdt;
 
-            var rdtStr = xml.getElementsByTagName("ReportDateTime")?.[0]?.textContent;
-            var rdt = newDate2(rdtStr);
-
-            var odtStr = elm.getElementsByTagName("OriginTime")?.[0]?.textContent;
-            var odt = newDate2(odtStr);
-
-            if (!odt) odt = rdt;
-
-            EQData.push({
-              status: xml.getElementsByTagName("Status")?.[0]?.textContent,
-              eventId: EventID[index],
-              category: "Tsunami",
-              OriginTime: odt,
-              epiCenter: ECTmp,
-              M: Number(Number(magStr)) || null,
-              maxI: null,
-              cancel: Boolean(cancel),
-              reportDateTime: rdt,
-              DetailURL: [url],
-              Headline: "",
-              axisData: null,
-            });
-          }
-        );
+          EQData.push({
+            status: status,
+            eventId: EventID[index],
+            category: "Tsunami",
+            OriginTime: odt,
+            epiCenter: ECTmp,
+            M: Number(magStr) || null,
+            maxI: null,
+            cancel: Boolean(cancel),
+            reportDateTime: rdt,
+            DetailURL: [url],
+            Headline: "",
+            axisData: null,
+          });
+        });
         MargeEQInfo(EQData, count);
 
         if (cancel) {
@@ -769,10 +774,14 @@ export function Req_JMAXML(url, count) {
                   }
 
                   var codeTmp = elm2.getElementsByTagName("Code")?.[0]?.textContent || null;
+                  var hasFirstHeight = Boolean(fHeightElm);
+                  var hasMaxHeight = Boolean(elm2.getElementsByTagName("MaxHeight")[0]);
 
                   stations.push({
                     name: nameTmp,
                     code: codeTmp,
+                    hasFirstHeight: hasFirstHeight,
+                    hasMaxHeight: hasMaxHeight,
                     ArrivedTime: ArrivalTimeTmp,
                     firstHeightCondition: firstHeightConditionTmp,
                     firstHeightInitial: firstHeightInitialTmp,
@@ -812,10 +821,12 @@ export function Req_JMAXML(url, count) {
         var kind = xml.getElementsByTagName("Head")?.[0]?.getElementsByTagName("InfoType")?.[0]?.textContent;
         var headline = xml.getElementsByTagName("Headline")?.[0]?.getElementsByTagName("Text")?.[0]?.textContent;
         var rdt = newDate2(xml.getElementsByTagName("ReportDateTime")?.[0]?.textContent);
+        var cdtStr = xml.getElementsByTagName("Control")?.[0]?.getElementsByTagName("DateTime")?.[0]?.textContent;
         var data = {
           title: title, //北海道・三陸沖後発地震注意情報
           kind: kind,//発表/取消
           reportDate: rdt, //時刻
+          ControlDateTime: cdtStr ? newDate2(cdtStr) : null,
           HeadLine: headline, //要約
           Text: "",
           Appendix: "",
