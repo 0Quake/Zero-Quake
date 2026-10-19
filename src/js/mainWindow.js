@@ -521,7 +521,17 @@ function eqInfoDraw(data, source) {
   })
   data_to_draw.sort(function (a, b) {
     if (sort_key == "t") return (a.DateForSort < b.DateForSort ? 1 : -1) | 0;
-    else if (sort_key == "m") return (a.M < b.M ? 1 : -1) | 0;
+    else if (sort_key == "m") {
+      var toMNum = function (val) {
+        if (typeof val === "number") return val;
+        if (val === "M8超" || val === "8超" || val === "Ｍ８を超える巨大地震") return 10;
+        var n = Number(val);
+        return !Number.isNaN(n) ? n : 0;
+      };
+      var aM = toMNum(a.M);
+      var bM = toMNum(b.M);
+      return (aM < bM ? 1 : -1) | 0;
+    }
     else if (sort_key == "i") return (NormalizeShindo(a.maxI, 5) < NormalizeShindo(b.maxI, 5) ? 1 : -1) | 0;
     else return 0;
   });
@@ -601,8 +611,13 @@ function eqInfoDraw(data, source) {
       var clone = EQTemplate.content.cloneNode(true);
 
       clone.querySelector(".EQI_epiCenter").textContent = elm.epiCenter || "震源調査中";
-      clone.querySelector(".EQI_datetime").textContent = elm.OriginTime ? NormalizeDate(4, elm.OriginTime) : "発生時刻不明";
-      clone.querySelector(".EQI_magnitude").textContent = (elm.M || elm.M === 0) ? elm.M.toFixed(1) : "不明";
+      var magDisplay = "不明";
+      if (elm.M || elm.M === 0) {
+        if (typeof elm.M === "number") magDisplay = elm.M.toFixed(1);
+        else if (elm.M === "M8超" || elm.M === "8超" || elm.M === "Ｍ８を超える巨大地震") magDisplay = "8超";
+        else magDisplay = String(elm.M).replace(/^M/i, "");
+      }
+      clone.querySelector(".EQI_magnitude").textContent = magDisplay;
       if (source == "jma") {
         clone.querySelector(".EQItem").setAttribute("id", `EQItem_${elm.eventId}`);
         clone.querySelector(".EQItem").setAttribute("tabindex", index == 0 ? 2 : -1);
@@ -631,7 +646,8 @@ function eqInfoDraw(data, source) {
           var lgIntStr = ""
           if (elm.maxLgInt) lgIntStr = `最大長周期地震動階級${elm.maxLgInt}、`
 
-          var ariaLabel = `過去の気象庁による地震情報アイテム：${elm.status == "訓練" ? "訓練報、" : ""}${elm.status == "試験" ? "試験報、" : ""}${(maxITmp != "?") ? `最大震度${NormalizeShindo(maxITmp, 1)}、` : ""}${lgIntStr}${elm.M || elm.M === 0 ? `マグニチュード${elm.M.toFixed(1)}、` : ""}${elm.epiCenter ? `震源は${elm.epiCenter}、` : ""}発生時刻は${elm.OriginTime ? NormalizeDate("M月D日h時m分", elm.OriginTime) : "不明"}。エンターキーで詳細情報を確認。`
+          var magAria = typeof elm.M === "number" ? elm.M.toFixed(1) : ((elm.M === "M8超" || elm.M === "8超" || elm.M === "Ｍ８を超える巨大地震") ? "8超" : elm.M);
+          var ariaLabel = `過去の気象庁による地震情報アイテム：${elm.status == "訓練" ? "訓練報、" : ""}${elm.status == "試験" ? "試験報、" : ""}${(maxITmp != "?") ? `最大震度${NormalizeShindo(maxITmp, 1)}、` : ""}${lgIntStr}${elm.M || elm.M === 0 ? `マグニチュード${magAria}、` : ""}${elm.epiCenter ? `震源は${elm.epiCenter}、` : ""}発生時刻は${elm.OriginTime ? NormalizeDate("M月D日h時m分", elm.OriginTime) : "不明"}。エンターキーで詳細情報を確認。`
 
           clone.querySelector(".EQItem").setAttribute("aria-label", ariaLabel);
           clone.querySelector(".EQItem").addEventListener("click", function () {

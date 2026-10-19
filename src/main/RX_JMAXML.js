@@ -311,9 +311,17 @@ export function Req_JMAXML(url, count) {
           var OTimeStr = EarthquakeElm.getElementsByTagName("OriginTime")?.[0]?.textContent;
           if (OTimeStr) originTime = new Date(OTimeStr);
           epiCenterTmp = EarthquakeElm.getElementsByTagName("Name")?.[0]?.textContent;
-          var magStr = EarthquakeElm.getElementsByTagName("jmx_eb:Magnitude")?.[0]?.textContent;
+          var magElm = EarthquakeElm.getElementsByTagName("jmx_eb:Magnitude")?.[0];
+          var magStr = magElm?.textContent;
+          var magDesc = magElm?.getAttribute?.("description") || "";
           if (magStr) magnitudeTmp = Number(magStr);
-          if (!Boolean2(magnitudeTmp)) magnitudeTmp = null;
+          if (!Boolean2(magnitudeTmp)) {
+            if (magDesc.includes("８を超える巨大地震")) {
+              magnitudeTmp = "M8超";
+            } else {
+              magnitudeTmp = null;
+            }
+          }
         }
 
         var TgDateStr = xml.getElementsByTagName("TargetDateTime")?.[0]?.textContent
@@ -539,9 +547,18 @@ export function Req_JMAXML(url, count) {
         var EQData = [];
         var status = xml.getElementsByTagName("Status")?.[0]?.textContent;
         var rdt = newDate2(xml.getElementsByTagName("ReportDateTime")?.[0]?.textContent);
-
         Array.from(xml.getElementsByTagName("Earthquake")).forEach(function (elm, index) {
-          var magStr = elm.getElementsByTagName("jmx_eb:Magnitude")?.[0]?.textContent;
+          var magElm = elm.getElementsByTagName("jmx_eb:Magnitude")?.[0];
+          var magStr = magElm?.textContent;
+          var magDesc = magElm?.getAttribute?.("description") || "";
+          var magTmp = Number(magStr);
+          if (!Boolean2(magTmp)) {
+            if (magDesc.includes("８を超える巨大地震")) {
+              magTmp = "M8超";
+            } else {
+              magTmp = null;
+            }
+          }
           var ECTmp = elm.getElementsByTagName("Name")?.[0]?.textContent;
           var odtStr = elm.getElementsByTagName("OriginTime")?.[0]?.textContent;
           var odt = newDate2(odtStr) || rdt;
@@ -552,7 +569,7 @@ export function Req_JMAXML(url, count) {
             category: "Tsunami",
             OriginTime: odt,
             epiCenter: ECTmp,
-            M: Number(magStr) || null,
+            M: magTmp,
             maxI: null,
             cancel: Boolean(cancel),
             reportDateTime: rdt,

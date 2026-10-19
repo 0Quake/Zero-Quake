@@ -23,6 +23,7 @@ describe("PROC_EQInfo.js - Unit Tests", () => {
       notice: {
         voice: {
           EQInfo_VoiceIntro: "地震情報",
+          EQInfo: "{origin_time2}の地震について、{region_name}でマグニチュード{magnitude}、最大震度{maxInt}が観測されました。",
           EQInfo_Detail_Domestic: "{time}頃、{epicenter}で地震がありました。最大震度は{shindo}、マグニチュードは{magnitude}、深さは{depth}と推定されます。",
           EQInfo_VoiceOutro: "",
         },
@@ -261,6 +262,84 @@ describe("PROC_EQInfo.js - Unit Tests", () => {
       assert.equal(EQInfoData[eventId].maxI, "4", "震度速報の震度4が保持されること");
       assert.equal(EQInfoData[eventId].M, 5.2, "震源に関する情報のM5.2が補完されること");
       assert.equal(EQInfoData[eventId].epiCenter, "千葉県北東部");
+    });
+
+    it("should retain 'M8超' string magnitude in MargeEQInfo without being coerced to null", async () => {
+      const { MargeEQInfo, EQInfoData } = await import("../src/main/PROC_EQInfo.js");
+      const eventId = "20261018999995";
+      const now = Date.now();
+
+      MargeEQInfo([{
+        eventId,
+        category: "震源・震度に関する情報",
+        status: "通常",
+        reportDateTime: new Date(now - 10000),
+        epiCenter: "三陸沖",
+        M: "M8超",
+        maxI: "6強",
+        cancel: false,
+      }], 1);
+      assert.equal(EQInfoData[eventId].M, "M8超", "M8超の文字列Mが維持されること");
+      assert.equal(EQInfoData[eventId].maxI, "6強");
+    });
+
+    it("should evaluate M8超 against M_threshold in AlertEQInfo and invoke audio notification", async () => {
+      const { AlertEQInfo } = await import("../src/main/PROC_EQInfo.js");
+      const { config } = await import("../src/main/state.js");
+      const { setWorkerWindow } = await import("../src/main/windows.js");
+
+      config.Info.EQInfo.NotificationSound = true;
+      config.Info.EQInfo.Bypass_threshold = false;
+      config.Info.EQInfo.maxI_threshold = "5弱"; // 震度5弱以上
+      config.Info.EQInfo.M_threshold = 8.0; // またはM8.0以上
+
+      const sentMessages = [];
+      setWorkerWindow({
+        isDestroyed: () => false,
+        webContents: {
+          send: (channel, data) => {
+            sentMessages.push({ channel, data });
+          },
+        },
+      });
+
+      const now = Date.now();
+      const testData = [{
+        eventId: "20261018999996",
+        category: "震源に関する情報",
+        reportDateTime: new Date(now),
+        OriginTime: new Date(now),
+        epiCenter: "三陸沖",
+        M: "M8超",
+        maxI: null,
+        audioNotification: true,
+      }];
+
+      AlertEQInfo(testData, "jma");
+
+      const audioCall = sentMessages.find(m => m.data?.action === "PlayAudio" && m.data?.data === "EQInfo");
+      const speakCall = sentMessages.find(m => m.data?.action === "speak");
+
+      assert.ok(audioCall, "M8超で通知音 PlayAudio('EQInfo') が確実に呼ばれること");
+      assert.ok(speakCall, "M8超で読み上げ speak が確実に呼ばれること");
+      assert.match(speakCall.data.data, /三陸沖/, "読み上げ文に震源名が含まれること");
+
+      // 逆に、M条件を満たさず(M6.0 < M8.0)、震度条件も未達の場合は通知されないこと
+      sentMessages.length = 0;
+      const belowThresholdData = [{
+        eventId: "20261018999997",
+        category: "震源に関する情報",
+        reportDateTime: new Date(now + 1000),
+        OriginTime: new Date(now + 1000),
+        epiCenter: "三陸沖",
+        M: 6.0,
+        maxI: null,
+        audioNotification: true,
+      }];
+      AlertEQInfo(belowThresholdData, "jma");
+      assert.equal(sentMessages.length, 0, "閾値未満の通常地震では音声通知が呼ばれないこと");
+
+      setWorkerWindow(null);
     });
   });
 });

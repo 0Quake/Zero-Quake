@@ -244,8 +244,9 @@ export function AlertEQInfo(data, source) {
 
       //音声通知
       if (dataToNotify) {
+        var notifyM = (dataToNotify.M === "M8超" || dataToNotify.M === "8超" || dataToNotify.M === "Ｍ８を超える巨大地震") ? 10 : dataToNotify.M;
         if (config.Info?.EQInfo?.NotificationSound &&
-          (config.Info?.EQInfo?.Bypass_threshold || NormalizeShindo(config.Info?.EQInfo?.maxI_threshold, 5) <= NormalizeShindo(dataToNotify.maxI, 5) || config.Info?.EQInfo?.M_threshold <= dataToNotify.M)) {
+          (config.Info?.EQInfo?.Bypass_threshold || NormalizeShindo(config.Info?.EQInfo?.maxI_threshold, 5) <= NormalizeShindo(dataToNotify.maxI, 5) || config.Info?.EQInfo?.M_threshold <= notifyM)) {
           PlayAudio("EQInfo");
           speak(GenerateEQInfoText(dataToNotify));
         }

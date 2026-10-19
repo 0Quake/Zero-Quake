@@ -11,6 +11,9 @@ export var MainWindow = null;
 export var SettingWindow = null;
 export var TsunamiWindow = null;
 export var WorkerWindow = null;
+export function setWorkerWindow(win) {
+  WorkerWindow = win;
+}
 
 export function messageToSettingWindow(message) {
   if (SettingWindow && !SettingWindow.isDestroyed()) {

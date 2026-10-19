@@ -1181,8 +1181,17 @@ function jmaXMLFetch(url) {
         var originTimeStr = EarthquakeElm.querySelector("OriginTime")?.textContent;
         if (originTimeStr) originTimeTmp = new Date(originTimeStr);
         epiCenterTmp = EarthquakeElm.querySelector("Name")?.textContent;
-        magnitudeTmp = Number(EarthquakeElm.getElementsByTagName("jmx_eb:Magnitude")?.[0]?.textContent);
-        magnitudeTypeTmp = EarthquakeElm.getElementsByTagName("jmx_eb:Magnitude")?.[0]?.getAttribute("type");
+        var magElm = EarthquakeElm.getElementsByTagName("jmx_eb:Magnitude")?.[0];
+        magnitudeTmp = Number(magElm?.textContent);
+        var magDesc = magElm?.getAttribute?.("description") || "";
+        if (!Boolean2(magnitudeTmp)) {
+          if (magDesc.includes("８を超える巨大地震") || magDesc.includes("8を超える巨大地震")) {
+            magnitudeTmp = "M8超";
+          } else {
+            magnitudeTmp = null;
+          }
+        }
+        magnitudeTypeTmp = magElm?.getAttribute?.("type");
         LatLngDepth = parse_LatLngDepth(EarthquakeElm.getElementsByTagName("jmx_eb:Coordinate")?.[0]?.textContent);
         if (LatLngDepth && LatLngDepth.length) {
           LatTmp = Number(LatLngDepth[1]);
@@ -2226,7 +2235,11 @@ function ConvertEQInfo(data) {
   else if (!EQInfo.magType) EQInfo.magType = "M";
 
   if (EQInfo.mag) {
-    data_M.innerText = `${EQInfo.magType} ${EQInfo.mag}`;
+    if (EQInfo.mag === "M8超" || EQInfo.mag === "Ｍ８を超える巨大地震") {
+      data_M.innerText = "Ｍ８を超える巨大地震";
+    } else {
+      data_M.innerText = `${EQInfo.magType} ${EQInfo.mag}`;
+    }
   } else {
     data_M.innerText = "不明";
   }

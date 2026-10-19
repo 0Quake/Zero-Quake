@@ -2,6 +2,7 @@ import { it } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
+import { JSDOM } from "jsdom";
 
 const source = readFileSync(new URL("../src/js/EQDetail.js", import.meta.url), "utf8");
 
@@ -109,3 +110,103 @@ it("correctly sets epicenter marker when lat or lng is 0 degrees", () => {
   assert.equal(setLngLatCalls[1]?.[0], 0, "lngが0度でもマーカーが更新されること");
   assert.equal(setLngLatCalls[1]?.[1], 10, "latが10");
 });
+
+it("correctly displays 'Ｍ８を超える巨大地震' when magnitude indicates M8+", () => {
+  const { context, element } = renderer();
+  context.mapReady = true;
+
+  context.ConvertEQInfo({ category: "震源・震度情報", reportTime: 1000, mag: "M8超" });
+  assert.equal(element("data_M").innerText, "Ｍ８を超える巨大地震");
+
+  // 通常の数値M
+  context.ConvertEQInfo({ category: "震源・震度情報", reportTime: 2000, mag: 7.2, magType: "Mj" });
+  assert.equal(element("data_M").innerText, "Mj 7.2");
+
+  // 通常の文字列M（"4.8", "5.8" など8を含むもの）が誤って巨大地震と判定されないこと
+  context.ConvertEQInfo({ category: "震源・震度情報", reportTime: 2500, mag: "4.8", magType: "M" });
+  assert.equal(element("data_M").innerText, "M 4.8");
+  context.ConvertEQInfo({ category: "震源・震度情報", reportTime: 2600, mag: "5.8", magType: "M" });
+  assert.equal(element("data_M").innerText, "M 5.8");
+
+  // M不明
+  context.ConvertEQInfo({ category: "震源・震度情報", reportTime: 3000, mag: null });
+  assert.equal(element("data_M").innerText, "不明");
+});
+
+it("correctly displays epicenter name in EQDetail UI", () => {
+  const { context, element } = renderer();
+  context.mapReady = true;
+
+  context.ConvertEQInfo({ category: "震源・震度情報", reportTime: 1000, epiCenter: "三陸沖" });
+  assert.equal(element("data_center").innerText, "三陸沖");
+
+  context.ConvertEQInfo({ category: "震源・震度情報", reportTime: 2000, epiCenter: "" });
+  assert.equal(element("data_center").innerText, "不明");
+});
+
+it("correctly extracts epicenter and M8+ from XML and renders them in EQDetail", () => {
+  const { context, element } = renderer();
+  context.mapReady = true;
+
+  const sampleXml = `<?xml version="1.0" encoding="utf-8"?>
+<Report xmlns="http://xml.kishou.go.jp/jmaxml1/">
+  <Control><Title>震源・震度に関する情報</Title><Status>通常</Status><DateTime>2026-10-18T12:00:00Z</DateTime></Control>
+  <Head><Title>震源・震度に関する情報</Title><ReportDateTime>2026-10-18T12:00:00Z</ReportDateTime><EventID>20261018120000</EventID><InfoType>発表</InfoType></Head>
+  <Body xmlns:jmx_eb="http://xml.kishou.go.jp/jmaxml1/elementBasis1/">
+    <Earthquake>
+      <OriginTime>2026-10-18T11:58:00Z</OriginTime>
+      <Name>三陸沖</Name>
+      <jmx_eb:Coordinate>+38.0+143.0-10000/</jmx_eb:Coordinate>
+      <jmx_eb:Magnitude type="Mj" condition="不明" description="Ｍ８を超える巨大地震">NaN</jmx_eb:Magnitude>
+    </Earthquake>
+  </Body>
+</Report>`;
+
+  const dom = new JSDOM(sampleXml, { contentType: "text/xml" });
+  const xml = dom.window.document;
+
+  context.xml = xml;
+  context.eid = "20261018120000";
+  context.fetchedURL = [];
+  context.jmaL_json_fetched = false;
+  context.parse_LatLngDepth = () => [null, "38.0", "143.0", "10000"];
+  context.document.createElement = () => ({ classList: { add() {} } });
+  context.map = {};
+  context.maplibregl = {
+    Popup: function() { return { setHTML() { return this; } }; },
+    Marker: function() {
+      return {
+        setLngLat() { return this; },
+        setPopup() { return this; },
+        addTo() { return this; },
+        getElement() { return { removeAttribute() {}, setAttribute() {} }; },
+      };
+    },
+  };
+
+  const parseSnippet = source.slice(
+    source.indexOf('var EarthquakeElm = xml.getElementsByTagName("Earthquake")?.[eqIndex];'),
+    source.indexOf('var IntensityElm = xml.querySelector("Body Intensity");')
+  );
+
+  vm.runInContext(`
+    var eqIndex = 0;
+    ${parseSnippet}
+    ConvertEQInfo({
+      category: "震源・震度に関する情報",
+      status: "通常",
+      reportTime: new Date("2026-10-18T12:00:00Z"),
+      originTime: originTimeTmp,
+      mag: magnitudeTmp,
+      magType: magnitudeTypeTmp,
+      lat: LatTmp,
+      lng: LngTmp,
+      depth: DepthTmp,
+      epiCenter: epiCenterTmp,
+    });
+  `, context);
+
+  assert.equal(element("data_center").innerText, "三陸沖", "XML解析から抽出された震源名が表示されること");
+  assert.equal(element("data_M").innerText, "Ｍ８を超える巨大地震", "XML解析のdescriptionからM8超が反映されること");
+});
+
