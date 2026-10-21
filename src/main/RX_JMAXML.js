@@ -303,7 +303,7 @@ export function Req_JMAXML(url, count) {
         title == "顕著な地震の震源要素更新のお知らせ"
       ) {
         //地震情報
-        var EarthquakeElm = xml.getElementsByTagName("Body")[0].getElementsByTagName("Earthquake")[0];
+        var EarthquakeElm = xml.getElementsByTagName("Body")?.[0]?.getElementsByTagName("Earthquake")?.[0];
         var originTime;
         var epiCenterTmp;
         var magnitudeTmp;
@@ -423,7 +423,7 @@ export function Req_JMAXML(url, count) {
         var rdtStr = xml.getElementsByTagName("ReportDateTime")[0]?.textContent;
         var rdt = newDate2(rdtStr);
 
-        var headline = xml.getElementsByTagName("Headline")?.[0]?.getElementsByTagName("Text")?.[0]?.textContent;
+        var headline = xml.getElementsByTagName("Headline")?.[0]?.getElementsByTagName("Text")?.[0]?.textContent || "";
 
         var isCancel = kind == "取消";
 
@@ -581,7 +581,7 @@ export function Req_JMAXML(url, count) {
         MargeEQInfo(EQData, count);
 
         if (cancel) {
-          var rdtStr = xml.getElementsByTagName("ReportDateTime")[0].textContent;
+          var rdtStr = xml.getElementsByTagName("ReportDateTime")?.[0]?.textContent;
           var rdt = newDate2(rdtStr);
           var EventIDs = Array.isArray(EventID) ? EventID.map(Number) : [];
 
@@ -781,7 +781,7 @@ export function Req_JMAXML(url, count) {
                     firstHeightInitialTmp = fHeightElm.getElementsByTagName("Initial")?.[0]?.textContent || null;
                   }
                   if (elm2.getElementsByTagName("MaxHeight")[0]) {
-                    var maxHeightElm = elm2.getElementsByTagName("MaxHeight")[0].getElementsByTagName("jmx_eb:TsunamiHeight")[0];
+                    var maxHeightElm = elm2.getElementsByTagName("MaxHeight")?.[0]?.getElementsByTagName("jmx_eb:TsunamiHeight")?.[0];
                     if (maxHeightElm) {
                       var desc = maxHeightElm.getAttribute("description");
                       if (desc) {
@@ -846,7 +846,7 @@ export function Req_JMAXML(url, count) {
         ConvertTsunamiInfo(tsunamiDataTmp);
       } else if (title == "北海道・三陸沖後発地震注意情報") {
         var kind = xml.getElementsByTagName("Head")?.[0]?.getElementsByTagName("InfoType")?.[0]?.textContent;
-        var headline = xml.getElementsByTagName("Headline")?.[0]?.getElementsByTagName("Text")?.[0]?.textContent;
+        var headline = xml.getElementsByTagName("Headline")?.[0]?.getElementsByTagName("Text")?.[0]?.textContent || "";
         var rdt = newDate2(xml.getElementsByTagName("ReportDateTime")?.[0]?.textContent);
         var cdtStr = xml.getElementsByTagName("Control")?.[0]?.getElementsByTagName("DateTime")?.[0]?.textContent;
         var data = {
@@ -871,8 +871,8 @@ export function Req_JMAXML(url, count) {
 
         Process_Hokkaidosanriku(data)
       } else if (title == "地震の活動状況等に関する情報") {
-        var headline = xml.getElementsByTagName("Headline")?.[0]?.getElementsByTagName("Text")?.[0]?.textContent
-        if (headline.includes("南海トラフ地震に関連する情報")) return;//南海トラフ地震関連解説情報（移行措置電文）の重複をはじく
+        var headline = xml.getElementsByTagName("Headline")?.[0]?.getElementsByTagName("Text")?.[0]?.textContent || "";
+        if (/^南海トラフ地震に関連する情報（(臨時|定例)）を発表します。$/.test(headline.trim())) return;//南海トラフ地震関連解説情報（移行措置電文）の重複をはじく
 
         var kind = xml.getElementsByTagName("Head")?.[0]?.getElementsByTagName("InfoType")?.[0]?.textContent;
         var rdt = newDate2(xml.getElementsByTagName("ReportDateTime")?.[0]?.textContent)

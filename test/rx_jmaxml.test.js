@@ -121,4 +121,83 @@ describe("RX_JMAXML.js - Unit Tests", () => {
       }
     });
   });
+
+  describe("Req_JMAXML - Body & Headline guards (Items 29, 31, 39)", () => {
+    it("should safely process earthquake XML without Body or Earthquake", async () => {
+      const rx = await import("../src/main/RX_JMAXML.js");
+      const nowIso = new Date().toISOString();
+      const noBodyXml = `<?xml version="1.0" encoding="utf-8"?>
+<Report xmlns="http://xml.kishou.go.jp/jmaxml1/">
+  <Control><Title>震源・震度に関する情報</Title><DateTime>${nowIso}</DateTime><Status>通常</Status></Control>
+  <Head><Title>震源・震度に関する情報</Title><ReportDateTime>${nowIso}</ReportDateTime></Head>
+</Report>`;
+
+      const originalFetch = globalThis.fetch;
+      try {
+        globalThis.fetch = async () => ({ ok: true, text: async () => noBodyXml });
+        assert.doesNotThrow(() => {
+          rx.Req_JMAXML("https://www.data.jma.go.jp/no_body_" + Date.now() + ".xml", 1);
+        });
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      } finally {
+        globalThis.fetch = originalFetch;
+      }
+    });
+
+    it("should safely handle KatsudoJokyo info with missing Headline or with normal Headline mentioning Nankai Trough", async () => {
+      const rx = await import("../src/main/RX_JMAXML.js");
+      const nowIso = new Date().toISOString();
+
+      const originalFetch = globalThis.fetch;
+      try {
+        // 1. Headline 欠落
+        const noHeadlineXml = `<?xml version="1.0" encoding="utf-8"?>
+<Report xmlns="http://xml.kishou.go.jp/jmaxml1/">
+  <Control><Title>地震の活動状況等に関する情報</Title><DateTime>${nowIso}</DateTime><Status>通常</Status></Control>
+  <Head><Title>地震の活動状況等に関する情報</Title><ReportDateTime>${nowIso}</ReportDateTime></Head>
+  <Body><Text>伊豆東部の活動状況です。</Text></Body>
+</Report>`;
+        globalThis.fetch = async () => ({ ok: true, text: async () => noHeadlineXml });
+        assert.doesNotThrow(() => {
+          rx.Req_JMAXML("https://www.data.jma.go.jp/no_headline_" + Date.now() + ".xml", 1);
+        });
+        await new Promise((resolve) => setTimeout(resolve, 50));
+
+        // 2. 南海トラフの語句を含む通常の自由文見出し（破棄されないこと）
+        const prevCount = rx.KatsudoJokyoInfoAll.length;
+        const normalMentionXml = `<?xml version="1.0" encoding="utf-8"?>
+<Report xmlns="http://xml.kishou.go.jp/jmaxml1/">
+  <Control><Title>地震の活動状況等に関する情報</Title><DateTime>${nowIso}</DateTime><Status>通常</Status></Control>
+  <Head>
+    <Title>地震の活動状況等に関する情報</Title>
+    <ReportDateTime>${nowIso}</ReportDateTime>
+    <Headline><Text>南海トラフ地震に関連する情報についても引き続きご留意ください。</Text></Headline>
+  </Head>
+  <Body><Text>伊豆東部の地震活動状況について説明します。</Text></Body>
+</Report>`;
+        globalThis.fetch = async () => ({ ok: true, text: async () => normalMentionXml });
+        rx.Req_JMAXML("https://www.data.jma.go.jp/mention_" + Date.now() + ".xml", 1);
+        await new Promise((resolve) => setTimeout(resolve, 80));
+        assert.equal(rx.KatsudoJokyoInfoAll.length, prevCount + 1, "通常の自由文見出しが破棄されず登録されること");
+
+        // 3. 移行措置電文の見出し（正しく破棄・スキップされること）
+        const transitionalXml = `<?xml version="1.0" encoding="utf-8"?>
+<Report xmlns="http://xml.kishou.go.jp/jmaxml1/">
+  <Control><Title>地震の活動状況等に関する情報</Title><DateTime>${nowIso}</DateTime><Status>通常</Status></Control>
+  <Head>
+    <Title>地震の活動状況等に関する情報</Title>
+    <ReportDateTime>${nowIso}</ReportDateTime>
+    <Headline><Text>南海トラフ地震に関連する情報（臨時）を発表します。</Text></Headline>
+  </Head>
+  <Body><Text>移行措置本文</Text></Body>
+</Report>`;
+        globalThis.fetch = async () => ({ ok: true, text: async () => transitionalXml });
+        rx.Req_JMAXML("https://www.data.jma.go.jp/transitional_" + Date.now() + ".xml", 1);
+        await new Promise((resolve) => setTimeout(resolve, 80));
+        assert.equal(rx.KatsudoJokyoInfoAll.length, prevCount + 1, "移行措置見出しは除外されて件数が増えないこと");
+      } finally {
+        globalThis.fetch = originalFetch;
+      }
+    });
+  });
 });
