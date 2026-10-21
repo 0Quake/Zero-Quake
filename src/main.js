@@ -744,7 +744,7 @@ function setOpenAtLogin(openAtLogin) {
     app.setLoginItemSettings({ openAtLogin: false });
 
     const homePath = String(app.getPath("home")).replace(/\\/g, "/");
-    const dist = `${homePath} /AppData/Roaming / Microsoft / Windows / Start Menu / Programs / Startup / ZeroQuake.lnk`;
+    const dist = `${homePath}/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup/ZeroQuake.lnk`;
     if (openAtLogin) {
       const source = String(app.getPath("exe")).replace(/\\/g, "/");
       let command = `
