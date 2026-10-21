@@ -55,6 +55,15 @@ export function ConvertTsunamiInfo(data) {
               if (elm[key]) SameArea[key] = elm[key];
             });
 
+            if (elm.firstHeightCondition == "第１波の到達を確認" || elm.firstHeightCondition == "津波到達中と推測") {
+              SameArea.firstHeight = null;
+            }
+            if (elm.grade == "Yoho") {
+              SameArea.firstHeight = null;
+              SameArea.firstHeightCondition = null;
+              SameArea.maxHeight = null;
+            }
+
             if (elm.stations) {
               elm.stations.forEach(function (elm2) {
                 var SameSta;
@@ -224,6 +233,15 @@ export function ConvertTsunamiInfo(data) {
               if (elm[key] !== undefined) SameArea[key] = elm[key];
             });
 
+            if (elm.firstHeightCondition == "第１波の到達を確認" || elm.firstHeightCondition == "津波到達中と推測") {
+              SameArea.firstHeight = null;
+            }
+            if (elm.grade == "Yoho") {
+              SameArea.firstHeight = null;
+              SameArea.firstHeightCondition = null;
+              SameArea.maxHeight = null;
+            }
+
             if (elm.stations) {
               if (!SameArea.stations) SameArea.stations = [];
               elm.stations.forEach(function (elm2) {
@@ -346,24 +364,24 @@ export function GenerateTsunamiText(data) {
       text = text.replaceAll("{home_grade}", grades_JA?.[homeArea?.grade] || "津波情報");
 
       var firstHeightTmp = "";
-      if (homeArea?.firstHeight) {
-        firstHeightTmp = `第１波が${NormalizeDate(9, homeArea?.firstHeight)}に予想され、`;
-      } else if (homeArea?.firstHeightCondition == "津波到達中と推測") {
+      if (homeArea?.firstHeightCondition == "津波到達中と推測") {
         firstHeightTmp = "津波が到達中とみられ、";
       } else if (homeArea?.firstHeightCondition == "第１波の到達を確認") {
         firstHeightTmp = "既に第１波が到達し、";
+      } else if (homeArea?.firstHeight) {
+        firstHeightTmp = `第１波が${NormalizeDate(9, homeArea?.firstHeight)}に予想され、`;
       } else {
         firstHeightTmp = "";
       }
       text = text.replaceAll("{first_height1}", firstHeightTmp);
 
       var firstHeightTmp2 = "";
-      if (homeArea?.firstHeight) {
-        firstHeightTmp2 = `到達予想時刻は${NormalizeDate(9, homeArea?.firstHeight)}`;
-      } else if (homeArea?.firstHeightCondition == "津波到達中と推測") {
+      if (homeArea?.firstHeightCondition == "津波到達中と推測") {
         firstHeightTmp2 = "津波到達中と推測";
       } else if (homeArea?.firstHeightCondition == "第１波の到達を確認") {
         firstHeightTmp2 = "第１波の到達を確認";
+      } else if (homeArea?.firstHeight) {
+        firstHeightTmp2 = `到達予想時刻は${NormalizeDate(9, homeArea?.firstHeight)}`;
       } else {
         firstHeightTmp2 = "到達時刻は不明";
       }
@@ -376,28 +394,28 @@ export function GenerateTsunamiText(data) {
       text = text.replaceAll("{immediately}", immediately);
 
       var MaxHeightTmp = "";
-      if (homeArea?.maxHeight == "巨大") {
+      if (homeArea?.grade == "Yoho") {
+        MaxHeightTmp = "若干の海面変動";
+      } else if (homeArea?.maxHeight == "巨大") {
         MaxHeightTmp = "巨大な津波";
       } else if (homeArea?.maxHeight == "高い") {
         MaxHeightTmp = "高い津波";
       } else if (homeArea?.maxHeight) {
         MaxHeightTmp = `今後最大${String(homeArea?.maxHeight).replace("m", "メートル")}の津波`;
-      } else if (!homeArea?.maxHeight && homeArea.grade == "Yoho") {
-        MaxHeightTmp = "若干の海面変動";
       } else {
         MaxHeightTmp = "高さ不明の津波";
       }
       text = text.replaceAll("{max_height1}", MaxHeightTmp);
 
       var MaxHeightTmp2 = "";
-      if (homeArea?.maxHeight == "巨大") {
+      if (homeArea?.grade == "Yoho") {
+        MaxHeightTmp2 = "若干の海面変動";
+      } else if (homeArea?.maxHeight == "巨大") {
         MaxHeightTmp2 = "巨大";
       } else if (homeArea?.maxHeight == "高い") {
         MaxHeightTmp2 = "高い";
       } else if (homeArea?.maxHeight) {
         MaxHeightTmp2 = String(homeArea?.maxHeight).replace("m", "メートル");
-      } else if (!homeArea?.maxHeight && homeArea?.grade == "Yoho") {
-        MaxHeightTmp2 = "若干の海面変動";
       } else {
         MaxHeightTmp2 = "不明";
       }

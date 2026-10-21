@@ -531,4 +531,124 @@ describe("PROC_Tsunami.js - ConvertTsunamiInfo", () => {
     assert.equal(sAfter.maxHeightRising, false); // 上昇中フラグがfalseに更新されること
     assert.equal(Number(sAfter.maxHeightTime), Number(mhTime2));
   });
+
+  it("should clear old arrival prediction when condition transitions to '第１波の到達を確認', and read out arrival confirmation", async () => {
+    const { ConvertTsunamiInfo, GenerateTsunamiText } = await import("../src/main/PROC_Tsunami.js");
+    const procTsunami = await import("../src/main/PROC_Tsunami.js");
+    const { config } = await import("../src/main/state.js");
+
+    config.home = config.home || {};
+    config.home.TsunamiSect = "予報区F";
+    config.notice = config.notice || {};
+    config.notice.voice = config.notice.voice || {};
+    config.notice.voice.Tsunami = "{home_area}では{first_height1}{first_height2}。{max_height1}。";
+
+    const t1 = new Date(Date.now() - 5000).toISOString();
+    const forecastTime = new Date(Date.now() + 600000);
+    const data1 = {
+      status: "通常",
+      issue: { time: t1, EventID: ["202610120090"] },
+      areas: [
+        {
+          name: "予報区F",
+          code: "260",
+          grade: "Warning",
+          cancelled: false,
+          firstHeight: forecastTime,
+          firstHeightCondition: null,
+          maxHeight: "3m",
+        },
+      ],
+      revocation: false,
+    };
+    ConvertTsunamiInfo(data1);
+
+    const areaBefore = procTsunami.Tsunami_data_Marged.areas.find(a => a.name === "予報区F");
+    assert.ok(areaBefore.firstHeight);
+
+    // 第2報: 「第１波の到達を確認」
+    const t2 = new Date(Date.now() - 2000).toISOString();
+    const data2 = {
+      status: "通常",
+      issue: { time: t2, EventID: ["202610120090"] },
+      areas: [
+        {
+          name: "予報区F",
+          code: "260",
+          grade: "Warning",
+          cancelled: false,
+          firstHeightCondition: "第１波の到達を確認",
+          maxHeight: "3m",
+        },
+      ],
+      revocation: false,
+    };
+    ConvertTsunamiInfo(data2);
+
+    const areaAfter = procTsunami.Tsunami_data_Marged.areas.find(a => a.name === "予報区F");
+    assert.equal(areaAfter.firstHeight, null, "第１波到達確認で旧予想時刻がクリアされること");
+    assert.equal(areaAfter.firstHeightCondition, "第１波の到達を確認");
+
+    const voice = GenerateTsunamiText(procTsunami.Tsunami_data_Marged);
+    assert.ok(voice.includes("既に第１波が到達し"), "到達確認の音声が出力されること");
+    assert.ok(voice.includes("第１波の到達を確認"), "到達予想時刻ではなく到達確認が出力されること");
+    assert.ok(!voice.includes("に予想され"), "過去の予想時刻を誤読しないこと");
+  });
+
+  it("should clear old maxHeight and prediction when downgraded to Yoho, reading out '若干の海面変動'", async () => {
+    const { ConvertTsunamiInfo, GenerateTsunamiText } = await import("../src/main/PROC_Tsunami.js");
+    const procTsunami = await import("../src/main/PROC_Tsunami.js");
+    const { config } = await import("../src/main/state.js");
+
+    config.home = config.home || {};
+    config.home.TsunamiSect = "予報区G";
+    config.notice = config.notice || {};
+    config.notice.voice = config.notice.voice || {};
+    config.notice.voice.Tsunami = "{home_area}では{first_height1}。{max_height1}。";
+
+    // 第1報: 注意報 1m
+    const t1 = new Date(Date.now() - 5000).toISOString();
+    const forecastTime = new Date(Date.now() + 600000);
+    const data1 = {
+      status: "通常",
+      issue: { time: t1, EventID: ["202610120095"] },
+      areas: [
+        {
+          name: "予報区G",
+          code: "270",
+          grade: "Watch",
+          cancelled: false,
+          firstHeight: forecastTime,
+          maxHeight: "1m",
+        },
+      ],
+      revocation: false,
+    };
+    ConvertTsunamiInfo(data1);
+
+    // 第2報: 津波予報（Yoho）へ格下げ
+    const t2 = new Date(Date.now() - 2000).toISOString();
+    const data2 = {
+      status: "通常",
+      issue: { time: t2, EventID: ["202610120095"] },
+      areas: [
+        {
+          name: "予報区G",
+          code: "270",
+          grade: "Yoho",
+          cancelled: false,
+        },
+      ],
+      revocation: false,
+    };
+    ConvertTsunamiInfo(data2);
+
+    const areaAfter = procTsunami.Tsunami_data_Marged.areas.find(a => a.name === "予報区G");
+    assert.equal(areaAfter.maxHeight, null, "Yoho格下げで旧maxHeightがクリアされること");
+    assert.equal(areaAfter.firstHeight, null, "Yoho格下げで旧firstHeightがクリアされること");
+
+    const voice = GenerateTsunamiText(procTsunami.Tsunami_data_Marged);
+    assert.ok(voice.includes("若干の海面変動"), "Yoho格下げで'若干の海面変動'が読み上げられること");
+    assert.ok(!voice.includes("1メートル"), "旧maxHeightの1mが読まれないこと");
+  });
 });
