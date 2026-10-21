@@ -72,6 +72,14 @@ export function MargeEQInfo(dataList, count) {
           if (!config.Info?.EQInfo?.showTest && elm.status == "試験") return;
           if (Replay !== 0 && Number(new Date(elm.reportDateTime)) > (Date.now() - Replay)) return;
 
+          if (Array.isArray(elm.DetailURL)) {
+            elm.DetailURL.forEach(function (elm2) {
+              if (elm2 && !EQInfo_Item.DetailURL.includes(elm2) && !EQElm.DetailURL.includes(elm2)) {
+                EQInfo_Item.DetailURL.push(elm2);
+              }
+            });
+          }
+
           //取消された電文（取消報自身および取消された過去報）は値集約から除外
           if (elm.cancel) return;
 
@@ -115,13 +123,6 @@ export function MargeEQInfo(dataList, count) {
             EQInfo_Item.maxLgInt = (elm.maxLgInt === "?") ? null : elm.maxLgInt;
           }
 
-          if (Array.isArray(elm.DetailURL)) {
-            elm.DetailURL.forEach(function (elm2) {
-              if (elm2 && !EQInfo_Item.DetailURL.includes(elm2) && !EQElm.DetailURL.includes(elm2)) {
-                EQInfo_Item.DetailURL.push(elm2);
-              }
-            });
-          }
           if (elm.axisData) EQInfo_Item.axisData.push(elm.axisData);
         });
 
