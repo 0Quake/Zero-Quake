@@ -61,9 +61,9 @@
   "homepage": "https://0quake.github.io/ZeroQuake_Website/",
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "electron": "^44.7.2",
+    "electron": "^44.9.0",
     "electron-builder": "^26.15.3",
-    "eslint": "^10.12.0",
+    "eslint": "^10.13.0",
     "globals": "^17.13.0",
     "prettier": "^3.9.10"
   },
@@ -71,7 +71,7 @@
     "@turf/turf": "^7.4.0",
     "electron-store": "^12.0.0",
     "eventsource": "^5.1.3",
-    "jsdom": "^30.1.2",
+    "jsdom": "^30.1.3",
     "maplibre-gl": "^6.14.0",
     "pmtiles": "^4.5.0"
   }
