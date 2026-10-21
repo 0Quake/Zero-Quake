@@ -55,7 +55,7 @@
                 var data = request.data;
                 if (!data) return;
 
-                document.title = `${data.status != "通常" ? `${data.status}／` : ""}${data.title} - Zero Quake`;
+                document.title = `${data.status != "通常" ? `${data.status}／` : ""}地震回数に関する情報 - Zero Quake`;
 
                 if (data.kind == "取消") document.getElementById("title").classList.remove("happyo")
                 else document.getElementById("title").classList.add("happyo")
