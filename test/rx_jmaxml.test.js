@@ -75,4 +75,50 @@ describe("RX_JMAXML.js - Unit Tests", () => {
       }
     });
   });
+
+  describe("Req_JMAXML - NankaiTroughInfo", () => {
+    it("should select Nankai Trough Rinji info even when InfoSerial is omitted", async () => {
+      const rx = await import("../src/main/RX_JMAXML.js");
+
+      const nowIso = new Date().toISOString();
+      const rinjiWithoutSerialXml = `<?xml version="1.0" encoding="utf-8"?>
+<Report xmlns="http://xml.kishou.go.jp/jmaxml1/">
+  <Control>
+    <Title>南海トラフ地震臨時情報</Title>
+    <DateTime>${nowIso}</DateTime>
+    <Status>通常</Status>
+  </Control>
+  <Head>
+    <Title>南海トラフ地震臨時情報</Title>
+    <ReportDateTime>${nowIso}</ReportDateTime>
+    <InfoType>発表</InfoType>
+    <Headline>
+      <Text>南海トラフ地震臨時情報を発表しました。</Text>
+    </Headline>
+  </Head>
+  <Body>
+    <EarthquakeInfo>
+      <InfoKind>南海トラフ地震臨時情報</InfoKind>
+      <Text>現在、南海トラフ沿いで発生した地震についての調査を行っています。</Text>
+    </EarthquakeInfo>
+  </Body>
+</Report>`;
+
+      const originalFetch = globalThis.fetch;
+      try {
+        globalThis.fetch = async () => ({
+          ok: true,
+          text: async () => rinjiWithoutSerialXml,
+        });
+
+        rx.Req_JMAXML("https://www.data.jma.go.jp/nankai_no_serial_" + Date.now() + ".xml", 1);
+        await new Promise((resolve) => setTimeout(resolve, 150));
+
+        assert.ok(rx.NankaiTroughInfo.rinji, "InfoSerialが省略されていてもrinjiとして選択されること");
+        assert.equal(rx.NankaiTroughInfo.rinji.kind, "臨時", "kindに'臨時'が設定されること");
+      } finally {
+        globalThis.fetch = originalFetch;
+      }
+    });
+  });
 });

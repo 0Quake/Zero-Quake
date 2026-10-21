@@ -453,7 +453,7 @@ export function Req_JMAXML(url, count) {
             var infoSerialName = EarthQuakeInfo.getElementsByTagName("InfoSerial")?.[0]?.getElementsByTagName("Name")?.[0]?.textContent;
             var infoKindName = EarthQuakeInfo.getElementsByTagName("InfoKind")?.[0]?.textContent;
             if (!isCancel) {
-              data.kind = infoSerialName || infoKindName || (title.startsWith("南海トラフ地震臨時情報") ? "臨時" : null);
+              data.kind = infoSerialName || (title.startsWith("南海トラフ地震臨時情報") ? "臨時" : infoKindName);
             }
             data.Text = EarthQuakeInfo.getElementsByTagName("Text")?.[0]?.textContent || "";
             data.Appendix = EarthQuakeInfo.getElementsByTagName("Appendix")?.[0]?.textContent || "";
@@ -503,7 +503,7 @@ export function Req_JMAXML(url, count) {
             elm.kind == "巨大地震注意" ||
             elm.kind == "調査中" ||
             (elm.kind == "調査終了" && offset <= 604800000) ||
-            (elm.kind == "臨時" && offset <= 604800000)
+            ((elm.kind == "臨時" || elm.kind == "南海トラフ地震臨時情報") && offset <= 604800000)
           );
         });
         if (rinji && rinji.reportKind != "取消") {
