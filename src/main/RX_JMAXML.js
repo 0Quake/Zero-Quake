@@ -581,8 +581,10 @@ export function Req_JMAXML(url, count) {
         MargeEQInfo(EQData, count);
 
         if (cancel) {
+          var dateStr = xml.getElementsByTagName("Control")[0]?.getElementsByTagName("DateTime")?.[0]?.textContent;
+          var dateTime = dateStr ? new Date(dateStr) : null;
           var rdtStr = xml.getElementsByTagName("ReportDateTime")?.[0]?.textContent;
-          var rdt = newDate2(rdtStr);
+          var rdt = dateTime || newDate2(rdtStr);
           var EventIDs = Array.isArray(EventID) ? EventID.map(Number) : [];
 
           tsunamiDataTmp = {
