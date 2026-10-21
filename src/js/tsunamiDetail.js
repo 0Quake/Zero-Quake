@@ -152,12 +152,6 @@ function tsunamiUpdate(dataTmp) {
             if (elm2.firstHeightInitial) {
               omaxHeight = `${elm2.omaxHeight} ${elm2.firstHeightInitial}`;
             }
-          } else if (String(elm2.maxHeightCondition).includes("観測中")) {
-            omaxHeight = "観測中";
-          } else if (String(elm2.maxHeightCondition).includes("微弱")) {
-            omaxHeight = "微弱";
-          } else if (String(elm2.maxHeightCondition).includes("欠測")) {
-            omaxHeight = "欠測";
           } else if (elm2.maxHeightCondition) {
             omaxHeight = elm2.maxHeightCondition;
           }
