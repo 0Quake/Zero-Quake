@@ -210,3 +210,83 @@ it("correctly extracts epicenter and M8+ from XML and renders them in EQDetail",
   assert.equal(element("data_M").innerText, "Ｍ８を超える巨大地震", "XML解析のdescriptionからM8超が反映されること");
 });
 
+it("handles XML with missing header/intensity elements without throwing unhandled exceptions", () => {
+  const { context } = renderer();
+
+  // Head/Title, Control/Status, Pref/Name, Station/Name, MaxInt 等が欠落したXML
+  const incompleteXml = `<?xml version="1.0" encoding="utf-8"?>
+<Report xmlns="http://xml.kishou.go.jp/jmaxml1/">
+  <Control>
+    <!-- Title欠落, Status欠落 -->
+    <DateTime>2026-10-18T12:00:00Z</DateTime>
+  </Control>
+  <Head>
+    <!-- Title欠落 -->
+    <ReportDateTime>2026-10-18T12:00:00Z</ReportDateTime>
+  </Head>
+  <Body>
+    <Earthquake>
+      <!-- OriginTime欠落, Name欠落 -->
+    </Earthquake>
+    <Intensity>
+      <!-- MaxInt欠落 -->
+      <Observation>
+        <Pref>
+          <!-- Name欠落 -->
+          <Area>
+            <City>
+              <IntensityStation>
+                <Code>12345</Code>
+                <!-- Name欠落 -->
+                <Int>3</Int>
+              </IntensityStation>
+            </City>
+          </Area>
+        </Pref>
+      </Observation>
+    </Intensity>
+  </Body>
+</Report>`;
+
+  const dom = new JSDOM(incompleteXml, { contentType: "application/xml" });
+  context.xml = dom.window.document;
+  context.eid = "20261018120000";
+  context.JMA_Int_Points = { 12345: { x: 139.7, y: 35.6 } };
+  context.jmaL_json_fetched = false;
+  context.parse_LatLngDepth = () => null;
+
+  const jmaFetchIdx = source.indexOf("function jmaXMLFetch");
+  const parseSnippet = source.slice(
+    source.indexOf('var cancelTmp =', jmaFetchIdx),
+    source.indexOf('ConvertEQInfo({', jmaFetchIdx)
+  );
+
+  assert.doesNotThrow(() => {
+    vm.runInContext(`
+      var newInfoDateTime = null;
+      ${parseSnippet}
+      var cdtStr = xml.querySelector("Control DateTime")?.textContent;
+      ConvertEQInfo({
+        category: infoType,
+        ControlDateTime: cdtStr ? new Date(cdtStr) : null,
+        status: xml.querySelector("Control Status")?.textContent || "通常",
+        reportTime: ReportTime || new Date(xml.querySelector("Head ReportDateTime")?.textContent || 0),
+        originTime: originTimeTmp,
+        maxI: maxIntTmp,
+        mag: magnitudeTmp,
+        magType: magnitudeTypeTmp,
+        lat: LatTmp,
+        lng: LngTmp,
+        depth: DepthTmp,
+        epiCenter: epiCenterTmp,
+        comment: commentText,
+        cancel: cancelTmp,
+        LngIntData: jmaL_json_fetched ? null : LngIntData,
+        IntData: IntData,
+      });
+    `, context);
+  }, "欠落要素があるXMLでも未catch例外が発生しないこと");
+
+  assert.equal(context.pendingEQInfo.length, 1);
+});
+

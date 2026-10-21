@@ -1202,7 +1202,7 @@ function jmaXMLFetch(url) {
 
       var IntensityElm = xml.querySelector("Body Intensity");
       if (IntensityElm)
-        maxIntTmp = NormalizeShindo(IntensityElm.querySelector("MaxInt").textContent, 4);
+        maxIntTmp = NormalizeShindo(IntensityElm.querySelector("MaxInt")?.textContent, 4);
 
       var commentText = {
         ForecastComment: "",
@@ -1218,8 +1218,9 @@ function jmaXMLFetch(url) {
           commentText.FreeFormComment = xml.querySelector("Body Comments FreeFormComment")?.textContent || "";
       }
 
-      var infoType = xml.querySelector("Head Title").textContent;
-      if (xml.querySelector("Control Title").textContent == "津波情報a" || xml.querySelector("Control Title").textContent == "津波警報・注意報・予報a")
+      var infoType = xml.querySelector("Head Title")?.textContent || "";
+      var controlTitle = xml.querySelector("Control Title")?.textContent;
+      if (controlTitle == "津波情報a" || controlTitle == "津波警報・注意報・予報a")
         infoType = "津波";
 
       var LngIntData = [];
@@ -1239,21 +1240,21 @@ function jmaXMLFetch(url) {
                     if (elm3.querySelectorAll("IntensityStation")[0]) {
                       elm3.querySelectorAll("IntensityStation")
                         .forEach(function (elm4) {
-                          var pointT = JMA_Int_Points[Number(elm4.querySelector("Code").textContent)];
+                          var pointT = JMA_Int_Points[Number(elm4.querySelector("Code")?.textContent)];
                           if (elm4.querySelector("Int")) {
                             stData.push({
                               lat: pointT ? pointT.y : null,
                               lng: pointT ? pointT.x : null,
-                              name: elm4.querySelector("Name").textContent,
-                              int: elm4.querySelector("Int").textContent,
+                              name: elm4.querySelector("Name")?.textContent || "",
+                              int: elm4.querySelector("Int")?.textContent || "",
                             });
                           }
                           if (elm4.querySelector("LgInt")) {
                             stDataL.push({
                               lat: pointT ? pointT.y : null,
                               lng: pointT ? pointT.x : null,
-                              name: elm4.querySelector("Name").textContent,
-                              lgint: elm4.querySelector("LgInt").textContent,
+                              name: elm4.querySelector("Name")?.textContent || "",
+                              lgint: elm4.querySelector("LgInt")?.textContent || "",
                             });
                           }
                         });
@@ -1304,7 +1305,7 @@ function jmaXMLFetch(url) {
                 if (elm2.querySelector(":scope > MaxLgInt")) {
                   areaDataL.push({
                     name: areaName,
-                    lgint: elm2.querySelector(":scope > MaxLgInt").textContent,
+                    lgint: elm2.querySelector(":scope > MaxLgInt")?.textContent || "",
                     station: stDataL,
                   });
                 }
@@ -1312,15 +1313,15 @@ function jmaXMLFetch(url) {
             }
             if (elm.querySelector(":scope > MaxInt")) {
               IntData.push({
-                name: elm.querySelector(":scope > Name")?.textContent || elm.querySelector("Name").textContent,
-                int: elm.querySelector(":scope > MaxInt").textContent,
+                name: elm.querySelector(":scope > Name")?.textContent || elm.querySelector("Name")?.textContent || "",
+                int: elm.querySelector(":scope > MaxInt")?.textContent || "",
                 area: areaData,
               });
             }
             if (elm.querySelector(":scope > MaxLgInt")) {
               LngIntData.push({
-                name: elm.querySelector(":scope > Name")?.textContent || elm.querySelector("Name").textContent,
-                lgint: elm.querySelector(":scope > MaxLgInt").textContent,
+                name: elm.querySelector(":scope > Name")?.textContent || elm.querySelector("Name")?.textContent || "",
+                lgint: elm.querySelector(":scope > MaxLgInt")?.textContent || "",
                 area: areaDataL,
               });
             }
@@ -1332,8 +1333,8 @@ function jmaXMLFetch(url) {
       ConvertEQInfo({
         category: infoType,
         ControlDateTime: cdtStr ? new Date(cdtStr) : null,
-        status: xml.querySelector("Control Status").textContent,
-        reportTime: new Date(xml.querySelector("Head ReportDateTime").textContent),
+        status: xml.querySelector("Control Status")?.textContent || "通常",
+        reportTime: ReportTime || new Date(xml.querySelector("Head ReportDateTime")?.textContent || 0),
         originTime: originTimeTmp,
         maxI: maxIntTmp,
         mag: magnitudeTmp,
