@@ -8,7 +8,6 @@ import { calcInt, calc_arTime, getClosestNum, } from "./CALC_PSWave.js";
 import { TTT_JMA2001, TTT_AK135, JMA_Int_Points, NormalizeShindo, NormalizeDate, Boolean2, EEWSect, EQIAreaLoc, newDate2 } from "./constants.js";
 import { MainWindow, messageToMainWindow, PlayAudio, speak, CreateMainWindow } from "./windows.js";
 import { MargeEQInfo } from "./PROC_EQInfo.js";
-import { worker } from "./RX_RTSeis.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -334,7 +333,7 @@ export function EEW_Marge(data) {
         var maxShindo = 0;
         var sects = Object.keys(EQIAreaLoc);
         JMA_Int_Points.forEach(function (elm) {
-          if (elm.a && elm.s) {
+          if (elm.a != null && elm.s != null) {
             var sect = sects[elm.s];
             if (!sect) return;
 
