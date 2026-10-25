@@ -507,24 +507,29 @@ export function Req_JMAXML(url, count) {
           });
 
         var teirei;
-        var rinji = NankaiTroughInfoAll.find(function (elm) {
-          var offset = Number(new Date() - new Date(elm.reportDate));
+        var latestRinji = NankaiTroughInfoAll.find(function (elm) {
           if (!elm.title.startsWith("南海トラフ地震臨時情報")) return false;
-          // 最新の取消電文自体は7日間カード表示
-          if (elm.reportKind == "取消") {
-            return offset <= 604800000;
-          }
-          // 取り消された過去の電文は候補から除外
-          if (elm.is_cancel) return false;
-
-          return (
-            (elm.kind == "巨大地震警戒" && offset <= 12091200000) ||
-            elm.kind == "巨大地震注意" ||
-            elm.kind == "調査中" ||
-            (elm.kind == "調査終了" && offset <= 604800000) ||
-            ((elm.kind == "臨時" || elm.kind == "南海トラフ地震臨時情報") && offset <= 604800000)
-          );
+          if (elm.is_cancel && elm.reportKind != "取消") return false;
+          return true;
         });
+
+        const OneDayInMS = 1000 * 60 * 60 * 24;
+        var rinji = null;
+        if (latestRinji) {
+          var offset = Number(new Date() - new Date(latestRinji.reportDate)) / OneDayInMS;
+          if (latestRinji.reportKind == "取消") {
+            if (offset <= 7) rinji = latestRinji;
+          } else {
+            var isValid = (
+              (latestRinji.kind == "巨大地震警戒" && offset <= 14) ||
+              (latestRinji.kind == "巨大地震注意" && offset <= 7) ||
+              (latestRinji.kind == "調査中" && offset <= 7) ||
+              (latestRinji.kind == "調査終了" && offset <= 7) ||
+              ((latestRinji.kind == "臨時" || latestRinji.kind == "南海トラフ地震臨時情報") && offset <= 7)
+            );
+            if (isValid) rinji = latestRinji;
+          }
+        }
         if (rinji && rinji.reportKind != "取消") {
           teirei = NankaiTroughInfoAll.find(function (elm) {
             return (
@@ -597,6 +602,24 @@ export function Req_JMAXML(url, count) {
             axisData: null,
           });
         });
+        if (cancel && EQData.length === 0 && Array.isArray(EventID) && EventID.length > 0) {
+          EventID.filter(Boolean).forEach(function (eid) {
+            EQData.push({
+              status: status,
+              eventId: eid,
+              category: "Tsunami",
+              OriginTime: null,
+              epiCenter: null,
+              M: null,
+              maxI: null,
+              cancel: true,
+              reportDateTime: rdt,
+              DetailURL: [url],
+              Headline: "",
+              axisData: null,
+            });
+          });
+        }
         MargeEQInfo(EQData, count);
 
         if (cancel) {
@@ -781,7 +804,7 @@ export function Req_JMAXML(url, count) {
           }
 
 
-          if (tsunamiElm.getElementsByTagName("Observation")[0]) {
+          if (tsunamiElm?.getElementsByTagName("Observation")?.[0]) {
             for (const elm of (tsunamiElm.getElementsByTagName("Observation")?.[0]?.getElementsByTagName("Item") || [])) {
               var stations = [];
               if (elm.getElementsByTagName("Station")[0]) {
@@ -848,6 +871,7 @@ export function Req_JMAXML(url, count) {
                 return elm2.name == areaName;
               });
               if (tsunamiItem) {
+                if (!Array.isArray(tsunamiItem.stations)) tsunamiItem.stations = [];
                 stations.forEach(function (elm2) {
                   var stationElm = tsunamiItem.stations.findIndex(function (elm3) {
                     return elm3.name == elm2.name;

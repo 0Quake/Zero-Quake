@@ -2195,7 +2195,7 @@ function ConvertEQInfo(data) {
         EQInfoTmp.comment = elm.comment;
       }
 
-      if (Boolean2(elm.LngIntData)) EQInfoTmp.LngIntData = elm.LngIntData;
+      if (elm.LngIntData !== undefined) EQInfoTmp.LngIntData = elm.LngIntData;
     }
   });
 
