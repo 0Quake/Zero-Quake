@@ -103,9 +103,22 @@ function singlePointProcess(stream) {
     const state = stationStates.get(st.Code);
     if (!state) return;
 
-    //初回でノイズフロア未設定の場合
-    if (state.noiseFloor === null) state.noiseFloor = Math.max(st.shindo, -0.5);
+    if (!st.data) {// 欠測点はリセット＆処理終了
+      state.isOnset = false;
+      state.isTriggered = false;
+      state.Prev_isTriggered = false;
+      state.onsetTime = null;
+      state.shindo = null;
 
+      st.isOnset = false;
+      st.isTriggered = false;
+      return;
+    }
+
+    //初回でノイズフロア未設定の場合
+    if (!Number.isFinite(state.noiseFloor)) {
+      state.noiseFloor = Math.max(st.shindo, -0.5);
+    }
     //単点検知判定
     //閾値式の検討：https://www.desmos.com/calculator/vkhen3u8cp
     const onsetTmp =
