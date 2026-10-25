@@ -567,7 +567,6 @@ export function EEW_Alert(data, update) {
     var first = !SameEEW || !SameEEW.isNotified;
     var PrevData;
     if (SameEEW) {
-      SameEEW.isNotified = true;
       PrevData = SameEEW.data
         .filter((e) => e.serial < data.serial)//本データより古く
         .sort((a, b) => b.serial - a.serial)[0]//降順[0]でserial最大
@@ -581,14 +580,16 @@ export function EEW_Alert(data, update) {
       //取消報の通知判定（震度閾値に関わらず取消音声を発動）
       PlayAudio("EEW2");
       speak(GenerateEEWText(data, false));
+      SameEEW.isNotified = true;
       var notice_setting = first ? config.notice?.window?.EEW : config.notice?.window?.EEW_Update;
       if (notice_setting == "openWindow") {
-        try { CreateMainWindow(); } catch {}
+        try { CreateMainWindow(); } catch { }
       }
     } else if (!update && show_alert && (int_increased || !config.Info.EEW.IntTerm1)) {
       //同一報の更新時でなく、条件に合致
       PlayAudio((data.alertflg == "警報") ? "EEW1" : "EEW2");
       speak(GenerateEEWText(data, !first));
+      SameEEW.isNotified = true;
 
       var notice_setting = first ? config.notice?.window?.EEW : config.notice?.window?.EEW_Update;
       var WindowInvisible = !MainWindow || MainWindow.isMinimized() || !MainWindow.isFocused() || !MainWindow.isVisible();
