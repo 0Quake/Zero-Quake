@@ -596,20 +596,21 @@ function eqInfoDraw(data, source) {
             `気象庁の地震履歴アイテム：${elm.status == "訓練" ? "訓練報、" : ""}${elm.status == "試験" ? "試験報、" : ""}${elm.headline || ""}${content}
       `//エンターキーで詳細情報を確認。
           );
-          clone.querySelector(".EQItem").addEventListener("click", function () {
-            window.electronAPI.messageReturn({
-              action: "EQInfoWindowOpen",
-              url: "src/EQCountDetail.html",
-              eid: elm.eventId,
-              data: elm,
-            });
+        clone.querySelector(".EQItem").addEventListener("click", function () {
+          window.electronAPI.messageReturn({
+            action: "EQInfoWindowOpen",
+            url: "src/EQCountDetail.html",
+            eid: elm.eventId,
+            data: elm,
           });
-        }
+        });
+      }
 
-        document.getElementById("JMA_EqInfo_Data").appendChild(clone);
-      } else {
+      document.getElementById("JMA_EqInfo_Data").appendChild(clone);
+    } else {
       var clone = EQTemplate.content.cloneNode(true);
 
+      clone.querySelector(".EQI_datetime").textContent = elm.OriginTime ? NormalizeDate(4, elm.OriginTime) : "発生時刻不明";
       clone.querySelector(".EQI_epiCenter").textContent = elm.epiCenter || "震源調査中";
       var magDisplay = "不明";
       if (elm.M || elm.M === 0) {
