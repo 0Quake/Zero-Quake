@@ -748,7 +748,7 @@ function setOpenAtLogin(openAtLogin) {
     if (openAtLogin) {
       const source = String(app.getPath("exe")).replace(/\\/g, "/");
       let command = `
-    $WshShell = New - Object - ComObject WScript.Shell;
+    $WshShell = New-Object -ComObject WScript.Shell;
     $ShortCut = $WshShell.CreateShortcut("${dist}");
     $ShortCut.TargetPath = "${source}";
     $ShortCut.Save();
