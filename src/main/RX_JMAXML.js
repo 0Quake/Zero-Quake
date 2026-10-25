@@ -349,7 +349,7 @@ export function Req_JMAXML(url, count) {
         MargeEQInfo([{
           status: xml.getElementsByTagName("Status")?.[0]?.textContent,
           eventId: xml.getElementsByTagName("EventID")?.[0]?.textContent,
-          category: xml.getElementsByTagName("Title")?.[0]?.textContent,
+          category: xml.getElementsByTagName("Head")?.[0]?.getElementsByTagName("Title")?.[0]?.textContent,
           ControlDateTime: cdtStr ? new Date(cdtStr) : null,
           OriginTime: originTime,
           epiCenter: epiCenterTmp,
