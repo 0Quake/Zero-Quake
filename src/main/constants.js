@@ -117,7 +117,7 @@ export function NormalizeShindo(str, responseType) {
   try {
     var p2p_table = { "10": 1, "20": 2, "30": 3, "40": 4, "45": 5, "50": 6, "55": 7, "60": 8, "70": 9 }
     var IntIndex = 11;
-    if (str === null || str === undefined) {
+    if (str === null || str === undefined || (typeof str === "string" && str.trim() === "")) {
       IntIndex = 11;//不明
     } else if (p2p_table[str]) {
       IntIndex = p2p_table[str]//p2pの2桁フォーマット

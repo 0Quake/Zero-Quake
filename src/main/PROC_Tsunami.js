@@ -78,6 +78,11 @@ export function ConvertTsunamiInfo(data) {
                   Object.keys(elm2).forEach(function (key) {
                     if (Boolean2(elm2[key])) SameSta[key] = elm2[key];
                   });
+                  if (elm2.firstHeightCondition == "第１波の到達を確認" || elm2.firstHeightCondition == "津波到達中と推測" ||
+                      elm2.Condition == "第１波の到達を確認" || elm2.Condition == "津波到達中と推測") {
+                    SameSta.ArrivalTime = null;
+                    SameSta.ArrivedTime = null;
+                  }
                   if (elm2.hasFirstHeight) {
                     if (!elm2.ArrivedTime) {
                       SameSta.ArrivedTime = null;
@@ -90,6 +95,8 @@ export function ConvertTsunamiInfo(data) {
                     SameSta.maxHeightRising = Boolean(elm2.maxHeightRising);
                     if (!elm2.omaxHeight) {
                       SameSta.omaxHeight = null;
+                    } else {
+                      SameSta.maxHeightCondition = elm2.maxHeightCondition || null;
                     }
                     if (!elm2.maxHeightTime) {
                       SameSta.maxHeightTime = null;
@@ -166,7 +173,8 @@ export function ConvertTsunamiInfo(data) {
           let sameTitle = !elm.title || !next.title || elm.title === next.title;
           let sameEvent = !elm.issue?.EventID?.length || !next.issue?.EventID?.length ||
             IncludesDuplicates(elm.issue?.EventID, next.issue?.EventID);
-          if (sameTitle && sameEvent) {
+          let sameStatus = !elm.status || !next.status || elm.status === next.status;
+          if (sameTitle && sameEvent && sameStatus) {
             return false; // より新しい時刻に同一情報単位の取消電文が存在するため無効
           }
         }
@@ -176,7 +184,7 @@ export function ConvertTsunamiInfo(data) {
 
     let latestRevocation = false;
     let latestCancelled = false;
-    let latestTorikeshi = sortedTsunamiData.some(elm => elm.Torikeshi);
+    let latestTorikeshi = activeTsunamiData.length === 0 && sortedTsunamiData.some(elm => elm.Torikeshi && (config.Info?.TsunamiInfo?.showtraining || elm.status !== "訓練"));
 
     activeTsunamiData.forEach(function (elm0) {
 
@@ -258,6 +266,11 @@ export function ConvertTsunamiInfo(data) {
                   Object.keys(elm2).forEach(function (key) {
                     if (Boolean2(elm2[key])) SameSta[key] = elm2[key];
                   });
+                  if (elm2.firstHeightCondition == "第１波の到達を確認" || elm2.firstHeightCondition == "津波到達中と推測" ||
+                      elm2.Condition == "第１波の到達を確認" || elm2.Condition == "津波到達中と推測") {
+                    SameSta.ArrivalTime = null;
+                    SameSta.ArrivedTime = null;
+                  }
                   if (elm2.hasFirstHeight) {
                     if (!elm2.ArrivedTime) {
                       SameSta.ArrivedTime = null;
@@ -270,6 +283,8 @@ export function ConvertTsunamiInfo(data) {
                     SameSta.maxHeightRising = Boolean(elm2.maxHeightRising);
                     if (!elm2.omaxHeight) {
                       SameSta.omaxHeight = null;
+                    } else {
+                      SameSta.maxHeightCondition = elm2.maxHeightCondition || null;
                     }
                     if (!elm2.maxHeightTime) {
                       SameSta.maxHeightTime = null;

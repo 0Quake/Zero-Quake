@@ -195,7 +195,17 @@ export var EQCount_data = {};
 export function EQCount_process(data) {
   if (data && data.eventId) {
     var existing = EQCount_data[data.eventId];
-    if (!existing || !existing.reportDateTime || !data.reportDateTime || Number(data.reportDateTime) >= Number(existing.reportDateTime)) {
+    var isNewer = true;
+    if (existing && existing.reportDateTime && data.reportDateTime) {
+      var diff = Number(data.reportDateTime) - Number(existing.reportDateTime);
+      if (diff < 0) {
+        isNewer = false;
+      } else if (diff === 0) {
+        var cdtDiff = Number(data.ControlDateTime || 0) - Number(existing.ControlDateTime || 0);
+        if (cdtDiff < 0) isNewer = false;
+      }
+    }
+    if (isNewer) {
       EQCount_data[data.eventId] = data;
     }
   }

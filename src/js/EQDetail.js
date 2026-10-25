@@ -1194,10 +1194,18 @@ function jmaXMLFetch(url) {
         magnitudeTypeTmp = magElm?.getAttribute?.("type");
         LatLngDepth = parse_LatLngDepth(EarthquakeElm.getElementsByTagName("jmx_eb:Coordinate")?.[0]?.textContent);
         if (LatLngDepth && LatLngDepth.length) {
-          LatTmp = Number(LatLngDepth[1]);
-          LngTmp = Number(LatLngDepth[2]);
-          DepthTmp = LatLngDepth[3] ? Number(LatLngDepth[3] / 1000) : null;
+          var parsedLat = Number(LatLngDepth[1]);
+          var parsedLng = Number(LatLngDepth[2]);
+          if (!isNaN(parsedLat) && parsedLat >= -90 && parsedLat <= 90 &&
+              !isNaN(parsedLng) && parsedLng >= -180 && parsedLng <= 180) {
+            LatTmp = parsedLat;
+            LngTmp = parsedLng;
+            DepthTmp = LatLngDepth[3] ? Number(LatLngDepth[3] / 1000) : null;
+          }
         }
+      } else {
+        var tgDateStr = xml.querySelector("Head TargetDateTime")?.textContent;
+        if (tgDateStr) originTimeTmp = new Date(tgDateStr);
       }
 
       var IntensityElm = xml.querySelector("Body Intensity");
@@ -1311,7 +1319,7 @@ function jmaXMLFetch(url) {
                 }
               });
             }
-            if (elm.querySelector(":scope > MaxInt")) {
+            if (elm.querySelector(":scope > MaxInt") || areaData.length > 0) {
               IntData.push({
                 name: elm.querySelector(":scope > Name")?.textContent || elm.querySelector("Name")?.textContent || "",
                 int: elm.querySelector(":scope > MaxInt")?.textContent || "",
@@ -1331,12 +1339,13 @@ function jmaXMLFetch(url) {
       var cdtStr = xml.querySelector("Control DateTime")?.textContent;
 
       ConvertEQInfo({
+        controlTitle: controlTitle || null,
         category: infoType,
         ControlDateTime: cdtStr ? new Date(cdtStr) : null,
         status: xml.querySelector("Control Status")?.textContent || "通常",
         reportTime: ReportTime || new Date(xml.querySelector("Head ReportDateTime")?.textContent || 0),
         originTime: originTimeTmp,
-        maxI: maxIntTmp,
+        maxI: IntensityElm ? maxIntTmp : undefined,
         mag: magnitudeTmp,
         magType: magnitudeTypeTmp,
         lat: LatTmp,
@@ -1345,8 +1354,8 @@ function jmaXMLFetch(url) {
         epiCenter: epiCenterTmp,
         comment: commentText,
         cancel: cancelTmp,
-        LngIntData: jmaL_json_fetched ? null : LngIntData,//気象庁json apiとの衝突を回避（）
-        IntData: IntData,
+        LngIntData: jmaL_json_fetched ? null : (xml.querySelector("Body Intensity Observation") ? LngIntData : undefined),//気象庁json apiとの衝突を回避（）
+        IntData: xml.querySelector("Body Intensity Observation") ? IntData : undefined,
       });
     })
     .catch((err) => {
@@ -2138,7 +2147,9 @@ function ConvertEQInfo(data) {
   EQInfoData.forEach(function (elm, index) {
     if (elm.cancel) {
       EQInfoData.slice(0, index).forEach(function (elm2, index2) {
-        if (elm2.category == elm.category) EQInfoData[index2].cancel = true;
+        var sameType = (elm2.controlTitle && elm.controlTitle) ? (elm2.controlTitle == elm.controlTitle) : (elm2.category == elm.category);
+        var sameStatus = !elm2.status || !elm.status || (elm2.status == elm.status);
+        if (sameType && sameStatus) EQInfoData[index2].cancel = true;
       });
     }
   });

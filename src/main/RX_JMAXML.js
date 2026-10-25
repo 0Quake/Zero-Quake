@@ -347,8 +347,8 @@ export function Req_JMAXML(url, count) {
           OriginTime: originTime,
           epiCenter: epiCenterTmp,
           M: magnitudeTmp,
-          maxI: NormalizeShindo(maxInt),
-          maxLgInt: maxLgInt,
+          maxI: IntElm ? NormalizeShindo(maxInt) : undefined,
+          maxLgInt: IntElm ? maxLgInt : undefined,
           cancel: Boolean(cancel),
           reportDateTime: new Date(
             xml.getElementsByTagName("ReportDateTime")?.[0]?.textContent
@@ -399,8 +399,10 @@ export function Req_JMAXML(url, count) {
         var rdtStr = xml.getElementsByTagName("ReportDateTime")?.[0]?.textContent
         var rdt = newDate2(rdtStr);
         var isCancel = cancel || xml.getElementsByTagName("Status")?.[0]?.textContent == "取消";
+        var cdtStr = xml.getElementsByTagName("Control")?.[0]?.getElementsByTagName("DateTime")?.[0]?.textContent;
 
         EQCount_process({
+          ControlDateTime: cdtStr ? newDate2(cdtStr) : null,
           status: xml.getElementsByTagName("Status")?.[0]?.textContent,
           eventId: xml.getElementsByTagName("EventID")?.[0]?.textContent,
           category: xml.getElementsByTagName("Title")?.[0]?.textContent,
@@ -427,8 +429,10 @@ export function Req_JMAXML(url, count) {
 
         var isCancel = kind == "取消";
 
+        var cdtStr = xml.getElementsByTagName("Control")?.[0]?.getElementsByTagName("DateTime")?.[0]?.textContent;
         var data = {
           title: title, //南海トラフ地震関連解説情報など
+          ControlDateTime: cdtStr ? newDate2(cdtStr) : null,
           eventId: eventId,
           status: status,//通常、訓練、試験
           kind: isCancel ? "取消" : null, //定例など
@@ -484,8 +488,23 @@ export function Req_JMAXML(url, count) {
         }
 
         NankaiTroughInfoAll.push(data);
+        // 全体の取消状態を再評価（取消が先着し、旧報が後着した場合にも対応）
+        NankaiTroughInfoAll.forEach(function (elm1) {
+          if (elm1.is_cancel || elm1.reportKind == "取消") {
+            NankaiTroughInfoAll.forEach(function (elm2) {
+              if (elm2.title == elm1.title && (!elm1.eventId || !elm2.eventId || elm1.eventId == elm2.eventId)) {
+                if (elm1.Serial != null && elm2.Serial != null) {
+                  if (elm2.Serial <= elm1.Serial) elm2.is_cancel = true;
+                }
+              }
+            });
+          }
+        });
         NankaiTroughInfoAll = NankaiTroughInfoAll
-          .sort((a, b) => a.reportDate > b.reportDate ? -1 : 1);
+          .sort(function (a, b) {
+            var diff = Number(new Date(b.reportDate)) - Number(new Date(a.reportDate));
+            return diff !== 0 ? diff : (Number(new Date(b.ControlDateTime || 0)) - Number(new Date(a.ControlDateTime || 0)));
+          });
 
         var teirei;
         var rinji = NankaiTroughInfoAll.find(function (elm) {
@@ -725,14 +744,16 @@ export function Req_JMAXML(url, count) {
                   var highTideStr = elm2.getElementsByTagName("HighTideDateTime")?.[0]?.textContent;
                   if (highTideStr) highTideTimeTmp = new Date(highTideStr);
 
-                  var arDateStr = elm2.getElementsByTagName("FirstHeight")?.[0]?.getElementsByTagName("ArrivalTime")?.[0]?.textContent;
+                  var fHeightElm = elm2.getElementsByTagName("FirstHeight")?.[0];
+                  var arDateStr = fHeightElm?.getElementsByTagName("ArrivalTime")?.[0]?.textContent;
                   if (arDateStr) ArrivalTimeTmp = new Date(arDateStr);
 
-                  ConditionTmp = elm2.getElementsByTagName("Condition")?.[0]?.textContent || null;
+                  ConditionTmp = fHeightElm?.getElementsByTagName("Condition")?.[0]?.textContent || elm2.getElementsByTagName("Condition")?.[0]?.textContent || null;
 
                   stations.push({
                     name: nameTmp,
                     code: codeTmp,
+                    hasFirstHeight: Boolean(fHeightElm),
                     HighTideDateTime: highTideTimeTmp,
                     ArrivalTime: ArrivalTimeTmp,
                     Condition: ConditionTmp,
@@ -851,8 +872,10 @@ export function Req_JMAXML(url, count) {
         var headline = xml.getElementsByTagName("Headline")?.[0]?.getElementsByTagName("Text")?.[0]?.textContent || "";
         var rdt = newDate2(xml.getElementsByTagName("ReportDateTime")?.[0]?.textContent);
         var cdtStr = xml.getElementsByTagName("Control")?.[0]?.getElementsByTagName("DateTime")?.[0]?.textContent;
+        var status = xml.getElementsByTagName("Status")?.[0]?.textContent || "通常";
         var data = {
           title: title, //北海道・三陸沖後発地震注意情報
+          status: status,
           kind: kind,//発表/取消
           reportDate: rdt, //時刻
           ControlDateTime: cdtStr ? newDate2(cdtStr) : null,
@@ -877,10 +900,12 @@ export function Req_JMAXML(url, count) {
         if (/^南海トラフ地震に関連する情報（(臨時|定例)）を発表します。$/.test(headline.trim())) return;//南海トラフ地震関連解説情報（移行措置電文）の重複をはじく
 
         var kind = xml.getElementsByTagName("Head")?.[0]?.getElementsByTagName("InfoType")?.[0]?.textContent;
-        var rdt = newDate2(xml.getElementsByTagName("ReportDateTime")?.[0]?.textContent)
+        var rdt = newDate2(xml.getElementsByTagName("ReportDateTime")?.[0]?.textContent);
+        var cdtStr = xml.getElementsByTagName("Control")?.[0]?.getElementsByTagName("DateTime")?.[0]?.textContent;
 
         var data = {
           title: title, //地震の活動状況等に関する情報
+          ControlDateTime: cdtStr ? newDate2(cdtStr) : null,
           kind: kind,//発表/取消
           reportDate: rdt, //時刻
           HeadLine: headline, //要約
@@ -902,7 +927,10 @@ export function Req_JMAXML(url, count) {
 
         KatsudoJokyoInfoAll.push(data);
         KatsudoJokyoInfoAll = KatsudoJokyoInfoAll
-          .sort((a, b) => a.reportDate > b.reportDate ? -1 : 1);
+          .sort(function (a, b) {
+            var diff = Number(new Date(b.reportDate)) - Number(new Date(a.reportDate));
+            return diff !== 0 ? diff : (Number(new Date(b.ControlDateTime || 0)) - Number(new Date(a.ControlDateTime || 0)));
+          });
 
         messageToMainWindow({
           action: "KatsudoJokyoInfo",
