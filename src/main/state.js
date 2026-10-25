@@ -12,7 +12,6 @@ export var kmoniOffset = 2500;
 export var JMA_CurrentInfoNumber = 20;
 export var USGS_CurrentInfoNumber = 20;
 export var EQ_FetchCount = 0;
-export var update_data = null;
 
 export function setConfig(val) { config = val; }
 export function setDefaultConfigVal(val) { defaultConfigVal = val; }
@@ -21,7 +20,6 @@ export function setReplay(val) { Replay = val; }
 export function setPackageVer(val) { package_ver = val; }
 export function setPackageJson(val) { packageJson = val; }
 export function setKmoniOffset(val) { kmoniOffset = val; }
-export function setUpdateData(val) { update_data = val; }
 export function setJMAInfoNumber(val) { JMA_CurrentInfoNumber = val; }
 export function setUSGSInfoNumber(val) { USGS_CurrentInfoNumber = val; }
 export function incEQFetchCount() { EQ_FetchCount++; }

@@ -51,7 +51,6 @@ import {
   store,
   Replay,
   package_ver,
-  update_data,
   kmoniTimeTmp,
   JMA_CurrentInfoNumber,
   USGS_CurrentInfoNumber,
@@ -70,6 +69,7 @@ import {
   HokkaidoSanrikuInfoAll,
   KatsudoJokyoInfoAll,
 } from "./RX_JMAXML.js";
+import { update_data } from "./RX_OtherAPIs.js";
 
 export function CreateMainWindow() {
   try {

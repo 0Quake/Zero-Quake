@@ -14,7 +14,7 @@ import {
   GeneralError_handler,
 } from "./state.js";
 
-export var update_data;
+export var update_data = null;
 export var downloadURL;
 
 //アップデートの確認
