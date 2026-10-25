@@ -1129,7 +1129,7 @@ function jmaL_Fetch(url) {
       ConvertEQInfo({
         category: json.Head.Title,
         status: json.Control.Status,
-        reportTime: 0,
+        reportTime: json.Head?.ReportDateTime || json.Control?.DateTime || 0,
         originTime: originTimeTmp,
         maxI: maxIntTmp,
         mag: magnitudeTmp,
