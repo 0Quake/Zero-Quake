@@ -921,7 +921,6 @@ function narikakun_ListReq() {
 //気象庁 取得・フォーマット変更→ ConvertEQInfo
 function jma_Fetch(url) {
   if (fetchedURL.includes(url)) return;
-  fetchedURL.push(url);
   fetch(url)
     .then(function (res) { return res.json(); })
     .then(function (json) {
@@ -1021,13 +1020,13 @@ function jma_Fetch(url) {
         cancel: cancelTmp,
         IntData: IntData,
       });
+      fetchedURL.push(url);
     });
 }
 
 var jmaL_json_fetched = false
 function jmaL_Fetch(url) {
   if (fetchedURL.includes(url)) return;
-  fetchedURL.push(url);
   fetch(url)
     .then(function (res) {
       return res.json();
@@ -1144,6 +1143,7 @@ function jmaL_Fetch(url) {
         IntData: IntData,
       });
       jmaL_json_fetched = true
+      fetchedURL.push(url);
     });
 }
 //気象庁防災XML 取得・フォーマット変更→ ConvertEQInfo
@@ -1158,7 +1158,6 @@ function jmaXMLFetch(url) {
       var parser = new DOMParser();
       var xml = parser.parseFromString(data, "application/xml");
       if (!xml || xml.querySelector("parsererror")) throw new Error("XMLのパースに失敗");
-      fetchedURL.push(url);
       var cancelTmp = (xml.querySelector("InfoType")?.textContent || "").trim() == "取消";
       var ReportTime = new Date(xml.querySelector("Head ReportDateTime")?.textContent);
       if (!newInfoDateTime || newInfoDateTime <= ReportTime) {
@@ -1197,7 +1196,7 @@ function jmaXMLFetch(url) {
           var parsedLat = Number(LatLngDepth[1]);
           var parsedLng = Number(LatLngDepth[2]);
           if (!isNaN(parsedLat) && parsedLat >= -90 && parsedLat <= 90 &&
-              !isNaN(parsedLng) && parsedLng >= -180 && parsedLng <= 180) {
+            !isNaN(parsedLng) && parsedLng >= -180 && parsedLng <= 180) {
             LatTmp = parsedLat;
             LngTmp = parsedLng;
             DepthTmp = LatLngDepth[3] ? Number(LatLngDepth[3] / 1000) : null;
@@ -1357,16 +1356,14 @@ function jmaXMLFetch(url) {
         LngIntData: jmaL_json_fetched ? null : (xml.querySelector("Body Intensity Observation") ? LngIntData : undefined),//気象庁json apiとの衝突を回避（）
         IntData: xml.querySelector("Body Intensity Observation") ? IntData : undefined,
       });
-    })
-    .catch((err) => {
+      fetchedURL.push(url);
+    }).catch((err) => {
       console.error("jmaXMLFetch error:", err);
     });
 }
 //narikakun地震情報API 取得・フォーマット変更→ ConvertEQInfo
 function narikakun_Fetch(url) {
   if (fetchedURL.includes(url)) return;
-
-  fetchedURL.push(url);
 
   fetch(url)
     .then(function (res) { return res.json(); })
@@ -1451,6 +1448,7 @@ function narikakun_Fetch(url) {
           IntData: IntData,
         });
       }
+      fetchedURL.push(url);
     });
 }
 
