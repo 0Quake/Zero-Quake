@@ -99,8 +99,20 @@ export function Req_JMA_wepa() {
     });
 }
 
+export const UpdateEQInfo_Tmp = throttle(function () {//ユーザー操作など一時
+  UpdateEQInfoCore();
+}, 2000);
 
-export var UpdateEQInfo = throttle(function (loop) {
+var UpdateEQInfo_Timer;
+export const UpdateEQInfo_Loop = function () {//ループ
+  UpdateEQInfoCore();
+
+  if (UpdateEQInfo_Timer) clearTimeout(UpdateEQInfo_Timer);
+  UpdateEQInfo_Timer = setTimeout(function () {
+    UpdateEQInfo_Loop();
+  }, config.Info.EQInfo.Interval);
+};
+export function UpdateEQInfoCore() {
   try {
     Req_JMAXMLList(EQ_FetchCount, EQ_FetchCount == 0);
     Req_JMAJSONList();
@@ -109,13 +121,7 @@ export var UpdateEQInfo = throttle(function (loop) {
     throw new Error("地震情報の処理でエラーが発生しました。", { cause: err });
   }
   incEQFetchCount();
-
-  if (loop) {
-    setTimeout(function () {
-      UpdateEQInfo(true);
-    }, config.Info.EQInfo.Interval);
-  }
-}, 2000);
+};
 
 //気象庁XMLリスト取得→Req_JMAXML
 export function Req_JMAXMLList(count, longFeed) {

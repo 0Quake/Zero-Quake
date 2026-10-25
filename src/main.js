@@ -72,7 +72,8 @@ import {
   Req_JMAXMLList,
   Req_JMA_gaikyo,
   Req_JMA_wepa,
-  UpdateEQInfo,
+  UpdateEQInfo_Tmp,
+  UpdateEQInfo_Loop,
 } from "./main/RX_JMAXML.js";
 import {
   checkUpdate,
@@ -571,7 +572,7 @@ electron.app.on("ready", () => {
   });
 
   electron.powerMonitor.on("resume", () => {
-    UpdateEQInfo();
+    UpdateEQInfo_Tmp();
     RegularExecution();
     if (WolfxConnection?.readyState === WebSocket.OPEN) WolfxConnection.send("query_jmaeew");
     if (ProjectBS_Connection?.readyState === WebSocket.OPEN) ProjectBS_Connection.send("queryjson");
@@ -680,7 +681,7 @@ ipcMain.on("message", (_event, response) => {
       break;
     case "internetConnection":
       if (response.internetConnection) {
-        UpdateEQInfo();
+        UpdateEQInfo_Tmp();
         RegularExecution();
         if (WolfxConnection?.readyState === WebSocket.OPEN) WolfxConnection.send("query_jmaeew");
         if (ProjectBS_Connection?.readyState === WebSocket.OPEN) ProjectBS_Connection.send("queryjson");
@@ -786,7 +787,7 @@ function start() {
   Req_SNet();
   Req_kmoni();
   SetKmoniOffset(Req_kmoni);
-  UpdateEQInfo(true); //地震情報定期取得 着火
+  UpdateEQInfo_Loop(); //地震情報定期取得 着火
   Req_EarlyEst();
   TREMRTS_SSE();
   TREMRTS_Replay();

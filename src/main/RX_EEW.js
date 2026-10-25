@@ -1,6 +1,6 @@
 import { DetectEEW } from "./PROC_EEW.js";
 import { ParseJSON, newDate2, NormalizeShindo } from "./constants.js";
-import { UpdateEQInfo } from "./RX_JMAXML.js";
+import { UpdateEQInfo_Tmp } from "./RX_JMAXML.js";
 import { ConvertTsunamiInfo } from "./PROC_Tsunami.js";
 import { MargeEQInfo } from "./PROC_EQInfo.js";
 
@@ -43,7 +43,7 @@ function Connect_P2P() {
 
           switch (data.code) {
             case 551:
-              setTimeout(UpdateEQInfo, 10000);
+              setTimeout(UpdateEQInfo_Tmp, 10000);
               break;
             case 552:
               //津波情報
@@ -277,7 +277,7 @@ function Connect_WolfxWS() {
         } else if (json.type == "jma_eew") {
           DetectEEW(2, json);
         } else if (json.type == "jma_eqlist") {
-          UpdateEQInfo();
+          UpdateEQInfo_Tmp();
         }
       } catch {
         UpdateStatus("wolfx", "Error");
