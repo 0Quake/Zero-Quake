@@ -16,6 +16,7 @@ import {
   UpdateStatus,
   GeneralError_handler,
 } from "./state.js";
+const OneDayInMS = 1000 * 60 * 60 * 24;
 
 var jmaXML_Fetched = [];
 
@@ -182,7 +183,7 @@ export function Req_JMAXMLList(count, longFeed) {
           var updatedStr = elm.getElementsByTagName("updated")?.[0]?.textContent;
           var updatedTime = updatedStr ? new Date(updatedStr).getTime() : NaN;
 
-          if (ttl && ttl.textContent.startsWith("南海トラフ地震臨時情報") && !Number.isNaN(updatedTime) && (Date.now() - updatedTime) <= 12091200000) {
+          if (ttl && ttl.textContent.startsWith("南海トラフ地震臨時情報") && !Number.isNaN(updatedTime) && (Date.now() - updatedTime) <= 14 * OneDayInMS) {
             var href = elm.getElementsByTagName("link")?.[0]?.getAttribute("href");
             if (href) Req_JMAXML(href);
           }
@@ -513,7 +514,6 @@ export function Req_JMAXML(url, count) {
           return true;
         });
 
-        const OneDayInMS = 1000 * 60 * 60 * 24;
         var rinji = null;
         if (latestRinji) {
           var offset = Number(new Date() - new Date(latestRinji.reportDate)) / OneDayInMS;
