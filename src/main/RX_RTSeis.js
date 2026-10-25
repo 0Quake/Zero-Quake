@@ -102,7 +102,6 @@ function formatTremData(json) {
   var TremRtsData = {};
   Object.keys(json.stations).forEach(function (StID) {
     var st = json.stations[StID];
-    if (!TremRts_sta) return Req_TremRts_sta();
     var StMeta = TremRts_sta?.[StID];
     if (StMeta) {
       var rgb = KmoniColorTable[Math.min(7, Math.max(-3, Math.floor(st.i * 10) / 10))];
@@ -113,6 +112,8 @@ function formatTremData(json) {
         Code: StID,
         rgb: [rgb.r, rgb.g, rgb.b],
       };
+    } else {
+      Req_TremRts_sta();
     }
   });
   return TremRtsData;
