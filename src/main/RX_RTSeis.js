@@ -21,7 +21,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 import {
   config,
   Replay,
-  setKmoniOffset,
+  state,
   UpdateStatus,
   GeneralError_handler,
   IntervalRun,
@@ -667,7 +667,7 @@ export async function SetKmoniOffset(func) {
     GeneralError_handler(err)
   }
   KmoniOffset = calculatedOffset;
-  setKmoniOffset(calculatedOffset);
+  state.kmoniOffset = calculatedOffset;
   if (func) setTimeout(func, 200);
 }
 

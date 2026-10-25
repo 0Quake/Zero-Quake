@@ -13,16 +13,43 @@ export var JMA_CurrentInfoNumber = 20;
 export var USGS_CurrentInfoNumber = 20;
 export var EQ_FetchCount = 0;
 
-export function setConfig(val) { config = val; }
-export function setDefaultConfigVal(val) { defaultConfigVal = val; }
-export function setStore(val) { store = val; }
-export function setReplay(val) { Replay = val; }
-export function setPackageVer(val) { package_ver = val; }
-export function setPackageJson(val) { packageJson = val; }
-export function setKmoniOffset(val) { kmoniOffset = val; }
-export function setJMAInfoNumber(val) { JMA_CurrentInfoNumber = val; }
-export function setUSGSInfoNumber(val) { USGS_CurrentInfoNumber = val; }
-export function incEQFetchCount() { EQ_FetchCount++; }
+// アプリケーション全体で共有する状態オブジェクト（セッター不要で直接プロパティ代入可能）
+export const state = {
+  get config() { return config; },
+  set config(val) { config = val; },
+  get defaultConfigVal() { return defaultConfigVal; },
+  set defaultConfigVal(val) { defaultConfigVal = val; },
+  get store() { return store; },
+  set store(val) { store = val; },
+  get Replay() { return Replay; },
+  set Replay(val) { Replay = val; },
+  get package_ver() { return package_ver; },
+  set package_ver(val) { package_ver = val; },
+  get packageJson() { return packageJson; },
+  set packageJson(val) { packageJson = val; },
+  get kmoniOffset() { return kmoniOffset; },
+  set kmoniOffset(val) { kmoniOffset = val; },
+  get JMA_CurrentInfoNumber() { return JMA_CurrentInfoNumber; },
+  set JMA_CurrentInfoNumber(val) { JMA_CurrentInfoNumber = val; },
+  get USGS_CurrentInfoNumber() { return USGS_CurrentInfoNumber; },
+  set USGS_CurrentInfoNumber(val) { USGS_CurrentInfoNumber = val; },
+  get EQ_FetchCount() { return EQ_FetchCount; },
+  set EQ_FetchCount(val) { EQ_FetchCount = val; },
+  get kmoniTimeTmp() { return kmoniTimeTmp; },
+  set kmoniTimeTmp(val) { kmoniTimeTmp = val; },
+};
+
+// 後方互換用セッター（既存テスト・移行コード用）
+export function setConfig(val) { state.config = val; }
+export function setDefaultConfigVal(val) { state.defaultConfigVal = val; }
+export function setStore(val) { state.store = val; }
+export function setReplay(val) { state.Replay = val; }
+export function setPackageVer(val) { state.package_ver = val; }
+export function setPackageJson(val) { state.packageJson = val; }
+export function setKmoniOffset(val) { state.kmoniOffset = val; }
+export function setJMAInfoNumber(val) { state.JMA_CurrentInfoNumber = val; }
+export function setUSGSInfoNumber(val) { state.USGS_CurrentInfoNumber = val; }
+export function incEQFetchCount() { state.EQ_FetchCount++; }
 
 // ステータス変更リスナー（UIへの通知用）
 let statusListener = null;

@@ -2,19 +2,12 @@ process.env.TZ = "Asia/Tokyo";
 process.title = 'Zero Quake';
 
 import {
-  setConfig,
-  setDefaultConfigVal,
-  setStore,
-  setReplay,
-  setPackageVer,
-  setPackageJson,
+  state,
   setStatusListener,
   UpdateStatus,
   GeneralError_handler,
   JMA_CurrentInfoNumber,
   USGS_CurrentInfoNumber,
-  setJMAInfoNumber,
-  setUSGSInfoNumber,
 } from "./main/state.js";
 import { eqInfo } from "./main/PROC_EQInfo.js";
 import {
@@ -253,11 +246,7 @@ var isFirstRun = !config || config.system.isFirstRun !== false;//ここじゃな
 config = mergeDeeply(defaultConfigVal, config);
 store.set("config", config);
 
-setConfig(config);
-setDefaultConfigVal(defaultConfigVal);
-setStore(store);
-setPackageJson(packageJson);
-setPackageVer(package_ver);
+Object.assign(state, { config, defaultConfigVal, store, packageJson, package_ver });
 
 setStatusListener((type, condition, timeStamp) => {
   messageToMainWindow({
@@ -278,7 +267,7 @@ function replay(ReplayDate) {
     } else {
       Replay = 0;
     }
-    setReplay(Replay);
+    state.Replay = Replay;
     clearEEWActive();
     if (worker) worker.postMessage({ action: "Replay", data: Replay });
     messageToMainWindow({ action: "Replay", data: Replay });
@@ -311,19 +300,19 @@ function ScheduledExecution() {
         if (json.token) {
           config.Source.axis.AccessToken = String(json.token);
           store.set("config", config);
-          setConfig(config);
+          state.config = config;
           SystemNotification("Axisのアクセストークンを自動で更新しました。");
         }
       } else if (json.status == "contract has expired") {
         //トークン期限切れ
         config.Source.axis.GetData = false;
         store.set("config", config);
-        setConfig(config);
+        state.config = config;
         SystemNotification("Axisのアクセストークンの期限が切れました。手動でトークンを更新しください。");
       } else if (json.status == "invalid header authorization") {
         config.Source.axis.GetData = false;
         store.set("config", config);
-        setConfig(config);
+        state.config = config;
         SystemNotification("Axisのアクセストークンが不正です。設定を修正してください。");
       }
     }).catch((err) => {
@@ -608,7 +597,7 @@ ipcMain.on("message", (_event, response) => {
     case "ChangeConfig":
       config = response.data;
       store.set("config", config);
-      setConfig(config);
+      state.config = config;
 
       if (SettingWindow) {
         SettingWindow.webContents.send("message2", {
@@ -706,7 +695,7 @@ ipcMain.on("message", (_event, response) => {
       break;
     case "Req_additionalEQInfo_JMA":
       if (JMA_CurrentInfoNumber < 1000) {//naknのMAX3000件以下にすべし
-        setJMAInfoNumber(JMA_CurrentInfoNumber + 5);
+        state.JMA_CurrentInfoNumber += 5;
         if (eqInfo.jma.length >= JMA_CurrentInfoNumber) {
           messageToMainWindow({
             action: "EQInfo",
@@ -721,7 +710,7 @@ ipcMain.on("message", (_event, response) => {
       break;
     case "Req_additionalEQInfo_USGS":
       if (USGS_CurrentInfoNumber < 1000) {
-        setUSGSInfoNumber(USGS_CurrentInfoNumber + 25);
+        state.USGS_CurrentInfoNumber += 25;
         if (eqInfo.usgs.length >= USGS_CurrentInfoNumber) {
           messageToMainWindow({
             action: "EQInfo",

@@ -11,7 +11,7 @@ import {
   config,
   Replay,
   EQ_FetchCount,
-  incEQFetchCount,
+  state,
   JMA_CurrentInfoNumber,
   UpdateStatus,
   GeneralError_handler,
@@ -120,7 +120,7 @@ export function UpdateEQInfoCore() {
   } catch (err) {
     throw new Error("地震情報の処理でエラーが発生しました。", { cause: err });
   }
-  incEQFetchCount();
+  state.EQ_FetchCount++;
 };
 
 //気象庁XMLリスト取得→Req_JMAXML
