@@ -129,7 +129,7 @@ export var Req_USGS = throttle(function () {
       if (!r.ok) throw new Error(`HTTP Error: ${r.status}`);
       return r.json();
     }).then((json) => {
-      var LastGenTmp = Number(json?.features?.[0]?.properties?.updated || new Date());
+      var LastGenTmp = Number(json?.metadata?.generated);
       if (!LastGenTmp) throw new Error("usgs.govが不正なデータを返しました。");
       if (usgsLastGenerated > LastGenTmp) throw new Error("usgs.govが古いデータを返しました。");
 
