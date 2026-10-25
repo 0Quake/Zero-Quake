@@ -37,7 +37,12 @@ export function MargeEQInfo(dataList, count) {
           headline: null,
           axisData: [],
         };
-        EQElm.raw_data.push(data);
+
+        //各フィールドの値まで含めた完全重複値がないかチェック（漏れは致命的ではないのでStringifyでゆるくチェック）
+        var duplicate = EQElm.raw_data.find((el) => {
+          return JSON.stringify(el) == JSON.stringify(data);
+        });
+        if (!duplicate) EQElm.raw_data.push(data);
         var rawData = EQElm.raw_data
           .sort((a, b) => {
             var diff = new Date(a.reportDateTime) - new Date(b.reportDateTime);
