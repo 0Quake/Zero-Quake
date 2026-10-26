@@ -270,6 +270,14 @@ document.getElementById("resetConfig").addEventListener("click", function () {
   }
 });
 
+document.getElementById("set_map_range").addEventListener("click", function () {
+  var b = map.getBounds();
+  document.getElementById("b_NELng").value = b._ne.lng.toFixed(6);
+  document.getElementById("b_NELat").value = b._ne.lat.toFixed(6);
+  document.getElementById("b_SWLng").value = b._sw.lng.toFixed(6);
+  document.getElementById("b_SWLat").value = b._sw.lat.toFixed(6);
+});
+
 function apply() {
   config.Info.EEW.IntType = document.getElementById("intType").value;
 
