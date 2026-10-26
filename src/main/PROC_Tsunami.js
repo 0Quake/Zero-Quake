@@ -65,13 +65,11 @@ export function ConvertTsunamiInfo(data) {
             }
 
             if (elm.stations) {
+              if (!Array.isArray(SameArea.stations)) SameArea.stations = [];
               elm.stations.forEach(function (elm2) {
-                var SameSta;
-                if (Array.isArray(SameArea.stations)) {
-                  SameSta = SameArea.stations.find(function (elm3) {
-                    return elm3.code == elm2.code || elm3.name == elm2.name;
-                  });
-                }
+                var SameSta = SameArea.stations.find(function (elm3) {
+                  return elm3.code == elm2.code || elm3.name == elm2.name;
+                });
                 if (!SameSta) {//同観測点のデータがないなら登録
                   SameArea.stations.push(elm2)
                 } else {//同観測点のデータがあるならマージ
