@@ -202,19 +202,21 @@ var JMATide_obs = {};
 export function Req_JMATide() {
   if (!JMATide_sta) return Req_JMATide_sta();
   JMATide_sta.forEach(function (st) {
+    var year = NormalizeDate("YYYY", new Date() - Replay);
+    const filename = `tide_astro_${year}_${st.code}.json`;
 
-    if (!JMATide_astro[st.code]) {
-      fetch(`https://www.jma.go.jp/bosai/tidelevel/const/tide_astro/tide_astro_${NormalizeDate("YYYY", new Date() - Replay)}_${st.code}.json`)
+    if (!JMATide_astro[filename]) {
+      fetch(`https://www.jma.go.jp/bosai/tidelevel/const/tide_astro/${filename}`)
         .then((r) => {
           if (!r.ok) throw new Error(`HTTP Error: ${r.status}`);
           return r.json();
         }).then((json) => {
           var tide = json.tide;
           if (tide && st.code) {
-            JMATide_astro[st.code] = tide
+            JMATide_astro[filename] = tide
 
             if (JMATide_obs[st.code]) {//★1と同じ
-              JMATide_obs[st.code].astro = tide[NormalizeDate("MMDD", new Date() - Replay)][NormalizeDate("h", new Date() - Replay)]
+              JMATide_obs[st.code].astro = tide[NormalizeDate("MMDD", new Date() - Replay)]?.[NormalizeDate("h", new Date() - Replay)]
               messageToMainWindow({ action: "Return_tide", data: sort_by_dist_TIDE(Object.values(JMATide_obs)) });
             }
           }
@@ -255,8 +257,8 @@ export function Req_JMATide() {
           }
           obsdata.height = height;
 
-          if (JMATide_astro[st.code]) {//★1と同じ処理
-            obsdata.astro = JMATide_astro[st.code]?.[NormalizeDate("MMDD", new Date() - Replay)]?.[NormalizeDate("h", new Date() - Replay)];
+          if (JMATide_astro[filename]) {//★1と同じ処理
+            obsdata.astro = JMATide_astro[filename]?.[NormalizeDate("MMDD", new Date() - Replay)]?.[NormalizeDate("h", new Date() - Replay)];
           }
 
           JMATide_obs[st.code] = obsdata
