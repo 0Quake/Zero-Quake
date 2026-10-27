@@ -81,11 +81,144 @@ downloadLink.addEventListener("click", function () {
   lnk.click();
 });
 
+function prop(objGetter, key) {
+  return {
+    get: function () {
+      return objGetter()?.[key];
+    },
+    set: function (v) {
+      var obj = objGetter();
+      if (obj) obj[key] = v;
+    }
+  };
+}
+
+function getElement(el) {
+  return typeof el === "string" ? document.getElementById(el) : el;
+}
+
+function applyConfigToUI(pair) {
+  var el = getElement(pair.element);
+  if (!el || !pair.target || typeof pair.target.get !== "function") return;
+
+  var val = pair.target.get();
+  if (typeof pair.loadFunc === "function") {
+    val = pair.loadFunc(val);
+  }
+
+  if (el.type === "checkbox") {
+    el.checked = Boolean(val);
+  } else if (el.tagName === "SELECT") {
+    selectBoxSet(el, val);
+  } else {
+    el.value = (val !== undefined && val !== null) ? val : "";
+  }
+}
+
+function applyUIToConfig(pair) {
+  var el = getElement(pair.element);
+  if (!el || !pair.target || typeof pair.target.set !== "function") return;
+
+  var val;
+  if (el.type === "checkbox") {
+    val = el.checked;
+  } else {
+    val = el.value;
+  }
+
+  if (typeof pair.saveFunc === "function") {
+    val = pair.saveFunc(val);
+  }
+
+  pair.target.set(val);
+}
+
+var pairs = [
+  // 拠点設定
+  { target: prop(() => config.home, "arv"), element: document.getElementById("arv"), saveFunc: Number },
+  { target: prop(() => config.home, "name"), element: document.getElementById("HomeName") },
+  { target: prop(() => config.home, "latitude"), element: document.getElementById("latitude") },
+  { target: prop(() => config.home, "longitude"), element: document.getElementById("longitude") },
+  { target: prop(() => config.home, "ShowPin"), element: document.getElementById("HomePinShow") },
+  { target: prop(() => config.home, "Section"), element: document.getElementById("saibun") },
+  { target: prop(() => config.home, "TsunamiSect"), element: document.getElementById("tsunamiSect") },
+
+  // EEW 設定
+  { target: prop(() => config.Info.EEW, "IntType"), element: document.getElementById("intType") },
+  { target: prop(() => config.Info.EEW, "showtraining"), element: document.getElementById("EEW_training") },
+  { target: prop(() => config.Info.EEW, "IntQuestion"), element: document.getElementById("EEW_IntQ") },
+  { target: prop(() => config.Info.EEW, "IntTerm1"), element: document.getElementById("EEW_IntI") },
+  { target: prop(() => config.Info.EEW, "userIntQuestion"), element: document.getElementById("EEW_userIntQ") },
+  { target: prop(() => config.Info.EEW, "kodoriyou"), element: document.getElementById("EEW_kodoriyou") },
+  { target: prop(() => config.Info.EEW, "IntThreshold"), element: document.getElementById("EEW_IntFilter") },
+  { target: prop(() => config.Info.EEW, "userIntThreshold"), element: document.getElementById("EEW_userIntFilter") },
+  { target: prop(() => config.notice.window, "EEW"), element: document.getElementById("EEW_Window") },
+  { target: prop(() => config.notice.window, "EEW_Update"), element: document.getElementById("EEW_Window_Update") },
+
+  // 音声文言
+  { target: prop(() => config.notice.voice, "EEW"), element: document.getElementById("EEW_Voice") },
+  { target: prop(() => config.notice.voice, "EEWUpdate"), element: document.getElementById("EEW2_Voice") },
+  { target: prop(() => config.notice.voice, "EEWCancel"), element: document.getElementById("EEW3_Voice") },
+  { target: prop(() => config.notice.voice, "Tsunami"), element: document.getElementById("Tsunami_Voice") },
+  { target: prop(() => config.notice.voice, "TsunamiRevocation"), element: document.getElementById("Tsunami_Voice2") },
+  { target: prop(() => config.notice.voice, "TsunamiTorikeshi"), element: document.getElementById("Tsunami_Voice3") },
+  { target: prop(() => config.notice.voice, "EQInfo"), element: document.getElementById("EQInfo_Voice1") },
+  { target: prop(() => config.notice.voice, "EQInfoCancel"), element: document.getElementById("EQInfo_Voice2") },
+
+  // 潮位
+  { target: prop(() => config.Info.TideHeight, "processing"), element: document.getElementById("tide_processing") },
+
+  // 地震検知・システム
+  { target: prop(() => config.Info.RealTimeShake, "DetectEarthquake"), element: document.getElementById("EarthquakeDetect") },
+  { target: prop(() => config.Info.RealTimeShake, "noticeLv"), element: document.getElementById("EQDetect_threshold") },
+  { target: prop(() => config.system, "WindowAutoOpen"), element: document.getElementById("WindowAutoOpen") },
+  { target: prop(() => config.system, "alwaysOnTop"), element: document.getElementById("alwaysOnTop") },
+  { target: prop(() => config.system, "powerSaveBlocking"), element: document.getElementById("powerSaveBlocking") },
+  { target: prop(() => config.system, "zoom"), element: document.getElementById("zoom"), loadFunc: (v) => 100 * v, saveFunc: (v) => Number(v) / 100 },
+
+  // 津波
+  { target: prop(() => config.Info.TsunamiInfo, "GetData"), element: document.getElementById("Tsunami_GetData") },
+  { target: prop(() => config.Info.TsunamiInfo, "showTest"), element: document.getElementById("Tsunami_Test") },
+  { target: prop(() => config.Info.TsunamiInfo, "showtraining"), element: document.getElementById("Tsunami_training") },
+  { target: prop(() => config.Info.TsunamiInfo, "NotificationSound"), element: document.getElementById("Tsunami_NotificationSound") },
+  { target: prop(() => config.Info.TsunamiInfo, "Global_threshold"), element: document.getElementById("Tsunami_threshold") },
+  { target: prop(() => config.Info.TsunamiInfo, "Local_threshold"), element: document.getElementById("Tsunami_L_threshold") },
+  { target: prop(() => config.Info.TsunamiInfo, "Bypass_threshold"), element: document.getElementById("Tsunami_Bypass_threshold") },
+
+  // 地震情報
+  { target: prop(() => config.Info.EQInfo, "showTest"), element: document.getElementById("EQInfo_Test") },
+  { target: prop(() => config.Info.EQInfo, "showtraining"), element: document.getElementById("EQInfo_training") },
+  { target: prop(() => config.Info.EQInfo, "NotificationSound"), element: document.getElementById("NotificationSound") },
+  { target: prop(() => config.Info.EQInfo, "maxI_threshold"), element: document.getElementById("maxI_threshold") },
+  { target: prop(() => config.Info.EQInfo, "M_threshold"), element: document.getElementById("M_threshold") },
+  { target: prop(() => config.Info.EQInfo, "Bypass_threshold"), element: document.getElementById("Bypass_threshold") },
+
+  // データソース
+  { target: prop(() => config.Source.axis, "GetData"), element: document.getElementById("Axis_GetData") },
+  { target: prop(() => config.Source.axis, "AccessToken"), element: document.getElementById("Axis_AccessToken") },
+  { target: prop(() => config.Source.wolfx, "GetData"), element: document.getElementById("Wolfx_GetData") },
+  { target: prop(() => config.Source.wolfx, "GetDataFromSeisJS"), element: document.getElementById("Wolfx_SeisJS_GetData") },
+  { target: prop(() => config.Source.ProjectBS, "GetData"), element: document.getElementById("ProjectBS_GetData") },
+  { target: prop(() => config.Source.EarlyEst, "GetData"), element: document.getElementById("EarlyEst_GetData") },
+  { target: prop(() => config.Source.msil, "GetData"), element: document.getElementById("msil_GetData") },
+  { target: prop(() => config.Source.kmoni.kmoni, "GetData"), element: document.getElementById("kmoni_GetData") },
+  { target: prop(() => config.Source.TREMRTS, "GetData"), element: document.getElementById("TREM-RTS_GetData") },
+
+  // インターバル（秒 ⇄ ミリ秒）
+  { target: prop(() => config.Info.EQInfo, "Interval"), element: document.getElementById("EQInfoInterval"), loadFunc: (v) => v / 1000, saveFunc: (v) => Number(v) * 1000 },
+  { target: prop(() => config.Source.EarlyEst, "Interval"), element: document.getElementById("EarlyEstInterval"), loadFunc: (v) => v / 1000, saveFunc: (v) => Number(v) * 1000 },
+  { target: prop(() => config.Source.kmoni.kmoni, "Interval"), element: document.getElementById("kmoniInterval"), loadFunc: (v) => v / 1000, saveFunc: (v) => Number(v) * 1000 },
+  { target: prop(() => config.Source.msil, "Interval"), element: document.getElementById("msilInterval"), loadFunc: (v) => v / 1000, saveFunc: (v) => Number(v) * 1000 },
+  { target: prop(() => config.Source.TREMRTS, "Interval"), element: document.getElementById("TREM-RTS_Interval"), loadFunc: (v) => v / 1000, saveFunc: (v) => Number(v) * 1000 },
+
+  // 棒読みちゃん & 配色
+  { target: prop(() => config.notice.voice_parameter, "Boyomi_Port"), element: document.getElementById("Boyomi_Port"), saveFunc: (v) => Math.floor(Number(v)) },
+  { target: prop(() => config.notice.voice_parameter, "Boyomi_Voice"), element: document.getElementById("BoyomiVoiceSelect") },
+  { target: prop(() => config.color, "IntColorTheme"), element: document.getElementById("shindoColor") },
+];
+
 function configDataDraw() {
-  document.getElementById("arv").value = config.home.arv;
-  document.getElementById("HomeName").value = config.home.name;
-  document.getElementById("latitude").value = config.home.latitude;
-  document.getElementById("longitude").value = config.home.longitude;
+  pairs.forEach(applyConfigToUI);
 
   var iBounds = config.home.initialBounds;
   document.getElementById("b_NELat").value = iBounds[1][1];
@@ -93,31 +226,8 @@ function configDataDraw() {
   document.getElementById("b_SWLat").value = iBounds[0][1];
   document.getElementById("b_SWLng").value = iBounds[0][0];
 
-  document.getElementById("EEW_Voice").value = config.notice.voice.EEW;
-  document.getElementById("EEW2_Voice").value = config.notice.voice.EEWUpdate;
-  document.getElementById("EEW3_Voice").value = config.notice.voice.EEWCancel;
-  document.getElementById("Tsunami_Voice").value = config.notice.voice.Tsunami;
-  document.getElementById("Tsunami_Voice2").value = config.notice.voice.TsunamiRevocation;
-  document.getElementById("Tsunami_Voice3").value = config.notice.voice.TsunamiTorikeshi;
-
-  document.getElementById("EQInfo_Voice1").value = config.notice.voice.EQInfo;
-  document.getElementById("EQInfo_Voice2").value = config.notice.voice.EQInfoCancel;
-  document.getElementById("EEW_training").checked = config.Info.EEW.showtraining;
-  document.getElementById("EEW_IntQ").checked = config.Info.EEW.IntQuestion;
-  document.getElementById("EEW_IntI").checked = config.Info.EEW.IntTerm1;
-  selectBoxSet(document.getElementById("tide_processing"), config.Info.TideHeight.processing)
-  document.getElementById("EEW_userIntQ").checked = config.Info.EEW.userIntQuestion;
-  document.getElementById("EQInfoInterval").value = config.Info.EQInfo.Interval / 1000;
-  document.getElementById("EEW_kodoriyou").checked = config.Info.EEW.kodoriyou;
-
-  selectBoxSet(document.getElementById("EEW_Window"), config.notice.window.EEW);
-  selectBoxSet(document.getElementById("EEW_Window_Update"), config.notice.window.EEW_Update);
-  selectBoxSet(document.getElementById("EEW_IntFilter"), config.Info.EEW.IntThreshold);
-  selectBoxSet(document.getElementById("EEW_userIntFilter"), config.Info.EEW.userIntThreshold);
-  selectBoxSet(document.getElementById("saibun"), config.home.Section);
   tsunamiSect = config.home.TsunamiSect;
   EQSect = config.home.Section;
-  selectBoxSet(document.getElementById("tsunamiSect"), tsunamiSect);
   if (map) {
     map.setFilter("tsunami_LINE_selected", ["==", "name", tsunamiSect]);
     map.setFilter("tsunami_LINE_selected_2", ["==", "name", tsunamiSect]);
@@ -127,55 +237,11 @@ function configDataDraw() {
   TTSvolumeSet(config.notice.voice_parameter.volume);
   TTSpitchSet(config.notice.voice_parameter.pitch);
   TTSspeedSet(config.notice.voice_parameter.rate);
-  volumeSet(config.notice.bell_volume, true)
+  volumeSet(config.notice.bell_volume, true);
 
   selectBoxSet(document.getElementById("TTSvoiceSelect"), config.notice.voice_parameter.voice);
 
-  selectBoxSet(document.getElementById("intType"), config.Info.EEW.IntType);
-  document.getElementById("EarthquakeDetect").checked = config.Info.RealTimeShake.DetectEarthquake;
-  document.getElementById("WindowAutoOpen").checked = config.system.WindowAutoOpen;
-  document.getElementById("alwaysOnTop").checked = config.system.alwaysOnTop;
-  document.getElementById("HomePinShow").checked = config.home.ShowPin;
-  document.getElementById("Tsunami_GetData").checked = config.Info.TsunamiInfo.GetData;
-  document.getElementById("Axis_GetData").checked = config.Source.axis.GetData;
-  document.getElementById("Wolfx_GetData").checked = config.Source.wolfx.GetData;
-  document.getElementById("Wolfx_SeisJS_GetData").checked = config.Source.wolfx.GetDataFromSeisJS;
-  document.getElementById("ProjectBS_GetData").checked = config.Source.ProjectBS.GetData;
-  document.getElementById("EarlyEst_GetData").checked = config.Source.EarlyEst.GetData;
-  document.getElementById("msil_GetData").checked = config.Source.msil.GetData;
-  document.getElementById("kmoni_GetData").checked = config.Source.kmoni.kmoni.GetData;
-  document.getElementById("EarlyEstInterval").value = config.Source.EarlyEst.Interval / 1000;
-  document.getElementById("kmoniInterval").value = config.Source.kmoni.kmoni.Interval / 1000;
-  document.getElementById("msilInterval").value = config.Source.msil.Interval / 1000;
-  if (config.Source.axis.AccessToken)
-    document.getElementById("Axis_AccessToken").value = config.Source.axis.AccessToken;
-
-  document.getElementById("Tsunami_Test").checked = config.Info.TsunamiInfo.showTest;
-  document.getElementById("Tsunami_training").checked = config.Info.TsunamiInfo.showtraining;
-
-  document.getElementById("EQInfo_Test").checked = config.Info.EQInfo.showTest;
-  document.getElementById("EQInfo_training").checked = config.Info.EQInfo.showtraining;
-
-  document.getElementById("TREM-RTS_GetData").checked = config.Source.TREMRTS.GetData;
-  document.getElementById("TREM-RTS_Interval").value = config.Source.TREMRTS.Interval / 1000;
-
   document.getElementById(`VoiceEngine_${config.notice.voice_parameter.engine}`).checked = true;
-  document.getElementById("Boyomi_Port").value = config.notice.voice_parameter.Boyomi_Port;
-
-  document.getElementById("NotificationSound").checked = config.Info.EQInfo.NotificationSound;
-  selectBoxSet(document.getElementById("maxI_threshold"), config.Info.EQInfo.maxI_threshold);
-  document.getElementById("M_threshold").value = config.Info.EQInfo.M_threshold;
-  document.getElementById("Bypass_threshold").checked = config.Info.EQInfo.Bypass_threshold;
-
-  document.getElementById("Tsunami_NotificationSound").checked = config.Info.TsunamiInfo.NotificationSound;
-  selectBoxSet(document.getElementById("Tsunami_threshold"), config.Info.TsunamiInfo.Global_threshold);
-  selectBoxSet(document.getElementById("Tsunami_L_threshold"), config.Info.TsunamiInfo.Local_threshold);
-  document.getElementById("Tsunami_Bypass_threshold").checked = config.Info.TsunamiInfo.Bypass_threshold;
-  document.getElementById("zoom").value = 100 * config.system.zoom;
-  selectBoxSet(document.getElementById("shindoColor"), config.color.IntColorTheme);
-
-  document.getElementById("powerSaveBlocking").checked = config.system.powerSaveBlocking;
-  selectBoxSet(document.getElementById("EQDetect_threshold"), config.Info.RealTimeShake.noticeLv);
 
   var boyomiPort = config.notice.voice_parameter.Boyomi_Port || 50080;
   fetch(`http://localhost:${boyomiPort}/GetVoiceList`).then(function (res) { return res.json(); })
@@ -282,17 +348,7 @@ document.getElementById("set_map_range").addEventListener("click", function () {
 });
 
 function apply() {
-  config.Info.EEW.IntType = document.getElementById("intType").value;
-
-  config.Info.RealTimeShake.DetectEarthquake = document.getElementById("EarthquakeDetect").checked;
-  config.system.WindowAutoOpen = document.getElementById("WindowAutoOpen").checked;
-  config.system.alwaysOnTop = document.getElementById("alwaysOnTop").checked;
-  config.home.ShowPin = document.getElementById("HomePinShow").checked;
-  config.Info.TsunamiInfo.GetData = document.getElementById("Tsunami_GetData").checked;
-  config.home.arv = Number(document.getElementById("arv").value);
-  config.home.name = document.getElementById("HomeName").value;
-  config.home.latitude = document.getElementById("latitude").value;
-  config.home.longitude = document.getElementById("longitude").value;
+  pairs.forEach(applyUIToConfig);
 
   var iBounds = config.home.initialBounds = [
     [document.getElementById("b_SWLng").value,
@@ -303,49 +359,13 @@ function apply() {
 
   //面積ゼロ回避
   if (iBounds[0][0] == iBounds[1][0]) {
-    iBounds[0][0] = Number(iBounds[0][0]) - 0.5
-    iBounds[1][0] = Number(iBounds[1][0]) + 0.5
+    iBounds[0][0] = Number(iBounds[0][0]) - 0.5;
+    iBounds[1][0] = Number(iBounds[1][0]) + 0.5;
   }
   if (iBounds[0][1] == iBounds[1][1]) {
-    iBounds[0][1] = Number(iBounds[0][1]) - 0.5
-    iBounds[1][1] = Number(iBounds[1][1]) + 0.5
+    iBounds[0][1] = Number(iBounds[0][1]) - 0.5;
+    iBounds[1][1] = Number(iBounds[1][1]) + 0.5;
   }
-
-
-  config.home.Section = document.getElementById("saibun").value;
-  config.home.TsunamiSect = document.getElementById("tsunamiSect").value;
-  config.notice.voice.EEW = document.getElementById("EEW_Voice").value;
-  config.notice.voice.EEWUpdate = document.getElementById("EEW2_Voice").value;
-  config.notice.voice.EEWCancel = document.getElementById("EEW3_Voice").value;
-  config.notice.voice.Tsunami = document.getElementById("Tsunami_Voice").value;
-  config.notice.voice.TsunamiRevocation = document.getElementById("Tsunami_Voice2").value;
-  config.notice.voice.TsunamiTorikeshi = document.getElementById("Tsunami_Voice3").value;
-  config.notice.voice.EQInfo = document.getElementById("EQInfo_Voice1").value;
-  config.notice.voice.EQInfoCancel = document.getElementById("EQInfo_Voice2").value;
-  config.Info.EEW.showtraining = document.getElementById("EEW_training").checked;
-  config.Info.EEW.IntQuestion = document.getElementById("EEW_IntQ").checked;
-  config.Info.EEW.IntTerm1 = document.getElementById("EEW_IntI").checked;
-  config.Info.TideHeight.processing = document.getElementById("tide_processing").value
-
-  config.Info.EEW.userIntQuestion = document.getElementById("EEW_userIntQ").checked;
-  config.Info.EEW.IntThreshold = document.getElementById("EEW_IntFilter").value;
-  config.Info.EEW.userIntThreshold = document.getElementById("EEW_userIntFilter").value;
-  config.notice.window.EEW = document.getElementById("EEW_Window").value;
-  config.notice.window.EEW_Update = document.getElementById("EEW_Window_Update").value;
-  config.Info.EEW.kodoriyou = document.getElementById("EEW_kodoriyou").checked;
-
-  config.Info.EQInfo.Interval = Number(document.getElementById("EQInfoInterval").value) * 1000;
-  config.Source.axis.GetData = document.getElementById("Axis_GetData").checked;
-  config.Source.axis.AccessToken = document.getElementById("Axis_AccessToken").value;
-  config.Source.wolfx.GetData = document.getElementById("Wolfx_GetData").checked;
-  config.Source.wolfx.GetDataFromSeisJS = document.getElementById("Wolfx_SeisJS_GetData").checked;
-  config.Source.ProjectBS.GetData = document.getElementById("ProjectBS_GetData").checked;
-  config.Source.EarlyEst.GetData = document.getElementById("EarlyEst_GetData").checked;
-  config.Source.msil.GetData = document.getElementById("msil_GetData").checked;
-  config.Source.kmoni.kmoni.GetData = document.getElementById("kmoni_GetData").checked;
-  config.Source.EarlyEst.Interval = Number(document.getElementById("EarlyEstInterval").value) * 1000;
-  config.Source.kmoni.kmoni.Interval = Number(document.getElementById("kmoniInterval").value) * 1000;
-  config.Source.msil.Interval = Number(document.getElementById("msilInterval").value) * 1000;
 
   config.notice.voice_parameter.rate = TTSspeed;
   config.notice.voice_parameter.pitch = TTSpitch;
@@ -354,39 +374,13 @@ function apply() {
 
   config.notice.bell_volume = master_volume;
 
-  config.Info.TsunamiInfo.showTest = document.getElementById("Tsunami_Test").checked;
-  config.Info.TsunamiInfo.showtraining = document.getElementById("Tsunami_training").checked;
-
-  config.Info.EQInfo.showTest = document.getElementById("EQInfo_Test").checked;
-  config.Info.EQInfo.showtraining = document.getElementById("EQInfo_training").checked;
-
-  config.Source.TREMRTS.GetData = document.getElementById("TREM-RTS_GetData").checked;
-  config.Source.TREMRTS.Interval = Number(document.getElementById("TREM-RTS_Interval").value) * 1000;
-
   let VoiceEngine_Elm = document.getElementsByName("VoiceEngine");
   for (let i = 0; i < VoiceEngine_Elm.length; i++) {
     if (VoiceEngine_Elm.item(i).checked) config.notice.voice_parameter.engine = VoiceEngine_Elm.item(i).value;
   }
-  config.notice.voice_parameter.Boyomi_Port = Math.floor(Number(document.getElementById("Boyomi_Port").value));
-  config.notice.voice_parameter.Boyomi_Voice = document.getElementById("BoyomiVoiceSelect").value;
 
-  config.Info.EQInfo.NotificationSound = document.getElementById("NotificationSound").checked;
-  config.Info.EQInfo.maxI_threshold = document.getElementById("maxI_threshold").value;
-  config.Info.EQInfo.M_threshold = document.getElementById("M_threshold").value;
-  config.Info.EQInfo.Bypass_threshold = document.getElementById("Bypass_threshold").checked;
-
-  config.Info.TsunamiInfo.NotificationSound = document.getElementById("Tsunami_NotificationSound").checked;
-  config.Info.TsunamiInfo.Global_threshold = document.getElementById("Tsunami_threshold").value;
-  config.Info.TsunamiInfo.Local_threshold = document.getElementById("Tsunami_L_threshold").value;
-  config.Info.TsunamiInfo.Bypass_threshold = document.getElementById("Tsunami_Bypass_threshold").checked;
-  config.system.zoom = Number(document.getElementById("zoom").value) / 100;
-
-  config.color.IntColorTheme = document.getElementById("shindoColor").value;
   config.color.Shindo = intColor[document.getElementById("shindoColor").value].Shindo;
   config.color.LgInt = intColor[document.getElementById("shindoColor").value].LgInt;
-
-  config.system.powerSaveBlocking = document.getElementById("powerSaveBlocking").checked;
-  config.Info.RealTimeShake.noticeLv = document.getElementById("EQDetect_threshold").value
 
   window.electronAPI.messageReturn({
     action: "ChangeConfig",
@@ -990,13 +984,14 @@ function speak(text, engine) {
   }
   if (engine == "Boyomichan") {
     var port = document.getElementById("Boyomi_Port").value || config.notice.voice_parameter.Boyomi_Port || 50080;
+    var host = `http://localhost:${port}`;
     if (document.getElementById("BoyomiVoiceSelect").value == "auto") {
-      fetch(`http://localhost:${port}/Talk?text=${text}&speed=${TTSspeed * 100}&volume=${TTSvolume * 100}&tone=${TTSpitch * 100}`)
+      fetch(`${host}/Talk?text=${text}&speed=${TTSspeed * 100}&volume=${TTSvolume * 100}&tone=${TTSpitch * 100}`)
         .catch(function () {
           speak(text, "Default");
         });
     } else {
-      fetch(`http://localhost:${port}/GetVoiceList`)
+      fetch(`${host}/GetVoiceList`)
         .then(function (res) { return res.json(); })
         .then(function (json) {
           var voice_parameter = "";
@@ -1005,7 +1000,7 @@ function speak(text, engine) {
           });
           if (voiceElm) voice_parameter = `&voice=${document.getElementById("BoyomiVoiceSelect").value}`;
 
-          fetch(`http://localhost:${port}/Talk?text=${text}${voice_parameter}&speed=${TTSspeed * 100}&volume=${TTSvolume * 100}&tone=${TTSpitch * 100}`)
+          fetch(`${host}/Talk?text=${text}${voice_parameter}&speed=${TTSspeed * 100}&volume=${TTSvolume * 100}&tone=${TTSpitch * 100}`)
             .catch(function () {
               speak(text, "Default");
             });
