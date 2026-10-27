@@ -389,9 +389,7 @@ export function ConvertSnet(data, date, y, uid) {
       action: "SnetUpdate",
       timestamp: new Date(date),
       LocalTime: new Date(),
-      data: {
-        data: [...data, ...msil_latest[another][1]]
-      },
+      data: [...data, ...msil_latest[another][1]],
     };
     messageToMainWindow(SnetPointsDataTmp);
   }

@@ -29,6 +29,6 @@ describe("RX_RTSeis.js - Unit Tests", () => {
     ConvertSnet([{ id: 2 }], date, 12, uid);
 
     assert.ok(SnetPointsDataTmp);
-    assert.equal(SnetPointsDataTmp.data.data.length, 2);
+    assert.equal(SnetPointsDataTmp.data.length, 2);
   });
 });

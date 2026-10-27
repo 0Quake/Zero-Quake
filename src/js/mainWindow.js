@@ -115,12 +115,12 @@ window.electronAPI.messageSend((event, request) => {
     UpdateStatus(request.timestamp, request.LocalTime, request.type, request.condition);
   } else if (request.action == "kmoniUpdate") {
     UpdateStatus(request.timestamp, request.LocalTime, "kmoniImg", "success");
-    if (!background) kmoniMapUpdate(request, "knet");
     knetMapData = request.data;
+    if (!background) kmoniMapUpdate(request.data, "knet");
   } else if (request.action == "SnetUpdate") {
     UpdateStatus(request.timestamp, request.LocalTime, "msilImg", "success");
-    kmoniMapUpdate(request.data, "snet");
-    if (!background) snetMapData = request.data;
+    snetMapData = request.data;
+    if (!background) kmoniMapUpdate(request.data, "snet");
   } else if (request.action == "TREM-RTSUpdate") {
     TREMRTS_TMP = request.data;
     TREMRTSUpdate(request.data);
@@ -1442,12 +1442,12 @@ function map_gethome() {
 
 //観測点情報更新
 var kmoni_popup = {};
-function kmoniMapUpdate(dataTmp, type) {
-  if (!dataTmp.data) return;
+function kmoniMapUpdate(points, type) {
+  if (!Array.isArray(points)) return;
   if (!map) return;
 
   if (type == "knet") {
-    dataTmp.data.forEach(function (elm, i) {
+    points.forEach(function (elm, i) {
       var currentState = map.getFeatureState({ source: "knet_points", id: elm.Code });
       var isVisible = Boolean(elm.data);
       if (currentState.shindo !== elm.shindo || currentState.isTriggered !== elm.isTriggered || currentState.visible !== isVisible) {
@@ -1473,7 +1473,7 @@ function kmoniMapUpdate(dataTmp, type) {
     });
 
   } else {
-    dataTmp.data.forEach(function (elm) {
+    points.forEach(function (elm) {
       var currentState = map.getFeatureState({ source: "snet_points", id: elm.Code });
       var isVisible = Boolean(elm.data);
       if (currentState.shindo !== elm.shindo || currentState.visible !== isVisible) {
