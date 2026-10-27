@@ -233,6 +233,8 @@ export function Req_JMATide() {
           var obsdata = {
             code: st.code,
             name: st.name,
+            lat: st.lat,
+            lon: st.lon,
             by: st.typeName ? String(st.typeName).replaceAll("（地図では自治体等）", "") : "-",
             time: new Date(Number(new Date(json.time)) + (json.interval * json.tide.length * 1000)),
             threshold_warn: st.threshold_warn,
