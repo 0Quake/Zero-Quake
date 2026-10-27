@@ -234,7 +234,7 @@ export function Req_JMATide() {
             code: st.code,
             name: st.name,
             by: st.typeName ? String(st.typeName).replaceAll("（地図では自治体等）", "") : "-",
-            date: new Date(Number(new Date(json.time)) + (json.interval * json.tide.length * 1000)),
+            time: new Date(Number(new Date(json.time)) + (json.interval * json.tide.length * 1000)),
             threshold_warn: st.threshold_warn,
             threshold_advisory: st.threshold_advisory
           };

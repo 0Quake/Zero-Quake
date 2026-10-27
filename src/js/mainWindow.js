@@ -2632,8 +2632,8 @@ function draw_tide(data) {
 
     if (index == 0) clone.setAttribute("tabindex", 2);
 
-    var dateToSpeak = NormalizeDate("M月D日h時m分", elm.time);
-    var dateStr = NormalizeDate("MM/DD hh:mm", elm.time);
+    var dateToSpeak = elm.time ? NormalizeDate("M月D日h時m分", elm.time) : "不明な時刻";
+    var dateStr = elm.time ? NormalizeDate("MM/DD hh:mm", elm.time) : "--/-- --:--";
     clone.querySelector(".EQI_datetime").textContent = dateStr;
 
     clone.querySelector(".EQI_name").textContent = elm.name;
