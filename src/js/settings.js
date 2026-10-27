@@ -177,7 +177,8 @@ function configDataDraw() {
   document.getElementById("powerSaveBlocking").checked = config.system.powerSaveBlocking;
   selectBoxSet(document.getElementById("EQDetect_threshold"), config.Info.RealTimeShake.noticeLv);
 
-  fetch("http://localhost:50080/GetVoiceList").then(function (res) { return res.json(); })
+  var boyomiPort = config.notice.voice_parameter.Boyomi_Port || 50080;
+  fetch(`http://localhost:${boyomiPort}/GetVoiceList`).then(function (res) { return res.json(); })
     .then(function (json) {
       json.voiceList.forEach(function (elm) {
         var VoiceOption = document.createElement("option");
@@ -186,6 +187,8 @@ function configDataDraw() {
         if (elm.id == config.notice.voice_parameter.Boyomi_Voice) VoiceOption.selected = true;
         document.getElementById("BoyomiVoiceSelect").appendChild(VoiceOption);
       });
+    }).catch(function (err) {
+      console.warn("Boyomichan GetVoiceList failed:", err);
     });
 
   disabled_control();
@@ -986,13 +989,14 @@ function speak(text, engine) {
     }
   }
   if (engine == "Boyomichan") {
+    var port = document.getElementById("Boyomi_Port").value || config.notice.voice_parameter.Boyomi_Port || 50080;
     if (document.getElementById("BoyomiVoiceSelect").value == "auto") {
-      fetch(`http://localhost:${document.getElementById("Boyomi_Port").value}/Talk?text=${text}&speed=${TTSspeed * 100}&volume=${TTSvolume * 100}&tone=${TTSpitch * 100}`)
+      fetch(`http://localhost:${port}/Talk?text=${text}&speed=${TTSspeed * 100}&volume=${TTSvolume * 100}&tone=${TTSpitch * 100}`)
         .catch(function () {
           speak(text, "Default");
         });
     } else {
-      fetch("http://localhost:50080/GetVoiceList")
+      fetch(`http://localhost:${port}/GetVoiceList`)
         .then(function (res) { return res.json(); })
         .then(function (json) {
           var voice_parameter = "";
@@ -1001,11 +1005,13 @@ function speak(text, engine) {
           });
           if (voiceElm) voice_parameter = `&voice=${document.getElementById("BoyomiVoiceSelect").value}`;
 
-          fetch(`http://localhost:${document.getElementById("Boyomi_Port").value}/Talk?text=${text}${voice_parameter}&speed=${TTSspeed * 100}&volume=${TTSvolume * 100}&tone=${TTSpitch * 100}`)
+          fetch(`http://localhost:${port}/Talk?text=${text}${voice_parameter}&speed=${TTSspeed * 100}&volume=${TTSvolume * 100}&tone=${TTSpitch * 100}`)
             .catch(function () {
               speak(text, "Default");
             });
-        })
+        }).catch(function () {
+          speak(text, "Default");
+        });
     }
   } else if (engine == "Default") {
     speechSynthesis.cancel();
