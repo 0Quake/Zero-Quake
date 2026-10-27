@@ -123,9 +123,10 @@ export function NormalizeShindo(str, responseType) {
       IntIndex = p2p_table[str]//p2pの2桁フォーマット
     } else if (isNaN(str)) {
       str = String(str)
-        .replace(/[０-９]/g, function (s) {
-          return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
-        }).replaceAll("＋", "+").replaceAll("－", "-").replaceAll("強", "+").replaceAll("弱", "-").replace(/\s+/g, "");
+        .normalize("NFKC")
+        .replaceAll("強", "+")
+        .replaceAll("弱", "-")
+        .replace(/\s+/g, "");
       switch (str) {
         case "1":
           IntIndex = 1;
