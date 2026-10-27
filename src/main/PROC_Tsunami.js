@@ -10,6 +10,63 @@ export function resetTsunamiData() {
 export var Tsunami_Data = [];
 export var Tsunami_data_Marged;
 export var TsunamiValidate_bypass = false;
+function mergeStation(target, source) {
+  if (!target || !source) return;
+  Object.keys(source).forEach(function (key) {
+    if (Boolean2(source[key])) target[key] = source[key];
+  });
+  var cond = source.firstHeightCondition || source.Condition;
+  if (cond === "第１波の到達を確認" || cond === "津波到達中と推測") {
+    target.ArrivalTime = null;
+    target.ArrivedTime = null;
+  }
+  if (source.firstHeight_obs && typeof source.firstHeight_obs === "object") {
+    target.ArrivedTime = source.firstHeight_obs.arrivedTime || null;
+    target.firstHeightInitial = source.firstHeight_obs.initial || null;
+    if (source.firstHeight_obs.condition) {
+      target.firstHeightCondition = source.firstHeight_obs.condition;
+    }
+  }
+  if (source.maxHeight_obs && typeof source.maxHeight_obs === "object") {
+    target.maxHeightRising = Boolean(source.maxHeight_obs.rising);
+    target.omaxHeight = source.maxHeight_obs.height || null;
+    target.maxHeightTime = source.maxHeight_obs.time || null;
+    target.maxHeightCondition = source.maxHeight_obs.condition || null;
+  }
+}
+
+function mergeArea(target, source) {
+  if (!target || !source) return;
+  var keys = ["code", "grade", "cancelled", "firstHeight", "firstHeightCondition", "maxHeight"];
+  keys.forEach(function (key) {
+    if (source[key] !== undefined) target[key] = source[key];
+  });
+
+  if (source.firstHeightCondition === "第１波の到達を確認" || source.firstHeightCondition === "津波到達中と推測") {
+    target.firstHeight = null;
+  }
+  if (source.grade === "Yoho") {
+    target.firstHeight = null;
+    target.firstHeightCondition = null;
+    target.maxHeight = null;
+  }
+
+  if (Array.isArray(source.stations)) {
+    if (!Array.isArray(target.stations)) target.stations = [];
+    source.stations.forEach(function (sta) {
+      if (!sta) return;
+      var existing = target.stations.find(function (s) {
+        return s && ((sta.code != null && s.code === sta.code) || (sta.name != null && s.name === sta.name));
+      });
+      if (!existing) {
+        target.stations.push({ ...sta });
+      } else {
+        mergeStation(existing, sta);
+      }
+    });
+  }
+}
+
 export function ConvertTsunamiInfo(data) {
 
   try {
@@ -49,60 +106,8 @@ export function ConvertTsunamiInfo(data) {
 
           if (!SameArea) {//同予報区のデータがないなら登録
             SameData.areas.push(elm);
-          } else {//同予報区のデータがあるならマージ
-            var keys = ["code", "grade", "cancelled", "firstHeight", "firstHeightCondition", "maxHeight"]
-            keys.forEach(function (key) {
-              if (elm[key]) SameArea[key] = elm[key];
-            });
-
-            if (elm.firstHeightCondition == "第１波の到達を確認" || elm.firstHeightCondition == "津波到達中と推測") {
-              SameArea.firstHeight = null;
-            }
-            if (elm.grade == "Yoho") {
-              SameArea.firstHeight = null;
-              SameArea.firstHeightCondition = null;
-              SameArea.maxHeight = null;
-            }
-
-            if (elm.stations) {
-              if (!Array.isArray(SameArea.stations)) SameArea.stations = [];
-              elm.stations.forEach(function (elm2) {
-                var SameSta = SameArea.stations.find(function (elm3) {
-                  return elm3.code == elm2.code || elm3.name == elm2.name;
-                });
-                if (!SameSta) {//同観測点のデータがないなら登録
-                  SameArea.stations.push(elm2)
-                } else {//同観測点のデータがあるならマージ
-                  Object.keys(elm2).forEach(function (key) {
-                    if (Boolean2(elm2[key])) SameSta[key] = elm2[key];
-                  });
-                  if (elm2.firstHeightCondition == "第１波の到達を確認" || elm2.firstHeightCondition == "津波到達中と推測" ||
-                      elm2.Condition == "第１波の到達を確認" || elm2.Condition == "津波到達中と推測") {
-                    SameSta.ArrivalTime = null;
-                    SameSta.ArrivedTime = null;
-                  }
-                  if (elm2.hasFirstHeight) {
-                    if (!elm2.ArrivedTime) {
-                      SameSta.ArrivedTime = null;
-                    }
-                    if (!elm2.firstHeightInitial) {
-                      SameSta.firstHeightInitial = null;
-                    }
-                  }
-                  if (elm2.hasMaxHeight) {
-                    SameSta.maxHeightRising = Boolean(elm2.maxHeightRising);
-                    if (!elm2.omaxHeight) {
-                      SameSta.omaxHeight = null;
-                    } else {
-                      SameSta.maxHeightCondition = elm2.maxHeightCondition || null;
-                    }
-                    if (!elm2.maxHeightTime) {
-                      SameSta.maxHeightTime = null;
-                    }
-                  }
-                }
-              });
-            }
+          } else {
+            mergeArea(SameArea, elm);
           }
         });
       }
@@ -234,63 +239,7 @@ export function ConvertTsunamiInfo(data) {
             });
           }
           if (SameArea) {
-            var keys = ["code", "grade", "cancelled", "firstHeight", "firstHeightCondition", "maxHeight"];
-            keys.forEach(function (key) {
-              if (elm[key] !== undefined) SameArea[key] = elm[key];
-            });
-
-            if (elm.firstHeightCondition == "第１波の到達を確認" || elm.firstHeightCondition == "津波到達中と推測") {
-              SameArea.firstHeight = null;
-            }
-            if (elm.grade == "Yoho") {
-              SameArea.firstHeight = null;
-              SameArea.firstHeightCondition = null;
-              SameArea.maxHeight = null;
-            }
-
-            if (elm.stations) {
-              if (!SameArea.stations) SameArea.stations = [];
-              elm.stations.forEach(function (elm2) {
-                var SameSta;
-                if (Array.isArray(SameArea.stations)) {
-                  SameSta = SameArea.stations.find(function (elm3) {
-                    return elm3.name == elm2.name;
-                  });
-                }
-
-                if (!SameSta) {
-                  SameArea.stations.push({ ...elm2 });
-                } else {
-                  Object.keys(elm2).forEach(function (key) {
-                    if (Boolean2(elm2[key])) SameSta[key] = elm2[key];
-                  });
-                  if (elm2.firstHeightCondition == "第１波の到達を確認" || elm2.firstHeightCondition == "津波到達中と推測" ||
-                      elm2.Condition == "第１波の到達を確認" || elm2.Condition == "津波到達中と推測") {
-                    SameSta.ArrivalTime = null;
-                    SameSta.ArrivedTime = null;
-                  }
-                  if (elm2.hasFirstHeight) {
-                    if (!elm2.ArrivedTime) {
-                      SameSta.ArrivedTime = null;
-                    }
-                    if (!elm2.firstHeightInitial) {
-                      SameSta.firstHeightInitial = null;
-                    }
-                  }
-                  if (elm2.hasMaxHeight) {
-                    SameSta.maxHeightRising = Boolean(elm2.maxHeightRising);
-                    if (!elm2.omaxHeight) {
-                      SameSta.omaxHeight = null;
-                    } else {
-                      SameSta.maxHeightCondition = elm2.maxHeightCondition || null;
-                    }
-                    if (!elm2.maxHeightTime) {
-                      SameSta.maxHeightTime = null;
-                    }
-                  }
-                }
-              });
-            }
+            mergeArea(SameArea, elm);
           } else {
             Tsunami_data_Marged.areas.push({
               ...elm,

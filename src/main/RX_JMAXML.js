@@ -779,14 +779,20 @@ export function Req_JMAXML(url, count) {
 
                   ConditionTmp = fHeightElm?.getElementsByTagName("Condition")?.[0]?.textContent || elm2.getElementsByTagName("Condition")?.[0]?.textContent || null;
 
-                  stations.push({
+                  var stationData = {
                     name: nameTmp,
                     code: codeTmp,
-                    hasFirstHeight: Boolean(fHeightElm),
                     HighTideDateTime: highTideTimeTmp,
                     ArrivalTime: ArrivalTimeTmp,
                     Condition: ConditionTmp,
-                  });
+                  };
+                  if (fHeightElm) {
+                    stationData.firstHeight_est = {
+                      arrivalTime: ArrivalTimeTmp,
+                      condition: ConditionTmp,
+                    };
+                  }
+                  stations.push(stationData);
                 }
               );
             }
@@ -853,14 +859,10 @@ export function Req_JMAXML(url, count) {
                   }
 
                   var codeTmp = elm2.getElementsByTagName("Code")?.[0]?.textContent || null;
-                  var hasFirstHeight = Boolean(fHeightElm);
-                  var hasMaxHeight = Boolean(elm2.getElementsByTagName("MaxHeight")[0]);
 
-                  stations.push({
+                  var stationData = {
                     name: nameTmp,
                     code: codeTmp,
-                    hasFirstHeight: hasFirstHeight,
-                    hasMaxHeight: hasMaxHeight,
                     ArrivedTime: ArrivalTimeTmp,
                     firstHeightCondition: firstHeightConditionTmp,
                     firstHeightInitial: firstHeightInitialTmp,
@@ -868,7 +870,23 @@ export function Req_JMAXML(url, count) {
                     maxHeightRising: maxHeightRising,
                     maxHeightTime: maxHeightTime,
                     maxHeightCondition: maxHeightCondition,
-                  });
+                  };
+                  if (fHeightElm) {
+                    stationData.firstHeight_obs = {
+                      arrivedTime: ArrivalTimeTmp,
+                      condition: firstHeightConditionTmp,
+                      initial: firstHeightInitialTmp,
+                    };
+                  }
+                  if (elm2.getElementsByTagName("MaxHeight")[0]) {
+                    stationData.maxHeight_obs = {
+                      height: oMaxHeightTmp,
+                      time: maxHeightTime,
+                      condition: maxHeightCondition,
+                      rising: maxHeightRising,
+                    };
+                  }
+                  stations.push(stationData);
                 }
               }
 
