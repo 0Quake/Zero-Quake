@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Report xmlns="http://xml.kishou.go.jp/jmaxml1/" xmlns:jmx="http://xml.kishou.go.jp/jmaxml1/">
+<Control>
+	<Title>地震回数に関する情報</Title>
+	<DateTime>2008-08-26T03:00:15Z</DateTime>
+	<Status>通常</Status>
+	<EditorialOffice>気象庁本庁</EditorialOffice>
+	<PublishingOffice>気象庁</PublishingOffice>
+</Control>
+<Head xmlns="http://xml.kishou.go.jp/jmaxml1/informationBasis1/">
+	<Title>地震回数に関する情報</Title>
+	<ReportDateTime>2008-08-26T12:00:00+09:00</ReportDateTime>
+	<TargetDateTime>2008-08-26T12:00:00+09:00</TargetDateTime>
+	<EventID>20080824150500</EventID>
+	<InfoType>発表</InfoType>
+	<Serial>1</Serial>
+	<InfoKind>地震回数情報</InfoKind>
+	<InfoKindVersion>1.0_0</InfoKindVersion>
+	<Headline>
+		<Text>地震回数に関する情報をお知らせします。</Text>
+	</Headline>
+</Head>
+<Body xmlns="http://xml.kishou.go.jp/jmaxml1/body/seismology1/">
+	<EarthquakeCount>
+		<Item type="地震回数">
+			<StartTime>2008-08-24T15:00:00+09:00</StartTime>
+			<EndTime>2008-08-25T09:00:00+09:00</EndTime>
+			<Number>1587</Number>
+			<FeltNumber>1</FeltNumber>
+		</Item>
+		<Item type="１時間地震回数">
+			<StartTime>2008-08-25T09:00:00+09:00</StartTime>
+			<EndTime>2008-08-25T10:00:00+09:00</EndTime>
+			<Number>35</Number>
+			<FeltNumber>0</FeltNumber>
+		</Item>
+		<Item type="１時間地震回数">
+			<StartTime>2008-08-25T10:00:00+09:00</StartTime>
+			<EndTime>2008-08-25T11:00:00+09:00</EndTime>
+			<Number>35</Number>
+			<FeltNumber>0</FeltNumber>
+		</Item>
+		<Item type="１時間地震回数">
+			<StartTime>2008-08-25T11:00:00+09:00</StartTime>
+			<EndTime>2008-08-25T12:00:00+09:00</EndTime>
+			<Number>47</Number>
+			<FeltNumber>0</FeltNumber>
+		</Item>
+		<Item type="累積地震回数">
+			<StartTime>2008-08-24T15:00:00+09:00</StartTime>
+			<EndTime>2008-08-25T12:00:00+09:00</EndTime>
+			<Number>1704</Number>
+			<FeltNumber>1</FeltNumber>
+		</Item>
+	</EarthquakeCount>
+	<NextAdvisory>次の「地震回数に関する情報」は、２６日１８時００分頃に発表します。</NextAdvisory>
+	<Comments>
+		<FreeFormComment>　８月２４日１５時過ぎから伊豆半島東方沖で地震が発生しています。この
+付近で発生した地震については、震度３以上の場合は「震源・震度情報」で
+発表しますが、震度２以下の場合は、「地震回数に関する情報」（本情報）
+で地震回数をまとめて発表します。</FreeFormComment>
+	</Comments>
+</Body>
+</Report>

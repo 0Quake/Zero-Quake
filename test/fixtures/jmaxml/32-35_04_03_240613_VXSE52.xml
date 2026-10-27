@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://xml.kishou.go.jp/jmaxml1/" xmlns:jmx="http://xml.kishou.go.jp/jmaxml1/">
+  <Control>
+    <Title>震源に関する情報</Title>
+    <DateTime>2010-01-25T07:18:33Z</DateTime>
+    <Status>通常</Status>
+    <EditorialOffice>大阪管区気象台</EditorialOffice>
+    <PublishingOffice>気象庁</PublishingOffice>
+  </Control>
+  <Head xmlns="http://xml.kishou.go.jp/jmaxml1/informationBasis1/">
+    <Title>震源に関する情報</Title>
+    <ReportDateTime>2010-01-25T16:18:00+09:00</ReportDateTime>
+    <TargetDateTime>2010-01-25T16:18:00+09:00</TargetDateTime>
+    <EventID>20100125161517</EventID>
+    <InfoType>発表</InfoType>
+    <Serial></Serial>
+    <InfoKind>震源速報</InfoKind>
+    <InfoKindVersion>1.0_0</InfoKindVersion>
+    <Headline>
+      <Text>２５日１６時１５分ころ、地震がありました。</Text>
+    </Headline>
+  </Head>
+  <Body xmlns="http://xml.kishou.go.jp/jmaxml1/body/seismology1/" xmlns:jmx_eb="http://xml.kishou.go.jp/jmaxml1/elementBasis1/">
+    <Earthquake>
+      <OriginTime>2010-01-25T16:15:00+09:00</OriginTime>
+      <ArrivalTime>2010-01-25T16:15:00+09:00</ArrivalTime>
+      <Hypocenter>
+        <Area>
+          <Name>大隅半島東方沖</Name>
+          <Code type="震央地名">820</Code>
+          <jmx_eb:Coordinate description="北緯３０．９度　東経１３１．１度　深さ　５０ｋｍ">+30.9+131.1-50000/</jmx_eb:Coordinate>
+        </Area>
+      </Hypocenter>
+      <jmx_eb:Magnitude type="Mj" description="Ｍ５．３">5.3</jmx_eb:Magnitude>
+    </Earthquake>
+    <Comments>
+    <ForecastComment codeType="固定付加文">
+    <Text>この地震による津波の心配はありません。</Text>
+    <Code>0215</Code>
+    </ForecastComment>
+    </Comments>
+  </Body>
+</Report>

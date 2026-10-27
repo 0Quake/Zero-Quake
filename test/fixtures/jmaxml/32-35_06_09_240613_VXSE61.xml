@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://xml.kishou.go.jp/jmaxml1/" xmlns:jmx="http://xml.kishou.go.jp/jmaxml1/">
+<Control>
+	<Title>顕著な地震の震源要素更新のお知らせ</Title>
+	<DateTime>2008-06-14T03:30:00Z</DateTime>
+	<Status>通常</Status>
+	<EditorialOffice>気象庁本庁</EditorialOffice>
+	<PublishingOffice>気象庁</PublishingOffice>
+  </Control>
+<Head xmlns="http://xml.kishou.go.jp/jmaxml1/informationBasis1/">
+	<Title>顕著な地震の震源要素更新のお知らせ</Title>
+	<ReportDateTime>2008-06-14T12:30:00+09:00</ReportDateTime>
+	<TargetDateTime>2008-06-14T12:30:00+09:00</TargetDateTime>
+	<EventID>20080614084350</EventID>
+	<InfoType>発表</InfoType>
+	<Serial></Serial>
+	<InfoKind>震源要素更新のお知らせ</InfoKind>
+	<InfoKindVersion>1.0_0</InfoKindVersion>
+	<Headline>
+		<Text>平成２０年　６月１４日１２時３０分をもって、地震の発生場所と規模を更新します。</Text>
+	</Headline>
+</Head>
+<Body xmlns="http://xml.kishou.go.jp/jmaxml1/body/seismology1/" xmlns:jmx_eb="http://xml.kishou.go.jp/jmaxml1/elementBasis1/">
+	<Earthquake>
+		<OriginTime>2008-06-14T08:43:00+09:00</OriginTime>
+		<ArrivalTime>2008-06-14T08:43:00+09:00</ArrivalTime>
+		<Hypocenter>
+			<Area>
+				<Name>岩手県内陸南部</Name>
+				<Code type="震央地名">213</Code>
+				<jmx_eb:Coordinate description="北緯３９．０度　東経１４０．９度　深さ　１０ｋｍ">+39.0+140.9-10000/</jmx_eb:Coordinate>
+				<jmx_eb:Coordinate type="震源位置（度分）" description="北緯３９度０１．７分　東経１４０度５２．８分　深さ　　８ｋｍ">+3901.7+14052.8-8000/</jmx_eb:Coordinate>
+			</Area>
+		</Hypocenter>
+		<jmx_eb:Magnitude type="Mj" description="Ｍ７．２">7.2</jmx_eb:Magnitude>
+	</Earthquake>
+	<Comments>
+		<FreeFormComment>度単位の震源要素は、津波情報等を引き続き発表する場合に使用されます。</FreeFormComment>
+	</Comments>
+</Body>
+</Report>

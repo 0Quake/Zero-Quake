@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://xml.kishou.go.jp/jmaxml1/" xmlns:jmx="http://xml.kishou.go.jp/jmaxml1/">
+  <Control>
+    <Title>震源に関する情報</Title>
+    <DateTime>2009-10-01T04:48:03Z</DateTime>
+    <Status>訓練</Status>
+    <EditorialOffice>気象庁本庁</EditorialOffice>
+    <PublishingOffice>気象庁</PublishingOffice>
+  </Control>
+  <Head xmlns="http://xml.kishou.go.jp/jmaxml1/informationBasis1/">
+    <Title>震源に関する情報</Title>
+    <ReportDateTime>2009-10-01T13:48:00+09:00</ReportDateTime>
+    <TargetDateTime>2009-10-01T13:48:00+09:00</TargetDateTime>
+    <EventID>20091001134500</EventID>
+    <InfoType>発表</InfoType>
+    <Serial></Serial>
+    <InfoKind>震源速報</InfoKind>
+    <InfoKindVersion>1.0_0</InfoKindVersion>
+    <Headline>
+      <Text>　１日１３時４５分ころ、地震がありました。</Text>
+    </Headline>
+  </Head>
+  <Body xmlns="http://xml.kishou.go.jp/jmaxml1/body/seismology1/" xmlns:jmx_eb="http://xml.kishou.go.jp/jmaxml1/elementBasis1/">
+    <Earthquake>
+      <OriginTime>2009-10-01T13:45:00+09:00</OriginTime>
+      <ArrivalTime>2009-10-01T13:45:00+09:00</ArrivalTime>
+      <Hypocenter>
+        <Area>
+          <Name>駿河湾</Name>
+          <Code type="震央地名">485</Code>
+          <jmx_eb:Coordinate description="北緯３４．８度　東経１３８．５度　深さ　１０ｋｍ">+34.8+138.5-10000/</jmx_eb:Coordinate>
+        </Area>
+      </Hypocenter>
+      <jmx_eb:Magnitude type="Mj" description="Ｍ６．６">6.6</jmx_eb:Magnitude>
+    </Earthquake>
+    <Comments>
+			<ForecastComment codeType="固定付加文">
+				<Text>この地震による津波の心配はありません。</Text>
+				<Code>0203</Code>
+			</ForecastComment>
+    </Comments>
+  </Body>
+</Report>

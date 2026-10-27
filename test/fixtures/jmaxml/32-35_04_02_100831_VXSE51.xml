@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://xml.kishou.go.jp/jmaxml1/" xmlns:jmx="http://xml.kishou.go.jp/jmaxml1/">
+  <Control>
+    <Title>震度速報</Title>
+    <DateTime>2010-01-25T07:18:02Z</DateTime>
+    <Status>通常</Status>
+    <EditorialOffice>気象庁本庁</EditorialOffice>
+    <PublishingOffice>気象庁</PublishingOffice>
+  </Control>
+  <Head xmlns="http://xml.kishou.go.jp/jmaxml1/informationBasis1/">
+    <Title>震度速報</Title>
+    <ReportDateTime>2010-01-25T16:18:00+09:00</ReportDateTime>
+    <TargetDateTime>2010-01-25T16:15:00+09:00</TargetDateTime>
+    <EventID>20100125161517</EventID>
+    <InfoType>発表</InfoType>
+    <Serial></Serial>
+    <InfoKind>震度速報</InfoKind>
+    <InfoKindVersion>1.0_0</InfoKindVersion>
+    <Headline>
+      <Text>２５日１６時１５分ころ、地震による強い揺れを感じました。震度３以上が観測された地域をお知らせします。</Text>
+      <Information type="震度速報">
+        <Item>
+          <Kind><Name>震度４</Name></Kind>
+          <Areas codeType="地震情報／細分区域">
+            <Area><Name>鹿児島県大隅</Name><Code>771</Code></Area>
+            <Area><Name>鹿児島県種子島</Name><Code>776</Code></Area>
+          </Areas>
+        </Item>
+        <Item>
+          <Kind><Name>震度３</Name></Kind>
+          <Areas codeType="地震情報／細分区域">
+            <Area><Name>宮崎県南部平野部</Name><Code>762</Code></Area>
+            <Area><Name>宮崎県南部山沿い</Name><Code>763</Code></Area>
+            <Area><Name>鹿児島県薩摩</Name><Code>770</Code></Area>
+            <Area><Name>鹿児島県屋久島</Name><Code>777</Code></Area>
+          </Areas>
+        </Item>
+      </Information>
+    </Headline>
+  </Head>
+  <Body xmlns="http://xml.kishou.go.jp/jmaxml1/body/seismology1/" xmlns:jmx_eb="http://xml.kishou.go.jp/jmaxml1/elementBasis1/">
+    <Intensity>
+      <Observation>
+        <CodeDefine>
+          <Type xpath="Pref/Code">地震情報／都道府県等</Type>
+          <Type xpath="Pref/Area/Code">地震情報／細分区域</Type>
+        </CodeDefine>
+        <MaxInt>4</MaxInt>
+        <Pref>
+          <Name>鹿児島県</Name>
+          <Code>46</Code>
+          <MaxInt>4</MaxInt>
+          <Area><Name>鹿児島県大隅</Name><Code>771</Code><MaxInt>4</MaxInt></Area>
+          <Area><Name>鹿児島県種子島</Name><Code>776</Code><MaxInt>4</MaxInt></Area>
+          <Area><Name>鹿児島県薩摩</Name><Code>770</Code><MaxInt>3</MaxInt></Area>
+          <Area><Name>鹿児島県屋久島</Name><Code>777</Code><MaxInt>3</MaxInt></Area>
+        </Pref>
+        <Pref>
+          <Name>宮崎県</Name>
+          <Code>45</Code>
+          <MaxInt>3</MaxInt>
+          <Area><Name>宮崎県南部平野部</Name><Code>762</Code><MaxInt>3</MaxInt></Area>
+          <Area><Name>宮崎県南部山沿い</Name><Code>763</Code><MaxInt>3</MaxInt></Area>
+        </Pref>
+      </Observation>
+    </Intensity>
+  </Body>
+</Report>

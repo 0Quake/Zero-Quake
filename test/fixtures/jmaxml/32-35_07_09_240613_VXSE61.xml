@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://xml.kishou.go.jp/jmaxml1/" xmlns:jmx="http://xml.kishou.go.jp/jmaxml1/">
+<Control>
+	<Title>顕著な地震の震源要素更新のお知らせ</Title>
+	<DateTime>2009-08-10T23:55:00Z</DateTime>
+	<Status>通常</Status>
+	<EditorialOffice>気象庁本庁</EditorialOffice>
+	<PublishingOffice>気象庁</PublishingOffice>
+  </Control>
+<Head xmlns="http://xml.kishou.go.jp/jmaxml1/informationBasis1/">
+	<Title>顕著な地震の震源要素更新のお知らせ</Title>
+	<ReportDateTime>2009-08-11T08:55:00+09:00</ReportDateTime>
+	<TargetDateTime>2009-08-11T06:45:00+09:00</TargetDateTime>
+	<EventID>20090811050711</EventID>
+	<InfoType>発表</InfoType>
+	<Serial></Serial>
+	<InfoKind>震源要素更新のお知らせ</InfoKind>
+	<InfoKindVersion>1.0_0</InfoKindVersion>
+	<Headline>
+		<Text>平成２１年　８月１１日０６時４５分をもって、地震の発生場所と規模を更新します。</Text>
+	</Headline>
+</Head>
+<Body xmlns="http://xml.kishou.go.jp/jmaxml1/body/seismology1/" xmlns:jmx_eb="http://xml.kishou.go.jp/jmaxml1/elementBasis1/">
+	<Earthquake>
+		<OriginTime>2009-08-11T05:07:00+09:00</OriginTime>
+		<ArrivalTime>2009-08-11T05:07:00+09:00</ArrivalTime>
+		<Hypocenter>
+			<Area>
+				<Name>駿河湾</Name>
+				<Code type="震央地名">485</Code>
+				<jmx_eb:Coordinate description="北緯３４．８度　東経１３８．５度　深さ　２０ｋｍ">+34.8+138.5-20000/</jmx_eb:Coordinate>
+				<jmx_eb:Coordinate type="震源位置（度分）" description="北緯３４度４７．１分　東経１３８度２９．９分　深さ　２３ｋｍ">+3447.1+13829.9-23000/</jmx_eb:Coordinate>
+			</Area>
+		</Hypocenter>
+		<jmx_eb:Magnitude type="Mj" description="Ｍ６．５">6.5</jmx_eb:Magnitude>
+	</Earthquake>
+	<Comments>
+		<FreeFormComment>度単位の震源要素は、津波情報等を引き続き発表する場合に使用されます。</FreeFormComment>
+	</Comments>
+</Body>
+</Report>

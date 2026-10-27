@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://xml.kishou.go.jp/jmaxml1/" xmlns:jmx="http://xml.kishou.go.jp/jmaxml1/">
+  <Control>
+    <Title>震源に関する情報</Title>
+    <DateTime>2008-06-13T23:51:15Z</DateTime>
+    <Status>通常</Status>
+    <EditorialOffice>気象庁本庁</EditorialOffice>
+    <PublishingOffice>気象庁</PublishingOffice>
+  </Control>
+  <Head xmlns="http://xml.kishou.go.jp/jmaxml1/informationBasis1/">
+    <Title>震源に関する情報</Title>
+    <ReportDateTime>2008-06-14T08:51:00+09:00</ReportDateTime>
+    <TargetDateTime>2008-06-14T08:51:00+09:00</TargetDateTime>
+    <EventID>20080614084350</EventID>
+    <InfoType>取消</InfoType>
+    <Serial></Serial>
+    <InfoKind>震源速報</InfoKind>
+    <InfoKindVersion>1.0_0</InfoKindVersion>
+    <Headline>
+      <Text>震源に関する情報を取り消します。</Text>
+    </Headline>
+  </Head>
+  <Body xmlns="http://xml.kishou.go.jp/jmaxml1/body/seismology1/" xmlns:jmx_eb="http://xml.kishou.go.jp/jmaxml1/elementBasis1/">
+    <Text>先ほどの、震源に関する情報を取り消します。</Text>
+  </Body>
+</Report>

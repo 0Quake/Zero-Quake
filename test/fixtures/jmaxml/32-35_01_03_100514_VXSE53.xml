@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Report xmlns="http://xml.kishou.go.jp/jmaxml1/" xmlns:jmx="http://xml.kishou.go.jp/jmaxml1/">
+  <Control>
+    <Title>震源・震度に関する情報</Title>
+    <DateTime>2009-11-09T11:15:00Z</DateTime>
+    <Status>通常</Status>
+    <EditorialOffice>気象庁本庁</EditorialOffice>
+    <PublishingOffice>気象庁</PublishingOffice>
+  </Control>
+  <Head xmlns="http://xml.kishou.go.jp/jmaxml1/informationBasis1/">
+    <Title>遠地地震に関する情報</Title>
+    <ReportDateTime>2009-11-09T20:15:00+09:00</ReportDateTime>
+    <TargetDateTime>2009-11-09T20:15:00+09:00</TargetDateTime>
+    <EventID>20091109194822</EventID>
+    <InfoType>発表</InfoType>
+    <Serial>1</Serial>
+    <InfoKind>地震情報</InfoKind>
+    <InfoKindVersion>1.0_0</InfoKindVersion>
+    <Headline>
+      <Text>　９日１９時４５分ころ、海外で規模の大きな地震がありました。</Text>
+    </Headline>
+  </Head>
+  <Body xmlns="http://xml.kishou.go.jp/jmaxml1/body/seismology1/" xmlns:jmx_eb="http://xml.kishou.go.jp/jmaxml1/elementBasis1/">
+    <Earthquake>
+      <OriginTime>2009-11-09T19:45:00+09:00</OriginTime>
+      <ArrivalTime>2009-11-09T19:45:00+09:00</ArrivalTime>
+      <Hypocenter>
+        <Area>
+          <Name>南太平洋</Name>
+          <Code type="震央地名">950</Code>
+          <jmx_eb:Coordinate description="南緯１７．２度　東経１７８．６度　深さ５７０ｋｍ">-17.2+178.6-570000/</jmx_eb:Coordinate>
+          <DetailedName>フィジー諸島</DetailedName>
+          <DetailedCode type="詳細震央地名">182</DetailedCode>
+        </Area>
+        <Source>ＰＴＷＣ</Source>
+      </Hypocenter>
+      <jmx_eb:Magnitude type="M" description="Ｍ７．１">7.1</jmx_eb:Magnitude>
+    </Earthquake>
+    <Comments>
+      <ForecastComment codeType="固定付加文">
+        <Text>この地震による津波の心配はありません。</Text>
+        <Code>0203</Code>
+      </ForecastComment>
+    </Comments>
+  </Body>
+</Report>
