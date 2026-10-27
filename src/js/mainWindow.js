@@ -2116,7 +2116,7 @@ function tsunamiDataUpdate(data) {
       );
     if (config.home.TsunamiSect) {
       var sectData = data.areas.find(function (elm) {
-        return elm.name == config.home.TsunamiSect;
+        return elm.name == config.home.TsunamiSect && !elm.cancelled;
       });
       if (sectData) {
         switch (sectData.grade) {
@@ -2901,7 +2901,7 @@ function GenerateTsunamiText(data, text) {
     var grade_arr = [];
     var homeArea;
     data?.areas?.forEach(function (area) {
-      if (area.grade) grades[area.grade] = true;
+      if (!area.cancelled && area.grade) grades[area.grade] = true;
       if (config.home.TsunamiSect && area.name == config.home.TsunamiSect)
         homeArea = area;
     });

@@ -651,4 +651,55 @@ describe("PROC_Tsunami.js - ConvertTsunamiInfo", () => {
     assert.ok(voice.includes("若干の海面変動"), "Yoho格下げで'若干の海面変動'が読み上げられること");
     assert.ok(!voice.includes("1メートル"), "旧maxHeightの1mが読まれないこと");
   });
+  it("should exclude cancelled home area from warning text and home sect when other areas remain active (B18)", async () => {
+    const { ConvertTsunamiInfo, GenerateTsunamiText } = await import("../src/main/PROC_Tsunami.js");
+    const procTsunami = await import("../src/main/PROC_Tsunami.js");
+    const { config } = await import("../src/main/state.js");
+
+    config.home = config.home || {};
+    config.home.TsunamiSect = "自宅地域";
+    config.notice = config.notice || {};
+    config.notice.voice = config.notice.voice || {};
+    config.notice.voice.Tsunami = "{max_grade}発令中。[{home_area}には{home_grade}が発表。]";
+
+    const t1 = new Date(Date.now() - 5000).toISOString();
+    const data1 = {
+      status: "通常",
+      issue: { time: t1, EventID: ["202610120100"] },
+      areas: [
+        { name: "自宅地域", code: "300", grade: "Warning", cancelled: false },
+        { name: "他地域", code: "301", grade: "Watch", cancelled: false },
+      ],
+      revocation: false,
+    };
+    ConvertTsunamiInfo(data1);
+
+    // 第1報時点: 自宅地域(警報)と他地域(注意報)が有効
+    const voice1 = GenerateTsunamiText(procTsunami.Tsunami_data_Marged);
+    assert.ok(voice1.includes("津波警報発令中"));
+    assert.ok(voice1.includes("自宅地域には津波警報が発表"));
+
+    // 第2報: 自宅地域のみ失効・解除 (cancelled: true)
+    const t2 = new Date(Date.now() - 2000).toISOString();
+    const data2 = {
+      status: "通常",
+      issue: { time: t2, EventID: ["202610120100"] },
+      areas: [
+        { name: "自宅地域", code: "300", grade: "Warning", cancelled: true },
+        { name: "他地域", code: "301", grade: "Watch", cancelled: false },
+      ],
+      revocation: false,
+    };
+    ConvertTsunamiInfo(data2);
+
+    // 自宅地域はcancelledのため、最大階級は「津波注意報」、自宅箇所の読み上げは除外されること
+    const voice2 = GenerateTsunamiText(procTsunami.Tsunami_data_Marged);
+    assert.ok(voice2.includes("津波注意報発令中"), "最大階級が津波注意報に更新されること");
+    assert.ok(!voice2.includes("津波警報"), "失効した自宅の津波警報が含まれないこと");
+    assert.ok(!voice2.includes("自宅地域"), "失効した自宅地域の案内が除外されること");
+
+    // mainWindow.jsの自宅エリア検索でも解除済みは取得されないこと
+    const sectData = procTsunami.Tsunami_data_Marged.areas.find(elm => elm.name === config.home.TsunamiSect && !elm.cancelled);
+    assert.equal(sectData, undefined, "解除済みの自宅地域はsectDataとして取得されないこと");
+  });
 });
