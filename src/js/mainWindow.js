@@ -1893,9 +1893,10 @@ function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrive
   });
   if (EQElm) {
     let _center = turf.point([longitude, latitude]);
-    var limit_n = turf.lineString([[-180, 83], [180, 83]]);//Webメルカトルの北端（85.051+マージン）
-    var limit_s = turf.lineString([[-180, -83], [180, -83]]);//Webメルカトルの南端（85.051+マージン）
-    var limitOfRadius = 1000 * Math.min(turf.pointToLineDistance(_center, limit_n, { units: "kilometers" }), turf.pointToLineDistance(_center, limit_s, { units: "kilometers" }));
+    var limitOfRadius = 1000 * Math.min(
+      turf.distance(_center, [longitude, 83], { units: "kilometers" }),//Webメルカトルの北端（85.051+マージン）
+      turf.distance(_center, [longitude, -83], { units: "kilometers" })//Webメルカトルの南端（85.051+マージン）
+    );
 
     if (map && map.getSource(`PCircle_${EventID}`)) {
       var PCircleElm = map.getSource(`PCircle_${EventID}`);
@@ -1973,10 +1974,7 @@ function psWaveReDraw(EventID, latitude, longitude, pRadius, sRadius, SnotArrive
         "tsunami_Yoho"
       );
 
-      var ZoomBounds = new maplibregl.LngLatBounds();
-      ZoomBounds.extend(_center);
-      ZoomBounds.extend(turf.bbox(p_geometry));
-      ZoomBounds.extend(turf.bbox(s_geometry));
+      var ZoomBounds = turf.bbox(turf.featureCollection([_center, p_geometry, s_geometry]));
 
       map.setMaxZoom(8);
       map.fitBounds(ZoomBounds, {

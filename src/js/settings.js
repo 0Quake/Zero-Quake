@@ -341,10 +341,12 @@ document.getElementById("resetConfig").addEventListener("click", function () {
 
 document.getElementById("set_map_range").addEventListener("click", function () {
   var b = map.getBounds();
-  document.getElementById("b_NELng").value = b._ne.lng.toFixed(6);
-  document.getElementById("b_NELat").value = b._ne.lat.toFixed(6);
-  document.getElementById("b_SWLng").value = b._sw.lng.toFixed(6);
-  document.getElementById("b_SWLat").value = b._sw.lat.toFixed(6);
+  var ne = b.getNorthEast();
+  var sw = b.getSouthWest();
+  document.getElementById("b_NELng").value = ne.lng.toFixed(6);
+  document.getElementById("b_NELat").value = ne.lat.toFixed(6);
+  document.getElementById("b_SWLng").value = sw.lng.toFixed(6);
+  document.getElementById("b_SWLat").value = sw.lat.toFixed(6);
 });
 
 function apply() {
@@ -809,13 +811,17 @@ function mapInit() {
   });
 }
 
-function lineString(arr) {
-  if (arr.length == 2 && arr[0][0] == arr[1][0] && arr[0][1] == arr[1][1]) {
-    arr[1][0] += 0.0001;
-    arr[1][1] += 0.0001;
-    return turf.lineString(arr);
-  } else {
-    return turf.lineString(arr);
+function getMinLineDistance(pt, geojson) {
+  try {
+    var lines = turf.flatten(geojson);
+    var minDist = Infinity;
+    lines.features.forEach(function (f) {
+      var d = turf.pointToLineDistance(pt, f, { units: "kilometers" });
+      if (d < minDist) minDist = d;
+    });
+    return minDist;
+  } catch {
+    return Infinity;
   }
 }
 
@@ -825,6 +831,7 @@ function MapReDraw() {
   if (!lat) lat = 0;
   if (!lng) lng = 0;
 
+  var pt = turf.point([lng, lat]);
   var EQSectFeatures = map.querySourceFeatures("basemap", { sourceLayer: 'jp_sect' });
 
   var selected_sect = EQSectFeatures.find(function (elm) {
@@ -833,46 +840,12 @@ function MapReDraw() {
 
   if (!selected_sect) {
     var minDistance = Infinity;
-    function calcDist(line) {
-      if (line.geometry.type == "MultiLineString") {
-        try {
-          var distances = line.geometry.coordinates.map(function (cd) {
-            return turf.pointToLineDistance(
-              turf.point([lng, lat]),
-              lineString(cd),
-              { units: "kilometers" }
-            );
-          });
-        } catch {
-          return Infinity;
-        }
-        return Math.min(...distances);
-      } else if (line.geometry.type == "LineString") {
-        try {
-          return turf.pointToLineDistance(
-            turf.point([lng, lat]),
-            lineString(line.geometry.coordinates),
-            { units: "kilometers" }
-          );
-        } catch {
-          return Infinity;
-        }
-      }
-    }
     EQSectFeatures.forEach(function (poly) {
-      var elm = turf.polygonToLine(poly);
-      if (elm.type == "Feature") {
-        var distance = calcDist(elm);
-      } else if (elm.type == "FeatureCollection") {
-        var distances = elm.features.map(function (elm2) {
-          return calcDist(elm2);
-        });
-        var distance = Math.min(...distances);
-      }
-      // 距離を求める
+      var line = turf.polygonToLine(poly);
+      var distance = getMinLineDistance(pt, line);
       if (minDistance > distance) {
         minDistance = distance;
-        selected_sect = elm;
+        selected_sect = line;
       }
     });
   }
@@ -886,34 +859,10 @@ function MapReDraw() {
   }
 
   var minDistance = Infinity;
-  var tsunamiFeatures = map.querySourceFeatures("tsunami", { sourceLayer: 'jp_tsunami' });;
+  var tsunamiFeatures = map.querySourceFeatures("tsunami", { sourceLayer: 'jp_tsunami' });
 
   tsunamiFeatures.forEach(function (elm) {
-    // 距離を求める
-    if (elm.geometry.type == "MultiLineString") {
-      var distances = elm.geometry.coordinates.map(function (cd) {
-        try {
-          return turf.pointToLineDistance(
-            turf.point([lng, lat]),
-            lineString(cd),
-            { units: "kilometers" }
-          );
-        } catch {
-          return Infinity;
-        }
-      });
-      var distance = Math.min(...distances);
-    } else if (elm.geometry.type == "LineString") {
-      try {
-        var distance = turf.pointToLineDistance(
-          turf.point([lng, lat]),
-          lineString(elm.geometry.coordinates),
-          { units: "kilometers" }
-        );
-      } catch {
-        return Infinity;
-      }
-    }
+    var distance = getMinLineDistance(pt, elm);
     if (minDistance > distance) {
       minDistance = distance;
       tsunamiSect = elm.properties.name;
@@ -1115,39 +1064,27 @@ document
 
 document.getElementById("shindoColor").addEventListener("change", function () {
   var colorTmp = intColor[this.value];
-  document.getElementById("ShindoSampleQ").style.background = colorTmp.Shindo["?"].background;
-  document.getElementById("ShindoSample0").style.background = colorTmp.Shindo["0"].background;
-  document.getElementById("ShindoSample1").style.background = colorTmp.Shindo["1"].background;
-  document.getElementById("ShindoSample2").style.background = colorTmp.Shindo["2"].background;
-  document.getElementById("ShindoSample3").style.background = colorTmp.Shindo["3"].background;
-  document.getElementById("ShindoSample4").style.background = colorTmp.Shindo["4"].background;
-  document.getElementById("ShindoSample5m").style.background = colorTmp.Shindo["5m"].background;
-  document.getElementById("ShindoSample5p").style.background = colorTmp.Shindo["5p"].background;
-  document.getElementById("ShindoSample6m").style.background = colorTmp.Shindo["6m"].background;
-  document.getElementById("ShindoSample6p").style.background = colorTmp.Shindo["6p"].background;
-  document.getElementById("ShindoSample7").style.background = colorTmp.Shindo["7"].background;
-  document.getElementById("LngIntSampleQ").style.background = colorTmp.LgInt["?"].background;
-  document.getElementById("LngIntSample1").style.background = colorTmp.LgInt["1"].background;
-  document.getElementById("LngIntSample2").style.background = colorTmp.LgInt["2"].background;
-  document.getElementById("LngIntSample3").style.background = colorTmp.LgInt["3"].background;
-  document.getElementById("LngIntSample4").style.background = colorTmp.LgInt["4"].background;
+  if (!colorTmp) return;
 
-  document.getElementById("ShindoSampleQ").style.color = colorTmp.Shindo["?"].color;
-  document.getElementById("ShindoSample0").style.color = colorTmp.Shindo["0"].color;
-  document.getElementById("ShindoSample1").style.color = colorTmp.Shindo["1"].color;
-  document.getElementById("ShindoSample2").style.color = colorTmp.Shindo["2"].color;
-  document.getElementById("ShindoSample3").style.color = colorTmp.Shindo["3"].color;
-  document.getElementById("ShindoSample4").style.color = colorTmp.Shindo["4"].color;
-  document.getElementById("ShindoSample5m").style.color = colorTmp.Shindo["5m"].color;
-  document.getElementById("ShindoSample5p").style.color = colorTmp.Shindo["5p"].color;
-  document.getElementById("ShindoSample6m").style.color = colorTmp.Shindo["6m"].color;
-  document.getElementById("ShindoSample6p").style.color = colorTmp.Shindo["6p"].color;
-  document.getElementById("ShindoSample7").style.color = colorTmp.Shindo["7"].color;
-  document.getElementById("LngIntSampleQ").style.color = colorTmp.LgInt["?"].color;
-  document.getElementById("LngIntSample1").style.color = colorTmp.LgInt["1"].color;
-  document.getElementById("LngIntSample2").style.color = colorTmp.LgInt["2"].color;
-  document.getElementById("LngIntSample3").style.color = colorTmp.LgInt["3"].color;
-  document.getElementById("LngIntSample4").style.color = colorTmp.LgInt["4"].color;
+  var shindoMap = { Q: "?", 0: "0", 1: "1", 2: "2", 3: "3", 4: "4", "5m": "5m", "5p": "5p", "6m": "6m", "6p": "6p", 7: "7" };
+  Object.keys(shindoMap).forEach(function (idKey) {
+    var el = document.getElementById("ShindoSample" + idKey);
+    var color = colorTmp.Shindo[shindoMap[idKey]];
+    if (el && color) {
+      el.style.background = color.background;
+      el.style.color = color.color;
+    }
+  });
+
+  var lgMap = { Q: "?", 1: "1", 2: "2", 3: "3", 4: "4" };
+  Object.keys(lgMap).forEach(function (idKey) {
+    var el = document.getElementById("LngIntSample" + idKey);
+    var color = colorTmp.LgInt[lgMap[idKey]];
+    if (el && color) {
+      el.style.background = color.background;
+      el.style.color = color.color;
+    }
+  });
 });
 
 var intColor = {
