@@ -693,61 +693,52 @@ function getCommonMapStyle(config, options = {}) {
 function setupHinanjoLoader(map, config, hinanjoLayers, popupFunc) {
   map.on("sourcedataloading", (e) => {
     const isHinanjoEnabled = config?.data?.overlay?.includes("hinanjo");
-    if (!map || e.sourceId !== "hinanjo" || !isHinanjoEnabled || e.tile === undefined) return;
+    if (!map || e.sourceId !== "hinanjo" || !isHinanjoEnabled || !e.tile?.tileID?.canonical) return;
 
     const ca = e.tile.tileID.canonical;
     const eq_name = `hinanjo_eq_${ca.x}${ca.y}${ca.z}`;
     const ts_name = `hinanjo_ts_${ca.x}${ca.y}${ca.z}`;
 
-    if (map.getLayer(eq_name)) map.removeLayer(eq_name);
-    if (map.getSource(eq_name)) map.removeSource(eq_name);
-    if (map.getLayer(ts_name)) map.removeLayer(ts_name);
-    if (map.getSource(ts_name)) map.removeSource(ts_name);
+    // 既に読み込み済みのタイルの場合は再取得・再登録を行わない
+    if (map.getLayer(eq_name) || map.getSource(eq_name) || map.getLayer(ts_name) || map.getSource(ts_name)) return;
 
-    map.addSource(eq_name, {
-      type: "geojson",
-      data: `https://cyberjapandata.gsi.go.jp/xyz/skhb04/${ca.z}/${ca.x}/${ca.y}.geojson`,
-    });
-    map.addLayer({
-      id: eq_name,
-      type: "circle",
-      source: eq_name,
-      layout: { visibility: isHinanjoEnabled ? "visible" : "none" },
-      paint: {
-        "circle-color": "#bf8715",
-        "circle-radius": 6,
-        "circle-stroke-width": 1,
-        "circle-stroke-color": "#222",
-      },
-      minzoom: 10,
-      maxzoom: 22,
-    });
+    const shelterTypes = [
+      { id: eq_name, code: "skhb04", color: "#bf8715" }, // 地震避難場所
+      { id: ts_name, code: "skhb05", color: "#2488c7" }, // 津波避難場所
+    ];
 
-    map.addSource(ts_name, {
-      type: "geojson",
-      data: `https://cyberjapandata.gsi.go.jp/xyz/skhb05/${ca.z}/${ca.x}/${ca.y}.geojson`,
-    });
-    map.addLayer({
-      id: ts_name,
-      type: "circle",
-      source: ts_name,
-      layout: { visibility: isHinanjoEnabled ? "visible" : "none" },
-      paint: {
-        "circle-color": "#2488c7",
-        "circle-radius": 6,
-        "circle-stroke-width": 1,
-        "circle-stroke-color": "#222",
-      },
-      minzoom: 10,
-      maxzoom: 22,
-    });
+    shelterTypes.forEach(({ id, code, color }) => {
+      if (map.getLayer(id)) map.removeLayer(id);
+      if (map.getSource(id)) map.removeSource(id);
 
-    if (popupFunc) {
-      map.on("click", eq_name, popupFunc);
-      map.on("click", ts_name, popupFunc);
-    }
-    if (hinanjoLayers && Array.isArray(hinanjoLayers)) {
-      hinanjoLayers.push(eq_name, ts_name);
-    }
+      map.addSource(id, {
+        type: "geojson",
+        data: `https://cyberjapandata.gsi.go.jp/xyz/${code}/${ca.z}/${ca.x}/${ca.y}.geojson`,
+      });
+      map.addLayer({
+        id: id,
+        type: "circle",
+        source: id,
+        layout: { visibility: isHinanjoEnabled ? "visible" : "none" },
+        paint: {
+          "circle-color": color,
+          "circle-radius": 6,
+          "circle-stroke-width": 1,
+          "circle-stroke-color": "#222",
+        },
+        minzoom: 10,
+        maxzoom: 22,
+      });
+
+      if (popupFunc) {
+        if (typeof map.off === "function") {
+          map.off("click", id, popupFunc);
+        }
+        map.on("click", id, popupFunc);
+      }
+      if (hinanjoLayers && Array.isArray(hinanjoLayers) && !hinanjoLayers.includes(id)) {
+        hinanjoLayers.push(id);
+      }
+    });
   });
 }
