@@ -100,17 +100,19 @@ export function TREMRTS_Replay() {
 
 function formatTremData(json) {
   var TremRtsData = {};
+  if (!json?.stations) return TremRtsData;
   Object.keys(json.stations).forEach(function (StID) {
     var st = json.stations[StID];
     var StMeta = TremRts_sta?.[StID];
     if (StMeta) {
-      var rgb = KmoniColorTable[Math.min(7, Math.max(-3, Math.floor(st.i * 10) / 10))];
+      var shindoVal = (st.i != null && !isNaN(st.i)) ? st.i : null;
+      var rgb = (shindoVal != null) ? KmoniColorTable[Math.min(7, Math.max(-3, Math.floor(shindoVal * 10) / 10))] : null;
       TremRtsData[StID] = {
         Type: "TREM-RTS",
         shindo: st.i,
         PGA: st.pga,
         Code: StID,
-        rgb: [rgb.r, rgb.g, rgb.b],
+        rgb: rgb ? [rgb.r, rgb.g, rgb.b] : [0, 0, 0],
       };
     } else {
       Req_TremRts_sta();
@@ -174,7 +176,7 @@ export function Req_JMATide_sta() {
     var stations = []
     Object.keys(json).forEach(function (key) {
       var el = json[key]
-      el.class30s.forEach(function (cl) {
+      (el.class30s || []).forEach(function (cl) {
         if (Array.isArray(cl.stations)) {
           cl.stations.forEach(function (st) {
             if (st.code && st.lat && st.lon && st.name) {//データ有効性チェック
@@ -589,14 +591,15 @@ function Connect_SeisjsWS() {
 
 export var SeisJSData = {};
 function MargeSeisJS(json) {
-  var rgb = KmoniColorTable[Math.min(7, Math.max(-3, Math.floor(json.CalcShindo * 10) / 10))];
+  var shindoVal = (json.CalcShindo != null && !isNaN(json.CalcShindo)) ? json.CalcShindo : null;
+  var rgb = (shindoVal != null) ? KmoniColorTable[Math.min(7, Math.max(-3, Math.floor(shindoVal * 10) / 10))] : null;
   SeisJSData[json.type] = {
     Type: "SeisJS",
     shindo: json.CalcShindo,
     PGA: json.PGA,
     Code: json.type,
     Name: json.region,
-    rgb: [rgb.r, rgb.g, rgb.b],
+    rgb: rgb ? [rgb.r, rgb.g, rgb.b] : [0, 0, 0],
     update_at: json.update_at,
   };
 
