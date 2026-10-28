@@ -821,14 +821,14 @@ function estimated_intensity_mapReq() {
         ConvertEQInfo({
           category: "推計震度分布",
           status: "通常",
-          reportTime: ItemTmp.hypo.it,
-          originTime: ItemTmp.hypo.at,
-          maxI: ItemTmp.hypo.maxi,
-          mag: ItemTmp.hypo.mag,
-          lat: ItemTmp.hypo.lat,
-          lng: ItemTmp.hypo.lon,
-          depth: ItemTmp.hypo.dep,
-          epiCenter: ItemTmp.hypo.epi,
+          reportTime: ItemTmp.hypo?.it,
+          originTime: ItemTmp.hypo?.at,
+          maxI: ItemTmp.hypo?.maxi,
+          mag: ItemTmp.hypo?.mag,
+          lat: ItemTmp.hypo?.lat,
+          lng: ItemTmp.hypo?.lon,
+          depth: ItemTmp.hypo?.dep,
+          epiCenter: ItemTmp.hypo?.epi,
           comment: ItemTmp.comment,
           cancel: null,
         });
@@ -836,7 +836,7 @@ function estimated_intensity_mapReq() {
         InfoType_add("type-6");
         var idTmp = ItemTmp.url;
 
-        ItemTmp.mesh_num.forEach(function (elm, index) {
+        (ItemTmp.mesh_num || []).forEach(function (elm, index) {
           var lat = Number(elm.substring(0, 2)) / 1.5;
           var lng = Number(elm.substring(2, 4)) + 100;
           var lat2 = lat + 2 / 3;
@@ -926,21 +926,21 @@ function jma_Fetch(url) {
     .then(function (json) {
       var LatLngDepth, originTimeTmp, epiCenterTmp, magnitudeTmp, maxIntTmp, LatTmp, LngTmp, depthTmp;
 
-      if (json.Body.Earthquake) {
-        if (json.Body.Earthquake.Hypocenter.Area.Coordinate_WGS) {
+      if (json.Body?.Earthquake) {
+        if (json.Body.Earthquake.Hypocenter?.Area?.Coordinate_WGS) {
           LatLngDepth = parse_LatLngDepth(json.Body.Earthquake.Hypocenter.Area.Coordinate_WGS);
           if (LatLngDepth && LatLngDepth[1] != null) LatLngDepth[1] /= 100;
           if (LatLngDepth && LatLngDepth[2] != null) LatLngDepth[2] /= 100;
-        } else {
+        } else if (json.Body.Earthquake.Hypocenter?.Area?.Coordinate) {
           LatLngDepth = parse_LatLngDepth(json.Body.Earthquake.Hypocenter.Area.Coordinate);
         }
       }
-      if (json.Body.Earthquake) {
+      if (json.Body?.Earthquake) {
         if (json.Body.Earthquake.OriginTime) originTimeTmp = new Date(json.Body.Earthquake.OriginTime);
-        if (json.Body.Earthquake.Hypocenter.Area.Name) epiCenterTmp = json.Body.Earthquake.Hypocenter.Area.Name;
+        if (json.Body.Earthquake.Hypocenter?.Area?.Name) epiCenterTmp = json.Body.Earthquake.Hypocenter.Area.Name;
         if (json.Body.Earthquake.Magnitude) magnitudeTmp = Number(json.Body.Earthquake.Magnitude);
       }
-      if (json.Body.Intensity && json.Body.Intensity.Observation.MaxInt) {
+      if (json.Body?.Intensity?.Observation?.MaxInt) {
         maxIntTmp = json.Body.Intensity.Observation.MaxInt;
       }
       if (LatLngDepth) {
@@ -948,18 +948,18 @@ function jma_Fetch(url) {
         if (!isNaN(LatLngDepth[2]) && LatLngDepth[2]) LngTmp = Number(LatLngDepth[2]);
         if (!isNaN(LatLngDepth[3]) && LatLngDepth[3]) depthTmp = Math.abs(Number(LatLngDepth[3]) / 1000);
       }
-      var cancelTmp = json.Head.InfoType == "取消";
+      var cancelTmp = json.Head?.InfoType == "取消";
 
       var commentText = {
         ForecastComment: "",
         VarComment: "",
         FreeFormComment: "",
       };
-      if (json.Body.Comments) {
-        if (json.Body.Comments.ForecastComment && json.Body.Comments.ForecastComment.Text) {
+      if (json.Body?.Comments) {
+        if (json.Body.Comments.ForecastComment?.Text) {
           commentText.ForecastComment = json.Body.Comments.ForecastComment.Text;
         }
-        if (json.Body.Comments.VarComment && json.Body.Comments.VarComment.Text) {
+        if (json.Body.Comments.VarComment?.Text) {
           commentText.VarComment = json.Body.Comments.VarComment.Text;
         }
         if (json.Body.Comments.FreeFormComment) {
@@ -968,7 +968,7 @@ function jma_Fetch(url) {
       }
 
       var IntData = [];
-      if (json.Body.Intensity && json.Body.Intensity.Observation.Pref) {
+      if (json.Body?.Intensity?.Observation?.Pref) {
         json.Body.Intensity.Observation.Pref.forEach(function (elm) {
           var areaData = [];
           if (elm.Area) {
@@ -980,8 +980,8 @@ function jma_Fetch(url) {
                   if (elm3.IntensityStation) {
                     elm3.IntensityStation.forEach(function (elm4) {
                       stData.push({
-                        lat: elm4.latlon.lat,
-                        lng: elm4.latlon.lon,
+                        lat: elm4.latlon?.lat,
+                        lng: elm4.latlon?.lon,
                         name: elm4.Name,
                         int: elm4.Int,
                       });
@@ -1006,9 +1006,9 @@ function jma_Fetch(url) {
       }
 
       ConvertEQInfo({
-        category: json.Head.Title,
-        status: json.Control.Status,
-        reportTime: json.Head.ReportDateTime,
+        category: json.Head?.Title,
+        status: json.Control?.Status,
+        reportTime: json.Head?.ReportDateTime,
         originTime: originTimeTmp,
         maxI: maxIntTmp,
         mag: magnitudeTmp,
@@ -1033,21 +1033,21 @@ function jmaL_Fetch(url) {
     })
     .then(function (json) {
       document.getElementById("LgInt_radioWrap").style.display = "block";
-      if (json.Body.Earthquake) {
-        if (json.Body.Earthquake.Hypocenter.Area.Coordinate_WGS) {
+      if (json.Body?.Earthquake) {
+        if (json.Body.Earthquake.Hypocenter?.Area?.Coordinate_WGS) {
           LatLngDepth = parse_LatLngDepth(json.Body.Earthquake.Hypocenter.Area.Coordinate_WGS);
           if (LatLngDepth && LatLngDepth[1] != null) LatLngDepth[1] /= 100;
           if (LatLngDepth && LatLngDepth[2] != null) LatLngDepth[2] /= 100;
-        } else {
+        } else if (json.Body.Earthquake.Hypocenter?.Area?.Coordinate) {
           var LatLngDepth = parse_LatLngDepth(json.Body.Earthquake.Hypocenter.Area.Coordinate);
         }
       }
-      if (json.Body.Earthquake) {
+      if (json.Body?.Earthquake) {
         if (json.Body.Earthquake.OriginTime) var originTimeTmp = new Date(json.Body.Earthquake.OriginTime);
-        if (json.Body.Earthquake.Hypocenter.Area.Name) var epiCenterTmp = json.Body.Earthquake.Hypocenter.Area.Name;
+        if (json.Body.Earthquake.Hypocenter?.Area?.Name) var epiCenterTmp = json.Body.Earthquake.Hypocenter.Area.Name;
         if (json.Body.Earthquake.Magnitude) var magnitudeTmp = Number(json.Body.Earthquake.Magnitude);
       }
-      if (json.Body.Intensity && json.Body.Intensity.Observation.MaxInt) {
+      if (json.Body?.Intensity?.Observation?.MaxInt) {
         var maxIntTmp = json.Body.Intensity.Observation.MaxInt;
       }
       if (LatLngDepth && !isNaN(LatLngDepth[1]) && LatLngDepth[1]) {
@@ -1060,28 +1060,28 @@ function jmaL_Fetch(url) {
         var depthTmp = Math.abs(Number(LatLngDepth[3]) / 1000);
       }
 
-      var cancelTmp = json.Head.InfoType == "取消";
+      var cancelTmp = json.Head?.InfoType == "取消";
 
-      if (json.Body.Comments) {
+      if (json.Body?.Comments) {
         var commentText = {
           ForecastComment: "",
           VarComment: "",
           FreeFormComment: "",
         };
-        if (json.Body.Comments.ForecastComment && json.Body.Comments.ForecastComment.Text) {
+        if (json.Body.Comments.ForecastComment?.Text) {
           commentText.ForecastComment = json.Body.Comments.ForecastComment.Text;
         }
-        if (json.Body.Comments.VarComment && json.Body.Comments.VarComment.Text) {
+        if (json.Body.Comments.VarComment?.Text) {
           commentText.VarComment = json.Body.Comments.VarComment.Text;
         }
-        if (json.Body.Comments.FreeFormComment && json.Body.Comments.FreeFormComment) {
+        if (json.Body.Comments.FreeFormComment) {
           commentText.FreeFormComment = json.Body.Comments.FreeFormComment;
         }
       }
 
       var LngIntData = [];
       var IntData = [];
-      if (json.Body.Intensity && json.Body.Intensity.Observation.Pref) {
+      if (json.Body?.Intensity?.Observation?.Pref) {
         json.Body.Intensity.Observation.Pref.forEach(function (elm) {
           var areaDataL = [];
           var areaData = [];
@@ -1092,14 +1092,14 @@ function jmaL_Fetch(url) {
               if (elm2.IntensityStation) {
                 elm2.IntensityStation.forEach(function (elm4) {
                   stDataL.push({
-                    lat: elm4.latlon.lat,
-                    lng: elm4.latlon.lon,
+                    lat: elm4.latlon?.lat,
+                    lng: elm4.latlon?.lon,
                     name: elm4.Name,
                     lgint: elm4.LgInt,
                   });
                   stData.push({
-                    lat: elm4.latlon.lat,
-                    lng: elm4.latlon.lon,
+                    lat: elm4.latlon?.lat,
+                    lng: elm4.latlon?.lon,
                     name: elm4.Name,
                     int: elm4.Int,
                   });
@@ -1127,8 +1127,8 @@ function jmaL_Fetch(url) {
       }
 
       ConvertEQInfo({
-        category: json.Head.Title,
-        status: json.Control.Status,
+        category: json.Head?.Title,
+        status: json.Control?.Status,
         reportTime: json.Head?.ReportDateTime || json.Control?.DateTime || 0,
         originTime: originTimeTmp,
         maxI: maxIntTmp,
@@ -1368,31 +1368,30 @@ function narikakun_Fetch(url) {
   fetch(url)
     .then(function (res) { return res.json(); })
     .then(function (json) {
-      if (json.Head.EventID == eid) {
+      if (json.Head?.EventID == eid) {
         var originTimeTmp, magnitudeTmp, depthTmp, epiCenterTmp, LatTmp, LngTmp, maxIntTmp, commentTmp;
-        if (json.Body.Earthquake) {
+        if (json.Body?.Earthquake) {
           if (json.Body.Earthquake.OriginTime) originTimeTmp = new Date(json.Body.Earthquake.OriginTime);
           if (json.Body.Earthquake.Magnitude) magnitudeTmp = Number(json.Body.Earthquake.Magnitude);
-          if (json.Body.Earthquake.Hypocenter.Depth) depthTmp = Number(json.Body.Earthquake.Hypocenter.Depth);
-          if (json.Body.Earthquake.Hypocenter.Name) epiCenterTmp = json.Body.Earthquake.Hypocenter.Name;
-          if (json.Body.Earthquake.Hypocenter.Latitude) LatTmp = json.Body.Earthquake.Hypocenter.Latitude;
-          if (json.Body.Earthquake.Hypocenter.Longitude) LngTmp = json.Body.Earthquake.Hypocenter.Longitude;
+          if (json.Body.Earthquake.Hypocenter?.Depth) depthTmp = Number(json.Body.Earthquake.Hypocenter.Depth);
+          if (json.Body.Earthquake.Hypocenter?.Name) epiCenterTmp = json.Body.Earthquake.Hypocenter.Name;
+          if (json.Body.Earthquake.Hypocenter?.Latitude) LatTmp = json.Body.Earthquake.Hypocenter.Latitude;
+          if (json.Body.Earthquake.Hypocenter?.Longitude) LngTmp = json.Body.Earthquake.Hypocenter.Longitude;
         }
-        if (json.Body.Intensity && json.Body.Intensity.Observation.MaxInt)
+        if (json.Body?.Intensity?.Observation?.MaxInt)
           maxIntTmp = json.Body.Intensity.Observation.MaxInt;
-        if (json.Body.Comments && json.Body.Comments.Observation)
+        if (json.Body?.Comments?.Observation)
           commentTmp = {
             ForecastComment: json.Body.Comments.Observation,
             VarComment: "",
             FreeFormComment: "",
           };
 
-        var cancelTmp = json.Head.InfoType == "取消";
+        var cancelTmp = json.Head?.InfoType == "取消";
 
         var IntData = [];
         if (
-          json.Body.Intensity &&
-          json.Body.Intensity.Observation.Pref &&
+          json.Body?.Intensity?.Observation?.Pref &&
           json.Body.Intensity.Observation.Pref.length > 0
         ) {
           json.Body.Intensity.Observation.Pref.forEach(function (elm) {
@@ -1433,9 +1432,9 @@ function narikakun_Fetch(url) {
         }
 
         ConvertEQInfo({
-          category: json.Head.Title,
-          status: json.Control.Status,
-          reportTime: json.Head.ReportDateTime,
+          category: json.Head?.Title,
+          status: json.Control?.Status,
+          reportTime: json.Head?.ReportDateTime,
           originTime: originTimeTmp,
           maxI: maxIntTmp,
           mag: magnitudeTmp,
@@ -1453,21 +1452,22 @@ function narikakun_Fetch(url) {
 }
 
 function axisInfoCtrl(json) {
-  var Earthquake = json.Body.Earthquake[0];
-  var LatLngDepth = parse_LatLngDepth(Earthquake.Hypocenter.Area.Coordinate[0].valueOf_)
+  var Earthquake = json.Body?.Earthquake?.[0];
+  var coord = Earthquake?.Hypocenter?.Area?.Coordinate?.[0]?.valueOf_;
+  var LatLngDepth = coord ? parse_LatLngDepth(coord) : null;
 
   var originTimeTmp, epiCenterTmp, magnitudeTmp, maxIntTmp, LatTmp, LngTmp, depthTmp;
 
-  if (Earthquake.OriginTime) {
+  if (Earthquake?.OriginTime) {
     originTimeTmp = new Date(Earthquake.OriginTime);
   }
-  if (Earthquake.Hypocenter.Area.Name) {
+  if (Earthquake?.Hypocenter?.Area?.Name) {
     epiCenterTmp = Earthquake.Hypocenter.Area.Name;
   }
-  if (Earthquake.Magnitude) {
+  if (Earthquake?.Magnitude) {
     magnitudeTmp = Number(Earthquake.Magnitude);
   }
-  if (json.Body.Intensity && json.Body.Intensity.Observation.MaxInt) {
+  if (json.Body?.Intensity?.Observation?.MaxInt) {
     maxIntTmp = json.Body.Intensity.Observation.MaxInt;
   }
 
@@ -1477,18 +1477,18 @@ function axisInfoCtrl(json) {
     if (!isNaN(LatLngDepth[3]) && LatLngDepth[3]) depthTmp = Math.abs(Number(LatLngDepth[3]) / 1000);
   }
 
-  var cancelTmp = json.Head.InfoType == "取消";
+  var cancelTmp = json.Head?.InfoType == "取消";
 
   var commentText = {
     ForecastComment: "",
     VarComment: "",
     FreeFormComment: "",
   };
-  if (json.Body.Comments) {
-    if (json.Body.Comments.ForecastComment && json.Body.Comments.ForecastComment.Text) {
+  if (json.Body?.Comments) {
+    if (json.Body.Comments.ForecastComment?.Text) {
       commentText.ForecastComment = json.Body.Comments.ForecastComment.Text;
     }
-    if (json.Body.Comments.VarComment && json.Body.Comments.VarComment.Text) {
+    if (json.Body.Comments.VarComment?.Text) {
       commentText.VarComment = json.Body.Comments.VarComment.Text;
     }
     if (json.Body.Comments.FreeFormComment) {
@@ -1497,7 +1497,7 @@ function axisInfoCtrl(json) {
   }
 
   var IntData = [];
-  if (json.Body.Intensity && json.Body.Intensity.Observation.Pref) {
+  if (json.Body?.Intensity?.Observation?.Pref) {
     json.Body.Intensity.Observation.Pref.forEach(function (elm) {
       var areaData = [];
       if (elm.Area) {
@@ -1532,9 +1532,9 @@ function axisInfoCtrl(json) {
   }
 
   ConvertEQInfo({
-    category: json.Head.Title,
-    status: json.Control.Status,
-    reportTime: json.Head.ReportDateTime,
+    category: json.Head?.Title,
+    status: json.Control?.Status,
+    reportTime: json.Head?.ReportDateTime,
     originTime: originTimeTmp,
     maxI: maxIntTmp,
     mag: magnitudeTmp,

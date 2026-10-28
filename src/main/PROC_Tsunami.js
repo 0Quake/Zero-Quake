@@ -118,8 +118,8 @@ export function ConvertTsunamiInfo(data) {
         // 取消報の通知判定（最新の取消報であれば閾値に関わらず取消音声を再生）
         if (config.Info.TsunamiInfo.NotificationSound) {
           let isNewest = !Tsunami_Data.find(function (elm) {
-            return (new Date(elm.issue.time) > new Date(data.issue.time) &&
-              (!elm.issue.EventID || !data.issue.EventID || IncludesDuplicates(elm.issue.EventID, data.issue.EventID)));
+            return (new Date(elm.issue?.time) > new Date(data.issue?.time) &&
+              (!elm.issue?.EventID || !data.issue?.EventID || IncludesDuplicates(elm.issue?.EventID, data.issue?.EventID)));
           });
           if (isNewest) {
             PlayAudio("TsunamiInfo");
@@ -165,7 +165,7 @@ export function ConvertTsunamiInfo(data) {
 
     Tsunami_data_Marged = { issue: {}, areas: [] };
     let sortedTsunamiData = [...Tsunami_Data]
-      .sort((a, b) => new Date(a.issue.time) - new Date(b.issue.time));//古→新（非破壊）
+      .sort((a, b) => new Date(a.issue?.time) - new Date(b.issue?.time));//古→新（非破壊）
 
     // 時系列ソート後のタイミングで、各電文に対する取消判定を実施
     // （自身の時刻より後に、同一情報単位の取消電文が存在するかどうかで判定）

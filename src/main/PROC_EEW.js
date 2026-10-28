@@ -161,7 +161,7 @@ export function DetectEEW(type, json) {
     try {
       var alertflgTmp = json.Title == "緊急地震速報（予報）" ? "予報" : "警報";
       var EBIData = [];
-      json.Forecast.forEach(function (elm) {
+      (json.Forecast || []).forEach(function (elm) {
         EBIData.push({
           Code: elm.Code,
           Name: elm.Name,
@@ -179,7 +179,7 @@ export function DetectEEW(type, json) {
         report_time: newDate2(json.ReportDateTime) || null,
         magnitude: Number(json.Magnitude) || null,
         maxInt: NormalizeShindo(json.Intensity),
-        depth: Number(String(json.Hypocenter?.Depth).replace("km", "")),
+        depth: json.Hypocenter?.Depth != null ? Number(String(json.Hypocenter.Depth).replace("km", "")) : null,
         is_cancel: json.Flag?.is_cancel,
         is_final: json.Flag?.is_final,
         is_training: json.Flag?.is_training,
@@ -201,8 +201,8 @@ export function DetectEEW(type, json) {
   } else if (type == 4) {
     //P2P
     try {
-      var scaleTo_arr = json.areas.map((p) => p.scaleTo);
-      var maxIntTmp = Math.floor(Math.max(...scaleTo_arr));
+      var scaleTo_arr = (json.areas || []).map((p) => p.scaleTo);
+      var maxIntTmp = scaleTo_arr.length > 0 ? Math.floor(Math.max(...scaleTo_arr)) : null;
 
       var latitudeTmp;
       var longitudeTmp;
@@ -221,7 +221,7 @@ export function DetectEEW(type, json) {
       conditionTmp = json.earthquake?.condition == "仮定震源要素";
 
       var EBIData = [];
-      json.areas.forEach(function (elm) {
+      (json.areas || []).forEach(function (elm) {
         EBIData.push({
           Code: null,
           Name: elm.name,
@@ -288,15 +288,18 @@ export function EEW_Marge(data) {
     }
 
     //現在地との距離
-
-    data.distance = turf.distance([data.longitude, data.latitude], [config.home.longitude, config.home.latitude])
-    data.TimeTable = {
-      p: TTT_JMA2001.p[getClosestNum(data.depth, Object.keys(TTT_JMA2001.p))],
-      s: TTT_JMA2001.s[getClosestNum(data.depth, Object.keys(TTT_JMA2001.s))]
+    if (!data.is_cancel && data.longitude != null && data.latitude != null) {
+      data.distance = turf.distance([data.longitude, data.latitude], [config.home.longitude, config.home.latitude]);
     }
-    data.TimeTable2 = {
-      p: TTT_AK135.p[getClosestNum(data.depth, Object.keys(TTT_AK135.p))],
-      s: TTT_AK135.s[getClosestNum(data.depth, Object.keys(TTT_AK135.s))]
+    if (data.depth != null) {
+      data.TimeTable = {
+        p: TTT_JMA2001.p[getClosestNum(data.depth, Object.keys(TTT_JMA2001.p))],
+        s: TTT_JMA2001.s[getClosestNum(data.depth, Object.keys(TTT_JMA2001.s))]
+      };
+      data.TimeTable2 = {
+        p: TTT_AK135.p[getClosestNum(data.depth, Object.keys(TTT_AK135.p))],
+        s: TTT_AK135.s[getClosestNum(data.depth, Object.keys(TTT_AK135.s))]
+      };
     }
 
 

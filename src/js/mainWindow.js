@@ -213,8 +213,8 @@ window.addEventListener("load", () => {
   fetch(`http://www.kmoni.bosai.go.jp/webservice/maintenance/message.json?_=${Number(new Date())}`)
     .then(function (res) { return res.json(); })
     .then(function (json) {
-      document.getElementById("kmoni_Message").innerHTML = json.message;
-    });
+      document.getElementById("kmoni_Message").innerHTML = json?.message || "";
+    }).catch(function () {});
 
   psWaveAnm(); //予報円描画着火
   setInterval(function () {
@@ -2090,7 +2090,7 @@ function tsunamiDataUpdate(data) {
     tsunamiData = null;
   } else {
     EQInfoLink.style.display = "none";
-    if (Array.isArray(data.issue.EventID) && data.issue.EventID.length) {
+    if (Array.isArray(data.issue?.EventID) && data.issue.EventID.length) {
       var link = [];
       EQinfo_Index = 0;
       document.getElementById("EQCount").innerText =
@@ -2113,7 +2113,7 @@ function tsunamiDataUpdate(data) {
         GenerateTsunamiText(data, "津波情報アイテム。情報内容を読み上げます。{max_grade}発令中。[{home_area}には{home_grade}が発表。{home_area}への{first_height2}、最大波予想は{max_height2}。{immediately}]{report_time}発表。")
       );
     if (config.home.TsunamiSect) {
-      var sectData = data.areas.find(function (elm) {
+      var sectData = data.areas?.find(function (elm) {
         return elm.name == config.home.TsunamiSect && !elm.cancelled;
       });
       if (sectData) {
@@ -2178,7 +2178,7 @@ function tsunamiDataUpdate(data) {
     var WatchList = ["any"];
     var YohoList = ["any"];
 
-    data.areas.forEach(function (elm) {
+    (data.areas || []).forEach(function (elm) {
       if (!elm.cancelled) {
         alertNowTmp = true;
         switch (elm.grade) {
@@ -2637,7 +2637,7 @@ function draw_tide(data) {
     clone.querySelector(".EQI_name").textContent = elm.name;
     clone.querySelector(".EQI_by").textContent = `(${elm.by})`;
 
-    clone.querySelector(".EQI_height").textContent = elm.height.toFixed(0);
+    clone.querySelector(".EQI_height").textContent = (elm.height != null && !isNaN(elm.height)) ? elm.height.toFixed(0) : "-";
 
     function to_percent(v) {
       return (v || v == 0) ? (v - range_min) / (range_max - range_min) * 100 : null
@@ -2699,7 +2699,7 @@ function draw_gaikyo(data) {
       } else {
         var startDateToSpeak = elm.date0 ? `${NormalizeDate("YY年M月D日", elm.date0)}から` : "";
         var startDateStr = elm.date0 ? `${NormalizeDate("YYYY/MM/DD", elm.date0)}～` : "";
-        if (!elm.date0 || elm.date0.getFullYear() != elm.date.getFullYear()) {
+        if (!elm.date0 || !elm.date || elm.date0.getFullYear() != elm.date.getFullYear()) {
           var dateFormToSpeak = "YY年M月D日";
           var dateFormStr = "YYYY/MM/DD";
         } else {

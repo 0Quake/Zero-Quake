@@ -246,7 +246,7 @@ function configDataDraw() {
   var boyomiPort = config.notice.voice_parameter.Boyomi_Port || 50080;
   fetch(`http://localhost:${boyomiPort}/GetVoiceList`).then(function (res) { return res.json(); })
     .then(function (json) {
-      json.voiceList.forEach(function (elm) {
+      (json?.voiceList || []).forEach(function (elm) {
         var VoiceOption = document.createElement("option");
         VoiceOption.textContent = elm.name;
         VoiceOption.value = elm.id;
@@ -881,7 +881,7 @@ function MapReDraw() {
   fetch(`https://www.j-shis.bosai.go.jp/map/api/sstrct/V4/meshinfo.geojson?position=${lng},${lat}&epsg=4612&attr=ARV`)
     .then(function (res) { return res.json(); })
     .then(function (json) {
-      if (json.features && json.features[0].properties)
+      if (json.features?.[0]?.properties)
         document.getElementById("arv").value = json.features[0].properties.ARV;
       else document.getElementById("arv").value = 1;
     })
@@ -944,7 +944,7 @@ function speak(text, engine) {
         .then(function (res) { return res.json(); })
         .then(function (json) {
           var voice_parameter = "";
-          var voiceElm = json.voiceList.find(function (elm) {
+          var voiceElm = json?.voiceList?.find(function (elm) {
             return elm.id == document.getElementById("BoyomiVoiceSelect").value;
           });
           if (voiceElm) voice_parameter = `&voice=${document.getElementById("BoyomiVoiceSelect").value}`;

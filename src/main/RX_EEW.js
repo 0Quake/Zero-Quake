@@ -47,12 +47,12 @@ function Connect_P2P() {
               break;
             case 552:
               //津波情報
-              data.issue.time = new Date(data.issue?.time);
+              if (data.issue) data.issue.time = new Date(data.issue?.time);
               data.cancelled = false;
               data.revocation = false;
               data.source = "P2P";
 
-              data.areas.forEach((elm) => {
+              (data.areas || []).forEach((elm) => {
                 elm.firstHeightCondition = elm.firstHeight?.condition;
                 elm.firstHeight = newDate2(elm.firstHeight?.arrivalTime) || null;
                 elm.maxHeight = elm.maxHeight?.description;
@@ -272,6 +272,7 @@ function Connect_WolfxWS() {
       UpdateStatus("wolfx", "success");
       try {
         var json = ParseJSON(event.data);
+        if (!json) return;
         if (json.type == "heartbeat") {
           ws.send("ping");
         } else if (json.type == "jma_eew") {

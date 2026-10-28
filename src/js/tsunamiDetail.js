@@ -34,7 +34,7 @@ function tsunamiUpdate(dataTmp) {
   var has_condition = false;
   var has_tide = false;
   var has_obs = false;
-  var revered = [...dataTmp.areas].reverse();
+  var revered = [...(dataTmp.areas || [])].reverse();
   revered.forEach((elm) => {
     if (!elm.cancelled) {
       var condition = "";

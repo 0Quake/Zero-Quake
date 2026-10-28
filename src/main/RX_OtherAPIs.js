@@ -45,6 +45,7 @@ export var checkUpdate = throttle(async function (userAction) {
         if (!r.ok) throw new Error(`HTTP Error: ${r.status}`);
         return r.json();
       }).then((json) => {
+        if (!Array.isArray(json) || !json[0]) throw new Error("GitHub Releases APIが空または不正なデータを返しました。");
         var latest_verTmp = String(json[0].tag_name).replace("v", "");
 
         var current_verTmp = packageJson.version;
@@ -136,13 +137,16 @@ export var Req_USGS = throttle(function () {
       usgsLastGenerated = LastGenTmp;
 
       var dataTmp2 = [];
-      json.features.forEach(function (elm) {
-        var FECode = FERegion.features.find(function (elm2) {
-          return turf.booleanPointInPolygon(elm.geometry.coordinates, elm2);
-        });
+      (json.features || []).forEach(function (elm) {
+        var FECode = null;
+        if (elm.geometry?.coordinates) {
+          FECode = FERegion.features.find(function (elm2) {
+            return turf.booleanPointInPolygon(elm.geometry.coordinates, elm2);
+          });
+        }
 
         var maxi;
-        if (elm.properties.mmi !== null) maxi = elm.properties.mmi;
+        if (elm.properties?.mmi != null) maxi = elm.properties.mmi;
 
         var magTmp = elm?.properties?.mag;
         dataTmp2.push({
@@ -152,7 +156,7 @@ export var Req_USGS = throttle(function () {
           epiCenter: FECode?.properties?.nameJA || "",
           M: magTmp ? (Math.round(magTmp * 10) / 10) : null,
           maxI: maxi,
-          DetailURL: [elm.properties.url],
+          DetailURL: elm.properties?.url ? [elm.properties.url] : [],
         });
       });
       dataTmp2 = dataTmp2.sort((a, b) => a.OriginTime > b.OriginTime ? -1 : 1);
@@ -179,7 +183,7 @@ export function Req_NarikakunList(count) {
       for (let item of json.items) {
         //if (!originTimeTmp) originTimeTmp = new Date(json.Head.TargetDateTime); 保留
 
-        for (let elm of item.lists) {
+        for (let elm of (item.lists || [])) {
           var originTime = newDate2(elm.data?.originTimeNew);
           var reportDateTime = newDate2(elm.datetime);
           var epiCenter = elm.data?.hypoName;
