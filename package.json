@@ -61,7 +61,7 @@
   "homepage": "https://0quake.github.io/ZeroQuake_Website/",
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "electron": "^45.0.0",
+    "electron": "^45.1.0",
     "electron-builder": "^26.15.3",
     "eslint": "^10.13.0",
     "globals": "^17.13.0",
