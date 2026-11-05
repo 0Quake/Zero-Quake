@@ -104,21 +104,27 @@ export const UpdateEQInfo_Tmp = throttle(function () {//ユーザー操作など
 }, 2000);
 
 var UpdateEQInfo_Timer;
+var lastFetchTime = 0;
 export const UpdateEQInfo_Loop = function () {//ループ
-  UpdateEQInfoCore();
-
-  if (UpdateEQInfo_Timer) clearTimeout(UpdateEQInfo_Timer);
-  UpdateEQInfo_Timer = setTimeout(function () {
-    UpdateEQInfo_Loop();
-  }, config.Info.EQInfo.Interval);
+  try {
+    UpdateEQInfoCore();
+  } catch (err) {
+    GeneralError_handler(err);
+  } finally {
+    if (UpdateEQInfo_Timer) clearTimeout(UpdateEQInfo_Timer);
+    UpdateEQInfo_Timer = setTimeout(UpdateEQInfo_Loop, config.Info?.EQInfo?.Interval || 60000);
+    if (UpdateEQInfo_Timer?.unref) UpdateEQInfo_Timer.unref();
+  }
 };
 export function UpdateEQInfoCore() {
   try {
-    Req_JMAXMLList(EQ_FetchCount, EQ_FetchCount == 0);
+    var isLong = state.EQ_FetchCount === 0 || (Date.now() - lastFetchTime > 900000);
+    lastFetchTime = Date.now();
+    Req_JMAXMLList(state.EQ_FetchCount, isLong);
     Req_JMAJSONList();
-    Req_NarikakunList(EQ_FetchCount);
+    Req_NarikakunList(state.EQ_FetchCount);
   } catch (err) {
-    throw new Error("地震情報の処理でエラーが発生しました。", { cause: err });
+    GeneralError_handler(err);
   }
   state.EQ_FetchCount++;
 };

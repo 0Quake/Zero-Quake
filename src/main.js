@@ -561,7 +561,7 @@ electron.app.on("ready", () => {
   });
 
   electron.powerMonitor.on("resume", () => {
-    UpdateEQInfo_Tmp();
+    UpdateEQInfo_Loop();
     RegularExecution();
     if (WolfxConnection?.readyState === WebSocket.OPEN) WolfxConnection.send("query_jmaeew");
     if (ProjectBS_Connection?.readyState === WebSocket.OPEN) ProjectBS_Connection.send("queryjson");
@@ -670,7 +670,7 @@ ipcMain.on("message", (_event, response) => {
       break;
     case "internetConnection":
       if (response.internetConnection) {
-        UpdateEQInfo_Tmp();
+        UpdateEQInfo_Loop();
         RegularExecution();
         if (WolfxConnection?.readyState === WebSocket.OPEN) WolfxConnection.send("query_jmaeew");
         if (ProjectBS_Connection?.readyState === WebSocket.OPEN) ProjectBS_Connection.send("queryjson");
