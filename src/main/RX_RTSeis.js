@@ -175,8 +175,8 @@ export function Req_JMATide_sta() {
   }).then((json) => {
     var stations = []
     Object.keys(json).forEach(function (key) {
-      var el = json[key]
-      (el.class30s || []).forEach(function (cl) {
+      var el = json[key];
+      (el?.class30s || []).forEach(function (cl) {
         if (Array.isArray(cl.stations)) {
           cl.stations.forEach(function (st) {
             if (st.code && st.lat && st.lon && st.name) {//データ有効性チェック
