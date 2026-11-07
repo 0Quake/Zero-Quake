@@ -121,11 +121,11 @@ export function MargeEQInfo(dataList, count) {
           if (elm.M !== undefined) {
             EQInfo_Item.M = (elm.M === "NaN" || Number.isNaN(elm.M)) ? null : elm.M;
           }
-          if (elm.maxI !== undefined) {
-            EQInfo_Item.maxI = (elm.maxI === "?") ? null : elm.maxI;
+          if (NormalizeShindo(elm.maxI) !== "?") {
+            EQInfo_Item.maxI = elm.maxI;
           }
-          if (elm.maxLgInt !== undefined) {
-            EQInfo_Item.maxLgInt = (elm.maxLgInt === "?") ? null : elm.maxLgInt;
+          if (NormalizeShindo(elm.maxLgInt) !== "?") {
+            EQInfo_Item.maxLgInt = elm.maxLgInt;
           }
 
           if (elm.axisData) EQInfo_Item.axisData.push(elm.axisData);
