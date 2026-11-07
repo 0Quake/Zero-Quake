@@ -1907,12 +1907,13 @@ const DrawIntensity = throttle(function () {
 }, 500);
 
 function DrawLgIntensity(data) {
-  if (!data?.length) return;
   LgIntIcons = [];
   LgIntIcons_st = [];
   document.getElementById("LngInt")?.replaceChildren();
-  document.getElementById("ShindoWrap").style.display = "inline-block";
-  document.getElementById("lngintListWrap").style.display = "block";
+  if (data?.length) {
+    document.getElementById("ShindoWrap").style.display = "inline-block";
+    document.getElementById("lngintListWrap").style.display = "block";
+  }
   mapFillResetL();
 
   LgIntFragment = document.createDocumentFragment();
