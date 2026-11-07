@@ -1851,10 +1851,11 @@ function add_IntensityStation_info(lat, lng, name, int) {
   wrap3[wrap3.length - 1]?.append(newDiv);
 }
 
-var WaitingToDraw = null
+var WaitingToDraw = null;
 const DrawIntensity = throttle(function () {
-  if (WaitingToDraw) var data = WaitingToDraw
-  else return
+  if (WaitingToDraw) var data = WaitingToDraw;
+  else return;
+
   var has_StaShindo = false;
   intensityIcons = [];
   intensityIcons_st = [];
@@ -1910,6 +1911,7 @@ const DrawIntensity = throttle(function () {
 }, 500);
 
 function DrawLgIntensity(data) {
+  if (!data?.length) return;
   LgIntIcons = [];
   LgIntIcons_st = [];
   removeChild(document.getElementById("LngInt"));

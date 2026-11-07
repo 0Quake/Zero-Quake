@@ -214,7 +214,7 @@ window.addEventListener("load", () => {
     .then(function (res) { return res.json(); })
     .then(function (json) {
       document.getElementById("kmoni_Message").innerHTML = json?.message || "";
-    }).catch(function () {});
+    }).catch(function () { });
 
   psWaveAnm(); //予報円描画着火
   setInterval(function () {
@@ -821,11 +821,6 @@ function EQDetectFinish(id) {
 //🔴UI🔴
 var updateTimeDialog = document.getElementById("UpdateTime_detail");
 
-//サイドバー表示・非表示
-document.getElementById("SideBarToggle").addEventListener("click", function () {
-  document.getElementById("sideBar").classList.toggle("close");
-  window.dispatchEvent(new Event("resize"));
-});
 document.getElementById("sideBar").addEventListener("transitionend", function () {
   window.dispatchEvent(new Event("resize"));
 });

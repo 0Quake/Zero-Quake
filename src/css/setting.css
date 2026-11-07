@@ -2,6 +2,11 @@ body {
   overflow: hidden;
 }
 
+main{
+  display: flex;
+  flex-direction: column;
+}
+
 button {
   margin: 6px 9px 6px 0;
 }
@@ -148,22 +153,20 @@ div .tabcontent {
   padding: 0 0 10px 5px;
 }
 #BtnWrap {
-  line-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: right;
   border-top: solid 1px #62626c;
-  text-align: center;
   font-size: 0;
   background: #222225;
-  box-shadow: 0 0 11px #000C;
-  padding: 3px;
-  position: relative;
+  padding: 4px;
 }
 
 #BtnWrap button {
-  margin: 5px;
+  margin: 3px;
 }
 #BtnWrap span {
   font-size: 12px;
-  display: block;
   height: auto;
   line-height: 20px;
   color: #ccc;

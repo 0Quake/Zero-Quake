@@ -12,14 +12,14 @@
   flex: 1;
 }
 #layerSwitch_toggle {
-  border-radius: 5px;
+  border-radius: 6px;
   background: #3f3f42;
   font-family: "Material Symbols";
   font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
-  font-size: 22px;
-  width: 45px;
-  height: 40px;
-  line-height: 40px;
+  font-size: 20px;
+  width: 37px;
+  height: 37px;
+  line-height: 35px;
   padding: 0;
   z-index: 100000001;
 }
@@ -97,7 +97,7 @@
 .maplibregl-ctrl-group button,
 .maplibregl-ctrl-group button:hover {
   margin: 0;
-  width: 40px;
+  width: 35px;
   height: 35px;
   background: transparent !important;
 }
@@ -293,13 +293,17 @@
   height: 25px;
 }
 .maplibregl-ctrl.maplibregl-ctrl-attrib {
-  background: #3f3f42;
-  color: #ccc;
   border-radius: 5px;
   margin: 5px;
-  padding: 2px 5px;
+  padding:0 5px;
   font-size: 10px;
   pointer-events: none;
+  background: none;
+  border: none;
+  color: #eee;
+  filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.4));
+  -webkit-text-stroke: 2px #666;
+  paint-order: stroke fill;
 }
 .maplibregl-ctrl a {
   color: #ccc;
@@ -428,7 +432,7 @@
   position: absolute;
   right: 0;
   bottom: 0;
-  padding: 5px 25px 40px 5px;
+  padding:0 8px 25px 0;
   z-index: 100000000;
   text-align: right;
   max-width: 50vw;
@@ -703,17 +707,13 @@ body {
     background: transparent;
     border-left: none;
   }
-  .close #SideBarToggle {
-    right: 0;
-    left: auto;
-  }
 }
 .maplibregl-control-container * {
   z-index: 100000000;
 }
 .maplibregl-ctrl-group {
   box-shadow: none !important;
-  border-radius: 5px;
+  border-radius: 6px;
   border: solid 1px #62626c;
 }
 .maplibregl-ctrl-group button {
