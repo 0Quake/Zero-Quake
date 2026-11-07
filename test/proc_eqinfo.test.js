@@ -283,6 +283,24 @@ describe("PROC_EQInfo.js - Unit Tests", () => {
       assert.equal(EQInfoData[eventId].maxI, "6強");
     });
 
+    it("should set audioNotification to true on EQInfoData for newly arriving latest report", async () => {
+      const { MargeEQInfo, EQInfoData } = await import("../src/main/PROC_EQInfo.js");
+      const eventId = "20261108999999";
+      const now = Date.now();
+
+      MargeEQInfo([{
+        eventId,
+        category: "震源・震度に関する情報",
+        status: "通常",
+        reportDateTime: new Date(now),
+        epiCenter: "茨城県南部",
+        M: 4.8,
+        maxI: "4",
+        cancel: false,
+      }], 1);
+      assert.equal(EQInfoData[eventId].audioNotification, true);
+    });
+
     it("should evaluate M8超 against M_threshold in AlertEQInfo and invoke audio notification", async () => {
       const { AlertEQInfo } = await import("../src/main/PROC_EQInfo.js");
       const { config } = await import("../src/main/state.js");

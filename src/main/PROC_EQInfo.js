@@ -183,10 +183,11 @@ export function MargeEQInfo(dataList, count) {
         EQInfoData[data.eventId].raw_data = [{ ...data }];//値渡しにする
 
         eqInfoTmp.push(EQInfoData[data.eventId]);
-        eqInfo.jma.push(EQInfoData[data.eventId]); var latest_reportDate = Math.max(...Object.values(EQInfoData).map(function (val) { return Number(val.reportDateTime) }));
+        eqInfo.jma.push(EQInfoData[data.eventId]);
+        var latest_reportDate = Math.max(...Object.values(EQInfoData).map(function (val) { return Number(val.reportDateTime) || 0 }));
 
         //当該イベントの初受信＆それが最新（reportDateが過去最大）なら音声通知する
-        data.audioNotification = (count !== 0 && data.category !== "EEW" && Number(data.reportDateTime) == latest_reportDate)
+        EQInfoData[data.eventId].audioNotification = data.audioNotification = (count !== 0 && data.category !== "EEW" && Number(data.reportDateTime) == latest_reportDate)
       }
     });
 
