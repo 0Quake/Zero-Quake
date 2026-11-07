@@ -246,8 +246,8 @@ export function newDate2(e) {
 
 
 export function IncludesDuplicates(a, b) {
-  const a1 = rray.isArray(a) ? a : (a != null ? [a] : [])
-  const b1 = rray.isArray(b) ? b : (b != null ? [b] : [])
+  const a1 = Array.isArray(a) ? a : (a != null ? [a] : [])
+  const b1 = Array.isArray(b) ? b : (b != null ? [b] : [])
   return !new Set(a1).isDisjointFrom(new Set(b1))
 }
 
