@@ -756,10 +756,7 @@ export function Req_JMAXML(url, count) {
             var maxHeightElm = elm.getElementsByTagName("MaxHeight")?.[0]?.getElementsByTagName("jmx_eb:TsunamiHeight");
             var mHeightStr = maxHeightElm?.[0]?.getAttribute("description");
             if (mHeightStr) {
-              maxHeightTmp = mHeightStr
-                .replace(/[Ａ-Ｚａ-ｚ０-９．]/g, function (s) {
-                  return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
-                });
+              maxHeightTmp = mHeightStr.normalize("NFKC");
             } else {
               maxHeightTmp = elm.getElementsByTagName("MaxHeight")?.[0]?.getElementsByTagName("Condition")?.[0]?.textContent || null;
             }
@@ -849,9 +846,7 @@ export function Req_JMAXML(url, count) {
                     if (maxHeightElm) {
                       var desc = maxHeightElm.getAttribute("description");
                       if (desc) {
-                        oMaxHeightTmp = desc.replace(/[Ａ-Ｚａ-ｚ０-９．]/g, function (s) {
-                          return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
-                        });
+                        oMaxHeightTmp = desc.normalize("NFKC");
                       }
                       if (maxHeightElm.getAttribute("condition")) {
                         maxHeightRising = maxHeightElm.getAttribute("condition") === "上昇中";

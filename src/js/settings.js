@@ -108,8 +108,6 @@ function applyConfigToUI(pair) {
 
   if (el.type === "checkbox") {
     el.checked = Boolean(val);
-  } else if (el.tagName === "SELECT") {
-    selectBoxSet(el, val);
   } else {
     el.value = (val !== undefined && val !== null) ? val : "";
   }
@@ -239,7 +237,7 @@ function configDataDraw() {
   TTSspeedSet(config.notice.voice_parameter.rate);
   volumeSet(config.notice.bell_volume, true);
 
-  selectBoxSet(document.getElementById("TTSvoiceSelect"), config.notice.voice_parameter.voice);
+  document.getElementById("TTSvoiceSelect").value = config.notice.voice_parameter.voice;
 
   document.getElementById(`VoiceEngine_${config.notice.voice_parameter.engine}`).checked = true;
 
@@ -855,7 +853,7 @@ function MapReDraw() {
       EQSect = selected_sect.features[0].properties.name;
     else EQSect = selected_sect.properties.name;
     map.setFilter("selected_sect", ["==", "name", EQSect]);
-    selectBoxSet(document.getElementById("saibun"), EQSect);
+    document.getElementById("saibun").value = EQSect;
   }
 
   var minDistance = Infinity;
@@ -871,7 +869,7 @@ function MapReDraw() {
 
   map.setFilter("tsunami_LINE_selected", ["==", "name", tsunamiSect]);
   map.setFilter("tsunami_LINE_selected_2", ["==", "name", tsunamiSect]);
-  selectBoxSet(document.getElementById("tsunamiSect"), tsunamiSect);
+  document.getElementById("tsunamiSect").value = tsunamiSect;
 
   map.flyTo({
     center: [lng, lat],
@@ -1022,13 +1020,6 @@ function audio_preview(volume) {
   AudioElm.currentTime = 0;
   AudioElm.volume = volume;
   if (AudioElm.paused) AudioElm.play();
-}
-
-function selectBoxSet(selectElm, TargetValue) {
-  selectElm.querySelectorAll("option").forEach(function (elm) {
-    if (elm.value == TargetValue) elm.setAttribute("selected", "");
-    else if (elm.hasAttribute("selected")) elm.removeAttribute("selected");
-  });
 }
 
 document

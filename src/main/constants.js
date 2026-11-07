@@ -258,11 +258,8 @@ export function newDate2(e) {
 }
 
 
-export function IncludesDuplicates(arr1, arr2) {
-  const a1 = Array.isArray(arr1) ? arr1 : [];
-  const a2 = Array.isArray(arr2) ? arr2 : [];
-
-  return a1.some(item => a2.includes(item));
+export function IncludesDuplicates(a1, a2) {
+  return !new Set(a1).isDisjointFrom(new Set(a2))
 }
 
 
