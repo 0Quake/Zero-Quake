@@ -182,6 +182,7 @@ export function CreateMainWindow() {
       MainWindow.loadFile("src/index.html");
 
       var savePosition = throttle(function () {
+        if (!MainWindow || MainWindow.isDestroyed()) return;
         const { x, y, width, height } = MainWindow.getBounds();
         store.set({ x, y, width, height });
         store.set("Maximized", MainWindow.isMaximized());
@@ -582,7 +583,7 @@ export function Create_KatsudoJokyoWindow() {
 }
 
 export function messageToMainWindow(message) {
-  if (MainWindow) MainWindow.webContents.send("message2", message);
+  if (MainWindow && !MainWindow.isDestroyed()) MainWindow.webContents.send("message2", message);
 }
 
 //地震情報ウィンドウ表示処理
@@ -662,7 +663,7 @@ export function EQInfo_createWindow(response, IS_WebURL) {
 
 
 export function speak(str) {
-  if (str && WorkerWindow) {
+  if (str && WorkerWindow && !WorkerWindow.isDestroyed()) {
     WorkerWindow.webContents.send("message2", { action: "speak", data: str });
   }
 }
@@ -670,7 +671,7 @@ export function speak(str) {
 //EEW時読み上げ文章 生成
 
 export function PlayAudio(name) {
-  if (WorkerWindow) {
+  if (WorkerWindow && !WorkerWindow.isDestroyed()) {
     WorkerWindow.webContents.send("message2", {
       action: "PlayAudio",
       data: name,

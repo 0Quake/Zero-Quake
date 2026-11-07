@@ -1907,6 +1907,7 @@ const DrawIntensity = throttle(function () {
 }, 500);
 
 function DrawLgIntensity(data) {
+  data = data || [];
   LgIntIcons = [];
   LgIntIcons_st = [];
   document.getElementById("LngInt")?.replaceChildren();

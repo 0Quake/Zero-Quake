@@ -282,7 +282,7 @@ export function AlertEQInfo(data, source) {
 
       //現在開いている地震情報ウィンドウにデータ送信
       data.forEach(function (elm) {
-        if (EQI_Window[elm.eventId]) {
+        if (EQI_Window[elm.eventId]?.window && !EQI_Window[elm.eventId].window.isDestroyed()) {
           var metadata = EQI_Window[elm.eventId].metadata;
           var EEWDataItem = EEW_Storage.find(function (elm2) {
             return elm2.EventID == elm.eventId;

@@ -47,17 +47,22 @@ export function TREMRTS_SSE() {
   });
   TremRts_es.addEventListener('trem.rts.v1', (e) => {
     if (Replay !== 0) return;
-    const json = JSON.parse(unzip(e.data));
-    const TremRtsData = formatTremData(json);
+    try {
+      const json = JSON.parse(unzip(e.data));
+      const TremRtsData = formatTremData(json);
 
-    TremRtsData_Marged = {
-      action: "TREM-RTSUpdate",
-      LocalTime: new Date((new Date() - Replay)),
-      data: TremRtsData,
-    };
-    messageToMainWindow(TremRtsData_Marged);
+      TremRtsData_Marged = {
+        action: "TREM-RTSUpdate",
+        LocalTime: new Date((new Date() - Replay)),
+        data: TremRtsData,
+      };
+      messageToMainWindow(TremRtsData_Marged);
 
-    UpdateStatus("TREM-RTS", "success", new Date(json.ts));
+      UpdateStatus("TREM-RTS", "success", new Date(json.ts));
+    } catch (err) {
+      GeneralError_handler(err);
+      UpdateStatus("TREM-RTS", "Error", new Date());
+    }
   });
   TremRts_es.addEventListener('error', (err) => {
     GeneralError_handler(err);

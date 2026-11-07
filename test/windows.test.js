@@ -1,9 +1,12 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import {
+  messageToMainWindow,
   messageToSettingWindow,
   messageToTsunamiWindow,
   messageToWorkerWindow,
+  speak,
+  PlayAudio,
   SettingWindow,
   TsunamiWindow,
   WorkerWindow,
@@ -23,11 +26,14 @@ describe("windows.js - Unit Tests", () => {
     assert.equal(TsunamiWindow, null);
     assert.equal(WorkerWindow, null);
 
-    // None of these should throw when windows are not created
+    // None of these should throw when windows are not created or are destroyed
     assert.doesNotThrow(() => {
+      messageToMainWindow({ test: true });
       messageToSettingWindow({ test: true });
       messageToTsunamiWindow({ test: true });
       messageToWorkerWindow({ test: true });
+      speak("テスト音声");
+      PlayAudio("EQInfo");
     });
   });
 });

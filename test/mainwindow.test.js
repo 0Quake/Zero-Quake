@@ -61,4 +61,10 @@ describe("mainWindow.js - Magnitude handling and sorting tests", () => {
       assert.equal(context.magDisplay, expected, `M=${input} のときの表示が ${expected} であること`);
     });
   });
+
+
+  it("safely handles psWaveEntry and tsunamiDataUpdate without throwing when map is uninitialized", () => {
+    assert.ok(source.includes("map?.getLayer"));
+    assert.ok(source.includes('map.setFilter("tsunami_MajorWarn"'));
+  });
 });

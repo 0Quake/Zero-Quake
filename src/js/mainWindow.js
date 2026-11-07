@@ -1771,12 +1771,12 @@ function psWaveEntry() {
       return elm2.EventID == elm.id;
     });
     if (!stillEEW || stillEEW.is_cancel) {
-      if (map.getLayer(`PCircle_${elm.id}`)) map.removeLayer(`PCircle_${elm.id}`);
-      if (map.getLayer(`SCircle_${elm.id}`)) map.removeLayer(`SCircle_${elm.id}`);
-      if (map.getLayer(`SCircle_${elm.id}_FILL`)) map.removeLayer(`SCircle_${elm.id}_FILL`);
+      if (map?.getLayer(`PCircle_${elm.id}`)) map.removeLayer(`PCircle_${elm.id}`);
+      if (map?.getLayer(`SCircle_${elm.id}`)) map.removeLayer(`SCircle_${elm.id}`);
+      if (map?.getLayer(`SCircle_${elm.id}_FILL`)) map.removeLayer(`SCircle_${elm.id}_FILL`);
 
-      if (map.getSource(`PCircle_${elm.id}`)) map.removeSource(`PCircle_${elm.id}`);
-      if (map.getSource(`SCircle_${elm.id}`)) map.removeSource(`SCircle_${elm.id}`);
+      if (map?.getSource(`PCircle_${elm.id}`)) map.removeSource(`PCircle_${elm.id}`);
+      if (map?.getSource(`SCircle_${elm.id}`)) map.removeSource(`SCircle_${elm.id}`);
       if (elm.SIElm) elm.SIElm.remove();
       return false;
     }
@@ -2057,10 +2057,12 @@ var tsunamiData;
 var tsunamiSTMarkers = [];
 function tsunamiDataUpdate(data) {
   tsunamiData = data;
-  map.setFilter("tsunami_MajorWarn", ["==", "name", ""]);
-  map.setFilter("tsunami_Warn", ["==", "name", ""]);
-  map.setFilter("tsunami_Watch", ["==", "name", ""]);
-  map.setFilter("tsunami_Yoho", ["==", "name", ""]);
+  if (map) {
+    map.setFilter("tsunami_MajorWarn", ["==", "name", ""]);
+    map.setFilter("tsunami_Warn", ["==", "name", ""]);
+    map.setFilter("tsunami_Watch", ["==", "name", ""]);
+    map.setFilter("tsunami_Yoho", ["==", "name", ""]);
+  }
   Tsunami_MajorWarning = Tsunami_Warning = Tsunami_Watch = Tsunami_Yoho = false;
 
   document.getElementById("tsunamiCancel").style.display = data.Torikeshi ? "block" : "none";
@@ -2294,10 +2296,12 @@ function tsunamiDataUpdate(data) {
       }
     });
 
-    map.setFilter("tsunami_MajorWarn", MajorWarningList);
-    map.setFilter("tsunami_Warn", WarningList);
-    map.setFilter("tsunami_Watch", WatchList);
-    map.setFilter("tsunami_Yoho", YohoList);
+    if (map) {
+      map.setFilter("tsunami_MajorWarn", MajorWarningList);
+      map.setFilter("tsunami_Warn", WarningList);
+      map.setFilter("tsunami_Watch", WatchList);
+      map.setFilter("tsunami_Yoho", YohoList);
+    }
 
     if (data.revocation) {
       document.getElementById("tsunamiWrap").style.display = "none";

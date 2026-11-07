@@ -373,9 +373,10 @@ app.whenReady().then(() => {
 
       if (rangeHeader && rangeHeader.startsWith("bytes=")) {
         var header_value = rangeHeader.match(/bytes=(\d+)-(\d*)/);
+        if (!header_value) return new Response(null, { status: 416 });
         var start = Number(header_value[1]);
-        var end = Number(header_value[2]) || totalSize - 1;
-        var ContentLength = end - start + 1;
+        var end = header_value[2] !== "" ? Number(header_value[2]) : totalSize - 1;
+        var ContentLength = Math.max(0, end - start + 1);
 
         var buffer = Buffer.alloc(ContentLength);
         var fd = fs.openSync(filePath, "r");
