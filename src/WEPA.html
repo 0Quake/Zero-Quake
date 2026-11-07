@@ -293,10 +293,10 @@
             if (json.issue.bulletin_number) document.getElementById("bulletin_number").innerText = json.issue.bulletin_number
             if (json.issue.by) document.getElementById("by").innerText = json.issue.by
             if (json.issue.at) {
-                var at = new Date(json.issue.at.year, json.issue.at.month_num - 1, json.issue.at.date, json.issue.at.hour, json.issue.at.minute)
+                var at = new Date(Date.UTC(json.issue.at.year, json.issue.at.month_num - 1, json.issue.at.date, json.issue.at.hour, json.issue.at.minute));
                 if (at.toString() !== "Invalid Date") {
                     report_date_UTC = at
-                    document.getElementById("at").innerText = NormalizeDate(4, ConvertJST(at)) + " JST"
+                    document.getElementById("at").innerText = NormalizeDate(4, at) + " JST"
                 }
             }
             if (json.issue.part && json.issue.part.number && json.issue.part.total) {
@@ -310,9 +310,9 @@
             document.getElementById("hypocentral_parameters").style.display = json.hypocentral_parameters ? "block" : "none"
             if (json.hypocentral_parameters?.origin_time) {
                 var ot = json.hypocentral_parameters.origin_time
-                var date = new Date(ot.year, ot.month_num - 1, ot.date, ot.hour, ot.minute)
+                var date = new Date(Date.UTC(ot.year, ot.month_num - 1, ot.date, ot.hour, ot.minute));
                 if (date.toString() !== "Invalid Date") {
-                    document.getElementById("origin_time").innerText = NormalizeDate(4, ConvertJST(date)) + " JST"
+                    document.getElementById("origin_time").innerText = NormalizeDate(4, date) + " JST"
                 }
             }
             var ec = json.hypocentral_parameters.preliminary_epicenter
@@ -372,8 +372,8 @@
                             var ampl = "-"
                             var ampl_speak = "-"
                         } else {
-                            var arrival = new Date(gen_YYYY(elm.arrival.month_num), elm.arrival.month_num - 1, elm.arrival.date, elm.arrival.hour, elm.arrival.minute)
-                            arrival = NormalizeDate("MM/DD hh:mm", ConvertJST(arrival)) + " JST"
+                            var arrival = new Date(Date.UTC(gen_YYYY(elm.arrival.month_num), elm.arrival.month_num - 1, elm.arrival.date, elm.arrival.hour, elm.arrival.minute));
+                            arrival = NormalizeDate("MM/DD hh:mm", arrival) + " JST"
                             var ampl = conv_table[elm.ampl.string]
                             var ampl_speak = conv_table_narrator[elm.ampl.string]
                         }
@@ -392,8 +392,8 @@
             if (json.observation) {
                 var clone = document.getElementById('table_base2').content.cloneNode(true);
                 json.observation.locations.forEach(function (elm) {
-                    var arrival = new Date(gen_YYYY(elm.max_wave_arrival.month_num), elm.max_wave_arrival.month_num - 1, elm.max_wave_arrival.date, elm.max_wave_arrival.hour, elm.max_wave_arrival.minute)
-                    arrival = NormalizeDate("MM/DD hh:mm", ConvertJST(arrival)) + " JST"
+                    var arrival = new Date(Date.UTC(gen_YYYY(elm.max_wave_arrival.month_num), elm.max_wave_arrival.month_num - 1, elm.max_wave_arrival.date, elm.max_wave_arrival.hour, elm.max_wave_arrival.minute));
+                    arrival = NormalizeDate("MM/DD hh:mm", arrival) + " JST"
                     var ampl = elm.ampl.value
 
                     clone.querySelector("tbody").innerHTML += `<tr><td>${elm.location}</td><td aria-label="${coord_toString_narrator(elm.lat, elm.lng)}">${coord_toString(elm.lat, elm.lng)}</td><td>${arrival}</td><td aria-label="${ampl}メートル">${ampl}m</td></tr>`
@@ -501,7 +501,7 @@
                 var target_blocks = str.split("THIS BULLETIN IS FOR\n")[1].split("\n\n")[0].split("\n")
                 target_blocks.forEach(function (elm) {
                     var words = elm.trim().split(" ")
-                    var status = words[words.length - 1].replace("(", "").replace(")", "").trim()
+                    var status = words.at(-1).replace("(", "").replace(")", "").trim()
                     if (status != "ADDITION" && status != "CANCELLATION") status = ""
                     json.target_blocks.push({
                         block: elm.replace(/\(.*?\)/g, "").trim(),
@@ -560,7 +560,7 @@
                                 unit: "M",
                             }
                         }
-                        estimated.blocks[estimated.blocks.length - 1].locations.push(item)
+                        estimated.blocks.at(-1).locations.push(item)
                     }
                 })
 
@@ -609,18 +609,18 @@
                         })
                     } else {
                         var month_num = month_table.indexOf(elm.substring(53, 56))
-                        observation[observation.length - 1].max_wave_arrival = {
+                        observation.at(-1).max_wave_arrival = {
                             month: elm.substring(53, 56),
                             month_num: Number(month_num),
                             date: Number(elm.substring(50, 52)),
                             hour: Number(elm.substring(44, 46)),
                             minute: Number(elm.substring(46, 48))
                         }
-                        observation[observation.length - 1].ampl = {
+                        observation.at(-1).ampl = {
                             value: Number(elm.substring(58).replace("M", "")),
                             unit: "M"
                         }
-                        observation[observation.length - 1].remarks = "MAXIMUM TSUNAMI WAVE"
+                        observation.at(-1).remarks = "MAXIMUM TSUNAMI WAVE"
                     }
                 })
 
@@ -654,11 +654,6 @@
             }
         }
 
-        function ConvertJST(time) {
-            var copy = new Date(time);
-            copy.setHours(copy.getHours() + 9)
-            return copy;
-        }
 
         //年をまたぐ情報の場合を考慮し、発表年から年を類推
         function gen_YYYY(month) {

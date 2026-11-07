@@ -2,18 +2,16 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
 import { JSDOM } from "jsdom";
 import { NormalizeShindo, Boolean2, newDate2 } from "../src/main/constants.js";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const samplesDir = path.join(__dirname, "fixtures", "jmaxml");
+const samplesDir = path.join(import.meta.dirname, "fixtures", "jmaxml");
 
 const DomPsr = new (new JSDOM()).window.DOMParser();
 
 // JMA観測点マスター
 const pointsRaw = JSON.parse(
-  fs.readFileSync(path.join(__dirname, "../src/Resource/JMA_Int_Points.json"), "utf-8")
+  fs.readFileSync(path.join(import.meta.dirname, "../src/Resource/JMA_Int_Points.json"), "utf-8")
 );
 const JMA_Int_Points = {};
 pointsRaw.forEach((p) => {

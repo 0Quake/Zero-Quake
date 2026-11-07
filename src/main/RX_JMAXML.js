@@ -21,7 +21,7 @@ const OneDayInMS = 1000 * 60 * 60 * 24;
 var jmaXML_Fetched = [];
 
 export function Req_JMA_gaikyo() {
-  fetch(`https://www.data.jma.go.jp/svd/eqev/data/gaikyo/?_=${Number(new Date())}`)
+  fetch(`https://www.data.jma.go.jp/svd/eqev/data/gaikyo/?_=${Date.now()}`)
     .then((r) => {
       if (!r.ok) throw new Error(`HTTP Error: ${r.status}`);
       return r.text();
@@ -87,7 +87,7 @@ export function Req_JMA_gaikyo() {
 }
 
 export function Req_JMA_wepa() {
-  fetch(`https://www.jma.go.jp/bosai/pacifictsunami/data/list.json?_=${Number(new Date())}`)
+  fetch(`https://www.jma.go.jp/bosai/pacifictsunami/data/list.json?_=${Date.now()}`)
     .then((r) => {
       if (!r.ok) throw new Error(`HTTP Error: ${r.status}`);
       return r.json();

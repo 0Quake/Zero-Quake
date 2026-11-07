@@ -84,15 +84,13 @@ import {
 
 import electron from "electron";
 const { app, BrowserWindow, ipcMain, dialog, Menu } = electron;
-import { fileURLToPath } from "url";
 import path from "path";
 import Store from "electron-store";
 import { readFile } from "fs/promises";
 import fs from "fs";
 import os from "os";
 import { exec } from "child_process";
-var __dirname = path.dirname(fileURLToPath(import.meta.url));
-var packageJson = JSON.parse(await readFile(path.join(__dirname, "../package.json")));
+var packageJson = JSON.parse(await readFile(path.join(import.meta.dirname, "../package.json")));
 var package_ver = packageJson.version;
 
 electron.protocol.registerSchemesAsPrivileged([
@@ -523,7 +521,7 @@ electron.app.on("ready", () => {
   //タスクトレイアイコン
   tray = new electron.Tray(
     // eslint-disable-next-line no-undef
-    `${__dirname}/img/icon.${process.platform === "win32" ? "ico" : "png"}`
+    path.join(import.meta.dirname, `/img/icon.${process.platform === "win32" ? "ico" : "png"}`)
   );
   tray.setToolTip("Zero Quake");
   tray.setContextMenu(

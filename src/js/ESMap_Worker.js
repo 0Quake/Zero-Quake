@@ -61,14 +61,14 @@ function NormalizeShindo(str, responseType) {
 self.addEventListener("message", (event) => {
   if (event.data.action == "config") {
     config = event.data.config;
-    intColor = true;
+    const getIntColorArr = (str) => NormalizeShindo(str, 2)[0].match(/\d+/g);
     intColor = {
-      4: NormalizeShindo("4", 2)[0].replace("rgb(", "").replace(")", "").replace(" ", "").split(","),
-      "5-": NormalizeShindo("5-", 2)[0].replace("rgb(", "").replace(")", "").replace(" ", "").split(","),
-      "5+": NormalizeShindo("5+", 2)[0].replace("rgb(", "").replace(")", "").replace(" ", "").split(","),
-      "6-": NormalizeShindo("6-", 2)[0].replace("rgb(", "").replace(")", "").replace(" ", "").split(","),
-      "6+": NormalizeShindo("6+", 2)[0].replace("rgb(", "").replace(")", "").replace(" ", "").split(","),
-      7: NormalizeShindo("7", 2)[0].replace("rgb(", "").replace(")", "").replace(" ", "").split(","),
+      4: getIntColorArr("4"),
+      "5-": getIntColorArr("5-"),
+      "5+": getIntColorArr("5+"),
+      "6-": getIntColorArr("6-"),
+      "6+": getIntColorArr("6+"),
+      7: getIntColorArr("7"),
     };
   } else if (event.data.action == "ESMap_canvas") {
     ESMap = event.data.canvas;

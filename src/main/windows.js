@@ -2,10 +2,8 @@ import electron from "electron";
 const { app, BrowserWindow, dialog, shell, Notification } = electron;
 import path from "path";
 import fs from "fs";
-import { fileURLToPath } from "url";
 import { throttle } from "./constants.js";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export var MainWindow = null;
 export var SettingWindow = null;
@@ -87,9 +85,9 @@ export function CreateMainWindow() {
         title: "Zero Quake",
         minWidth: 650,
         minHeight: 400,
-        icon: path.join(__dirname, "../img/icon.ico"),
+        icon: path.join(import.meta.dirname, "../img/icon.ico"),
         webPreferences: {
-          preload: path.join(__dirname, "../js/preload.js"),
+          preload: path.join(import.meta.dirname, "../js/preload.js"),
           backgroundThrottling: false,
         },
         backgroundColor: "#222225",
@@ -244,7 +242,7 @@ export function Create_WorkerWindow() {
   if (WorkerWindow) WorkerWindow.close();
   WorkerWindow = new BrowserWindow({
     webPreferences: {
-      preload: path.join(__dirname, "../js/preload.js"),
+      preload: path.join(import.meta.dirname, "../js/preload.js"),
       backgroundThrottling: false,
     },
     show: false,
@@ -285,9 +283,9 @@ export function Create_SettingWindow(update) {
       center: true,
       minWidth: 650,
       minHeight: 400,
-      icon: path.join(__dirname, "../img/icon.ico"),
+      icon: path.join(import.meta.dirname, "../img/icon.ico"),
       webPreferences: {
-        preload: path.join(__dirname, "../js/preload.js"),
+        preload: path.join(import.meta.dirname, "../js/preload.js"),
       },
       backgroundColor: "#222225",
       alwaysOnTop: config.system.alwaysOnTop,
@@ -356,9 +354,9 @@ export function Create_TsunamiWindow() {
       title: "津波詳細情報 - Zero Quake",
       minWidth: 650,
       minHeight: 400,
-      icon: path.join(__dirname, "../img/icon.ico"),
+      icon: path.join(import.meta.dirname, "../img/icon.ico"),
       webPreferences: {
-        preload: path.join(__dirname, "../js/preload.js"),
+        preload: path.join(import.meta.dirname, "../js/preload.js"),
       },
       backgroundColor: "#222225",
       alwaysOnTop: config.system.alwaysOnTop,
@@ -406,9 +404,9 @@ export function Create_NankaiWindow(type) {
         title: "南海トラフ地震に関連する情報 - Zero Quake",
         minWidth: 650,
         minHeight: 400,
-        icon: path.join(__dirname, "../img/icon.ico"),
+        icon: path.join(import.meta.dirname, "../img/icon.ico"),
         webPreferences: {
-          preload: path.join(__dirname, "../js/preload.js"),
+          preload: path.join(import.meta.dirname, "../js/preload.js"),
         },
         backgroundColor: "#222225",
         alwaysOnTop: config.system.alwaysOnTop,
@@ -456,9 +454,9 @@ export function Create_WepaWindow(fname) {
       title: "国際津波関連情報 - Zero Quake",
       minWidth: 650,
       minHeight: 400,
-      icon: path.join(__dirname, "../img/icon.ico"),
+      icon: path.join(import.meta.dirname, "../img/icon.ico"),
       webPreferences: {
-        preload: path.join(__dirname, "../js/preload.js"),
+        preload: path.join(import.meta.dirname, "../js/preload.js"),
       },
       backgroundColor: "#222225",
       alwaysOnTop: config.system.alwaysOnTop,
@@ -503,9 +501,9 @@ export function Create_HokkaidoSanrikuWindow() {
       title: "北海道・三陸沖後発地震注意情報 - Zero Quake",
       minWidth: 650,
       minHeight: 400,
-      icon: path.join(__dirname, "../img/icon.ico"),
+      icon: path.join(import.meta.dirname, "../img/icon.ico"),
       webPreferences: {
-        preload: path.join(__dirname, "../js/preload.js"),
+        preload: path.join(import.meta.dirname, "../js/preload.js"),
       },
       backgroundColor: "#222225",
       alwaysOnTop: config.system.alwaysOnTop,
@@ -550,9 +548,9 @@ export function Create_KatsudoJokyoWindow() {
       title: "地震の活動状況等に関する情報 - Zero Quake",
       minWidth: 650,
       minHeight: 400,
-      icon: path.join(__dirname, "../img/icon.ico"),
+      icon: path.join(import.meta.dirname, "../img/icon.ico"),
       webPreferences: {
-        preload: path.join(__dirname, "../js/preload.js"),
+        preload: path.join(import.meta.dirname, "../js/preload.js"),
       },
       backgroundColor: "#222225",
       alwaysOnTop: config.system.alwaysOnTop,
@@ -610,9 +608,9 @@ export function EQInfo_createWindow(response, IS_WebURL) {
       title: "地震詳細情報 - Zero Quake",
       minWidth: 650,
       minHeight: 400,
-      icon: path.join(__dirname, "../img/icon.ico"),
+      icon: path.join(import.meta.dirname, "../img/icon.ico"),
       webPreferences: {
-        preload: path.join(__dirname, "../js/preload.js"),
+        preload: path.join(import.meta.dirname, "../js/preload.js"),
       },
       backgroundColor: IS_WebURL ? null : "#222225",
       alwaysOnTop: config.system.alwaysOnTop,
@@ -686,7 +684,7 @@ export function SystemNotification(message) {
   var Push = new Notification({
     title: "Zero Quake システム通知",
     body: message,
-    icon: path.join(__dirname, "../img/icon.ico"),
+    icon: path.join(import.meta.dirname, "../img/icon.ico"),
   });
 
   Push.show();

@@ -7,7 +7,6 @@ import {
   newDate2,
   IncludesDuplicates,
   ParseJSON,
-  ConvertJST,
   ConvertUTC,
 } from "../src/main/constants.js";
 
@@ -108,14 +107,11 @@ describe("constants.js - Unit Tests", () => {
     });
   });
 
-  describe("ConvertJST and ConvertUTC", () => {
-    it("should shift time by 9 hours accurately", () => {
-      const base = new Date("2026-01-01T00:00:00Z");
-      const jst = ConvertJST(base);
-      assert.equal(jst.getTime() - base.getTime(), 9 * 60 * 60 * 1000);
-
-      const utc = ConvertUTC(jst);
-      assert.equal(utc.getTime(), base.getTime());
+  describe("ConvertUTC", () => {
+    it("should shift time by -9 hours accurately", () => {
+      const base = new Date("2026-01-01T09:00:00Z");
+      const utc = ConvertUTC(base);
+      assert.equal(base.getTime() - utc.getTime(), 9 * 60 * 60 * 1000);
     });
   });
 

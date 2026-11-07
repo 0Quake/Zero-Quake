@@ -1,8 +1,6 @@
 import workerThreads from "worker_threads";
 import path from "path";
 import { readFile } from "fs/promises";
-import { fileURLToPath } from "url";
-var __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 var EEWNow = false; //EEW発令中かどうか
 var EQDetectID = 0; //独自の地震ID
@@ -70,7 +68,7 @@ function EQDetect(data, date, detect) {
         elm.detect2 = elm.detect && ((elm.pga >= threshold03 && ptData.UpCount > 0) || elm.shindo > thresholds.threshold04);
 
         //連続上昇回数（変化なし含む）
-        if (elm.pga >= ptData.SUMTmp[ptData.SUMTmp.length - 1]) ptData.UpCount++;
+        if (elm.pga >= ptData.SUMTmp.at(-1)) ptData.UpCount++;
         else ptData.UpCount = 0;
 
         if (ptData.detectCount == 0 && detect0) {
@@ -253,7 +251,7 @@ function GuessHypocenter(EQElm, data) {
   return [result, originTime];
 }
 
-var TTT_JMA2001 = JSON.parse(await readFile(path.join(__dirname, "../Resource/TimeTable_JMA2001.json")));
+var TTT_JMA2001 = JSON.parse(await readFile(path.join(import.meta.dirname, "../Resource/TimeTable_JMA2001.json")));
 function calcDifference(lat, lng, stations, data, originTime, dep) {
   var TimeTable = TTT_JMA2001.s[dep];
   var f_arrivalTime_min = Infinity;

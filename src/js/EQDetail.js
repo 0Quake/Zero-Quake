@@ -116,7 +116,7 @@ window.electronAPI.messageSend((event, request) => {
       axisDatas = request.axisData;
 
     if (request.eew) {
-      var eewItem = request.eew.data[request.eew.data.length - 1];
+      var eewItem = request.eew.data.at(-1);
 
       EEWData = {
         category: "EEW",
@@ -475,7 +475,7 @@ function Int_Area_Popup(e) {
     .setLngLat(e.features[0].geometry.coordinates)
     .addTo(map);
 
-  e.originalEvent.cancelBubble = true;
+  e.originalEvent?.stopPropagation();
 }
 
 function Int_Sta_Popup(e) {
@@ -496,7 +496,7 @@ function Int_Sta_Popup(e) {
     .setLngLat(e.features[0].geometry.coordinates)
     .addTo(map);
 
-  if (e.originalEvent) e.originalEvent.cancelBubble = true;
+  if (e.originalEvent) e.originalEvent?.stopPropagation();
 }
 function LgInt_Area_Popup(e) {
   var elm = e.features[0].properties;
@@ -515,7 +515,7 @@ function LgInt_Area_Popup(e) {
     .setLngLat(e.features[0].geometry.coordinates)
     .addTo(map);
 
-  e.originalEvent.cancelBubble = true;
+  e.originalEvent?.stopPropagation();
 }
 
 function LgInt_Sta_Popup(e) {
@@ -535,7 +535,7 @@ function LgInt_Sta_Popup(e) {
     .setLngLat(e.features[0].geometry.coordinates)
     .addTo(map);
 
-  if (e.originalEvent) e.originalEvent.cancelBubble = true;
+  if (e.originalEvent) e.originalEvent?.stopPropagation();
 }
 
 function roundedRect(ctx, x, y, width, height, radius) {
@@ -692,8 +692,8 @@ function overlaySelect(layerName, checked) {
     document.getElementById("legend2").style.display = over3_visiblity || over4_visiblity ? "inline-block" : "none";
   }
   var selectedLayer = [];
-  document.getElementsByName("overlaySelect").forEach(function (elm) {
-    if (elm.checked) selectedLayer.push(elm.value);
+  document.querySelectorAll('input[name="overlaySelect"]:checked').forEach(function (elm) {
+    selectedLayer.push(elm.value);
   });
 
   config.data.overlay = selectedLayer;
@@ -1702,7 +1702,7 @@ function add_Area_info(name, maxInt) {
   newDiv2.setAttribute("role", "group");
   newDiv.setAttribute("aria-controls", `WrapLevel2_${name}`);
 
-  wrap[wrap.length - 1].append(newDiv, newDiv2);
+  wrap.at(-1).append(newDiv, newDiv2);
 
   if (name == config.home.Section) {
     var newDiv3 = document.createElement("div");
@@ -1714,7 +1714,7 @@ function add_Area_info(name, maxInt) {
     newDiv3.setAttribute("aria-label", `${homeName}エリアの ${name}、震度${NormalizeShindo(maxInt, 1)}`);
     newDiv3.setAttribute("title", `細分区域（${homeName}周辺）：${name}`);
 
-    removeChild(document.getElementById("homeShindo"));
+    document.getElementById("homeShindo")?.replaceChildren();
     document.getElementById("homeShindoWrap").style.display = "block";
     document.getElementById("homeShindo").appendChild(newDiv3);
   }
@@ -1801,7 +1801,7 @@ function add_City_info(name, maxInt) {
     newDiv2.setAttribute("role", "group");
     newDiv.setAttribute("aria-controls", `WrapLevel2_${name}`);
   }
-  wrap2[wrap2.length - 1].append(newDiv, newDiv2);
+  wrap2.at(-1).append(newDiv, newDiv2);
 }
 //観測点ごとの情報描画（リスト・地図プロット）
 function add_IntensityStation_info(lat, lng, name, int) {
@@ -1844,7 +1844,7 @@ function add_IntensityStation_info(lat, lng, name, int) {
     if (icon) Int_Sta_Popup({ features: [icon] });
   });
 
-  wrap3[wrap3.length - 1]?.append(newDiv);
+  wrap3.at(-1)?.append(newDiv);
 }
 
 var WaitingToDraw = null;
@@ -1855,7 +1855,7 @@ const DrawIntensity = throttle(function () {
   var has_StaShindo = false;
   intensityIcons = [];
   intensityIcons_st = [];
-  removeChild(document.getElementById("Shindo"));
+  document.getElementById("Shindo")?.replaceChildren();
   document.getElementById("ShindoWrap").style.display = "inline-block";
   document.getElementById("Shindo").style.display = "block";
   mapFillReset();
@@ -1910,7 +1910,7 @@ function DrawLgIntensity(data) {
   if (!data?.length) return;
   LgIntIcons = [];
   LgIntIcons_st = [];
-  removeChild(document.getElementById("LngInt"));
+  document.getElementById("LngInt")?.replaceChildren();
   document.getElementById("ShindoWrap").style.display = "inline-block";
   document.getElementById("lngintListWrap").style.display = "block";
   mapFillResetL();
@@ -2002,7 +2002,7 @@ function add_Area_infoL(name, maxInt) {
   newDiv2.setAttribute("role", "group");
   newDiv.setAttribute("aria-controls", `WrapLevel2L_${name}`);
 
-  wrap[wrap.length - 1].append(newDiv, newDiv2);
+  wrap.at(-1).append(newDiv, newDiv2);
 
   if (name == config.home.Section) {
     var newDiv3 = document.createElement("div");
@@ -2013,7 +2013,7 @@ function add_Area_infoL(name, maxInt) {
     newDiv3.setAttribute("aria-label", `${homeName}エリアの ${name}、長周期地震動階級${maxInt} `);
     newDiv3.setAttribute("title", `細分区域（${homeName} 周辺）：${name} `);
 
-    removeChild(document.getElementById("homeShindoL"));
+    document.getElementById("homeShindoL")?.replaceChildren();
     document.getElementById("homeShindoWrap").style.display = "block";
     document.getElementById("homeShindoL").appendChild(newDiv3);
   }
@@ -2066,7 +2066,7 @@ function add_IntensityStation_infoL(lat, lng, name, int) {
   newDiv.setAttribute("title", `観測点：${name} \nクリックで地図を観測点に移動`);
   newDiv.setAttribute("aria-expanded", "false");
   newDiv.setAttribute("role", "treeitem");
-  wrap3[wrap3.length - 1]?.append(newDiv);
+  wrap3.at(-1)?.append(newDiv);
 
   if (lat !== null && lng !== null) {
     var lgint_num = Number(int) || 0;
@@ -2477,11 +2477,11 @@ function Boolean2(elm) {
 
 function parse_LatLngDepth(str) {
   try {
-    if (str) {
-      return String(str).replaceAll("+", "｜+").replaceAll("-", "｜-").replaceAll("/", "").split("｜");
-    }
-  } catch { }
-  return [];
+    const matches = String(str).match(/[+-]\d+(?:\.\d+)?/g);
+    return matches ? ["", ...matches] : [];
+  } catch {
+    return [];
+  }
 }
 function throttle(cb, delay = 1000) {
   let shouldWait = false

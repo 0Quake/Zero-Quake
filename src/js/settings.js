@@ -374,11 +374,7 @@ function apply() {
 
   config.notice.bell_volume = master_volume;
 
-  let VoiceEngine_Elm = document.getElementsByName("VoiceEngine");
-  for (let i = 0; i < VoiceEngine_Elm.length; i++) {
-    if (VoiceEngine_Elm.item(i).checked) config.notice.voice_parameter.engine = VoiceEngine_Elm.item(i).value;
-  }
-
+  config.notice.voice_parameter.engine = document.querySelector('input[name="VoiceEngine"]:checked')?.value;
   config.color.Shindo = intColor[document.getElementById("shindoColor").value].Shindo;
   config.color.LgInt = intColor[document.getElementById("shindoColor").value].LgInt;
 
@@ -923,12 +919,9 @@ document.getElementById("speak_test").addEventListener("click", function () {
 });
 function speak(text, engine) {
   if (!engine) {
-    let VoiceEngine_Elm = document.getElementsByName("VoiceEngine");
-    for (let i = 0; i < VoiceEngine_Elm.length; i++) {
-      if (VoiceEngine_Elm.item(i).checked)
-        engine = VoiceEngine_Elm.item(i).value;
-    }
+    engine = document.querySelector('input[name="VoiceEngine"]:checked')?.value;
   }
+
   if (engine == "Boyomichan") {
     var port = document.getElementById("Boyomi_Port").value || config.notice.voice_parameter.Boyomi_Port || 50080;
     var host = `http://localhost:${port}`;

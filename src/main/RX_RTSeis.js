@@ -1,5 +1,4 @@
 import path from "path";
-import { fileURLToPath } from "url";
 import workerThreads from "worker_threads";
 import electron from "electron";
 const { net } = electron;
@@ -10,13 +9,12 @@ const DomPsr = new (new JSDOM()).window.DOMParser();
 import zlib from "zlib";
 import { EventSource } from 'eventsource';
 
-import { throttle, NormalizeDate, KmoniColorTable, Boolean2, FERegion, ConvertJST, ConvertUTC, newDate2, ParseJSON } from "./constants.js";
+import { throttle, NormalizeDate, KmoniColorTable, Boolean2, FERegion, ConvertUTC, newDate2, ParseJSON } from "./constants.js";
 import { messageToMainWindow, messageToWorkerWindow, PlayAudio, CreateMainWindow } from "./windows.js";
 import { EarlyEst_Marge, EEW_Active } from "./PROC_EEW.js";
 
 export var worker = null;
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 import {
   config,
@@ -124,7 +122,7 @@ function formatTremData(json) {
 export var TremRts_sta = {};
 export var Req_TremRts_sta = throttle(function () {
   fetch(
-    `https://static.core.exptech.dev/resource/station?_=${Number(new Date())}`,
+    `https://static.core.exptech.dev/resource/station?_=${Date.now()}`,
     { signal: AbortSignal.timeout(4000) }
   ).then((r) => {
     if (!r.ok) throw new Error(`HTTP Error: ${r.status}`);
@@ -167,7 +165,7 @@ function sort_by_dist_TIDE(data) {
 export var JMATide_sta;
 export function Req_JMATide_sta() {
   fetch(
-    `https://www.jma.go.jp/bosai/tidelevel/const/tide_area.json?_=${Number(new Date())}`,
+    `https://www.jma.go.jp/bosai/tidelevel/const/tide_area.json?_=${Date.now()}`,
     { signal: AbortSignal.timeout(4000) }
   ).then((r) => {
     if (!r.ok) throw new Error(`HTTP Error: ${r.status}`);
@@ -254,7 +252,7 @@ export function Req_JMATide() {
               break;
             default:
             case "latest":
-              height = json.tide[json.tide.length - 1]
+              height = json.tide.at(-1);
               break;
           }
           obsdata.height = height;
@@ -308,13 +306,13 @@ export function Req_EarlyEst() {
           alertflg: "EarlyEst",
           EventID: Number(String(elm.getAttribute("publicID")).slice(-12)) || 1,
           serial: Number((elm.querySelector("origin quality")?.getElementsByTagName("ee:report_count")?.[0]?.textContent) || 0) + 1,
-          report_time: ConvertJST(newDate2(elm.querySelector("creationInfo creationTime")?.textContent)) || null,
+          report_time: newDate2(elm.querySelector("creationInfo creationTime")?.textContent + "Z") || null,//末尾にZを付けてUTCとして扱う
           magnitude: Number(elm.querySelector("magnitude mag value")?.textContent) || null,
           depth: (Number(elm.querySelector("origin depth value")?.textContent) / 1000) || null,
           latitude: latitude,
           longitude: longitude,
           region_name: FECode.properties.nameJA,
-          origin_time: ConvertJST(newDate2(elm.querySelector("origin time value")?.textContent)) || null,
+          origin_time: newDate2(elm.querySelector("origin time value")?.textContent + "Z") || null,
           source: "EarlyEst",
         };
         EarlyEst_Marge(data);
@@ -327,7 +325,7 @@ export function Req_EarlyEst() {
 }
 
 export function createWorker() {
-  worker = new workerThreads.Worker(path.join(__dirname, "../js/EQDetectWorker.js"));
+  worker = new workerThreads.Worker(path.join(import.meta.dirname, "../js/EQDetectWorker.js"));
   worker.on("message", (message) => {
     switch (message.action) {
       case "EQDetectUpdate":
@@ -458,7 +456,7 @@ export function Req_SNet() {
   if (!net.online) return UpdateStatus("msilImg", "Error");
 
   fetch(
-    `https://www.msil.go.jp/data/tiles/smoni/targetTimes.json?${Number(new Date())}`
+    `https://www.msil.go.jp/data/tiles/smoni/targetTimes.json?${Date.now()}`
     , { signal: AbortSignal.timeout(4000) }
   ).then((r) => {
     if (!r.ok) throw new Error(`HTTP Error: ${r.status}`);
@@ -497,7 +495,7 @@ export function Req_SNet() {
           UpdateStatus("msilImg", "Error");
         });
       }
-      var unique_id = String(Number(new Date())) + String(Math.floor(Math.random() * 100));
+      var unique_id = crypto.randomUUID();
       Req_SNet_core(11, unique_id);
       Req_SNet_core(12, unique_id);
       Msil_LastRecv = basetime;
@@ -512,7 +510,7 @@ export function Req_SNet() {
 export var Seisjs_sta = {};
 export function Req_Seisjs_sta() {
   fetch(
-    `https://api.wolfx.jp/seis_list.json?_=${Number(new Date())}`
+    `https://api.wolfx.jp/seis_list.json?_=${Date.now()}`
     , { signal: AbortSignal.timeout(4000) }
   ).then((r) => {
     if (!r.ok) throw new Error(`HTTP Error: ${r.status}`);
@@ -645,7 +643,7 @@ export async function SetKmoniOffset(func) {
         var reqTime = new Date();
 
         fetch(
-          `http://www.kmoni.bosai.go.jp/webservice/server/pros/latest.json?_=${Number(new Date())}`
+          `http://www.kmoni.bosai.go.jp/webservice/server/pros/latest.json?_=${Date.now()}`
           , { signal: AbortSignal.timeout(4000) }
         ).then((r) => {
           if (!r.ok) throw new Error(`HTTP Error: ${r.status}`);

@@ -1,7 +1,6 @@
 import electron from "electron";
 const { powerSaveBlocker, Notification } = electron;
 import path from "path";
-import { fileURLToPath } from "url";
 import * as turf from "@turf/turf";
 
 import { calcInt, calc_arTime, getClosestNum, } from "./CALC_PSWave.js";
@@ -9,7 +8,6 @@ import { TTT_JMA2001, TTT_AK135, JMA_Int_Points, NormalizeShindo, NormalizeDate,
 import { MainWindow, messageToMainWindow, PlayAudio, speak, CreateMainWindow } from "./windows.js";
 import { MargeEQInfo } from "./PROC_EQInfo.js";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 import { config, Replay, UpdateStatus } from "./state.js";
 
@@ -220,18 +218,15 @@ export function DetectEEW(type, json) {
       origin_timeTmp = newDate2(json.earthquake?.originTime);
       conditionTmp = json.earthquake?.condition == "仮定震源要素";
 
-      var EBIData = [];
-      (json.areas || []).forEach(function (elm) {
-        EBIData.push({
-          Code: null,
-          Name: elm.name,
-          Alert: elm.kindCode == 10 || elm.kindCode == 11 || elm.kindCode == 19,
-          IntTo: NormalizeShindo(elm.scaleTo),
-          IntFrom: NormalizeShindo(elm.scaleFrom),
-          ArrivalTime: new Date(elm.arrivalTime),
-          Arrived: elm.kindCode == 11,
-        });
-      });
+      var EBIData = (json.areas || []).map(elm => ({
+        Code: null,
+        Name: elm.name,
+        Alert: elm.kindCode == 10 || elm.kindCode == 11 || elm.kindCode == 19,
+        IntTo: NormalizeShindo(elm.scaleTo),
+        IntFrom: NormalizeShindo(elm.scaleFrom),
+        ArrivalTime: new Date(elm.arrivalTime),
+        Arrived: elm.kindCode == 11,
+      }));
       if (!json.issue) return;
       var EEWdata = {
         alertflg: "警報",
@@ -599,7 +594,7 @@ export function EEW_Alert(data, update) {
         var EEWNotification = new Notification({
           title: `${data.is_training ? "【訓練報】 " : ""}緊急地震速報 ${data.alertflg} #${data.serial}`,
           body: `${data.region_name}\n予想最大震度：${NormalizeShindo(data.maxInt, 1)} ／ M${data.magnitude ? data.magnitude : "不明"} ／ 深さ：${data.depth ? `${data.depth}km` : "不明"}${data.userIntensity ? `\n現在地の予想震度：${NormalizeShindo(data.userIntensity, 1)}` : ""}`,
-          icon: path.join(__dirname, "../img/icon.ico"),
+          icon: path.join(import.meta.dirname, "../img/icon.ico"),
         });
         EEWNotification.show();
         EEWNotification.on("click", CreateMainWindow);
@@ -683,7 +678,7 @@ export function EarlyEst_Alert(data, first) {
       var EEWNotification = new Notification({
         title: `Early-Est 地震情報 #${data.serial}`,
         body: `${data.region_name}\n M${data.magnitude}  深さ：${data.depth}km`,
-        icon: path.join(__dirname, "../img/icon.ico"),
+        icon: path.join(import.meta.dirname, "../img/icon.ico"),
       });
       EEWNotification.show();
       EEWNotification.on("click", function () {

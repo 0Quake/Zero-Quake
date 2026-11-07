@@ -1,10 +1,8 @@
 import workerThreads from "worker_threads";
 import path from "path";
-import { fileURLToPath } from "url";
 import { readFile } from "fs/promises";
 import { distance } from "@turf/turf";
 
-var __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 workerThreads.parentPort.on("message", (message) => {
   switch (message.action) {
@@ -31,7 +29,7 @@ const events = new Map();
 const stationStates = new Map();//観測点ごとのワーカー側保持データ
 //データフレームなどの初期化
 async function init() {
-  var Knet_PointsJson = JSON.parse(await readFile(path.join(__dirname, "../Resource/Knet_Points.json")));
+  var Knet_PointsJson = JSON.parse(await readFile(path.join(import.meta.dirname, "../Resource/Knet_Points.json")));
   Knet_PointsJson.forEach((elm) => {
     if (elm.IsSuspended) return;
     stationStates.set(elm.Code, {

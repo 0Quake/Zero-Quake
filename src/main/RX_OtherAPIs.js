@@ -40,17 +40,15 @@ export var checkUpdate = throttle(async function (userAction) {
       }
     };
 
-    fetch(`https://api.github.com/repos/0quake/Zero-Quake/releases?_=${Number(new Date())}`)
+    fetch(`https://api.github.com/repos/0quake/Zero-Quake/releases?_=${Date.now()}`)
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP Error: ${r.status}`);
         return r.json();
       }).then((json) => {
         if (!Array.isArray(json) || !json[0]) throw new Error("GitHub Releases APIが空または不正なデータを返しました。");
-        var latest_verTmp = String(json[0].tag_name).replace("v", "");
+        var latest_ver = String(json[0].tag_name).replace("v", "");
+        var current_ver = packageJson.version;
 
-        var current_verTmp = packageJson.version;
-        var latest_v = String(latest_verTmp).split(".").map(Number);
-        var current_v = String(current_verTmp).split(".").map(Number);
         var dl_page = json[0].html_url;
         var update_detail = json[0].body;
         downloadURL = json[0].assets[0];
@@ -65,25 +63,17 @@ export var checkUpdate = throttle(async function (userAction) {
             });
           }
         }
-        var update_available = false;
-        if (latest_v[0] > current_v[0]) {
-          update_available = true;
-        } else if (latest_v[0] == current_v[0]) {
-          if (latest_v[1] > current_v[1]) {
-            update_available = true;
-          } else if (latest_v[1] == current_v[1]) {
-            if (latest_v[2] > current_v[2]) {
-              update_available = true;
-            }
-          }
-        }
+
+
+        const collator = new Intl.Collator(undefined, { numeric: true });
+        var update_available = collator.compare(current_ver, latest_ver) < 0;
 
         if (update_available && !userAction) {
           var options4 = {
             type: "question",
             title: "アプリケーションの更新",
             message: "Zero Quake で更新が利用可能です。",
-            detail: `v.${current_verTmp} > v.${latest_verTmp}\n操作を選択してください。`,
+            detail: `v.${current_ver} > v.${latest_ver}\n操作を選択してください。`,
             buttons: ["後で確認", "詳細を確認"],
             noLink: true,
           };
@@ -98,8 +88,8 @@ export var checkUpdate = throttle(async function (userAction) {
         update_data = {
           check_error: false,
           check_date: new Date(),
-          latest_version: latest_verTmp,
-          current_version: current_verTmp,
+          latest_version: latest_ver,
+          current_version: current_ver,
           update_available: update_available,
           dl_page: dl_page,
           update_detail: update_detail,

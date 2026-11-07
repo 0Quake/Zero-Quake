@@ -322,12 +322,6 @@ function NormalizeDate(type, date) {
   }
 }
 
-//子要素一括削除
-//eslint-disable-next-line
-function removeChild(element) {
-  element?.replaceChildren();
-}
-
 //緯度経度フォーマット
 //eslint-disable-next-line
 function latitudeConvert(data) {
@@ -366,7 +360,7 @@ window.addEventListener("keydown", (event) => {
   else if (event.key == "ArrowLeft") moveFocus(-1, event);
   else if ((event.key == "Enter" || event.key == " ") && document.activeElement) {
     var tagname = document.activeElement.tagName;
-    if (tagname == "DIV" || tagname == "SPAN") document.activeElement.dispatchEvent(new PointerEvent("click"));
+    if (tagname == "DIV" || tagname == "SPAN") document.activeElement.click();
   }
 });
 function Boolean2(elm) {
