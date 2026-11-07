@@ -116,7 +116,7 @@ window.electronAPI.messageSend((event, request) => {
       axisDatas = request.axisData;
 
     if (request.eew) {
-      var eewItem = request.eew.data.at(-1);
+      var eewItem = request.eew.data[request.eew.data.length - 1];
 
       EEWData = {
         category: "EEW",
@@ -1702,7 +1702,7 @@ function add_Area_info(name, maxInt) {
   newDiv2.setAttribute("role", "group");
   newDiv.setAttribute("aria-controls", `WrapLevel2_${name}`);
 
-  wrap.at(-1).append(newDiv, newDiv2);
+  wrap[wrap.length - 1].append(newDiv, newDiv2);
 
   if (name == config.home.Section) {
     var newDiv3 = document.createElement("div");
@@ -1801,7 +1801,7 @@ function add_City_info(name, maxInt) {
     newDiv2.setAttribute("role", "group");
     newDiv.setAttribute("aria-controls", `WrapLevel2_${name}`);
   }
-  wrap2.at(-1).append(newDiv, newDiv2);
+  wrap2[wrap2.length - 1].append(newDiv, newDiv2);
 }
 //観測点ごとの情報描画（リスト・地図プロット）
 function add_IntensityStation_info(lat, lng, name, int) {
@@ -1844,7 +1844,7 @@ function add_IntensityStation_info(lat, lng, name, int) {
     if (icon) Int_Sta_Popup({ features: [icon] });
   });
 
-  wrap3.at(-1)?.append(newDiv);
+  wrap3[wrap3.length - 1].append(newDiv);
 }
 
 var WaitingToDraw = null;
@@ -2002,7 +2002,7 @@ function add_Area_infoL(name, maxInt) {
   newDiv2.setAttribute("role", "group");
   newDiv.setAttribute("aria-controls", `WrapLevel2L_${name}`);
 
-  wrap.at(-1).append(newDiv, newDiv2);
+  wrap[wrap.length - 1].append(newDiv, newDiv2);
 
   if (name == config.home.Section) {
     var newDiv3 = document.createElement("div");
@@ -2066,7 +2066,7 @@ function add_IntensityStation_infoL(lat, lng, name, int) {
   newDiv.setAttribute("title", `観測点：${name} \nクリックで地図を観測点に移動`);
   newDiv.setAttribute("aria-expanded", "false");
   newDiv.setAttribute("role", "treeitem");
-  wrap3.at(-1)?.append(newDiv);
+  wrap3[wrap3.length - 1]?.append(newDiv);
 
   if (lat !== null && lng !== null) {
     var lgint_num = Number(int) || 0;
