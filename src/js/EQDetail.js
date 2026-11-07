@@ -2199,11 +2199,11 @@ function ConvertEQInfo(data) {
 
   //長周期のデータを先に追加し、長周期以外を後から追加することで、長周期以外のものを優先
   EQInfoData.filter((elm) => !elm.cancel && elm.category == "長周期地震動に関する観測情報").forEach(function (elm) {
-    if (elm.IntData !== undefined) EQInfoTmp.IntData = elm.IntData;
+    if (elm.IntData?.length) EQInfoTmp.IntData = elm.IntData;
   });
 
   EQInfoData.filter((elm) => !elm.cancel && elm.category !== "長周期地震動に関する観測情報").forEach(function (elm) {
-    if (elm.IntData !== undefined) EQInfoTmp.IntData = elm.IntData;
+    if (elm.IntData?.length) EQInfoTmp.IntData = elm.IntData;
   });
 
   EQInfoTmp.cancel = !EQInfoData.find(function (elm) {
