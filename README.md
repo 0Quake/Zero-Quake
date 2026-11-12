@@ -154,4 +154,4 @@
 ## OSSライセンス
 ソースコードは [GNU General Public License v2.0](./LICENSE.md) の下で公開されています。  
 名称・ロゴはGPL-2.0 の対象外であり、知的財産権で保護されています。派生著作物を制作する際は、[ブランド規約](BRANDING.md)を遵守してください。  
-[サードパーティプログラムのライセンス](../THIRD-PARTY-LICENSES.txt)
+[サードパーティプログラムのライセンス](./THIRD-PARTY-LICENSES.txt)

@@ -3,13 +3,14 @@
 
 <head>
     <meta charset="UTF-8">
+    <base href="../">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>設定 - Zero Quake</title>
-    <link rel="stylesheet" href="./css/style.css">
-    <link rel='stylesheet' href='../node_modules/maplibre-gl/dist/maplibre-gl.css'>
-    <link rel="stylesheet" href="./css/map.css">
-    <link rel="stylesheet" href="./css/setting.css">
+    <link rel="stylesheet" href="src/css/style.css">
+    <link rel='stylesheet' href='node_modules/maplibre-gl/dist/maplibre-gl.css'>
+    <link rel="stylesheet" href="src/css/map.css">
+    <link rel="stylesheet" href="src/css/setting.css">
     <meta name="color-scheme" content="dark">
     <style>
         body {
@@ -20,7 +21,7 @@
 
 <body>
     <div id="splash">
-        <img src="./img/icon.svg" width="256" height="256" alt="Zero Quakeロゴ" aria-hidden="true">
+        <img src="src/img/icon.svg" width="256" height="256" alt="Zero Quakeロゴ" aria-hidden="true">
         <div id="loading-wrap" aria-label="読み込み中"></div>
     </div>
 
@@ -450,17 +451,17 @@
                 </div>
                 <div id="tab1_content2" class="tabcontent" role="tabpanel" aria-labelledby="tab1_menu2">
 
-                    <h2 id="softName"><a href="https://0quake.github.io/ZeroQuake_Website/"><img src="./img/icon.svg">Zero Quake v<span id="softVersion">取得中</span></a></h2>
+                    <h2 id="softName"><a href="https://0quake.github.io/ZeroQuake_Website/"><img src="src/img/icon.svg">Zero Quake v<span id="softVersion">取得中</span></a></h2>
 
                     <div id="smallWrap">
                         <small>&copy;2022-2026 Benidate</small>
                         <div id="flex_wrap">
                             <div>
-                                <p><a href="../LICENSE.md" target="_blank">GNU General Public License v2.0</a></p>
+                                <p><a href="LICENSE.md" target="_blank">GNU General Public License v2.0</a></p>
                                 <p>このソフトウェアは無保証です。</p>
                             </div>
                             <div>
-                                <img src="./img/UDFONT.svg" id="ud_logo">
+                                <img src="src/img/UDFONT.svg" id="ud_logo">
                             </div>
                         </div>
                     </div>
@@ -645,9 +646,9 @@
                         </li>
                     </ul>
                     <h2 id="ossライセンス">OSSライセンス</h2>
-                    <p>ソースコードは <a href="./LICENSE.html">GNU General Public License v2.0</a> の下で公開されています。<br>
-                        名称・ロゴはGPL-2.0 の対象外であり、知的財産権で保護されています。派生著作物を制作する際は、<a href="BRANDING.html">ブランド規約</a>を遵守してください。<br>
-                        <a href="../THIRD-PARTY-LICENSES.txt">サードパーティプログラムのライセンス</a>
+                    <p>ソースコードは <a href="LICENSE.md" target="_blank">GNU General Public License v2.0</a> の下で公開されています。<br>
+                        名称・ロゴはGPL-2.0 の対象外であり、知的財産権で保護されています。派生著作物を制作する際は、<a href="BRANDING.md" target="_blank">ブランド規約</a>を遵守してください。<br>
+                        <a href="THIRD-PARTY-LICENSES.txt" target="_blank">サードパーティプログラムのライセンス</a>
                     </p>
 
 
@@ -1739,14 +1740,14 @@
     </main>
 
     <script type="module">
-        import * as maplibregl from '../node_modules/maplibre-gl/dist/maplibre-gl.mjs';
-        maplibregl.setWorkerUrl('../node_modules/maplibre-gl/dist/maplibre-gl-worker.mjs');
+        import * as maplibregl from './node_modules/maplibre-gl/dist/maplibre-gl.mjs';
+        maplibregl.setWorkerUrl('node_modules/maplibre-gl/dist/maplibre-gl-worker.mjs');
         window.maplibregl = maplibregl;
     </script>
-    <script src="./js/UIcommon.js"></script>
-    <script src="../node_modules/@turf/turf/turf.min.js"></script>
-    <script src="../node_modules//pmtiles/dist/pmtiles.js"></script>
-    <script src="./js/settings.js"></script>
+    <script src="src/js/UIcommon.js"></script>
+    <script src="node_modules/@turf/turf/turf.min.js"></script>
+    <script src="node_modules/pmtiles/dist/pmtiles.js"></script>
+    <script src="src/js/settings.js"></script>
 </body>
 
 </html>

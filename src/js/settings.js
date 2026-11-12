@@ -790,7 +790,7 @@ function mapInit() {
   });
 
   const img = document.createElement("img");
-  img.src = "./img/homePin.svg";
+  img.src = "src/img/homePin.svg";
   img.classList.add("homeIcon");
 
   markerElm = new maplibregl.Marker({ element: img })
