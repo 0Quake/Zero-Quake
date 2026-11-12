@@ -1,3 +1,9 @@
+Zero Quake Copyright (C) 2022 Benidate
+
+本ソフトウェアのソースコードは、以下の GNU General Public License Version 2 が適用されます。ただし、ソフトウェアの名称「Zero Quake」、ロゴ等のブランドアセットには本ライセンスは適用されません。 これらの使用条件については BRANDING.md を参照してください。
+
+******************
+
                     GNU GENERAL PUBLIC LICENSE
                        Version 2, June 1991
 
