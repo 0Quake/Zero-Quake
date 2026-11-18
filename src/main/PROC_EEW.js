@@ -267,9 +267,10 @@ export function EEW_Marge(data) {
 
     //５分以上前の地震／未来の地震（リプレイ時）を除外 ただし既に表示中の地震の更新報および取消報は通す
     if (!data.is_cancel && data.origin_time) {
-      var pastTime = new Date() - Replay - data.origin_time;
+      var originMs = Number(new Date(data.origin_time));
+      var pastTime = (Date.now() - Replay) - originMs;
       var showing = Boolean(EEW_Active.find((elm) => elm.EventID == data.EventID));
-      if (!showing && (pastTime > 300000 || pastTime < 0)) return;
+      if (!showing && (Number.isNaN(originMs) || pastTime > 300000 || pastTime < 0)) return;
     }
 
     if (data.source == "simulation") {
@@ -476,8 +477,9 @@ export function EarlyEst_Marge(data) {
     if (!data) return;
     if (!data.origin_time || !data.latitude || !data.longitude) return;
 
-    var pastTime = new Date() - Replay - data.origin_time;
-    if (pastTime > 300000 || pastTime < 0) return;
+    var OriginMs = Number(new Date(data.origin_time));
+    var pastTime = (Date.now() - Replay) - OriginMs;
+    if (Number.isNaN(OriginMs) || pastTime > 300000 || pastTime < 0) return;
 
     data.distance = turf.distance([data.longitude, data.latitude], [config.home.longitude, config.home.latitude]);
 

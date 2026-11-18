@@ -192,10 +192,13 @@ export function CreateMainWindow() {
         .on('resize', savePosition)
         .on('move', savePosition);
 
+      let mainUnresponsiveTimer = null;
       MainWindow.on("unresponsive", () => {
         MainWindow.responsive = true;
-        setTimeout(function () {
-          if (MainWindow.responsive) {
+        if (mainUnresponsiveTimer) clearTimeout(mainUnresponsiveTimer);
+        mainUnresponsiveTimer = setTimeout(function () {
+          mainUnresponsiveTimer = null;
+          if (MainWindow && !MainWindow.isDestroyed() && MainWindow.responsive) {
             dialog.showMessageBox(MainWindow, unresponsiveMsg).then(function (result) {
               switch (result.response) {
                 case 0:
@@ -211,6 +214,10 @@ export function CreateMainWindow() {
         }, 5000);
       }).on("responsive", () => {
         MainWindow.responsive = false;
+        if (mainUnresponsiveTimer) {
+          clearTimeout(mainUnresponsiveTimer);
+          mainUnresponsiveTimer = null;
+        }
       });
 
       MainWindow.on("focus", () => {
@@ -239,7 +246,17 @@ export function CreateMainWindow() {
   }
 }
 //ワーカーウィンドウ表示処理
+let workerRecreateTimer = null;
+let workerUnresponsiveTimer = null;
 export function Create_WorkerWindow() {
+  if (workerRecreateTimer) {
+    clearTimeout(workerRecreateTimer);
+    workerRecreateTimer = null;
+  }
+  if (workerUnresponsiveTimer) {
+    clearTimeout(workerUnresponsiveTimer);
+    workerUnresponsiveTimer = null;
+  }
   if (WorkerWindow) WorkerWindow.close();
   WorkerWindow = new BrowserWindow({
     webPreferences: {
@@ -250,7 +267,8 @@ export function Create_WorkerWindow() {
   });
   WorkerWindow.on("close", () => {
     WorkerWindow = null;
-    setTimeout(Create_WorkerWindow, 2000)
+    if (workerRecreateTimer) clearTimeout(workerRecreateTimer);
+    workerRecreateTimer = setTimeout(Create_WorkerWindow, 2000);
   });
   WorkerWindow.webContents.on("did-finish-load", () => {
     WorkerWindow.webContents.send("message2", {
@@ -261,12 +279,18 @@ export function Create_WorkerWindow() {
   WorkerWindow.loadFile("src/WorkerWindow.html");
   WorkerWindow.on("unresponsive", () => {
     WorkerWindow.responsive = true;
-    setTimeout(function () {
-      if (WorkerWindow.responsive) Create_WorkerWindow();
+    if (workerUnresponsiveTimer) clearTimeout(workerUnresponsiveTimer);
+    workerUnresponsiveTimer = setTimeout(function () {
+      workerUnresponsiveTimer = null;
+      if (WorkerWindow && !WorkerWindow.isDestroyed() && WorkerWindow.responsive) Create_WorkerWindow();
     }, 5000);
   });
   WorkerWindow.on("responsive", () => {
     WorkerWindow.responsive = false;
+    if (workerUnresponsiveTimer) {
+      clearTimeout(workerUnresponsiveTimer);
+      workerUnresponsiveTimer = null;
+    }
   });
 }
 //設定ウィンドウ表示処理
@@ -590,8 +614,6 @@ export function messageToMainWindow(message) {
 export var EQI_Window = {};
 export function handleUrlOpen(e, url) {
   if (url.startsWith("http")) {
-    setTimeout(function () {
-    }, 5)
     e.preventDefault();
     shell.openExternal(url);
   }

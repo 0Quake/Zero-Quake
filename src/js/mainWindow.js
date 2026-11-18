@@ -345,9 +345,12 @@ function EEW_AlertUpdate(data) {
       if (EEWItem) EEWItem.remove();
     } else if (elm.is_cancel) {
       epiCenterClear(elm.EventID);
-      setTimeout(function () {
-        if (EEWItem) EEWItem.remove();
-      }, 10000);
+      if (!EEWItem?.dataset?.removing) {
+        if (EEWItem) EEWItem.dataset.removing = true;
+        setTimeout(function () {
+          if (EEWItem) EEWItem.remove();
+        }, 10000);
+      }
     }
     return stillEQ;
   });
@@ -2080,6 +2083,7 @@ function tsunamiDataUpdate(data) {
     document.getElementById("tsunamiWrap").style.display = "none";
     document.body.classList.remove("TsunamiMode");
     tsunamiData = null;
+    tsunamiAlertNow = false;
   } else {
     EQInfoLink.style.display = "none";
     if (Array.isArray(data.issue?.EventID) && data.issue.EventID.length) {

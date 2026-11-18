@@ -534,6 +534,7 @@ export function Req_Seisjs_sta() {
 
 var SeisjsWS_Client;
 var SeisjsWS_timer;
+var Seisjs_ReconnectTimer;
 var Seisjs_ConnectedDate = new Date();
 export function SeisjsWS() {
   if (!config.Source.wolfx.GetDataFromSeisJS) return;
@@ -541,11 +542,16 @@ export function SeisjsWS() {
 }
 function TryConnect_SeisjsWS() {
   var timeoutTmp = Math.max(30000 - (new Date() - Seisjs_ConnectedDate), 100);
-  setTimeout(Connect_SeisjsWS, timeoutTmp);
+  if (Seisjs_ReconnectTimer) clearTimeout(Seisjs_ReconnectTimer);
+  Seisjs_ReconnectTimer = setTimeout(Connect_SeisjsWS, timeoutTmp);
 }
 function Connect_SeisjsWS() {
   if (!config.Source.wolfx.GetDataFromSeisJS) return;
   try {
+    if (SeisjsWS_timer) {
+      clearInterval(SeisjsWS_timer);
+      SeisjsWS_timer = null;
+    }
     if (SeisjsWS_Client) {
       SeisjsWS_Client.onclose = null;
       SeisjsWS_Client.close();

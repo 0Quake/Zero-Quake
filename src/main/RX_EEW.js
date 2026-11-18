@@ -8,12 +8,15 @@ import { config, Replay, UpdateStatus } from "./state.js";
 
 var P2P_WS;
 var P2PReconnectTimeout = 500;
+var P2P_Timer;
+var P2P_EQInfoTimer;
 export function P2P() {
   Connect_P2P();
 }
 function TryConnect_P2P() {
   P2PReconnectTimeout = Math.min(30000, P2PReconnectTimeout * 2);
-  setTimeout(Connect_P2P, P2PReconnectTimeout);
+  if (P2P_Timer) clearTimeout(P2P_Timer);
+  P2P_Timer = setTimeout(Connect_P2P, P2PReconnectTimeout);
 }
 function Connect_P2P() {
   try {
@@ -43,7 +46,8 @@ function Connect_P2P() {
 
           switch (data.code) {
             case 551:
-              setTimeout(UpdateEQInfo_Tmp, 10000);
+              if (P2P_EQInfoTimer) clearTimeout(P2P_EQInfoTimer);
+              P2P_EQInfoTimer = setTimeout(UpdateEQInfo_Tmp, 10000);
               break;
             case 552:
               //津波情報
@@ -184,6 +188,10 @@ function TryConnect_ProjectBS() {
 function Connect_ProjectBS() {
   if (!config.Source.ProjectBS.GetData) return;
   try {
+    if (ProjectBS_Ping_Timer) {
+      clearInterval(ProjectBS_Ping_Timer);
+      ProjectBS_Ping_Timer = null;
+    }
     if (ProjectBS_Connection) {
       ProjectBS_Connection.onclose = null;
       ProjectBS_Connection.close();
@@ -231,6 +239,7 @@ function Connect_ProjectBS() {
 //Wolfx WebSocket接続・受信処理
 export var WolfxConnection = null;
 var Wolfx_Timer;
+var Wolfx_ReconnectTimer;
 var Wolfx_ConnectedDate = new Date();
 export function WolfxWS() {
   if (!config.Source.wolfx.GetData) return;
@@ -238,11 +247,16 @@ export function WolfxWS() {
 }
 function TryConnect_WolfxWS() {
   var timeoutTmp = Math.max(30000 - (new Date() - Wolfx_ConnectedDate), 100);
-  setTimeout(Connect_WolfxWS, timeoutTmp);
+  if (Wolfx_ReconnectTimer) clearTimeout(Wolfx_ReconnectTimer);
+  Wolfx_ReconnectTimer = setTimeout(Connect_WolfxWS, timeoutTmp);
 }
 function Connect_WolfxWS() {
   if (!config.Source.wolfx.GetData) return;
   try {
+    if (Wolfx_Timer) {
+      clearInterval(Wolfx_Timer);
+      Wolfx_Timer = null;
+    }
     if (WolfxConnection) {
       WolfxConnection.onclose = null;
       WolfxConnection.close();
