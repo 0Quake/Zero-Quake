@@ -82,9 +82,11 @@ export function AXIS() {
   if (!config.Source.axis.GetData) return;
   Connect_AXIS();
 }
+var Axis_timer;
 function TryConnect_AXIS() {
   var timeoutTmp = Math.max(30000 - (new Date() - AXIS_ConnectedDate), 100);
-  setTimeout(Connect_AXIS, timeoutTmp);
+  if (Axis_timer) clearTimeout(Axis_timer);
+  Axis_timer = setTimeout(Connect_AXIS, timeoutTmp);
 }
 function Connect_AXIS() {
   if (!config.Source.axis.GetData) return;
@@ -98,10 +100,10 @@ function Connect_AXIS() {
         Authorization: `Bearer ${config.Source.axis.AccessToken}`,
       },
     });
+    AXIS_ConnectedDate = new Date();
 
     AXIS_WS.onopen = function () {
       UpdateStatus("axis", "success");
-      AXIS_ConnectedDate = new Date();
     };
     AXIS_WS.onerror = function () {
       UpdateStatus("axis", "Error");
@@ -173,9 +175,11 @@ export function ProjectBS() {
   if (!config.Source.ProjectBS.GetData) return;
   Connect_ProjectBS();
 }
+var ProjectBS_Timer;
 function TryConnect_ProjectBS() {
   var timeout = Math.max(30000 - (new Date() - ProjectBS_ConnectedDate), 100);
-  setTimeout(Connect_ProjectBS, timeout);
+  if (ProjectBS_Timer) clearTimeout(ProjectBS_Timer);
+  ProjectBS_Timer = setTimeout(Connect_ProjectBS, timeout);
 }
 function Connect_ProjectBS() {
   if (!config.Source.ProjectBS.GetData) return;
