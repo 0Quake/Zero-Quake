@@ -28,8 +28,103 @@ import {
 export var KmoniOffset = 2500;
 export var kmoniPointsDataTmp, SnetPointsDataTmp, TremRtsData_Marged;
 
+const TREMRTS_SSE_HOSTS = [
+  "https://api.lb.exptech.dev",
+  "https://api.lb-tpe1.exptech.dev",
+  "https://api.lb-khh1.exptech.dev",
+];
+const TREMRTS_CORE_HOSTS = [
+  "https://api.core.exptech.dev",
+  "https://api.core-tnn1.exptech.dev",
+  "https://api.core-tyo1.exptech.dev",
+];
+const TREMRTS_STATIC_HOSTS = [
+  "https://static.core.exptech.dev",
+  "https://static.core-tnn1.exptech.dev",
+  "https://static.core-tyo1.exptech.dev",
+];
+
+// Kmoni_URLIndex / Kmoni_ErrorCount と同じローリング方式のホスト切り替え
+function createHostRotator(hosts) {
+  let index = 0;
+  let errorCount = 0;
+  return {
+    current: () => hosts[index],
+    reset: () => {
+      errorCount = 0;
+    },
+    fail: () => {
+      errorCount++;
+      if (errorCount > 3) {//エラー回数が溜まったらURLを替える
+        errorCount = 0;
+        index = (index + 1) % hosts.length;
+        return true;
+      }
+      return false;
+    },
+  };
+}
+
+const tremRtsSseHost = createHostRotator(TREMRTS_SSE_HOSTS);
+const tremRtsCoreHost = createHostRotator(TREMRTS_CORE_HOSTS);
+const tremRtsStaticHost = createHostRotator(TREMRTS_STATIC_HOSTS);
+
 var TremRts_es;
+let TremRts_ReconnectTimer;
+let TremRts_StaleTimer;
+let tremRtsRetryMs = 3000;
+const TREMRTS_STALE_MS = 90000;
+const TREMRTS_MAX_RETRY_MS = 60000;
+
+function closeTremRtsSSE() {
+  if (TremRts_ReconnectTimer) {
+    clearTimeout(TremRts_ReconnectTimer);
+    TremRts_ReconnectTimer = null;
+  }
+  if (TremRts_StaleTimer) {
+    clearTimeout(TremRts_StaleTimer);
+    TremRts_StaleTimer = null;
+  }
+  if (TremRts_es) {
+    TremRts_es.close();
+    TremRts_es = null;
+  }
+}
+
+function resetTremRtsStaleTimer() {
+  if (TremRts_StaleTimer) clearTimeout(TremRts_StaleTimer);
+  TremRts_StaleTimer = setTimeout(() => {
+    if (!config.Source.TREMRTS.GetData) return;
+    tremRtsSseHost.fail();
+    closeTremRtsSSE();
+    UpdateStatus("TREM-RTS", "Error", new Date());
+    scheduleTremRtsReconnect();
+  }, TREMRTS_STALE_MS);
+}
+
+function scheduleTremRtsReconnect() {
+  if (!config.Source.TREMRTS.GetData) return;
+  if (TremRts_ReconnectTimer) clearTimeout(TremRts_ReconnectTimer);
+  const wait = tremRtsRetryMs + Math.random() * 1000;
+  tremRtsRetryMs = Math.min(tremRtsRetryMs * 2, TREMRTS_MAX_RETRY_MS);
+  TremRts_ReconnectTimer = setTimeout(() => {
+    TremRts_ReconnectTimer = null;
+    TREMRTS_SSE();
+  }, wait);
+}
+
+function applyTremRtsSnapshot(json) {
+  TremRtsData_Marged = {
+    action: "TREM-RTSUpdate",
+    LocalTime: new Date((new Date() - Replay)),
+    data: formatTremData(json),
+  };
+  messageToMainWindow(TremRtsData_Marged);
+  UpdateStatus("TREM-RTS", "success", new Date(json.ts));
+}
+
 export function TREMRTS_SSE() {
+  closeTremRtsSSE();//既存やタイマーを破棄（無効化時も含む）
   if (!config.Source.TREMRTS.GetData) return;
 
   function unzip(value) {
@@ -40,33 +135,47 @@ export function TREMRTS_SSE() {
     return str;
   }
 
-  TremRts_es?.close();//既存なら破棄
-  TremRts_es = new EventSource("https://api.lb.exptech.dev/api/v1/trem/sse?topics=trem.intensity.v1,trem.rts.v1&mode=live");
-  TremRts_es.addEventListener('open', () => {
+  const sseUrl = `${tremRtsSseHost.current()}/api/v1/trem/sse?topics=trem.rts.v1&mode=live`;
+  TremRts_es = new EventSource(sseUrl);
+  resetTremRtsStaleTimer();
+
+  const onConnected = () => {
+    tremRtsRetryMs = 3000;
+    tremRtsSseHost.reset();
+    resetTremRtsStaleTimer();
     UpdateStatus("TREM-RTS", "success", new Date());
-  });
+  };
+  TremRts_es.addEventListener('open', onConnected);
+  TremRts_es.addEventListener('info', onConnected);
+
   TremRts_es.addEventListener('trem.rts.v1', (e) => {
+    resetTremRtsStaleTimer();
+    tremRtsRetryMs = 3000;
+    tremRtsSseHost.reset();
     if (Replay !== 0) return;
     try {
-      const json = JSON.parse(unzip(e.data));
-      const TremRtsData = formatTremData(json);
-
-      TremRtsData_Marged = {
-        action: "TREM-RTSUpdate",
-        LocalTime: new Date((new Date() - Replay)),
-        data: TremRtsData,
-      };
-      messageToMainWindow(TremRtsData_Marged);
-
-      UpdateStatus("TREM-RTS", "success", new Date(json.ts));
+      applyTremRtsSnapshot(JSON.parse(unzip(e.data)));
     } catch (err) {
       GeneralError_handler(err);
       UpdateStatus("TREM-RTS", "Error", new Date());
     }
   });
+  TremRts_es.addEventListener('close', (e) => {
+    tremRtsSseHost.fail();
+    closeTremRtsSSE();
+    UpdateStatus("TREM-RTS", "Error", new Date());
+    if (e.data !== "token revoked") {
+      scheduleTremRtsReconnect();
+    }
+  });
   TremRts_es.addEventListener('error', (err) => {
     GeneralError_handler(err);
     UpdateStatus("TREM-RTS", "Error", new Date());
+    tremRtsSseHost.fail();
+    if (!TremRts_es || TremRts_es.readyState === EventSource.CLOSED) {
+      closeTremRtsSSE();
+      scheduleTremRtsReconnect();
+    }
   });
 }
 
@@ -80,28 +189,22 @@ export function TREMRTS_Replay() {
 
   var Time10Dig = Math.floor((new Date() - Replay) / 1000);
   fetch(
-    `https://api.core.exptech.dev/api/v3/trem/rts/${Time10Dig}`,
+    `${tremRtsCoreHost.current()}/api/v3/trem/rts/${Time10Dig}`,
     { signal: AbortSignal.timeout(4000) }
   ).then((r) => {
     if (!r.ok) throw new Error(`HTTP Error: ${r.status}`);
     return r.json();
   }).then((json) => {
-    const TremRtsData = formatTremData(json);
-
-    TremRtsData_Marged = {
-      action: "TREM-RTSUpdate",
-      LocalTime: new Date((new Date() - Replay)),
-      data: TremRtsData,
-    };
-    messageToMainWindow(TremRtsData_Marged);
-    UpdateStatus("TREM-RTS", "success", new Date(json.ts));
+    tremRtsCoreHost.reset();
+    applyTremRtsSnapshot(json);
   }).catch((err) => {
     GeneralError_handler(err);
+    tremRtsCoreHost.fail();
     UpdateStatus("TREM-RTS", "Error", new Date());
   });
 }
 
-function formatTremData(json) {
+export function formatTremData(json) {
   var TremRtsData = {};
   if (!json?.stations) return TremRtsData;
   Object.keys(json.stations).forEach(function (StID) {
@@ -114,6 +217,7 @@ function formatTremData(json) {
         Type: "TREM-RTS",
         shindo: st.i,
         PGA: st.pga,
+        alert: st.alert === 1,
         Code: StID,
         rgb: rgb ? [rgb.r, rgb.g, rgb.b] : [0, 0, 0],
       };
@@ -127,12 +231,13 @@ function formatTremData(json) {
 export var TremRts_sta = {};
 export var Req_TremRts_sta = throttle(function () {
   fetch(
-    `https://static.core.exptech.dev/resource/station?_=${Date.now()}`,
+    `${tremRtsStaticHost.current()}/resource/station?_=${Date.now()}`,
     { signal: AbortSignal.timeout(4000) }
   ).then((r) => {
     if (!r.ok) throw new Error(`HTTP Error: ${r.status}`);
     return r.text();
   }).then((text) => {
+    tremRtsStaticHost.reset();
     text.split(/\r?\n/).forEach(function (line) {
       var frame = line.split(",");
       TremRts_sta[frame[1]] = {
@@ -155,6 +260,7 @@ export var Req_TremRts_sta = throttle(function () {
 
   }).catch((err) => {
     GeneralError_handler(err)
+    tremRtsStaticHost.fail();
     UpdateStatus("TREM-RTS", "Error");
   });
 }, 5000);
@@ -404,13 +510,12 @@ export function ConvertSnet(data, date, y, uid) {
   }
 }
 
-var Kmoni_URLIndex = 0;
-var Kmoni_ErrorCount = 0;
 var Kmoni_Timer;
 const Kmoni_URLs = [
   `http://www.kmoni.bosai.go.jp/data/map_img/RealTimeImg/jma_s/[YYYYMMDD]/[YYYYMMDDhhmmss].jma_s.gif`,
   `https://www.lmoni.bosai.go.jp/img_svr/data/map_img/RealTimeImg/jma_s/[YYYYMMDD]/[YYYYMMDDhhmmss].jma_s.gif`,
 ];
+const kmoniHost = createHostRotator(Kmoni_URLs);
 
 //強震モニタへのHTTPリクエスト
 export function Req_kmoni() {//済
@@ -421,7 +526,7 @@ export function Req_kmoni() {//済
   if (!config.Source.kmoni.kmoni.GetData) return;
 
   var ReqTime = new Date() - KmoniOffset - Replay;
-  var url = Kmoni_URLs[Kmoni_URLIndex]
+  var url = kmoniHost.current()
     .replace("[YYYYMMDD]", NormalizeDate(2, ReqTime))
     .replace("[YYYYMMDDhhmmss]", NormalizeDate(1, ReqTime));
   fetch(
@@ -431,7 +536,7 @@ export function Req_kmoni() {//済
     if (!r.ok) throw new Error(`HTTP Error: ${r.status}`);
     return r.arrayBuffer();
   }).then((buffer) => {
-    Kmoni_ErrorCount = 0;
+    kmoniHost.reset();
     messageToWorkerWindow({
       action: "KmoniImgUpdate",
       data: Buffer.from(buffer),
@@ -439,10 +544,7 @@ export function Req_kmoni() {//済
     });
   }).catch((err) => {
     GeneralError_handler(err)
-    Kmoni_ErrorCount++;
-    if (Kmoni_ErrorCount > 3) {//エラー回数が溜まったらURLを替える
-      Kmoni_ErrorCount = 0;
-      Kmoni_URLIndex = (Kmoni_URLIndex + 1) % Kmoni_URLs.length//モニタURLをローリングで選択
+    if (kmoniHost.fail()) {
       SetKmoniOffset(Req_kmoni);
     }
     UpdateStatus("kmoniImg", "Error");

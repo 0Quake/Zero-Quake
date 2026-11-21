@@ -5,6 +5,8 @@ import {
   KmoniOffset,
   ConvertSnet,
   SnetPointsDataTmp,
+  formatTremData,
+  TremRts_sta,
 } from "../src/main/RX_RTSeis.js";
 import {
   setKmoniOffset,
@@ -30,5 +32,23 @@ describe("RX_RTSeis.js - Unit Tests", () => {
 
     assert.ok(SnetPointsDataTmp);
     assert.equal(SnetPointsDataTmp.data.length, 2);
+  });
+
+  it("formatTremData should include boolean alert field and preserve missing PGA", () => {
+    TremRts_sta["11DFDBC"] = { id: "11DFDBC", lat: 23.5, lon: 120.5 };
+    TremRts_sta["117825C"] = { id: "117825C", lat: 24.0, lon: 121.0 };
+
+    const result = formatTremData({
+      ts: 1790619680000,
+      stations: {
+        "11DFDBC": { i: 1.2, pga: 2.34, alert: 1 },
+        "117825C": { i: 0.1 },
+      },
+    });
+
+    assert.equal(result["11DFDBC"].alert, true);
+    assert.equal(result["11DFDBC"].PGA, 2.34);
+    assert.equal(result["117825C"].alert, false);
+    assert.equal(result["117825C"].PGA, undefined);
   });
 });

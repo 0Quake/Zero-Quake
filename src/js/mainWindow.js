@@ -1120,13 +1120,13 @@ function init() {
             "case", [
               "all",
               ["boolean", ["feature-state", "visible"], false],
-              ["<=", ["coalesce", ["feature-state", "shindo"], 0], 0.3]
+              ["!", ["boolean", ["feature-state", "alert"], false]]
             ],
             1, 0
           ],
           "circle-opacity": [
-            "case", ["<=", ["coalesce", ["feature-state", "shindo"], 0], 0.3],
-            0, 1
+            "case", ["boolean", ["feature-state", "alert"], false],
+            1, 0
           ],
         },
       },
@@ -1507,11 +1507,12 @@ function generatePopupContent_TREM(params) {
 
   var shindoColor = NormalizeShindo(state.shindo, 2);
   var rgb = `${state.rgb_r || 0},${state.rgb_g || 0},${state.rgb_b || 0}`;
+  var pgaText = (state.PGA != null && Number.isFinite(Number(state.PGA))) ? Number(state.PGA).toFixed(2) : "--";
   return `<h3 class='PointName' style='border-bottom-color:rgb(${rgb})'>
       <span>${params.Type}_${params.Code}</span></h3><div class='popupContentWrap'>
         <div class='obsShindoWrap' style='background:${shindoColor[0]};color:${shindoColor[1]};'>震度 ${NormalizeShindo(state.shindo, 1)}
           <span>${Number(state.shindo || 0).toFixed(2)}</span></div>
-        <div class='obsPGAWrap'>PGA ${Number(state.PGA).toFixed(2)}</div></div>`;
+        <div class='obsPGAWrap'>PGA ${pgaText}</div></div>`;
 }
 
 var TREMRTS_LastUpdate = {};
@@ -1523,7 +1524,8 @@ function TREMRTSUpdate(dataTmp) {
     var elm = dataTmp[key];
     var currentState = map.getFeatureState({ source: "TREMRTS_points", id: elm.Code });
     var isVisible = true;//TREM-RTSではエントリ有⇔データ有
-    if (currentState.shindo !== elm.shindo || currentState.visible !== isVisible) {
+    var isAlert = Boolean(elm.alert);
+    if (currentState.shindo !== elm.shindo || currentState.visible !== isVisible || currentState.alert !== isAlert) {
       map.setFeatureState(
         {
           source: "TREMRTS_points",
@@ -1536,6 +1538,7 @@ function TREMRTSUpdate(dataTmp) {
           rgb_b: elm?.rgb?.[2],
           PGA: elm.PGA,
           shindo: elm.shindo,
+          alert: isAlert,
         }
       );
     }
