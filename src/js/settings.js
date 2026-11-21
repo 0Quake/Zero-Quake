@@ -207,7 +207,6 @@ var pairs = [
   { target: prop(() => config.Source.EarlyEst, "Interval"), element: document.getElementById("EarlyEstInterval"), loadFunc: (v) => v / 1000, saveFunc: (v) => Number(v) * 1000 },
   { target: prop(() => config.Source.kmoni.kmoni, "Interval"), element: document.getElementById("kmoniInterval"), loadFunc: (v) => v / 1000, saveFunc: (v) => Number(v) * 1000 },
   { target: prop(() => config.Source.msil, "Interval"), element: document.getElementById("msilInterval"), loadFunc: (v) => v / 1000, saveFunc: (v) => Number(v) * 1000 },
-  { target: prop(() => config.Source.TREMRTS, "Interval"), element: document.getElementById("TREM-RTS_Interval"), loadFunc: (v) => v / 1000, saveFunc: (v) => Number(v) * 1000 },
 
   // 棒読みちゃん & 配色
   { target: prop(() => config.notice.voice_parameter, "Boyomi_Port"), element: document.getElementById("Boyomi_Port"), saveFunc: (v) => Math.floor(Number(v)) },
