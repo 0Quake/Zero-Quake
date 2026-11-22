@@ -1,7 +1,7 @@
 import electron from "electron";
 const { dialog } = electron;
 import * as turf from "@turf/turf";
-import { throttle, NormalizeShindo, newDate2, FERegion } from "./constants.js";
+import { throttle, NormalizeShindo, newDate2, FERegion, nullHandler } from "./constants.js";
 import { MainWindow, SettingWindow, Create_SettingWindow, messageToMainWindow } from "./windows.js";
 import { MargeEQInfo, AlertEQInfo, eqInfo } from "./PROC_EQInfo.js";
 
@@ -223,3 +223,40 @@ export function Req_NarikakunList(count) {
     });
 }
 
+var NaknQAPI_Fetched = [];
+export function Req_NaknQAPI_Rep(reportId) {
+  var url = `https://quake-api.nakn.jp/v2/reports/${reportId}`;
+  if (NaknQAPI_Fetched.includes(url)) return;
+
+  fetch(
+    url,
+    { signal: AbortSignal.timeout(5000) }
+  ).then((r) => {
+    if (!r.ok) throw new Error(`HTTP Error: ${r.status}`);
+    return r.text();
+  }).then((text) => {
+    var json = JSON.parse(text);
+    if (!json) throw new Error("nakn quake apiでjsonパースエラー");
+    UpdateStatus("NaknQAPI", "success");
+
+    MargeEQInfo([{
+      status: "通常",
+      eventId: nullHandler(json.eventId),
+      category: nullHandler(json.title),
+      reportDateTime: nullHandler(json.reportedAt, (v) => new Date(v)),
+      OriginTime: nullHandler(json.body?.earthquake?.originTime, (v) => new Date(v)),
+      epiCenter: nullHandler(json.body?.earthquake?.hypocenter?.name),
+      M: nullHandler(json.body?.earthquake?.magnitude?.value, Number),
+      maxI: NormalizeShindo(json.body?.intensity?.maxIntensity),
+      cancel: json.infoType === "canceled",
+      DetailURL: [url],
+      headline: nullHandler(json.headline),
+      axisData: null,
+    }]);
+
+    NaknQAPI_Fetched.push(url);
+  }).catch((err) => {
+    GeneralError_handler(err)
+    UpdateStatus("NaknQAPI", "Error");
+  });
+}

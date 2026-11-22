@@ -1,10 +1,11 @@
 import { DetectEEW } from "./PROC_EEW.js";
-import { ParseJSON, newDate2, NormalizeShindo } from "./constants.js";
+import { ParseJSON, newDate2, NormalizeShindo, nullHandler } from "./constants.js";
 import { UpdateEQInfo_Tmp } from "./RX_JMAXML.js";
+import { Req_NaknQAPI_Rep } from "./RX_OtherAPIs.js";
 import { ConvertTsunamiInfo } from "./PROC_Tsunami.js";
 import { MargeEQInfo } from "./PROC_EQInfo.js";
 
-import { config, Replay, UpdateStatus } from "./state.js";
+import { config, Replay, UpdateStatus, GeneralError_handler } from "./state.js";
 
 var P2P_WS;
 var P2PReconnectTimeout = 500;
@@ -366,92 +367,12 @@ function Connect_NaknQAPIWS() {
           DetectEEW(5, data);
 
         } else if (json.type == "earthquake") {
-          /*
+          data?.reports?.forEach(function (report) {
+            if (report?.reportId) {
+              Req_NaknQAPI_Rep(report.reportId);
+            }
+          });
 
-{
-  "eventId": "20261122090925",
-  "status": "active",
-  "version": 1,
-  "updatedAt": "2026-11-22T09:14:00+09:00",
-  "headline": "２２日０９時０９分ころ、地震がありました。",
-  "originTime": "2026-11-22T09:09:00+09:00",
-  "hypocenter": {
-    "code": "301",
-    "name": "茨城県南部",
-    "latitude": 36.1,
-    "longitude": 139.9,
-    "depthKm": 50,
-    "depthCondition": null
-  },
-  "magnitude": {
-    "value": 2.7,
-    "type": "Mj",
-    "condition": null,
-    "label": "M2.7"
-  },
-  "maxIntensity": "1",
-  "intensity": {
-    "source": "VXSE53",
-    "prefectures": [
-      {
-        "code": "08",
-        "name": "茨城県",
-        "maxIntensity": "1",
-        "unreceived": false
-      }
-    ],
-    "areas": [
-      {
-        "code": "300",
-        "name": "茨城県北部",
-        "prefectureCode": "08",
-        "maxIntensity": "1",
-        "unreceived": false
-      }
-    ],
-    "cities": [
-      {
-        "code": "0822500",
-        "name": "常陸大宮市",
-        "prefectureCode": "08",
-        "areaCode": "300",
-        "maxIntensity": "1",
-        "unreceived": false
-      }
-    ],
-    "stations": [
-      {
-        "code": "0822521",
-        "name": "常陸大宮市北町＊",
-        "prefectureCode": "08",
-        "areaCode": "300",
-        "cityCode": "0822500",
-        "intensity": "1",
-        "unreceived": false
-      }
-    ]
-  },
-  "tsunami": {
-    "risk": "none",
-    "comment": "この地震による津波の心配はありません。"
-  },
-  "eewIssued": false,
-  "comments": {
-    "var": "＊印は気象庁以外の震度観測点についての情報です。",
-    "free": null
-  },
-  "reports": [
-    {
-      "reportId": "f492bc24a8c9dd2b33c6c3b0da482e1631a1f4ad085277844248aa68ff94d57173105202ba5e92a827971827aa617524",
-      "type": "VXSE53",
-      "serial": 1,
-      "infoType": "issued",
-      "reportedAt": "2026-11-22T09:14:00+09:00",
-      "canceled": false
-    }
-  ]
-}
-          */
         } else if (json.type == "tsunami") {
           /*  {
     "id": "20260728162718",
