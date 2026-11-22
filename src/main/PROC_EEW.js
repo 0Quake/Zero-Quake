@@ -4,7 +4,7 @@ import path from "path";
 import * as turf from "@turf/turf";
 
 import { calcInt, calc_arTime, getClosestNum, } from "./CALC_PSWave.js";
-import { TTT_JMA2001, TTT_AK135, JMA_Int_Points, NormalizeShindo, NormalizeDate, Boolean2, EEWSect, EQIAreaLoc, newDate2 } from "./constants.js";
+import { TTT_JMA2001, TTT_AK135, JMA_Int_Points, NormalizeShindo, NormalizeDate, Boolean2, EEWSect, EQIAreaLoc, newDate2, nullHandler } from "./constants.js";
 import { MainWindow, messageToMainWindow, PlayAudio, speak, CreateMainWindow } from "./windows.js";
 import { MargeEQInfo } from "./PROC_EQInfo.js";
 
@@ -252,6 +252,50 @@ export function DetectEEW(type, json) {
     } catch {
       UpdateStatus("P2P_EEW", "Error");
     }
+  } else if (type == 5) {
+    try {
+      var areaData = [];
+      json?.areas?.forEach(function (area) {
+        areaData.push({
+          Code: null,
+          Name: nullHandler(area.name),
+          Alert: null,
+          IntTo: NormalizeShindo(area.intensityTo, 0),
+          IntFrom: NormalizeShindo(area.intensityFrom, 0),
+          ArrivalTime: nullHandler(area.arrivalTime, (v) => new Date(v)),
+          Arrived: nullHandler(area.arrived, Boolean),
+        });
+      });
+
+      var EEWdata = {
+        alertflg: Boolean(json.isWarning) ? "警報" : "予報",
+        EventID: nullHandler(json.eventId, Number),
+        serial: nullHandler(json.serial, Number),
+        report_time: nullHandler(json.reportedAt, (v) => new Date(v)),
+        magnitude: nullHandler(json.magnitude, Number),
+        maxInt: NormalizeShindo(json.maxIntensity, 0),
+        depth: nullHandler(json?.hypocenter?.depthKm, Number),
+        is_cancel: (json.status == "canceled"),
+        is_final: nullHandler(json.isFinal, Boolean),
+        is_training: false,//訓練報は配信されない
+        latitude: nullHandler(json?.hypocenter?.latitude, Number),
+        longitude: nullHandler(json?.hypocenter?.longitude, Number),
+        region_name: nullHandler(json?.hypocenter?.name),
+        origin_time: nullHandler(json.originTime, (v) => new Date(v)),
+        isPlum: nullHandler(json.isAssumption, Boolean),
+        userIntensity: null,
+        arrivalTime: null,
+        intensityAreas: null,
+        warnZones: areaData,
+        source: "NaknQAPI",
+      };
+
+      EEW_Marge(EEWdata);
+
+    } catch (err) {
+      UpdateStatus("NaknQAPI", "Error");
+    }
+
   }
 }
 

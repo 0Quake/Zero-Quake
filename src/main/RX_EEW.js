@@ -197,7 +197,7 @@ function Connect_ProjectBS() {
       ProjectBS_Connection.close();
     }
     const ws = new WebSocket("wss://telegram-cf.projectbs.cn/jmaeewws/");
-    ws.sendUTF = ws.send.bind(ws);
+    //ws.sendUTF = ws.send.bind(ws);
     ProjectBS_Connection = ws;
     ProjectBS_ConnectedDate = new Date();
 
@@ -309,3 +309,278 @@ function Connect_WolfxWS() {
 }
 
 //Seisjs WebSocket接続・受信処理
+
+
+
+//nakn quake api
+export var NaknQAPIConnection = null;
+//var NaknQAPI_Timer;
+var NaknQAPI_ReconnectTimer;
+var NaknQAPI_ConnectedDate = new Date();
+var NaknQAPI_Sequence = null;
+export function NaknQAPIWS() {
+  if (!config.Source.NaknQAPI.GetData) return;
+  Connect_NaknQAPIWS();
+}
+function TryConnect_NaknQAPIWS() {
+  var timeoutTmp = Math.max(30000 - (new Date() - NaknQAPI_ConnectedDate), 100);
+  if (NaknQAPI_ReconnectTimer) clearTimeout(NaknQAPI_ReconnectTimer);
+  NaknQAPI_ReconnectTimer = setTimeout(Connect_NaknQAPIWS, timeoutTmp);
+}
+function Connect_NaknQAPIWS() {
+  if (!config.Source.NaknQAPI.GetData) return;
+  try {
+    if (NaknQAPIConnection) {
+      NaknQAPIConnection.onclose = null;
+      NaknQAPIConnection.close();
+    }
+
+    var since_str = (NaknQAPI_Sequence !== null) ? `&since=${NaknQAPI_Sequence}` : "";
+    const ws = new WebSocket(`wss://quake-api.nakn.jp/v2/ws?topics=earthquake,tsunami,eew${since_str}`);
+    NaknQAPIConnection = ws;
+    NaknQAPI_ConnectedDate = new Date();
+
+    ws.onopen = function () {
+      UpdateStatus("NaknQAPI", "success");
+    };
+    ws.onerror = function () {
+      UpdateStatus("NaknQAPI", "Error");
+    };
+    ws.onclose = function () {
+      UpdateStatus("NaknQAPI", "Disconnect");
+      TryConnect_NaknQAPIWS();
+    };
+
+
+    ws.onmessage = function (event) {
+      if (Replay !== 0) return;
+      UpdateStatus("NaknQAPI", "success");
+      try {
+        var json = ParseJSON(event.data);
+        if (json?.seq != null) NaknQAPI_Sequence = json.seq;
+        if (json?.type === "resync") NaknQAPI_Sequence = null;
+        if (!json?.data) return;
+        var data = json.data;
+
+        if (json.type == "eew") {
+          DetectEEW(5, data);
+
+        } else if (json.type == "earthquake") {
+          /*
+
+{
+  "eventId": "20261122090925",
+  "status": "active",
+  "version": 1,
+  "updatedAt": "2026-11-22T09:14:00+09:00",
+  "headline": "２２日０９時０９分ころ、地震がありました。",
+  "originTime": "2026-11-22T09:09:00+09:00",
+  "hypocenter": {
+    "code": "301",
+    "name": "茨城県南部",
+    "latitude": 36.1,
+    "longitude": 139.9,
+    "depthKm": 50,
+    "depthCondition": null
+  },
+  "magnitude": {
+    "value": 2.7,
+    "type": "Mj",
+    "condition": null,
+    "label": "M2.7"
+  },
+  "maxIntensity": "1",
+  "intensity": {
+    "source": "VXSE53",
+    "prefectures": [
+      {
+        "code": "08",
+        "name": "茨城県",
+        "maxIntensity": "1",
+        "unreceived": false
+      }
+    ],
+    "areas": [
+      {
+        "code": "300",
+        "name": "茨城県北部",
+        "prefectureCode": "08",
+        "maxIntensity": "1",
+        "unreceived": false
+      }
+    ],
+    "cities": [
+      {
+        "code": "0822500",
+        "name": "常陸大宮市",
+        "prefectureCode": "08",
+        "areaCode": "300",
+        "maxIntensity": "1",
+        "unreceived": false
+      }
+    ],
+    "stations": [
+      {
+        "code": "0822521",
+        "name": "常陸大宮市北町＊",
+        "prefectureCode": "08",
+        "areaCode": "300",
+        "cityCode": "0822500",
+        "intensity": "1",
+        "unreceived": false
+      }
+    ]
+  },
+  "tsunami": {
+    "risk": "none",
+    "comment": "この地震による津波の心配はありません。"
+  },
+  "eewIssued": false,
+  "comments": {
+    "var": "＊印は気象庁以外の震度観測点についての情報です。",
+    "free": null
+  },
+  "reports": [
+    {
+      "reportId": "f492bc24a8c9dd2b33c6c3b0da482e1631a1f4ad085277844248aa68ff94d57173105202ba5e92a827971827aa617524",
+      "type": "VXSE53",
+      "serial": 1,
+      "infoType": "issued",
+      "reportedAt": "2026-11-22T09:14:00+09:00",
+      "canceled": false
+    }
+  ]
+}
+          */
+        } else if (json.type == "tsunami") {
+          /*  {
+    "id": "20260728162718",
+    "status": "warning",
+    "version": 2,
+    "updatedAt": "2026-07-28T16:29:00+09:00",
+    "headline": "各地の満潮時刻と津波到達予想時刻をお知らせします。",
+    "eventIds": [
+      "20260728162718"
+    ],
+    "maxCategory": "advisory",
+    "forecasts": [
+      {
+        "area": {
+          "code": "712",
+          "name": "有明・八代海"
+        },
+        "category": "advisory",
+        "categoryLabel": "津波注意報",
+        "firstArrival": {
+          "time": null,
+          "condition": "arriving",
+          "conditionLabel": "津波到達中と推測",
+          "initial": null
+        },
+        "maxHeight": {
+          "heightM": 1,
+          "qualifier": null,
+          "time": null,
+          "rising": false,
+          "important": false,
+          "condition": null,
+          "label": "1m"
+        }
+      },
+      {
+        "area": {
+          "code": "730",
+          "name": "長崎県西方"
+        },
+        "category": "forecast",
+        "categoryLabel": "津波予報（若干の海面変動）",
+        "firstArrival": null,
+        "maxHeight": {
+          "heightM": 0.2,
+          "qualifier": "under",
+          "time": null,
+          "rising": false,
+          "important": false,
+          "condition": null,
+          "label": "0.2m未満"
+        }
+      },
+      {
+        "area": {
+          "code": "740",
+          "name": "熊本県天草灘沿岸"
+        },
+        "category": "forecast",
+        "categoryLabel": "津波予報（若干の海面変動）",
+        "firstArrival": null,
+        "maxHeight": {
+          "heightM": 0.2,
+          "qualifier": "under",
+          "time": null,
+          "rising": false,
+          "important": false,
+          "condition": null,
+          "label": "0.2m未満"
+        }
+      }
+    ],
+    "observations": [],
+    "offshore": {
+      "observations": [],
+      "estimations": []
+    },
+    "earthquakes": [
+      {
+        "originTime": "2026-07-28T16:27:00+09:00",
+        "arrivalTime": "2026-07-28T16:27:00+09:00",
+        "hypocenter": {
+          "code": "741",
+          "name": "熊本県熊本地方",
+          "latitude": 32.6,
+          "longitude": 130.7,
+          "depthKm": 10,
+          "depthCondition": null
+        },
+        "magnitude": {
+          "value": 7.1,
+          "type": "Mj",
+          "condition": null,
+          "label": "M7.1"
+        }
+      }
+    ],
+    "comments": {
+      "warning": "津波と満潮が重なると、津波はより高くなりますので十分な注意が必要です。",
+      "free": null
+    },
+    "reports": [
+      {
+        "reportId": "f71f2ad143f99486bc32b15d148185ba64fb545723b2179eac1c3d9cdb7b8f6cd8426ec4c19b55d662caf98e65c22640",
+        "type": "VTSE51",
+        "serial": 1,
+        "infoType": "issued",
+        "reportedAt": "2026-07-28T16:29:00+09:00",
+        "canceled": false
+      },
+      {
+        "reportId": "efed4a180f82f75bd98ee4694b89b153587aadb45b53dbc5953a3fb4e8b5f783084d82e1d60e94652adc4bca3a2f50c3",
+        "type": "VTSE41",
+        "serial": null,
+        "infoType": "issued",
+        "reportedAt": "2026-07-28T16:29:00+09:00",
+        "canceled": false
+      }
+    ]
+  } */
+
+        }
+
+      } catch {
+        UpdateStatus("NaknQAPI", "Error");
+      }
+    };
+  } catch {
+    UpdateStatus("NaknQAPI", "Error");
+    TryConnect_NaknQAPIWS();
+  }
+}

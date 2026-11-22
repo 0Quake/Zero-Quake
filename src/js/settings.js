@@ -197,6 +197,7 @@ var pairs = [
   { target: prop(() => config.Source.wolfx, "GetData"), element: document.getElementById("Wolfx_GetData") },
   { target: prop(() => config.Source.wolfx, "GetDataFromSeisJS"), element: document.getElementById("Wolfx_SeisJS_GetData") },
   { target: prop(() => config.Source.ProjectBS, "GetData"), element: document.getElementById("ProjectBS_GetData") },
+  { target: prop(() => config.Source.NaknQAPI, "GetData"), element: document.getElementById("NaknQAPI_GetData") },
   { target: prop(() => config.Source.EarlyEst, "GetData"), element: document.getElementById("EarlyEst_GetData") },
   { target: prop(() => config.Source.msil, "GetData"), element: document.getElementById("msil_GetData") },
   { target: prop(() => config.Source.kmoni.kmoni, "GetData"), element: document.getElementById("kmoni_GetData") },

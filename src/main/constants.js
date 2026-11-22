@@ -276,3 +276,12 @@ export function throttle(cb, delay = 1000) {
     setTimeout(timeoutFunc, delay)
   }
 }
+
+export function nullHandler(val, formatter = (v) => v) {
+  const isInvalidDate = (v) => v instanceof Date && Number.isNaN(v.getTime());
+  // null, undefined, NaN, Invalid Date のみ無効値と扱う
+  const isNully = (v) => v == null || Number.isNaN(v) || isInvalidDate(v);
+  if (isNully(val)) return null;
+  const formatted = formatter(val);
+  return isNully(formatted) ? null : formatted;
+}

@@ -78,6 +78,7 @@ import {
   AXIS,
   ProjectBS,
   WolfxWS,
+  NaknQAPIWS,
   WolfxConnection,
   ProjectBS_Connection,
 } from "./main/RX_EEW.js";
@@ -179,6 +180,7 @@ var defaultConfigVal = {
     axis: { GetData: false, AccessToken: "" },
     ProjectBS: { GetData: true },
     wolfx: { GetData: true, GetDataFromSeisJS: false },
+    NaknQAPI: { GetData: false },
     TREMRTS: { GetData: true },
     EarlyEst: { GetData: false, Interval: 60000 },
   },
@@ -765,6 +767,7 @@ function start() {
   ProjectBS();
   WolfxWS();
   SeisjsWS();
+  NaknQAPIWS();
 
   //一回限り
   Req_TremRts_sta();

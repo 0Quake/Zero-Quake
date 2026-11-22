@@ -76,6 +76,9 @@
                         <div id="tab1_menu16" class="tabmenu" tabindex="-1" ZQ-focusgroup-item role="tab" aria-controls="tab1_content16">
                             Project BS
                         </div>
+                        <div id="tab1_menu19" class="tabmenu" tabindex="-1" ZQ-focusgroup-item role="tab" aria-controls="tab1_content19">
+                            quake.nakn.jp
+                        </div>
                         <div id="tab1_menu17" class="tabmenu" tabindex="-1" ZQ-focusgroup-item role="tab" aria-controls="tab1_content17">
                             TREM-RTS
                         </div>
@@ -1345,6 +1348,19 @@
                     <h4>全般</h4>
                     <section>
                         <label><input type="checkbox" id="ProjectBS_GetData">データを取得</label>
+                        <span class="smalltext">WebSocketで随時情報を受け取ります。</span>
+                    </section>
+                </div>
+                <div id="tab1_content19" class="tabcontent" role="tabpanel" aria-labelledby="tab1_menu19">
+                    <h3><span>情報源ごとの設定</span>quake.nakn.jp</h3>
+                    <div class="infoType">取得する情報：
+                        <div class="tip">緊急地震速報</div>
+                        <div class="tip">地震情報</div>
+                        <div class="tip">津波情報</div>
+                    </div>
+                    <h4>全般</h4>
+                    <section>
+                        <label><input type="checkbox" id="NaknQAPI_GetData">データを取得</label>
                         <span class="smalltext">WebSocketで随時情報を受け取ります。</span>
                     </section>
                 </div>
