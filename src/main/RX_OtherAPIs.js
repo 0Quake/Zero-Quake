@@ -4,6 +4,7 @@ import * as turf from "@turf/turf";
 import { throttle, NormalizeShindo, newDate2, FERegion, nullHandler } from "./constants.js";
 import { MainWindow, SettingWindow, Create_SettingWindow, messageToMainWindow } from "./windows.js";
 import { MargeEQInfo, AlertEQInfo, eqInfo } from "./PROC_EQInfo.js";
+import { ConvertTsunamiInfo } from "./PROC_Tsunami.js";
 
 import {
   package_ver,
@@ -237,22 +238,212 @@ export function Req_NaknQAPI_Rep(reportId) {
   }).then((text) => {
     var json = JSON.parse(text);
     if (!json) throw new Error("nakn quake apiでjsonパースエラー");
+
+    if (json?.kind == "earthquake") {
+      MargeEQInfo([{
+        status: "通常",
+        eventId: nullHandler(json.eventId),
+        category: nullHandler(json.title),
+        reportDateTime: nullHandler(json.reportedAt, (v) => new Date(v)),
+        OriginTime: nullHandler(json.body?.earthquake?.originTime, (v) => new Date(v)),
+        epiCenter: nullHandler(json.body?.earthquake?.hypocenter?.name),
+        M: nullHandler(json.body?.earthquake?.magnitude?.value, Number),
+        maxI: NormalizeShindo(json.body?.intensity?.maxIntensity),
+        cancel: json.infoType === "canceled",
+        DetailURL: [url],
+        headline: nullHandler(json.headline),
+        axisData: null,
+      }]);
+    } else if (json?.kind == "tsunami") {
+      var rdt = nullHandler(json.reportedAt ?? json.targetAt, (v) => new Date(v));
+      var validDateTimeTmp = nullHandler(rdt, (d) => {
+        var dt = new Date(d);
+        dt.setHours(dt.getHours() + 12);
+        return dt;
+      });
+      var isCanceled = json.infoType === "canceled";
+      var eventIdsTmp = Array.isArray(json.eventIds)
+        ? json.eventIds.filter(Boolean).map(String)
+        : (json.eventId ? [String(json.eventId)] : []);
+
+      var tsunamiDataTmp = {
+        title: nullHandler(json.title),
+        status: "通常",
+        issue: {
+          time: rdt,
+          EventID: eventIdsTmp,
+          EarthQuake: [],
+        },
+        areas: [],
+        Torikeshi: isCanceled,
+        cancelled: isCanceled,
+        revocation: false,
+        headline: nullHandler(json.headline),
+        comment: null,
+        source: "NaknQAPI",
+        ValidDateTime: isCanceled ? null : validDateTimeTmp,
+      };
+
+      //付加文取得の不具合による処理停止を回避
+      try {
+        var WarningComment = json.body?.comments?.warning?.text || "";
+        var FreeFormComment = json.body?.comments?.free || "";
+
+        tsunamiDataTmp.comment = [WarningComment, FreeFormComment].filter(Boolean).join("\n\n");
+      } catch { }
+
+
+      var EQData = [];
+      json.body?.earthquakes?.forEach(function (eq, index) {
+        var eventId = eventIdsTmp[index];
+        if (!eventId) return;
+        EQData.push({
+          status: "通常",
+          eventId: eventId,
+          category: "Tsunami",
+          OriginTime: nullHandler(eq.originTime, (v) => new Date(v)),
+          epiCenter: nullHandler(eq.hypocenter?.name),
+          M: nullHandler(eq.magnitude?.value, Number),
+          maxI: null,
+          cancel: isCanceled,
+          reportDateTime: rdt,
+          DetailURL: [],
+          headline: "",
+          axisData: null,
+        });
+      });
+      if (isCanceled && EQData.length === 0 && eventIdsTmp.length > 0) {
+        eventIdsTmp.forEach(function (eid) {
+          EQData.push({
+            status: "通常",
+            eventId: eid,
+            category: "Tsunami",
+            OriginTime: null,
+            epiCenter: null,
+            M: null,
+            maxI: undefined,
+            cancel: true,
+            reportDateTime: rdt,
+            DetailURL: [url],
+            headline: "",
+            axisData: null,
+          });
+        });
+      }
+      if (EQData.length > 0) MargeEQInfo(EQData);
+      tsunamiDataTmp.issue.EarthQuake = EQData;
+
+      var forecastItems = (Array.isArray(json.body?.forecasts) && json.body.forecasts.length > 0)
+        ? json.body.forecasts
+        : (Array.isArray(json.body?.estimations) ? json.body.estimations : []);
+
+      for (const item of forecastItems) {
+        var gradeTmp = null;
+        var cancelledTmp = false;
+
+        switch (item.category) {
+          case "majorWarning":
+            gradeTmp = "MajorWarning";
+            break;
+          case "warning":
+            gradeTmp = "Warning";
+            break;
+          case "advisory":
+            gradeTmp = "Watch";
+            break;
+          case "forecast":
+            gradeTmp = "Yoho";
+            break;
+          case "none":
+            cancelledTmp = true;
+            break;
+        }
+
+        var firstHeightTmp = nullHandler(item.firstArrival?.time, (v) => new Date(v));
+        var firstHeightConditionTmp = nullHandler(item.firstArrival?.conditionLabel);
+        var maxHeightTmp = nullHandler(item.maxHeight?.label, (v) => String(v).normalize("NFKC"));
+        var codeTmp = nullHandler(item.area?.code, Number);
+        var name = nullHandler(item.area?.name);
+
+        tsunamiDataTmp.areas.push({
+          code: codeTmp,
+          grade: gradeTmp,
+          name: name,
+          cancelled: cancelledTmp,
+          firstHeight: firstHeightTmp,
+          firstHeightCondition: firstHeightConditionTmp,
+          stations: [],
+          maxHeight: maxHeightTmp,
+        });
+      }
+
+      if (Array.isArray(json.body?.observations)) {
+        const initialMap = { push: "押し", pull: "引き" };
+        for (const obs of json.body.observations) {
+          var ArrivalTimeTmp = nullHandler(obs.firstArrival?.time, (v) => new Date(v));
+          var firstHeightConditionTmp = nullHandler(obs.firstArrival?.conditionLabel);
+          var firstHeightInitialTmp = initialMap[obs.firstArrival?.initial] ?? nullHandler(obs.firstArrival?.initial);
+          var maxHeightTime = nullHandler(obs.maxHeight?.time, (v) => new Date(v));
+          var maxHeightCondition = obs.maxHeight?.condition ? nullHandler(obs.maxHeight?.label) : null;
+          var oMaxHeightTmp = (obs.maxHeight?.heightM != null || !obs.maxHeight?.condition)
+            ? nullHandler(obs.maxHeight?.label, (v) => String(v).normalize("NFKC"))
+            : null;
+          var maxHeightRising = Boolean(obs.maxHeight?.rising);
+          var nameTmp = nullHandler(obs.station?.name);
+          var codeTmp = nullHandler(obs.station?.code);
+
+          var stationData = {
+            name: nameTmp,
+            code: codeTmp,
+            ArrivedTime: ArrivalTimeTmp,
+            firstHeightCondition: firstHeightConditionTmp,
+            firstHeightInitial: firstHeightInitialTmp,
+            omaxHeight: oMaxHeightTmp,
+            maxHeightRising: maxHeightRising,
+            maxHeightTime: maxHeightTime,
+            maxHeightCondition: maxHeightCondition,
+          };
+          if (obs.firstArrival) {
+            stationData.firstHeight_obs = {
+              arrivedTime: ArrivalTimeTmp,
+              condition: firstHeightConditionTmp,
+              initial: firstHeightInitialTmp,
+            };
+          }
+          if (obs.maxHeight) {
+            stationData.maxHeight_obs = {
+              height: oMaxHeightTmp,
+              time: maxHeightTime,
+              condition: maxHeightCondition,
+              rising: maxHeightRising,
+            };
+          }
+
+          var areaName = (json.type == "VTSE52" || !obs.area?.name) ? "（海上）" : obs.area.name;
+          var tsunamiItem = tsunamiDataTmp.areas.find(function (elm2) {
+            return elm2.name == areaName;
+          });
+          if (tsunamiItem) {
+            if (!Array.isArray(tsunamiItem.stations)) tsunamiItem.stations = [];
+            var stationElm = tsunamiItem.stations.findIndex(function (elm3) {
+              return elm3.name == stationData.name;
+            });
+            if (stationElm > -1) tsunamiItem.stations[stationElm] = Object.assign(tsunamiItem.stations[stationElm], stationData);
+            else tsunamiItem.stations.push(stationData);
+          } else {
+            tsunamiDataTmp.areas.push({
+              name: areaName,
+              stations: [stationData],
+            });
+          }
+        }
+      }
+
+      ConvertTsunamiInfo(tsunamiDataTmp);
+    }
     UpdateStatus("NaknQAPI", "success");
 
-    MargeEQInfo([{
-      status: "通常",
-      eventId: nullHandler(json.eventId),
-      category: nullHandler(json.title),
-      reportDateTime: nullHandler(json.reportedAt, (v) => new Date(v)),
-      OriginTime: nullHandler(json.body?.earthquake?.originTime, (v) => new Date(v)),
-      epiCenter: nullHandler(json.body?.earthquake?.hypocenter?.name),
-      M: nullHandler(json.body?.earthquake?.magnitude?.value, Number),
-      maxI: NormalizeShindo(json.body?.intensity?.maxIntensity),
-      cancel: json.infoType === "canceled",
-      DetailURL: [url],
-      headline: nullHandler(json.headline),
-      axisData: null,
-    }]);
+
 
     NaknQAPI_Fetched.push(url);
   }).catch((err) => {

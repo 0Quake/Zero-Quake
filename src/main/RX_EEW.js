@@ -366,134 +366,13 @@ function Connect_NaknQAPIWS() {
         if (json.type == "eew") {
           DetectEEW(5, data);
 
-        } else if (json.type == "earthquake") {
+        } else if (json.type == "earthquake" || json.type == "tsunami") {
+          //地震・津波は上流でマージされてから届くが、本ソフトのマージロジックと競合するため内容を破棄しHTTPで報ごとに取得する。
           data?.reports?.forEach(function (report) {
             if (report?.reportId) {
               Req_NaknQAPI_Rep(report.reportId);
             }
           });
-
-        } else if (json.type == "tsunami") {
-          /*  {
-    "id": "20260728162718",
-    "status": "warning",
-    "version": 2,
-    "updatedAt": "2026-07-28T16:29:00+09:00",
-    "headline": "各地の満潮時刻と津波到達予想時刻をお知らせします。",
-    "eventIds": [
-      "20260728162718"
-    ],
-    "maxCategory": "advisory",
-    "forecasts": [
-      {
-        "area": {
-          "code": "712",
-          "name": "有明・八代海"
-        },
-        "category": "advisory",
-        "categoryLabel": "津波注意報",
-        "firstArrival": {
-          "time": null,
-          "condition": "arriving",
-          "conditionLabel": "津波到達中と推測",
-          "initial": null
-        },
-        "maxHeight": {
-          "heightM": 1,
-          "qualifier": null,
-          "time": null,
-          "rising": false,
-          "important": false,
-          "condition": null,
-          "label": "1m"
-        }
-      },
-      {
-        "area": {
-          "code": "730",
-          "name": "長崎県西方"
-        },
-        "category": "forecast",
-        "categoryLabel": "津波予報（若干の海面変動）",
-        "firstArrival": null,
-        "maxHeight": {
-          "heightM": 0.2,
-          "qualifier": "under",
-          "time": null,
-          "rising": false,
-          "important": false,
-          "condition": null,
-          "label": "0.2m未満"
-        }
-      },
-      {
-        "area": {
-          "code": "740",
-          "name": "熊本県天草灘沿岸"
-        },
-        "category": "forecast",
-        "categoryLabel": "津波予報（若干の海面変動）",
-        "firstArrival": null,
-        "maxHeight": {
-          "heightM": 0.2,
-          "qualifier": "under",
-          "time": null,
-          "rising": false,
-          "important": false,
-          "condition": null,
-          "label": "0.2m未満"
-        }
-      }
-    ],
-    "observations": [],
-    "offshore": {
-      "observations": [],
-      "estimations": []
-    },
-    "earthquakes": [
-      {
-        "originTime": "2026-07-28T16:27:00+09:00",
-        "arrivalTime": "2026-07-28T16:27:00+09:00",
-        "hypocenter": {
-          "code": "741",
-          "name": "熊本県熊本地方",
-          "latitude": 32.6,
-          "longitude": 130.7,
-          "depthKm": 10,
-          "depthCondition": null
-        },
-        "magnitude": {
-          "value": 7.1,
-          "type": "Mj",
-          "condition": null,
-          "label": "M7.1"
-        }
-      }
-    ],
-    "comments": {
-      "warning": "津波と満潮が重なると、津波はより高くなりますので十分な注意が必要です。",
-      "free": null
-    },
-    "reports": [
-      {
-        "reportId": "f71f2ad143f99486bc32b15d148185ba64fb545723b2179eac1c3d9cdb7b8f6cd8426ec4c19b55d662caf98e65c22640",
-        "type": "VTSE51",
-        "serial": 1,
-        "infoType": "issued",
-        "reportedAt": "2026-07-28T16:29:00+09:00",
-        "canceled": false
-      },
-      {
-        "reportId": "efed4a180f82f75bd98ee4694b89b153587aadb45b53dbc5953a3fb4e8b5f783084d82e1d60e94652adc4bca3a2f50c3",
-        "type": "VTSE41",
-        "serial": null,
-        "infoType": "issued",
-        "reportedAt": "2026-07-28T16:29:00+09:00",
-        "canceled": false
-      }
-    ]
-  } */
-
         }
 
       } catch {
