@@ -4,13 +4,14 @@ import * as turf from "@turf/turf";
 import { throttle, NormalizeShindo, newDate2, FERegion, nullHandler } from "./constants.js";
 import { MainWindow, SettingWindow, Create_SettingWindow, messageToMainWindow } from "./windows.js";
 import { MargeEQInfo, AlertEQInfo, eqInfo } from "./PROC_EQInfo.js";
-import { ConvertTsunamiInfo } from "./PROC_Tsunami.js";
+import { ConvertTsunamiInfo, TsunamiValidate_bypass } from "./PROC_Tsunami.js";
 
 import {
   package_ver,
   packageJson,
   JMA_CurrentInfoNumber,
   USGS_CurrentInfoNumber,
+  Replay,
   UpdateStatus,
   GeneralError_handler,
 } from "./state.js";
@@ -229,7 +230,7 @@ export function Req_NaknQAPI_Rep(reportId) {
   var url = `https://quake-api.nakn.jp/v2/reports/${reportId}`;
   if (NaknQAPI_Fetched.includes(url)) return;
 
-  fetch(
+  return fetch(
     url,
     { signal: AbortSignal.timeout(5000) }
   ).then((r) => {
@@ -240,15 +241,17 @@ export function Req_NaknQAPI_Rep(reportId) {
     if (!json) throw new Error("nakn quake apiでjsonパースエラー");
 
     if (json?.kind == "earthquake") {
+      var eqBody = json.body?.earthquake;
+      var intBody = json.body?.intensity;
       MargeEQInfo([{
         status: "通常",
         eventId: nullHandler(json.eventId),
         category: nullHandler(json.title),
         reportDateTime: nullHandler(json.reportedAt, (v) => new Date(v)),
-        OriginTime: nullHandler(json.body?.earthquake?.originTime, (v) => new Date(v)),
-        epiCenter: nullHandler(json.body?.earthquake?.hypocenter?.name),
-        M: nullHandler(json.body?.earthquake?.magnitude?.value, Number),
-        maxI: NormalizeShindo(json.body?.intensity?.maxIntensity),
+        OriginTime: eqBody ? nullHandler(eqBody.originTime, (v) => new Date(v)) : undefined,
+        epiCenter: eqBody ? nullHandler(eqBody.hypocenter?.name) : undefined,
+        M: eqBody ? nullHandler(eqBody.magnitude?.value, Number) : undefined,
+        maxI: intBody ? NormalizeShindo(intBody.maxIntensity) : undefined,
         cancel: json.infoType === "canceled",
         DetailURL: [url],
         headline: nullHandler(json.headline),
@@ -263,8 +266,8 @@ export function Req_NaknQAPI_Rep(reportId) {
       });
       var isCanceled = json.infoType === "canceled";
       var eventIdsTmp = Array.isArray(json.eventIds)
-        ? json.eventIds.filter(Boolean).map(String)
-        : (json.eventId ? [String(json.eventId)] : []);
+        ? json.eventIds.map(Number).filter((n) => !Number.isNaN(n) && n > 0)
+        : (json.eventId != null && !Number.isNaN(Number(json.eventId)) && Number(json.eventId) > 0 ? [Number(json.eventId)] : []);
 
       var tsunamiDataTmp = {
         title: nullHandler(json.title),
@@ -304,10 +307,10 @@ export function Req_NaknQAPI_Rep(reportId) {
           OriginTime: nullHandler(eq.originTime, (v) => new Date(v)),
           epiCenter: nullHandler(eq.hypocenter?.name),
           M: nullHandler(eq.magnitude?.value, Number),
-          maxI: null,
+          maxI: undefined,
           cancel: isCanceled,
           reportDateTime: rdt,
-          DetailURL: [],
+          DetailURL: [url],
           headline: "",
           axisData: null,
         });
@@ -332,6 +335,12 @@ export function Req_NaknQAPI_Rep(reportId) {
       }
       if (EQData.length > 0) MargeEQInfo(EQData);
       tsunamiDataTmp.issue.EarthQuake = EQData;
+
+      if (!isCanceled && validDateTimeTmp && Number(validDateTimeTmp) < (Date.now() - Replay) && !TsunamiValidate_bypass) {
+        UpdateStatus("NaknQAPI", "success");
+        NaknQAPI_Fetched.push(url);
+        return;
+      }
 
       var forecastItems = (Array.isArray(json.body?.forecasts) && json.body.forecasts.length > 0)
         ? json.body.forecasts

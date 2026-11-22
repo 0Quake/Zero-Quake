@@ -116,9 +116,9 @@ export function MargeEQInfo(dataList, count) {
           EQInfo_Item.category = elm.category;
           if (Boolean2(elm.headline)) EQInfo_Item.headline = elm.headline;
 
-          if (elm.OriginTime != null) EQInfo_Item.OriginTime = elm.OriginTime;
-          if (elm.epiCenter != null) EQInfo_Item.epiCenter = elm.epiCenter;
-          if (elm.M != null) {
+          if (elm.OriginTime !== undefined) EQInfo_Item.OriginTime = elm.OriginTime;
+          if (elm.epiCenter !== undefined) EQInfo_Item.epiCenter = elm.epiCenter;
+          if (elm.M !== undefined) {
             EQInfo_Item.M = (elm.M === "NaN" || Number.isNaN(elm.M)) ? null : elm.M;
           }
           if (NormalizeShindo(elm.maxI) !== "?") {
